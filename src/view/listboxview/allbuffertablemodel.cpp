@@ -184,23 +184,9 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
                 assert (!buffer->get<int>("rec_num").isNull(buffer_index));
                 unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
 
-                if (associations.count(rec_num))
+                if (associations.contains(rec_num))
                 {
-                    QString utns;
-
-                    typedef DBOAssociationCollection::const_iterator MMAPIterator;
-
-                    // It returns a pair representing the range of elements with key equal to 'c'
-                    std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
-
-                    // Iterate over the range
-                    for (MMAPIterator it = result.first; it != result.second; it++)
-                        if (it == result.first)
-                            utns = QString::number(it->second.utn_);
-                        else
-                            utns += ","+QString::number(it->second.utn_);
-
-                    return QVariant(utns);
+                    return QVariant(manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
                 }
                 else
                     return QVariant();

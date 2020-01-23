@@ -1,48 +1,52 @@
 <!--
 osgEarth Sample
+
+layout crop_features="true"
 -->
 
-<map name="Wordwide Line Vectors" type="geocentric">
+<map name="Wordwide Line Vectors" type="geocentric" version="2">
   
     <options>
         <lighting>false</lighting>
-         <terrain color="#101010ff"/>
+        <terrain>
+            <min_tile_range_factor>8</min_tile_range_factor>
+            <color>#000000FF</color>
+        </terrain>
+      
     </options>
 
-    <image driver="gdal" name="world-tiff" cache_enabled="false">
-        <url>shapefiles/example.tif</url>
-        <caching_policy usage="no_cache"/>
-    </image>
-    
     <geodetic_graticule name="Graticule" visible="true">
         <color>#ffff007f</color>
         <label_color>#ffffffff</label_color>
         <grid_lines>20</grid_lines>
-        <resolutions>10 5.0 2.0 1.0 0.5</resolutions>
+        <resolutions>10 5.0 2.0 1.0 0.5 0.25 0.125 0.0625 0.03125</resolutions>
     </geodetic_graticule>
 
-    <model name="world_boundaries" driver="feature_geom">
-            
-        <features name="world" driver="ogr">
-            <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
-            <build_spatial_index>true</build_spatial_index>
-            <convert type="line"/>
-        </features>
+    <feature_source name="world-data" driver="ogr">
+        <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
+        <convert type="line"/>
+    </feature_source>
+    
+    <feature_model name="world_boundaries" feature_source="world-data">
         
-        <layout tile_size="500000">
+        <layout tile_size="100000"  paged="true">
             <level max_range="1e10"/>
         </layout>
                 
         <styles>
             <style type="text/css">
                 world {
-                   stroke:                       #ffff00;
-                   stroke-width:                 2px;
-                   render-depth-offset-min-bias: 1000;
+                   stroke:                   #ffff00;
+                   stroke-width:             2px;
+                   stroke-tessellation-size: 1km;
+                   render-lighting:          false;
+                   altitude-clamping:        none;
+                   render-depth-test: false;
                 }            
             </style>
         </styles>
         
-    </model>
-  
+    </feature_model>
+ 
+
 </map>

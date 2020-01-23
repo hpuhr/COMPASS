@@ -16,7 +16,7 @@
  */
 
 #include "dbodatasource.h"
-#include "dbodatasourcewidget.h"
+//#include "dbodatasourcewidget.h"
 #include "dbobject.h"
 #include "projectionmanager.h"
 #include "rs2g.h"
@@ -53,9 +53,6 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_altitude_)
         altitude_ = other.altitude();
 
-    if (widget_)
-        widget_->update();
-
     loginf << "DBODataSource: operator=: name " << name_
            << " short name " << (has_short_name_ ? short_name_ : "false")
            << " sac " << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false")
@@ -88,14 +85,10 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
 
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setDataSource(*this);
-
     return *this;
 }
 
-bool DBODataSource::operator==(StoredDBODataSource& other)
+bool DBODataSource::operator==(const StoredDBODataSource& other) const
 {
     logdbg << "DBODataSource: operator==: name " << (name_ == other.name())
            << " short " << (short_name_ == other.shortName())
@@ -606,16 +599,16 @@ double DBODataSource::altitude() const
     return altitude_;
 }
 
+const std::string DBODataSource::dboName () const
+{
+    assert (object_);
+    return object_->name();
+}
+
 unsigned int DBODataSource::id() const
 {
     return id_;
 }
-
-//void DBODataSource::id(unsigned int id)
-//{
-//    // TODO
-//    assert (false);
-//}
 
 double DBODataSource::latitude() const
 {
@@ -718,16 +711,41 @@ void DBODataSource::sic(unsigned char sic)
     this->sic_ = sic;
 }
 
-DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
+void DBODataSource::removeShortName()
 {
-    if (!widget_)
-    {
-        widget_.reset(new DBODataSourceWidget (*this, add_headers, parent, f));
-        assert (widget_);
-    }
-    return widget_.get();
+    has_short_name_ = false;
+    short_name_ = "";
 }
 
+void DBODataSource::removeSac()
+{
+    has_sac_ = false;
+    sac_ = 0;
+}
+
+void DBODataSource::removeSic()
+{
+    has_sic_ = false;
+    sic_ = 0;
+}
+
+void DBODataSource::removeLatitude()
+{
+    has_latitude_ = false;
+    latitude_ = 0;
+}
+
+void DBODataSource::removeLongitude()
+{
+    has_longitude_ = false;
+    longitude_ = 0;
+}
+
+void DBODataSource::removeAltitude()
+{
+    has_altitude_ = false;
+    altitude_ = 0;
+}
 void DBODataSource::updateInDatabase ()
 {
     assert (object_);

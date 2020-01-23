@@ -44,7 +44,7 @@ class DBObjectManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    void schemaLockedSlot ();
+    //void schemaLockedSlot ();
     void loadSlot ();
     void updateSchemaInformationSlot ();
     void databaseContentChangedSlot ();
@@ -52,7 +52,6 @@ public slots:
 
 signals:
     void dbObjectsChangedSignal ();
-    //void databaseContentChangedSignal ();
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();
@@ -67,6 +66,7 @@ public:
     /// @brief Returns the object of type, if existing
     DBObject &object (const std::string& dbo_name);
     void deleteObject (const std::string& dbo_name);
+    bool hasData();
 
     using DBObjectIterator = typename std::map<std::string, DBObject*>::iterator;
     DBObjectIterator begin() { return objects_.begin(); }
@@ -116,8 +116,8 @@ public:
     void orderMetaVariable(MetaDBOVariable& variable);
     void clearOrderVariable ();
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
     void quitLoading ();
 
@@ -129,6 +129,8 @@ public:
 
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
+
+    bool isOtherDBObjectPostProcessing (DBObject& object);
 
 protected:
     bool use_filters_ {false};

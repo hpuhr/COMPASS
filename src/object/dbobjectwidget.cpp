@@ -110,11 +110,6 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         connect(edit_label_button_, &QPushButton::clicked, this, &DBObjectWidget::showLabelDefinitionWidgetSlot);
         properties_layout->addWidget(edit_label_button_);
 
-        edit_ds_button_ = new QPushButton ("Edit Data Sources");
-        connect(edit_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::editDataSourcesSlot);
-        properties_layout->addWidget(edit_ds_button_);
-
-
         QPushButton* print_button_ = new QPushButton ("Print");
         connect(print_button_, &QPushButton::clicked, this, &DBObjectWidget::printSlot);
         properties_layout->addWidget(print_button_);
@@ -202,18 +197,6 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     all_var_layout->addStretch();
 
-//    QLabel *all_var_label = new QLabel ("Add unused DBOVariables in current schema");
-//    all_var_label->setFont (font_bold);
-//    all_var_layout->addWidget (all_var_label);
-
-//    QLabel *all_var_schema_label = new QLabel ("Schema");
-//    all_var_layout->addWidget (all_var_schema_label);
-
-//    all_schemas_box_ = new DBSchemaSelectionComboBox ();
-//    //updateAllVarsSchemaSelectionSlot();
-//    all_schemas_box_->update();
-//    all_var_layout->addWidget (all_schemas_box_);
-
     update_variables_button_ = new QPushButton ("Update Variables");
     connect(update_variables_button_, &QPushButton::clicked, this, &DBObjectWidget::updateVariablesSlot);
     all_var_layout->addWidget (update_variables_button_);
@@ -229,82 +212,6 @@ DBObjectWidget::~DBObjectWidget()
 {
 
 }
-
-void DBObjectWidget::lock ()
-{
-    if (locked_)
-        return;
-
-    name_edit_->setDisabled (true);
-    info_edit_->setDisabled (true);
-    edit_label_button_->setDisabled (true);
-    edit_ds_button_->setDisabled (true);
-
-    for (int i = 0; i < ds_grid_->count(); ++i)
-    {
-        QWidget *widget = ds_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(true);
-    }
-
-    new_ds_button_->setDisabled (true);
-
-    new_meta_button_->setDisabled (true);
-
-    for (int i = 0; i < dbovars_grid_->count(); ++i)
-    {
-        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(true);
-    }
-
-    //all_schemas_box_->setDisabled (true);
-    update_variables_button_->setDisabled (true);
-
-    locked_ = true;
-}
-
-void DBObjectWidget::unlock ()
-{
-    if (!locked_)
-        return;
-
-    name_edit_->setDisabled (false);
-    info_edit_->setDisabled (false);
-    edit_label_button_->setDisabled (false);
-    edit_ds_button_->setDisabled (false);
-
-    for (int i = 0; i < ds_grid_->count(); ++i)
-    {
-        QWidget *widget = ds_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(false);
-    }
-
-    new_ds_button_->setDisabled (false);
-
-    new_meta_button_->setDisabled (false);
-
-    for (int i = 0; i < dbovars_grid_->count(); ++i)
-    {
-        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(false);
-    }
-
-    //all_schemas_box_->setDisabled (false);
-    update_variables_button_->setDisabled (false);
-
-    locked_ = false;
-}
-
-//void DBObjectWidget::updateAllVarsSchemaSelectionSlot ()
-//{
-//    logdbg  << "DBObjectWidget: updateAllVarsSchemaSelection";
-//    assert (all_schemas_box_);
-//    //TODO
-//    //updateSchemaSelectionBox (all_schemas_box_);
-//}
 
 void DBObjectWidget::editNameSlot ()
 {
@@ -328,21 +235,6 @@ void DBObjectWidget::editInfoSlot ()
     object_->info (text);
     emit changedDBOSignal();
 }
-
-//void DBObjectWidget::editDBOVarSlot()
-//{
-//    logdbg  << "DBObjectWidget: deleteDBOVar";
-//    QPushButton *button = static_cast<QPushButton*>(sender());
-
-//    QVariant data = button->property("variable");
-
-//    DBOVariable* variable = data.value<DBOVariable*>();
-//    assert (variable);
-//    variable->widget()->show();
-
-//    //assert (dbo_vars_grid_edit_buttons_.find(button) != dbo_vars_grid_edit_buttons_.end());
-//    //dbo_vars_grid_edit_buttons_.at(button)->widget()->show();
-//}
 
 void DBObjectWidget::editDBOVariableNameSlot ()
 {
@@ -414,10 +306,7 @@ void DBObjectWidget::deleteDBOVarSlot()
     DBOVariable* variable = data.value<DBOVariable*>();
     assert (variable);
     object_->deleteVariable (variable->name());
-    //variable->widget()->show();
 
-    //    assert (dbo_vars_grid_delete_buttons_.find(button) != dbo_vars_grid_delete_buttons_.end());
-    //    object_->deleteVariable (dbo_vars_grid_delete_buttons_.at(button)->name());
     updateDBOVarsGridSlot();
 }
 
@@ -611,12 +500,6 @@ void DBObjectWidget::showLabelDefinitionWidgetSlot()
     object_->labelDefinitionWidget()->show();
 }
 
-void DBObjectWidget::editDataSourcesSlot()
-{
-    assert (object_);
-    object_->editDataSourcesWidget()->show();
-}
-
 void DBObjectWidget::printSlot ()
 {
     assert (object_);
@@ -626,10 +509,6 @@ void DBObjectWidget::printSlot ()
 void DBObjectWidget::updateVariablesSlot ()
 {
     assert (object_);
-    //assert (all_schemas_box_);
-
-//    if (all_schemas_box_->count() == 0)
-//        return;
 
     if (!schema_manager_.hasCurrentSchema())
     {
@@ -709,7 +588,6 @@ void DBObjectWidget::updateVariablesSlot ()
 
         Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
         var_configuration.addParameterString ("schema", schema_name);
-        //var_configuration.addParameterString ("meta_table", meta.name());
         var_configuration.addParameterString ("variable_identifier", col.identifier());
 
         object_->generateSubConfigurable("DBOVariable", instance);
@@ -891,8 +769,6 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOVarSlot() ));
         del->setProperty("variable", data);
-        //assert (dbo_vars_grid_delete_buttons_.find(del) == dbo_vars_grid_delete_buttons_.end());
-        //dbo_vars_grid_delete_buttons_ [del] = var_it->second;
         dbovars_grid_->addWidget (del, row, col);
 
         row++;

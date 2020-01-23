@@ -1,0 +1,27 @@
+{
+    "parameters": {
+        "association_dubious_close_time_future": 1.0,
+        "association_dubious_close_time_past": 8.0,
+        "association_time_future": 2.0,
+        "association_time_past": 20.0,
+        "associations_dubious_distant_time": 12.0,
+        "beginning_time": 30.0,
+        "current_data_source_name": "ARTS",
+        "dubious_time": 30.0,
+        "end_track_time": 300.0,
+        "future_time": 2.0,
+        "hash_var_str": "hash_code",
+        "ignore_track_coasting_associations": true,
+        "ignore_track_end_associations": true,
+        "key_var_str": "rec_num",
+        "mark_track_coasting_associations_dubious": false,
+        "mark_track_end_associations_dubious": false,
+        "misses_acceptable_time": 60.0,
+        "tod_var_str": "tod",
+        "tracker_ds_id_var_str": "ds_id",
+        "tracker_track_begin_var_str": "track_created",
+        "tracker_track_coasting_var_str": "track_coasted",
+        "tracker_track_end_var_str": "track_end",
+        "tracker_track_num_var_str": "track_num"
+    }
+}

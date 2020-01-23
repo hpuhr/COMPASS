@@ -49,6 +49,18 @@ The following operations exist, depending on the mouse action modes (set in the 
   \begin{tabular}{ | l | l | l |}
     \hline
     \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Start/end labeling box \\ \hline
+    LMB click \& drag & - & Traverse map \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline  
+    \end{tabular}
+  \caption{Map widget view operations in Label Multiple mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
     LMB click & - & Start/end measurement \\ \hline
     LMB click \& drag & - & Traverse map \\ \hline
     ... & ... & Other operations are the same as in Navigate mode \\ \hline  
@@ -98,8 +110,8 @@ In the upper-right corner, the ATSDB version is shown. In the lower-right corner
 Labels can be shown for target reports, when the Label mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_action.png} is active. Simply do a LMB click on a target report symbol.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_labels.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_labels.png}
   \caption{OSG View Labels}
 \end{figure}
 
@@ -110,8 +122,8 @@ Please note that if association information is present, the UTN is always shown 
 Several data-related operations can be also performed in the data widget when the Label mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_action.png} is active, by a RMB click on a target report symbol.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_data_operations.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_data_operations.png}
   \caption{OSG View geometry operations}
 \end{figure}
 
@@ -125,21 +137,35 @@ The data context menu allows the following operations:
 
 Depending on the grouping mode in the 'Config' tab, different parent layer items are shown. For each of this parents the same menu entries exist as if they where clicked in the 'Layers' tab. Please refer to \nameref{sec:geometry_operations} for details.
 
+\subsubsection{Label Multiple}
+
+Multiple target reports can be selected when the Label Multiple mode \includegraphics[width=0.5cm,frame]{../../data/icons/label_multiple_action.png} is active. \\
+
+The usage of this mode mode works exactly like the Selection mode, only that the target reports are not selected but each one is labeled. If more then 100 target reports are labeled, only the first 100 ones are labeled and an error message is shown.
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=7cm]{../screenshots/osgview_label_multiple_error.png}
+  \caption{OSG View Label Multiple error message}
+\end{figure}
+
+For details about the rectangular target report labeling please refer to \nameref{sec:osgview_selection}.
+
 \subsubsection{Show Associations}
 
 Of special interest is of the case when association information is present and a 'UTN' group mode is used. Using the Geometry Menu of a layer item which generated the associations (e.g. ARTAS Tracker), the association information can be shown for each target report of the layer.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_assoc.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/osgview_assoc.png}
   \caption{OSG View show ARTAS association information}
 \end{figure}
 
 These associations are gradient-coloured from the color of the system track update to color of the associated target report. Additionally, the time window filter can be used to show the timing of the data.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_assoc_time_window.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/osgview_assoc_time_window.png}
   \caption{OSG View show ARTAS association information in time window}
 \end{figure}
 
@@ -151,8 +177,8 @@ Distance measurements can be made when the Measure mode \includegraphics[width=0
 Simply do a LMB click on a target report or a position on the map to start the measurement.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure1.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_measure1.png}
   \caption{OSG View measurement}
 \end{figure}
 
@@ -167,8 +193,8 @@ During the measurement, the following information is shown in the top-left corne
 Then do a second LMB click on the map on a point of interest to finish the measurement.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure2.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_measure2.png}
   \caption{OSG View measurement done}
 \end{figure}
 
@@ -177,8 +203,8 @@ If 'Use height' is checked, measurements are calculated in the same way as previ
 For a measurement between two target reports with height information, the measurement will be displayed as follows:
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure3d.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_measure3d.png}
   \caption{OSG View measurement with height information}
 \end{figure}
 
@@ -187,53 +213,56 @@ The measurements is shown in the Layers tab, and is identified using a number. F
 Please note the the measurement number background color can be set as with the label background color. 
 
 \subsubsection{Selection}
+\label{sec:osgview_selection}
 
-Target reports can be selected when the Select mode \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} is active. If 'Use height' is not checked, measurements are done as follows:
+Target reports can be selected when the Select mode \includegraphics[width=0.5cm,frame]{../../data/icons/select_action.png} is active. If 'Use height' is not checked, select is done as follows:
 
 Simply do a LMB click on a target report or a position on the map to start the selection. Move the mouse to another location to create a red selection rectangle.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select1.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select1.png}
   \caption{OSG View selection}
 \end{figure}
 
 With a second LMB click the selection is finalized and all target reports in the created latitude/longitude rectangle are selection. This is shown by a different color (yellow by default), and the 'Selected' counter in the lower-left corner shows the current selection size.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select2.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select2.png}
   \caption{OSG View selection done}
 \end{figure}
 
 If another selection is done, the previous one is cleared by default. If another selection should be \textit{added} to the current one, hold down the \textbf{Control} key when doing the second LMB click.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select_add1.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select_add1.png}
   \caption{OSG View selection with adding}
 \end{figure}
 
 This adds the target reports within the new red rectangle to the current selecion.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select_add2.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select_add2.png}
   \caption{OSG View selection with adding done}
 \end{figure}
 
-If 'Use height' is checked, selection can be done with height information, which is shown as a box. Simply do a LMB click on the map for a target report, and move the cursor to another target report or map location. If both locations have zero height (map location or no height information in target report), again a rectangle is shown. If one or both locations have a non-zero height, a 3D box is displayed.
+If 'Use height' is checked, selection can be done with height information, which is shown as a box. Simply do a LMB click on the map for a target report, and move the cursor to another target report or map location.  \\
+
+If both locations have zero height (map location or no height information in target report), again a rectangle is shown. If one or both locations have a non-zero height, a 3D box is displayed.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select3d.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select3d.png}
   \caption{OSG View selection with height}
 \end{figure}
 
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_select3d_2.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_select3d_2.png}
   \caption{OSG View selection with height done}
 \end{figure}
 
@@ -244,8 +273,8 @@ Once activated using the symbol \includegraphics[width=0.5cm,frame]{../../data/i
 
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_time_filter.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_time_filter.png}
   \caption{OSG View time filter}
   \label{fig:osgview_time_filter}
 \end{figure}
@@ -263,7 +292,9 @@ The following items exist:
 \end{itemize}
 \ \\
 
-During usage of the time filter, changes in the Configuration Widget was suppressed, but changes in the Layers Widgets are possible.
+During usage of the time filter, most changes in the Configuration panel are not available (except for changes in the Layers tab and current style). \\
+
+Please \textbf{note} that the time filter automatically deactivated if a re-load is triggered.
 
 \subsubsection{Depth Check}
 
@@ -273,6 +304,14 @@ Once activated using the symbol \includegraphics[width=0.5cm,frame]{../../data/i
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/osgview_depth_check.png}
   \caption{OSG View depth check}
+\end{figure}
+
+Please note that if the display check is activated for geometry without height display, bad rendering can occur. For this reason, this mode is only recommended for geometry display with height.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_depth_check_bad.png}
+  \caption{OSG View depth check bad rendering}
 \end{figure}
 
 \subsubsection{Data Label Background Color}

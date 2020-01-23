@@ -23,7 +23,7 @@
 
 #include <vector>
 
-class JSONImporterTask;
+class JSONImportTask;
 
 class JSONParsingSchema : public Configurable
 {

@@ -22,9 +22,11 @@
 #include "eventprocessor.h"
 
 class ListBoxView;
-class QTabWidget;
 class ListBoxViewDataWidget;
 class ListBoxViewConfigWidget;
+
+class QSplitter;
+class QTabWidget;
 
 /**
  * @brief Used for textual data display in a ListBoxView.
@@ -55,6 +57,7 @@ public:
     ListBoxViewDataWidget *getDataWidget () { return data_widget_; }
 
 protected:
+    QSplitter* main_splitter_ {nullptr};
     /// Data widget with data display
     ListBoxViewDataWidget* data_widget_ {nullptr};
     /// Config widget with configuration elements

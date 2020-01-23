@@ -26,19 +26,16 @@
 #include "dbovariableset.h"
 #include "dbodatasource.h"
 #include "dbodatasourcedefinition.h"
-#include "storeddbodatasource.h"
-#include "dboeditdatasourceactionoptions.h"
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
-#include "dboassociationentry.h"
+#include "dboassociationcollection.h"
 
 class PropertyList;
 class MetaDBTable;
 
 class DBObjectWidget;
 class DBObjectInfoWidget;
-class DBOEditDataSourcesWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
@@ -49,8 +46,6 @@ class DBOVariableSet;
 class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
 class DBObjectManager;
-
-using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -166,6 +161,7 @@ public:
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();
+    bool isPostProcessing ();
     /// @brief Returns if DBO exists and has data in the database
     bool hasData ();
     /// @brief Returns number of elements for DBO type
@@ -201,18 +197,6 @@ public:
     bool hasKeyVariable ();
     DBOVariable& getKeyVariable();
 
-    using StoredDataSourceIterator = typename std::map<unsigned int, StoredDBODataSource>::iterator;
-    StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
-    StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
-
-    /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
-    bool hasStoredDataSource (unsigned int id) const;
-    /// @brief Returns variable identified by id
-    StoredDBODataSource& storedDataSource (unsigned int id);
-    StoredDBODataSource& addNewStoredDataSource ();
-//    /// @brief Deletes a variable identified by id
-    void deleteStoredDataSource (unsigned int id);
-
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
     DataSourceIterator dsBegin() { return data_sources_.begin(); }
     DataSourceIterator dsEnd() { return data_sources_.end(); }
@@ -228,9 +212,6 @@ public:
     const std::string& getNameOfSensor (int id);
     const std::map<int, DBODataSource>& dataSources() const { return data_sources_; }
 
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB ();
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg ();
-
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
 
@@ -240,14 +221,12 @@ public:
     std::string status ();
 
     DBObjectWidget* widget ();
+    void closeWidget ();
+
     DBObjectInfoWidget* infoWidget ();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
-    DBOEditDataSourcesWidget* editDataSourcesWidget();
 
     std::shared_ptr<Buffer> data () { return data_; }
-
-    void lock ();
-    void unlock ();
 
     bool existsInDB () const;
 
@@ -288,16 +267,11 @@ protected:
 
     std::shared_ptr<Buffer> data_;
 
-    bool locked_ {false};
-
     /// Container with all DBOSchemaMetaTableDefinitions
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
-    std::unique_ptr<DBOEditDataSourcesWidget> edit_ds_widget_;
-
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
-    std::map<unsigned int, StoredDBODataSource> stored_data_sources_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;

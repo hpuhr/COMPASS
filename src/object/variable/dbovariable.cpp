@@ -140,9 +140,6 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
         widget_->setVariable(*this);
     other.widget_ = nullptr;
 
-    locked_ = other.locked_;
-    other.locked_ = false;
-
     other.configuration().updateParameterPointer ("name", &name_);
     other.configuration().updateParameterPointer ("description", &description_);
     other.configuration().updateParameterPointer ("data_type_str", &data_type_str_);
@@ -502,34 +499,9 @@ DBOVariableWidget* DBOVariable::widget ()
     {
         widget_ = new DBOVariableWidget (*this);
         assert (widget_);
-
-        if (locked_)
-            widget_->lock();
     }
 
     return widget_;
-}
-
-void DBOVariable::lock ()
-{
-    if (locked_)
-        return;
-
-    if (widget_)
-        widget_->lock();
-
-    locked_ = true;
-}
-
-void DBOVariable::unlock ()
-{
-    if (!locked_)
-        return;
-
-    if (widget_)
-        widget_->unlock();
-
-    locked_ = false;
 }
 
 DBOVariable::Representation DBOVariable::representation() const

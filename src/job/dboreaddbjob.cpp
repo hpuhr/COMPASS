@@ -68,7 +68,7 @@ void DBOReadDBJob::run ()
                                order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt=0;
-    unsigned int row_count=0;
+
     while (!done_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
@@ -86,7 +86,7 @@ void DBOReadDBJob::run ()
 
         logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
-        row_count += buffer->size();
+        row_count_ += buffer->size();
         emit intermediateSignal(buffer);
 
         if (buffer->lastOne())
@@ -101,11 +101,16 @@ void DBOReadDBJob::run ()
 
     if (diff.total_seconds() > 0)
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
-               << 1000.0*row_count/diff.total_milliseconds() << " el/s";
+               << 1000.0*row_count_/diff.total_milliseconds() << " el/s";
     else
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
 
     done_=true;
 
     return;
+}
+
+unsigned int DBOReadDBJob::rowCount() const
+{
+    return row_count_;
 }

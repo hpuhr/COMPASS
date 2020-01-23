@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "files.h"
 #include "configurationmanager.h"
+#include "stringconv.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -49,15 +50,13 @@ namespace po = boost::program_options;
 Client::Client(int& argc, char** argv)
     : QApplication(argc, argv)
 {
-    bool reset_config = false;
-
     setlocale(LC_ALL, "C");
 
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "produce help message")
             //("compression", po::value<int>(), "set compression level")
-            ("reset-config,rc", po::bool_switch(&reset_config), "reset user configuration files")
+            ("reset,r", po::bool_switch(&config_and_data_reset_wanted_), "reset user configuration and data")
             ;
 
     try
@@ -83,7 +82,7 @@ Client::Client(int& argc, char** argv)
     {
         cout << "ATSDBClient: setting directory paths" << endl;
 
-        string system_install_path = SYSTEM_INSTALL_PATH;
+        system_install_path_ = SYSTEM_INSTALL_PATH;
 
 #if USE_EXPERIMENTAL_SOURCE == true
         cout <<"ATSDBClient: includes experimental features" << endl;
@@ -94,11 +93,10 @@ Client::Client(int& argc, char** argv)
             cout << "ATSDBClient: assuming fuse environment in " << appdir << endl;
             assert (appdir);
 
-            system_install_path = string(appdir) + "/appdir/atsdb/";
+            system_install_path_ = string(appdir) + "/appdir/atsdb/";
 
-            cout << "ATSDBClient: set install path to '" << system_install_path << "'" << endl;
-            assert (Files::directoryExists(system_install_path));
-
+            cout << "ATSDBClient: set install path to '" << system_install_path_ << "'" << endl;
+            assert (Files::directoryExists(system_install_path_));
 
             osgDB::FilePathList path_list;
 
@@ -113,54 +111,9 @@ Client::Client(int& argc, char** argv)
         }
 #endif
 
-        cout << "ATSDBClient: checking if local configuration exists ... ";
+        checkNeededActions ();
 
-        bool config_and_data_exists = Files::directoryExists(HOME_SUBDIRECTORY);
-        bool config_and_data_copied = false;
-
-        if (config_and_data_exists)
-        {
-            cout << " yes" << endl;
-        }
-        else
-        {
-            cout << " no" << endl;
-            copyConfigurationAndData(system_install_path);
-            config_and_data_copied = true;
-        }
-
-        {
-            SimpleConfig config ("config.json");
-            string config_version;
-
-            if (config.existsId("version"))
-                config_version = config.getString("version");
-
-            if (config_version != VERSION)
-            {
-                cout << "ATSDBClient: configuration mismatch detected, local version '" << config_version << "'"
-                          << " application version '" << VERSION << "'" << endl;
-
-                QMessageBox::StandardButton reply;
-                reply = QMessageBox::question(nullptr, "Upgrade Configuration & Data",
-                                              "A configuration & data updade is required, do you want to update now?",
-                                              QMessageBox::Yes|QMessageBox::No);
-                if (reply == QMessageBox::Yes)
-                {
-                    cout << "ATSDBClient: config & data upgrade confirmed" << endl;
-                    copyConfigurationAndData(system_install_path);
-                }
-                else
-                {
-                    cout << "ATSDBClient: config & data upgrade denied" << endl;
-                    quit_requested_ = true;
-                    return;
-                }
-            }
-        }
-
-        if (reset_config && !config_and_data_copied)
-            copyConfiguration(system_install_path);
+        performNeededActions();
 
         cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY+"main.conf'" << endl;
 
@@ -208,7 +161,7 @@ Client::Client(int& argc, char** argv)
 
 }
 
-bool Client::notify(QObject * receiver, QEvent * event)
+bool Client::notify(QObject* receiver, QEvent* event)
 {
     try
     {
@@ -233,29 +186,145 @@ bool Client::quitRequested() const
     return quit_requested_;
 }
 
-void Client::copyConfigurationAndData (const string& system_install_path)
+void Client::checkNeededActions ()
 {
-    if (!Files::directoryExists(system_install_path))
-        throw runtime_error ("ATSDBClient: unable to locate system installation files at '"+system_install_path
-                             +"'");
+    cout << "ATSDBClient: checking if local configuration exists ... ";
 
-    cout << "ATSDBClient: copying files from system installation from '" << system_install_path
-              << "' to '" << HOME_SUBDIRECTORY <<  "' ... ";
+    config_and_data_exists_ = Files::directoryExists(HOME_SUBDIRECTORY);
 
-    if (!Files::copyRecursively(system_install_path, HOME_SUBDIRECTORY))
-        throw runtime_error ("ATSDBClient: copying files from system installation from '" + system_install_path
+    if (config_and_data_exists_)
+        cout << " yes" << endl;
+    else
+        cout << " no" << endl;
+
+    if (config_and_data_exists_) // check updating actions
+    {
+        SimpleConfig config ("config.json");
+        string config_version;
+
+        if (config.existsId("version"))
+            config_version = config.getString("version");
+
+        if (String::compareVersions(VERSION, config_version) != 0) // not same
+        {
+            upgrade_needed_ = true;
+
+            // 0 if same, -1 if v1 > v2, 1 if v1 < v2
+            bool app_version_newer = String::compareVersions(VERSION, config_version) == -1;
+
+            cout << "ATSDBClient: configuration mismatch detected, local version '" << config_version << "'"
+                 << (app_version_newer ? " newer" : " older")
+                 << " application version '" << VERSION << "'" << endl;
+
+            if (app_version_newer)  // check if cfg version is so old it needs deleting
+                config_and_data_deletion_wanted_ =
+                        (String::compareVersions(DELETE_CFG_BEFORE_VERSION, config_version) == -1);
+            else
+                config_and_data_deletion_wanted_ = // check if cfg version is new so it needs deleting
+                        (String::compareVersions(VERSION, config_version) == 1);
+        }
+        else
+            cout << "ATSDBClient: same configuration version '" << config_version << "' found" << endl;
+    }
+}
+
+void Client::performNeededActions ()
+{
+    if (!config_and_data_exists_) // simple copy of nothing exists
+    {
+        cout << "ATSDBClient: no previous installation, copying new information and data" << endl;
+
+        copyConfigurationAndData();
+        config_and_data_copied_ = true;
+
+        return;
+    }
+
+    if (upgrade_needed_ || config_and_data_reset_wanted_)
+    {
+        if (config_and_data_deletion_wanted_) // version so old it should be deleted before
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(
+                        nullptr, "Delete Previous Configuration & Data",
+                        "Deletion of the existing configuration and data is required. This will delete"
+                        " the folders ~/.atsdb/conf and ~/.atsdb/data. Do you want to continue?",
+                        QMessageBox::Yes|QMessageBox::No);
+
+            if (reply == QMessageBox::Yes)
+            {
+                cout << "ATSDBClient: config & data delete confirmed" << endl;
+
+                deleteConfigurationAndData ();
+                copyConfigurationAndData();
+                return;
+            }
+            else
+            {
+                cout << "ATSDBClient: required config & data delete denied" << endl;
+                quit_requested_ = true;
+                return;
+            }
+        }
+
+        // simple upgrade
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(
+                    nullptr, "Upgrade Configuration & Data",
+                    "A configuration & data updade is required, do you want to update now?",
+                    QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::Yes)
+        {
+            cout << "ATSDBClient: config & data upgrade confirmed" << endl;
+            copyConfigurationAndData();
+        }
+        else
+        {
+            cout << "ATSDBClient: config & data upgrade denied" << endl;
+            quit_requested_ = true;
+            return;
+        }
+    }
+}
+
+void Client::deleteConfigurationAndData ()
+{
+    if (!Files::directoryExists(HOME_CONF_DIRECTORY))
+        throw runtime_error ("ATSDBClient: unable to delete conf files at '"+HOME_CONF_DIRECTORY+"'");
+
+    if (!Files::directoryExists(HOME_DATA_DIRECTORY))
+        throw runtime_error ("ATSDBClient: unable to delete data files at '"+HOME_DATA_DIRECTORY+"'");
+
+    Files::deleteFolder (HOME_CONF_DIRECTORY);
+    Files::deleteFolder (HOME_DATA_DIRECTORY);
+
+    assert (!Files::directoryExists(HOME_CONF_DIRECTORY));
+    assert (!Files::directoryExists(HOME_DATA_DIRECTORY));
+}
+
+void Client::copyConfigurationAndData ()
+{
+    if (!Files::directoryExists(system_install_path_))
+        throw runtime_error ("ATSDBClient: unable to locate system installation files at '"+system_install_path_+"'");
+
+    cout << "ATSDBClient: copying files from system installation from '" << system_install_path_
+         << "' to '" << HOME_SUBDIRECTORY <<  "' ... ";
+
+    if (!Files::copyRecursively(system_install_path_, HOME_SUBDIRECTORY))
+        throw runtime_error ("ATSDBClient: copying files from system installation from '" + system_install_path_
                              +"' to '"+HOME_SUBDIRECTORY+" failed");
 
     cout << " done" << endl;
 }
 
-void Client::copyConfiguration (const string& system_install_path)
+void Client::copyConfiguration ()
 {
-    string system_conf_path = system_install_path+"conf/";
+    string system_conf_path = system_install_path_+"conf/";
     string home_conf_path = HOME_SUBDIRECTORY+"conf/";
 
     cout << "ATSDBClient: reset config from from '" << system_conf_path
-              << "' to '" << home_conf_path <<  "' ... ";
+         << "' to '" << home_conf_path <<  "' ... ";
 
     if (!Files::copyRecursively(system_conf_path, home_conf_path))
         throw runtime_error ("ATSDBClient: reset config from from '" + system_conf_path

@@ -25,12 +25,8 @@
 #include "global.h"
 #include "logger.h"
 #include "filtermanager.h"
-//#include "StructureReader.h"
-//#include "WriteBufferDBJob.h"
 #include "jobmanager.h"
 #include "taskmanager.h"
-//#include "DBOInfoDBJob.h"
-//#include "DBOVariableDistinctStatisticsDBJob.h"
 #include "viewmanager.h"
 #include "projectionmanager.h"
 
@@ -43,10 +39,11 @@ using namespace std;
  * Sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.json"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr),
-   db_schema_manager_ (nullptr), filter_manager_(nullptr), view_manager_(nullptr)
+ : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.json")
 {
     logdbg  << "ATSDB: constructor: start";
+
+    simple_config_.reset (new SimpleConfig ("config.json"));
 
     JobManager::instance().start();
 
@@ -59,16 +56,19 @@ ATSDB::ATSDB()
     assert (task_manager_);
     assert (view_manager_);
 
-    QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_,
-                      SLOT(updateSchemaInformationSlot()));
-    QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), db_schema_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
+    QObject::connect (db_schema_manager_.get(), &DBSchemaManager::schemaChangedSignal,
+                      dbo_manager_.get(),  &DBObjectManager::updateSchemaInformationSlot);
+    //QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
+    QObject::connect (db_interface_.get(), &DBInterface::databaseContentChangedSignal,
+                      db_schema_manager_.get(), &DBSchemaManager::databaseContentChangedSlot, Qt::QueuedConnection);
+    QObject::connect (db_interface_.get(), &DBInterface::databaseContentChangedSignal,
+                      dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot, Qt::QueuedConnection);
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
-    //reference_point_defined_=false;
+    QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
+                     task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
+    QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal,
+                     task_manager_.get(), &TaskManager::schemaChangedSlot);
 
     logdbg  << "ATSDB: constructor: end";
 }
@@ -90,27 +90,12 @@ ATSDB::~ATSDB()
 
     assert (!initialized_);
 
-    //delete struct_reader_;
-
     assert (!dbo_manager_);
     assert (!db_schema_manager_);
     assert (!db_interface_);
     assert (!filter_manager_);
     assert (!task_manager_);
     assert (!view_manager_);
-
-//    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > >::iterator it;
-//    for (it = data_sources_instances_.begin(); it != data_sources_instances_.end(); it++)
-//    {
-//        std::map <std::pair<unsigned char, unsigned char>, DataSource* >::iterator it2;
-
-//        for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
-//        {
-//            delete it2->second;
-//        }
-//        it->second.clear();
-//    }
-//    data_sources_instances_.clear();
 
     logdbg  << "ATSDB: destructor: end";
 }
@@ -120,40 +105,40 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
     logdbg  << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
     if (class_id == "DBInterface")
     {
-        assert (db_interface_ == nullptr);
-        db_interface_ = new DBInterface (class_id, instance_id, this);
-        assert (db_interface_ != nullptr);
+        assert (!db_interface_);
+        db_interface_.reset(new DBInterface (class_id, instance_id, this));
+        assert (db_interface_);
     }
     else if (class_id == "DBObjectManager")
     {
-        assert (dbo_manager_ == nullptr);
-        dbo_manager_ = new DBObjectManager (class_id, instance_id, this);
-        assert (dbo_manager_ != nullptr);
+        assert (!dbo_manager_);
+        dbo_manager_.reset(new DBObjectManager (class_id, instance_id, this));
+        assert (dbo_manager_);
     }
     else if (class_id == "DBSchemaManager")
     {
         assert (db_interface_);
-        assert (db_schema_manager_ == nullptr);
-        db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this, *db_interface_);
-        assert (db_schema_manager_ != nullptr);
+        assert (!db_schema_manager_);
+        db_schema_manager_.reset(new DBSchemaManager (class_id, instance_id, this, *db_interface_));
+        assert (db_schema_manager_);
     }
     else if (class_id == "FilterManager")
     {
-        assert (filter_manager_ == nullptr);
-        filter_manager_ = new FilterManager (class_id, instance_id, this);
-        assert (filter_manager_ != nullptr);
+        assert (!filter_manager_);
+        filter_manager_.reset(new FilterManager (class_id, instance_id, this));
+        assert (filter_manager_);
     }
     else if (class_id == "TaskManager")
     {
-        assert (task_manager_ == nullptr);
-        task_manager_ = new TaskManager (class_id, instance_id, this);
-        assert (task_manager_ != nullptr);
+        assert (!task_manager_);
+        task_manager_.reset(new TaskManager (class_id, instance_id, this));
+        assert (task_manager_);
     }
     else if (class_id == "ViewManager")
     {
-        assert (view_manager_ == nullptr);
-        view_manager_ = new ViewManager (class_id, instance_id, this);
-        assert (view_manager_ != nullptr);
+        assert (!view_manager_);
+        view_manager_.reset(new ViewManager (class_id, instance_id, this));
+        assert (view_manager_);
     }
     else
         throw std::runtime_error ("ATSDB: generateSubConfigurable: unknown class_id "+class_id );
@@ -161,42 +146,42 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
 
 void ATSDB::checkSubConfigurables ()
 {
-    if (db_interface_ == nullptr)
+    if (!db_interface_)
     {
         addNewSubConfiguration ("DBInterface", "DBInterface0");
         generateSubConfigurable ("DBInterface", "DBInterface0");
-        assert (db_interface_ != nullptr);
+        assert (db_interface_);
     }
-    if (dbo_manager_ == nullptr)
+    if (!dbo_manager_)
     {
         assert (db_interface_);
         addNewSubConfiguration ("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable ("DBObjectManager", "DBObjectManager0");
-        assert (dbo_manager_ != nullptr);
+        assert (dbo_manager_);
     }
-    if (db_schema_manager_ == nullptr)
+    if (!db_schema_manager_)
     {
         addNewSubConfiguration ("DBSchemaManager", "DBSchemaManager0");
         generateSubConfigurable ("DBSchemaManager", "DBSchemaManager0");
-        assert (dbo_manager_ != nullptr);
+        assert (dbo_manager_);
     }
-    if (filter_manager_ == nullptr)
+    if (!filter_manager_)
     {
         addNewSubConfiguration ("FilterManager", "FilterManager0");
         generateSubConfigurable ("FilterManager", "FilterManager0");
-        assert (filter_manager_ != nullptr);
+        assert (filter_manager_);
     }
-    if (task_manager_ == nullptr)
+    if (!task_manager_)
     {
         addNewSubConfiguration ("TaskManager", "TaskManager0");
         generateSubConfigurable ("TaskManager", "TaskManager0");
-        assert (task_manager_ != nullptr);
+        assert (task_manager_);
     }
-    if (view_manager_ == nullptr)
+    if (!view_manager_)
     {
         addNewSubConfiguration ("ViewManager", "ViewManager0");
         generateSubConfigurable ("ViewManager", "ViewManager0");
-        assert (view_manager_ != nullptr);
+        assert (view_manager_);
     }
 }
 
@@ -242,6 +227,13 @@ ViewManager &ATSDB::viewManager ()
     return *view_manager_;
 }
 
+SimpleConfig& ATSDB::config ()
+{
+    assert (initialized_);
+    assert (simple_config_);
+    return *simple_config_;
+}
+
 bool ATSDB::ready ()
 {
     if (!db_interface_ || !initialized_)
@@ -267,180 +259,31 @@ void ATSDB::shutdown ()
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
 
-    assert (task_manager_);
-    task_manager_->shutdown();
-    delete task_manager_;
-    task_manager_ = nullptr;
+    assert (db_interface_);
+    db_interface_->closeConnection(); // removes connection widgets, needs to be before
 
     assert (view_manager_);
     view_manager_->close();
-    delete view_manager_;
     view_manager_ = nullptr;
 
-    assert (db_interface_);
-    db_interface_->closeConnection();
-
     assert (dbo_manager_);
-    delete dbo_manager_;
     dbo_manager_ = nullptr;
 
     assert (db_schema_manager_);
-    delete db_schema_manager_;
     db_schema_manager_ = nullptr;
 
+    assert (task_manager_);
+    task_manager_->shutdown();
+    task_manager_ = nullptr;
+
     assert (db_interface_);
-    delete db_interface_;
     db_interface_ = nullptr;
 
     assert (filter_manager_);
-    delete filter_manager_;
     filter_manager_ = nullptr;
 
     initialized_=false;
 
-//    if (struct_reader_->hasUnwrittenData())
-//    {
-//        loginf << "ATSDB: shutdown: finalizing data insertion";
-//        struct_reader_->finalize();
-
-//        if (!WorkerThreadManager::getInstance().noJobs())
-//            loginf << "ATSDB: shutdown: waiting on data insertion finish";
-
-//        while (!WorkerThreadManager::getInstance().noJobs())
-//        {
-//            sleep(1);
-//        }
-//        WorkerThreadManager::getInstance().shutdown();
-//    }
-//    else
-//    {
-//        setJobsObsolete();
-
-//        while (active_jobs_.size() != 0)
-//        {
-//            loginf << "ATSDB: shutdown: waiting for " << active_jobs_.size() << " job(s) to finish";
-//            sleep(1);
-//        }
-//    }
     loginf  << "ATSDB: shutdown: end";
 }
 
-////void ATSDB::insert (const std::string &type, void *data)
-////{
-////    logdbg  << "ATSDB: insert: got type " << type;
-
-////    if (type == DBO_SENSOR_INFORMATION)
-////    {
-////        logerr << "ATSDB: insert: sensor info write unavailable";
-////        return;
-////    }
-
-////    struct_reader_->add (type, data);
-////}
-
-//void ATSDB::insert (Buffer *buffer, std::string table_name)
-//{
-//    assert (buffer);
-//    assert (table_name.size() != 0);
-
-//    assert (db_interface_);
-//    db_interface_->writeBuffer(buffer, table_name);
-//}
-
-//void ATSDB::getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//        boost::function<void (Job*)> obsolete_function, const std::string &type, unsigned int id, DBOVariableSet read_list)
-//{
-
-//    //TODO
-//    assert (false);
-
-////    std::vector <unsigned int> ids;
-////    ids.push_back(id);
-
-////    DBOInfoDBJob *infojob = new DBOInfoDBJob (orderer, done_function, obsolete_function, db_interface_,
-////            type, ids, read_list, false, "", true, 0, 0, true);
-//}
-
-//void ATSDB::getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//        boost::function<void (Job*)> obsolete_function, const std::string &type,
-//        std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
-//        bool ascending, unsigned int limit_min, unsigned int limit_max, bool finalize)
-//{
-//    //TODO
-//    assert (false);
-
-////    DBOInfoDBJob *infojob = new DBOInfoDBJob (orderer, done_function, obsolete_function, db_interface_,
-////            type, ids, read_list, use_filters, order_by_variable, ascending, limit_min, limit_max, finalize);
-//}
-
-//void ATSDB::getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//        boost::function<void (Job*)> obsolete_function, const std::string &type,
-//        DBOVariable *variable, unsigned int sensor_number)
-//{
-//    //TODO
-//    assert (false);
-
-////    DBOVariableDistinctStatisticsDBJob *distinct_job = new DBOVariableDistinctStatisticsDBJob (orderer, done_function,
-////            obsolete_function, db_interface_, type, variable, sensor_number);
-//}
-
-//void ATSDB::updateDBODone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-////    logdbg << "ATSDB: updateDBODone";
-////    UpdateBufferDBJob *updatejob = (UpdateBufferDBJob*) job;
-
-
-////    logdbg << "ATSDB: updateDBODone: done";
-////    delete updatejob->getBuffer();
-////    delete updatejob;
-//}
-
-//void ATSDB::updateDBOAborted( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-////    logdbg << "ATSDB: updateDBOAborted";
-////    UpdateBufferDBJob *updatejob = (UpdateBufferDBJob*) job;
-
-////    logdbg << "ATSDB: updateDBOAborted: done";
-////    delete updatejob->getBuffer();
-////    delete updatejob;
-//}
-
-//void ATSDB::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter)
-//{
-//    assert (db_interface_);
-//    assert (variable);
-//    assert (value.size() != 0);
-//    assert (filter.size() != 0);
-
-//    db_interface_->deleteAllRowsWithVariableValue(variable, value, filter);
-//}
-
-//void ATSDB::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter)
-//{
-//    assert (db_interface_);
-//    assert (variable);
-//    assert (value.size() != 0);
-//    assert (new_value.size() != 0);
-//    assert (filter.size() != 0);
-
-
-//    db_interface_->updateAllRowsWithVariableValue(variable, value, new_value, filter);
-//}
-
-////void ATSDB::getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values)
-////{
-////
-////}
-
-//Buffer *ATSDB::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
-//        bool has_tod, double tod_min, double tod_max)
-//{
-//    assert (db_interface_);
-//    return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti, has_tod, tod_min, tod_max);
-//}

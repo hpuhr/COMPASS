@@ -23,6 +23,7 @@
 #include <string>
 
 static const std::string VERSION = "@CPACK_PACKAGE_VERSION_MAJOR@.@CPACK_PACKAGE_VERSION_MINOR@.@CPACK_PACKAGE_VERSION_PATCH@";
+static const std::string DELETE_CFG_BEFORE_VERSION = "0.5.0";
 
 static QSize UI_ICON_SIZE (20,20);
 static const unsigned int UI_ICON_BUTTON_MAX_WIDTH=40;

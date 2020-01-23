@@ -18,7 +18,7 @@
 #ifndef DBSCHEMAMANAGERWIDGET_H
 #define DBSCHEMAMANAGERWIDGET_H
 
-#include <QFrame>
+#include <QWidget>
 
 class DBSchemaManager;
 
@@ -27,9 +27,12 @@ class QComboBox;
 class QPushButton;
 class QStackedWidget;
 
-class DBSchemaManagerWidget : public QFrame
+class DBSchemaManagerWidget : public QWidget
 {
     Q_OBJECT
+
+signals:
+    void schemaLockedSignal();
 
 public:
     explicit DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent=0, Qt::WindowFlags f=0);

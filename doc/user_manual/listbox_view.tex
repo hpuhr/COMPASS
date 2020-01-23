@@ -2,8 +2,6 @@
 \label{sec:listbox_view}
 A Listbox View displays the DBObject data as text in tables, to allow textual data inspection. When started, it presents itself in the following manner.
 
-\section{Layout}
-
 \begin{figure}[H]
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/listbox_start.png}
@@ -11,23 +9,28 @@ A Listbox View displays the DBObject data as text in tables, to allow textual da
   \label{fig:listbox_start}
 \end{figure}
 
-On the left side, a number of tabs exist as 'All' and for each active DBO, each of which contains a table. On the right side, a configuration area exists. A number of variables is displayed in the 'Variables' list. One can change the order, remove and add variables to be inspected. \\
+\section{Layout}
+
+
+On the left side, a number of tabs exist as 'All' and for each active DBO, each of which contains a table. \\
+
+On the right side, a configuration area exists which allows configuration of what data is loaded and how it is displayed. \\
+
+Both areas can be resized and hidden if wanted.
 
 \section{Data Loading}
 
-To load the data use the the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used.
+To load the data use the the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used. \\
 
 \begin{figure}[H]
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded.png}
   \caption{Listbox View after loading}
-  \label{fig:listbox_load}
 \end{figure}
 
-Once updated, the tables are filled with text representing the values of the DBO variables.  If a value is undefined its cell is empy. For each DBO, a dedicated table is shown, as well as the 'All' table, where data from all DBOs are collectively shown. \\
+Once updated, the tables are filled with text representing the values of the DBObject variables.  If a value is undefined its cell is empy. For each DBO, a dedicated table is shown, as well as the 'All' table, where data from all DBOs are collectively shown. \\
 
-Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ. \\
-
+Please \textbf{note} that since some variable might only exist in some DBObjects, the number of columns for different DBObjects may differ. \\
 
 \section{Usage}
 
@@ -45,7 +48,6 @@ If Meta variables are used, they are display in all DObjects they exist. If DBOb
 \begin{figure}[H]
     \includegraphics[width=16cm,frame]{../screenshots/listbox_add.png}
   \caption{Listbox View adding of variables}
-  \label{fig:listbox_load}
 \end{figure}
 
 
@@ -66,14 +68,15 @@ This checkbox can only be used if association information is present in the data
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded_assoc.png}
   \caption{Listbox View after loading with associated UTNs}
-  \label{fig:listbox_load}
 \end{figure}
 
 
 \subsection{Exporting}
 \label{sec:exporting}
 
-The data from the current DBO table can be exported to a comma-separated value (CSV) text file. 
+The data from the current DBO table can be exported to a comma-separated value (CSV) text file. \\
+
+For this example a Mode 3/A code filter was used to load only target reports and system track updates from a single target. \\
 
 When pressing the 'Export' button, a dialog is opened.
 
@@ -81,7 +84,6 @@ When pressing the 'Export' button, a dialog is opened.
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/listbox_export.png}
   \caption{Listbox View export}
-  \label{fig:listbox_export}
 \end{figure}
 
 Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported File' checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
@@ -89,17 +91,19 @@ Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported
 After export, a dialog is shown indicating that the export was completed.
 
 \begin{figure}[H]
-    \includegraphics[width=4cm,frame]{../screenshots/listbox_exported.png}
+  \center
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported.png}
   \caption{Listbox View export done}
-  \label{fig:listbox_exported}
 \end{figure}
 
 The exported file can be opened in any editor, or for example imported into LibreOffice Calc.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported_calc.png}
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/listbox_exported_calc.png}
   \caption{Listbox View export in LibreOffice Calc}
-  \label{fig:listbox_export_calc}
 \end{figure}
  
+\subsection{Reload}
+
+Additionally, if a change is made that requires re-loading of the data (e.g. additional data should be displayed) the 'Reload' button becomes available, and can be used to trigger a loading process as in Section \nameref{sec:management_dbos}. 

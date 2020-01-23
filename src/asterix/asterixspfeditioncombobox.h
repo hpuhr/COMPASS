@@ -1,7 +1,7 @@
 #ifndef ASTERIXSPFEDITIONCOMBOBOX_H
 #define ASTERIXSPFEDITIONCOMBOBOX_H
 
-#include "asteriximportertask.h"
+#include "asteriximporttask.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/spfedition.h>
@@ -26,7 +26,7 @@ signals:
 
 public:
     /// @brief Constructor
-    ASTERIXSPFEditionComboBox(ASTERIXImporterTask& task, const std::shared_ptr<jASTERIX::Category> category,
+    ASTERIXSPFEditionComboBox(ASTERIXImportTask& task, const std::shared_ptr<jASTERIX::Category> category,
                            QWidget* parent = nullptr)
     : QComboBox(parent), task_(task), category_(category)
     {
@@ -63,7 +63,7 @@ public:
     }
 
 protected:
-    ASTERIXImporterTask& task_;
+    ASTERIXImportTask& task_;
     const std::shared_ptr<jASTERIX::Category> category_;
 
 };

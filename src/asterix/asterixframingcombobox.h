@@ -18,7 +18,7 @@
 #ifndef ASTERIXFRAMINGCOMBOBOX_H
 #define ASTERIXFRAMINGCOMBOBOX_H
 
-#include "asteriximportertask.h"
+#include "asteriximporttask.h"
 
 #include <jasterix/jasterix.h>
 
@@ -34,7 +34,7 @@ signals:
 
 public:
     /// @brief Constructor
-    ASTERIXFramingComboBox(ASTERIXImporterTask& task, QWidget * parent = 0)
+    ASTERIXFramingComboBox(ASTERIXImportTask& task, QWidget * parent = 0)
     : QComboBox(parent), task_(task)
     {
         loadFramings();
@@ -70,7 +70,7 @@ public:
     }
 
 protected:
-    ASTERIXImporterTask& task_;
+    ASTERIXImportTask& task_;
 };
 
 #endif // ASTERIXFRAMINGCOMBOBOX_H

@@ -105,5 +105,11 @@ std::string getIconFilepath (const std::string& filename)
     return filepath;
 }
 
+void deleteFolder (const std::string& path)
+{
+    QDir dir(path.c_str());
+    dir.removeRecursively();
+}
+
 }
 }

@@ -25,6 +25,7 @@
 #include "dbobject.h"
 #include "metadbovariable.h"
 #include "atsdb.h"
+#include "dboassociationcollection.h"
 
 AllBufferCSVExportJob::AllBufferCSVExportJob(std::map<std::string, std::shared_ptr <Buffer>> buffers,
                                              DBOVariableOrderedSet* read_set,
@@ -133,16 +134,7 @@ void AllBufferCSVExportJob::run ()
                 assert (!rec_num_vec.isNull(buffer_index));
                 unsigned int rec_num = rec_num_vec.get(buffer_index);
 
-                typedef DBOAssociationCollection::const_iterator MMAPIterator;
-                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
-
-                std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
-
-                for (MMAPIterator it = result.first; it != result.second; it++)
-                    if (it == result.first)
-                        ss << std::to_string(it->second.utn_);
-                    else
-                        ss << "," << std::to_string(it->second.utn_);
+                ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
             for (unsigned int col=0; col < read_set_size; ++col)

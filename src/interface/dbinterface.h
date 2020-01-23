@@ -27,7 +27,7 @@
 #include "propertylist.h"
 #include "dbovariableset.h"
 #include "sqlgenerator.h"
-#include "dboassociationentry.h"
+#include "dboassociationcollection.h"
 
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
@@ -45,14 +45,12 @@ class DBODataSource;
 class DBResult;
 class DBTableColumn;
 class DBTableInfo;
-class DBInterfaceWidget;
 class DBInterfaceInfoWidget;
 class Job;
 class BufferWriter;
 
 class SQLGenerator;
 class QWidget;
-class QProgressDialog;
 
 /**
  * @brief Encapsulates all dedicated database functionality
@@ -67,11 +65,6 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
 signals:
     void databaseContentChangedSignal ();
-    void postProcessingDoneSignal ();
-
-public slots:
-    void postProcessingJobDoneSlot();
-    //void updateDBObjectInformationSlot ();
 
 public:
     /// @brief Constructor
@@ -93,10 +86,9 @@ public:
 
     std::vector <std::string> getDatabases ();
 
-    DBInterfaceWidget *widget();
-    DBInterfaceInfoWidget *infoWidget();
+    DBInterfaceInfoWidget* infoWidget();
 
-    QWidget *connectionWidget ();
+    QWidget* connectionWidget ();
 
     const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
 
@@ -112,11 +104,6 @@ public:
     /// @brief Returns a set with all active data source ids for a DBO type
     std::set<int> getActiveDataSources (DBObject &object);
 
-    //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
-    //    void writeBuffer (Buffer *data);
-    //    void writeBuffer (Buffer *data, std::string table_name);
-//    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
-//                       size_t to_index);
     void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
     void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
     void insertBuffer (const std::string& table_name, std::shared_ptr<Buffer> buffer);
@@ -139,12 +126,9 @@ public:
     std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject);
     /// @brief Cleans up incremental read of DBO type
     void finalizeReadStatement (const DBObject &dbobject);
-    /// @brief Sets reading_done_ flags
-    //void clearResult ();
 
     /// @brief Returns number of rows for a database table
     size_t count (const std::string &table);
-    //    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
 
     /// @brief Returns if properties table exists
     bool existsPropertiesTable ();
@@ -170,43 +154,17 @@ public:
     void insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,
                        const std::string& max);
 
-    /// @brief Returns if database was post processed
-    bool isPostProcessed ();
-    void postProcess ();
-
-    //    /// @brief Returns variable values for a number of DBO type elements
-    //    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
-    //            std::string order_by_variable, bool ascending, unsigned int limit_min=0, unsigned int limit_max=0,
-    //            bool finalize=0);
-
-    //    /// @brief Sets the context reference point as property
-    //    void setContextReferencePoint (bool defined, float latitude, float longitude);
-    //    /// @brief Returns if context reference point is defined
-    //    bool getContextReferencePointDefined ();
-    //    /// @brief Returns the context reference point
-    //    std::pair<float, float> getContextReferencePoint ();
-
     /// @brief Deletes table content for given table name
     void clearTableContent (const std::string& table_name);
 
     /// @brief Returns minimum/maximum information for all columns in a table
     std::shared_ptr<DBResult> queryMinMaxNormalForTable (const DBTable& table);
-    //    /// @brief Returns minimum/maximum information for a given column in a table
-    //    DBResult *queryMinMaxForColumn (DBTableColumn *column, std::string table);
-
-    //    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
     /// @brief Executes query and returns numbers for all active sensors
     std::set<int> queryActiveSensorNumbers (DBObject& object);
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
     //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
-
-    //    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
-    ////    void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
-
-    //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
-    //            bool has_tod, double tod_min, double tod_max);
 
     void createAssociationsTable (const std::string& table_name);
     DBOAssociationCollection getAssociations (const std::string& table_name);
@@ -230,14 +188,9 @@ protected:
     /// Generates SQL statements
     SQLGenerator sql_generator_;
 
-    DBInterfaceWidget*widget_ {nullptr};
     DBInterfaceInfoWidget* info_widget_ {nullptr};
 
     std::map <std::string, DBTableInfo> table_info_;
-
-    std::vector <std::shared_ptr<Job>> postprocess_jobs_;
-    QProgressDialog* postprocess_dialog_ {nullptr};
-    size_t postprocess_job_num_{0};
 
     std::map <std::string, std::string> properties_;
 
@@ -245,7 +198,6 @@ protected:
 
     void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
 
-    void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
 
@@ -253,4 +205,4 @@ protected:
     void saveProperties ();
 };
 
-#endif /* SQLITE3CONNECTION_H_ */
+#endif /* DBINTERFACE_H_ */

@@ -41,12 +41,13 @@ public slots:
     void serverConnectedSlot ();
     void databaseOpenedSlot ();
 
-    void showImportMenuSlot ();
-    void importSQLTextSlot();
-    void importSQLTextFromArchiveSlot();
+//    void showImportMenuSlot ();
+//    void importSQLTextSlot();
+//    void importSQLTextFromArchiveSlot();
 
 public:
     explicit MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent = 0);
+    virtual ~MySQLppConnectionWidget();
 
 protected:
     MySQLppConnection& connection_;
@@ -55,8 +56,8 @@ protected:
     QPushButton* add_button_ {nullptr};
     QPushButton* delete_button_ {nullptr};
 
-    QPushButton* import_button_ {nullptr};
-    QMenu import_menu_;
+//    QPushButton* import_button_ {nullptr};
+//    QMenu import_menu_;
 
     QStackedWidget* server_widgets_ {nullptr};
 

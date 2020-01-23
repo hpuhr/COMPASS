@@ -55,7 +55,7 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
 
     createSubConfigurables ();
 
-    lock();
+    //lock();
 }
 /**
  * Deletes all DBOs.
@@ -121,11 +121,11 @@ bool DBObjectManager::existsObject (const std::string& dbo_name)
     return (objects_.find(dbo_name) != objects_.end());
 }
 
-void DBObjectManager::schemaLockedSlot()
-{
-    loginf << "DBObjectManager: schemaLockedSlot";
-    unlock ();
-}
+//void DBObjectManager::schemaLockedSlot()
+//{
+//    loginf << "DBObjectManager: schemaLockedSlot";
+//    unlock ();
+//}
 
 DBObject& DBObjectManager::object (const std::string& dbo_name)
 {
@@ -144,6 +144,15 @@ void DBObjectManager::deleteObject (const std::string& dbo_name)
     objects_.erase(dbo_name);
 
     emit dbObjectsChangedSignal();
+}
+
+bool DBObjectManager::hasData()
+{
+    for (auto& object_it : objects_)
+        if (object_it.second->hasData())
+            return true;
+
+    return false;
 }
 
 bool DBObjectManager::existsMetaVariable (const std::string& var_name)
@@ -184,8 +193,8 @@ DBObjectManagerWidget* DBObjectManager::widget()
         widget_ = new DBObjectManagerWidget (*this);
         //connect (this, SIGNAL(databaseContentChangedSignal), widget_, SLOT(updateDBOsSlot));
 
-        if (locked_)
-            widget_->lock ();
+//        if (locked_)
+//            widget_->lock ();
     }
 
     assert (widget_);
@@ -312,40 +321,40 @@ void DBObjectManager::clearOrderVariable ()
     order_variable_name_="";
 }
 
-void DBObjectManager::lock ()
-{
-    if (locked_)
-        return;
+//void DBObjectManager::lock ()
+//{
+//    if (locked_)
+//        return;
 
-    locked_ = true;
+//    locked_ = true;
 
-    for (auto& object_it : objects_)
-        object_it.second->lock();
+//    for (auto& object_it : objects_)
+//        object_it.second->lock();
 
-    for (auto& meta_it : meta_variables_)
-        meta_it.second->lock();
+//    for (auto& meta_it : meta_variables_)
+//        meta_it.second->lock();
 
-    if (widget_)
-        widget_->lock();
-}
+//    if (widget_)
+//        widget_->lock();
+//}
 
-void DBObjectManager::unlock ()
-{
-    if (!locked_)
-        return;
+//void DBObjectManager::unlock ()
+//{
+//    if (!locked_)
+//        return;
 
-    locked_ = false;
+//    locked_ = false;
 
-    for (auto& object_it : objects_)
-        object_it.second->unlock();
+//    for (auto& object_it : objects_)
+//        object_it.second->unlock();
 
-    for (auto& meta_it : meta_variables_)
-        meta_it.second->unlock();
+//    for (auto& meta_it : meta_variables_)
+//        meta_it.second->unlock();
 
 
-    if (widget_)
-        widget_->unlock();
-}
+//    if (widget_)
+//        widget_->unlock();
+//}
 
 void DBObjectManager::loadSlot ()
 {
@@ -445,6 +454,8 @@ void DBObjectManager::databaseContentChangedSlot ()
 
     if (load_widget_)
         load_widget_->updateSlot();
+
+    emit dbObjectsChangedSignal();
 
     loginf << "DBObjectManager: databaseContentChangedSlot: done";
 }
@@ -566,4 +577,13 @@ std::string DBObjectManager::associationsDBObject() const
 std::string DBObjectManager::associationsDataSourceName() const
 {
     return associations_ds_;
+}
+
+bool DBObjectManager::isOtherDBObjectPostProcessing (DBObject& object)
+{
+    for (auto& dbo_it : objects_)
+        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
+            return true;
+
+    return false;
 }

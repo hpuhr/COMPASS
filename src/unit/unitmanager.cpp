@@ -101,6 +101,18 @@ void UnitManager::checkSubConfigurables ()
         dimensions_.at("Position")->addUnit ("Mile", 1.0/1609.344, "");
         dimensions_.at("Position")->addUnit ("Nautical Mile", 1.0/1852.0, "");
     }
+
+    if (dimensions_.count("Speed") == 0)
+    {
+        addNewSubConfiguration ("Dimension", "Speed");
+        generateSubConfigurable("Dimension", "Speed");
+
+        dimensions_.at("Speed")->addUnit ("Konts", 1.0, "");
+        dimensions_.at("Speed")->addUnit ("Meter/Second", 0.514444, "");
+        dimensions_.at("Speed")->addUnit ("NM/Second", 1.0/3600.0, "");
+        dimensions_.at("Speed")->addUnit ("Mach", 0.00149984, "");
+
+    }
 }
 
 

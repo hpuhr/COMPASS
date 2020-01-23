@@ -38,14 +38,13 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "jobmanager.h"
+#include "taskmanager.h"
+#include "managedatasourcestask.h"
 #include "dbtableinfo.h"
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
 #include "insertbufferdbjob.h"
 #include "updatebufferdbjob.h"
-#include "dboeditdatasourceswidget.h"
-#include "dboeditdatasourceactionoptionswidget.h"
-#include "storeddbodatasourcewidget.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -127,19 +126,6 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
         assert (!label_definition_);
         label_definition_.reset (new DBOLabelDefinition (class_id, instance_id, this));
     }
-    else if (class_id == "StoredDBODataSource")
-    {
-        unsigned int id = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueUint("id");
-
-        assert (stored_data_sources_.find (id) == stored_data_sources_.end());
-
-        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
-
-        stored_data_sources_.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(id),  // args for key
-                                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
-    }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -205,58 +191,7 @@ bool DBObject::uses (const DBTableColumn& column) const
     return false;
 }
 
-bool DBObject::hasStoredDataSource (unsigned int id) const
-{
-    return stored_data_sources_.find (id) != stored_data_sources_.end();
-}
 
-StoredDBODataSource& DBObject::storedDataSource (unsigned int id)
-{
-    assert (hasStoredDataSource (id));
-    return stored_data_sources_.at(id);
-}
-
-StoredDBODataSource& DBObject::addNewStoredDataSource ()
-{
-    unsigned int id = stored_data_sources_.size() ? stored_data_sources_.rbegin()->first+1 : 0;
-
-    loginf << "DBObject: addNewStoredDataSource: new id " << id;
-
-    assert (!hasStoredDataSource (id));
-
-    Configuration& config = configuration().addNewSubConfiguration("StoredDBODataSource",
-                                                                   "StoredDBODataSource"+std::to_string(id));
-    config.addParameterUnsignedInt ("id", id);
-
-    generateSubConfigurable("StoredDBODataSource", "StoredDBODataSource"+std::to_string(id));
-
-    return storedDataSource(id);
-}
-
-//void DBObject::renameStoredDataSource (const std::string& name, const std::string& new_name)
-//{
-//    loginf << "DBObject: renameStoredDataSource: name " << name << " new_name " << new_name;
-
-//    assert (hasStoredDataSource (name));
-//    assert (!hasStoredDataSource (new_name));
-
-//    stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
-
-//    stored_data_sources_.erase(name);
-
-//    assert (hasStoredDataSource (new_name));
-//    stored_data_sources_.at(new_name).name(new_name);
-//}
-
-void DBObject::deleteStoredDataSource (unsigned int id)
-{
-    assert (hasStoredDataSource (id));
-    stored_data_sources_.erase(id);
-    assert (!hasStoredDataSource (id));
-
-    if (edit_ds_widget_)
-        edit_ds_widget_->update();
-}
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
@@ -540,6 +475,9 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
+    ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+    const std::map<unsigned int, StoredDBODataSource>&  stored_data_sources = ds_task.storedDataSources(name_);
+
     unsigned int cnt=0;
     int sac, sic;
     bool has_sac_sic;
@@ -558,7 +496,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
             bool stored_found = false;
             unsigned int stored_id {0};
 
-            for (auto& stored_it : stored_data_sources_)
+            for (auto& stored_it : stored_data_sources)
             {
                 if (stored_it.second.sac() == sac && stored_it.second.sic() == sic)
                 {
@@ -570,8 +508,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
             if (stored_found)
             {
-                assert (hasStoredDataSource(stored_id));
-                StoredDBODataSource& src = storedDataSource(stored_id);
+                assert (ds_task.hasStoredDataSource(name_, stored_id));
+                StoredDBODataSource& src = ds_task.storedDataSource(name_, stored_id);
 
                 name = src.name();
                 if (src.hasShortName())
@@ -688,33 +626,7 @@ const std::string& DBObject::getNameOfSensor (int id)
     return data_sources_.at(id).name();
 }
 
-DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromDB ()
-{
-    DBOEditDataSourceActionOptionsCollection options_collection;
 
-    for (auto& ds_it : data_sources_)
-    {
-        assert (ds_it.first >= 0); // todo refactor to uint?
-        unsigned int id = ds_it.first;
-        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB (*this, ds_it.second);
-    }
-
-    return options_collection;
-}
-
-DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromCfg ()
-{
-    DBOEditDataSourceActionOptionsCollection options_collection;
-
-    for (auto& ds_it : stored_data_sources_)
-    {
-        assert (ds_it.first >= 0); // todo refactor to uint?
-        unsigned int id = ds_it.first;
-        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg (*this, ds_it.second);
-    }
-
-    return options_collection;
-}
 
 bool DBObject::hasActiveDataSourcesInfo ()
 {
@@ -753,12 +665,14 @@ DBObjectWidget* DBObject::widget ()
     {
         widget_.reset(new DBObjectWidget (this, ATSDB::instance().schemaManager()));
         assert (widget_);
-
-        if (locked_)
-            widget_->lock();
     }
 
     return widget_.get(); // needed for qt integration, not pretty
+}
+
+void DBObject::closeWidget ()
+{
+    widget_ = nullptr;
 }
 
 DBObjectInfoWidget *DBObject::infoWidget ()
@@ -777,39 +691,6 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
     assert (label_definition_);
     return label_definition_->widget();
 }
-
-DBOEditDataSourcesWidget* DBObject::editDataSourcesWidget()
-{
-    if (!edit_ds_widget_)
-    {
-        edit_ds_widget_.reset(new DBOEditDataSourcesWidget (this));
-    }
-
-    return edit_ds_widget_.get();
-}
-
-void DBObject::lock ()
-{
-    locked_ = true;
-
-    for (auto& var_it : variables_)
-        var_it.second.lock();
-
-    if (widget_)
-        widget_->lock();
-}
-
-void DBObject::unlock ()
-{
-    locked_ = false;
-
-    for (auto& var_it : variables_)
-        var_it.second.unlock();
-
-    if (widget_)
-        widget_->unlock();
-}
-
 
 void DBObject::schemaChangedSlot ()
 {
@@ -957,13 +838,10 @@ void DBObject::insertProgressSlot (float percent)
 void DBObject::insertDoneSlot ()
 {
     assert (insert_job_);
-//    bool emit_change = insert_job_->emitChange();
+
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
-
-//    if (emit_change)
-//        emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
@@ -976,8 +854,7 @@ void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shar
 
     buffer->transformVariables(list, false); // back again
 
-    update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
-                                                                            *this, key_var, buffer));
+    update_job_ = std::make_shared<UpdateBufferDBJob> (ATSDB::instance().interface(), *this, key_var, buffer);
 
     connect (update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot, Qt::QueuedConnection);
     connect (update_job_.get(), &UpdateBufferDBJob::updateProgressSignal, this, &DBObject::updateProgressSlot,
@@ -1050,7 +927,7 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
 
-    loginf  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+    logdbg  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
 
     return labels;
 }
@@ -1151,9 +1028,7 @@ void DBObject::finalizeReadJobDoneSlot()
     assert (found);
 
     if (!data_)
-    {
         data_ = buffer;
-    }
     else
         data_->seizeBuffer (*buffer.get());
 
@@ -1162,13 +1037,33 @@ void DBObject::finalizeReadJobDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    emit newDataSignal(*this);
-
-    if (!isLoading())
+    if (!isLoading()) // should be last one
     {
+        emit newDataSignal(*this);
         loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
         emit loadingDoneSignal(*this);
+        return;
     }
+
+    // read job or finalize jobs exist
+
+    // check if other is still loading
+    if (manager_.isOtherDBObjectPostProcessing(*this))
+    {
+        logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying new data since other is loading";
+        return;
+    }
+
+    // check if more data can immediately loaded from read job
+    if (read_job_ && data_->size() < read_job_->rowCount())
+    {
+        logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
+        return;
+    }
+
+    // exact data from read job or finalize jobs still active
+    emit newDataSignal(*this);
+    return;
 }
 
 
@@ -1209,6 +1104,11 @@ void DBObject::updateToDatabaseContent ()
 bool DBObject::isLoading ()
 {
     return read_job_ || finalize_jobs_.size();
+}
+
+bool DBObject::isPostProcessing ()
+{
+    return  finalize_jobs_.size();
 }
 
 bool DBObject::hasData ()
@@ -1364,7 +1264,7 @@ bool DBObject::hasAssociations ()
 
 void DBObject::addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num)
 {
-    associations_.emplace(rec_num, DBOAssociationEntry(utn, src_rec_num));
+    associations_.add(rec_num, DBOAssociationEntry(utn, src_rec_num));
     associations_changed_ = true;
     associations_loaded_ = true;
 }
