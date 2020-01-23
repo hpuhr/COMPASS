@@ -117,11 +117,11 @@ void DBOEditDataSourceAction::refreshActionString ()
     {
         if (action_ == "Add")
         {
-            action_str_ += " to "+target_type_+" with new id";
+            action_str_ += " new id"; // " to "+target_type_+
         }
         else if ("Overwrite")
         {
-            action_str_ += " in "+target_type_+" with id "+target_id_;
+            action_str_ += " id "+target_id_; // " in "+target_type_+
         }
     }
 }

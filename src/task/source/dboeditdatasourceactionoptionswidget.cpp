@@ -26,7 +26,10 @@ DBOEditDataSourceActionOptionsWidget::DBOEditDataSourceActionOptionsWidget(DBOEd
                                      QWidget* parent, Qt::WindowFlags f)
 : QWidget (parent, f), options_(&options)
 {
+    setContentsMargins(1,1,1,1);
+
     QHBoxLayout* main_layout = new QHBoxLayout ();
+    main_layout->setContentsMargins(1,1,1,1);
 
     perform_check_ = new QCheckBox (options_->sourceId().c_str());
     connect(perform_check_, SIGNAL(clicked()), this, SLOT(changedPerformSlot ()));

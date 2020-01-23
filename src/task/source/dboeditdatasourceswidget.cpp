@@ -140,21 +140,37 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
     // action stuff
     {
-        QVBoxLayout* action_layout = new QVBoxLayout();
+//        QFrame *action_frame = new QFrame ();
+//        action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//        action_frame->setMaximumWidth(275);
 
-        QFrame *action_frame = new QFrame ();
-        action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        QVBoxLayout* action_frame_layout = new QVBoxLayout();
+        //action_frame->setLayout(action_frame_layout);
 
         action_heading_label_ = new QLabel (action_heading_.c_str());
         action_heading_label_->setFont (font_bold);
-        action_layout->addWidget (action_heading_label_);
+        action_frame_layout->addWidget (action_heading_label_);
 
-        action_layout->addWidget(new QLabel());
+        //action_layout->addWidget(new QLabel());
 
+        // actions
         action_layout_ = new QGridLayout();
-        action_layout->addLayout(action_layout_);
+
+        QWidget* action_layout_widget = new QWidget();
+        action_layout_widget->setContentsMargins(0, 0, 0, 0);
+        action_layout_widget->setLayout(action_layout_);
+
+        QScrollArea *action_scroll = new QScrollArea ();
+        action_scroll->setMaximumWidth(270);
+        action_scroll->setWidgetResizable (true);
+        action_scroll->setWidget(action_layout_widget);
+
+        action_frame_layout->addWidget(action_scroll);
 
         // action selection buttons
+
+        QVBoxLayout* action_button_layout = new QVBoxLayout();
+
         QHBoxLayout* action_select_layout = new QHBoxLayout();
 
         select_all_actions_ = new QPushButton ("Select All");
@@ -165,24 +181,19 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
         connect(deselect_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::deselectAllActionsSlot);
         action_select_layout->addWidget(deselect_all_actions_);
 
-        action_layout->addLayout(action_select_layout);
+        action_button_layout->addLayout(action_select_layout);
 
         // perform actions
         perform_actions_button_ = new QPushButton ("Perform Actions");
         connect(perform_actions_button_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::performActionsSlot);
-        action_layout->addWidget(perform_actions_button_);
+        action_button_layout->addWidget(perform_actions_button_);
 
         updateActionButtons();
-        action_frame->setLayout (action_layout);
-
-        QScrollArea *action_scroll = new QScrollArea ();
-        action_scroll->setMaximumWidth(250);
-        action_scroll->setWidgetResizable (true);
-        action_scroll->setWidget(action_frame);
+        action_frame_layout->addLayout(action_button_layout);
 
         //sources_layout->addWidget(action_scroll);
 
-        main_layout->addWidget(action_scroll);
+        main_layout->addLayout(action_frame_layout);
     }
 
     update ();
