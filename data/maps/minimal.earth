@@ -29,7 +29,7 @@ layout crop_features="true"
     
     <feature_model name="world_boundaries" feature_source="world-data">
         
-        <layout tile_size="500000"  paged="true">
+        <layout tile_size="100000"  paged="true">
             <level max_range="1e10"/>
         </layout>
                 
