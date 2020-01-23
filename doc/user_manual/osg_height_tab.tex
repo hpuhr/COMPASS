@@ -2,6 +2,12 @@
 
 Per default, a target reports height is not used for display, which is common in current air-traffic displays. However, in certain situation a true 3D display might be of interest to a user, and therefore several options where incorporated:
 
+%  \item Use Height: Whether height information should be used to create a 3D presentation
+%  \item Offset Factor: If height information is used, this factor is added to the height
+%  \item Scale Factor: If height information is used, this factor is used to multiply the height
+%  \item Null Offset: If height information is used, this factor is used for target reports without height information
+
+
 \begin{itemize}
  \item Use Height: Use the height based on Mode C $h_c$, transformed to meters
  \item Offset Factor: If height information is used, this factor $h_o$ is added to the height
