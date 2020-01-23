@@ -49,14 +49,7 @@ using namespace jASTERIX;
 ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget *parent)
      : QWidget(parent), task_(task)
 {
-//    QFont font_bold;
-//    font_bold.setBold(true);
-
     main_layout_ = new QVBoxLayout ();
-
-//    QLabel *main_label = new QLabel ("ASTERIX Configuration");
-//    main_label->setFont (font_bold);
-//    main_layout_->addWidget (main_label);
 
     // framing stuff
     {
@@ -156,7 +149,7 @@ void ASTERIXConfigWidget::framingChangedSlot()
 
 void ASTERIXConfigWidget::framingEditSlot()
 {
-    std::string framing_path = "file:///"+task_.jASTERIX()->framingsFolderPath()+"/"+task_.currentFraming();
+    std::string framing_path = "file:///"+task_.jASTERIX()->framingsFolderPath()+"/"+task_.currentFraming()+".json";
     loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
