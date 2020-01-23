@@ -23,9 +23,9 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 
 ## Screenshots
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/artas_association_config.png)
+![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/app_ss1.png)
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/osgview_use_height.png)
+![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/app_ss2.png)
 
 ## Contents
 
