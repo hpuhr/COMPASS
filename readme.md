@@ -18,13 +18,14 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - System Tracks and Reference Trajectories
   - MLAT & WAM target reports
   - ADS-B target reports
-- XML-based configuration files
-- Multiple coexisting configurations, usage chosen during runtime
-- Based on Open Source libraries
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/osgview_measure3d.png)
+## Screenshots
+
+![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/artas_association_config.png)
+
+![alt text](https://github.com/hpuhr/ATSDB/blob/v0.5.0-beta/doc/screenshots/osgview_use_height.png)
 
 ## Contents
 
@@ -38,12 +39,12 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - LICENSE: GPL license
 - readme.md: This file
 
-## Released Experimental Version v0.4.2-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.2-beta/ATSDB-v0.4.2-x86_64.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.4.2-beta/user_manual_v0.4.2.pdf)
+## Released Experimental Version v0.5.0-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/ATSDB_v0.5.0-x86_64.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/user_manual_v0.5.0.pdf)
 
 ## YouTube Videos
-### Current from v0.4.0
+### Old from v0.4.0
 - [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
 - [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
 - [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
