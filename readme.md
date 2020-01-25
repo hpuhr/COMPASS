@@ -7,9 +7,6 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - Dynamic ASTERIX import using [jASTERIX](https://github.com/hpuhr/jASTERIX)
 - MySQL database import and management of SCDB databases
 - High performance processing, low memory footprint
-- Utilization of application during loading procedure
-- Views for data inspection
-- Cross-view data selection and inspection
 - Filtering for detailed analysis
 - Simple custom filter generation
 - ARTAS track association (TRI) analysis
@@ -18,30 +15,31 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - System Tracks and Reference Trajectories
   - MLAT & WAM target reports
   - ADS-B target reports
+- Textual data inspection using Listbox View
+  - Display of data as text tables
+  - Configurable data loading of data of interest
+  - Exporting of data as CSV
+- Graphical data inspection using OSG View
+  - Customizable map/terrain display based on osgEarth
+  - Customizable display of ATC surveillance data
+  - High-speed time-filtered display
+  - Numerous operations for analysis, e.g. data selection, labeling, distance measurement
+  - Configurable data layering and styling for detailed analysis
+  - Relatively low memory footprint (e.g. 16 million target reports in ~6 GB RAM)
+- Cross-view data selection and inspection
+
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
+
+## Released Experimental Version v0.5.0-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/ATSDB_v0.5.0-x86_64.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/user_manual_v0.5.0.pdf)
 
 ## Screenshots
 
 ![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss1.png)
 
 ![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss2.png)
-
-## Contents
-
-- Folder "cmake_modules": Contains cmake find scripts
-- Folder "conf": Contains configuration
-- Folder "data": Contains icons, textures, maps,...
-- Folder "doc": Contains documentation
-- Folder "src": Contains source code
-- Folder "utils": Contains scripts for manual CSV import
-- CMakeLists.txt: CMake config file
-- LICENSE: GPL license
-- readme.md: This file
-
-## Released Experimental Version v0.5.0-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/ATSDB_v0.5.0-x86_64.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/user_manual_v0.5.0.pdf)
 
 ## YouTube Videos
 ### Old from v0.4.0
@@ -54,6 +52,20 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - [v0.2.1: OSGView Display Options](https://youtu.be/vEoT88RGLQo)
 - [v0.2.1: Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
+
+## Contents
+
+- appimage/: Contains AppImage build base
+- cmake_modules/: Contains cmake find scripts
+- conf/: Contains configuration
+- data/: Contains icons, textures, maps,...
+- doc/: Contains documentation
+- docker/: Contains Docker buildfile and AppImage build scripts
+- src/: Contains source code
+- utils/": Contains scripts for manual CSV import
+- CMakeLists.txt: CMake config file
+- LICENSE: GPL license
+- readme.md: This file
 
 ## Newsletter
 If you are interested in our newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
