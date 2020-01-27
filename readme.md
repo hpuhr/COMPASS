@@ -31,8 +31,8 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental Version v0.5.0-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/ATSDB_v0.5.0-x86_64.AppImage)
+## Released Experimental Version v0.5.0-beta-hotfix1
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta.hf1/ATSDB-v0.5.0-hotfix1_x86_64.AppImage)
 - [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/user_manual_v0.5.0.pdf)
 
 ## Screenshots
