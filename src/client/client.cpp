@@ -197,6 +197,14 @@ void Client::checkNeededActions ()
     else
         cout << " no" << endl;
 
+    if (!Files::fileExists(HOME_CONF_DIRECTORY+"config.json"))
+    {
+        cout << "ATSDBClient: config.json does not exist, delete and upgrade required" << endl;
+        config_and_data_deletion_wanted_ = true;
+        upgrade_needed_ = true;
+        return;
+    }
+
     if (config_and_data_exists_) // check updating actions
     {
         SimpleConfig config ("config.json");

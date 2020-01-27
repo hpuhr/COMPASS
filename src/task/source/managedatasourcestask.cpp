@@ -86,6 +86,9 @@ void ManageDataSourcesTask::generateSubConfigurable (const std::string &class_id
 
 bool ManageDataSourcesTask::checkPrerequisites ()
 {
+    for (auto& widget_it : edit_ds_widgets_)
+        widget_it.second->update();
+
     if (!ATSDB::instance().interface().ready())
         return false;
 

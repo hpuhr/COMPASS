@@ -87,3 +87,4 @@ void ManageDataSourcesTaskWidget::dbItemChangedSlot ()
     emit task_.statusChangedSignal(task_.name());
 }
 
+
