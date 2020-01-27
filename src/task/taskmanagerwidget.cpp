@@ -218,13 +218,21 @@ void TaskManagerWidget::updateTaskStates ()
 
     loginf << "TaskManagerWidget: updateTaskStates: all required done " << all_required_done;
 
-    if (start_button_ && all_required_done)
+    if (start_button_)
     {
-        QFont font_bold;
-        font_bold.setBold(true);
+        if (all_required_done)
+        {
+            QFont font_bold;
+            font_bold.setBold(true);
 
-        start_button_->setDisabled(false);
-        start_button_->setFont(font_bold);
+            start_button_->setDisabled(false);
+            start_button_->setFont(font_bold);
+        }
+        else
+        {
+            start_button_->setDisabled(true);
+            start_button_->setFont(QFont());
+        }
     }
 }
 

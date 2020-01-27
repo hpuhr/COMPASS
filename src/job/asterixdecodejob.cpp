@@ -47,9 +47,15 @@ void ASTERIXDecodeJob::run ()
 
     started_ = true;
 
-    using namespace std::placeholders;
-    std::function<void(std::unique_ptr<nlohmann::json>, size_t, size_t, size_t)> callback =
-            std::bind(&ASTERIXDecodeJob::jasterix_callback, this, _1, _2, _3, _4);
+//    using namespace std::placeholders;
+//    std::function<void(std::unique_ptr<nlohmann::json>, size_t, size_t, size_t)> callback =
+//            std::bind(&ASTERIXDecodeJob::jasterix_callback, this, _1, _2, _3, _4);
+
+    auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
+            size_t numErrors) {
+                    this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
+              };
+
     try
     {
         if (framing_ == "")

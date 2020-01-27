@@ -176,12 +176,19 @@ ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget()
 
 void ASTERIXImportTaskWidget::addFileSlot ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Add ASTERIX File"));
-
-    if (filename.size() > 0)
+    QFileDialog dialog(this);
+    dialog.setWindowTitle("Add ASTERIX File(s)");
+    //dialog.setDirectory(QDir::homePath());
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    //dialog.setNameFilter(trUtf8("Splits (*.000 *.001)"));
+    QStringList fileNames;
+    if (dialog.exec())
     {
-        if (!task_.hasFile(filename.toStdString()))
-            task_.addFile(filename.toStdString());
+        for (auto& filename : dialog.selectedFiles())
+        {
+            if (!task_.hasFile(filename.toStdString()))
+                task_.addFile(filename.toStdString());
+        }
     }
 }
 

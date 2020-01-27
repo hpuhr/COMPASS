@@ -96,7 +96,7 @@ bool PostProcessTask::canRun()
 
 void PostProcessTask::run ()
 {
-    assert (!done_);
+    //assert (!done_);
 
     loginf << "PostProcessTask: run: post-processing started";
 

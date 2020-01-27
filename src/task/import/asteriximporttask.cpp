@@ -37,6 +37,7 @@
 #include "buffer.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createartasassociationstask.h"
+#include "postprocesstask.h"
 #include "system.h"
 
 #include <jasterix/jasterix.h>
@@ -248,9 +249,12 @@ void ASTERIXImportTask::currentFilename (const std::string& filename)
 {
     loginf << "ASTERIXImporterTask: currentFilename: filename '" << filename << "'";
 
+    bool had_filename = canImportFile();
+
     current_filename_ = filename;
 
-    emit statusChangedSignal(name_);
+    if (!had_filename) // not on re-select
+        emit statusChangedSignal(name_);
 }
 
 const std::string& ASTERIXImportTask::currentFraming() const
@@ -1067,16 +1071,21 @@ void ASTERIXImportTask::checkAllDone ()
         else
         {
             task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
+
+            bool was_done = done_;
             done_ = true;
 
             // in case data was imported, clear other task done properties
             if (status_widget_->dboInsertedCounts().count("Radar"))
                 ATSDB::instance().interface().setProperty(RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
 
+            ATSDB::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
             ATSDB::instance().interface().setProperty(CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
             ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-            emit doneSignal(name_);
+
+            if (!was_done) // only emit if first time done
+                emit doneSignal(name_);
         }
 
         test_ = false; // set again by widget

@@ -46,7 +46,8 @@ ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test,
 
         general_grid->addWidget(new QLabel("Filename"), row, 0);
         QLabel* filename_label = new QLabel(filename_.c_str());
-        filename_label->setAlignment(Qt::AlignRight);
+        filename_label->setWordWrap(true);
+        filename_label->setAlignment(Qt::AlignLeft);
         general_grid->addWidget(filename_label, row, 1);
 
         ++row;
