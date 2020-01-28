@@ -99,9 +99,10 @@ Qt::ItemFlags BufferTableModel::flags(const QModelIndex &index) const
         flags |= Qt::ItemIsEnabled;
         flags |= Qt::ItemIsUserCheckable;
         flags |= Qt::ItemIsEditable;
+        //flags |= Qt::ItemIsSelectable;
     }
     else
-        return Qt::ItemIsEnabled;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return flags;
 }
