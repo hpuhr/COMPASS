@@ -146,7 +146,7 @@ protected:
 
     std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
-    size_t key_count_ {0};
+    //size_t key_count_ {0};
     size_t insert_active_ {0};
 
     std::set <int> added_data_sources_;

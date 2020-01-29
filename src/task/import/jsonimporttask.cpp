@@ -421,17 +421,18 @@ void JSONImportTask::parseJSONDoneSlot ()
 
     assert (schemas_.count(current_schema_));
 
-    std::shared_ptr<JSONMappingJob> json_map_job = std::make_shared<JSONMappingJob> (
-                std::move(json_objects), schemas_.at(current_schema_).parsers(), key_count_);
+    // TODO
+//    std::shared_ptr<JSONMappingJob> json_map_job = std::make_shared<JSONMappingJob> (
+//                std::move(json_objects), schemas_.at(current_schema_).parsers(), key_count_);
 
-    connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal,
-             this, &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
-    connect (json_map_job.get(), &JSONMappingJob::doneSignal,
-             this, &JSONImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
+//    connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal,
+//             this, &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
+//    connect (json_map_job.get(), &JSONMappingJob::doneSignal,
+//             this, &JSONImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
-    json_map_jobs_.push_back(json_map_job);
+//    json_map_jobs_.push_back(json_map_job);
 
-    JobManager::instance().addNonBlockingJob(json_map_job);
+//    JobManager::instance().addNonBlockingJob(json_map_job);
 
     key_count_ += count;
 

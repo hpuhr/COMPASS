@@ -11,6 +11,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/savedfile.h"
         "${CMAKE_CURRENT_LIST_DIR}/number.h"
         "${CMAKE_CURRENT_LIST_DIR}/stringconv.h"
+        "${CMAKE_CURRENT_LIST_DIR}/json.h"
         "${CMAKE_CURRENT_LIST_DIR}/singleton.h"
         "${CMAKE_CURRENT_LIST_DIR}/system.h"
         "${CMAKE_CURRENT_LIST_DIR}/logger.h"
@@ -23,6 +24,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/format.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logger.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/number.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/json.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/datatypeformatselectionwidget.cpp"
 )

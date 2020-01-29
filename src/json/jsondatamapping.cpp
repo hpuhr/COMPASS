@@ -429,8 +429,6 @@ const nlohmann::json* JSONDataMapping::findKey (const nlohmann::json& j) const
 
     if (has_sub_keys_)
     {
-
-
         for (auto sub_it=sub_keys_.begin(); sub_it != sub_keys_.end(); ++sub_it)
         {
             if (val_ptr->contains (*sub_it))

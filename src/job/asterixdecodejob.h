@@ -45,11 +45,9 @@ public:
     bool error() const;
     std::string errorMessage() const;
 
-    //std::vector<nlohmann::json>& extractedRecords(); // to be moved out
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    void clearExtractedRecords ();
-    std::unique_ptr<std::vector<nlohmann::json>>& extractedRecords();
+    std::unique_ptr<nlohmann::json>&& extractedData();
 
 private:
     ASTERIXImportTask& task_;
@@ -66,13 +64,13 @@ private:
     bool error_ {false};
     std::string error_message_;
 
-    std::unique_ptr<std::vector <nlohmann::json>> extracted_records_;
+    std::unique_ptr<nlohmann::json> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
-    void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
+    void jasterix_callback(std::unique_ptr<nlohmann::json>&& data, size_t num_frames, size_t num_records,
                            size_t numErrors);
     void processRecord (unsigned int category, nlohmann::json& record);
 };

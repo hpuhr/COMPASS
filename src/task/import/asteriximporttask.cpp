@@ -582,7 +582,7 @@ void ASTERIXImportTask::run()
     connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImportTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
-    key_count_ = 0;
+    //key_count_ = 0;
     insert_active_ = 0;
 
     all_done_ = false;
@@ -723,18 +723,25 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
 //    decode_job_->clearExtractedRecords();
 
-    std::unique_ptr<std::vector<nlohmann::json>> extracted_records {std::move (decode_job_->extractedRecords())};
+    std::unique_ptr<nlohmann::json> extracted_data = std::move (decode_job_->extractedData());
 
     if (!create_mapping_stubs_) // test or import
     {
-        size_t count = extracted_records->size();
+        //size_t count = extracted_records->size();
 
         assert (schema_);
 
-        std::shared_ptr<JSONMappingJob> json_map_job =
-                make_shared<JSONMappingJob> (std::move(extracted_records), schema_->parsers(), key_count_);
+        std::vector<std::string> keys;
 
-        extracted_records = nullptr;
+        if (current_framing_ == "")
+            keys = {"data_blocks", "content", "records"};
+        else
+            keys = {"frames", "content", "data_blocks", "content", "records"};
+
+        std::shared_ptr<JSONMappingJob> json_map_job = make_shared<JSONMappingJob> (
+                        std::move(extracted_data), keys, schema_->parsers()); // , key_count_
+
+        assert (!extracted_data);
 
         connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImportTask::mapJSONObsoleteSlot,
                  Qt::QueuedConnection);
@@ -745,7 +752,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
         JobManager::instance().addNonBlockingJob(json_map_job);
 
-        key_count_ += count;
+        //key_count_ += count;
 
         if (decode_job_)
         {
@@ -768,7 +775,15 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
         assert (json_map_stub_job_ == nullptr);
 
-        json_map_stub_job_ = make_shared<JSONMappingStubsJob> (std::move(extracted_records), schema_->parsers());
+        std::vector<std::string> keys;
+
+        if (current_framing_ == "")
+            keys = {"data_blocks", "content", "records"};
+        else
+            keys = {"frames", "content", "data_blocks", "content", "records"};
+
+        json_map_stub_job_ = make_shared<JSONMappingStubsJob> (std::move(extracted_data), keys, schema_->parsers());
+        assert (!extracted_data);
 
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal,
                  this, &ASTERIXImportTask::mapStubsObsoleteSlot, Qt::QueuedConnection);

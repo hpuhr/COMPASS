@@ -69,7 +69,6 @@ public:
 
     Format jsonValueFormat() const;
     Format& jsonValueFormatRef();
-    //void jsonValueFormat(const Format &json_value_format);
 
     std::string dbObjectName() const;
 
@@ -77,8 +76,6 @@ public:
     std::string dboVariableName() const;
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
-
-    //JSONDataMappingWidget* widget ();
 
     void initializeIfRequired ();
 
@@ -111,7 +108,6 @@ private:
 
     std::string format_data_type_;
     Format json_value_format_;
-    //std::unique_ptr<Format> json_value_format_;
 
     /// Unit dimension
     std::string dimension_;
@@ -134,6 +130,7 @@ private:
 protected:
     virtual void checkSubConfigurables () {}
 
+    // TODO change to Utils::JSON?
     const nlohmann::json* findKey (const nlohmann::json& j) const;
     const nlohmann::json* findParentKey (const nlohmann::json& j) const;
 
