@@ -73,8 +73,6 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
-    //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
-
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("limit_ram", &limit_ram_, false);
     registerParameter("current_filename", &current_filename_, "");
@@ -582,7 +580,6 @@ void ASTERIXImportTask::run()
     connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImportTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
-    //key_count_ = 0;
     insert_active_ = 0;
 
     all_done_ = false;
@@ -721,14 +718,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
     status_widget_->show();
 
-//    decode_job_->clearExtractedRecords();
-
     std::unique_ptr<nlohmann::json> extracted_data = std::move (decode_job_->extractedData());
 
     if (!create_mapping_stubs_) // test or import
     {
-        //size_t count = extracted_records->size();
-
         assert (schema_);
 
         std::vector<std::string> keys;
@@ -739,7 +732,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
             keys = {"frames", "content", "data_blocks", "content", "records"};
 
         std::shared_ptr<JSONMappingJob> json_map_job = make_shared<JSONMappingJob> (
-                        std::move(extracted_data), keys, schema_->parsers()); // , key_count_
+                        std::move(extracted_data), keys, schema_->parsers());
 
         assert (!extracted_data);
 
@@ -751,8 +744,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
         json_map_jobs_.push(json_map_job);
 
         JobManager::instance().addNonBlockingJob(json_map_job);
-
-        //key_count_ += count;
 
         if (decode_job_)
         {
@@ -835,38 +826,6 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
     }
 
     insertData (std::move(job_buffers));
-
-//    for (auto& buf_it : job_buffers)
-//    {
-//        if (buf_it.second && buf_it.second->size())
-//        {
-//            std::shared_ptr<Buffer> job_buffer = buf_it.second;
-
-//            if (buffers_.count(buf_it.first) == 0)
-//                buffers_[buf_it.first] = job_buffer;
-//            else
-//                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
-//        }
-//    }
-
-//    if (!insert_active_)
-//    {
-//        for (auto& buf_it : buffers_)
-//        {
-//            if (buf_it.second->size() > 10000)
-//            {
-//                logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
-//                insertData ();
-//                return;
-//            }
-//        }
-//    }
-
-//    if (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0)
-//    {
-//        logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
-//        insertData ();
-//    }
 }
 
 void ASTERIXImportTask::mapJSONObsoleteSlot ()
@@ -1023,8 +982,6 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
             logdbg << "ASTERIXImporterTask: insertData: emtpy buffer for " << parser_it.second.dbObject().name();
     }
 
-    //assert (buffers_.size() == 0);
-
     logdbg << "JSONImporterTask: insertData: done";
 }
 
@@ -1049,10 +1006,10 @@ void ASTERIXImportTask::checkAllDone ()
 
     loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
-            << " insert active " << (insert_active_ == 0); // << " buffers " << (buffers_.size() == 0)
+            << " insert active " << (insert_active_ == 0);
 
     if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
-            && insert_active_ == 0) // && buffers_.size() == 0
+            && insert_active_ == 0)
     {
         loginf << "ASTERIXImporterTask: checkAllDone: all done";
 
@@ -1063,7 +1020,6 @@ void ASTERIXImportTask::checkAllDone ()
 
         QApplication::restoreOverrideCursor();
 
-        //buffers_.clear();
         refreshjASTERIX();
 
         assert (widget_);

@@ -24,8 +24,6 @@ namespace Utils
         extern void applyFunctionToValues (nlohmann::json& j, const std::vector<std::string>& keys,
                                     std::vector<std::string>::const_iterator current_key_it,
                                     std::function<void(nlohmann::json&)> function, bool required);
-//        extern void applyFunctionToValues (nlohmann::json& j, const std::vector<std::string>& keys,
-//                                    std::function<void(nlohmann::json&)> function, bool required);
     }
 }
 

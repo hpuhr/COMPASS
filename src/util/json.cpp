@@ -97,8 +97,6 @@ namespace Utils
                                     std::vector<std::string>::const_iterator current_key_it,
                                     std::function<void(nlohmann::json&)> function, bool required)
         {
-//            assert (keys.size());
-
 //            loginf << "Utils: JSON: applyFunctionToValues: current_key '" << *current_key_it << "' data '"
 //                   << j.dump(4) << "'";
 
@@ -148,11 +146,5 @@ namespace Utils
                     return;
             }
         }
-
-//        void applyFunctionToValues (nlohmann::json& j, const std::vector<std::string>& keys,
-//                                    std::function<void(nlohmann::json&)> function, bool required)
-//        {
-//            applyFunctionToValues(j, keys, keys.begin(), function, required);
-//        }
     }
 }

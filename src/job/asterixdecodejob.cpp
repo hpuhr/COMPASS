@@ -48,10 +48,6 @@ void ASTERIXDecodeJob::run ()
 
     started_ = true;
 
-//    using namespace std::placeholders;
-//    std::function<void(std::unique_ptr<nlohmann::json>, size_t, size_t, size_t)> callback =
-//            std::bind(&ASTERIXDecodeJob::jasterix_callback, this, _1, _2, _3, _4);
-
     auto callback = [this](std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
             size_t numErrors) {
                     this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
@@ -88,7 +84,6 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
     extracted_data_ = std::move(data);
     assert (extracted_data_);
     assert (extracted_data_->is_object());
-    //extracted_data_.reset(new std::vector <nlohmann::json>());
 
     num_frames_ = num_frames;
     num_records_ = num_records;
@@ -100,11 +95,6 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
 
     auto process_lambda = [this, &category](nlohmann::json& record)
     {
-        //this->jasterix_callback(std::move(data), num_frames, num_records, numErrors);
-        if (category_counts_.count(category) == 0)
-            category_counts_[category] = 0;
-
-        //for (json& record : data_block.at("content").at("records"))
         processRecord (category, record);
     };
 
@@ -112,26 +102,17 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
     {
         assert (extracted_data_->contains("data_blocks"));
 
+        std::vector<std::string> keys {"content", "records"};
+
         for (json& data_block : extracted_data_->at("data_blocks"))
         {
             category = data_block.at("category");
 
-            std::vector<std::string> keys {"content", "records"};
+            if (category_counts_.count(category) == 0)
+                category_counts_[category] = 0;
 
             loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
-
-//            if (!data_block.contains("content")) // data blocks with errors
-//                continue;
-
-//            if (data_block.at("content").contains("records"))
-//            {
-//                if (category_counts_.count(category) == 0)
-//                    category_counts_[category] = 0;
-
-//                for (json& record : data_block.at("content").at("records"))
-//                    processRecord (category, record);
-//            }
         }
     }
     else
@@ -160,20 +141,11 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
 
                 category = data_block.at("category");
 
+                if (category_counts_.count(category) == 0)
+                    category_counts_[category] = 0;
+
                 //loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function to frames";
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
-
-//                if (!data_block.contains("content")) // data block with errors
-//                    continue;
-
-//                if (data_block.at("content").contains("records"))
-//                {
-//                    if (category_counts_.count(category) == 0)
-//                        category_counts_[category] = 0;
-
-//                    for (json& record : data_block.at("content").at("records"))
-//                        processRecord (category, record);
-//                }
             }
         }
     }
@@ -355,7 +327,6 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
         }
     }
 
-    //extracted_data_->emplace_back(std::move(record));
     category_counts_.at(category) += 1;
 }
 
@@ -363,11 +334,6 @@ std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 {
     return category_counts_;
 }
-
-//void ASTERIXDecodeJob::clearExtractedRecords ()
-//{
-//    extracted_data_ = nullptr;
-//}
 
 std::unique_ptr<nlohmann::json>&& ASTERIXDecodeJob::extractedData()
 {

@@ -139,14 +139,12 @@ protected:
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
-    //std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
 
     std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
-    //size_t key_count_ {0};
     size_t insert_active_ {0};
 
     std::set <int> added_data_sources_;

@@ -100,16 +100,6 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
     if (class_id == "JSONDataMapping")
     {
         data_mappings_.emplace_back (class_id, instance_id, *this);
-
-//        assert (configuration().hasSubConfiguration(class_id, instance_id));
-//        Configuration& subcfg = configuration().getSubConfiguration(class_id, instance_id);
-//        std::string json_key = subcfg.getParameterConfigValueString("json_key");
-
-        // registerParameter("json_key", &json_key_, "");
-
-//        data_mappings_.emplace(std::piecewise_construct,
-//                             std::forward_as_tuple(name),  // args for key
-//                             std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -157,20 +147,6 @@ void JSONObjectParser::JSONContainerKey(const std::string& key)
 
     json_container_key_ = key;
 }
-//void JSONObjectParser::addMapping (JSONDataMapping mapping)
-//{
-//    assert (mapping.variable().hasCurrentDBColumn());
-
-//    data_mappings_.push_back(mapping);
-//    list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
-//    var_list_.add(mapping.variable());
-
-//    if (mapping.variable().isKey())
-//    {
-//        assert (mapping.variable().dataType() == PropertyDataType::INT);
-//        has_key_mapping_ = true;
-//    }
-//}
 
 void JSONObjectParser::initialize ()
 {
@@ -197,7 +173,6 @@ void JSONObjectParser::initialize ()
 
             mapping.initializeIfRequired();
 
-            //assert (mapping.variable().hasCurrentDBColumn());
             list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
             var_list_.add(mapping.variable());
         }
@@ -242,12 +217,8 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, Buffer& buffer) const
 {
     assert (initialized_);
 
-    //assert (buffer != nullptr);
-
     size_t row_cnt = buffer.size();
     size_t skipped_cnt = 0;
-
-    //size_t all_cnt = 0;
 
     bool parsed_any = false;
 
@@ -289,9 +260,6 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, Buffer& buffer) const
         assert (j.is_object());
 
         parsed_any = parseTargetReport (j, buffer, row_cnt);
-
-//        if (!skipped)
-//            ++row_cnt;
     }
 
     return parsed_any;
@@ -525,13 +493,8 @@ void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
 void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& j,
                                                     bool is_in_array)
 {
-    //bool j_is_array = false; // indicated if j contains array
-    //std::string j_array_type;
-
     if (j.is_array()) // do map arrays
     {
-        //j_is_array = true;
-
         if (!j.size()) // do not map if empty
             return;
 
@@ -546,11 +509,6 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
             }
             else if (j_it.is_array())
                 j_array_contains_only_primitives = false;
-
-//            if (!j_array_type.size())
-//                j_array_type = j_it.type_name();
-//            else if (j_array_type != "mixed" && j_array_type != j_it.type_name())
-//                j_array_type = "mixed";
         }
 
         if (!j_array_contains_only_primitives)
@@ -582,9 +540,7 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
             if (!map_it.comment().size())
             {
                 std::stringstream ss;
-//                if (j_is_array)
-//                    ss << "Type Array[" << j_array_type << "], value " << j.dump();
-//                else
+
                 ss << "Type " << j.type_name() << ", value " << j.dump();
                 map_it.comment (ss.str());
             }
@@ -627,13 +583,6 @@ void JSONObjectParser::removeMapping (unsigned int index)
            << " instance " << mapping.instanceId();
 
     logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
-//    unsigned int i = 0;
-//    for (auto &map_it : data_mappings_)
-//    {
-//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
-//               << " mapping " << map_it.instanceId();
-//        ++i;
-//    }
 
     if (mapping.active() && mapping.initialized())
     {
@@ -643,19 +592,10 @@ void JSONObjectParser::removeMapping (unsigned int index)
             var_list_.removeVariable(mapping.variable());
     }
 
-    //Configurable::removeChildConfigurable(mapping, false); // extra remove since destructor called after moving over
-
     logdbg << "JSONObjectParser: removeMapping: removing";
     data_mappings_.erase(data_mappings_.begin()+index);
 
     logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
-//    i = 0;
-//    for (auto &map_it : data_mappings_)
-//    {
-//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
-//               << " mapping " << map_it.instanceId();
-//        ++i;
-//    }
 }
 
 void JSONObjectParser::transformBuffer (Buffer& buffer, size_t index) const
@@ -664,7 +604,6 @@ void JSONObjectParser::transformBuffer (Buffer& buffer, size_t index) const
 
     logdbg << "JSONObjectParser: transformBuffer: object " << db_object_->name();
 
-    //assert (buffer);
     assert (index < buffer.size());
 
     if (override_data_source_)
@@ -674,11 +613,8 @@ void JSONObjectParser::transformBuffer (Buffer& buffer, size_t index) const
         assert (data_source_variable_name_.size());
         assert (buffer.has<int>(data_source_variable_name_));
 
-        //buffer->addProperty(data_source_variable_name_, PropertyDataType::INT);
         NullableVector<int>& ds_id_vector = buffer.get<int> (data_source_variable_name_);
-        //size_t size = buffer->size();
 
-        //for (size_t cnt=0; cnt < size; ++cnt)
         ds_id_vector.set(index, 0);
     }
 
