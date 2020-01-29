@@ -834,37 +834,39 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
         return;
     }
 
-    for (auto& buf_it : job_buffers)
-    {
-        if (buf_it.second && buf_it.second->size())
-        {
-            std::shared_ptr<Buffer> job_buffer = buf_it.second;
+    insertData (std::move(job_buffers));
 
-            if (buffers_.count(buf_it.first) == 0)
-                buffers_[buf_it.first] = job_buffer;
-            else
-                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
-        }
-    }
+//    for (auto& buf_it : job_buffers)
+//    {
+//        if (buf_it.second && buf_it.second->size())
+//        {
+//            std::shared_ptr<Buffer> job_buffer = buf_it.second;
 
-    if (!insert_active_)
-    {
-        for (auto& buf_it : buffers_)
-        {
-            if (buf_it.second->size() > 10000)
-            {
-                logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
-                insertData ();
-                return;
-            }
-        }
-    }
+//            if (buffers_.count(buf_it.first) == 0)
+//                buffers_[buf_it.first] = job_buffer;
+//            else
+//                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
+//        }
+//    }
 
-    if (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0)
-    {
-        logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
-        insertData ();
-    }
+//    if (!insert_active_)
+//    {
+//        for (auto& buf_it : buffers_)
+//        {
+//            if (buf_it.second->size() > 10000)
+//            {
+//                logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+//                insertData ();
+//                return;
+//            }
+//        }
+//    }
+
+//    if (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0)
+//    {
+//        logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
+//        insertData ();
+//    }
 }
 
 void ASTERIXImportTask::mapJSONObsoleteSlot ()
@@ -892,7 +894,7 @@ void ASTERIXImportTask::mapStubsObsoleteSlot ()
     json_map_stub_job_ = nullptr;
 }
 
-void ASTERIXImportTask::insertData ()
+void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffer>>&& job_buffers)
 {
     loginf << "ASTERIXImporterTask: insertData: inserting into database";
 
@@ -910,19 +912,19 @@ void ASTERIXImportTask::insertData ()
 
     for (auto& parser_it : *schema_)
     {
-        if (buffers_.count(parser_it.second.dbObject().name()) != 0)
+        if (job_buffers.count(parser_it.second.dbObject().name()) != 0)
         {
             ++insert_active_;
 
             DBObject& db_object = parser_it.second.dbObject();
-            std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
+            std::shared_ptr<Buffer> buffer = job_buffers.at(parser_it.second.dbObject().name());
 
             has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
                     && buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
             logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
 
-            logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
+            loginf << "ASTERIXImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
             connect (&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
                      Qt::UniqueConnection);
@@ -1015,13 +1017,13 @@ void ASTERIXImportTask::insertData ()
             status_widget_->addNumInserted(db_object.name(), buffer->size());
 
             logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " clearing";
-            buffers_.erase(parser_it.second.dbObject().name());
+            job_buffers.erase(parser_it.second.dbObject().name());
         }
         else
             logdbg << "ASTERIXImporterTask: insertData: emtpy buffer for " << parser_it.second.dbObject().name();
     }
 
-    assert (buffers_.size() == 0);
+    //assert (buffers_.size() == 0);
 
     logdbg << "JSONImporterTask: insertData: done";
 }
@@ -1047,10 +1049,10 @@ void ASTERIXImportTask::checkAllDone ()
 
     loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
-           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0);
+            << " insert active " << (insert_active_ == 0); // << " buffers " << (buffers_.size() == 0)
 
     if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
-            && buffers_.size() == 0 && insert_active_ == 0)
+            && insert_active_ == 0) // && buffers_.size() == 0
     {
         loginf << "ASTERIXImporterTask: checkAllDone: all done";
 
@@ -1061,7 +1063,7 @@ void ASTERIXImportTask::checkAllDone ()
 
         QApplication::restoreOverrideCursor();
 
-        buffers_.clear();
+        //buffers_.clear();
         refreshjASTERIX();
 
         assert (widget_);

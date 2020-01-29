@@ -33,7 +33,7 @@ void JSONMappingJob::run ()
         if (!buffers_.count(parser_it.second.dbObject().name()))
             buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
         else
-            parser_it.second.appendVariablesToBuffer(buffers_.at(parser_it.second.dbObject().name()));
+            parser_it.second.appendVariablesToBuffer(*buffers_.at(parser_it.second.dbObject().name()));
     }
 
 //    bool parsed;
@@ -58,10 +58,11 @@ void JSONMappingJob::run ()
         {
             logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
-            parsed = map_it.second.parseJSON(record, buffer);
+            assert (buffer);
+            parsed = map_it.second.parseJSON(record, *buffer);
 
             if (parsed)
-                map_it.second.transformBuffer(buffer, buffer->size()-1);
+                map_it.second.transformBuffer(*buffer, buffer->size()-1);
 
             parsed_any |= parsed;
         }

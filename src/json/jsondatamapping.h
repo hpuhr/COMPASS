@@ -22,7 +22,6 @@
 #include "logger.h"
 #include "format.h"
 #include "nullablevector.h"
-#include "jsonutils.h"
 #include "configurable.h"
 #include "jsondatamappingwidget.h"
 

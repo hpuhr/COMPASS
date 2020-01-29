@@ -139,7 +139,7 @@ protected:
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
-    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
+    //std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
@@ -155,7 +155,7 @@ protected:
 
     virtual void checkSubConfigurables ();
 
-    void insertData ();
+    void insertData (std::map <std::string, std::shared_ptr<Buffer>>&& job_buffers);
     void checkAllDone ();
 
     bool maxLoadReached ();

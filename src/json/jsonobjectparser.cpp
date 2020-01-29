@@ -25,6 +25,7 @@
 #include "atsdb.h"
 #include "stringconv.h"
 #include "configuration.h"
+#include "util/json.h"
 
 #include <algorithm>
 
@@ -223,27 +224,27 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
     return std::make_shared<Buffer> (list_, db_object_->name());
 }
 
-void JSONObjectParser::appendVariablesToBuffer (std::shared_ptr<Buffer>& buffer) const
+void JSONObjectParser::appendVariablesToBuffer (Buffer& buffer) const
 {
     assert (initialized_);
     assert (db_object_);
 
     for (auto& p_it : list_.properties())
     {
-        if (!buffer->properties().hasProperty(p_it.name()))
+        if (!buffer.properties().hasProperty(p_it.name()))
         {
-            buffer->addProperty(p_it.name(), p_it.dataType());
+            buffer.addProperty(p_it.name(), p_it.dataType());
         }
     }
 }
 
-bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer>& buffer) const
+bool JSONObjectParser::parseJSON (nlohmann::json& j, Buffer& buffer) const
 {
     assert (initialized_);
 
-    assert (buffer != nullptr);
+    //assert (buffer != nullptr);
 
-    size_t row_cnt = buffer->size();
+    size_t row_cnt = buffer.size();
     size_t skipped_cnt = 0;
 
     //size_t all_cnt = 0;
@@ -334,7 +335,7 @@ void JSONObjectParser::createMappingStubs (nlohmann::json& j)
     return;
 }
 
-bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer>& buffer,
+bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, Buffer& buffer,
                                           size_t row_cnt) const
 {
     // check key match
@@ -383,8 +384,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: bool " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<bool>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<bool> (current_var_name), row_cnt);
+            assert (buffer.has<bool>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<bool> (current_var_name), row_cnt);
 
             break;
         }
@@ -392,8 +393,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: char " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<char>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<char> (current_var_name), row_cnt);
+            assert (buffer.has<char>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<char> (current_var_name), row_cnt);
 
             break;
         }
@@ -401,8 +402,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: uchar " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<unsigned char>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned char> (current_var_name), row_cnt);
+            assert (buffer.has<unsigned char>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<unsigned char> (current_var_name), row_cnt);
 
             break;
         }
@@ -410,8 +411,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: int " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<int>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<int> (current_var_name), row_cnt);
+            assert (buffer.has<int>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<int> (current_var_name), row_cnt);
 
             break;
         }
@@ -419,8 +420,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: uint " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<unsigned int>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned int> (current_var_name), row_cnt);
+            assert (buffer.has<unsigned int>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<unsigned int> (current_var_name), row_cnt);
 
             break;
         }
@@ -428,8 +429,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: long " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<long int>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<long int> (current_var_name), row_cnt);
+            assert (buffer.has<long int>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<long int> (current_var_name), row_cnt);
 
             break;
         }
@@ -437,8 +438,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: ulong " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<unsigned long>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned long> (current_var_name), row_cnt);
+            assert (buffer.has<unsigned long>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<unsigned long> (current_var_name), row_cnt);
 
             break;
         }
@@ -446,8 +447,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: float " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<float>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
+            assert (buffer.has<float>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<float> (current_var_name), row_cnt);
 
             break;
         }
@@ -455,8 +456,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: double " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<double>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<double> (current_var_name), row_cnt);
+            assert (buffer.has<double>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<double> (current_var_name), row_cnt);
 
             break;
         }
@@ -464,8 +465,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
             logdbg << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
-            assert (buffer->has<std::string>(current_var_name));
-            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
+            assert (buffer.has<std::string>(current_var_name));
+            mandatory_missing = map_it.findAndSetValue (tr, buffer.get<std::string> (current_var_name), row_cnt);
 
             break;
         }
@@ -486,8 +487,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     if (mandatory_missing)
     {
         // cleanup
-        if (buffer->size() > row_cnt)
-            buffer->cutToSize(row_cnt);
+        if (buffer.size() > row_cnt)
+            buffer.cutToSize(row_cnt);
     }
 
     return !mandatory_missing;
@@ -657,24 +658,24 @@ void JSONObjectParser::removeMapping (unsigned int index)
 //    }
 }
 
-void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t index) const
+void JSONObjectParser::transformBuffer (Buffer& buffer, size_t index) const
 {
     assert (db_object_);
 
     logdbg << "JSONObjectParser: transformBuffer: object " << db_object_->name();
 
-    assert (buffer);
-    assert (index < buffer->size());
+    //assert (buffer);
+    assert (index < buffer.size());
 
     if (override_data_source_)
     {
         logdbg << "JSONObjectParser: transformBuffer: overiding data source for object " << db_object_->name()
                << " ds id name '" << data_source_variable_name_ << "'";
         assert (data_source_variable_name_.size());
-        assert (buffer->has<int>(data_source_variable_name_));
+        assert (buffer.has<int>(data_source_variable_name_));
 
         //buffer->addProperty(data_source_variable_name_, PropertyDataType::INT);
-        NullableVector<int>& ds_id_vector = buffer->get<int> (data_source_variable_name_);
+        NullableVector<int>& ds_id_vector = buffer.get<int> (data_source_variable_name_);
         //size_t size = buffer->size();
 
         //for (size_t cnt=0; cnt < size; ++cnt)
@@ -724,9 +725,9 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             {
             case PropertyDataType::BOOL:
             {
-                assert (buffer->has<bool>(current_var_name));
+                assert (buffer.has<bool>(current_var_name));
 
-                NullableVector<bool> &array_list = buffer->get<bool>(current_var_name);
+                NullableVector<bool> &array_list = buffer.get<bool>(current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -738,8 +739,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::CHAR:
             {
-                assert (buffer->has<char>(current_var_name));
-                NullableVector<char> &array_list = buffer->get<char> (current_var_name);
+                assert (buffer.has<char>(current_var_name));
+                NullableVector<char> &array_list = buffer.get<char> (current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -751,8 +752,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::UCHAR:
             {
-                assert (buffer->has<unsigned char>(current_var_name));
-                NullableVector<unsigned char> &array_list = buffer->get<unsigned char> (current_var_name);
+                assert (buffer.has<unsigned char>(current_var_name));
+                NullableVector<unsigned char> &array_list = buffer.get<unsigned char> (current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -764,8 +765,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::INT:
             {
-                assert (buffer->has<int>(current_var_name));
-                NullableVector<int> &array_list = buffer->get<int> (current_var_name);
+                assert (buffer.has<int>(current_var_name));
+                NullableVector<int> &array_list = buffer.get<int> (current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -777,8 +778,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::UINT:
             {
-                assert (buffer->has<unsigned int>(current_var_name));
-                NullableVector<unsigned int> &array_list = buffer->get<unsigned int> (current_var_name);
+                assert (buffer.has<unsigned int>(current_var_name));
+                NullableVector<unsigned int> &array_list = buffer.get<unsigned int> (current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -790,8 +791,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::LONGINT:
             {
-                assert (buffer->has<long int>(current_var_name));
-                NullableVector<long int> &array_list = buffer->get<long int>(current_var_name);
+                assert (buffer.has<long int>(current_var_name));
+                NullableVector<long int> &array_list = buffer.get<long int>(current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -803,8 +804,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::ULONGINT:
             {
-                assert (buffer->has<unsigned long>(current_var_name));
-                NullableVector<unsigned long> &array_list = buffer->get<unsigned long>(current_var_name);
+                assert (buffer.has<unsigned long>(current_var_name));
+                NullableVector<unsigned long> &array_list = buffer.get<unsigned long>(current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -816,8 +817,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::FLOAT:
             {
-                assert (buffer->has<float>(current_var_name));
-                NullableVector<float> &array_list = buffer->get<float>(current_var_name);
+                assert (buffer.has<float>(current_var_name));
+                NullableVector<float> &array_list = buffer.get<float>(current_var_name);
 
                 if (array_list.isNull(index))
                     break;
@@ -829,8 +830,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t 
             }
             case PropertyDataType::DOUBLE:
             {
-                assert (buffer->has<double>(current_var_name));
-                NullableVector<double> &array_list = buffer->get<double>(current_var_name);
+                assert (buffer.has<double>(current_var_name));
+                NullableVector<double> &array_list = buffer.get<double>(current_var_name);
 
                 if (array_list.isNull(index))
                     break;
