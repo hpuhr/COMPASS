@@ -29,8 +29,10 @@
 #include <QObject>
 
 #include <memory>
+#include <mutex>
+#include <deque>
 
-#include <tbb/concurrent_queue.h>
+//#include <tbb/concurrent_queue.h>
 
 class TaskManager;
 class ASTERIXImportTaskWidget;
@@ -137,7 +139,10 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-    tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+
+    std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    std::mutex map_jobs_mutex_;
+    bool waiting_for_map_ {false};
     std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
 
     bool error_ {false};
@@ -145,6 +150,7 @@ protected:
 
     std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
+    bool waiting_for_insert_ {false};
     size_t insert_active_ {0};
 
     std::set <int> added_data_sources_;

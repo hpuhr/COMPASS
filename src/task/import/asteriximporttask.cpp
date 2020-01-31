@@ -741,7 +741,9 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
         connect (json_map_job.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImportTask::mapJSONDoneSlot,
                  Qt::QueuedConnection);
 
-        json_map_jobs_.push(json_map_job);
+        map_jobs_mutex_.lock();
+        json_map_jobs_.push_back(json_map_job);
+        map_jobs_mutex_.unlock();
 
         JobManager::instance().addNonBlockingJob(json_map_job);
 
@@ -797,10 +799,14 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
     JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
     std::shared_ptr<JSONMappingJob> queued_map_job;
 
-    while (!json_map_jobs_.try_pop(queued_map_job))
-    {
-        QThread::msleep(1);
-    }
+    map_jobs_mutex_.lock();
+    waiting_for_map_ = true;
+
+    queued_map_job = json_map_jobs_.front();
+    json_map_jobs_.pop_front();
+
+    map_jobs_mutex_.unlock();
+    waiting_for_map_ = false;
 
     assert (queued_map_job.get() == map_job);
 
@@ -861,9 +867,12 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
     while (insert_active_)
     {
+        waiting_for_insert_ = true;
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep (1);
     }
+
+    waiting_for_insert_ = false;
 
     bool has_sac_sic = false;
 
@@ -1005,13 +1014,14 @@ void ASTERIXImportTask::checkAllDone ()
     logdbg << "ASTERIXImporterTask: checkAllDone";
 
     loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
+           << " wait map " << !waiting_for_map_
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
-            << " insert active " << (insert_active_ == 0);
+           << " wait insert " << ! waiting_for_insert_ << " insert active " << (insert_active_ == 0);
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
-            && insert_active_ == 0)
+    if (!all_done_ && decode_job_ == nullptr && !waiting_for_map_ && json_map_jobs_.empty()
+            && json_map_stub_job_ == nullptr && !waiting_for_insert_ && insert_active_ == 0)
     {
-        loginf << "ASTERIXImporterTask: checkAllDone: all done";
+        loginf << "ASTERIXImporterTask: checkAllDone: setting all done";
 
         assert (status_widget_);
         status_widget_->setDone();
@@ -1077,7 +1087,7 @@ void ASTERIXImportTask::closeStatusDialogSlot()
 bool ASTERIXImportTask::maxLoadReached ()
 {
     if (limit_ram_)
-        return json_map_jobs_.unsafe_size() > limited_num_json_jobs_;
+        return json_map_jobs_.size() > limited_num_json_jobs_;
     else
-        return json_map_jobs_.unsafe_size() > unlimited_num_json_jobs_;
+        return json_map_jobs_.size() > unlimited_num_json_jobs_;
 }
