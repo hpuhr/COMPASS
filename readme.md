@@ -42,15 +42,14 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 ![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss2.png)
 
 ## YouTube Videos
+### v0.5.0
+- [v0.5.0: Import ASTERIX & Setup](https://youtu.be/o1S3S9tcifA)
+- [v0.5.0: New OSGView Features](https://youtu.be/c1v3tIjNLVM)
+
 ### Old from v0.4.0
 - [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
 - [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
 - [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
-
-### Previous
-- [v0.2.1: Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
-- [v0.2.1: OSGView Display Options](https://youtu.be/vEoT88RGLQo)
-- [v0.2.1: Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
 
 ## Contents
