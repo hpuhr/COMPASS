@@ -34,6 +34,8 @@ SOFTWARE.
 #define NLOHMANN_JSON_VERSION_MINOR 7
 #define NLOHMANN_JSON_VERSION_PATCH 0
 
+#define NDEBUG
+
 #include <algorithm> // all_of, find, for_each
 #include <cassert> // assert
 #include <ciso646> // and, not, or
@@ -22679,6 +22681,6 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 #undef JSON_HEDLEY_WARNING
 #undef JSON_HEDLEY_WARN_UNUSED_RESULT
 
-
+#undef NDEBUG
 
 #endif  // INCLUDE_NLOHMANN_JSON_HPP_
