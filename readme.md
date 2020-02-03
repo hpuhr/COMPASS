@@ -31,8 +31,8 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental Version v0.5.0-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/ATSDB_v0.5.0-x86_64.AppImage)
+## Released Experimental Version v0.5.0-beta-hotfix1
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta.hf1/ATSDB-v0.5.0-hotfix1_x86_64.AppImage)
 - [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.0-beta/user_manual_v0.5.0.pdf)
 
 ## Screenshots
@@ -42,15 +42,14 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 ![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss2.png)
 
 ## YouTube Videos
+### v0.5.0
+- [v0.5.0: Import ASTERIX & Setup](https://youtu.be/o1S3S9tcifA)
+- [v0.5.0: New OSGView Features](https://youtu.be/c1v3tIjNLVM)
+
 ### Old from v0.4.0
 - [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
 - [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
 - [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
-
-### Previous
-- [v0.2.1: Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
-- [v0.2.1: OSGView Display Options](https://youtu.be/vEoT88RGLQo)
-- [v0.2.1: Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
 
 ## Contents
