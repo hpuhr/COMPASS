@@ -132,7 +132,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     ConfigurationManager::getInstance().saveConfiguration();
 
     ATSDB::instance().shutdown();
-    assert (!ATSDB::instance().ready());
+    //assert (!ATSDB::instance().ready());
 
     if (tab_widget_)
     {

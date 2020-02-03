@@ -52,9 +52,9 @@ using namespace Utils;
 /**
  * Registers parameters, creates sub configurables
  */
-DBObject::DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
+DBObject::DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
     : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".json"),
-      manager_(*manager)
+      atsdb_(atsdb), manager_(*manager)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
@@ -696,9 +696,9 @@ void DBObject::schemaChangedSlot ()
 {
     loginf << "DBObject: schemaChangedSlot";
 
-    if (ATSDB::instance().schemaManager().hasCurrentSchema())
+    if (atsdb_.schemaManager().hasCurrentSchema())
     {
-        DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+        DBSchema& schema = atsdb_.schemaManager().getCurrentSchema();
 
         if (!hasMetaTable(schema.name()))
         {

@@ -20,6 +20,10 @@
 
 #include <QApplication>
 
+#include <memory>
+
+class MainWindow;
+
 //namespace ATSDB
 //{
 
@@ -33,14 +37,17 @@ public:
     ///@brief Constructor.
   Client(int& argc, char** argv);
   ///@brief Destructor.
-  virtual ~Client() { }
+  virtual ~Client();
 
   ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
   virtual bool notify(QObject* receiver, QEvent* event);
 
   bool quitRequested() const;
+  MainWindow& mainWindow ();
 
 private:
+  //bool atsdb_initialized_ {false};
+
   std::string system_install_path_;
   bool quit_requested_ {false};
 
@@ -51,6 +58,10 @@ private:
 
   bool upgrade_needed_ {false};
   bool config_and_data_deletion_wanted_ {false};
+
+  std::unique_ptr<MainWindow> main_window_;
+
+  void checkAndSetupConfig ();
 
   void checkNeededActions ();
   void performNeededActions ();

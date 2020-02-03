@@ -84,10 +84,7 @@ public:
     ///@brief Destructor.
     virtual ~ATSDB();
 
-    void initialize ();
-
-    ///@brief Shuts down the DB access.
-    void shutdown ();
+    //void initialize ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -101,8 +98,12 @@ public:
 
     bool ready ();
 
+    ///@brief Shuts down the DB access.
+    void shutdown ();
+
 protected:
-    bool initialized_ {false};
+    //bool initialized_ {false};
+    bool shut_down_ {false};
 
     std::unique_ptr<SimpleConfig> simple_config_;
     /// DB interface, encapsulating all database functionality.

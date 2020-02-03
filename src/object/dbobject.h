@@ -31,6 +31,7 @@
 #include "dboschemametatabledefinition.h"
 #include "dboassociationcollection.h"
 
+class ATSDB;
 class PropertyList;
 class MetaDBTable;
 
@@ -107,7 +108,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
+    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
 
@@ -246,6 +247,7 @@ public:
     void updateToDatabaseContent ();
 
 protected:
+    ATSDB& atsdb_;
     DBObjectManager& manager_;
     /// DBO name
     std::string name_;

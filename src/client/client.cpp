@@ -23,6 +23,8 @@
 #include "files.h"
 #include "configurationmanager.h"
 #include "stringconv.h"
+#include "mainwindow.h"
+#include "atsdb.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -77,6 +79,59 @@ Client::Client(int& argc, char** argv)
         throw runtime_error ("ATSDBClient: unable to parse command line parameters: "+string(e.what()));
     }
 
+    checkAndSetupConfig ();
+
+    if (quit_requested_)
+        return;
+
+    //ATSDB::instance().initialize();
+    //atsdb_initialized_ = true;
+}
+
+Client::~Client()
+{
+    loginf << "Client: destructor";
+
+//    if (atsdb_initialized_ && ATSDB::instance().ready())
+//        ATSDB::instance().shutdown();
+}
+
+MainWindow& Client::mainWindow ()
+{
+    if (!main_window_)
+        main_window_.reset (new MainWindow ());
+
+    assert (main_window_);
+    return *main_window_;
+}
+
+bool Client::notify(QObject* receiver, QEvent* event)
+{
+    try
+    {
+        return QApplication::notify(receiver, event);
+    }
+    catch(exception& e)
+    {
+        logerr  << "ATSDBClient: Exception thrown: " << e.what();
+        //assert (false);
+        QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", QString(e.what()));
+    }
+    catch(...)
+    {
+        //assert (false);
+        QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", "Unknown exception");
+    }
+    return false;
+}
+
+bool Client::quitRequested() const
+{
+    return quit_requested_;
+}
+
+void Client::checkAndSetupConfig ()
+{
     // check if basic configuration works
     try
     {
@@ -158,32 +213,6 @@ Client::Client(int& argc, char** argv)
         quit_requested_ = true;
         return;
     }
-
-}
-
-bool Client::notify(QObject* receiver, QEvent* event)
-{
-    try
-    {
-        return QApplication::notify(receiver, event);
-    }
-    catch(exception& e)
-    {
-        logerr  << "Client: Exception thrown: " << e.what();
-        //assert (false);
-        QMessageBox::critical( NULL, "Client::notify(): Exception", QString( e.what() ) );
-    }
-    catch(...)
-    {
-        //assert (false);
-        QMessageBox::critical( NULL, "Client::notify(): Exception", "Unknown exception" );
-    }
-    return false;
-}
-
-bool Client::quitRequested() const
-{
-    return quit_requested_;
 }
 
 void Client::checkNeededActions ()
