@@ -45,7 +45,7 @@ using namespace std;
 
 MainWindow::MainWindow()
 {
-    logdbg  << "MainWindow: constructor";
+    logdbg << "MainWindow: constructor";
 
     setMinimumSize(QSize(1200, 900));
 
@@ -57,6 +57,12 @@ MainWindow::MainWindow()
 
     assert (ATSDB::instance().config().existsId("version"));
     std::string title =  "ATSDB v"+ATSDB::instance().config().getString("version");
+
+    if (ATSDB::instance().config().existsId("save_config_on_exit"))
+    {
+        save_configuration_ = ATSDB::instance().config().getBool("save_config_on_exit");
+        loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
+    }
 
     QWidget::setWindowTitle (title.c_str());
 
@@ -90,14 +96,20 @@ MainWindow::~MainWindow()
     // remember: this not called! insert deletes into closeEvent function
 }
 
+void MainWindow::disableConfigurationSaving ()
+{
+    logdbg << "MainWindow: disableConfigurationSaving";
+    save_configuration_ = false;
+}
+
 void MainWindow::databaseOpenedSlot()
 {
-    logdbg  << "MainWindow: databaseOpenedSlot";
+    logdbg << "MainWindow: databaseOpenedSlot";
 }
 
 void MainWindow::startSlot ()
 {
-    loginf  << "MainWindow: startSlot";
+    loginf << "MainWindow: startSlot";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -129,10 +141,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
-    ConfigurationManager::getInstance().saveConfiguration();
+    if (save_configuration_)
+        ConfigurationManager::getInstance().saveConfiguration();
+    else
+        loginf  << "MainWindow: closeEvent: configuration not saved";
 
     ATSDB::instance().shutdown();
-    //assert (!ATSDB::instance().ready());
 
     if (tab_widget_)
     {
@@ -142,12 +156,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     event->accept();
 
-    //QWidget::closeEvent(event);
-    logdbg  << "MainWindow: closeEvent: done";
+    logdbg << "MainWindow: closeEvent: done";
 }
 
-void MainWindow::keyPressEvent ( QKeyEvent * event )
-{
-    logdbg  << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
-}
+//void MainWindow::keyPressEvent ( QKeyEvent * event )
+//{
+//    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
+//}
 
