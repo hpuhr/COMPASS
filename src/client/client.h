@@ -46,8 +46,6 @@ public:
   MainWindow& mainWindow ();
 
 private:
-  //bool atsdb_initialized_ {false};
-
   std::string system_install_path_;
   bool quit_requested_ {false};
 
@@ -59,8 +57,6 @@ private:
   bool upgrade_needed_ {false};
   bool config_and_data_deletion_wanted_ {false};
 
-  std::unique_ptr<MainWindow> main_window_;
-
   void checkAndSetupConfig ();
 
   void checkNeededActions ();
@@ -69,6 +65,9 @@ private:
   void deleteConfigurationAndData ();
   void copyConfigurationAndData ();
   void copyConfiguration ();
+
+protected:
+    std::unique_ptr<MainWindow> main_window_;
 };
 //}
 

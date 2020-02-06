@@ -1,44 +1,34 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include "catch.hpp"
 
-#include "client.h"
 #include "mainwindow.h"
+#include "logger.h"
+#include "client.h"
 
-//#include <thread>
+#include <QThread>
 
-//std::unique_ptr<Client> client_;
-
-//void thread_function()
-//{
-//    int argc = 0;
-//    char *argv[] = {"test_atsdb", NULL};
-
-//    client_.reset(new Client (argc, argv));
-
-
-//    if (client_->quitRequested())
-//        return;
-
-//    client_->mainWindow().show();
-//    client_->exec();
-//}
-
-unsigned int Factorial( unsigned int number ) {
-    return number <= 1 ? number : Factorial(number-1)*number;
-}
-
-TEST_CASE( "Factorials are computed", "[factorial]" )
+TEST_CASE( "ATSDB MainWindow", "[ATSDB]" )
 {
-//    std::thread threadObj(thread_function);
-//     for(int i = 0; i < 10000; i++)
-//         std::cout<<"Display From MainThread"<<std::endl;
+    int argc = 1;
+    char* argv[1];
 
-//     client_->mainWindow().close();
+    Client client (argc, argv);
 
-//     threadObj.join();
+    QThread::msleep(100); //delay
 
-    REQUIRE( Factorial(1) == 1 );
-    REQUIRE( Factorial(2) == 2 );
-    REQUIRE( Factorial(3) == 6 );
-    REQUIRE( Factorial(10) == 3628800 );
+    while (client.hasPendingEvents())
+        client.processEvents();
+
+    REQUIRE (!client.quitRequested() );
+
+    client.mainWindow().show();
+
+    QThread::msleep(100); // delay
+
+    while (client.hasPendingEvents())
+        client.processEvents();
+
+    QThread::msleep(100); // delay
+
+    client.mainWindow().close();
 }
