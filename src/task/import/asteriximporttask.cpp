@@ -861,7 +861,7 @@ void ASTERIXImportTask::mapStubsObsoleteSlot ()
 
 void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers)
 {
-    loginf << "ASTERIXImporterTask: insertData: inserting into database";
+    logdbg << "ASTERIXImporterTask: insertData: inserting into database";
 
     assert (status_widget_);
 
@@ -913,7 +913,7 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
         if (!buffer->size())
         {
-            logerr << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
+            logdbg << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
             continue;
         }
 
@@ -927,7 +927,7 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
         has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
                 && buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
-        loginf << "ASTERIXImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic
+        logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic
                << " buffer size " << buffer->size();
 
         connect (&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
@@ -937,7 +937,7 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
         std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbo_name));
 
-        loginf << "ASTERIXImporterTask: insertData: adding new data sources in dbo " << db_object.name()
+        logdbg << "ASTERIXImporterTask: insertData: adding new data sources in dbo " << db_object.name()
                << " ds varname '" << data_source_var_name << "'";
 
         // collect existing datasources
@@ -1008,8 +1008,6 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
             db_object.addDataSources(datasources_to_add);
         }
 
-        logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " inserting";
-
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
         db_object.insertData(set, buffer, false);
 
@@ -1037,9 +1035,7 @@ void ASTERIXImportTask::insertDoneSlot (DBObject& object)
 
 void ASTERIXImportTask::checkAllDone ()
 {
-    logdbg << "ASTERIXImporterTask: checkAllDone";
-
-    loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
+    logdbg << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
            << " wait map " << !waiting_for_map_
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
            << " wait insert " << ! waiting_for_insert_ << " insert active " << (insert_active_ == 0);
@@ -1098,6 +1094,12 @@ void ASTERIXImportTask::checkAllDone ()
         }
 
         test_ = false; // set again by widget
+
+        if (!show_done_summary_)
+        {
+            status_widget_->close();
+            status_widget_ = nullptr;
+        }
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";

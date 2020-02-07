@@ -87,6 +87,7 @@ TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
 
     asterix_import_task_widget->addFile(recording_filename);
     REQUIRE(asterix_import_task.canRun());
+    asterix_import_task.showDoneSummary(false);
 
     task_manager_widget->runCurrentTaskSlot();
 

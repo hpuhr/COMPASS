@@ -89,7 +89,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
     num_records_ = num_records;
     num_errors_ = num_errors;
 
-    loginf << "ASTERIXDecodeJob: jasterix_callback: num errors " << num_errors_;
+    if (num_errors_)
+        logwrn << "ASTERIXDecodeJob: jasterix_callback: num errors " << num_errors_;
 
     unsigned int category;
 
@@ -106,10 +107,16 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
 
         for (json& data_block : extracted_data_->at("data_blocks"))
         {
+            if (!data_block.contains("category"))
+            {
+                logwrn << "ASTERIXDecodeJob: jasterix_callback: data block without asterix category";
+                continue;
+            }
+
             category = data_block.at("category");
 
-            if (category_counts_.count(category) == 0)
-                category_counts_[category] = 0;
+//            if (category_counts_.count(category) == 0)
+//                category_counts_[category] = 0;
 
             loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
@@ -137,12 +144,15 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data,
             for (json& data_block : frame.at("content").at("data_blocks"))
             {
                 if (!data_block.contains("category")) // data block with errors
+                {
+                    logwrn << "ASTERIXDecodeJob: jasterix_callback: data block without asterix category";
                     continue;
+                }
 
                 category = data_block.at("category");
 
-                if (category_counts_.count(category) == 0)
-                    category_counts_[category] = 0;
+//                if (category_counts_.count(category) == 0)
+//                    category_counts_[category] = 0;
 
                 //loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function to frames";
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
@@ -327,7 +337,7 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
         }
     }
 
-    category_counts_.at(category) += 1;
+    category_counts_[category] += 1;
 }
 
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const

@@ -872,7 +872,7 @@ std::set<int> DBInterface::getActiveDataSources (DBObject &object)
 
 void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size " << buffer->size();
+    logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size " << buffer->size();
 
     std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert (partial_buffer->size());
@@ -888,7 +888,7 @@ void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer>
 
 void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
+    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
 
     assert (current_connection_);
     assert (buffer);
