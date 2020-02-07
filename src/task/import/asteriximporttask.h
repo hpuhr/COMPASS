@@ -153,13 +153,14 @@ protected:
     bool waiting_for_insert_ {false};
     size_t insert_active_ {0};
 
+    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set <int> added_data_sources_;
 
     bool all_done_{false};
 
     virtual void checkSubConfigurables ();
 
-    void insertData (std::map <std::string, std::shared_ptr<Buffer>>&& job_buffers);
+    void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
     void checkAllDone ();
 
     bool maxLoadReached ();

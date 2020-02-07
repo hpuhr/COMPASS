@@ -66,6 +66,19 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
     registerParameter ("used_connection", &used_connection_, "");
 
     createSubConfigurables();
+
+    if (used_connection_.size())
+    {
+        if (!connections_.count(used_connection_))
+        {
+            logerr << "DBInterface: constructor: unknown connection '" << used_connection_ << "'";
+            used_connection_ = "";
+        }
+        else
+        {
+            current_connection_ = connections_.at(used_connection_);
+        }
+    }
 }
 
 /**

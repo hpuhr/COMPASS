@@ -260,7 +260,7 @@ void TaskManagerWidget::selectNextTask ()
     taskClickedSlot (task_list_->currentItem()); // update to change buttons
 }
 
-std::string TaskManagerWidget::getCurrentTask ()
+std::string TaskManagerWidget::getCurrentTaskName ()
 {
     QListWidgetItem* current_item = task_list_->currentItem();
     assert (current_item);
@@ -321,7 +321,7 @@ void TaskManagerWidget::runCurrentTaskSlot()
 {
     loginf << "TaskManagerWidget: runCurrentTaskSlot";
 
-    task_manager_.runTask(getCurrentTask());
+    task_manager_.runTask(getCurrentTaskName());
 }
 
 void TaskManagerWidget::startSlot ()

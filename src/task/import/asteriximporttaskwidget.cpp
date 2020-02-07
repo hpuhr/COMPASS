@@ -185,11 +185,14 @@ void ASTERIXImportTaskWidget::addFileSlot ()
     if (dialog.exec())
     {
         for (auto& filename : dialog.selectedFiles())
-        {
-            if (!task_.hasFile(filename.toStdString()))
-                task_.addFile(filename.toStdString());
-        }
+            addFile (filename.toStdString());
     }
+}
+
+void ASTERIXImportTaskWidget::addFile (const std::string& filename)
+{
+    if (!task_.hasFile(filename))
+        task_.addFile(filename);
 }
 
 void ASTERIXImportTaskWidget::deleteFileSlot ()

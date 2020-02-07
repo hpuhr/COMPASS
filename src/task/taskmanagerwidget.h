@@ -52,7 +52,7 @@ public:
     void updateTaskStates ();
     void selectNextTask ();
 
-    std::string getCurrentTask ();
+    std::string getCurrentTaskName ();
 
     TaskManagerLogWidget* logWidget() { assert (log_widget_); return log_widget_; }
 

@@ -818,8 +818,7 @@ void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer,
 
     buffer->transformVariables(list, false); // back again
 
-    insert_job_ = std::shared_ptr<InsertBufferDBJob> (new InsertBufferDBJob(ATSDB::instance().interface(),
-                                                                            *this, buffer, emit_change));
+    insert_job_ = std::make_shared<InsertBufferDBJob> (ATSDB::instance().interface(), *this, buffer, emit_change);
 
     connect (insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot, Qt::QueuedConnection);
     connect (insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this, &DBObject::insertProgressSlot,
