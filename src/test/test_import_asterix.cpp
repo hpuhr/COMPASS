@@ -12,8 +12,15 @@
 #include "taskmanagerwidget.h"
 #include "databaseopentask.h"
 #include "sqliteconnectionwidget.h"
+#include "managedatasourcestask.h"
+#include "managedatasourcestaskwidget.h"
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
+#include "dboeditdatasourceswidget.h"
+#include "radarplotpositioncalculatortask.h"
+#include "postprocesstask.h"
 
 #include <QThread>
 
@@ -76,8 +83,18 @@ TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
     while (client.hasPendingEvents())
         client.processEvents();
 
+    // clear previous data sources
+    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask ();
+    task_manager_widget->setCurrentTask(manage_ds_task);
+    REQUIRE (task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+    manage_ds_task.clearConfigDataSources();
+
+    while (client.hasPendingEvents())
+        client.processEvents();
+
     // import asterix
     ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
+    task_manager_widget->setCurrentTask(asterix_import_task);
     REQUIRE (task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
     REQUIRE (asterix_import_task.isRecommended());
 
@@ -93,10 +110,52 @@ TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
 
     QThread::msleep(100);
 
-    while (!asterix_import_task.done())
+    while (client.hasPendingEvents() || !asterix_import_task.done())
         client.processEvents();
 
-    QThread::msleep(1000); // delay
+    // set data sources
+    REQUIRE (task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+
+    std::string ds_filename = data_path+"ds.json";
+    REQUIRE(Files::fileExists(ds_filename));
+
+    manage_ds_task.importConfigDataSources(ds_filename);
+    manage_ds_task.autoSyncAllConfigDataSourcesToDB ();
+
+    while (client.hasPendingEvents())
+        client.processEvents();
+
+    QThread::msleep(100); // delay
+
+    // calculate radar plot positions
+    RadarPlotPositionCalculatorTask& radar_plot_pos_calc = task_manager.radarPlotPositionCalculatorTask();
+    REQUIRE (task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
+    REQUIRE (radar_plot_pos_calc.isRecommended());
+    radar_plot_pos_calc.showDoneSummary(false);
+
+    task_manager_widget->runCurrentTaskSlot();
+
+    QThread::msleep(100);
+
+    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
+        client.processEvents();
+
+    // post-process
+    PostProcessTask& post_process_task = task_manager.postProcessTask();
+    REQUIRE (task_manager_widget->getCurrentTaskName() == post_process_task.name());
+    REQUIRE (post_process_task.isRecommended());
+    REQUIRE (post_process_task.isRequired());
+
+    task_manager_widget->runCurrentTaskSlot();
+
+    QThread::msleep(100);
+
+    while (client.hasPendingEvents() || !post_process_task.done())
+        client.processEvents();
+
+    QThread::msleep(100); // delay
+
+    REQUIRE (task_manager_widget->isStartPossible());
 
     client.mainWindow().close();
 }

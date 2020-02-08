@@ -813,7 +813,9 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
     msg_box_->setWindowTitle("Calculating Radar Plot Positions");
     msg_box_->setText("Writing of object data done.");
     msg_box_->setStandardButtons(QMessageBox::Ok);
-    msg_box_->exec();
+
+    if (show_done_summary_)
+        msg_box_->exec();
 
     delete msg_box_;
     msg_box_ = nullptr;

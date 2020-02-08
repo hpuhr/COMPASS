@@ -51,10 +51,13 @@ public:
     void updateTaskList ();
     void updateTaskStates ();
     void selectNextTask ();
+    void setCurrentTask (Task& task);
 
     std::string getCurrentTaskName ();
 
     TaskManagerLogWidget* logWidget() { assert (log_widget_); return log_widget_; }
+
+    bool isStartPossible ();
 
 protected:
     TaskManager& task_manager_;

@@ -64,6 +64,8 @@ public:
     void exportConfigDataSources ();
     void clearConfigDataSources ();
     void importConfigDataSources ();
+    void importConfigDataSources (const std::string& filename);
+    void autoSyncAllConfigDataSourcesToDB ();
 
     bool hasDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);
     StoredDBODataSource& getDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);

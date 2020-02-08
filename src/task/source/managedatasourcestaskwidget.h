@@ -6,6 +6,7 @@
 class ManageDataSourcesTask;
 
 class QTabWidget;
+class DBOEditDataSourcesWidget;
 
 class ManageDataSourcesTaskWidget : public TaskWidget
 {
@@ -17,11 +18,14 @@ public slots:
     void exportConfigDataSourcesSlot ();
     void clearConfigDataSourcesSlot ();
     void importConfigDataSourcesSlot ();
+    void autoSyncAllConfigDataSourcesToDB ();
 
     void dbItemChangedSlot ();
 
 public:
     ManageDataSourcesTaskWidget(ManageDataSourcesTask& task, QWidget *parent=nullptr);
+
+    void setCurrentWidget (DBOEditDataSourcesWidget* widget);
 
 protected:
     ManageDataSourcesTask& task_;
