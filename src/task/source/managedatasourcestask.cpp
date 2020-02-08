@@ -257,6 +257,9 @@ void ManageDataSourcesTask::exportConfigDataSources ()
         output_file.open(filename.toStdString(), std::ios_base::out);
 
         output_file << j.dump(4);
+
+        task_manager_.appendInfo("ManageDataSourcesTask: exported configuration data sources to file '"
+                                 +filename.toStdString()+"'");
     }
     else
         loginf << "ManageDataSourcesTask: exportConfigDataSources: cancelled";
@@ -271,6 +274,8 @@ void ManageDataSourcesTask::clearConfigDataSources ()
 
     for (auto& edit_it : edit_ds_widgets_)
         edit_it.second->update();
+
+    task_manager_.appendInfo("ManageDataSourcesTask: cleared all configuration data sources");
 
     emit statusChangedSignal(name_);
 }
@@ -341,6 +346,9 @@ void ManageDataSourcesTask::importConfigDataSources (const std::string& filename
 
         for (auto& edit_it : edit_ds_widgets_)
             edit_it.second->update();
+
+        task_manager_.appendInfo("ManageDataSourcesTask: imported configuration data sources from  file '"
+                                 +filename+"'");
     }
     catch (json::exception& e)
     {
@@ -361,6 +369,8 @@ void ManageDataSourcesTask::autoSyncAllConfigDataSourcesToDB ()
         current_widget->syncOptionsFromCfgSlot();
         current_widget->performActionsSlot();
     }
+
+    task_manager_.appendInfo("ManageDataSourcesTask: synced all configuration data sources to database");
 }
 
 bool ManageDataSourcesTask::hasDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic)
