@@ -61,6 +61,8 @@ public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImportTaskWidget();
 
+    void addFile (const std::string& filename);
+
     void updateLimitRAM ();
 
     void runStarted ();

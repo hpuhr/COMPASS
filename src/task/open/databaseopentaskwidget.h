@@ -60,6 +60,8 @@ public:
     DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget *parent=nullptr);
     virtual ~DatabaseOpenTaskWidget();
 
+    void updateUsedConnection ();
+
 protected:
     DatabaseOpenTask& task_;
 
@@ -67,7 +69,6 @@ protected:
 
     QStackedWidget* connection_stack_ {nullptr};
 
-    void useConnection (const std::string& connection_type);
 };
 
 #endif // DATABASEOPENTASKWIDGET_H

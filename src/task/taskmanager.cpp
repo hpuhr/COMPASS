@@ -360,8 +360,58 @@ void TaskManager::runTask (const std::string& task_name)
     tasks_.at(task_name)->run();
 }
 
-ManageDataSourcesTask& TaskManager::manageDataSourcesTask ()
+DatabaseOpenTask& TaskManager::databaseOpenTask() const
+{
+    assert (database_open_task_);
+    return *database_open_task_;
+}
+
+ManageSchemaTask& TaskManager::manageSchemaTask() const
+{
+    assert (manage_schema_task_);
+    return *manage_schema_task_;
+}
+
+ManageDataSourcesTask& TaskManager::manageDataSourcesTask () const
 {
     assert (manage_datasources_task_);
-    return *manage_datasources_task_.get();
+    return *manage_datasources_task_;
+}
+
+#if USE_JASTERIX
+ASTERIXImportTask& TaskManager::asterixImporterTask() const
+{
+    assert (asterix_importer_task_);
+    return *asterix_importer_task_;
+}
+#endif
+
+JSONImportTask& TaskManager::jsonImporterTask() const
+{
+    assert (json_importer_task_);
+    return *json_importer_task_;
+}
+
+MySQLDBImportTask& TaskManager::mysqldbImportTask() const
+{
+    assert (mysqldb_import_task_);
+    return *mysqldb_import_task_;
+}
+
+RadarPlotPositionCalculatorTask& TaskManager::radarPlotPositionCalculatorTask() const
+{
+    assert (radar_plot_position_calculator_task_);
+    return *radar_plot_position_calculator_task_;
+}
+
+CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
+{
+    assert (manage_datasources_task_);
+    return *create_artas_associations_task_;
+}
+
+PostProcessTask& TaskManager::postProcessTask() const
+{
+    assert (manage_datasources_task_);
+    return *post_process_task_;
 }

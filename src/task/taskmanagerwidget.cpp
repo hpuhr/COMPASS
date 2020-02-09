@@ -260,13 +260,19 @@ void TaskManagerWidget::selectNextTask ()
     taskClickedSlot (task_list_->currentItem()); // update to change buttons
 }
 
-std::string TaskManagerWidget::getCurrentTask ()
+std::string TaskManagerWidget::getCurrentTaskName ()
 {
     QListWidgetItem* current_item = task_list_->currentItem();
     assert (current_item);
 
     assert (item_task_mappings_.count(current_item));
     return item_task_mappings_.at(current_item)->name();
+}
+
+bool TaskManagerWidget::isStartPossible ()
+{
+    assert (start_button_);
+    return start_button_->isEnabled();
 }
 
 void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
@@ -281,23 +287,39 @@ void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
     Task* current_task = item_task_mappings_.at(item);
     assert (current_task);
 
-    if (tasks_widget_->indexOf(current_task->widget()) == -1) // add of not added previously
-        tasks_widget_->addWidget(current_task->widget());
+    setCurrentTask(*current_task);
+}
 
-    tasks_widget_->setCurrentWidget(current_task->widget());
+void TaskManagerWidget::setCurrentTask (Task& task)
+{
+    loginf << "TaskManagerWidget: setCurrentTask: task '" << task.name()
+           << "' can run " << task.canRun() << " done " << task.done()
+           << " is recommended " << task.isRecommended();
 
-    loginf << "TaskManagerWidget: taskClickedSlot: item '" << item->text().toStdString()
-           << "' can run " << current_task->canRun() << " done " << current_task->done()
-           << " is recommended " << current_task->isRecommended();
+    // check if selected in list
+    assert (task_list_);
 
-    if (current_task->canRun())
+    QList<QListWidgetItem*> items = task_list_->findItems(task.guiName().c_str(), Qt::MatchExactly);
+    assert (items.size() == 1);
+    QListWidgetItem* task_item = items.at(0);
+    if (task_list_->currentItem() != task_item)
+        task_list_->setCurrentItem(task_item);
+
+    // set widget
+    if (tasks_widget_->indexOf(task.widget()) == -1) // add of not added previously
+        tasks_widget_->addWidget(task.widget());
+
+    tasks_widget_->setCurrentWidget(task.widget());
+
+    // update run current task button
+    if (task.canRun())
     {
         QFont font_bold;
         font_bold.setBold(true);
 
         run_current_task_button_->setEnabled(true);
 
-        if (!current_task->done() && current_task->isRecommended())
+        if (!task.done() && task.isRecommended())
             run_current_task_button_->setFont(font_bold);
         else
             run_current_task_button_->setFont(QFont());
@@ -321,7 +343,7 @@ void TaskManagerWidget::runCurrentTaskSlot()
 {
     loginf << "TaskManagerWidget: runCurrentTaskSlot";
 
-    task_manager_.runTask(getCurrentTask());
+    task_manager_.runTask(getCurrentTaskName());
 }
 
 void TaskManagerWidget::startSlot ()

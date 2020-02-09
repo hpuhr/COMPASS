@@ -133,6 +133,7 @@ public:
     bool isOtherDBObjectPostProcessing (DBObject& object);
 
 protected:
+    ATSDB& atsdb_;
     bool use_filters_ {false};
 
     bool use_order_ {false};

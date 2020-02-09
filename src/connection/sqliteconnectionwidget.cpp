@@ -95,9 +95,15 @@ void SQLiteConnectionWidget::addFileSlot ()
     QString filename = QFileDialog::getOpenFileName(this, tr("Add SQLite3 File"));
 
     if (filename.size() > 0)
+        addFile (filename.toStdString());
+}
+
+void SQLiteConnectionWidget::addFile (const std::string& filename)
+{
+    if (!connection_.hasFile(filename))
     {
-        if (!connection_.hasFile(filename.toStdString()))
-            connection_.addFile(filename.toStdString());
+        loginf << "SQLiteConnectionWidget: addFile: filename '" << filename << "'";
+        connection_.addFile(filename);
     }
 }
 

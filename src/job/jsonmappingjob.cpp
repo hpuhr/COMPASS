@@ -35,12 +35,11 @@ void JSONMappingJob::run ()
             parser_it.second.appendVariablesToBuffer(*buffers_.at(parser_it.second.dbObject().name()));
     }
 
-    unsigned int category;
-
-    auto process_lambda = [this, &category](nlohmann::json& record)
+    auto process_lambda = [this](nlohmann::json& record)
     {
         //loginf << "UGA '" << record.dump(4) << "'";
 
+        unsigned int category {0};
         bool has_cat = record.contains("category");
 
         if (has_cat)

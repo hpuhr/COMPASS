@@ -31,6 +31,15 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
                " but is performed using the 'Open' button.";
 }
 
+
+void DatabaseOpenTask::useConnection (const std::string& connection_type)
+{
+    ATSDB::instance().interface().useConnection(connection_type);
+
+    if (widget_)
+        widget_->updateUsedConnection();
+}
+
 TaskWidget* DatabaseOpenTask::widget ()
 {
     if (!widget_)
