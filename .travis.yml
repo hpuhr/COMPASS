@@ -6,8 +6,8 @@ addons:
      - ubuntu-toolchain-r-test
     packages:
      - cmake
-     - gcc-9
-     - g++-9
+     #- gcc-9
+     #- g++-9
      - qtbase5-dev
      - libqt5opengl5-dev
      - libboost-dev
@@ -30,8 +30,8 @@ compiler:
 # - clang
 
 script:
- - export CC=gcc-9
- - export CXX=g++-9
+ #- export CC=gcc-9
+ #- export CXX=g++-9
  - mkdir build
  - cd build
  - cmake ..
