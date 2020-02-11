@@ -88,12 +88,12 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     if (limit_ram_)
     {
         jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::record_chunk_size = limited_chunk_size;
+        jASTERIX::data_block_chunk_size = limited_chunk_size;
     }
     else
     {
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::record_chunk_size = unlimited_chunk_size;
+        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX> (jasterix_definition_path, false, debug_jasterix_, true);
@@ -456,12 +456,12 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
     if (limit_ram_)
     {
         jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::record_chunk_size = limited_chunk_size;
+        jASTERIX::data_block_chunk_size = limited_chunk_size;
     }
     else
     {
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::record_chunk_size = unlimited_chunk_size;
+        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
 
     if (widget_)
