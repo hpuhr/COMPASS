@@ -7,6 +7,8 @@
 
 #include <regex>
 
+#include <QThread>
+
 using namespace Utils;
 
 ReadJSONFileJob::ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects)
@@ -38,8 +40,14 @@ void ReadJSONFileJob::run ()
         assert (init_performed_);
     }
 
-    //while (!file_read_done_ && objects_.size() < num_objects_)
-    readFilePart();
+    while (!file_read_done_) //&& objects_.size() < num_objects_
+    {
+        while (pause_)
+            QThread::msleep(1);
+
+        bytes_read_tmp_ = 0;
+        readFilePart();
+    }
 
     //cleanCommas ();
 
@@ -257,23 +265,41 @@ void ReadJSONFileJob::readFilePart ()
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
     }
 
+    loginf << "ReadJSONFilePartJob: readFilePart: emitting signal";
+
+    assert (objects_.size());
+    emit readJSONFilePartSignal ();
+
+    while (objects_.size())
+        QThread::msleep(1);
+
     loginf << "ReadJSONFilePartJob: readFilePart: done";
 }
 
-void ReadJSONFileJob::resetDone ()
+void ReadJSONFileJob::pause ()
 {
-    assert (!file_read_done_);
-    assert (!objects_.size());
-    done_ = false; // yet another part
-    bytes_read_tmp_ = 0;
+    pause_ = true;
 }
 
-bool ReadJSONFileJob::fileReadDone() const
+void ReadJSONFileJob::unpause ()
 {
-    return file_read_done_;
+    pause_ = false;
 }
 
-std::vector<std::string>&& ReadJSONFileJob::objects()
+//void ReadJSONFileJob::resetDone ()
+//{
+//    assert (!file_read_done_);
+//    assert (!objects_.size());
+//    done_ = false; // yet another part
+//    bytes_read_tmp_ = 0;
+//}
+
+//bool ReadJSONFileJob::fileReadDone() const
+//{
+//    return file_read_done_;
+//}
+
+std::vector<std::string> ReadJSONFileJob::objects()
 {
     return std::move(objects_);
 }

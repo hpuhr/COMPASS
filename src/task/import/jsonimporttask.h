@@ -48,17 +48,18 @@ class JSONImportTask : public Task, public Configurable
     using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
 
 public slots:
-    void insertProgressSlot (float percent);
-    void insertDoneSlot (DBObject& object);
-
-    void readJSONFilePartDoneSlot ();
-    void readJSONFilePartObsoleteSlot ();
+    void addReadJSONSlot ();
+    void readJSONFileDoneSlot ();
+    void readJSONFileObsoleteSlot ();
 
     void parseJSONDoneSlot ();
     void parseJSONObsoleteSlot ();
 
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
+
+    void insertProgressSlot (float percent);
+    void insertDoneSlot (DBObject& object);
 
 public:
     JSONImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
@@ -104,7 +105,7 @@ protected:
 
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;
-    size_t key_count_ {0};
+    //size_t key_count_ {0};
 
     size_t insert_active_ {0};
 
@@ -148,6 +149,8 @@ protected:
     void checkAllDone ();
 
     void updateMsgBox ();
+
+    bool maxLoadReached ();
 
     virtual void checkSubConfigurables () {}
 };

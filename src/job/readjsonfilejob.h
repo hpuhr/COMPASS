@@ -10,17 +10,20 @@
 
 class ReadJSONFileJob : public Job
 {
+    Q_OBJECT
+signals:
+    void readJSONFilePartSignal ();
+
 public:
     ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects);
     virtual ~ReadJSONFileJob();
 
     virtual void run ();
 
-    void resetDone ();
+    void pause ();
+    void unpause ();
 
-    bool fileReadDone() const;
-
-    std::vector<std::string>&& objects(); // for moving out
+    std::vector<std::string> objects(); // for moving out
 
     size_t bytesRead() const;
     size_t bytesToRead() const;
@@ -49,6 +52,8 @@ protected:
     size_t bytes_read_ {0};
     size_t bytes_read_tmp_ {0};
     std::vector<std::string> objects_;
+
+    volatile bool pause_ {false};
 
     void performInit ();
     void readFilePart ();
