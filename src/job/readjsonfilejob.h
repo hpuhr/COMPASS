@@ -8,11 +8,11 @@
 #include <sstream>
 #include <fstream>
 
-class ReadJSONFilePartJob : public Job
+class ReadJSONFileJob : public Job
 {
 public:
-    ReadJSONFilePartJob(const std::string& file_name, bool archive, unsigned int num_objects);
-    virtual ~ReadJSONFilePartJob();
+    ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects);
+    virtual ~ReadJSONFileJob();
 
     virtual void run ();
 

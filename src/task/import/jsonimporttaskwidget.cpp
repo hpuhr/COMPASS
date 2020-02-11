@@ -26,6 +26,7 @@
 #include "dbobjectmanager.h"
 #include "dbobject.h"
 #include "selectdbobjectdialog.h"
+#include "jsonparsingschema.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>

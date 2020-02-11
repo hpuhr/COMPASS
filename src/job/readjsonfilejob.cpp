@@ -1,4 +1,4 @@
-#include "readjsonfilepartjob.h"
+#include "readjsonfilejob.h"
 #include "stringconv.h"
 #include "logger.h"
 
@@ -9,12 +9,12 @@
 
 using namespace Utils;
 
-ReadJSONFilePartJob::ReadJSONFilePartJob(const std::string& file_name, bool archive, unsigned int num_objects)
+ReadJSONFileJob::ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects)
     : Job("ReadJSONFilePartJob"), file_name_(file_name), archive_(archive), num_objects_(num_objects)
 {
 
 }
-ReadJSONFilePartJob::~ReadJSONFilePartJob()
+ReadJSONFileJob::~ReadJSONFileJob()
 {
     if (archive_)
         closeArchive();
@@ -22,7 +22,7 @@ ReadJSONFilePartJob::~ReadJSONFilePartJob()
         file_stream_.close();
 }
 
-void ReadJSONFilePartJob::run ()
+void ReadJSONFileJob::run ()
 {
     logdbg << "ReadJSONFilePartJob: run: start";
     started_ = true;
@@ -49,7 +49,7 @@ void ReadJSONFilePartJob::run ()
     return;
 }
 
-void ReadJSONFilePartJob::performInit ()
+void ReadJSONFileJob::performInit ()
 {
     assert (!init_performed_);
 
@@ -85,7 +85,7 @@ void ReadJSONFilePartJob::performInit ()
     init_performed_ = true;
 }
 
-void ReadJSONFilePartJob::readFilePart ()
+void ReadJSONFileJob::readFilePart ()
 {
     loginf << "ReadJSONFilePartJob: readFilePart: begin";
 
@@ -260,7 +260,7 @@ void ReadJSONFilePartJob::readFilePart ()
     loginf << "ReadJSONFilePartJob: readFilePart: done";
 }
 
-void ReadJSONFilePartJob::resetDone ()
+void ReadJSONFileJob::resetDone ()
 {
     assert (!file_read_done_);
     assert (!objects_.size());
@@ -268,27 +268,27 @@ void ReadJSONFilePartJob::resetDone ()
     bytes_read_tmp_ = 0;
 }
 
-bool ReadJSONFilePartJob::fileReadDone() const
+bool ReadJSONFileJob::fileReadDone() const
 {
     return file_read_done_;
 }
 
-std::vector<std::string>&& ReadJSONFilePartJob::objects()
+std::vector<std::string>&& ReadJSONFileJob::objects()
 {
     return std::move(objects_);
 }
 
-size_t ReadJSONFilePartJob::bytesRead() const
+size_t ReadJSONFileJob::bytesRead() const
 {
     return bytes_read_;
 }
 
-size_t ReadJSONFilePartJob::bytesToRead() const
+size_t ReadJSONFileJob::bytesToRead() const
 {
     return bytes_to_read_;
 }
 
-void ReadJSONFilePartJob::openArchive (bool raw)
+void ReadJSONFileJob::openArchive (bool raw)
 {
     int r;
 
@@ -312,7 +312,7 @@ void ReadJSONFilePartJob::openArchive (bool raw)
         logerr << "JSONImporterTask: openArchive: archive open error: "
                << std::string(archive_error_string(a));
 }
-void ReadJSONFilePartJob::closeArchive ()
+void ReadJSONFileJob::closeArchive ()
 {
     int r = archive_read_close(a);
     if (r != ARCHIVE_OK)
@@ -332,7 +332,7 @@ void ReadJSONFilePartJob::closeArchive ()
                                  +std::string(archive_error_string(a)));
 }
 
-float ReadJSONFilePartJob::getStatusPercent ()
+float ReadJSONFileJob::getStatusPercent ()
 {
     if (bytes_to_read_ == 0)
         return 0.0;
@@ -340,7 +340,7 @@ float ReadJSONFilePartJob::getStatusPercent ()
         return 100.0*static_cast<double>(bytes_read_)/static_cast<double>(bytes_to_read_);
 }
 
-void ReadJSONFilePartJob::cleanCommas ()
+void ReadJSONFileJob::cleanCommas ()
 {
     loginf << "ReadJSONFilePartJob: cleanCommas: " << objects_.size() << " objects";
 

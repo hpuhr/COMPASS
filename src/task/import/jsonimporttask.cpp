@@ -30,12 +30,14 @@
 #include "propertylist.h"
 #include "buffer.h"
 #include "jobmanager.h"
+#include "readjsonfilejob.h"
 #include "jsonparsejob.h"
 #include "jsonmappingjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createartasassociationstask.h"
+#include "jsonparsingschema.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -330,11 +332,11 @@ void JSONImportTask::run()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    read_json_job_ = std::make_shared<ReadJSONFilePartJob> (current_filename_, archive_, num_objects_chunk);
+    read_json_job_ = std::make_shared<ReadJSONFileJob> (current_filename_, archive_, num_objects_chunk);
 
-    connect (read_json_job_.get(), &ReadJSONFilePartJob::obsoleteSignal,
+    connect (read_json_job_.get(), &ReadJSONFileJob::obsoleteSignal,
              this, &JSONImportTask::readJSONFilePartObsoleteSlot, Qt::QueuedConnection);
-    connect (read_json_job_.get(), &ReadJSONFilePartJob::doneSignal,
+    connect (read_json_job_.get(), &ReadJSONFileJob::doneSignal,
              this, &JSONImportTask::readJSONFilePartDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(read_json_job_);

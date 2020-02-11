@@ -20,22 +20,26 @@
 
 #include "configurable.h"
 #include "json.hpp"
-#include "jsonparsingschema.h"
-#include "readjsonfilepartjob.h"
 #include "task.h"
 
 #include <QObject>
 
 #include <memory>
+#include <set>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class JSONImportTaskWidget;
 class SavedFile;
-class QMessageBox;
 class JSONParseJob;
 class JSONMappingJob;
+class ReadJSONFileJob;
+class JSONParsingSchema;
+class DBObject;
+class Buffer;
+
+class QMessageBox;
 
 class JSONImportTask : public Task, public Configurable
 {
@@ -106,7 +110,7 @@ protected:
 
     std::set <int> added_data_sources_;
 
-    std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
+    std::shared_ptr <ReadJSONFileJob> read_json_job_;
     std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
     std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
