@@ -473,9 +473,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
 
-    if (calculated_) // TODO: done signal comes twice?
-        return;
-
     disconnect (db_object_, &DBObject::newDataSignal, this, &RadarPlotPositionCalculatorTask::newDataSlot);
     disconnect (db_object_, &DBObject::loadingDoneSignal, this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
@@ -715,7 +712,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         msgBox.setText(text.c_str());
         msgBox.exec();
 
-        calculated_ = true;
         return;
     }
 
@@ -738,7 +734,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
                       "transformation errors";
             task_manager_.appendInfo("RadarPlotPositionCalculatorTask: aborted by user because of "
                                      "transformation errors");
-            calculated_ = true;
             return;
         }
         else
@@ -768,7 +763,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     connect (db_object_, &DBObject::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
     connect (db_object_, &DBObject::updateProgressSignal, this, &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
-    calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
 
