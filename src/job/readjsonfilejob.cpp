@@ -11,10 +11,13 @@
 
 using namespace Utils;
 
-ReadJSONFileJob::ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects)
-    : Job("ReadJSONFilePartJob"), file_name_(file_name), archive_(archive), num_objects_(num_objects)
+ReadJSONFileJob::ReadJSONFileJob(const std::string& file_name, unsigned int num_objects)
+    : Job("ReadJSONFileJob"), file_name_(file_name), num_objects_(num_objects)
 {
+    archive_ = String::hasEnding(file_name_, ".zip") || String::hasEnding(file_name_, ".gz")
+            || String::hasEnding(file_name_, ".tgz");
 
+    loginf << "ReadJSONFileJob: contructor: filename " << file_name_ << "' archive " << archive_;
 }
 ReadJSONFileJob::~ReadJSONFileJob()
 {
@@ -26,7 +29,7 @@ ReadJSONFileJob::~ReadJSONFileJob()
 
 void ReadJSONFileJob::run ()
 {
-    logdbg << "ReadJSONFilePartJob: run: start";
+    logdbg << "ReadJSONFileJob: run: start";
     started_ = true;
 
     assert (!done_);
@@ -53,7 +56,7 @@ void ReadJSONFileJob::run ()
 
     done_=true;
 
-    logdbg << "ReadJSONFilePartJob: run: done";
+    logdbg << "ReadJSONFileJob: run: done";
     return;
 }
 
@@ -66,13 +69,13 @@ void ReadJSONFileJob::performInit ()
         // if gz but not tar.gz or tgz
         bool raw = String::hasEnding (file_name_, ".gz") && !String::hasEnding (file_name_, ".tar.gz");
 
-        loginf  << "ReadJSONFilePartJob: performInit: importing " << file_name_ << " raw " << raw;
+        loginf  << "ReadJSONFileJob: performInit: importing " << file_name_ << " raw " << raw;
 
         openArchive(raw);
 
         while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
-            loginf << "ReadJSONFilePartJob: performInit: got "
+            loginf << "ReadJSONFileJob: performInit: got "
                    << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
             bytes_to_read_ += archive_entry_size(entry);
         }
@@ -80,13 +83,13 @@ void ReadJSONFileJob::performInit ()
         closeArchive();
         openArchive(raw); // slightly dirty
 
-        loginf << "ReadJSONFilePartJob: performInit: archive size " << bytes_to_read_;
+        loginf << "ReadJSONFileJob: performInit: archive size " << bytes_to_read_;
     }
     else
     {
         file_stream_.open(file_name_, std::ios::ate);
         bytes_to_read_ = file_stream_.tellg();
-        loginf << "ReadJSONFilePartJob: performInit: non-archive size " << bytes_to_read_;
+        loginf << "ReadJSONFileJob: performInit: non-archive size " << bytes_to_read_;
         file_stream_.seekg(0);
     }
 
@@ -95,11 +98,11 @@ void ReadJSONFileJob::performInit ()
 
 void ReadJSONFileJob::readFilePart ()
 {
-    loginf << "ReadJSONFilePartJob: readFilePart: begin";
+    loginf << "ReadJSONFileJob: readFilePart: begin";
 
     if (archive_)
     {
-        logdbg << "ReadJSONFilePartJob: readFilePart: archive";
+        logdbg << "ReadJSONFileJob: readFilePart: archive";
 
         const void *buff;
         size_t size;
@@ -111,34 +114,34 @@ void ReadJSONFileJob::readFilePart ()
         {
             if (entry_done_)
             {
-                logdbg << "ReadJSONFilePartJob: readFilePart: reading next archive entry";
+                logdbg << "ReadJSONFileJob: readFilePart: reading next archive entry";
 
                 r = archive_read_next_header(a, &entry);
 
                 if (r != ARCHIVE_OK)
                 {
-                    logdbg << "ReadJSONFilePartJob: readFilePart: reading not ok '" << r << "'";
+                    logdbg << "ReadJSONFileJob: readFilePart: reading not ok '" << r << "'";
 
                     if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || r == ARCHIVE_RETRY)
-                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: header error: "
+                        throw std::runtime_error("ReadJSONFileJob: readFilePart: header error: "
                                                  +std::string(archive_error_string(a)));
                     else if (r == ARCHIVE_WARN)
-                        logwrn << "ReadJSONFilePartJob: readFilePart: header error: "
+                        logwrn << "ReadJSONFileJob: readFilePart: header error: "
                                << std::string(archive_error_string(a));
                     else if (r == ARCHIVE_EOF)
                     {
-                        logdbg << "ReadJSONFilePartJob: readFilePart: end of archive";
+                        logdbg << "ReadJSONFileJob: readFilePart: end of archive";
                         break;
                     }
                     else
-                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: unknown header error: "
+                        throw std::runtime_error("ReadJSONFileJob: readFilePart: unknown header error: "
                                                  +std::string(archive_error_string(a)));
                 }
 
-                logdbg << "ReadJSONFilePartJob: readFilePart: reading ok";
+                logdbg << "ReadJSONFileJob: readFilePart: reading ok";
             }
 
-            loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
+            loginf << "ReadJSONFileJob: readFilePart: parsing archive file: "
                    << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
             for (;;)
@@ -154,13 +157,13 @@ void ReadJSONFileJob::readFilePart ()
                 if (r != ARCHIVE_OK)
                 {
                     if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || r == ARCHIVE_RETRY)
-                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: data block error: "
+                        throw std::runtime_error("ReadJSONFileJob: readFilePart: data block error: "
                                                  +std::string(archive_error_string(a)));
                     else if (r == ARCHIVE_WARN)
-                        logwrn << "ReadJSONFilePartJob: readFilePart: header error: "
+                        logwrn << "ReadJSONFileJob: readFilePart: header error: "
                                << std::string(archive_error_string(a));
                     else
-                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: unknown data block error: "
+                        throw std::runtime_error("ReadJSONFileJob: readFilePart: unknown data block error: "
                                                  +std::string(archive_error_string(a)));
                 }
 
@@ -216,7 +219,7 @@ void ReadJSONFileJob::readFilePart ()
             }
         }
 
-        loginf << "ReadJSONFilePartJob: readFilePart: archive done";
+        loginf << "ReadJSONFileJob: readFilePart: archive done";
 
         assert (open_count_ == 0); // nothing left open
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
@@ -250,7 +253,7 @@ void ReadJSONFileJob::readFilePart ()
 
             if (closed_bracked && open_count_ == 0)
             {
-                //loginf << "ReadJSONFilePartJob: readFilePart: obj '" << tmp_stream_.str() << "'";
+                //loginf << "ReadJSONFileJob: readFilePart: obj '" << tmp_stream_.str() << "'";
                 objects_.push_back(tmp_stream_.str());
                 tmp_stream_.str("");
             }
@@ -259,13 +262,13 @@ void ReadJSONFileJob::readFilePart ()
         if (objects_.size() != num_objects_)
             file_read_done_ = true;
 
-        loginf << "ReadJSONFilePartJob: readFilePart: parsed " << objects_.size() << " done " << file_read_done_;
+        loginf << "ReadJSONFileJob: readFilePart: parsed " << objects_.size() << " done " << file_read_done_;
 
         assert (open_count_ == 0); // nothing left open
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
     }
 
-    loginf << "ReadJSONFilePartJob: readFilePart: emitting signal";
+    loginf << "ReadJSONFileJob: readFilePart: emitting signal";
 
     assert (objects_.size());
     emit readJSONFilePartSignal ();
@@ -273,7 +276,7 @@ void ReadJSONFileJob::readFilePart ()
     while (objects_.size())
         QThread::msleep(1);
 
-    loginf << "ReadJSONFilePartJob: readFilePart: done";
+    loginf << "ReadJSONFileJob: readFilePart: done";
 }
 
 void ReadJSONFileJob::pause ()
@@ -354,7 +357,7 @@ void ReadJSONFileJob::closeArchive ()
     }
 
     if (r != ARCHIVE_OK)
-        throw std::runtime_error("ReadJSONFilePartJob: closeArchive: archive error: "
+        throw std::runtime_error("ReadJSONFileJob: closeArchive: archive error: "
                                  +std::string(archive_error_string(a)));
 }
 
@@ -368,7 +371,7 @@ float ReadJSONFileJob::getStatusPercent ()
 
 void ReadJSONFileJob::cleanCommas ()
 {
-    loginf << "ReadJSONFilePartJob: cleanCommas: " << objects_.size() << " objects";
+    loginf << "ReadJSONFileJob: cleanCommas: " << objects_.size() << " objects";
 
     std::regex commas_between_brackets("\\[(,|\n)+\\]");
     std::regex multiple_commas(",\\n*,+");

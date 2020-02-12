@@ -173,12 +173,11 @@ void JSONImportTask::removeCurrentFilename ()
         widget_->updateFileListSlot();
 }
 
-void JSONImportTask::currentFilename (const std::string filename, bool archive)
+void JSONImportTask::currentFilename (const std::string& filename)
 {
 
-    loginf << "JSONImporterTask: currentFilename: filename '" << filename << "' archive " << archive;
+    loginf << "JSONImporterTask: currentFilename: filename '" << filename << "'";
 
-    archive_ = archive;
     current_filename_ = filename;
 
     emit statusChangedSignal(name_);
@@ -289,19 +288,14 @@ bool JSONImportTask::canRun()
 
 void JSONImportTask::run()
 {
-    loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' archive " << archive_ << " test " << test_;
+    loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
 
     std::string tmp;
 
     if (test_)
-        tmp = "test import of";
+        tmp = "test import of file ";
     else
-        tmp = "import of ";
-
-    if (archive_)
-        tmp += " archive ";
-    else
-        tmp += " file ";
+        tmp = "import of file ";
 
     task_manager_.appendInfo("JSONImporterTask: "+tmp+" '"+current_filename_+"' started");
 
@@ -331,7 +325,7 @@ void JSONImportTask::run()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    read_json_job_ = std::make_shared<ReadJSONFileJob> (current_filename_, archive_, num_objects_chunk);
+    read_json_job_ = std::make_shared<ReadJSONFileJob> (current_filename_, num_objects_chunk);
 
     connect (read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal,
              this, &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
@@ -738,10 +732,7 @@ void JSONImportTask::updateMsgBox ()
 
     std::string msg;
 
-    if (archive_)
-        msg = "Archive '"+current_filename_+"'\n";
-    else
-        msg = "File '"+current_filename_+"'\n";
+    msg = "File '"+current_filename_+"'\n";
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 

@@ -232,14 +232,13 @@ void JSONImportTaskWidget::deleteFileSlot ()
 
 void JSONImportTaskWidget::selectedFileSlot ()
 {
-    loginf << "JSONImporterTaskWidget: selectedFileSlot";
+    logdbg << "JSONImporterTaskWidget: selectedFileSlot";
     assert (file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
     assert (task_.hasFile(filename.toStdString()));
 
-    bool archive = (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"));
-    task_.currentFilename (filename.toStdString(), archive);
+    task_.currentFilename (filename.toStdString());
 }
 
 void JSONImportTaskWidget::updateFileListSlot ()

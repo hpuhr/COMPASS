@@ -69,18 +69,18 @@ public:
     virtual TaskWidget* widget ();
     virtual void deleteWidget ();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     bool canImportFile ();
     virtual bool canRun();
     virtual void run ();
 
-    const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
-    bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
-    void addFile (const std::string &filename);
+    const std::map <std::string, SavedFile*>& fileList () { return file_list_; }
+    bool hasFile (const std::string& filename) { return file_list_.count (filename) > 0; }
+    void addFile (const std::string& filename);
     void removeCurrentFilename ();
-    void currentFilename (const std::string filename, bool archive);
-    const std::string &currentFilename () { return current_filename_; }
+    void currentFilename (const std::string& filename);
+    const std::string& currentFilename () { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
@@ -90,7 +90,7 @@ public:
     void removeCurrentSchema ();
 
     std::string currentSchemaName() const;
-    void currentSchemaName(const std::string &currentSchema);
+    void currentSchemaName(const std::string& currentSchema);
 
     virtual bool checkPrerequisites ();
     virtual bool isRecommended ();
@@ -117,7 +117,6 @@ protected:
     std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
     bool test_ {false};
-    bool archive_ {false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

@@ -15,7 +15,7 @@ signals:
     void readJSONFilePartSignal ();
 
 public:
-    ReadJSONFileJob(const std::string& file_name, bool archive, unsigned int num_objects);
+    ReadJSONFileJob(const std::string& file_name, unsigned int num_objects);
     virtual ~ReadJSONFileJob();
 
     virtual void run ();
