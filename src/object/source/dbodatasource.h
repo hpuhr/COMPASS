@@ -108,8 +108,8 @@ protected:
     bool has_short_name_{false};
     std::string short_name_;
 
-    bool has_sac_;
-    unsigned char sac_;
+    bool has_sac_ {false};
+    unsigned char sac_ {0};
 
     bool has_sic_{false};
     unsigned char sic_ {0};

@@ -38,6 +38,7 @@ class ReadJSONFileJob;
 class JSONParsingSchema;
 class DBObject;
 class Buffer;
+class DBOVariableSet;
 
 class QMessageBox;
 
@@ -105,10 +106,10 @@ protected:
 
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;
-    //size_t key_count_ {0};
 
     size_t insert_active_ {0};
 
+    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set <int> added_data_sources_;
 
     std::shared_ptr <ReadJSONFileJob> read_json_job_;
@@ -140,11 +141,9 @@ protected:
     std::string object_rate_str_;
     std::string remaining_time_str_;
 
-    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
-
     QMessageBox* msg_box_ {nullptr};
 
-    void insertData ();
+    void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
 
     void checkAllDone ();
 
