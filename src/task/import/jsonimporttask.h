@@ -98,6 +98,8 @@ public:
 
     void test(bool test);
 
+    size_t objectsInserted() const;
+
 protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
@@ -140,7 +142,7 @@ protected:
     std::string object_rate_str_;
     std::string remaining_time_str_;
 
-    QMessageBox* msg_box_ {nullptr};
+    std::unique_ptr<QMessageBox> msg_box_;
 
     void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
 

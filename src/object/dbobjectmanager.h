@@ -132,6 +132,8 @@ public:
 
     bool isOtherDBObjectPostProcessing (DBObject& object);
 
+    bool loadInProgress() const;
+
 protected:
     ATSDB& atsdb_;
     bool use_filters_ {false};
@@ -150,6 +152,8 @@ protected:
     bool has_associations_ {false};
     std::string associations_dbo_;
     std::string associations_ds_;
+
+    bool load_in_progress_ {false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;

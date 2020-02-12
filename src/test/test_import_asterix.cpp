@@ -157,7 +157,31 @@ TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
 
     REQUIRE (task_manager_widget->isStartPossible());
 
+    task_manager_widget->startSlot();
+
+    while (client.hasPendingEvents())
+        client.processEvents();
+
+    QThread::msleep(100); // delay
+
+    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    object_manager.loadSlot();
+
+    while (client.hasPendingEvents() || object_manager.loadInProgress())
+        client.processEvents();
+
+    for (unsigned int cnt=0; cnt < 1000; ++cnt)
+    {
+        client.processEvents();
+        QThread::msleep(1); // delay
+    }
+
     client.mainWindow().close();
+
+    while (client.hasPendingEvents())
+        client.processEvents();
+
+    QThread::msleep(100); // delay
 }
 
 int main (int argc, char* argv[])

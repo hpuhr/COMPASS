@@ -82,7 +82,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
 
-    loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
+    loginf << "ASTERIXImporterTask: constructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
     if (limit_ram_)
@@ -101,7 +101,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
     {
-        loginf << "ASTERIXImporterTask: contructor: resetting to no framing";
+        loginf << "ASTERIXImporterTask: constructor: resetting to no framing";
         current_framing_ = "";
     }
 }

@@ -73,12 +73,6 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 
 JSONImportTask::~JSONImportTask()
 {
-    if (msg_box_)
-    {
-        delete msg_box_;
-        msg_box_ = nullptr;
-    }
-
     for (auto it : file_list_)
         delete it.second;
 
@@ -180,6 +174,9 @@ void JSONImportTask::currentFilename (const std::string& filename)
 
     current_filename_ = filename;
 
+    if (widget_)
+        widget_->updateFileListSlot();
+
     emit statusChangedSignal(name_);
 }
 
@@ -255,6 +252,11 @@ bool JSONImportTask::isRequired ()
 void JSONImportTask::test(bool test)
 {
     test_ = test;
+}
+
+size_t JSONImportTask::objectsInserted() const
+{
+    return objects_inserted_;
 }
 
 bool JSONImportTask::canImportFile ()
@@ -677,7 +679,6 @@ void JSONImportTask::checkAllDone ()
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
         all_done_ = true;
-        //assert (buffers_.size() == 0);
 
         QApplication::restoreOverrideCursor();
 
@@ -718,9 +719,18 @@ void JSONImportTask::updateMsgBox ()
 {
     logdbg << "JSONImporterTask: updateMsgBox";
 
+    if (all_done_ && !show_done_summary_)
+    {
+        if (msg_box_)
+            msg_box_->close();
+
+        msg_box_ = nullptr;
+        return;
+    }
+
     if (!msg_box_)
     {
-        msg_box_ = new QMessageBox ();
+        msg_box_.reset(new QMessageBox ());
 
         if (test_)
             msg_box_->setWindowTitle("Test Import JSON Data Status");
