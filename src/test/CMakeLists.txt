@@ -16,7 +16,7 @@ target_link_libraries ( test_import_json atsdb)
 enable_testing()
 
 IF (jASTERIX_FOUND)
-    #add_test(NAME TestImportASTERIX COMMAND test_import_asterix --data_path ${TEST_DATA_PATH} --filename 20190506.ff)
+    add_test(NAME TestImportASTERIX COMMAND test_import_asterix --data_path ${TEST_DATA_PATH} --filename 20190506.ff)
 ENDIF()
 
 add_test(NAME TestImportSDDLJSON COMMAND
