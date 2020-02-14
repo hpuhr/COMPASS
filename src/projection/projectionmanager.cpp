@@ -35,28 +35,28 @@ ProjectionManager::ProjectionManager()
     registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
     registerParameter ("use_rs2g_projection_", &use_rs2g_projection_, false);
 
-    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
-    registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
+//    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
+//    registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
 
-    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
-            << " long " << sdl_system_longitude_;
+//    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
+//            << " long " << sdl_system_longitude_;
 
-    // init sdl
-    t_GPos geo_pos;
+//    // init sdl
+//    t_GPos geo_pos;
 
-    preset_gpos (&geo_pos);
-    preset_mapping_info (&sdl_mapping_info_);
+//    preset_gpos (&geo_pos);
+//    preset_mapping_info (&sdl_mapping_info_);
 
-    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
-    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
-    geo_pos.altitude = 0.0; // TODO check if exists
-    geo_pos.defined = true;
+//    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
+//    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
+//    geo_pos.altitude = 0.0; // TODO check if exists
+//    geo_pos.defined = true;
 
-    t_Retc lrc;
+//    t_Retc lrc;
 
-    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
+//    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
 
-    assert (lrc == RC_OKAY);
+//    assert (lrc == RC_OKAY);
 
     registerParameter ("epsg_value", &epsg_value_, 31258); // 	MGI Austria GK M31.prj 	BMN – M31 	Greenwich
 
@@ -125,24 +125,24 @@ bool ProjectionManager::ogrCart2Geo (double x_pos, double y_pos, double& latitud
     return ret;
 }
 
-bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
-{
-    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
+//bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
+//{
+//    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
 
-    t_Retc lrtc;
-    //    t_CPos lcl_pos;
+//    t_Retc lrtc;
+//    //    t_CPos lcl_pos;
 
-    //    lrtc = geo_grs_to_lcl (sdl_mapping_info_, grs_pos, &lcl_pos);
+//    //    lrtc = geo_grs_to_lcl (sdl_mapping_info_, grs_pos, &lcl_pos);
 
-    t_GPos tmp_geo_pos;
+//    t_GPos tmp_geo_pos;
 
-    lrtc = geo_grs_to_llh (grs_pos, &tmp_geo_pos);
+//    lrtc = geo_grs_to_llh (grs_pos, &tmp_geo_pos);
 
-    assert (lrtc == RC_OKAY);
-    geo_pos = tmp_geo_pos;
+//    assert (lrtc == RC_OKAY);
+//    geo_pos = tmp_geo_pos;
 
-    return true;
-}
+//    return true;
+//}
 
 std::string ProjectionManager::getWorldPROJ4Info ()
 {
@@ -209,41 +209,41 @@ ProjectionManagerWidget* ProjectionManager::widget ()
     return widget_;
 }
 
-float ProjectionManager::sdlSystemLatitude() const
-{
-    return sdl_system_latitude_;
-}
+//float ProjectionManager::sdlSystemLatitude() const
+//{
+//    return sdl_system_latitude_;
+//}
 
-void ProjectionManager::sdlSystemLatitude(float sdl_system_latitude)
-{
-    sdl_system_latitude_ = sdl_system_latitude;
-}
+//void ProjectionManager::sdlSystemLatitude(float sdl_system_latitude)
+//{
+//    sdl_system_latitude_ = sdl_system_latitude;
+//}
 
-float ProjectionManager::sdlSystemLongitude() const
-{
-    return sdl_system_longitude_;
-}
+//float ProjectionManager::sdlSystemLongitude() const
+//{
+//    return sdl_system_longitude_;
+//}
 
-void ProjectionManager::sdlSystemLongitude(float sdl_system_longitude)
-{
-    sdl_system_longitude_ = sdl_system_longitude;
-}
+//void ProjectionManager::sdlSystemLongitude(float sdl_system_longitude)
+//{
+//    sdl_system_longitude_ = sdl_system_longitude;
+//}
 
-bool ProjectionManager::useSDLProjection() const
-{
-    return use_sdl_projection_;
-}
+//bool ProjectionManager::useSDLProjection() const
+//{
+//    return use_sdl_projection_;
+//}
 
-void ProjectionManager::useSDLProjection(bool use_sdl_projection)
-{
-    use_sdl_projection_ = use_sdl_projection;
+//void ProjectionManager::useSDLProjection(bool use_sdl_projection)
+//{
+//    use_sdl_projection_ = use_sdl_projection;
 
-    if (use_sdl_projection_)
-    {
-        use_ogr_projection_ = false;
-        use_rs2g_projection_ = false;
-    }
-}
+//    if (use_sdl_projection_)
+//    {
+//        use_ogr_projection_ = false;
+//        use_rs2g_projection_ = false;
+//    }
+//}
 
 bool ProjectionManager::useOGRProjection() const
 {

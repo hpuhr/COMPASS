@@ -124,7 +124,7 @@ void DBODataSource::finalize ()
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    assert (proj_man.useOGRProjection() || proj_man.useSDLProjection() || proj_man.useRS2GProjection());
+    assert (proj_man.useOGRProjection() || proj_man.useRS2GProjection()); // | proj_man.useSDLProjection()
 
     if (proj_man.useOGRProjection())
     {
@@ -140,22 +140,22 @@ void DBODataSource::finalize ()
         initRS2G(); // used for elevation calculation
     }
 
-    if (proj_man.useSDLProjection())
-    {
-        preset_cpos (&grs_pos_);
-        preset_gpos (&geo_pos_);
-        preset_mapping_info (&mapping_info_);
+//    if (proj_man.useSDLProjection())
+//    {
+//        preset_cpos (&grs_pos_);
+//        preset_gpos (&geo_pos_);
+//        preset_mapping_info (&mapping_info_);
 
-        geo_pos_.latitude = latitude_ * DEG2RAD;
-        geo_pos_.longitude = longitude_ * DEG2RAD;
-        geo_pos_.altitude = altitude_; // TODO check if exists
-        geo_pos_.defined = true;
+//        geo_pos_.latitude = latitude_ * DEG2RAD;
+//        geo_pos_.longitude = longitude_ * DEG2RAD;
+//        geo_pos_.altitude = altitude_; // TODO check if exists
+//        geo_pos_.defined = true;
 
-        t_Retc lrc;
+//        t_Retc lrc;
 
-        lrc = geo_calc_info (geo_pos_, &mapping_info_);
-        assert (lrc == RC_OKAY);
-    }
+//        lrc = geo_calc_info (geo_pos_, &mapping_info_);
+//        assert (lrc == RC_OKAY);
+//    }
 
     if (proj_man.useRS2GProjection())
         initRS2G();
@@ -221,177 +221,177 @@ bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double sl
 }
 
 // azimuth degrees, range nautical miles, altitude in meters
-bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-                                                double baro_altitude_ft, t_CPos& grs_pos)
-{
-    if (!finalized_)
-        logerr << "DBODataSource: calculateSDLSystemCoordinates: " << short_name_ << " not finalized";
+//bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+//                                                double baro_altitude_ft, t_CPos& grs_pos)
+//{
+//    if (!finalized_)
+//        logerr << "DBODataSource: calculateSDLSystemCoordinates: " << short_name_ << " not finalized";
 
-    assert (finalized_);
+//    assert (finalized_);
 
-    t_Retc lrc;
-    t_Real hgt = 0.0;    // Height for projection; metres
-    bool hgt_defined = false;    // Height for projection defined
+//    t_Retc lrc;
+//    t_Real hgt = 0.0;    // Height for projection; metres
+//    bool hgt_defined = false;    // Height for projection defined
 
-    if (has_baro_altitude)
-    {
-        double baro_altitude_m = 0.3048 * baro_altitude_ft;
-        hgt = map_mch_to_hae (baro_altitude_m);
-        hgt_defined = true;
-    }
+//    if (has_baro_altitude)
+//    {
+//        double baro_altitude_m = 0.3048 * baro_altitude_ft;
+//        hgt = map_mch_to_hae (baro_altitude_m);
+//        hgt_defined = true;
+//    }
 
-    // check height
-    if (!hgt_defined)
-    {
-        t_Real default_height;
-        // Default height; metres
-        t_Real default_height_gradient;
-        // Default height gradient
+//    // check height
+//    if (!hgt_defined)
+//    {
+//        t_Real default_height;
+//        // Default height; metres
+//        t_Real default_height_gradient;
+//        // Default height gradient
 
-        default_height = 100.0 * M_FL2MTR;
-        // Beware: hard-coded value
-        // Beware: no mapping by map_mch_to_hae()
-        default_height_gradient = 1.0 / (20.0 * M_NMI2MTR);
-        // Beware: hard-coded value
+//        default_height = 100.0 * M_FL2MTR;
+//        // Beware: hard-coded value
+//        // Beware: no mapping by map_mch_to_hae()
+//        default_height_gradient = 1.0 / (20.0 * M_NMI2MTR);
+//        // Beware: hard-coded value
 
-        //        if (msg_ptr->rtgt.reported_ppos.present)
-        //        {
-        t_Real f;
-        // Factor
-        t_Real rng;
-        // Slant range; metres
+//        //        if (msg_ptr->rtgt.reported_ppos.present)
+//        //        {
+//        t_Real f;
+//        // Factor
+//        t_Real rng;
+//        // Slant range; metres
 
-        rng = slant_range_m;
-        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+//        rng = slant_range_m;
+//        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
 
-        // Compute factor
-        f = 1.0;
-        if (rng > 0.0)
-        {
-            f = default_height_gradient * rng;
-            if (f > 1.0)
-            {
-                f = 1.0;
-            }
-        }
+//        // Compute factor
+//        f = 1.0;
+//        if (rng > 0.0)
+//        {
+//            f = default_height_gradient * rng;
+//            if (f > 1.0)
+//            {
+//                f = 1.0;
+//            }
+//        }
 
-        // Set assumed height
-        hgt = f * default_height;
-        hgt_defined = true;
+//        // Set assumed height
+//        hgt = f * default_height;
+//        hgt_defined = true;
 
-        // Remember this height
-        //        msg_ptr->proc.assumed_height.present = true;
-        //        msg_ptr->proc.assumed_height.value = hgt;
-        //        msg_ptr->proc.assumed_height.value_in_feet =
-        //                (t_Si32) (hgt / M_FT2MTR);
+//        // Remember this height
+//        //        msg_ptr->proc.assumed_height.present = true;
+//        //        msg_ptr->proc.assumed_height.value = hgt;
+//        //        msg_ptr->proc.assumed_height.value_in_feet =
+//        //                (t_Si32) (hgt / M_FT2MTR);
 
-        //#if DBGAID
-        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
-        //#endif
-        //        }
-        //        else
-        //        {
-        //            // No polar position
+//        //#if DBGAID
+//        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
+//        //#endif
+//        //        }
+//        //        else
+//        //        {
+//        //            // No polar position
 
-        //            // Set assumed height
-        //            hgt = default_height;
-        //            hgt_defined = true;
+//        //            // Set assumed height
+//        //            hgt = default_height;
+//        //            hgt_defined = true;
 
-        //            // Remember this height
-        //            msg_ptr->proc.assumed_height.present = true;
-        //            msg_ptr->proc.assumed_height.value = hgt;
-        //            msg_ptr->proc.assumed_height.value_in_feet =
-        //                    (t_Si32) (hgt / M_FT2MTR);
+//        //            // Remember this height
+//        //            msg_ptr->proc.assumed_height.present = true;
+//        //            msg_ptr->proc.assumed_height.value = hgt;
+//        //            msg_ptr->proc.assumed_height.value_in_feet =
+//        //                    (t_Si32) (hgt / M_FT2MTR);
 
-        //#if DBGAID
-        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
-        //#endif
-        //        }
-    }
+//        //#if DBGAID
+//        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
+//        //#endif
+//        //        }
+//    }
 
-    bool elevation_present = false;
-    double elevation = 0.0;
+//    bool elevation_present = false;
+//    double elevation = 0.0;
 
-    // calculate elevation angle
-    if (hgt_defined) // must be at this point
-    {
-        t_Real elv;
-        // Elevation (above radar horizon); degrees
-        t_Real rng;
-        // Slant range; metres
+//    // calculate elevation angle
+//    if (hgt_defined) // must be at this point
+//    {
+//        t_Real elv;
+//        // Elevation (above radar horizon); degrees
+//        t_Real rng;
+//        // Slant range; metres
 
-        rng = slant_range_m;
-        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+//        rng = slant_range_m;
+//        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
 
-        if (rng > 0.0)
-        {
-            lrc = geo_calc_elv (&mapping_info_, rng, hgt, &elv);
+//        if (rng > 0.0)
+//        {
+//            lrc = geo_calc_elv (&mapping_info_, rng, hgt, &elv);
 
-            if (lrc == RC_OKAY)
-            {
-                elevation_present = true;
-                elevation = M_DEG2RAD * elv;
-            }
-        }
-    }
+//            if (lrc == RC_OKAY)
+//            {
+//                elevation_present = true;
+//                elevation = M_DEG2RAD * elv;
+//            }
+//        }
+//    }
 
-    if (!elevation_present)
-    {
-        loginf << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
-               << " alt " << baro_altitude_ft << " elevation not present";
-        return false;
-    }
+//    if (!elevation_present)
+//    {
+//        loginf << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
+//               << " alt " << baro_altitude_ft << " elevation not present";
+//        return false;
+//    }
 
-    //    if (elevation_present)
-    //    {
-    t_Real azm;
-    // Azimuth; radians
-    t_Real elv;
-    // Elevation (above radar horizon); radians
-    t_Real rng;
-    // Slant range; metres
+//    //    if (elevation_present)
+//    //    {
+//    t_Real azm;
+//    // Azimuth; radians
+//    t_Real elv;
+//    // Elevation (above radar horizon); radians
+//    t_Real rng;
+//    // Slant range; metres
 
-    azm = azimuth_rad;
-    elv = elevation;
-    rng = slant_range_m;
-    //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+//    azm = azimuth_rad;
+//    elv = elevation;
+//    rng = slant_range_m;
+//    //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
 
-    assert (0.0 <= azm && azm < M_TWO_PI); //, "Invalid azimuth");
-    assert (-M_PI_HALF <= elv && elv <= +M_PI_HALF); //,"Invalid elevation");
-    assert (rng > 0.0); //, "Invalid slant range");
+//    assert (0.0 <= azm && azm < M_TWO_PI); //, "Invalid azimuth");
+//    assert (-M_PI_HALF <= elv && elv <= +M_PI_HALF); //,"Invalid elevation");
+//    assert (rng > 0.0); //, "Invalid slant range");
 
-    t_CPos lcl_pos;
-    // Local Cartesian position
+//    t_CPos lcl_pos;
+//    // Local Cartesian position
 
-    lrc = geo_lpc_to_lcl (rng, azm, elv, &lcl_pos);
-    assert (lrc == RC_OKAY); //, "Cannot map to local Cartesian position");
+//    lrc = geo_lpc_to_lcl (rng, azm, elv, &lcl_pos);
+//    assert (lrc == RC_OKAY); //, "Cannot map to local Cartesian position");
 
-    t_CPos tmp_grs_pos;
-    // GRS position
+//    t_CPos tmp_grs_pos;
+//    // GRS position
 
-    lrc = geo_lcl_to_grs (&mapping_info_, lcl_pos, &tmp_grs_pos);
-    assert (lrc == RC_OKAY); //, "Cannot map to GRS position");
+//    lrc = geo_lcl_to_grs (&mapping_info_, lcl_pos, &tmp_grs_pos);
+//    assert (lrc == RC_OKAY); //, "Cannot map to GRS position");
 
-    grs_pos = tmp_grs_pos;
+//    grs_pos = tmp_grs_pos;
 
-    //        t_CPos sys_pos;
-    //        // Position relative to system reference point
+//    //        t_CPos sys_pos;
+//    //        // Position relative to system reference point
 
-    //        lrc = geo_grs_to_lcl (&(gp_areas->srp_mapping_info),
-    //                              grs_pos, &sys_pos);
-    //        Assert (lrc == RC_OKAY, "Cannot map to system coordinates");
+//    //        lrc = geo_grs_to_lcl (&(gp_areas->srp_mapping_info),
+//    //                              grs_pos, &sys_pos);
+//    //        Assert (lrc == RC_OKAY, "Cannot map to system coordinates");
 
-    //        msg_ptr->proc.uvh_position.defined = true;
-    //        msg_ptr->proc.uvh_position.value[M_CPOS_U] =
-    //                sys_pos.value[M_CPOS_X];
-    //        msg_ptr->proc.uvh_position.value[M_CPOS_V] =
-    //                sys_pos.value[M_CPOS_Y];
-    //        msg_ptr->proc.uvh_position.value[M_CPOS_H] =
-    //                hgt;
-    //    }
+//    //        msg_ptr->proc.uvh_position.defined = true;
+//    //        msg_ptr->proc.uvh_position.value[M_CPOS_U] =
+//    //                sys_pos.value[M_CPOS_X];
+//    //        msg_ptr->proc.uvh_position.value[M_CPOS_V] =
+//    //                sys_pos.value[M_CPOS_Y];
+//    //        msg_ptr->proc.uvh_position.value[M_CPOS_H] =
+//    //                hgt;
+//    //    }
 
-    return true;
-}
+//    return true;
+//}
 
 void DBODataSource::initRS2G()
 {

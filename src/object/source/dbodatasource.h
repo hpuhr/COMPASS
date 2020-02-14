@@ -22,7 +22,7 @@
 #include <QWidget>
 
 #include "rs2g.h"
-#include "geomap.h"
+//#include "geomap.h"
 #include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
@@ -91,8 +91,8 @@ public:
     bool calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
                                         double baro_altitude_ft, double &sys_x, double &sys_y);
 
-    bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-                                     double baro_altitude_ft, t_CPos& grs_pos);
+//    bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+//                                     double baro_altitude_ft, t_CPos& grs_pos);
 
     bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
 
@@ -128,9 +128,9 @@ protected:
     double ogr_system_x_ {0};
     double ogr_system_y_ {0};
 
-    t_CPos grs_pos_;
-    t_GPos geo_pos_;
-    t_Mapping_Info mapping_info_;
+//    t_CPos grs_pos_;
+//    t_GPos geo_pos_;
+//    t_Mapping_Info mapping_info_;
 
     MatA rs2g_A_;
 

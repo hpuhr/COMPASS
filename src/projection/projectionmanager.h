@@ -19,7 +19,7 @@
 #define PROJECTIONMANAGER_H_
 
 #include <ogr_spatialref.h>
-#include "geomap.h"
+//#include "geomap.h"
 #include "rs2g.h"
 
 //#include <Eigen/Dense>
@@ -56,7 +56,7 @@ public:
     virtual ~ProjectionManager();
 
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
+    //bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
     /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, returns false on error
     bool ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
@@ -81,14 +81,14 @@ public:
         static ProjectionManager instance;
         return instance;
     }
-    float sdlSystemLatitude() const;
-    void sdlSystemLatitude(float sdl_system_latitude);
+//    float sdlSystemLatitude() const;
+//    void sdlSystemLatitude(float sdl_system_latitude);
 
-    float sdlSystemLongitude() const;
-    void sdlSystemLongitude(float sdl_system_longitude);
+//    float sdlSystemLongitude() const;
+//    void sdlSystemLongitude(float sdl_system_longitude);
 
-    bool useSDLProjection() const;
-    void useSDLProjection(bool use_sdl_projection);
+//    bool useSDLProjection() const;
+//    void useSDLProjection(bool use_sdl_projection);
 
     bool useOGRProjection() const;
     void useOGRProjection(bool use_ogr_projection);
@@ -101,9 +101,9 @@ protected:
     bool use_ogr_projection_ {false};
     bool use_rs2g_projection_ {false};
 
-    float sdl_system_latitude_;
-    float sdl_system_longitude_;
-    t_Mapping_Info sdl_mapping_info_;
+//    float sdl_system_latitude_;
+//    float sdl_system_longitude_;
+//    t_Mapping_Info sdl_mapping_info_;
 
     unsigned int epsg_value_;
     OGRSpatialReference ogr_geo_;

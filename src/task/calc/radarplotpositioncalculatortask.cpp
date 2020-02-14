@@ -501,13 +501,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     ProjectionManager &proj_man = ProjectionManager::instance();
 
     bool use_ogr_proj = proj_man.useOGRProjection();
-    bool use_sdl_proj = proj_man.useSDLProjection();
+    //bool use_sdl_proj = proj_man.useSDLProjection();
     bool use_rs2g_proj = proj_man.useRS2GProjection();
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method sdl " << use_sdl_proj
-           << " ogr " << use_ogr_proj << " rs2g " << use_rs2g_proj;
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method ogr " << use_ogr_proj
+           << " rs2g " << use_rs2g_proj;
 
-    assert (use_ogr_proj || use_sdl_proj || use_rs2g_proj);
+    assert (use_ogr_proj || use_rs2g_proj); // use_sdl_proj ||
 
     for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
         assert (ds_it->second.isFinalized()); // has to be done before
@@ -632,25 +632,25 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
                 ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
         }
 
-        if (use_sdl_proj)
-        {
-            t_CPos grs_pos;
+//        if (use_sdl_proj)
+//        {
+//            t_CPos grs_pos;
 
-            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft, grs_pos);
-            if (ret)
-            {
-                t_GPos geo_pos;
+//            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft, grs_pos);
+//            if (ret)
+//            {
+//                t_GPos geo_pos;
 
-                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
+//                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
 
-                if (ret)
-                {
-                    lat = geo_pos.latitude * RAD2DEG;
-                    lon = geo_pos.longitude * RAD2DEG;
-                    //lat = geo_pos.latitude; what to do with altitude?
-                }
-            }
-        }
+//                if (ret)
+//                {
+//                    lat = geo_pos.latitude * RAD2DEG;
+//                    lon = geo_pos.longitude * RAD2DEG;
+//                    //lat = geo_pos.latitude; what to do with altitude?
+//                }
+//            }
+//        }
 
         if (use_rs2g_proj)
         {
