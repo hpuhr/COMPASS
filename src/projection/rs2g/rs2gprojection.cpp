@@ -45,10 +45,6 @@ bool RS2GProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double s
 {
     assert (hasCoordinateSystem(id));
 
-    //            float rho; // (m)
-    //            float theta; // (deg)
-
-    //double sys_x, sys_y;
     double x1, y1, z1;
     bool ret;
 

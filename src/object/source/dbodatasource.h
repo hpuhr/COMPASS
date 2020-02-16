@@ -82,19 +82,6 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-//    void finalize ();
-
-//    bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
-
-    // azimuth degrees, range & altitude in meters
-//    bool calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-//                                        double baro_altitude_ft, double &sys_x, double &sys_y);
-
-//    bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-//                                     double baro_altitude_ft, t_CPos& grs_pos);
-
-//    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
-
     DBObject& object();
     void updateInDatabase (); // not called automatically in setters
 
@@ -121,11 +108,6 @@ protected:
 
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
-
-//    bool finalized_ {false};
-
-//    double ogr_system_x_ {0};
-//    double ogr_system_y_ {0};
 
 //    t_CPos grs_pos_;
 //    t_GPos geo_pos_;

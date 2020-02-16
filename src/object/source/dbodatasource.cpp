@@ -117,53 +117,6 @@ DBODataSource::~DBODataSource()
     logdbg << "DBODataSource: dtor: id " << std::to_string(id_);
 }
 
-//void DBODataSource::finalize ()
-//{
-//    finalized_ = false;
-
-//    ProjectionManager& proj_man = ProjectionManager::instance();
-
-//    assert (proj_man.useOGRProjection() || proj_man.useRS2GProjection()); // | proj_man.useSDLProjection()
-
-//    if (proj_man.useOGRProjection())
-//    {
-//        bool ret = proj_man.ogrGeo2Cart(latitude_, longitude_, ogr_system_x_, ogr_system_y_);
-
-//        if (!ret)
-//        {
-//            logwrn << "DBODataSource: finalize: ogrGeo2Cart return false for " << short_name_
-//                   << " lat " << latitude_ << " lon " << longitude_ << " x " << ogr_system_x_ << " y " << ogr_system_y_;
-//            return;
-//        }
-
-//        initRS2G(); // used for elevation calculation
-//    }
-
-//    if (proj_man.useSDLProjection())
-//    {
-//        preset_cpos (&grs_pos_);
-//        preset_gpos (&geo_pos_);
-//        preset_mapping_info (&mapping_info_);
-
-//        geo_pos_.latitude = latitude_ * DEG2RAD;
-//        geo_pos_.longitude = longitude_ * DEG2RAD;
-//        geo_pos_.altitude = altitude_; // TODO check if exists
-//        geo_pos_.defined = true;
-
-//        t_Retc lrc;
-
-//        lrc = geo_calc_info (geo_pos_, &mapping_info_);
-//        assert (lrc == RC_OKAY);
-//    }
-
-//    if (proj_man.useRS2GProjection())
-//        initRS2G();
-
-//    loginf << "DBODataSource: finalize: " << short_name_ << " done";
-
-//    finalized_ = true;
-//}
-
 // azimuth degrees, range nautical miles, altitude in meters
 //bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
 //                                                   double baro_altitude_ft, double &sys_x, double &sys_y)

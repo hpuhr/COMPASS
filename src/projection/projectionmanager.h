@@ -18,7 +18,6 @@
 #ifndef PROJECTIONMANAGER_H_
 #define PROJECTIONMANAGER_H_
 
-#include <ogr_spatialref.h>
 //#include "geomap.h"
 
 #include "configurable.h"
@@ -26,17 +25,6 @@
 
 class ProjectionManagerWidget;
 class Projection;
-
-//typedef mtl::matrix<double,
-//               mtl::rectangle<3,3>,
-//               mtl::dense<>,
-//               mtl::row_major>::type MatA;
-
-//typedef Eigen::Matrix3d MatA;
-
-//typedef mtl::dense1D<double> VecB;
-
-//typedef Eigen::Vector2d VecB;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -58,19 +46,6 @@ public:
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
     //bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
-    /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, returns false on error
-    bool ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
-    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    bool ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude);
-
-    std::string getWorldPROJ4Info ();
-    void setNewCartesianEPSG (unsigned int epsg_value);
-    std::string getCartesianPROJ4Info ();
-
-    void createOGRProjection ();
-
-    unsigned int getEPSG () { return epsg_value_; }
-
     ProjectionManagerWidget* widget ();
 
     void shutdown ();
@@ -81,21 +56,6 @@ public:
         static ProjectionManager instance;
         return instance;
     }
-//    float sdlSystemLatitude() const;
-//    void sdlSystemLatitude(float sdl_system_latitude);
-
-//    float sdlSystemLongitude() const;
-//    void sdlSystemLongitude(float sdl_system_longitude);
-
-//    bool useSDLProjection() const;
-//    void useSDLProjection(bool use_sdl_projection);
-
-//    bool useOGRProjection() const;
-//    void useOGRProjection(bool use_ogr_projection);
-
-//    bool useRS2GProjection() const;
-//    void useRS2GProjection(bool use_rs2g_projection);
-
     std::string currentProjectionName() const;
     void currentProjectionName(const std::string& name);
 
@@ -104,22 +64,11 @@ public:
     Projection& currentProjection ();
 
 protected:
-    //    bool use_sdl_projection_ {false};
-    //    bool use_ogr_projection_ {false};
-    //    bool use_rs2g_projection_ {false};
-
 //    float sdl_system_latitude_;
 //    float sdl_system_longitude_;
 //    t_Mapping_Info sdl_mapping_info_;
 
     std::string current_projection_name_;
-
-    unsigned int epsg_value_;
-    OGRSpatialReference ogr_geo_;
-    OGRSpatialReference ogr_cart_;
-
-    OGRCoordinateTransformation* ogr_geo2cart_ {nullptr};
-    OGRCoordinateTransformation* ogr_cart2geo_ {nullptr};
 
     ProjectionManagerWidget* widget_ {nullptr};
 

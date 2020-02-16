@@ -367,27 +367,6 @@ void RadarPlotPositionCalculatorTask::run ()
 
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
-    assert (obj_man.existsObject(db_object_str_));
-//    DBObject& db_object = obj_man.object(db_object_str_);
-
-//    bool not_final = false;
-//    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-//    {
-//        ds_it->second.finalize();
-//        if (!ds_it->second.isFinalized())
-//        {
-//            not_final = true;
-//            break;
-//        }
-//    }
-
-//    if (not_final)
-//    {
-//        QMessageBox::warning (nullptr, "EPSG Value Wrong",
-//                              "The coordinates of the data sources of selected database object could not be calculated."
-//                              " Please select a suitable EPSG value and try again");
-//        return;
-//    }
 
     calculating_=true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -404,13 +383,8 @@ void RadarPlotPositionCalculatorTask::run ()
 
     num_loaded_=0;
 
-    if (db_object_str_.size())
-    {
-        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
-            db_object_str_="";
-        else
-            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
-    }
+    assert (obj_man.existsObject(db_object_str_));
+    db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
     assert (db_object_);
 
     if (key_var_str_.size())
@@ -504,16 +478,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     assert (proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
 
-    //bool use_ogr_proj = proj_man.useOGRProjection();
-    //bool use_sdl_proj = proj_man.useSDLProjection();
-    //bool use_rs2g_proj = proj_man.useRS2GProjection();
-
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method' " << projection.name() << "'";
-
-    //assert (use_ogr_proj || use_rs2g_proj); // use_sdl_proj ||
-
-//    for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-//        assert (ds_it->second.isFinalized()); // has to be done before
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method '" << projection.name() << "'";
 
     std::shared_ptr<Buffer> read_buffer = db_object_->data();
     unsigned int read_size = read_buffer->size();
