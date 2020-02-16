@@ -1,7 +1,7 @@
 #include "rs2gprojection.h"
 #include "projectionmanager.h"
 #include "rs2gcoordinatesystem.h"
-#include "rs2g.h"
+#include "global.h"
 
 #include "logger.h"
 
@@ -52,7 +52,7 @@ bool RS2GProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double s
     double x1, y1, z1;
     bool ret;
 
-    VecB pos;
+    Eigen::Vector3d pos;
 
     x1 = slant_range_m * sin(azimuth_rad);
     y1 = slant_range_m * cos(azimuth_rad);
@@ -70,12 +70,12 @@ bool RS2GProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double s
     {
         logdbg << "RS2GProjection: polarToWGS84: geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
 
-        ret = geocentric2Geodesic(pos);
+        ret = RS2GCoordinateSystem::geocentric2Geodesic(pos);
 
         latitude = pos [0];
         longitude = pos [1];
 
-        logdbg << "geod x " << pos[0] << " y " << pos[1];
+        logdbg << "RS2GProjection: polarToWGS84: geod x " << pos[0] << " y " << pos[1];
         //what to do with altitude?
     }
 

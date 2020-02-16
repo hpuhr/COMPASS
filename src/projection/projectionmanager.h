@@ -20,9 +20,6 @@
 
 #include <ogr_spatialref.h>
 //#include "geomap.h"
-#include "rs2g.h"
-
-//#include <Eigen/Dense>
 
 #include "configurable.h"
 #include "singleton.h"

@@ -20,7 +20,6 @@ public:
                                double baro_altitude_ft, double& latitude, double& longitude);
 
 protected:
-
     std::map <unsigned int, std::unique_ptr<RS2GCoordinateSystem>> coordinate_systems_;
 
     virtual void checkSubConfigurables ();
