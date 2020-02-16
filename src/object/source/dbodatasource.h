@@ -19,15 +19,14 @@
 #define DBODATASOURCE_H
 
 #include <memory>
-#include <QWidget>
+//#include <QWidget>
 
-#include "rs2g.h"
 //#include "geomap.h"
 #include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
 //class DBODataSourceWidget;
-class QGridLayout;
+//class QGridLayout;
 
 class DBODataSource
 {
@@ -83,20 +82,20 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    void finalize ();
+//    void finalize ();
 
-    bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
+//    bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
 
     // azimuth degrees, range & altitude in meters
-    bool calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-                                        double baro_altitude_ft, double &sys_x, double &sys_y);
+//    bool calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+//                                        double baro_altitude_ft, double &sys_x, double &sys_y);
 
 //    bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
 //                                     double baro_altitude_ft, t_CPos& grs_pos);
 
-    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
+//    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
 
-    DBObject& object() { assert (object_); return *object_; }
+    DBObject& object();
     void updateInDatabase (); // not called automatically in setters
 
 protected:
@@ -123,33 +122,14 @@ protected:
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
 
-    bool finalized_ {false};
+//    bool finalized_ {false};
 
-    double ogr_system_x_ {0};
-    double ogr_system_y_ {0};
+//    double ogr_system_x_ {0};
+//    double ogr_system_y_ {0};
 
 //    t_CPos grs_pos_;
 //    t_GPos geo_pos_;
 //    t_Mapping_Info mapping_info_;
-
-    MatA rs2g_A_;
-
-    MatA rs2g_T_Ai_; // transposed matrix (depends on radar)
-    VecB rs2g_bi_;  // vector (depends on radar)
-    double rs2g_hi_; // height of selected radar
-    double rs2g_Rti_; // earth radius of tangent sphere at the selected radar
-    double rs2g_ho_; // height of COP
-    double rs2g_Rto_; // earth radius of tangent sphere at the COP
-
-    MatA rs2g_A_p0q0_;
-    VecB rs2g_b_p0q0_;
-
-    void initRS2G ();
-    double rs2gAzimuth(double x, double y);
-    double rs2gElevation(double z, double rho);
-    void radarSlant2LocalCart(VecB& local);
-    void sysCart2SysStereo(VecB& b, double* x, double* y);
-    void localCart2Geocentric(VecB& input);
 
 };
 

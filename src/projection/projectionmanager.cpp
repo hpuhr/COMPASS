@@ -15,7 +15,7 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _USE_MATH_DEFINES
+//#define _USE_MATH_DEFINES
 #include <math.h>
 #include <cmath>
 
@@ -23,6 +23,7 @@
 
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "rs2gprojection.h"
 #include "global.h"
 #include "logger.h"
 
@@ -31,32 +32,36 @@ ProjectionManager::ProjectionManager()
 {
     loginf  << "ProjectionManager: constructor";
 
-    registerParameter ("use_sdl_projection", &use_sdl_projection_, false);
-    registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
-    registerParameter ("use_rs2g_projection_", &use_rs2g_projection_, false);
+    registerParameter ("current_projection_name", &current_projection_name_, "RS2G");
 
-//    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
-//    registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
+    //    registerParameter ("use_sdl_projection", &use_sdl_projection_, false);
+    //    registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
+    //    registerParameter ("use_rs2g_projection_", &use_rs2g_projection_, false);
 
-//    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
-//            << " long " << sdl_system_longitude_;
+    //    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
+    //    registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
 
-//    // init sdl
-//    t_GPos geo_pos;
+    //    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
+    //            << " long " << sdl_system_longitude_;
 
-//    preset_gpos (&geo_pos);
-//    preset_mapping_info (&sdl_mapping_info_);
+    //    // init sdl
+    //    t_GPos geo_pos;
 
-//    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
-//    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
-//    geo_pos.altitude = 0.0; // TODO check if exists
-//    geo_pos.defined = true;
+    //    preset_gpos (&geo_pos);
+    //    preset_mapping_info (&sdl_mapping_info_);
 
-//    t_Retc lrc;
+    //    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
+    //    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
+    //    geo_pos.altitude = 0.0; // TODO check if exists
+    //    geo_pos.defined = true;
 
-//    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
+    //    t_Retc lrc;
 
-//    assert (lrc == RC_OKAY);
+    //    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
+
+    //    assert (lrc == RC_OKAY);
+
+    createSubConfigurables();
 
     registerParameter ("epsg_value", &epsg_value_, 31258); // 	MGI Austria GK M31.prj 	BMN – M31 	Greenwich
 
@@ -84,6 +89,32 @@ ProjectionManager::~ProjectionManager()
     }
 }
 
+void ProjectionManager::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
+{
+    if (class_id == "RS2GProjection")
+    {
+        std::string name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (!projections_.count(name));
+
+        projections_[name].reset (new RS2GProjection (class_id, instance_id, *this));
+    }
+    else
+        throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+void ProjectionManager::checkSubConfigurables ()
+{
+    if (!projections_.count("RS2G"))
+    {
+        Configuration& configuration = addNewSubConfiguration ("RS2GProjection");
+
+        configuration.addParameterString ("name", "RS2G");
+        generateSubConfigurable ("RS2GProjection", configuration.getInstanceId());
+    }
+}
+
 void ProjectionManager::shutdown ()
 {
     loginf  << "ProjectionManager: shutdown";
@@ -93,6 +124,32 @@ void ProjectionManager::shutdown ()
         delete widget_;
         widget_ = nullptr;
     }
+}
+
+std::string ProjectionManager::currentProjectionName() const
+{
+    return current_projection_name_;
+}
+
+void ProjectionManager::currentProjectionName(const std::string& name)
+{
+    loginf << "ProjectionManager: currentProjectionName: name " << name;
+    current_projection_name_ = name;
+}
+
+bool ProjectionManager::hasProjection (const std::string& name)
+{
+    return projections_.count(name);
+}
+
+bool ProjectionManager::hasCurrentProjection ()
+{
+    return hasProjection(current_projection_name_);
+}
+
+Projection& ProjectionManager::currentProjection ()
+{
+    return *projections_.at(current_projection_name_);
 }
 
 bool ProjectionManager::ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos)
@@ -245,35 +302,35 @@ ProjectionManagerWidget* ProjectionManager::widget ()
 //    }
 //}
 
-bool ProjectionManager::useOGRProjection() const
-{
-    return use_ogr_projection_;
-}
+//bool ProjectionManager::useOGRProjection() const
+//{
+//    return use_ogr_projection_;
+//}
 
-void ProjectionManager::useOGRProjection(bool use_ogr_projection)
-{
-    use_ogr_projection_ = use_ogr_projection;
+//void ProjectionManager::useOGRProjection(bool use_ogr_projection)
+//{
+//    use_ogr_projection_ = use_ogr_projection;
 
-    if (use_ogr_projection_)
-    {
-        use_sdl_projection_ = false;
-        use_rs2g_projection_ = false;
-    }
-}
+//    if (use_ogr_projection_)
+//    {
+//        use_sdl_projection_ = false;
+//        use_rs2g_projection_ = false;
+//    }
+//}
 
-bool ProjectionManager::useRS2GProjection() const
-{
-    return use_rs2g_projection_;
-}
+//bool ProjectionManager::useRS2GProjection() const
+//{
+//    return use_rs2g_projection_;
+//}
 
-void ProjectionManager::useRS2GProjection(bool use_rs2g_projection)
-{
-    use_rs2g_projection_ = use_rs2g_projection;
+//void ProjectionManager::useRS2GProjection(bool use_rs2g_projection)
+//{
+//    use_rs2g_projection_ = use_rs2g_projection;
 
-    if (use_rs2g_projection_)
-    {
-        use_sdl_projection_ = false;
-        use_ogr_projection_ = false;
-    }
-}
+//    if (use_rs2g_projection_)
+//    {
+//        use_sdl_projection_ = false;
+//        use_ogr_projection_ = false;
+//    }
+//}
 

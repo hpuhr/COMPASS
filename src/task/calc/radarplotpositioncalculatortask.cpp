@@ -29,6 +29,7 @@
 #include "propertylist.h"
 #include "taskmanager.h"
 #include "projectionmanager.h"
+#include "projection.h"
 #include "stringconv.h"
 #include "dbinterface.h"
 
@@ -367,26 +368,26 @@ void RadarPlotPositionCalculatorTask::run ()
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     assert (obj_man.existsObject(db_object_str_));
-    DBObject& db_object = obj_man.object(db_object_str_);
+//    DBObject& db_object = obj_man.object(db_object_str_);
 
-    bool not_final = false;
-    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-    {
-        ds_it->second.finalize();
-        if (!ds_it->second.isFinalized())
-        {
-            not_final = true;
-            break;
-        }
-    }
+//    bool not_final = false;
+//    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+//    {
+//        ds_it->second.finalize();
+//        if (!ds_it->second.isFinalized())
+//        {
+//            not_final = true;
+//            break;
+//        }
+//    }
 
-    if (not_final)
-    {
-        QMessageBox::warning (nullptr, "EPSG Value Wrong",
-                              "The coordinates of the data sources of selected database object could not be calculated."
-                              " Please select a suitable EPSG value and try again");
-        return;
-    }
+//    if (not_final)
+//    {
+//        QMessageBox::warning (nullptr, "EPSG Value Wrong",
+//                              "The coordinates of the data sources of selected database object could not be calculated."
+//                              " Please select a suitable EPSG value and try again");
+//        return;
+//    }
 
     calculating_=true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -498,19 +499,21 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     //    return;
 
-    ProjectionManager &proj_man = ProjectionManager::instance();
+    ProjectionManager& proj_man = ProjectionManager::instance();
 
-    bool use_ogr_proj = proj_man.useOGRProjection();
+    assert (proj_man.hasCurrentProjection());
+    Projection& projection = proj_man.currentProjection();
+
+    //bool use_ogr_proj = proj_man.useOGRProjection();
     //bool use_sdl_proj = proj_man.useSDLProjection();
-    bool use_rs2g_proj = proj_man.useRS2GProjection();
+    //bool use_rs2g_proj = proj_man.useRS2GProjection();
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method ogr " << use_ogr_proj
-           << " rs2g " << use_rs2g_proj;
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method' " << projection.name() << "'";
 
-    assert (use_ogr_proj || use_rs2g_proj); // use_sdl_proj ||
+    //assert (use_ogr_proj || use_rs2g_proj); // use_sdl_proj ||
 
-    for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-        assert (ds_it->second.isFinalized()); // has to be done before
+//    for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
+//        assert (ds_it->second.isFinalized()); // has to be done before
 
     std::shared_ptr<Buffer> read_buffer = db_object_->data();
     unsigned int read_size = read_buffer->size();
@@ -543,12 +546,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     assert (db_object_->hasDataSources());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
-    double sys_x, sys_y;
+    //double sys_x, sys_y;
     double lat, lon;
     unsigned int update_cnt=0;
 
-    double x1, y1, z1;
-    VecB pos;
+    //double x1, y1, z1;
+    //VecB pos;
 
     assert (msg_box_);
     float done_percent;
@@ -624,13 +627,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
         //altitude_m = 0.3048 * altitude_ft;
 
-        if (use_ogr_proj)
-        {
-            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft,
-                                                            sys_x, sys_y);
-            if (ret)
-                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
-        }
+//        if (use_ogr_proj)
+//        {
+//            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft,
+//                                                            sys_x, sys_y);
+//            if (ret)
+//                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
+//        }
 
 //        if (use_sdl_proj)
 //        {
@@ -652,35 +655,47 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 //            }
 //        }
 
-        if (use_rs2g_proj)
+//        if (use_rs2g_proj)
+//        {
+////            float rho; // (m)
+////            float theta; // (deg)
+
+//            x1 = pos_range_m * sin(pos_azm_rad);
+//            y1 = pos_range_m * cos(pos_azm_rad);
+
+//            if (has_altitude)
+//                z1 = altitude_ft * FT2M;
+//            else
+//                z1 = -1000.0;
+
+//            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
+
+//            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
+//            if (ret)
+//            {
+//                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
+
+//                ret = geocentric2Geodesic(pos);
+
+//                lat = pos [0];
+//                lon = pos [1];
+
+//                logdbg << "geod x " << pos[0] << " y " << pos[1];
+//                //what to do with altitude?
+//            }
+//        }
+
+        if (!projection.hasCoordinateSystem(data_source.id()))
         {
-//            float rho; // (m)
-//            float theta; // (deg)
-
-            x1 = pos_range_m * sin(pos_azm_rad);
-            y1 = pos_range_m * cos(pos_azm_rad);
-
-            if (has_altitude)
-                z1 = altitude_ft * FT2M;
-            else
-                z1 = -1000.0;
-
-            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
-
-            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
-            if (ret)
-            {
-                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
-
-                ret = geocentric2Geodesic(pos);
-
-                lat = pos [0];
-                lon = pos [1];
-
-                logdbg << "geod x " << pos[0] << " y " << pos[1];
-                //what to do with altitude?
-            }
+            assert (data_source.hasLatitude());
+            assert (data_source.hasLongitude());
+            assert (data_source.hasAltitude());
+            projection.addCoordinateSystem(data_source.id(), data_source.latitude(), data_source.longitude(),
+                                           data_source.altitude());
         }
+
+        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude, altitude_ft,
+                                      lat, lon);
 
         if (!ret)
         {

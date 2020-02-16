@@ -28,6 +28,7 @@
 #include "singleton.h"
 
 class ProjectionManagerWidget;
+class Projection;
 
 //typedef mtl::matrix<double,
 //               mtl::rectangle<3,3>,
@@ -54,6 +55,8 @@ protected:
 public:
     /// @brief Desctructor
     virtual ~ProjectionManager();
+
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
     //bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
@@ -90,20 +93,29 @@ public:
 //    bool useSDLProjection() const;
 //    void useSDLProjection(bool use_sdl_projection);
 
-    bool useOGRProjection() const;
-    void useOGRProjection(bool use_ogr_projection);
+//    bool useOGRProjection() const;
+//    void useOGRProjection(bool use_ogr_projection);
 
-    bool useRS2GProjection() const;
-    void useRS2GProjection(bool use_rs2g_projection);
+//    bool useRS2GProjection() const;
+//    void useRS2GProjection(bool use_rs2g_projection);
+
+    std::string currentProjectionName() const;
+    void currentProjectionName(const std::string& name);
+
+    bool hasProjection (const std::string& name);
+    bool hasCurrentProjection ();
+    Projection& currentProjection ();
 
 protected:
-    bool use_sdl_projection_ {false};
-    bool use_ogr_projection_ {false};
-    bool use_rs2g_projection_ {false};
+    //    bool use_sdl_projection_ {false};
+    //    bool use_ogr_projection_ {false};
+    //    bool use_rs2g_projection_ {false};
 
 //    float sdl_system_latitude_;
 //    float sdl_system_longitude_;
 //    t_Mapping_Info sdl_mapping_info_;
+
+    std::string current_projection_name_;
 
     unsigned int epsg_value_;
     OGRSpatialReference ogr_geo_;
@@ -113,6 +125,10 @@ protected:
     OGRCoordinateTransformation* ogr_cart2geo_ {nullptr};
 
     ProjectionManagerWidget* widget_ {nullptr};
+
+    std::map<std::string, std::unique_ptr<Projection>> projections_;
+
+    virtual void checkSubConfigurables ();
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

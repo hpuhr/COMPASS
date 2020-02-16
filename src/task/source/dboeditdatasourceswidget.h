@@ -29,6 +29,7 @@ class QTableWidget;
 class QLabel;
 class QPushButton;
 class QTableWidgetItem;
+class QGridLayout;
 
 class DBOEditDataSourcesWidget : public QWidget
 {
