@@ -8,7 +8,7 @@ class RS2GCoordinateSystem
 public:
     RS2GCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg, double altitude_m);
 
-    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
+    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos, bool has_altitude);
 
     static void geodesic2Geocentric(Eigen::Vector3d& input);
 
@@ -42,7 +42,7 @@ protected:
 
     double rs2gAzimuth(double x, double y);
     double rs2gElevation(double z, double rho);
-    void radarSlant2LocalCart(Eigen::Vector3d& local);
+    void radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude);
     void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
     void localCart2Geocentric(Eigen::Vector3d& input);
 

@@ -130,12 +130,13 @@ double RS2GCoordinateSystem::rs2gElevation(double z, double rho)
 }
 
 
-void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local)
+void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude)
 {
     logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
 
     double z = local[2];
-    if (z == -1000.0)
+
+    if (!has_altitude)
         z = rs2g_hi_; // the Z value has not been filled so use at least the radar height
 
     //double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
@@ -181,25 +182,26 @@ void RS2GCoordinateSystem::localCart2Geocentric(Eigen::Vector3d& input)
     logdbg << "localCart2Geocentric: out x: " << input[0] << " y:" << input[1] << " z:" << input[2];
 }
 
-bool RS2GCoordinateSystem::calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos)
+bool RS2GCoordinateSystem::calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos,
+                                                       bool has_altitude)
 {
-    Eigen::Vector3d Xlocal(3);  //, Xsystem(3);
+    Eigen::Vector3d pos(3);
 
     // the coordinates are in radar slant coordinates
-    Xlocal[0] = x;
-    Xlocal[1] = y;
-    Xlocal[2] = z;
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
 
     // radar slant to local cartesian
-    radarSlant2LocalCart(Xlocal);
+    radarSlant2LocalCart(pos, has_altitude);
 
     // local cartesian to geocentric
-    localCart2Geocentric(Xlocal);
+    localCart2Geocentric(pos);
 
-    geoc_pos = Xlocal;
+    geoc_pos = pos;
 
     // geocentric to geodesic
-    //Geocentric2Geodesic(Xlocal);
+    //Geocentric2Geodesic(pos);
     // done later
 
     return true;

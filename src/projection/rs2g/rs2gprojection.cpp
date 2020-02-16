@@ -60,11 +60,11 @@ bool RS2GProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double s
     if (has_baro_altitude)
         z1 = baro_altitude_ft * FT2M;
     else
-        z1 = -1000.0;
+        z1 = 0.0;
 
     logdbg << "RS2GProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
 
-    ret = coordinate_systems_.at(id)->calculateRadSlt2Geocentric(x1, y1, z1, pos);
+    ret = coordinate_systems_.at(id)->calculateRadSlt2Geocentric(x1, y1, z1, pos, has_baro_altitude);
 
     if (ret)
     {
