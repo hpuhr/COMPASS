@@ -668,17 +668,18 @@ void ASTERIXImportTask::run()
 
 void ASTERIXImportTask::decodeASTERIXDoneSlot ()
 {
-    logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
     assert (decode_job_);
 
     if (decode_job_->error())
     {
+        loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot: error";
         error_ = decode_job_->error();
         error_message_ = decode_job_->errorMessage();
 
         QMessageBox msgBox;
-        msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease quit the application.").c_str());
+        msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease check the decoder settings.").c_str());
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
@@ -926,7 +927,7 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
         if (!buffer->size())
         {
-            logdbg << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
+            loginf << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
             continue;
         }
 
@@ -1027,6 +1028,8 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
         status_widget_->addNumInserted(db_object.name(), buffer->size());
 
     }
+
+    checkAllDone();
 
     logdbg << "JSONImporterTask: insertData: done";
 }

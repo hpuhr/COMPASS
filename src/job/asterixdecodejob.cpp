@@ -78,7 +78,10 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
                                          size_t num_errors)
 {
     if (error_)
+    {
+        loginf << "ASTERIXDecodeJob: jasterix_callback: errors state";
         return;
+    }
 
     assert (!extracted_data_);
     extracted_data_ = std::move(data);
