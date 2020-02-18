@@ -13,10 +13,10 @@ OGRCoordinateSystem::OGRCoordinateSystem(unsigned int id, double latitude_deg, d
     wgs84_ellispoid_semi_minor_ = wgs84_.GetSemiMinor();
 
     double scale = 1.0;
-    double radius_at_radar = getRadiusAt (latitude_deg_);
+//    double radius_at_radar = getRadiusAt (latitude_deg_);
 
-    // scaling trial
-    scale = (radius_at_radar+altitude_m_) / radius_at_radar;
+//    // scaling trial
+//    scale = (radius_at_radar+altitude_m_) / radius_at_radar;
 
     local_.SetStereographic(latitude_deg, longitude_deg_, scale, 0.0, 0.0);
 

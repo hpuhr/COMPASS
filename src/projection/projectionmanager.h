@@ -63,9 +63,12 @@ public:
     bool hasCurrentProjection ();
     Projection& currentProjection ();
 
+
+    std::map<std::string, std::unique_ptr<Projection>>& projections();
+
 protected:
-//    float sdl_system_latitude_;
-//    float sdl_system_longitude_;
+    //    float sdl_system_latitude_;
+    //    float sdl_system_longitude_;
 //    t_Mapping_Info sdl_mapping_info_;
 
     std::string current_projection_name_;

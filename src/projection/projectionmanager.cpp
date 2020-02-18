@@ -146,6 +146,11 @@ Projection& ProjectionManager::currentProjection ()
     return *projections_.at(current_projection_name_);
 }
 
+std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projections()
+{
+    return projections_;
+}
+
 
 
 //bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)

@@ -21,28 +21,43 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
-#include <QRadioButton>
-#include <QGroupBox>
+#include <QComboBox>
+
+#include <cassert>
 
 #include "stringconv.h"
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "projection.h"
+#include "logger.h"
 
 ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent, Qt::WindowFlags f)
  : QWidget (parent, f), projection_manager_(proj_man)
 {
+    setContentsMargins(0,0,0,0);
+
     QVBoxLayout *main_layout = new QVBoxLayout ();
+    main_layout->setContentsMargins(0,0,0,0);
 
-//    QGroupBox *groupBox = new QGroupBox(tr("Projection Selection"));
+    QGridLayout* grid = new QGridLayout ();
+    grid->setContentsMargins(0,0,0,0);
 
-//    QVBoxLayout *layout = new QVBoxLayout ();
+    grid->addWidget(new QLabel("Projection Method"), 0, 0);
 
-//    ogr_radio_ = new QRadioButton ("OGR Projection");
-//    ogr_radio_->setChecked(projection_manager_.useOGRProjection());
-//    connect (ogr_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-//    layout->addWidget(ogr_radio_);
+    projection_box_ = new QComboBox ();
 
-//    QGridLayout *grid = new QGridLayout ();
+    for (auto& proj_it : projection_manager_.projections())
+        projection_box_->addItem(proj_it.first.c_str());
+
+    if (projection_manager_.hasCurrentProjection())
+        projection_box_->setCurrentText(projection_manager_.currentProjectionName().c_str());
+
+    connect (projection_box_, SIGNAL(currentIndexChanged(const QString&)),
+             this, SLOT(selectedObjectParserSlot(const QString&)));
+
+    grid->addWidget(projection_box_, 0, 1);
+
+    main_layout->addLayout(grid);
 
 //    QLabel *world_label = new QLabel ("World Coordinates (WGS84) Info");
 //    grid->addWidget (world_label, 0, 0);
@@ -69,22 +84,6 @@ ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QW
 //    grid->addWidget (cart_proj_info_label_, 2, 1);
 
 //    layout->addLayout (grid);
-
-//    sdl_radio_ = new QRadioButton ("SDL Projection");
-//    //ogr_radio_->setChecked(projection_manager_.useSDLProjection());
-//    //connect (sdl_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-//    //sdl_radio_->setChecked(projection_manager_.useSDLProjection());
-//    sdl_radio_->setDisabled(true);
-//    //layout->addWidget(sdl_radio_);
-
-//    rs2g_radio_  = new QRadioButton ("RS2G Projection");
-//    connect (rs2g_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-//    rs2g_radio_->setChecked(projection_manager_.useRS2GProjection());
-//    layout->addWidget(rs2g_radio_);
-
-//    groupBox->setLayout(layout);
-
-//    main_layout->addWidget(groupBox);
 
     setLayout (main_layout);
 }
@@ -117,18 +116,11 @@ ProjectionManagerWidget::~ProjectionManagerWidget()
 //    }
 //}
 
-void ProjectionManagerWidget::projectionChangedSlot()
+void ProjectionManagerWidget::selectedObjectParserSlot(const QString& name)
 {
-//    assert (ogr_radio_);
-//    assert (sdl_radio_);
-//    assert (rs2g_radio_);
+    loginf << "ProjectionManagerWidget: selectedObjectParserSlot: name " << name.toStdString();
 
-//    if (ogr_radio_->isChecked())
-//        projection_manager_.useOGRProjection(true);
-
-////    if (sdl_radio_->isChecked())
-////        projection_manager_.useSDLProjection(true);
-
-//    if (rs2g_radio_->isChecked())
-//        projection_manager_.useRS2GProjection(true);
+    assert (projection_manager_.hasProjection(name.toStdString()));
+    projection_manager_.currentProjectionName(name.toStdString());
 }
+
