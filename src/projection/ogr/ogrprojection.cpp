@@ -49,97 +49,36 @@ void OGRProjection::addCoordinateSystem (unsigned int id, double latitude_deg, d
 
 
 bool OGRProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-                           double baro_altitude_ft, double& latitude, double& longitude)
+                           double baro_altitude_ft, double& latitude_deg, double& longitude_deg)
 {
     assert (hasCoordinateSystem(id));
 
-    double x1, y1, z1;
-    bool ret;
+//    double x1, y1, z1;
+//    bool ret;
 
-//    Eigen::Vector3d pos;
+//    x1 = slant_range_m * sin(azimuth_rad);
+//    y1 = slant_range_m * cos(azimuth_rad);
 
-    x1 = slant_range_m * sin(azimuth_rad);
-    y1 = slant_range_m * cos(azimuth_rad);
+//    if (has_baro_altitude)
+//        z1 = baro_altitude_ft * FT2M;
+//    else
+//        z1 = 0.0;
 
-    if (has_baro_altitude)
-        z1 = baro_altitude_ft * FT2M;
-    else
-        z1 = 0.0;
+//    logdbg << "OGRProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
 
-    logdbg << "OGRProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
+//    ret = coordinate_systems_.at(id)->cartesian2WGS84(x1, y1, latitude_deg, longitude_deg);
 
-    ret = coordinate_systems_.at(id)->ogrCart2Geo(x1, y1, latitude, longitude);
+    double x_pos_m, y_pos_m;
+    bool ret = coordinate_systems_.at(id)->polarSlantToCartesian(azimuth_rad, slant_range_m, has_baro_altitude,
+                                                                 baro_altitude_ft * FT2M, true, x_pos_m, y_pos_m);
+
+    if (!ret)
+        return false;
+
+    ret = coordinate_systems_.at(id)->cartesian2WGS84 (x_pos_m, y_pos_m, latitude_deg, longitude_deg);
 
     // TODO altitude
 
     return ret;
-
-//    if (ret)
-//    {
-//        logdbg << "OGRProjection: polarToWGS84: geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
-
-//        ret = RS2GCoordinateSystem::geocentric2Geodesic(pos);
-
-//        latitude = pos [0];
-//        longitude = pos [1];
-
-//        logdbg << "OGRProjection: polarToWGS84: geod x " << pos[0] << " y " << pos[1];
-//        //what to do with altitude?
-//    }
-
-
 }
 
-//OGRSpatialReference* OGRProjection::wgs84() const
-//{
-//    return &wgs84_;
-//}
-
-//std::string OGRProjection::getWorldPROJ4Info ()
-//{
-//    char *tmp=0;
-//    ogr_geo_.exportToProj4(&tmp);
-//    std::string info = tmp;
-//    CPLFree (tmp);
-
-//    //loginf << "OGRProjection: getWorldPROJ4Info: '" << info << "'";
-
-//    return info;
-//}
-
-//void OGRProjection::setNewCartesianEPSG (unsigned int epsg_value)
-//{
-//    epsg_value_=epsg_value;
-//    init();
-//}
-
-//void OGRProjection::init ()
-//{
-//    OGRErr error = ogr_cart_.importFromEPSG(epsg_value_);
-
-//    if (error != OGRERR_NONE)
-//        throw std::runtime_error ("OGRProjection: createProjection: cartesian EPSG value "
-//                                  +std::to_string(epsg_value_)+" caused OGR error "
-//                                  +std::to_string(error));
-
-//    ogr_geo2cart_ = nullptr;
-//    ogr_cart2geo_ = nullptr;
-
-//    ogr_geo2cart_.reset(OGRCreateCoordinateTransformation( &ogr_geo_, &ogr_cart_));
-//    assert (ogr_geo2cart_);
-
-//    ogr_cart2geo_.reset(OGRCreateCoordinateTransformation( &ogr_cart_, &ogr_geo_ ));
-//    assert (ogr_cart2geo_);
-//}
-
-//std::string OGRProjection::getCartesianPROJ4Info ()
-//{
-//    char* tmp = nullptr;
-//    ogr_cart_.exportToProj4(&tmp);
-//    std::string info = tmp;
-//    CPLFree (tmp);
-
-//    logdbg << "OGRProjection: getCartesianPROJ4Info: '" << info << "'";
-
-//    return info;
-//}
