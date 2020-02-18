@@ -70,7 +70,7 @@ bool OGRProjection::polarToWGS84 (unsigned int id, double azimuth_rad, double sl
 
     double x_pos_m, y_pos_m;
     bool ret = coordinate_systems_.at(id)->polarSlantToCartesian(azimuth_rad, slant_range_m, has_baro_altitude,
-                                                                 baro_altitude_ft * FT2M, true, x_pos_m, y_pos_m);
+                                                                 baro_altitude_ft * FT2M, x_pos_m, y_pos_m);
 
     if (!ret)
         return false;

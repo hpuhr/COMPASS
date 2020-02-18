@@ -14,7 +14,7 @@ public:
     virtual ~OGRCoordinateSystem();
 
     bool polarSlantToCartesian (double azimuth_rad, double slant_range_m, bool has_altitude, double altitude_baro_m,
-                           bool do_slant_range_correction, double& x_pos_m, double& y_pos_m);
+                                double& x_pos_m, double& y_pos_m);
 
     bool polarHorizontalToCartesian (double azimuth_rad, double horizontal_range_m, double& x_pos_m, double& y_pos_m);
 

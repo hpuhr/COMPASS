@@ -32,13 +32,10 @@ OGRCoordinateSystem::~OGRCoordinateSystem()
 }
 
 bool OGRCoordinateSystem::polarSlantToCartesian (double azimuth_rad, double slant_range_m,
-                                            bool has_altitude, double altitude_baro_m, bool do_slant_range_correction,
+                                            bool has_altitude, double altitude_baro_m,
                                             double& x_pos_m, double& y_pos_m)
 {
-    if (!do_slant_range_correction)
-        return polarHorizontalToCartesian (azimuth_rad, slant_range_m, x_pos_m, y_pos_m);
-
-    // calulated lat/lon of target for radius estimation
+    // calulate lat/lon of target for radius estimation
     double h_e_t; // height of ellipsoid at target location, slight error here
 
     {
