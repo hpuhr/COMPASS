@@ -15,7 +15,7 @@ ReadJSONFileJob::ReadJSONFileJob(const std::string& file_name, unsigned int num_
     : Job("ReadJSONFileJob"), file_name_(file_name), num_objects_(num_objects)
 {
     archive_ = String::hasEnding(file_name_, ".zip") || String::hasEnding(file_name_, ".gz")
-            || String::hasEnding(file_name_, ".tgz");
+            || String::hasEnding(file_name_, ".tgz") || String::hasEnding(file_name_, ".tar");
 
     loginf << "ReadJSONFileJob: contructor: filename " << file_name_ << "' archive " << archive_;
 }
@@ -211,6 +211,7 @@ void ReadJSONFileJob::readFilePart ()
                     entry_done_ = true;
                 }
             }
+
             if (entry_done_) // will read next entry
             {
                 assert (open_count_ == 0); // nothing left open
