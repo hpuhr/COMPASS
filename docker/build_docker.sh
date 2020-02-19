@@ -1,1 +1,1 @@
-docker build -t sk/v2.9 .
+docker build -t sk/v2.9_oldqt .
