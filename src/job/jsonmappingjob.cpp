@@ -79,10 +79,18 @@ void JSONMappingJob::run ()
     //loginf << "JSONMappingJob: run: applying JSON function";
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(), process_lambda, false);
 
+    std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
+
     logdbg << "JSONMappingJob: run: counting buffer sizes";
     for (auto& buf_it : buffers_)
-        if (buf_it.second)
+    {
+        if (buf_it.second && buf_it.second->size())
+        {
             num_created_ += buf_it.second->size();
+            not_empty_buffers[buf_it.first] = buf_it.second;
+        }
+    }
+    buffers_ = not_empty_buffers; // cleaner
 
     done_ = true;
     data_ = nullptr;

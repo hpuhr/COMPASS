@@ -544,7 +544,7 @@ void ASTERIXImportTask::run()
     }
     else if (free_ram >= ram_threshold && limit_ram_)
     {
-        loginf << "ASTERIXImporterTask: ASTERIXImporterTask: " << free_ram << " GB free ram, recommending not limiting";
+        loginf << "ASTERIXImporterTask: run: " << free_ram << " GB free ram, recommending not limiting";
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(nullptr, "RAM Limiting",
@@ -570,6 +570,13 @@ void ASTERIXImportTask::run()
         widget_->runStarted();
 
     assert (canImportFile());
+
+
+    if (status_widget_)
+    {
+        logwrn << "ASTERIXImporterTask: run: status widget still active";
+        status_widget_ = nullptr;
+    }
     assert (!status_widget_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -682,8 +689,9 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot ()
         msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease check the decoder settings.").c_str());
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
-    }
 
+
+    }
     assert (status_widget_);
 
     if (status_widget_->numErrors())
