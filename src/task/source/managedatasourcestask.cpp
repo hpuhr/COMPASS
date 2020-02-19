@@ -245,8 +245,20 @@ void ManageDataSourcesTask::exportConfigDataSources ()
 
     logdbg << "ManageDataSourcesTask: exportConfigDataSources: json '" << j.dump(4) << "'";
 
-    QString filename = QFileDialog::getSaveFileName(nullptr, tr("Save Data Sources as JSON"),
-                                                    "", "*.json");
+    QFileDialog dialog (nullptr);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("JSON Files (*.json)");
+    dialog.setDefaultSuffix("json");
+    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+
+    QStringList file_names;
+    if (dialog.exec())
+        file_names = dialog.selectedFiles();
+
+    QString filename;
+
+    if (file_names.size() == 1)
+        filename = file_names.at(0);
 
     if (filename.size() > 0)
     {

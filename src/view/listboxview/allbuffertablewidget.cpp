@@ -97,24 +97,32 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "AllBufferTableWidget: exportSlot";
 
-    QString file_name;
-    if (overwrite)
-    {
-        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
-                                                 tr("Comma-separated values (*.csv);;All Files (*)"));
-    }
-    else
-    {
-        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
-                                                 tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
-                                                 QFileDialog::DontConfirmOverwrite);
-    }
+    QFileDialog dialog (nullptr);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("CSV Files (*.csv)");
+    dialog.setDefaultSuffix("csv");
+    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
 
-    if (file_name.size())
+    if (!overwrite)
+        dialog.setOption(QFileDialog::DontConfirmOverwrite);
+
+    QStringList file_names;
+    if (dialog.exec())
+        file_names = dialog.selectedFiles();
+
+    QString filename;
+
+    if (file_names.size() == 1)
+        filename = file_names.at(0);
+
+    if (filename.size())
     {
-        loginf << "AllBufferTableWidget: exportSlot: export filename " << file_name.toStdString();
+        if (!filename.endsWith(".csv")) // in case of qt bug
+            filename += ".csv";
+
+        loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
         assert (model_);
-        model_->saveAsCSV(file_name.toStdString(), overwrite);
+        model_->saveAsCSV(filename.toStdString(), overwrite);
     }
     else
     {
