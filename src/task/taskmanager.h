@@ -81,19 +81,7 @@ public:
 
     void runTask (const std::string& task_name);
 
-
-    DatabaseOpenTask& databaseOpenTask() const;
-    ManageSchemaTask& manageSchemaTask() const;
-    ManageDataSourcesTask& manageDataSourcesTask () const;
-#if USE_JASTERIX
-    ASTERIXImportTask& asterixImporterTask() const;
-#endif
-    JSONImportTask& jsonImporterTask() const;
-    MySQLDBImportTask& mysqldbImportTask() const;
-    ManageDataSourcesTask& manageDatasourcesTask() const;
-    RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
-    CreateARTASAssociationsTask& createArtasAssociationsTask() const;
-    PostProcessTask& postProcessTask() const;
+    ManageDataSourcesTask& manageDataSourcesTask ();
 
 protected:
     bool expert_mode_ {false};

@@ -66,19 +66,6 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
     registerParameter ("used_connection", &used_connection_, "");
 
     createSubConfigurables();
-
-    if (used_connection_.size())
-    {
-        if (!connections_.count(used_connection_))
-        {
-            logerr << "DBInterface: constructor: unknown connection '" << used_connection_ << "'";
-            used_connection_ = "";
-        }
-        else
-        {
-            current_connection_ = connections_.at(used_connection_);
-        }
-    }
 }
 
 /**
@@ -872,7 +859,7 @@ std::set<int> DBInterface::getActiveDataSources (DBObject &object)
 
 void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size " << buffer->size();
+    loginf << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size " << buffer->size();
 
     std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert (partial_buffer->size());
@@ -888,7 +875,7 @@ void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer>
 
 void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
+    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
 
     assert (current_connection_);
     assert (buffer);

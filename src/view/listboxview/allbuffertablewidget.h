@@ -87,7 +87,7 @@ protected:
     AllBufferTableModel* model_ {nullptr};
 
     /// @brief Is called when keys are pressed
-    virtual void keyPressEvent (QKeyEvent* event);
+    //virtual void keyPressEvent (QKeyEvent * event);
 };
 
 #endif /* ALLBUFFERTABLEWIDGET_H_ */

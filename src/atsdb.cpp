@@ -70,18 +70,16 @@ ATSDB::ATSDB()
     QObject::connect(dbo_manager_.get(), &DBObjectManager::schemaChangedSignal,
                      task_manager_.get(), &TaskManager::schemaChangedSlot);
 
-    dbo_manager_->updateSchemaInformationSlot();
-
     logdbg  << "ATSDB: constructor: end";
 }
 
-//void ATSDB::initialize()
-//{
-//    assert (!initialized_);
-//    initialized_=true;
+void ATSDB::initialize()
+{
+    assert (!initialized_);
+    initialized_=true;
 
-
-//}
+    dbo_manager_->updateSchemaInformationSlot();
+}
 
 /**
  * Deletes members.
@@ -90,13 +88,7 @@ ATSDB::~ATSDB()
 {
     logdbg  << "ATSDB: destructor: start";
 
-    if (!shut_down_)
-    {
-        logerr << "ATSDB: destructor: not shut down";
-        shutdown();
-    }
-
-    //assert (!initialized_);
+    assert (!initialized_);
 
     assert (!dbo_manager_);
     assert (!db_schema_manager_);
@@ -196,55 +188,55 @@ void ATSDB::checkSubConfigurables ()
 DBInterface &ATSDB::interface ()
 {
     assert (db_interface_);
-    //assert (initialized_);
+    assert (initialized_);
     return *db_interface_;
 }
 
 DBSchemaManager &ATSDB::schemaManager ()
 {
     assert (db_schema_manager_);
-    //assert (initialized_);
+    assert (initialized_);
     return *db_schema_manager_;
 }
 
 DBObjectManager &ATSDB::objectManager ()
 {
     assert (dbo_manager_);
-    //assert (initialized_);
+    assert (initialized_);
     return *dbo_manager_;
 }
 
 FilterManager &ATSDB::filterManager ()
 {
     assert (filter_manager_);
-    //assert (initialized_);
+    assert (initialized_);
     return *filter_manager_;
 }
 
 TaskManager& ATSDB::taskManager ()
 {
     assert (task_manager_);
-    //assert (initialized_);
+    assert (initialized_);
     return *task_manager_;
 }
 
 ViewManager &ATSDB::viewManager ()
 {
     assert (view_manager_);
-    //assert (initialized_);
+    assert (initialized_);
     return *view_manager_;
 }
 
 SimpleConfig& ATSDB::config ()
 {
-    //assert (initialized_);
+    assert (initialized_);
     assert (simple_config_);
     return *simple_config_;
 }
 
 bool ATSDB::ready ()
 {
-    if (!db_interface_) // || !initialized_)
+    if (!db_interface_ || !initialized_)
         return false;
 
     return db_interface_->ready();
@@ -258,7 +250,7 @@ void ATSDB::shutdown ()
 {
     loginf  << "ATSDB: database shutdown";
 
-    if (shut_down_)
+    if (!initialized_)
     {
         logerr  << "ATSDB: already shut down";
         return;
@@ -290,7 +282,7 @@ void ATSDB::shutdown ()
     assert (filter_manager_);
     filter_manager_ = nullptr;
 
-    shut_down_=true;
+    initialized_=false;
 
     loginf  << "ATSDB: shutdown: end";
 }

@@ -31,7 +31,6 @@
 #include "dboschemametatabledefinition.h"
 #include "dboassociationcollection.h"
 
-class ATSDB;
 class PropertyList;
 class MetaDBTable;
 
@@ -108,7 +107,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
+    DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
 
@@ -193,7 +192,7 @@ public:
         return data_source_definitions_;
     }
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     bool hasKeyVariable ();
     DBOVariable& getKeyVariable();
@@ -247,7 +246,6 @@ public:
     void updateToDatabaseContent ();
 
 protected:
-    ATSDB& atsdb_;
     DBObjectManager& manager_;
     /// DBO name
     std::string name_;

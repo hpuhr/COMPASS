@@ -30,14 +30,12 @@
 #include "propertylist.h"
 #include "buffer.h"
 #include "jobmanager.h"
-#include "readjsonfilejob.h"
 #include "jsonparsejob.h"
 #include "jsonmappingjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createartasassociationstask.h"
-#include "jsonparsingschema.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -73,6 +71,12 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
 
 JSONImportTask::~JSONImportTask()
 {
+    if (msg_box_)
+    {
+        delete msg_box_;
+        msg_box_ = nullptr;
+    }
+
     for (auto it : file_list_)
         delete it.second;
 
@@ -167,15 +171,13 @@ void JSONImportTask::removeCurrentFilename ()
         widget_->updateFileListSlot();
 }
 
-void JSONImportTask::currentFilename (const std::string& filename)
+void JSONImportTask::currentFilename (const std::string filename, bool archive)
 {
 
-    loginf << "JSONImporterTask: currentFilename: filename '" << filename << "'";
+    loginf << "JSONImporterTask: currentFilename: filename '" << filename << "' archive " << archive;
 
+    archive_ = archive;
     current_filename_ = filename;
-
-    if (widget_)
-        widget_->updateFileListSlot();
 
     emit statusChangedSignal(name_);
 }
@@ -254,11 +256,6 @@ void JSONImportTask::test(bool test)
     test_ = test;
 }
 
-size_t JSONImportTask::objectsInserted() const
-{
-    return objects_inserted_;
-}
-
 bool JSONImportTask::canImportFile ()
 {
     if (!current_filename_.size())
@@ -290,14 +287,19 @@ bool JSONImportTask::canRun()
 
 void JSONImportTask::run()
 {
-    loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
+    loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' archive " << archive_ << " test " << test_;
 
     std::string tmp;
 
     if (test_)
-        tmp = "test import of file ";
+        tmp = "test import of";
     else
-        tmp = "import of file ";
+        tmp = "import of ";
+
+    if (archive_)
+        tmp += " archive ";
+    else
+        tmp += " file ";
 
     task_manager_.appendInfo("JSONImporterTask: "+tmp+" '"+current_filename_+"' started");
 
@@ -325,80 +327,79 @@ void JSONImportTask::run()
         if (!map_it.second.initialized())
             map_it.second.initialize();
 
+
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    read_json_job_ = std::make_shared<ReadJSONFileJob> (current_filename_, num_objects_chunk);
+    read_json_job_ = std::make_shared<ReadJSONFilePartJob> (current_filename_, archive_, num_objects_chunk);
 
-    connect (read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal,
-             this, &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
-    connect (read_json_job_.get(), &ReadJSONFileJob::obsoleteSignal,
-             this, &JSONImportTask::readJSONFileObsoleteSlot, Qt::QueuedConnection);
-    connect (read_json_job_.get(), &ReadJSONFileJob::doneSignal,
-             this, &JSONImportTask::readJSONFileDoneSlot, Qt::QueuedConnection);
+    connect (read_json_job_.get(), &ReadJSONFilePartJob::obsoleteSignal,
+             this, &JSONImportTask::readJSONFilePartObsoleteSlot, Qt::QueuedConnection);
+    connect (read_json_job_.get(), &ReadJSONFilePartJob::doneSignal,
+             this, &JSONImportTask::readJSONFilePartDoneSlot, Qt::QueuedConnection);
 
-    JobManager::instance().addBlockingJob(read_json_job_);
+    JobManager::instance().addNonBlockingJob(read_json_job_);
 
     updateMsgBox();
 
     logdbg << "JSONImporterTask: run done";
 }
 
-void JSONImportTask::addReadJSONSlot ()
+void JSONImportTask::readJSONFilePartDoneSlot ()
 {
-    loginf << "JSONImporterTask: addReadJSONSlot";
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
     assert (read_json_job_);
 
-    loginf << "JSONImporterTask: addReadJSONSlot: moving objects";
-
-    if (maxLoadReached())
-        read_json_job_->pause();
-
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: moving objects";
     std::vector <std::string> objects = read_json_job_->objects();
+    //assert (!read_json_job_->objects().size());
 
     bytes_read_ = read_json_job_->bytesRead();
     bytes_to_read_ = read_json_job_->bytesToRead();
     read_status_percent_ = read_json_job_->getStatusPercent();
     objects_read_ += objects.size();
-    loginf << "JSONImporterTask: addReadJSONSlot: bytes " << bytes_read_ << " to read " << bytes_to_read_
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_ << " to read " << bytes_to_read_
            << " percent " << read_status_percent_;
 
+    //loginf << "got part '" << ss.str() << "'";
+
+    // restart read job
+    if (!read_json_job_->fileReadDone())
+    {
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
+        read_json_job_->resetDone();
+        JobManager::instance().addNonBlockingJob(read_json_job_);
+    }
+    else
+    {
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: done";
+        task_manager_.appendInfo("JSONImporterTask: reading done with "+std::to_string(objects_read_)+" records");
+        read_status_percent_ = 100.0;
+        read_json_job_ = nullptr;
+    }
+
     // start parse job
-    loginf << "JSONImporterTask: addReadJSONSlot: starting parse job";
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: starting parse job";
     std::shared_ptr<JSONParseJob> json_parse_job = std::make_shared<JSONParseJob> (std::move(objects));
 
     connect (json_parse_job.get(), &JSONParseJob::obsoleteSignal,
              this, &JSONImportTask::parseJSONObsoleteSlot, Qt::QueuedConnection);
     connect (json_parse_job.get(), &JSONParseJob::doneSignal,
-             this, &JSONImportTask::parseJSONDoneSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::parseJSONDoneSlot,Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(json_parse_job);
 
     json_parse_jobs_.push_back(json_parse_job);
 
-    loginf << "JSONImporterTask: addReadJSONSlot: updating message box";
-    updateMsgBox();
-}
-
-
-void JSONImportTask::readJSONFileDoneSlot ()
-{
-    loginf << "JSONImporterTask: readJSONFileDoneSlot";
-
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: done";
-    task_manager_.appendInfo("JSONImporterTask: reading done with "+std::to_string(objects_read_)+" records");
-    read_status_percent_ = 100.0;
-    read_json_job_ = nullptr;
-
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: updating message box";
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: updating message box";
     updateMsgBox();
 
-    logdbg << "JSONImporterTask: readJSONFileDoneSlot: done";
+    logdbg << "JSONImporterTask: readJSONFilePartDoneSlot: done";
 }
 
-void JSONImportTask::readJSONFileObsoleteSlot ()
+void JSONImportTask::readJSONFilePartObsoleteSlot ()
 {
-    logdbg << "JSONImporterTask: readJSONFileObsoleteSlot";
+    logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
 }
 
 void JSONImportTask::parseJSONDoneSlot ()
@@ -410,21 +411,18 @@ void JSONImportTask::parseJSONDoneSlot ()
 
     objects_parsed_ += parse_job->objectsParsed();
     objects_parse_errors_ += parse_job->parseErrors();
-    std::unique_ptr<nlohmann::json> json_objects = parse_job->jsonObjects();
-    assert (json_objects->contains("records"));
+    std::unique_ptr<std::vector<nlohmann::json>> json_objects {std::move(parse_job->jsonObjects())};
 
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
-    size_t count = json_objects->at("records").size();
+    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects->size() << " parsed objects";
 
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
+    size_t count = json_objects->size();
 
     assert (schemas_.count(current_schema_));
 
-    std::vector<std::string> data_records_keys {"records"};
-
     std::shared_ptr<JSONMappingJob> json_map_job = std::make_shared<JSONMappingJob> (
-                std::move(json_objects), data_records_keys, schemas_.at(current_schema_).parsers());
+                std::move(json_objects), schemas_.at(current_schema_).parsers(), key_count_);
 
     connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal,
              this, &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
@@ -435,15 +433,9 @@ void JSONImportTask::parseJSONDoneSlot ()
 
     JobManager::instance().addNonBlockingJob(json_map_job);
 
-    updateMsgBox();
+    key_count_ += count;
 
-    if (read_json_job_)
-    {
-        if (maxLoadReached())
-            read_json_job_->pause();
-        else
-            read_json_job_->unpause();
-    }
+    updateMsgBox();
 
     logdbg << "JSONImporterTask: parseJSONDoneSlot: done";
 }
@@ -483,17 +475,39 @@ void JSONImportTask::mapJSONDoneSlot ()
         return;
     }
 
-    updateMsgBox();
-
-    if (read_json_job_)
+    for (auto& buf_it : job_buffers)
     {
-        if (maxLoadReached())
-            read_json_job_->pause();
-        else
-            read_json_job_->unpause();
+        if (buf_it.second && buf_it.second->size())
+        {
+            std::shared_ptr<Buffer> job_buffer = buf_it.second;
+
+            if (buffers_.count(buf_it.first) == 0)
+                buffers_[buf_it.first] = job_buffer;
+            else
+                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
+        }
     }
 
-    insertData (std::move(job_buffers));
+    updateMsgBox();
+
+    if (!insert_active_)
+    {
+        for (auto& buf_it : buffers_)
+        {
+            if (buf_it.second->size() > 10000)
+            {
+                loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+                insertData ();
+                return;
+            }
+        }
+    }
+
+    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+    {
+        loginf << "JSONImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
+        insertData ();
+    }
 
     logdbg << "JSONImporterTask: mapJSONDoneSlot: done";
 }
@@ -503,36 +517,9 @@ void JSONImportTask::mapJSONObsoleteSlot ()
     logdbg << "JSONImporterTask: mapJSONObsoleteSlot";
 }
 
-void JSONImportTask::insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers)
+void JSONImportTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
-
-    assert (schemas_.count(current_schema_));
-
-    if (!dbo_variable_sets_.size()) // initialize if empty
-    {
-        for (auto& parser_it : schemas_.at(current_schema_))
-        {
-            std::string dbo_name = parser_it.second.dbObject().name();
-
-            DBObject& db_object = parser_it.second.dbObject();
-            assert (db_object.hasCurrentDataSourceDefinition());
-
-            std::string data_source_var_name = parser_it.second.dataSourceVariableName();
-            assert (data_source_var_name.size());
-            assert (db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
-
-            DBOVariableSet set = parser_it.second.variableList();
-
-            if (dbo_variable_sets_.count(dbo_name)) // add variables
-            {
-                assert (std::get<0>(dbo_variable_sets_.at(dbo_name)) == data_source_var_name);
-                std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
-            }
-            else // create it
-                dbo_variable_sets_[dbo_name] = std::make_tuple(data_source_var_name, set);
-        }
-    }
 
     while (insert_active_)
     {
@@ -542,119 +529,121 @@ void JSONImportTask::insertData (std::map <std::string, std::shared_ptr<Buffer>>
 
     bool has_sac_sic = false;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    assert (schemas_.count(current_schema_));
 
-    for (auto& buf_it : job_buffers)
+    for (auto& parser_it : schemas_.at(current_schema_))
     {
-        std::string dbo_name = buf_it.first;
-        assert (dbo_variable_sets_.count(dbo_name));
-        std::shared_ptr<Buffer> buffer = buf_it.second;
-
-        if (!buffer->size())
+        if (buffers_.count(parser_it.second.dbObject().name()) != 0)
         {
-            logdbg << "JSONImportTask: insertData: dbo " << buf_it.first << " with empty buffer";
-            continue;
-        }
+            ++insert_active_;
 
-        assert (object_manager.existsObject(dbo_name));
-        DBObject& db_object = object_manager.object(dbo_name);
+            DBObject& db_object = parser_it.second.dbObject();
+            std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
 
-        assert (db_object.hasCurrentDataSourceDefinition());
+            has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
+                    && buffer->has<char>("sac") && buffer->has<char>("sic");
 
-        ++insert_active_;
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
 
-        has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
-                && buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
-        logdbg << "JSONImportTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic
-               << " buffer size " << buffer->size();
+            connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImportTask::insertDoneSlot,
+                     Qt::UniqueConnection);
+            connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImportTask::insertProgressSlot,
+                     Qt::UniqueConnection);
 
-        connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImportTask::insertDoneSlot,
-                 Qt::UniqueConnection);
-        connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImportTask::insertProgressSlot,
-                 Qt::UniqueConnection);
 
-        std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbo_name));
-
-        logdbg << "JSONImportTask: insertData: adding new data sources in dbo " << db_object.name()
-               << " ds varname '" << data_source_var_name << "'";
-
-        // collect existing datasources
-        std::set <int> datasources_existing;
-        if (db_object.hasDataSources())
-            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-                datasources_existing.insert(ds_it->first);
-
-        // getting key list and distinct values
-        assert (buffer->properties().hasProperty(data_source_var_name));
-        assert (buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
-
-        assert(buffer->has<int>(data_source_var_name));
-        NullableVector<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
-        std::set<int> data_source_keys = data_source_key_list.distinctValues();
-
-        std::map <int, std::pair<unsigned char, unsigned char>> sac_sics; // keyvar->(sac,sic)
-        // collect sac/sics
-        if (has_sac_sic)
-        {
-            NullableVector<unsigned char>& sac_list = buffer->get<unsigned char> ("sac");
-            NullableVector<unsigned char>& sic_list = buffer->get<unsigned char> ("sic");
-
-            size_t size = buffer->size();
-            int key_val;
-            for (unsigned int cnt=0; cnt < size; ++cnt)
+            if (parser_it.second.dataSourceVariableName() != "")
             {
-                key_val = data_source_key_list.get(cnt);
+                logdbg << "JSONImporterTask: insertData: adding new data sources";
 
-                if (datasources_existing.count(key_val) != 0)
-                    continue;
+                std::string data_source_var_name = parser_it.second.dataSourceVariableName();
 
-                if (sac_sics.count(key_val) == 0)
+
+                // collect existing datasources
+                std::set <int> datasources_existing;
+                if (db_object.hasDataSources())
+                    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+                        datasources_existing.insert(ds_it->first);
+
+                // getting key list and distinct values
+                assert (buffer->properties().hasProperty(data_source_var_name));
+                assert (buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
+
+                assert(buffer->has<int>(data_source_var_name));
+                NullableVector<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
+                std::set<int> data_source_keys = data_source_key_list.distinctValues();
+
+                std::map <int, std::pair<char, char>> sac_sics; // keyvar->(sac,sic)
+                // collect sac/sics
+                if (has_sac_sic)
                 {
-                    logdbg << "JSONImportTask: insertData: found new ds " << key_val << " for sac/sic";
+                    NullableVector<char>& sac_list = buffer->get<char> ("sac");
+                    NullableVector<char>& sic_list = buffer->get<char> ("sic");
 
-                    assert (!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
-                    sac_sics[key_val] = std::pair<unsigned char, unsigned char> (sac_list.get(cnt), sic_list.get(cnt));
+                    size_t size = buffer->size();
+                    int key_val;
+                    for (unsigned int cnt=0; cnt < size; ++cnt)
+                    {
+                        key_val = data_source_key_list.get(cnt);
 
-                    logdbg << "JSONImportTask: insertData: source " << key_val
-                           << " sac " << static_cast<int>(sac_list.get(cnt))
-                           << " sic " << static_cast<int>(sic_list.get(cnt));
+                        if (datasources_existing.count(key_val) != 0)
+                            continue;
+
+                        if (sac_sics.count(key_val) == 0)
+                        {
+                            logdbg << "JSONImporterTask: insertData: found new ds " << key_val << " for sac/sic";
+
+                            assert (!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
+                            sac_sics[key_val] = std::pair<char, char> (sac_list.get(cnt), sic_list.get(cnt));
+
+                            loginf << "JSONImporterTask: insertData: source " << key_val
+                                   << " sac " << static_cast<int>(sac_list.get(cnt))
+                                   << " sic " << static_cast<int>(sic_list.get(cnt));
+                        }
+                    }
+
+                }
+
+                // adding datasources
+                std::map <int, std::pair<int,int>> datasources_to_add;
+
+                for (auto ds_key_it : data_source_keys)
+                    if (datasources_existing.count(ds_key_it) == 0 && added_data_sources_.count(ds_key_it) == 0)
+                    {
+                        if (datasources_to_add.count(ds_key_it) == 0)
+                        {
+                            logdbg << "JSONImporterTask: insertData: adding new data source " << ds_key_it;
+                            if (sac_sics.count(ds_key_it) == 0)
+                                datasources_to_add[ds_key_it] = {-1,-1};
+                            else
+                                datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
+                                                                 sac_sics.at(ds_key_it).second};
+
+                            added_data_sources_.insert(ds_key_it);
+                        }
+                    }
+
+                if (datasources_to_add.size())
+                {
+                    db_object.addDataSources(datasources_to_add);
                 }
             }
+
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
+
+            DBOVariableSet set = parser_it.second.variableList();
+            db_object.insertData(set, buffer, false);
+            objects_inserted_ += buffer->size();
+
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
+            buffers_.erase(parser_it.second.dbObject().name());
         }
-
-        // adding datasources
-        std::map <int, std::pair<int,int>> datasources_to_add;
-
-        for (auto ds_key_it : data_source_keys)
-            if (datasources_existing.count(ds_key_it) == 0 && added_data_sources_.count(ds_key_it) == 0)
-            {
-                if (datasources_to_add.count(ds_key_it) == 0)
-                {
-                    logdbg << "JSONImportTask: insertData: adding new data source " << ds_key_it;
-                    if (sac_sics.count(ds_key_it) == 0)
-                        datasources_to_add[ds_key_it] = {-1,-1};
-                    else
-                        datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
-                                                         sac_sics.at(ds_key_it).second};
-
-                    added_data_sources_.insert(ds_key_it);
-                }
-            }
-
-        if (datasources_to_add.size())
-        {
-            db_object.addDataSources(datasources_to_add);
-        }
-
-        DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
-        db_object.insertData(set, buffer, false);
-
-        objects_inserted_ += buffer->size();
-
-        //status_widget_->addNumInserted(db_object.name(), buffer->size());
-
+        else
+            logdbg << "JSONImporterTask: insertData: emtpy buffer for " << parser_it.second.dbObject().name();
     }
+
+    assert (buffers_.size() == 0);
 
     logdbg << "JSONImporterTask: insertData: done";
 }
@@ -679,6 +668,7 @@ void JSONImportTask::checkAllDone ()
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
         all_done_ = true;
+        assert (buffers_.size() == 0);
 
         QApplication::restoreOverrideCursor();
 
@@ -719,18 +709,9 @@ void JSONImportTask::updateMsgBox ()
 {
     logdbg << "JSONImporterTask: updateMsgBox";
 
-    if (all_done_ && !show_done_summary_)
-    {
-        if (msg_box_)
-            msg_box_->close();
-
-        msg_box_ = nullptr;
-        return;
-    }
-
     if (!msg_box_)
     {
-        msg_box_.reset(new QMessageBox ());
+        msg_box_ = new QMessageBox ();
 
         if (test_)
             msg_box_->setWindowTitle("Test Import JSON Data Status");
@@ -742,7 +723,10 @@ void JSONImportTask::updateMsgBox ()
 
     std::string msg;
 
-    msg = "File '"+current_filename_+"'\n";
+    if (archive_)
+        msg = "Archive '"+current_filename_+"'\n";
+    else
+        msg = "File '"+current_filename_+"'\n";
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -832,11 +816,6 @@ void JSONImportTask::updateMsgBox ()
     msg_box_->show();
 
     logdbg << "JSONImporterTask: updateMsgBox: done";
-}
-
-bool JSONImportTask::maxLoadReached ()
-{
-    return json_parse_jobs_.size() > 2 || json_map_jobs_.size() > 2;
 }
 
 void JSONImportTask::insertProgressSlot (float percent)

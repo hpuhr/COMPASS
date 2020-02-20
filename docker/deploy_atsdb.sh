@@ -20,9 +20,7 @@ mkdir -p appimage/appdir/atsdb/
 cp -r data appimage/appdir/atsdb/
 cp -r conf appimage/appdir/atsdb/
 
-mkdir -p appimage/appdir/lib
-
-/app/tools/linuxdeployqt-continuous-x86_64.AppImage --appimage-extract-and-run appimage/appdir/atsdb.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so
-#-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake  -show-exclude-libs
+/app/tools/linuxdeployqt-continuous-x86_64.AppImage --appimage-extract-and-run appimage/appdir/atsdb.desktop -appimage -bundle-non-qt-libs -verbose=2 
+#-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake 
 
 cd /app/workspace/atsdb/docker

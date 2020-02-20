@@ -637,8 +637,6 @@ void SQLiteConnection::addFile (const std::string &filename)
     config.addParameterString("name", filename);
     generateSubConfigurable ("SQLiteFile", "SQLiteFile"+instancename);
 
-    last_filename_ = filename;
-
     if (widget_)
         widget_->updateFileListSlot();
 }

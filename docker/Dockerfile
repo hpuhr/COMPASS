@@ -42,13 +42,9 @@ RUN apt-get remove qt4-qmake libqt4* qt4-dev-tools libopenscenegraph-dev libopen
 RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-drivers libxkbcommon-x11-dev -y
 
 # qt
-#ENV QT_VERSION_A=5.6
-#ENV QT_VERSION_B=5.6.2
-#ENV QT_VERSION_SCRIPT=562
-ENV QT_VERSION_A=5.8
-ENV QT_VERSION_B=5.8.0
-ENV QT_VERSION_SCRIPT=580
-
+ENV QT_VERSION_A=5.9
+ENV QT_VERSION_B=5.9.9
+ENV QT_VERSION_SCRIPT=599
 RUN wget https://download.qt.io/archive/qt/${QT_VERSION_A}/${QT_VERSION_B}/qt-opensource-linux-x64-${QT_VERSION_B}.run
 RUN chmod +x qt-opensource-linux-x64-${QT_VERSION_B}.run 
 COPY qt-noninteractive.qs /qt-noninteractive.qs
@@ -57,8 +53,8 @@ RUN ./qt-opensource-linux-x64-${QT_VERSION_B}.run --script qt-noninteractive.qs 
 ENV QT_SELECT=5
 ENV QT_QPA_PLATFORMTHEME=gtk3
 ENV UBUNTU_MENUPROXY=
-#ENV QT_STYLE_OVERRIDE=adwaita
-ENV QTDIR=/qt/${QT_VERSION_A}
+ENV QT_STYLE_OVERRIDE=adwaita
+ENV QTDIR=/qt/${QT_VERSION_B}
 ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
 ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
 ENV QTLIBDIR="${QTDIR}/gcc_64/"

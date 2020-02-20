@@ -217,7 +217,6 @@ void ASTERIXConfigWidget::updateCategories()
     int row=1;
 
     ref_edit_buttons_.clear();
-    spf_edit_buttons_.clear();
 
     for (auto& cat_it : task_.jASTERIX()->categories())
     {

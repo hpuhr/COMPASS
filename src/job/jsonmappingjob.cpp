@@ -3,15 +3,10 @@
 #include "buffer.h"
 #include "dbobject.h"
 #include "logger.h"
-#include "json.h"
 
-using namespace Utils;
-using namespace nlohmann;
-
-JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
-                               const std::vector<std::string>& data_record_keys,
-                               const std::map <std::string, JSONObjectParser>& parsers)
-    : Job ("JSONMappingJob"), data_(std::move(data)), data_record_keys_(data_record_keys), parsers_(parsers)
+JSONMappingJob::JSONMappingJob(std::unique_ptr<std::vector<nlohmann::json>> extracted_records,
+                               const std::map <std::string, JSONObjectParser>& parsers, size_t key_count)
+    : Job ("JSONMappingJob"), extracted_records_(std::move(extracted_records)), parsers_(parsers), key_count_(key_count)
 {
     logdbg << "JSONMappingJob: ctor";
 }
@@ -32,35 +27,46 @@ void JSONMappingJob::run ()
         if (!buffers_.count(parser_it.second.dbObject().name()))
             buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
         else
-            parser_it.second.appendVariablesToBuffer(*buffers_.at(parser_it.second.dbObject().name()));
+            parser_it.second.appendVariablesToBuffer(buffers_.at(parser_it.second.dbObject().name()));
     }
 
-    auto process_lambda = [this](nlohmann::json& record)
-    {
-        //loginf << "UGA '" << record.dump(4) << "'";
+    bool parsed;
+    bool parsed_any = false;
 
-        unsigned int category {0};
-        bool has_cat = record.contains("category");
+    bool has_cat;
+    unsigned int category;
+
+    logdbg << "JSONMappingJob: run: mapping json";
+    for (auto& j_it : *extracted_records_)
+    {
+        //loginf << "UGA '" << j_it.dump(4) << "'";
+
+        has_cat = j_it.find("category") != j_it.end();
 
         if (has_cat)
-            category = record.at("category");
+            category = j_it.at("category");
 
-        bool parsed {false};
-        bool parsed_any {false};
+//        if (j_it.find("010") != j_it.end())
+//        {
+//            has_sac_sic = true;
+//            sac = j_it.at("010").at("SAC");
+//            sic = j_it.at("010").at("SIC");
+//        }
+
+        parsed = false;
+        parsed_any = false;
 
         for (auto& map_it : parsers_)
         {
             logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
-            assert (buffer);
-            parsed = map_it.second.parseJSON(record, *buffer);
+            parsed = map_it.second.parseJSON(j_it, buffer);
 
             if (parsed)
-                map_it.second.transformBuffer(*buffer, buffer->size()-1);
+                map_it.second.transformBuffer(buffer, buffer->size()-1);
 
             parsed_any |= parsed;
         }
-
         if (parsed_any)
         {
             if (has_cat)
@@ -73,27 +79,24 @@ void JSONMappingJob::run ()
                 category_mapped_counts_[category].second += 1;
             ++num_not_mapped_;
         }
-    };
-
-    assert (data_);
-    //loginf << "JSONMappingJob: run: applying JSON function";
-    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(), process_lambda, false);
-
-    std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
+    }
 
     logdbg << "JSONMappingJob: run: counting buffer sizes";
-    for (auto& buf_it : buffers_)
+    for (auto& parser_it : parsers_)
     {
-        if (buf_it.second && buf_it.second->size())
+        assert (buffers_.count(parser_it.second.dbObject().name()));
+
+        logdbg << "JSONMappingJob: run: creating buffer for " << parser_it.second.dbObject().name();
+
+        std::shared_ptr<Buffer>& buffer = buffers_.at(parser_it.second.dbObject().name());
+
+        if (buffer && buffer->size())
         {
-            num_created_ += buf_it.second->size();
-            not_empty_buffers[buf_it.first] = buf_it.second;
+            num_created_ += buffer->size();
         }
     }
-    buffers_ = not_empty_buffers; // cleaner
 
     done_ = true;
-    data_ = nullptr;
 
     logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped " << num_not_mapped_;
 }

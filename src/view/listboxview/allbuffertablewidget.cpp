@@ -24,8 +24,6 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QFileDialog>
-#include <QClipboard>
-#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -51,8 +49,6 @@ AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSou
     QVBoxLayout *layout = new QVBoxLayout ();
 
     table_ = new QTableView (this);
-    table_->setSelectionBehavior(QAbstractItemView::SelectItems);
-    table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
     model_ = new AllBufferTableModel (this, data_source_);
     table_->setModel(model_);
 
@@ -97,32 +93,24 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "AllBufferTableWidget: exportSlot";
 
-    QFileDialog dialog (nullptr);
-    dialog.setFileMode(QFileDialog::AnyFile);
-    dialog.setNameFilter("CSV Files (*.csv)");
-    dialog.setDefaultSuffix("csv");
-    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
-
-    if (!overwrite)
-        dialog.setOption(QFileDialog::DontConfirmOverwrite);
-
-    QStringList file_names;
-    if (dialog.exec())
-        file_names = dialog.selectedFiles();
-
-    QString filename;
-
-    if (file_names.size() == 1)
-        filename = file_names.at(0);
-
-    if (filename.size())
+    QString file_name;
+    if (overwrite)
     {
-        if (!filename.endsWith(".csv")) // in case of qt bug
-            filename += ".csv";
+        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
+                                                 tr("Comma-separated values (*.csv);;All Files (*)"));
+    }
+    else
+    {
+        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
+                                                 tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
+                                                 QFileDialog::DontConfirmOverwrite);
+    }
 
-        loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
+    if (file_name.size())
+    {
+        loginf << "AllBufferTableWidget: exportSlot: export filename " << file_name.toStdString();
         assert (model_);
-        model_->saveAsCSV(filename.toStdString(), overwrite);
+        model_->saveAsCSV(file_name.toStdString(), overwrite);
     }
     else
     {
@@ -187,78 +175,164 @@ ListBoxView &AllBufferTableWidget::view() const
     return view_;
 }
 
-void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
-{
-    loginf  << "AllBufferTableWidget: keyPressEvent: got keypressed";
+//void AllBufferTableWidget::itemChanged (QTableWidgetItem *item)
+//{
+//    if (selection_checkboxes_.find (item) != selection_checkboxes_.end())
+//    {
+//        unsigned int id = selection_checkboxes_[item];
+//        bool checked = item->checkState() == Qt::Checked;
+//        logdbg  << "AllBufferTableWidget: itemChanged: id " << id << " checked " << checked;
 
-    assert (table_);
+//        if (checked) // add
+//        {
+//            ViewSelectionEntries entries;
+//            entries.push_back(ViewSelectionEntry (ViewSelectionId(type_, id), ViewSelectionEntry::TYPE_BILLBOARD));
+//            ViewSelection::getInstance().addSelection(entries);
+//        }
+//        else // remove
+//        {
+//            ViewSelectionEntries selection_entries = ViewSelection::getInstance().getEntries();
+//            ViewSelectionEntries::iterator it;
 
-    if (event->modifiers() & Qt::ControlModifier)
-    {
-        if (event->key() == Qt::Key_C)
-        {
-            loginf  << "AllBufferTableWidget: keyPressEvent: copying";
+//            bool found=false;
+//            for (it = selection_entries.begin(); it != selection_entries.end(); it++)
+//            {
+//                if (it->id_.first == type_ && it->id_.second == id)
+//                {
+//                    found = true;
+//                    selection_entries.erase (it);
+//                    break;
+//                }
+//            }
 
-            QAbstractItemModel* model = table_->model();
-            QItemSelectionModel* selection = table_->selectionModel();
-            QModelIndexList indexes = selection->selectedIndexes();
+//            if (found)
+//            {
+//                logdbg  << "AllBufferTableWidget: itemChanged: unselecting type " << type_ << " id " << id;
+//                ViewSelection::getInstance().clearSelection();
+//                ViewSelection::getInstance().setSelection(selection_entries);
+//            }
+//            else
+//            {
+//                logwrn  << "AllBufferTableWidget: itemChanged: unselect failed for type " << type_ << " id " << id;
+//            }
+//        }
+//    }
+//    else
+//        logerr << "AllBufferTableWidget: itemChanged: unknown table item";
+//}
 
-            QString selected_text;
-            QString selected_headers;
-            // You need a pair of indexes to find the row changes
-            QModelIndex previous = indexes.first();
-            unsigned int row_count = 0;
+//void AllBufferTableWidget::keyPressEvent ( QKeyEvent * event )
+//{
+//    logdbg  << "AllBufferTableWidget: keyPressEvent: got keypressed";
 
-            selected_headers = model->headerData(previous.column(), Qt::Horizontal).toString();
-            selected_text = model->data(previous).toString();
-            indexes.removeFirst();
+//    assert (table_);
 
-            foreach(const QModelIndex &current, indexes)
-            {
-                // If you are at the start of the row the row number of the previous index
-                // isn't the same.  Text is followed by a row separator, which is a newline.
-                if (current.row() != previous.row())
-                {
-                    selected_text.append('\n');
+    //TODO
+//    if (event->modifiers()  & Qt::ControlModifier)
+//    {
+//        if (event->key() == Qt::Key_C)
+//        {
+//            QAbstractItemModel *abmodel = table_->model();
+//            QItemSelectionModel * model = table_->selectionModel();
+//            QModelIndexList list = model->selectedIndexes();
 
-                    if (!row_count) // first row
-                        selected_headers.append('\n');
+//            qSort(list);
 
-                    ++row_count;
+//            if(list.size() < 1)
+//                return;
 
-                    if (row_count == 999)
-                    {
-                        QMessageBox m_warning (QMessageBox::Warning, "Too Many Rows Selected",
-                                               "If more than 1000 lines are selected, only the first 1000 are copied.",
-                                               QMessageBox::Ok);
-                        m_warning.exec();
-                        break;
-                    }
-                }
-                // Otherwise it's the same row, so append a column separator, which is a tab.
-                else
-                {
-                    if (!row_count) // first row
-                        selected_headers.append(';');
+//            int min_col=0, max_col=0, min_row=0, max_row=0;
 
-                    selected_text.append(';');
-                }
+//            for(int i = 0; i < list.size(); i++)
+//            {
+//                QModelIndex index = list.at(i);
 
-                QVariant data = model->data(current);
-                QString text = data.toString();
-                // At this point `text` contains the text in one cell
-                selected_text.append(text);
+//                int row = index.row();
+//                int col = index.column();
 
-//                loginf << "UGA row " << current.row() << " col " << current.column() << " text '"
-//                       << text.toStdString() << "'";
+//                if (i==0)
+//                {
+//                    min_col=col;
+//                    max_col=col;
+//                    min_row=row;
+//                    max_row=row;
+//                }
 
-                if (!row_count) // first row
-                    selected_headers.append(model->headerData(current.column(), Qt::Horizontal).toString());
+//                if (row < min_row)
+//                    min_row=row;
+//                if (row > max_row)
+//                    max_row=row;
 
-                previous = current;
-            }
+//                if (col < min_col)
+//                    min_col=col;
+//                if (col > max_col)
+//                    max_col=col;
+//            }
 
-            QApplication::clipboard()->setText(selected_headers+selected_text);
-        }
-    }
-}
+//            int rows = max_row-min_row+1;
+//            int cols = max_col-min_col+1;
+
+//            if (rows < 1)
+//            {
+//                logwrn  << "AllBufferTableWidget: keyPressEvent: too few rows " << rows;
+//                return;
+//            }
+//            logdbg  << "AllBufferTableWidget: keyPressEvent: rows " << rows;
+
+//            if (cols < 1)
+//            {
+//                logwrn  << "AllBufferTableWidget: keyPressEvent: too few cols " << cols;
+//                return;
+//            }
+//            logdbg  << "AllBufferTableWidget: keyPressEvent: cols " << cols;
+
+//            std::vector < std::vector <std::string> > table_strings (rows,std::vector<std::string> (cols));
+
+//            for(int i = 0; i < list.size(); i++)
+//            {
+//                QModelIndex index = list.at(i);
+//                QVariant data = abmodel->data(index);
+//                QString text = data.toString();
+
+//                QTableWidgetItem *item = table_->item (index.row(), index.column());
+//                if( item->checkState() == Qt::Checked )
+//                    text = "X";
+
+//                table_strings.at(index.row()-min_row).at(index.column()-min_col) = "\""+text.toStdString()+"\"";
+//            }
+
+//            QString copy_table;
+//            for(int i = 0; i < (int)table_strings.size(); i++)
+//            {
+//                std::vector <std::string> &row_strings = table_strings.at(i);
+//                for(int j = 0; j < (int)row_strings.size(); j++)
+//                {
+//                    if (j != 0)
+//                        copy_table.append('\t');
+//                    copy_table.append(row_strings.at(j).c_str());
+//                }
+//                copy_table.append('\n');
+//            }
+
+//            // make col indexes
+//            std::set<unsigned int> col_indexes;
+//            for (int i = min_col; i <= max_col; i++)
+//                col_indexes.insert(i);
+
+//            //set header
+//            std::set<unsigned int>::iterator it;
+//            QString header_string;
+//            for (it = col_indexes.begin(); it != col_indexes.end(); it++)
+//            {
+//                if (it != col_indexes.begin())
+//                    header_string.append('\t');
+//                assert (*it < (unsigned int) header_list_.size());
+//                header_string.append(header_list_.at(*it));
+//            }
+//            header_string.append('\n');
+
+//            QClipboard *clipboard = QApplication::clipboard();
+//            clipboard->setText(header_string+copy_table);
+//        }
+//    }
+//}

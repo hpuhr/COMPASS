@@ -38,7 +38,7 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-    : Configurable (class_id, instance_id, atsdb, "db_object.json"), atsdb_(*atsdb)
+    : Configurable (class_id, instance_id, atsdb, "db_object.json")
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -91,7 +91,7 @@ void DBObjectManager::generateSubConfigurable (const std::string& class_id, cons
     logdbg  << "DBObjectManager: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
     if (class_id.compare ("DBObject") == 0)
     {
-        DBObject* object = new DBObject (atsdb_, class_id, instance_id, this);
+        DBObject* object = new DBObject (class_id, instance_id, this);
         logdbg  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
@@ -360,8 +360,6 @@ void DBObjectManager::loadSlot ()
 {
     logdbg << "DBObjectManager: loadSlot";
 
-    load_in_progress_ = true;
-
     bool load_job_created = false;
 
     for (auto& object : objects_)
@@ -418,8 +416,6 @@ void DBObjectManager::quitLoading ()
 
     for (auto& object : objects_)
         object.second->quitLoading();
-
-    load_in_progress_ = true; // TODO
 }
 
 void DBObjectManager::updateSchemaInformationSlot ()
@@ -479,7 +475,6 @@ void DBObjectManager::loadingDoneSlot (DBObject& object)
     if (done)
     {
         loginf << "DBObjectManager: loadingDoneSlot: all done";
-        load_in_progress_ = false;
         emit allLoadingDoneSignal();
 
         if (load_widget_)
@@ -591,9 +586,4 @@ bool DBObjectManager::isOtherDBObjectPostProcessing (DBObject& object)
             return true;
 
     return false;
-}
-
-bool DBObjectManager::loadInProgress() const
-{
-    return load_in_progress_;
 }

@@ -53,7 +53,7 @@ void InsertBufferDBJob::run ()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-    logdbg  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
+    loginf  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
     assert (buffer_->size());
 
     db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
@@ -63,7 +63,7 @@ void InsertBufferDBJob::run ()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time= diff.total_milliseconds()/1000.0;
 
-    logdbg  << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
+    loginf  << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
     done_=true;
 }
 

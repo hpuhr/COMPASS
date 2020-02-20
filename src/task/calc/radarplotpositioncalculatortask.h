@@ -123,6 +123,7 @@ protected:
     boost::posix_time::ptime stop_time_;
 
     bool calculating_ {false};
+    bool calculated_ {false};
 
     unsigned int num_loaded_ {0};
 

@@ -281,13 +281,6 @@ void ASTERIXStatusDialog::addNumInserted (const std::string& dbo_name, unsigned 
     double records_per_second = records_inserted_/(time_diff_.total_milliseconds()/1000.0);
     records_inserted_rate_str_ = std::to_string(static_cast<int>(records_per_second))+" (e/s)";
     records_inserted_rate_label_->setText(records_inserted_rate_str_.c_str());
-
-    if (elapsed_time_str_ != last_log_elapsed_time_str_)
-    {
-        loginf << "ASTERIXStatusDialog: addNumInserted: " << records_inserted_ << " records inserted after "
-               << elapsed_time_str_ << ", rate " << records_inserted_rate_str_;
-        last_log_elapsed_time_str_ = elapsed_time_str_;
-    }
 }
 
 void ASTERIXStatusDialog::setCategoryCounts (const std::map<unsigned int, size_t>& counts)

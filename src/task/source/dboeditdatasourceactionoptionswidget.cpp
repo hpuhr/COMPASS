@@ -58,10 +58,7 @@ void DBOEditDataSourceActionOptionsWidget::update ()
     {
         action_box_->addItem (opt_it.second.getActionString().c_str());
     }
-
     action_box_->setCurrentIndex(options_->currentActionId());
-
-    perform_check_->setDisabled(options_->currentAction().getActionString() == "None");
 }
 
 void DBOEditDataSourceActionOptionsWidget::changedPerformSlot ()
@@ -90,6 +87,4 @@ void DBOEditDataSourceActionOptionsWidget::changedActionSlot (int index)
         perform_check_->setChecked(true);
         changedPerformSlot();
     }
-
-    perform_check_->setDisabled(options_->currentAction().getActionString() == "None");
 }

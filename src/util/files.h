@@ -32,7 +32,6 @@ QStringList getFilesInDirectory (const std::string& path);
 
 std::string getIconFilepath (const std::string& filename);
 
-void deleteFile (const std::string& filename);
 void deleteFolder (const std::string& path);
 
 }

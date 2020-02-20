@@ -105,12 +105,6 @@ std::string getIconFilepath (const std::string& filename)
     return filepath;
 }
 
-void deleteFile (const std::string& filename)
-{
-    QFile file (filename.c_str());
-    file.remove();
-}
-
 void deleteFolder (const std::string& path)
 {
     QDir dir(path.c_str());

@@ -84,7 +84,9 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
     setLayout (main_layout_);
 
     if (db_interface_.usedConnection().size() > 0)
-        updateUsedConnection();
+    {
+        useConnection (db_interface_.usedConnection());
+    }
 }
 
 DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
@@ -98,11 +100,13 @@ DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
 void DatabaseOpenTaskWidget::databaseTypeSelectSlot ()
 {
     QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());
-    task_.useConnection(radio->text().toStdString());
+    useConnection(radio->text().toStdString());
 }
 
-void DatabaseOpenTaskWidget::updateUsedConnection ()
+void DatabaseOpenTaskWidget::useConnection (const std::string& connection_type)
 {
+    db_interface_.useConnection(connection_type);
+
     assert (connection_stack_);
 
     connection_stack_->setCurrentWidget(db_interface_.connectionWidget());

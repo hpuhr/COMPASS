@@ -53,22 +53,10 @@ ManageDataSourcesTaskWidget::ManageDataSourcesTaskWidget(ManageDataSourcesTask& 
         connect(import_button_, &QPushButton::clicked, this, &ManageDataSourcesTaskWidget::importConfigDataSourcesSlot);
         button_layout->addWidget(import_button_);
 
-        QPushButton* auto_sync_all_button_ = new QPushButton ("Auto Sync All to DB");
-        connect(auto_sync_all_button_, &QPushButton::clicked,
-                this, &ManageDataSourcesTaskWidget::autoSyncAllConfigDataSourcesToDB);
-        button_layout->addWidget(auto_sync_all_button_);
-
         main_layout_->addLayout(button_layout);
     }
 
     setLayout (main_layout_);
-}
-
-void ManageDataSourcesTaskWidget::setCurrentWidget (DBOEditDataSourcesWidget* widget)
-{
-    assert (widget);
-    assert (tab_widget_->indexOf(widget) != -1);
-    tab_widget_->setCurrentWidget(widget);
 }
 
 void ManageDataSourcesTaskWidget::expertModeChangedSlot ()
@@ -91,14 +79,6 @@ void ManageDataSourcesTaskWidget::importConfigDataSourcesSlot ()
 {
     loginf << "ManageDataSourcesTaskWidget: importConfigDataSourcesSlot";
     task_.importConfigDataSources();
-}
-
-void ManageDataSourcesTaskWidget::autoSyncAllConfigDataSourcesToDB ()
-{
-    loginf << "ManageDataSourcesTaskWidget: autoSyncAllConfigDataSourcesToDB";
-    task_.autoSyncAllConfigDataSourcesToDB();
-
-    emit task_.statusChangedSignal(task_.name());
 }
 
 void ManageDataSourcesTaskWidget::dbItemChangedSlot ()

@@ -97,7 +97,7 @@ public:
     template<typename T> void rename (const std::string &id, const std::string &id_new);
 
     /// @brief  Returns current size
-    size_t size ();
+    const size_t size ();
     void cutToSize (size_t size);
 
     /// @brief Returns PropertyList

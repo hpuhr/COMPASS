@@ -48,8 +48,6 @@ public:
     virtual bool isRecommended ();
     virtual bool isRequired ();
 
-    void useConnection (const std::string& connection_type);
-
 protected:
     std::unique_ptr<DatabaseOpenTaskWidget> widget_;
 

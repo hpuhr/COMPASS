@@ -20,27 +20,22 @@
 
 #include "configurable.h"
 #include "json.hpp"
+#include "jsonparsingschema.h"
+#include "readjsonfilepartjob.h"
 #include "task.h"
 
 #include <QObject>
 
 #include <memory>
-#include <set>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class JSONImportTaskWidget;
 class SavedFile;
+class QMessageBox;
 class JSONParseJob;
 class JSONMappingJob;
-class ReadJSONFileJob;
-class JSONParsingSchema;
-class DBObject;
-class Buffer;
-class DBOVariableSet;
-
-class QMessageBox;
 
 class JSONImportTask : public Task, public Configurable
 {
@@ -49,18 +44,17 @@ class JSONImportTask : public Task, public Configurable
     using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
 
 public slots:
-    void addReadJSONSlot ();
-    void readJSONFileDoneSlot ();
-    void readJSONFileObsoleteSlot ();
+    void insertProgressSlot (float percent);
+    void insertDoneSlot (DBObject& object);
+
+    void readJSONFilePartDoneSlot ();
+    void readJSONFilePartObsoleteSlot ();
 
     void parseJSONDoneSlot ();
     void parseJSONObsoleteSlot ();
 
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
-
-    void insertProgressSlot (float percent);
-    void insertDoneSlot (DBObject& object);
 
 public:
     JSONImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
@@ -69,18 +63,18 @@ public:
     virtual TaskWidget* widget ();
     virtual void deleteWidget ();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     bool canImportFile ();
     virtual bool canRun();
     virtual void run ();
 
-    const std::map <std::string, SavedFile*>& fileList () { return file_list_; }
-    bool hasFile (const std::string& filename) { return file_list_.count (filename) > 0; }
-    void addFile (const std::string& filename);
+    const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
+    bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
+    void addFile (const std::string &filename);
     void removeCurrentFilename ();
-    void currentFilename (const std::string& filename);
-    const std::string& currentFilename () { return current_filename_; }
+    void currentFilename (const std::string filename, bool archive);
+    const std::string &currentFilename () { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
@@ -90,15 +84,13 @@ public:
     void removeCurrentSchema ();
 
     std::string currentSchemaName() const;
-    void currentSchemaName(const std::string& currentSchema);
+    void currentSchemaName(const std::string &currentSchema);
 
     virtual bool checkPrerequisites ();
     virtual bool isRecommended ();
     virtual bool isRequired ();
 
     void test(bool test);
-
-    size_t objectsInserted() const;
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
@@ -108,17 +100,18 @@ protected:
 
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;
+    size_t key_count_ {0};
 
     size_t insert_active_ {0};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set <int> added_data_sources_;
 
-    std::shared_ptr <ReadJSONFileJob> read_json_job_;
+    std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
     std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
     std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
     bool test_ {false};
+    bool archive_ {false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
@@ -142,15 +135,15 @@ protected:
     std::string object_rate_str_;
     std::string remaining_time_str_;
 
-    std::unique_ptr<QMessageBox> msg_box_;
+    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
-    void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
+    QMessageBox* msg_box_ {nullptr};
+
+    void insertData ();
 
     void checkAllDone ();
 
     void updateMsgBox ();
-
-    bool maxLoadReached ();
 
     virtual void checkSubConfigurables () {}
 };

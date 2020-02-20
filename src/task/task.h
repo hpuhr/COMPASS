@@ -86,23 +86,12 @@ public:
         return tooltip_;
     }
 
-    bool showDoneSummary() const
-    {
-        return show_done_summary_;
-    }
-
-    void showDoneSummary(bool value)
-    {
-        show_done_summary_ = value;
-    }
-
 protected:
     std::string name_;
     std::string gui_name_;
     bool gui_only_ {false};
     bool expert_only_ {false};
     bool done_ {false};
-    bool show_done_summary_ {true};
 
     std::string tooltip_;
 

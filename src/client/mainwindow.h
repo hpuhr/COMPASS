@@ -54,9 +54,17 @@ private slots:
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
     void startSlot ();
+//    void addJSONImporterTaskSlot ();
+//    void addRadarPlotPositionCalculatorTaskSlot ();
+//    void addCreateARTASAssociationsTaskSlot ();
+
+//#if USE_JASTERIX
+//    void addASTERIXImporterTaskSlot ();
+//#endif
+
 
     /// @brief Handles key press events
-    //void keyPressEvent ( QKeyEvent * event );
+    void keyPressEvent ( QKeyEvent * event );
 
 public:
     /// @brief Constructor
@@ -64,17 +72,29 @@ public:
     /// @brief Destructor
     virtual ~MainWindow();
 
-    void disableConfigurationSaving ();
-
 protected:
     /// Widget stack for startup to usage switch
     QTabWidget* tab_widget_ {nullptr};
+    /// Database configuration widget
+    //QWidget *dbinterface_widget_;
+    // Contains database schema configuration elements
+    //QWidget *dbschema_manager_widget_;
+    //QMenu *task_menu_ {nullptr};
 
     TaskManagerWidget* task_manager_widget_ {nullptr};
 
+    /// Contains DBObject configuration elements
+    //DBObjectManagerWidget *object_manager_widget_;
+
     ManagementWidget* management_widget_ {nullptr};
 
-    bool save_configuration_ {true};
+    //QCheckBox *postprocess_check_{nullptr};
+    //QPushButton *start_button_{nullptr};
+
+    /// @brief Creates File menu
+    //void createMenus();
+
+    //void initAfterStart ();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent *event);

@@ -6,6 +6,7 @@ include_directories (
 target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/json.hpp"
+        "${CMAKE_CURRENT_LIST_DIR}/jsonutils.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsonparsingschema.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsondatamapping.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsondatamappingwidget.h"

@@ -8,22 +8,19 @@
 #include <sstream>
 #include <fstream>
 
-class ReadJSONFileJob : public Job
+class ReadJSONFilePartJob : public Job
 {
-    Q_OBJECT
-signals:
-    void readJSONFilePartSignal ();
-
 public:
-    ReadJSONFileJob(const std::string& file_name, unsigned int num_objects);
-    virtual ~ReadJSONFileJob();
+    ReadJSONFilePartJob(const std::string& file_name, bool archive, unsigned int num_objects);
+    virtual ~ReadJSONFilePartJob();
 
     virtual void run ();
 
-    void pause ();
-    void unpause ();
+    void resetDone ();
 
-    std::vector<std::string> objects(); // for moving out
+    bool fileReadDone() const;
+
+    std::vector<std::string>&& objects(); // for moving out
 
     size_t bytesRead() const;
     size_t bytesToRead() const;
@@ -52,8 +49,6 @@ protected:
     size_t bytes_read_ {0};
     size_t bytes_read_tmp_ {0};
     std::vector<std::string> objects_;
-
-    volatile bool pause_ {false};
 
     void performInit ();
     void readFilePart ();

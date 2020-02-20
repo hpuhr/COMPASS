@@ -41,7 +41,6 @@ SQLiteConnectionInfoWidget::SQLiteConnectionInfoWidget(SQLiteConnection& connect
     grid->addWidget(new QLabel ("Database"), 0, 0);
 
     database_label_ = new QLabel ();
-    database_label_->setWordWrap(true);
     grid->addWidget(database_label_, 0, 1);
 
     grid->addWidget(new QLabel ("Status"), 1, 0);

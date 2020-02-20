@@ -29,10 +29,8 @@
 #include <QObject>
 
 #include <memory>
-#include <mutex>
-#include <deque>
 
-//#include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_queue.h>
 
 class TaskManager;
 class ASTERIXImportTaskWidget;
@@ -139,29 +137,25 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-
-    std::shared_ptr <JSONMappingJob> json_map_job_;
-    //std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
-    //std::mutex map_jobs_mutex_;
-    //bool waiting_for_map_ {false};
+    tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
+    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
 
     std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
-    bool waiting_for_insert_ {false};
+    size_t key_count_ {0};
     size_t insert_active_ {0};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set <int> added_data_sources_;
 
     bool all_done_{false};
 
     virtual void checkSubConfigurables ();
 
-    void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
+    void insertData ();
     void checkAllDone ();
 
     bool maxLoadReached ();
