@@ -360,6 +360,8 @@ void DBObjectManager::loadSlot ()
 {
     logdbg << "DBObjectManager: loadSlot";
 
+    load_in_progress_ = true;
+
     bool load_job_created = false;
 
     for (auto& object : objects_)
@@ -416,6 +418,8 @@ void DBObjectManager::quitLoading ()
 
     for (auto& object : objects_)
         object.second->quitLoading();
+
+    load_in_progress_ = true; // TODO
 }
 
 void DBObjectManager::updateSchemaInformationSlot ()
@@ -475,6 +479,7 @@ void DBObjectManager::loadingDoneSlot (DBObject& object)
     if (done)
     {
         loginf << "DBObjectManager: loadingDoneSlot: all done";
+        load_in_progress_ = false;
         emit allLoadingDoneSignal();
 
         if (load_widget_)
@@ -586,4 +591,9 @@ bool DBObjectManager::isOtherDBObjectPostProcessing (DBObject& object)
             return true;
 
     return false;
+}
+
+bool DBObjectManager::loadInProgress() const
+{
+    return load_in_progress_;
 }

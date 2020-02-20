@@ -60,6 +60,8 @@ public:
     JSONImportTaskWidget(JSONImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~JSONImportTaskWidget();
 
+    void addFile (const std::string& filename);
+
     void runStarted ();
     void runDone ();
 

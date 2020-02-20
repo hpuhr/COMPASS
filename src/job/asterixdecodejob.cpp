@@ -74,11 +74,14 @@ void ASTERIXDecodeJob::run ()
     logdbg << "ASTERIXDecodeJob: run: done";
 }
 
-void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json>&& data, size_t num_frames, size_t num_records,
+void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
                                          size_t num_errors)
 {
     if (error_)
+    {
+        loginf << "ASTERIXDecodeJob: jasterix_callback: errors state";
         return;
+    }
 
     assert (!extracted_data_);
     extracted_data_ = std::move(data);
@@ -343,11 +346,6 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 {
     return category_counts_;
-}
-
-std::unique_ptr<nlohmann::json>&& ASTERIXDecodeJob::extractedData()
-{
-    return std::move(extracted_data_);
 }
 
 size_t ASTERIXDecodeJob::numErrors() const

@@ -20,9 +20,7 @@
 
 #include <QWidget>
 
-class QLineEdit;
-class QLabel;
-class QRadioButton;
+class QComboBox;
 
 class ProjectionManager;
 
@@ -31,8 +29,7 @@ class ProjectionManagerWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    void projectionChangedSlot();
-    void changedEPSGSlot();
+    void selectedObjectParserSlot(const QString& name);
 
 public:
     ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -41,13 +38,7 @@ public:
 protected:
     ProjectionManager& projection_manager_;
 
-    QRadioButton* ogr_radio_ {nullptr};
-    QLabel* world_proj_info_label_ {nullptr};
-    QLineEdit* epsg_edit_ {nullptr};
-    QLabel* cart_proj_info_label_ {nullptr};
-
-    QRadioButton* sdl_radio_ {nullptr};
-    QRadioButton* rs2g_radio_ {nullptr};
+    QComboBox* projection_box_ {nullptr};
 };
 
 

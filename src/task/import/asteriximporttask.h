@@ -140,9 +140,10 @@ protected:
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
-    std::mutex map_jobs_mutex_;
-    bool waiting_for_map_ {false};
+    std::shared_ptr <JSONMappingJob> json_map_job_;
+    //std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    //std::mutex map_jobs_mutex_;
+    //bool waiting_for_map_ {false};
     std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
 
     bool error_ {false};

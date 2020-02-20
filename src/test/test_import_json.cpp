@@ -14,8 +14,9 @@
 #include "sqliteconnectionwidget.h"
 #include "managedatasourcestask.h"
 #include "managedatasourcestaskwidget.h"
-#include "asteriximporttask.h"
-#include "asteriximporttaskwidget.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskwidget.h"
+#include "jsonparsingschema.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
 #include "dboeditdatasourceswidget.h"
@@ -28,8 +29,9 @@ using namespace Utils;
 
 std::string data_path;
 std::string filename;
+std::string schema_name;
 
-TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
+TEST_CASE( "ATSDB Import JSON", "[ATSDB]" )
 {
     int argc = 1;
     char* argv[1];
@@ -93,55 +95,60 @@ TEST_CASE( "ATSDB Import ASTERIX", "[ATSDB]" )
         client.processEvents();
 
     // import asterix
-    ASTERIXImportTask& asterix_import_task = task_manager.asterixImporterTask();
-    task_manager_widget->setCurrentTask(asterix_import_task);
-    REQUIRE (task_manager_widget->getCurrentTaskName() == asterix_import_task.name());
-    REQUIRE (asterix_import_task.isRecommended());
+    JSONImportTask& json_import_task = task_manager.jsonImporterTask();
+    task_manager_widget->setCurrentTask(json_import_task);
+    REQUIRE (task_manager_widget->getCurrentTaskName() == json_import_task.name());
+    REQUIRE (json_import_task.isRecommended());
 
-    ASTERIXImportTaskWidget* asterix_import_task_widget = dynamic_cast<ASTERIXImportTaskWidget*> (
-                asterix_import_task.widget());
-    REQUIRE(asterix_import_task_widget);
+    JSONImportTaskWidget* json_import_task_widget = dynamic_cast<JSONImportTaskWidget*> (
+                json_import_task.widget());
+    REQUIRE(json_import_task_widget);
 
-    asterix_import_task_widget->addFile(recording_filename);
-    REQUIRE(asterix_import_task.canRun());
-    asterix_import_task.showDoneSummary(false);
-
-    task_manager_widget->runCurrentTaskSlot();
-
-    QThread::msleep(100);
-
-    while (client.hasPendingEvents() || !asterix_import_task.done())
-        client.processEvents();
-
-    // set data sources
-    REQUIRE (task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
-
-    std::string ds_filename = data_path+"ds.json";
-    REQUIRE(Files::fileExists(ds_filename));
-
-    manage_ds_task.importConfigDataSources(ds_filename);
-    manage_ds_task.autoSyncAllConfigDataSourcesToDB ();
-
-    while (client.hasPendingEvents())
-        client.processEvents();
-
-    QThread::msleep(100); // delay
-
-    // calculate radar plot positions
-    RadarPlotPositionCalculatorTask& radar_plot_pos_calc = task_manager.radarPlotPositionCalculatorTask();
-    REQUIRE (task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
-    REQUIRE (radar_plot_pos_calc.isRecommended());
-    radar_plot_pos_calc.showDoneSummary(false);
+    json_import_task_widget->addFile(recording_filename);
+    json_import_task.currentFilename(recording_filename);
+    json_import_task_widget->selectedSchemaChangedSlot(schema_name.c_str());
+    REQUIRE(json_import_task.canRun());
+    json_import_task.showDoneSummary(false);
 
     task_manager_widget->runCurrentTaskSlot();
 
     QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
+    while (client.hasPendingEvents() || !json_import_task.done())
         client.processEvents();
+
+    REQUIRE (json_import_task.objectsInserted() != 0);
+
+//    // set data sources
+//    REQUIRE (task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+
+//    std::string ds_filename = data_path+"ds.json";
+//    REQUIRE(Files::fileExists(ds_filename));
+
+//    manage_ds_task.importConfigDataSources(ds_filename);
+//    manage_ds_task.autoSyncAllConfigDataSourcesToDB ();
+
+//    while (client.hasPendingEvents())
+//        client.processEvents();
+
+//    QThread::msleep(100); // delay
+
+//    // calculate radar plot positions
+//    RadarPlotPositionCalculatorTask& radar_plot_pos_calc = task_manager.radarPlotPositionCalculatorTask();
+//    REQUIRE (task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
+//    REQUIRE (radar_plot_pos_calc.isRecommended());
+//    radar_plot_pos_calc.showDoneSummary(false);
+
+//    task_manager_widget->runCurrentTaskSlot();
+
+//    QThread::msleep(100);
+
+//    while (client.hasPendingEvents() || !radar_plot_pos_calc.done())
+//        client.processEvents();
 
     // post-process
     PostProcessTask& post_process_task = task_manager.postProcessTask();
+    task_manager_widget->setCurrentTask(post_process_task);
     REQUIRE (task_manager_widget->getCurrentTaskName() == post_process_task.name());
     REQUIRE (post_process_task.isRecommended());
     REQUIRE (post_process_task.isRequired());
@@ -196,7 +203,10 @@ int main (int argc, char* argv[])
             ("path for data files")
             | Opt( filename, "filename" ) // bind variable to a new option, with a hint string
             ["--filename"]    // the option names it will respond to
-            ("filename to use");        // description string for the help output
+            ("filename to use")        // description string for the help output
+            | Opt( schema_name, "schema_name" ) // bind variable to a new option, with a hint string
+            ["--schema_name"]    // the option names it will respond to
+            ("schema to use");
 
     // Now pass the new composite back to Catch so it uses that
     session.cli(cli);
@@ -219,6 +229,14 @@ int main (int argc, char* argv[])
     else
     {
         std::cout << "filename variable missing" << std::endl;
+        return -1;
+    }
+
+    if(schema_name.size())
+        std::cout << "schema_name: '" << schema_name << "'" << std::endl;
+    else
+    {
+        std::cout << "schema_name variable missing" << std::endl;
         return -1;
     }
 

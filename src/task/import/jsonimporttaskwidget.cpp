@@ -26,6 +26,7 @@
 #include "dbobjectmanager.h"
 #include "dbobject.h"
 #include "selectdbobjectdialog.h"
+#include "jsonparsingschema.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -200,15 +201,18 @@ JSONImportTaskWidget::~JSONImportTaskWidget()
 
 }
 
+void JSONImportTaskWidget::addFile (const std::string& filename)
+{
+    if (!task_.hasFile(filename))
+        task_.addFile(filename);
+}
+
 void JSONImportTaskWidget::addFileSlot ()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Add JSON File"));
 
     if (filename.size() > 0)
-    {
-        if (!task_.hasFile(filename.toStdString()))
-            task_.addFile(filename.toStdString());
-    }
+        addFile(filename.toStdString());
 }
 
 void JSONImportTaskWidget::deleteFileSlot ()
@@ -231,14 +235,13 @@ void JSONImportTaskWidget::deleteFileSlot ()
 
 void JSONImportTaskWidget::selectedFileSlot ()
 {
-    loginf << "JSONImporterTaskWidget: selectedFileSlot";
+    logdbg << "JSONImporterTaskWidget: selectedFileSlot";
     assert (file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
     assert (task_.hasFile(filename.toStdString()));
 
-    bool archive = (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"));
-    task_.currentFilename (filename.toStdString(), archive);
+    task_.currentFilename (filename.toStdString());
 }
 
 void JSONImportTaskWidget::updateFileListSlot ()

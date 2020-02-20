@@ -47,7 +47,11 @@ public:
 
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    std::unique_ptr<nlohmann::json>&& extractedData();
+    std::unique_ptr<nlohmann::json> extractedData()
+    {
+        return std::move(extracted_data_);
+    }
+
 
 private:
     ASTERIXImportTask& task_;
@@ -70,7 +74,7 @@ private:
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
-    void jasterix_callback(std::unique_ptr<nlohmann::json>&& data, size_t num_frames, size_t num_records,
+    void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
                            size_t numErrors);
     void processRecord (unsigned int category, nlohmann::json& record);
 };

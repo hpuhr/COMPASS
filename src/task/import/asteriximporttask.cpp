@@ -59,8 +59,8 @@ using namespace std;
 const unsigned int unlimited_chunk_size = 10000;
 const unsigned int limited_chunk_size = 5000;
 
-const unsigned int unlimited_num_json_jobs_ = 2;
-const unsigned int limited_num_json_jobs_ = 1;
+//const unsigned int unlimited_num_json_jobs_ = 2;
+//const unsigned int limited_num_json_jobs_ = 1;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
@@ -82,18 +82,18 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
 
-    loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
+    loginf << "ASTERIXImporterTask: constructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
     if (limit_ram_)
     {
         jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::record_chunk_size = limited_chunk_size;
+        jASTERIX::data_block_chunk_size = limited_chunk_size;
     }
     else
     {
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::record_chunk_size = unlimited_chunk_size;
+        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX> (jasterix_definition_path, false, debug_jasterix_, true);
@@ -101,7 +101,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
     {
-        loginf << "ASTERIXImporterTask: contructor: resetting to no framing";
+        loginf << "ASTERIXImporterTask: constructor: resetting to no framing";
         current_framing_ = "";
     }
 }
@@ -456,12 +456,12 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
     if (limit_ram_)
     {
         jASTERIX::frame_chunk_size = limited_chunk_size;
-        jASTERIX::record_chunk_size = limited_chunk_size;
+        jASTERIX::data_block_chunk_size = limited_chunk_size;
     }
     else
     {
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
-        jASTERIX::record_chunk_size = unlimited_chunk_size;
+        jASTERIX::data_block_chunk_size = unlimited_chunk_size;
     }
 
     if (widget_)
@@ -544,7 +544,7 @@ void ASTERIXImportTask::run()
     }
     else if (free_ram >= ram_threshold && limit_ram_)
     {
-        loginf << "ASTERIXImporterTask: ASTERIXImporterTask: " << free_ram << " GB free ram, recommending not limiting";
+        loginf << "ASTERIXImporterTask: run: " << free_ram << " GB free ram, recommending not limiting";
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(nullptr, "RAM Limiting",
@@ -570,6 +570,13 @@ void ASTERIXImportTask::run()
         widget_->runStarted();
 
     assert (canImportFile());
+
+
+    if (status_widget_)
+    {
+        logwrn << "ASTERIXImporterTask: run: status widget still active";
+        status_widget_ = nullptr;
+    }
     assert (!status_widget_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -668,21 +675,23 @@ void ASTERIXImportTask::run()
 
 void ASTERIXImportTask::decodeASTERIXDoneSlot ()
 {
-    logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
     assert (decode_job_);
 
     if (decode_job_->error())
     {
+        loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot: error";
         error_ = decode_job_->error();
         error_message_ = decode_job_->errorMessage();
 
         QMessageBox msgBox;
-        msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease quit the application.").c_str());
+        msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease check the decoder settings.").c_str());
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
-    }
 
+
+    }
     assert (status_widget_);
 
     if (status_widget_->numErrors())
@@ -722,6 +731,21 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
     if (!create_mapping_stubs_) // test or import
     {
+//        map_jobs_mutex_.lock();
+//        json_map_jobs_.push_back(json_map_job);
+//        map_jobs_mutex_.unlock();
+
+        while (json_map_job_) // only one can exist at a time
+        {
+            if (decode_job_)
+                decode_job_->pause();
+
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
+
+        assert (!json_map_job_);
+
         assert (schema_);
 
         std::vector<std::string> keys;
@@ -731,21 +755,16 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
         else
             keys = {"frames", "content", "data_blocks", "content", "records"};
 
-        std::shared_ptr<JSONMappingJob> json_map_job = make_shared<JSONMappingJob> (
-                    std::move(extracted_data), keys, schema_->parsers());
+        json_map_job_ = make_shared<JSONMappingJob> (std::move(extracted_data), keys, schema_->parsers());
 
         assert (!extracted_data);
 
-        connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImportTask::mapJSONObsoleteSlot,
+        connect (json_map_job_.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImportTask::mapJSONObsoleteSlot,
                  Qt::QueuedConnection);
-        connect (json_map_job.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImportTask::mapJSONDoneSlot,
+        connect (json_map_job_.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImportTask::mapJSONDoneSlot,
                  Qt::QueuedConnection);
 
-        map_jobs_mutex_.lock();
-        json_map_jobs_.push_back(json_map_job);
-        map_jobs_mutex_.unlock();
-
-        JobManager::instance().addNonBlockingJob(json_map_job);
+        JobManager::instance().addNonBlockingJob(json_map_job_);
 
         if (decode_job_)
         {
@@ -796,26 +815,29 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
 
     assert (status_widget_);
 
-    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
-    std::shared_ptr<JSONMappingJob> queued_map_job;
+//    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
+//    std::shared_ptr<JSONMappingJob> queued_map_job;
 
-    map_jobs_mutex_.lock();
-    waiting_for_map_ = true;
+//    map_jobs_mutex_.lock();
+//    waiting_for_map_ = true;
 
-    queued_map_job = json_map_jobs_.front();
-    json_map_jobs_.pop_front();
+    assert (json_map_job_);
 
-    map_jobs_mutex_.unlock();
-    waiting_for_map_ = false;
+//    queued_map_job = json_map_jobs_.front();
+//    json_map_jobs_.pop_front();
 
-    assert (queued_map_job.get() == map_job);
+//    map_jobs_mutex_.unlock();
+//    waiting_for_map_ = false;
 
-    status_widget_->addNumMapped(map_job->numMapped());
-    status_widget_->addNumNotMapped(map_job->numNotMapped());
-    status_widget_->addMappedCounts(queued_map_job->categoryMappedCounts());
-    status_widget_->addNumCreated(map_job->numCreated());
+//    assert (queued_map_job.get() == map_job);
 
-    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = std::move(map_job->buffers());
+    status_widget_->addNumMapped(json_map_job_->numMapped());
+    status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
+    status_widget_->addMappedCounts(json_map_job_->categoryMappedCounts());
+    status_widget_->addNumCreated(json_map_job_->numCreated());
+
+    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = std::move(json_map_job_->buffers());
+    json_map_job_ = nullptr;
 
     if (decode_job_)
     {
@@ -913,7 +935,7 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
         if (!buffer->size())
         {
-            logdbg << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
+            loginf << "ASTERIXImporterTask: insertData: dbo " << buf_it.first << " with empty buffer";
             continue;
         }
 
@@ -1015,6 +1037,8 @@ void ASTERIXImportTask::insertData (std::map <std::string, std::shared_ptr<Buffe
 
     }
 
+    checkAllDone();
+
     logdbg << "JSONImporterTask: insertData: done";
 }
 
@@ -1036,11 +1060,11 @@ void ASTERIXImportTask::insertDoneSlot (DBObject& object)
 void ASTERIXImportTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
-           << " wait map " << !waiting_for_map_
-           << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
+           //<< " wait map " << !waiting_for_map_
+           << " map job " << (json_map_job_ == nullptr) << " map stubs " << (json_map_stub_job_ == nullptr)
            << " wait insert " << ! waiting_for_insert_ << " insert active " << (insert_active_ == 0);
 
-    if (!all_done_ && decode_job_ == nullptr && !waiting_for_map_ && json_map_jobs_.empty()
+    if (!all_done_ && decode_job_ == nullptr && json_map_job_ == nullptr
             && json_map_stub_job_ == nullptr && !waiting_for_insert_ && insert_active_ == 0)
     {
         loginf << "ASTERIXImporterTask: checkAllDone: setting all done";
@@ -1114,8 +1138,10 @@ void ASTERIXImportTask::closeStatusDialogSlot()
 
 bool ASTERIXImportTask::maxLoadReached ()
 {
-    if (limit_ram_)
-        return json_map_jobs_.size() > limited_num_json_jobs_;
-    else
-        return json_map_jobs_.size() > unlimited_num_json_jobs_;
+    return insert_active_ >= 2;
+
+//    if (limit_ram_)
+//        return json_map_jobs_.size() > limited_num_json_jobs_;
+//    else
+//        return json_map_jobs_.size() > unlimited_num_json_jobs_;
 }

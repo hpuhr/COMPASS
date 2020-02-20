@@ -25,7 +25,7 @@ public:
     size_t numNotMapped() const;
     size_t numCreated() const;
 
-    std::map<std::string, std::shared_ptr<Buffer>>& buffers () { return buffers_; }
+    std::map<std::string, std::shared_ptr<Buffer>> buffers () { return std::move(buffers_); }
 
     std::map<unsigned int, std::pair<size_t, size_t> > categoryMappedCounts() const;
 
