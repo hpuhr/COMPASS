@@ -67,7 +67,6 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
-
 }
 
 TaskManager::~TaskManager()
