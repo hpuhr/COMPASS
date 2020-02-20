@@ -28,6 +28,8 @@ public:
     explicit SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent=0);
     virtual ~SQLiteConnectionWidget();
 
+    void addFile (const std::string& filename);
+
 protected:
     SQLiteConnection& connection_;
 

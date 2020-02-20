@@ -21,70 +21,69 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
-#include <QRadioButton>
-#include <QGroupBox>
+#include <QComboBox>
+
+#include <cassert>
 
 #include "stringconv.h"
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "projection.h"
+#include "logger.h"
 
 ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent, Qt::WindowFlags f)
  : QWidget (parent, f), projection_manager_(proj_man)
 {
+    setContentsMargins(0,0,0,0);
+
     QVBoxLayout *main_layout = new QVBoxLayout ();
+    main_layout->setContentsMargins(0,0,0,0);
 
-    QGroupBox *groupBox = new QGroupBox(tr("Projection Selection"));
+    QGridLayout* grid = new QGridLayout ();
+    grid->setContentsMargins(0,0,0,0);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    grid->addWidget(new QLabel("Projection Method"), 0, 0);
 
-    ogr_radio_ = new QRadioButton ("OGR Projection");
-    ogr_radio_->setChecked(projection_manager_.useOGRProjection());
-    connect (ogr_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-    layout->addWidget(ogr_radio_);
+    projection_box_ = new QComboBox ();
 
-    QGridLayout *grid = new QGridLayout ();
+    for (auto& proj_it : projection_manager_.projections())
+        projection_box_->addItem(proj_it.first.c_str());
 
-    QLabel *world_label = new QLabel ("World Coordinates (WGS84) Info");
-    grid->addWidget (world_label, 0, 0);
+    if (projection_manager_.hasCurrentProjection())
+        projection_box_->setCurrentText(projection_manager_.currentProjectionName().c_str());
 
-    world_proj_info_label_ = new QLabel (projection_manager_.getWorldPROJ4Info().c_str());
-    world_proj_info_label_->setWordWrap(true);
-    grid->addWidget (world_proj_info_label_, 0, 1);
+    connect (projection_box_, SIGNAL(currentIndexChanged(const QString&)),
+             this, SLOT(selectedObjectParserSlot(const QString&)));
 
-    QLabel *cart_label = new QLabel ("Cartesian Coordinates EPSG");
-    grid->addWidget (cart_label, 1, 0);
+    grid->addWidget(projection_box_, 0, 1);
 
-    epsg_edit_ = new QLineEdit ();
-    epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
-    connect (epsg_edit_, SIGNAL(returnPressed()), this, SLOT(changedEPSGSlot()));
-    epsg_edit_->setToolTip("Please refer to the EPSG number appropriate to your country \n"
-                           "under http://spatialreference.org/ref/epsg/");
-    grid->addWidget (epsg_edit_, 1, 1);
+    main_layout->addLayout(grid);
 
-    QLabel *cart_info_label = new QLabel ("Cartesian Coordinates Info");
-    grid->addWidget (cart_info_label, 2, 0);
+//    QLabel *world_label = new QLabel ("World Coordinates (WGS84) Info");
+//    grid->addWidget (world_label, 0, 0);
 
-    cart_proj_info_label_ = new QLabel (projection_manager_.getCartesianPROJ4Info().c_str());
-    cart_proj_info_label_->setWordWrap(true);
-    grid->addWidget (cart_proj_info_label_, 2, 1);
+//    world_proj_info_label_ = new QLabel (projection_manager_.getWorldPROJ4Info().c_str());
+//    world_proj_info_label_->setWordWrap(true);
+//    grid->addWidget (world_proj_info_label_, 0, 1);
 
-    layout->addLayout (grid);
+//    QLabel *cart_label = new QLabel ("Cartesian Coordinates EPSG");
+//    grid->addWidget (cart_label, 1, 0);
 
-    sdl_radio_ = new QRadioButton ("SDL Projection");
-    //ogr_radio_->setChecked(projection_manager_.useSDLProjection());
-    //connect (sdl_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-    //sdl_radio_->setChecked(projection_manager_.useSDLProjection());
-    sdl_radio_->setDisabled(true);
-    //layout->addWidget(sdl_radio_);
+//    epsg_edit_ = new QLineEdit ();
+//    epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
+//    connect (epsg_edit_, SIGNAL(returnPressed()), this, SLOT(changedEPSGSlot()));
+//    epsg_edit_->setToolTip("Please refer to the EPSG number appropriate to your country \n"
+//                           "under http://spatialreference.org/ref/epsg/");
+//    grid->addWidget (epsg_edit_, 1, 1);
 
-    rs2g_radio_  = new QRadioButton ("RS2G Projection");
-    connect (rs2g_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
-    rs2g_radio_->setChecked(projection_manager_.useRS2GProjection());
-    layout->addWidget(rs2g_radio_);
+//    QLabel *cart_info_label = new QLabel ("Cartesian Coordinates Info");
+//    grid->addWidget (cart_info_label, 2, 0);
 
-    groupBox->setLayout(layout);
+//    cart_proj_info_label_ = new QLabel (projection_manager_.getCartesianPROJ4Info().c_str());
+//    cart_proj_info_label_->setWordWrap(true);
+//    grid->addWidget (cart_proj_info_label_, 2, 1);
 
-    main_layout->addWidget(groupBox);
+//    layout->addLayout (grid);
 
     setLayout (main_layout);
 }
@@ -93,42 +92,35 @@ ProjectionManagerWidget::~ProjectionManagerWidget()
 {
 }
 
-void ProjectionManagerWidget::changedEPSGSlot ()
+//void ProjectionManagerWidget::changedEPSGSlot ()
+//{
+//    assert (epsg_edit_);
+//    assert (cart_proj_info_label_);
+
+//    std::string value_str = epsg_edit_->text().toStdString();
+
+//    try
+//    {
+//        unsigned int value = std::stoul(value_str);
+//        ProjectionManager::instance().setNewCartesianEPSG(value);
+//        cart_proj_info_label_->setText(projection_manager_.getCartesianPROJ4Info().c_str());
+//    }
+//    catch (...)
+//    {
+//        std::string msg = "Forbidden value '"+value_str
+//                +"'\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers.";
+
+//        QMessageBox::warning ( this, "Change EPSG Value", msg.c_str());
+//        epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
+//        return;
+//    }
+//}
+
+void ProjectionManagerWidget::selectedObjectParserSlot(const QString& name)
 {
-    assert (epsg_edit_);
-    assert (cart_proj_info_label_);
+    loginf << "ProjectionManagerWidget: selectedObjectParserSlot: name " << name.toStdString();
 
-    std::string value_str = epsg_edit_->text().toStdString();
-
-    try
-    {
-        unsigned int value = std::stoul(value_str);
-        ProjectionManager::instance().setNewCartesianEPSG(value);
-        cart_proj_info_label_->setText(projection_manager_.getCartesianPROJ4Info().c_str());
-    }
-    catch (...)
-    {
-        std::string msg = "Forbidden value '"+value_str
-                +"'\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers.";
-
-        QMessageBox::warning ( this, "Change EPSG Value", msg.c_str());
-        epsg_edit_->setText(std::to_string(projection_manager_.getEPSG()).c_str());
-        return;
-    }
+    assert (projection_manager_.hasProjection(name.toStdString()));
+    projection_manager_.currentProjectionName(name.toStdString());
 }
 
-void ProjectionManagerWidget::projectionChangedSlot()
-{
-    assert (ogr_radio_);
-    assert (sdl_radio_);
-    assert (rs2g_radio_);
-
-    if (ogr_radio_->isChecked())
-        projection_manager_.useOGRProjection(true);
-
-//    if (sdl_radio_->isChecked())
-//        projection_manager_.useSDLProjection(true);
-
-    if (rs2g_radio_->isChecked())
-        projection_manager_.useRS2GProjection(true);
-}

@@ -61,10 +61,10 @@ public:
     bool hasMapping (unsigned int index) const;
     void removeMapping (unsigned int index);
 
-    void transformBuffer (std::shared_ptr<Buffer>& buffer, size_t index) const;
+    void transformBuffer (Buffer& buffer, size_t index) const;
 
     // returs true on successful parse
-    bool parseJSON (nlohmann::json& j, std::shared_ptr<Buffer>& buffer) const;
+    bool parseJSON (nlohmann::json& j, Buffer& buffer) const;
     void createMappingStubs (nlohmann::json& j);
 
     const DBOVariableSet& variableList() const;
@@ -79,7 +79,7 @@ public:
     void initialize ();
 
     std::shared_ptr<Buffer> getNewBuffer () const;
-    void appendVariablesToBuffer (std::shared_ptr<Buffer>& buffer) const;
+    void appendVariablesToBuffer (Buffer& buffer) const;
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
@@ -122,7 +122,7 @@ private:
     std::vector <JSONDataMapping> data_mappings_;
 
     // returns true on successful parse
-    bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer>& buffer, size_t row_cnt) const;
+    bool parseTargetReport (const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
     void createMappingsFromTargetReport (const nlohmann::json& tr);
 
     void checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& tr, bool is_in_array=false);

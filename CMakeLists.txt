@@ -2,9 +2,8 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 3.1)
-set ( CMAKE_BUILD_TYPE Debug )
-set(CMAKE_CXX_FLAGS_MYREL "-O3")
-#set ( CMAKE_BUILD_TYPE Release )
+
+set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
@@ -17,7 +16,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -Wall -std=c++11) #-Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation
+add_definitions ( -UNDEBUG -Wall -std=c++11)
+
+#-Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation for new compiler and old libs
+# -UNDEBUG for enabling asserts in release buils (until testing/error management is improved)
 
 find_package(Qt5Widgets)
 find_package(Qt5Core)
@@ -148,7 +150,7 @@ link_directories(
     ${jASTERIX_LIBRARIES}
     )
 
-target_link_libraries ( atsdb
+target_link_libraries ( atsdb optimized
     ${jASTERIX_LIBRARIES})
 ENDIF()
 
@@ -156,7 +158,6 @@ target_link_libraries ( atsdb optimized
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL
-#    ${TINYXML2_LIBRARY}
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}

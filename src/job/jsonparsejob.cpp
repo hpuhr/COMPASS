@@ -3,8 +3,8 @@
 
 using namespace nlohmann;
 
-JSONParseJob::JSONParseJob(std::vector<std::string>&& objects)
-    : Job ("JSONParseJob"), objects_(objects)
+JSONParseJob::JSONParseJob(std::vector<std::string> objects)
+    : Job ("JSONParseJob"), objects_(std::move(objects))
 {
 
 }
@@ -20,13 +20,16 @@ void JSONParseJob::run ()
 
     started_ = true;
     assert (!json_objects_);
-    json_objects_.reset(new std::vector<nlohmann::json>());
+    json_objects_.reset(new json());
+    (*json_objects_)["records"] = json::array();
+
+    json& records = json_objects_->at("records");
 
     for (auto& str_it : objects_)
     {
         try
         {
-            json_objects_->push_back(json::parse(str_it));
+            records.push_back(json::parse(str_it));
         }
         catch (nlohmann::detail::parse_error& e)
         {
@@ -51,9 +54,9 @@ size_t JSONParseJob::parseErrors() const
     return parse_errors_;
 }
 
-std::unique_ptr<std::vector<nlohmann::json>>& JSONParseJob::jsonObjects()
+std::unique_ptr<nlohmann::json> JSONParseJob::jsonObjects()
 {
-    return json_objects_;
+    return std::move(json_objects_);
 }
 
 

@@ -66,6 +66,7 @@ private:
     boost::posix_time::ptime stop_time_;
     boost::posix_time::time_duration time_diff_;
     std::string elapsed_time_str_;
+    std::string last_log_elapsed_time_str_;
 
     QLabel* time_label_ {nullptr};
 

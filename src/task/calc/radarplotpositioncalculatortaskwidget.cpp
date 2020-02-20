@@ -109,6 +109,8 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     expertModeChangedSlot();
     update();
 
+    main_layout->addStretch();
+
     setLayout (main_layout);
 }
 

@@ -71,9 +71,21 @@ Buffer::Buffer(PropertyList properties, const std::string &dbo_name)
  */
 Buffer::~Buffer()
 {
-    logdbg  << "Buffer: destructor: start";
+    logdbg  << "Buffer: destructor: dbo " << dbo_name_ << " id " << id_;
 
     properties_.clear();
+
+    getArrayListMap<bool>().clear();
+    getArrayListMap<char>().clear();
+    getArrayListMap<unsigned char>().clear();
+    getArrayListMap<int>().clear();
+    getArrayListMap<unsigned int>().clear();
+    getArrayListMap<long int>().clear();
+    getArrayListMap<unsigned long int>().clear();
+    getArrayListMap<float>().clear();
+    getArrayListMap<double>().clear();
+    getArrayListMap<std::string>().clear();
+
     data_size_ = 0;
 
     logdbg  << "Buffer: destructor: end";
@@ -192,7 +204,7 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     logdbg  << "Buffer: seizeBuffer: end size " << size();
 }
 
-const size_t Buffer::size ()
+size_t Buffer::size ()
 {
     return data_size_;
 }
