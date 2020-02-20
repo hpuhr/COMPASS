@@ -28,6 +28,7 @@
 #include "managedbobjectstaskwidget.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
+#include "jsonparsingschema.h"
 #include "managedatasourcestask.h"
 #include "managedatasourcestaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
