@@ -36,7 +36,7 @@ public:
 
     // copy from dbds, everything but id
     DBODataSource& operator=(StoredDBODataSource& other);
-    DBODataSource& operator=(DBODataSource&& other);
+    //DBODataSource& operator=(DBODataSource&& other);
 
     // comparison
     bool operator==(const StoredDBODataSource& other) const;

@@ -283,5 +283,5 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
    input[1] = G * RAD2DEG;
    input[2] = H;
 
-   return !isnan(input[0]) && !isnan(input[1]);
+   return !std::isnan(input[0]) && !std::isnan(input[1]);
 }

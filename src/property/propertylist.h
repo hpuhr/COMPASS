@@ -157,7 +157,7 @@ public:
             }
         }
         logerr << "PropertyList: get: property " << id << " not found";
-        assert (false);
+        throw std::runtime_error ("PropertyList: get: property "+id+" not found");
     }
 
     /**
@@ -169,7 +169,7 @@ public:
     {
         logdbg << "PropertyList: getPropertyIndex: start";
         if (!hasProperty(id))
-            throw std::runtime_error ("PropteryList: getPropertyIndex: property "+id+" does not exists");
+            throw std::runtime_error ("PropertyList: getPropertyIndex: property "+id+" does not exists");
 
         unsigned int cnt=0;
         for (auto it : properties_)
@@ -180,7 +180,7 @@ public:
             }
             cnt++;
         }
-        throw std::runtime_error("PropteryList: getPropertyIndex: property "+id+" not found");
+        throw std::runtime_error("PropertyList: getPropertyIndex: property "+id+" not found");
     }
 
     /// @brief Returns flag indicating if property is in list

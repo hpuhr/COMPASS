@@ -21,6 +21,7 @@
 #include "configurable.h"
 #include "json.hpp"
 #include "task.h"
+#include "jsonparsingschema.h"
 
 #include <QObject>
 
@@ -35,7 +36,6 @@ class SavedFile;
 class JSONParseJob;
 class JSONMappingJob;
 class ReadJSONFileJob;
-class JSONParsingSchema;
 class DBObject;
 class Buffer;
 class DBOVariableSet;

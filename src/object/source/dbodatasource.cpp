@@ -63,29 +63,29 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     return *this;
 }
 
-DBODataSource& DBODataSource::operator=(DBODataSource&& other)
-{
-    loginf << "DBODataSource: move operator: moving";
+//DBODataSource& DBODataSource::operator=(DBODataSource&& other)
+//{
+//    loginf << "DBODataSource: move operator: moving";
 
-    object_ = other.object_;
-    id_ = other.id_;
+//    object_ = other.object_;
+//    id_ = other.id_;
 
-    name_ = other.name_;
-    has_short_name_ = other.has_short_name_;
-    short_name_ = other.short_name_;
-    has_sac_ = other.has_sac_;
-    sac_ = other.sac_;
-    has_sic_ = other.has_sic_;
-    sic_ = other.sic_;
-    has_latitude_ = other.has_latitude_;
-    latitude_ = other.latitude_;
-    has_longitude_ = other.has_longitude_;
-    longitude_ = other.longitude_;
-    has_altitude_ = other.has_altitude_;
-    altitude_ = other.altitude_;
+//    name_ = other.name_;
+//    has_short_name_ = other.has_short_name_;
+//    short_name_ = other.short_name_;
+//    has_sac_ = other.has_sac_;
+//    sac_ = other.sac_;
+//    has_sic_ = other.has_sic_;
+//    sic_ = other.sic_;
+//    has_latitude_ = other.has_latitude_;
+//    latitude_ = other.latitude_;
+//    has_longitude_ = other.has_longitude_;
+//    longitude_ = other.longitude_;
+//    has_altitude_ = other.has_altitude_;
+//    altitude_ = other.altitude_;
 
-    return *this;
-}
+//    return *this;
+//}
 
 bool DBODataSource::operator==(const StoredDBODataSource& other) const
 {
