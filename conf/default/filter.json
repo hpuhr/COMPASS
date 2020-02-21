@@ -203,6 +203,48 @@
                     }
                 }
             },
+            "PrimaryOnly": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "name": "PrimaryOnly",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "PrimaryOnlyCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "IS",
+                                "reset_value": "NULL",
+                                "value": "NULL",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "mode3a_code"
+                            }
+                        },
+                        "PrimaryOnlyCondition1": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "IS",
+                                "reset_value": "NULL",
+                                "value": "NULL",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "target_addr"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "PrimaryOnlyWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            },
             "TargetAddress": {
                 "parameters": {
                     "active": false,
