@@ -83,7 +83,7 @@ public:
     void addFile (const std::string& filename);
     void removeCurrentFilename ();
     void currentFilename (const std::string& filename);
-    const std::string &currentFilename () { return current_filename_; }
+    const std::string& currentFilename () { return current_filename_; }
 
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
     void refreshjASTERIX();
