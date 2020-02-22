@@ -6780,11 +6780,11 @@
                                     },
                                     "JSONDataMapping81": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 5, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "report_type",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,

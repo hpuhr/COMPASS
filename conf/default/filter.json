@@ -203,41 +203,30 @@
                     }
                 }
             },
-            "PrimaryOnly": {
+            "RadarReportType": {
                 "parameters": {
                     "active": true,
                     "changed": true,
-                    "name": "PrimaryOnly",
+                    "name": "RadarReportType",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "PrimaryOnlyCondition0": {
+                        "RadarReportTypeCondition0": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
-                                "operator": "IS",
-                                "reset_value": "NULL",
-                                "value": "NULL",
+                                "operator": "IN",
+                                "reset_value": "1",
+                                "value": "1",
                                 "variable_dbo_name": "Meta",
-                                "variable_name": "mode3a_code"
-                            }
-                        },
-                        "PrimaryOnlyCondition1": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": "IS",
-                                "reset_value": "NULL",
-                                "value": "NULL",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "target_addr"
+                                "variable_name": "report_type"
                             }
                         }
                     },
                     "DBFilterWidget": {
-                        "PrimaryOnlyWidget0": {
+                        "RadarReportTypeWidget0": {
                             "parameters": {
                                 "visible": true
                             }
