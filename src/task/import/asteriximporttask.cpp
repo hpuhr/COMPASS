@@ -66,6 +66,8 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 const float ram_threshold = 4.0;
 
+const float tod_24h = 24*60*60;
+
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
     : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
@@ -77,6 +79,12 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("limit_ram", &limit_ram_, false);
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_framing", &current_framing_, "");
+
+    registerParameter("override_sac_org", &override_sac_org_, 0);
+    registerParameter("override_sic_org", &override_sic_org_, 0);
+    registerParameter("override_sac_new", &override_sac_new_, 1);
+    registerParameter("override_sic_new", &override_sic_new_, 1);
+    registerParameter("override_tod_offset", &override_tod_offset_, 0.0);
 
     createSubConfigurables();
 
@@ -495,6 +503,78 @@ bool ASTERIXImportTask::isRequired ()
     return false;
 }
 
+bool ASTERIXImportTask::overrideActive() const
+{
+    return override_active_;
+}
+
+void ASTERIXImportTask::overrideActive(bool value)
+{
+    loginf << "ASTERIXImportTask: overrideActive: value " << value;
+
+    override_active_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSacOrg() const
+{
+    return override_sac_org_;
+}
+
+void ASTERIXImportTask::overrideSacOrg(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSacOrg: value " << value;
+
+    override_sac_org_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSicOrg() const
+{
+    return override_sic_org_;
+}
+
+void ASTERIXImportTask::overrideSicOrg(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSicOrg: value " << value;
+
+    override_sic_org_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSacNew() const
+{
+    return override_sac_new_;
+}
+
+void ASTERIXImportTask::overrideSacNew(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSacNew: value " << value;
+
+    override_sac_new_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSicNew() const
+{
+    return override_sic_new_;
+}
+
+void ASTERIXImportTask::overrideSicNew(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSicNew: value " << value;
+
+    override_sic_new_ = value;
+}
+
+float ASTERIXImportTask::overrideTodOffset() const
+{
+    return override_tod_offset_;
+}
+
+void ASTERIXImportTask::overrideTodOffset(float value)
+{
+    loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
+
+    override_tod_offset_ = value;
+}
+
 void ASTERIXImportTask::deleteWidget ()
 {
     widget_.reset(nullptr);
@@ -828,7 +908,20 @@ void ASTERIXImportTask::run()
             if (record.contains("070")
                     && record.at("070").contains("Time Of Track Information"))
             {
-                record.at("070").at("Time Of Track Information") += override_tod_offset_;
+                float tod = record.at("070").at("Time Of Track Information"); // in seconds
+
+                tod += override_tod_offset_;
+
+                // check for out-of-bounds because of midnight-jump
+                while (tod < 0.0f)
+                    tod += tod_24h;
+                while (tod > tod_24h)
+                    tod -= tod_24h;
+
+                assert (tod >= 0.0f);
+                assert (tod <= tod_24h);
+
+                record.at("070").at("Time Of Track Information") = tod;
             }
         }
     };

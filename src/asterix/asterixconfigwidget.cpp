@@ -46,7 +46,7 @@ using namespace std;
 using namespace Utils;
 using namespace jASTERIX;
 
-ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget *parent)
+ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* parent)
      : QWidget(parent), task_(task)
 {
     main_layout_ = new QVBoxLayout ();
@@ -63,7 +63,7 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget *paren
         framing_grid->addWidget (framing_combo_, 0, 1);
 
         framing_edit_ = new QPushButton("Edit");
-        connect(framing_edit_, SIGNAL( clicked() ), this, SLOT(framingEditSlot()));
+        connect(framing_edit_, SIGNAL(clicked()), this, SLOT(framingEditSlot()));
         framing_grid->addWidget (framing_edit_, 0, 2);
 
         updateFraming();
@@ -105,7 +105,6 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget *paren
 
 ASTERIXConfigWidget::~ASTERIXConfigWidget()
 {
-
 }
 
 void ASTERIXConfigWidget::editDataBlockSlot()

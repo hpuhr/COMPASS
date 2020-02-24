@@ -2,6 +2,7 @@
 #define TEXTFIELDDOUBLEVALIDATOR_H
 
 #include <QDoubleValidator>
+#include <QLineEdit>
 
 #include "logger.h"
 
@@ -62,6 +63,18 @@ public:
 
             return QValidator::Invalid;
         }
+    }
+
+    static void displayValidityAsColor (QLineEdit* line_edit)
+    {
+        assert (line_edit);
+
+        if (line_edit->hasAcceptableInput())
+            line_edit->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); "
+                                                     "selection-background-color: rgb(200, 200, 200); }");
+        else
+            line_edit->setStyleSheet("QLineEdit { background: rgb(255, 100, 100); "
+                                                     "selection-background-color: rgb(255, 200, 200); }");
     }
 
 };

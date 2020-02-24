@@ -120,6 +120,24 @@ public:
     virtual bool isRecommended ();
     virtual bool isRequired ();
 
+    bool overrideActive() const;
+    void overrideActive(bool value);
+
+    unsigned int overrideSacOrg() const;
+    void overrideSacOrg(unsigned int value);
+
+    unsigned int overrideSicOrg() const;
+    void overrideSicOrg(unsigned int value);
+
+    unsigned int overrideSacNew() const;
+    void overrideSacNew(unsigned int value);
+
+    unsigned int overrideSicNew() const;
+    void overrideSicNew(unsigned int value);
+
+    float overrideTodOffset() const;
+    void overrideTodOffset(float value);
+
 protected:
     bool debug_jasterix_;
     bool limit_ram_;
