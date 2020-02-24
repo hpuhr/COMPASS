@@ -10,5 +10,9 @@ cp /usr/lib/libjasterix.a appimage/appdir/lib/
 cd definitions/
 zip -r ../jasterix_definitions.zip .
 
+cd ../analyze/
+zip -r ../analyze.zip . -x ".*" -x "__*" -x "*/__*"
+
+
 cd /app/workspace/atsdb/docker
 
