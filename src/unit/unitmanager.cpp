@@ -107,7 +107,7 @@ void UnitManager::checkSubConfigurables ()
         addNewSubConfiguration ("Dimension", "Speed");
         generateSubConfigurable("Dimension", "Speed");
 
-        dimensions_.at("Speed")->addUnit ("Konts", 1.0, "");
+        dimensions_.at("Speed")->addUnit ("Knots", 1.0, "");
         dimensions_.at("Speed")->addUnit ("Meter/Second", 0.514444, "");
         dimensions_.at("Speed")->addUnit ("NM/Second", 1.0/3600.0, "");
         dimensions_.at("Speed")->addUnit ("Mach", 0.00149984, "");

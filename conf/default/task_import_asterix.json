@@ -155,7 +155,7 @@
                                             "json_key": "150.Air Speed [knots]",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "JSONDataMapping11": {
@@ -955,7 +955,7 @@
                                             "json_key": "151.True Air Speed",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "JSONDataMapping61": {
@@ -3496,7 +3496,7 @@
                                             "json_key": "200.CALCULATED GROUNDSPEED",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "JSONDataMapping4": {
@@ -5607,7 +5607,7 @@
                                             "json_key": "185.Ground Speed",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "JSONDataMapping173": {

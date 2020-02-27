@@ -2656,7 +2656,7 @@
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "AIRSPEED_MACH": {
@@ -3017,7 +3017,7 @@
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "GROUND_BIT": {
@@ -3797,7 +3797,7 @@
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "TURNRATE_DEGPS": {
@@ -6334,7 +6334,7 @@
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "TRACK_HEADING_DEG": {
@@ -6708,7 +6708,7 @@
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": "Konts"
+                                            "unit": "Knots"
                                         }
                                     },
                                     "HASH_CODE": {
