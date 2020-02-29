@@ -736,22 +736,6 @@ void ASTERIXImportTask::run()
 
     loginf << "ASTERIXImporterTask: run: starting decode job";
 
-//    std::function<void(unsigned int, nlohmann::json&)> postprocess_lambda =
-//            [=](unsigned int cat, nlohmann::json& record)
-//    {
-//        this->post_process_.postProcess(cat, record);
-//    };
-
-
-//    std::function<void(unsigned int, nlohmann::json&)> override_lambda =
-//            [this] (unsigned int category, nlohmann::json& record)
-//    {
-//        if (category == 62)
-//        {
-
-//        }
-//    };
-
     assert (decode_job_ == nullptr);
 
     decode_job_ = make_shared<ASTERIXDecodeJob> (

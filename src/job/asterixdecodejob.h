@@ -35,7 +35,6 @@ signals:
 public:
     ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
                      ASTERIXPostProcess& post_process);
-                     //std::function<void(unsigned int category, nlohmann::json& record)> override_function);
     virtual ~ASTERIXDecodeJob();
 
     virtual void run ();
@@ -63,9 +62,6 @@ private:
     std::string framing_;
     bool test_ {false};
     ASTERIXPostProcess& post_process_;
-
-//    std::function<void(unsigned int category, nlohmann::json& record)> process_function_;
-//    std::function<void(unsigned int category, nlohmann::json& record)> override_function_;
 
     volatile bool pause_{false};
 

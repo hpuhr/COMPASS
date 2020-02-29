@@ -33,11 +33,8 @@ using namespace Utils;
 ASTERIXDecodeJob::ASTERIXDecodeJob(
         ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
         ASTERIXPostProcess& post_process)
-//        std::function<void(unsigned int category, nlohmann::json& record)> process_function,
-//        std::function<void(unsigned int category, nlohmann::json& record)> override_function)
     : Job ("ASTERIXDecodeJob"), task_(task), filename_(filename), framing_(framing), test_(test),
       post_process_(post_process)
-      //process_function_(process_function), override_function_(override_function)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 }
@@ -107,18 +104,10 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
         countRecord (category, record);
     };
 
-
-
     auto process_lambda = [this, &category](nlohmann::json& record)
     {
         post_process_.postProcess(category, record);
-        //process_function_ (category, record);
     };
-
-//    auto override_lambda = [this, &category](nlohmann::json& record)
-//    {
-//        override_function_ (category, record);
-//    };
 
     if (framing_ == "")
     {
@@ -139,9 +128,6 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
             loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
-
-//            if (override_function_)
-//                JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
         }
     }
     else
@@ -175,19 +161,17 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
 
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
-
-//                if (override_function_)
-//                    JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
             }
         }
     }
 
+    while (pause_) // block decoder until unpaused
+        QThread::msleep(1);
+
     emit decodedASTERIXSignal();
 
-    while (pause_ || extracted_data_) // block decoder until unpaused and extracted records moved out
-    {
+    while (extracted_data_) // block decoder until extracted records have been moved out
         QThread::msleep(1);
-    }
 
     assert (!extracted_data_);
 }
