@@ -1,5 +1,5 @@
 {
-    "name":"cat062_1.12_record",
+    "name":"cat062_1.16_record",
     "type":"record",
     "field_specification":{
         "name":"FSPEC",
@@ -113,6 +113,20 @@
                     "type":"fixed_bitfield",
                     "length":2,
                     "items":[
+                        {
+                            "name":"V",
+                            "comment":"0 Code validated\n1 Code not validated",
+                            "type":"fixed_bits",
+                            "start_bit":15,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"G",
+                            "comment":"0 Default\n1 Garbled Code",
+                            "type":"fixed_bits",
+                            "start_bit":14,
+                            "bit_length":1
+                        },
                         {
                             "name":"CH",
                             "comment":"Change in Mode 3/A\n0 No Change\n1 Mode 3/A has changed",
@@ -375,6 +389,115 @@
                             "comment":"0 Default value\n1 Assigned Mode A Code Conflict (same discrete Mode A Code assigned to another track)",
                             "type":"fixed_bits",
                             "start_bit":1,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"FX4",
+                            "type":"fixed_bits",
+                            "start_bit":0,
+                            "bit_length":1
+                        }
+                    ]
+                }
+                ,
+                {
+                    "name":"Track Status Fourth Extent",
+                    "type":"fixed_bitfield",
+                    "length":1,
+                    "optional":true,
+                    "optional_variable_name":"FX4",
+                    "optional_variable_value":1,
+                    "items":[
+                        {
+                            "name":"SDS",
+                            "comment":"Surveillance Data Status\n0 Combined\n1 Co-operative only\n2 Non-Cooperative only\n3 Not defined",
+                            "type":"fixed_bits",
+                            "start_bit":6,
+                            "bit_length":2
+                        },
+                        {
+                            "name":"EMS",
+                            "comment":"Emergency Status Indication\n0 No emergency\n1 General emergency\n2 Lifeguard / medical\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 \"Downed\" Aircraft\n7 Undefined",
+                            "type":"fixed_bits",
+                            "start_bit":3,
+                            "bit_length":3
+                        },
+                        {
+                            "name":"PFT",
+                            "comment":"0 No indication\n1 Potential False Track Indication",
+                            "type":"fixed_bits",
+                            "start_bit":2,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"FPLT",
+                            "comment":"0 Default value\n1 Track created / updated with FPL data",
+                            "type":"fixed_bits",
+                            "start_bit":1,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"FX5",
+                            "type":"fixed_bits",
+                            "start_bit":0,
+                            "bit_length":1
+                        }
+                    ]
+                },
+                {
+                    "name":"Track Status Fifth Extent",
+                    "type":"fixed_bitfield",
+                    "length":1,
+                    "optional":true,
+                    "optional_variable_name":"FX5",
+                    "optional_variable_value":1,
+                    "items":[
+                        {
+                            "name":"DUPT",
+                            "comment":"0 Default value\n1 Duplicate Mode 3/A Code",
+                            "type":"fixed_bits",
+                            "start_bit":7,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"DUPF",
+                            "comment":"0 Default value\n1 Duplicate Flight Plan",
+                            "type":"fixed_bits",
+                            "start_bit":6,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"DUPM",
+                            "comment":"0 Default value\n1 Duplicate Flight Plan due to manual correlation",
+                            "type":"fixed_bits",
+                            "start_bit":5,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"SFC",
+                            "comment":"0 Default value\n1 Surface target",
+                            "type":"fixed_bits",
+                            "start_bit":4,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"IDD",
+                            "comment":"0 No indication\n1 Duplicate Flight-ID",
+                            "type":"fixed_bits",
+                            "start_bit":3,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"IEC",
+                            "comment":"0 Default value\n1 Inconsistent Emergency Code",
+                            "type":"fixed_bits",
+                            "start_bit":2,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"FX6",
+                            "type":"fixed_bits",
+                            "start_bit":0,
                             "bit_length":1
                         }
                     ]
@@ -1002,7 +1125,7 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true                      
+                        "reverse_bits":true
                     },
                     "items":[
                         {
@@ -1805,9 +1928,9 @@
                                             "name":"Last Measured Mode C Code",
                                             "comment":"Last Measured Mode C Code, in two's complement form\nVmin = -12 FL\nVmax = 1270 FL",
                                             "type":"fixed_bits",
-                                            "data_type":"int",
                                             "start_bit":0,
                                             "bit_length":14,
+                                            "data_type":"int",
                                             "lsb":0.25
                                         }
                                     ]
@@ -2279,7 +2402,7 @@
                                         },
                                         {
                                             "name":"STAT",
-                                            "comment":"Flight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground",
+                                            "comment":"Flight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground\n6 Not defined\n7 Unknown or not yet extracted",
                                             "type":"fixed_bits",
                                             "start_bit":10,
                                             "bit_length":3

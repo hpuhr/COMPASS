@@ -1895,6 +1895,7 @@
                                             "type":"fixed_bits",
                                             "start_bit":0,
                                             "bit_length":14,
+                                            "data_type":"int",
                                             "lsb":0.25
                                         }
                                     ]
