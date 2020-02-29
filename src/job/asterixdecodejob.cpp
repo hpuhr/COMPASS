@@ -32,10 +32,12 @@ using namespace Utils;
 
 ASTERIXDecodeJob::ASTERIXDecodeJob(
         ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
-        std::function<void(unsigned int category, nlohmann::json& record)> process_function,
-        std::function<void(unsigned int category, nlohmann::json& record)> override_function)
+        ASTERIXPostProcess& post_process)
+//        std::function<void(unsigned int category, nlohmann::json& record)> process_function,
+//        std::function<void(unsigned int category, nlohmann::json& record)> override_function)
     : Job ("ASTERIXDecodeJob"), task_(task), filename_(filename), framing_(framing), test_(test),
-      process_function_(process_function), override_function_(override_function)
+      post_process_(post_process)
+      //process_function_(process_function), override_function_(override_function)
 {
     logdbg << "ASTERIXDecodeJob: ctor";
 }
@@ -98,22 +100,25 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
     if (num_errors_)
         logwrn << "ASTERIXDecodeJob: jasterix_callback: num errors " << num_errors_;
 
-    unsigned int category;
+    unsigned int category {0};
 
     auto count_lambda = [this, &category](nlohmann::json& record)
     {
         countRecord (category, record);
     };
 
+
+
     auto process_lambda = [this, &category](nlohmann::json& record)
     {
-        process_function_ (category, record);
+        post_process_.postProcess(category, record);
+        //process_function_ (category, record);
     };
 
-    auto override_lambda = [this, &category](nlohmann::json& record)
-    {
-        override_function_ (category, record);
-    };
+//    auto override_lambda = [this, &category](nlohmann::json& record)
+//    {
+//        override_function_ (category, record);
+//    };
 
     if (framing_ == "")
     {
@@ -135,8 +140,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
 
-            if (override_function_)
-                JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
+//            if (override_function_)
+//                JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
         }
     }
     else
@@ -171,8 +176,8 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
 
-                if (override_function_)
-                    JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
+//                if (override_function_)
+//                    JSON::applyFunctionToValues(data_block, keys, keys.begin(), override_lambda, false);
             }
         }
     }

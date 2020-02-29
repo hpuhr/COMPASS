@@ -25,6 +25,7 @@
 #include "jsonmappingjob.h"
 #include "jsonmappingstubsjob.h"
 #include "task.h"
+#include "asterixpostprocess.h"
 
 #include <QObject>
 
@@ -142,6 +143,7 @@ protected:
     bool debug_jasterix_;
     bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
+    ASTERIXPostProcess post_process_;
 
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
@@ -157,18 +159,6 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-
-    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
-    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
-
-    bool override_active_ {false};
-    unsigned int override_sac_org_ {0};
-    unsigned int override_sic_org_ {0};
-
-    unsigned int override_sac_new_ {0};
-    unsigned int override_sic_new_ {0};
-
-    float override_tod_offset_ {0};
 
     std::shared_ptr <JSONMappingJob> json_map_job_;
     //std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;

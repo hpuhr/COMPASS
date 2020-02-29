@@ -24,6 +24,7 @@
 #include <functional>
 
 class ASTERIXImportTask;
+class ASTERIXPostProcess;
 
 class ASTERIXDecodeJob : public Job
 {
@@ -33,8 +34,8 @@ signals:
 
 public:
     ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
-                     std::function<void(unsigned int category, nlohmann::json& record)> process_function,
-                     std::function<void(unsigned int category, nlohmann::json& record)> override_function);
+                     ASTERIXPostProcess& post_process);
+                     //std::function<void(unsigned int category, nlohmann::json& record)> override_function);
     virtual ~ASTERIXDecodeJob();
 
     virtual void run ();
@@ -61,9 +62,10 @@ private:
     std::string filename_;
     std::string framing_;
     bool test_ {false};
+    ASTERIXPostProcess& post_process_;
 
-    std::function<void(unsigned int category, nlohmann::json& record)> process_function_;
-    std::function<void(unsigned int category, nlohmann::json& record)> override_function_;
+//    std::function<void(unsigned int category, nlohmann::json& record)> process_function_;
+//    std::function<void(unsigned int category, nlohmann::json& record)> override_function_;
 
     volatile bool pause_{false};
 
