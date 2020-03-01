@@ -150,15 +150,15 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
             air_speed_item["Air Speed [mach]"] = airspeed/666.739;
         }
     }
-//        else if (record.contains("160"))
-//        {
-//            json& ground_speed_item = record.at("160");
-//            //assert (ground_speed_item.contains("IM"));
-//            assert (ground_speed_item.contains("Air Speed));
+    //        else if (record.contains("160"))
+    //        {
+    //            json& ground_speed_item = record.at("160");
+    //            //assert (ground_speed_item.contains("IM"));
+    //            assert (ground_speed_item.contains("Air Speed));
 
-//            double ground_speed = ground_speed_item.at("Ground Speed");
-//            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
-//        }
+    //            double ground_speed = ground_speed_item.at("Ground Speed");
+    //            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
+    //        }
 }
 
 //void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
@@ -183,6 +183,92 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
 
         speed_item["Ground Speed"] = speed;
         speed_item["Track Angle"] = track_angle;
+    }
+
+    if (record.contains("080")
+            && record.at("080").contains("PSR")
+            && record.at("080").contains("SSR")
+            && record.at("080").contains("MDS")) // && record.at("080").contains("ADS") not used
+    {
+        //            if find_value("080.CST", record) == 1:
+        //                return 0  # no detection
+        if (record.at("080").contains("CST") && record.at("080").at("CST") == 1)
+            record["detection_type"] = 0;  // no detection
+        else
+        {
+            //            psr_updated = find_value("080.PSR", record) == 0
+            //            ssr_updated = find_value("080.SSR", record) == 0
+            //            mds_updated = find_value("080.MDS", record) == 0
+            //            ads_updated = find_value("080.ADS", record) == 0
+            bool psr_updated = record.at("080").at("PSR") == 0;
+            bool ssr_updated = record.at("080").at("SSR") == 0;
+            bool mds_updated = record.at("080").at("MDS") == 0;
+            //bool ads_updated = record.at("080").at("ADS");
+
+            //            if not mds_updated:
+            if (!mds_updated)
+            {
+
+                //                if psr_updated and not ssr_updated:
+                if (psr_updated && !ssr_updated)
+                {
+                    //                    if find_value("290.MLT.Age", record) is not None:
+                    //                        # age not 63.75
+                    //                        mlat_age = find_value("290.MLT.Age", record)
+                    if (record.contains("290")
+                            && record.at("290").contains("MLT")
+                            && record.at("290").at("MLT").contains("Age")
+                            && record.at("290").at("MLT").at("Age") <= 12.0)
+                        //                        if mlat_age <= 12.0:
+                        //                            return 3
+                        record["detection_type"] = 3; // combined psr & mlat ssr
+                    else
+                        //                    return 1  # single psr, no mode-s
+                        record["detection_type"] = 1; //single psr, no mode-s
+                }
+                //                if not psr_updated and ssr_updated:
+                //                    return 2  # single ssr, no mode-s
+                else if (!psr_updated && ssr_updated)
+                    record["detection_type"] = 2; // single ssr, no mode-s
+                //                if psr_updated and ssr_updated:
+                //                    return 3  # cmb, no mode-s
+                else if (psr_updated && ssr_updated)
+                    record["detection_type"] = 2; // single ssr, no mode-s
+
+                // not psr_updated and not ssr_updated:
+
+                //            if find_value("380.ADR.Target Address", record) is not None:
+                //                return 5
+
+                else if (record.contains("380")
+                        && record.at("380").contains("ADR")
+                        && record.at("380").at("ADR").contains("Target Address"))
+                    record["detection_type"] = 5;  // ssr, mode-s
+
+                //            if find_value("060.Mode-3/A reply", record) is not None \
+                //                    or find_value("136.Measured Flight Level", record) is not None:
+                //                return 2
+                else if ((record.contains("060") && record.at("060").contains("Mode-3/A reply"))
+                         || (record.contains("136") && record.at("136").contains("Measured Flight Level")))
+                    record["detection_type"] = 5;  // ssr, mode-s
+
+                //            return 0  # unknown
+                else
+                    record["detection_type"] = 0;  // unkown
+            }
+            //            else:
+            else
+            {
+                //                if not psr_updated:
+                //                    return 5  # ssr, mode-s
+                //                else:
+                //                    return 7  # cmb, mode-s
+                if (!psr_updated)
+                    record["detection_type"] = 5; // ssr, mode-s
+                else
+                    record["detection_type"] = 7; // cmb, mode-s
+            }
+        }
     }
 
     // overrides
