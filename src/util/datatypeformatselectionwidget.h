@@ -26,8 +26,6 @@ public:
     /// @brief Destructor
     virtual ~DataTypeFormatSelectionWidget();
 
-    //void update (std::string& data_type_str, Format& format);
-
 protected:
     std::string& data_type_str_;
     Format& format_;
