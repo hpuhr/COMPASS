@@ -220,19 +220,19 @@ void CreateARTASAssociationsJob::createUTNS ()
 
         track_begin_set = !track_begins.isNull(cnt);
         if (track_begin_set)
-            track_begin = track_begins.get(cnt) == "1";
+            track_begin = track_begins.get(cnt) == "Y";
         else
             track_begin = false;
 
         track_end_set = !track_ends.isNull(cnt);
         if (track_end_set)
-            track_end = track_ends.get(cnt) == "1";
+            track_end = track_ends.get(cnt) == "Y";
         else
             track_end = false;
 
         track_coasting_set = !track_coastings.isNull(cnt);
         if (track_coasting_set)
-            track_coasting = track_coastings.get(cnt) == "1";
+            track_coasting = track_coastings.get(cnt) == "Y";
         else
             track_coasting = false;
 
