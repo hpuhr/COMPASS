@@ -6547,13 +6547,13 @@
                                         "parameters": {
                                             "comment": "Calculated Geographical Altitude",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "CALC_ALT_GEO_FT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "CALC_VERTICAL_RATE_FTM": {
@@ -6767,12 +6767,12 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "LM_ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "LM_ALT_BARO_G": {
@@ -6803,12 +6803,12 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "LM_ALT_GEO_FT",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "LM_MODE3A_CODE": {
@@ -6876,36 +6876,36 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Time",
                                             "is_key": false,
                                             "name": "MEASURED_ALT_BARO_AGE_S",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "MEASURED_ALT_BARO_FT": {
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "MEASURED_ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "MEASURED_MODE3A_AGE_S": {
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Time",
                                             "is_key": false,
                                             "name": "MEASURED_MODE3A_AGE_S",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "MIL_EMERGENCY": {
@@ -6964,13 +6964,13 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Time",
                                             "is_key": false,
                                             "name": "MODEC_AGE",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "MODEC_CODE_FT": {
@@ -7315,12 +7315,12 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "SELECTED_ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "SELECTED_ALT_BARO_SOURCE": {
@@ -7417,24 +7417,24 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "TRACKED_ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "mediumint",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "TRACKED_ALT_GEO_FT": {
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "TRACKED_ALT_GEO_FT",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "TRACKED_MODE3A_CODE": {

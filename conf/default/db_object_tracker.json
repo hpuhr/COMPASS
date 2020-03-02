@@ -842,10 +842,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "Tracker",
                     "description": "Calculated barometric altitude [I030/130,I062/135 dependend on I062/080 SRC]",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -908,10 +908,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "Calculated Geographical Altitude",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "calc_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1281,10 +1281,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "lm_alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1344,10 +1344,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "lm_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1471,10 +1471,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Time",
                     "name": "measured_alt_baro_age_s",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1492,10 +1492,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "measured_alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1513,10 +1513,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Time",
                     "name": "measured_mode3a_age_s",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1622,10 +1622,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Time",
                     "name": "modec_age",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2216,10 +2216,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "selected_alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2566,10 +2566,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "tracked_alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2587,10 +2587,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "tracked_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2610,7 +2610,7 @@
                     "description": "",
                     "dimension": "",
                     "name": "tracked_mode3a_code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "DEC_TO_OCTAL",
                     "unit": ""
                 },
                 "sub_configs": {
