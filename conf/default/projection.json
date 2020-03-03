@@ -1,6 +1,6 @@
 {
     "parameters": {
-        "current_projection_name": "OGR"
+        "current_projection_name": "RS2G"
     },
     "sub_configs": {
         "OGRProjection": {

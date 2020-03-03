@@ -107,8 +107,13 @@ void CreateARTASAssociationsTask::deleteWidget ()
 
 bool CreateARTASAssociationsTask::checkPrerequisites ()
 {
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: ready " << ATSDB::instance().interface().ready();
+
     if (!ATSDB::instance().interface().ready())
         return false;
+
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: done "
+           << ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME);
 
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
@@ -117,8 +122,14 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
         return false;
 
     // check if was post-processed
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: post "
+           << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+
     if (!ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
         return false;
+
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
+           << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
     if (ATSDB::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
         return false;
@@ -126,6 +137,7 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
     // check if hash var exists in all data
     DBObjectManager& object_man = ATSDB::instance().objectManager();
 
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: hashes";
     for (auto& dbo_it : object_man)
     {
         DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
@@ -133,6 +145,7 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
             return false;
     }
 
+    loginf << "CreateARTASAssociationsTask: checkPrerequisites: ok";
     return true;
 }
 
@@ -150,31 +163,46 @@ bool CreateARTASAssociationsTask::canRun ()
 
     //ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME)
 
+    loginf << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
+
     if (!object_man.existsObject("Tracker"))
         return false;
 
     DBObject& tracker_object = object_man.object("Tracker");
 
     // tracker stuff
+    loginf << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
     if (!tracker_object.loadable())
         return false;
 
+    loginf << "CreateARTASAssociationsTask: canRun: tracker count " << tracker_object.count();
     if (!tracker_object.count())
+        return false;
+
+    // no data sources
+    if (tracker_object.dsBegin() == tracker_object.dsEnd())
         return false;
 
     bool ds_found {false};
     for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
     {
         if ((ds_it->second.hasShortName() && ds_it->second.shortName() == current_data_source_name_)
-                || (!ds_it->second.hasShortName() && ds_it->second.name() == current_data_source_name_))
+                || (ds_it->second.name() == current_data_source_name_))
         {
             ds_found = true;
             break;
         }
     }
-    if (!ds_found)
-        return false;
 
+    loginf << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
+    if (!ds_found)
+    {
+        loginf << "CreateARTASAssociationsTask: canRun: resetting current source to "
+               << tracker_object.dsBegin()->second.name();
+        current_data_source_name_ = tracker_object.dsBegin()->second.name();
+    }
+
+    loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
     if (!tracker_object.hasVariable(tracker_track_num_var_str_)
             || !tracker_object.hasVariable(tracker_track_begin_var_str_)
             || !tracker_object.hasVariable(tracker_track_end_var_str_)
@@ -182,16 +210,19 @@ bool CreateARTASAssociationsTask::canRun ()
         return false;
 
     // meta var stuff
+    loginf << "CreateARTASAssociationsTask: canRun: meta vars";
     if (!key_var_str_.size()
             || !hash_var_str_.size()
             || !tod_var_str_.size())
         return false;
 
+    loginf << "CreateARTASAssociationsTask: canRun: metas in tracker";
     if (!object_man.existsMetaVariable(key_var_str_)
             || !object_man.existsMetaVariable(hash_var_str_)
             || !object_man.existsMetaVariable(tod_var_str_))
         return false;
 
+    loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : object_man)
     {
         if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
@@ -200,6 +231,7 @@ bool CreateARTASAssociationsTask::canRun ()
             return false;
     }
 
+    loginf << "CreateARTASAssociationsTask: canRun: ok";
     return true;
 }
 

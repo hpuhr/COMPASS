@@ -27,6 +27,7 @@
 
 class ASTERIXImportTask;
 class ASTERIXConfigWidget;
+class ASTERIXOverrideWidget;
 
 class QHBoxLayout;
 class QPushButton;
@@ -86,6 +87,7 @@ protected:
     QStackedWidget* object_parser_widget_ {nullptr};
 
     ASTERIXConfigWidget* config_widget_ {nullptr};
+    ASTERIXOverrideWidget* override_widget_ {nullptr};
 
     QCheckBox* debug_check_ {nullptr};
     QCheckBox* limit_ram_check_ {nullptr};
@@ -94,6 +96,7 @@ protected:
 
     void addMainTab ();
     void addASTERIXConfigTab();
+    void addOverrideTab();
     void addMappingsTab();
 
     void updateParserBox ();

@@ -78,6 +78,12 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_framing", &current_framing_, "");
 
+    registerParameter("override_sac_org", &post_process_.override_sac_org_, 0);
+    registerParameter("override_sic_org", &post_process_.override_sic_org_, 0);
+    registerParameter("override_sac_new", &post_process_.override_sac_new_, 1);
+    registerParameter("override_sic_new", &post_process_.override_sic_new_, 1);
+    registerParameter("override_tod_offset", &post_process_.override_tod_offset_, 0.0);
+
     createSubConfigurables();
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
@@ -495,6 +501,78 @@ bool ASTERIXImportTask::isRequired ()
     return false;
 }
 
+bool ASTERIXImportTask::overrideActive() const
+{
+    return post_process_.override_active_;
+}
+
+void ASTERIXImportTask::overrideActive(bool value)
+{
+    loginf << "ASTERIXImportTask: overrideActive: value " << value;
+
+    post_process_.override_active_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSacOrg() const
+{
+    return post_process_.override_sac_org_;
+}
+
+void ASTERIXImportTask::overrideSacOrg(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSacOrg: value " << value;
+
+    post_process_.override_sac_org_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSicOrg() const
+{
+    return post_process_.override_sic_org_;
+}
+
+void ASTERIXImportTask::overrideSicOrg(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSicOrg: value " << value;
+
+    post_process_.override_sic_org_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSacNew() const
+{
+    return post_process_.override_sac_new_;
+}
+
+void ASTERIXImportTask::overrideSacNew(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSacNew: value " << value;
+
+    post_process_.override_sac_new_ = value;
+}
+
+unsigned int ASTERIXImportTask::overrideSicNew() const
+{
+    return post_process_.override_sic_new_;
+}
+
+void ASTERIXImportTask::overrideSicNew(unsigned int value)
+{
+    loginf << "ASTERIXImportTask: overrideSicNew: value " << value;
+
+    post_process_.override_sic_new_ = value;
+}
+
+float ASTERIXImportTask::overrideTodOffset() const
+{
+    return post_process_.override_tod_offset_;
+}
+
+void ASTERIXImportTask::overrideTodOffset(float value)
+{
+    loginf << "ASTERIXImportTask: overrideTodOffset: value " << value;
+
+    post_process_.override_tod_offset_ = value;
+}
+
 void ASTERIXImportTask::deleteWidget ()
 {
     widget_.reset(nullptr);
@@ -659,7 +737,9 @@ void ASTERIXImportTask::run()
     loginf << "ASTERIXImporterTask: run: starting decode job";
 
     assert (decode_job_ == nullptr);
-    decode_job_ = make_shared<ASTERIXDecodeJob> (*this, current_filename_, current_framing_, test_);
+
+    decode_job_ = make_shared<ASTERIXDecodeJob> (
+                        *this, current_filename_, current_framing_, test_, post_process_);
 
     connect (decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
              &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
@@ -731,9 +811,9 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
     if (!create_mapping_stubs_) // test or import
     {
-//        map_jobs_mutex_.lock();
-//        json_map_jobs_.push_back(json_map_job);
-//        map_jobs_mutex_.unlock();
+        //        map_jobs_mutex_.lock();
+        //        json_map_jobs_.push_back(json_map_job);
+        //        map_jobs_mutex_.unlock();
 
         while (json_map_job_) // only one can exist at a time
         {
@@ -815,21 +895,21 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
 
     assert (status_widget_);
 
-//    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
-//    std::shared_ptr<JSONMappingJob> queued_map_job;
+    //    JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
+    //    std::shared_ptr<JSONMappingJob> queued_map_job;
 
-//    map_jobs_mutex_.lock();
-//    waiting_for_map_ = true;
+    //    map_jobs_mutex_.lock();
+    //    waiting_for_map_ = true;
 
     assert (json_map_job_);
 
-//    queued_map_job = json_map_jobs_.front();
-//    json_map_jobs_.pop_front();
+    //    queued_map_job = json_map_jobs_.front();
+    //    json_map_jobs_.pop_front();
 
-//    map_jobs_mutex_.unlock();
-//    waiting_for_map_ = false;
+    //    map_jobs_mutex_.unlock();
+    //    waiting_for_map_ = false;
 
-//    assert (queued_map_job.get() == map_job);
+    //    assert (queued_map_job.get() == map_job);
 
     status_widget_->addNumMapped(json_map_job_->numMapped());
     status_widget_->addNumNotMapped(json_map_job_->numNotMapped());
@@ -1060,7 +1140,7 @@ void ASTERIXImportTask::insertDoneSlot (DBObject& object)
 void ASTERIXImportTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
-           //<< " wait map " << !waiting_for_map_
+              //<< " wait map " << !waiting_for_map_
            << " map job " << (json_map_job_ == nullptr) << " map stubs " << (json_map_stub_job_ == nullptr)
            << " wait insert " << ! waiting_for_insert_ << " insert active " << (insert_active_ == 0);
 
@@ -1085,7 +1165,7 @@ void ASTERIXImportTask::checkAllDone ()
             emit ATSDB::instance().interface().databaseContentChangedSignal();
 
         task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(status_widget_->numRecordsInserted())
-                                 +" records ("+status_widget_->recordsInsertedRateStr()+" rec/s)");
+                                 +" records, rate "+status_widget_->recordsInsertedRateStr());
 
         for (auto& db_cnt_it : status_widget_->dboInsertedCounts())
             task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(db_cnt_it.second)
@@ -1140,8 +1220,8 @@ bool ASTERIXImportTask::maxLoadReached ()
 {
     return insert_active_ >= 2;
 
-//    if (limit_ram_)
-//        return json_map_jobs_.size() > limited_num_json_jobs_;
-//    else
-//        return json_map_jobs_.size() > unlimited_num_json_jobs_;
+    //    if (limit_ram_)
+    //        return json_map_jobs_.size() > limited_num_json_jobs_;
+    //    else
+    //        return json_map_jobs_.size() > unlimited_num_json_jobs_;
 }

@@ -1805,6 +1805,7 @@
                                             "name":"Last Measured Mode C Code",
                                             "comment":"Last Measured Mode C Code, in two's complement form\nVmin = -12 FL\nVmax = 1270 FL",
                                             "type":"fixed_bits",
+                                            "data_type":"int",
                                             "start_bit":0,
                                             "bit_length":14,
                                             "lsb":0.25

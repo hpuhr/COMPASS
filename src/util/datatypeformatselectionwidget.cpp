@@ -6,8 +6,6 @@ DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget(std::string& data_t
 {
     logdbg  << "DataTypeFormatSelectionWidget: constructor";
 
-    //update (data_type_str, format);
-
     showValues();
     createMenu();
 
@@ -18,17 +16,6 @@ DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget(std::string& data_t
 DataTypeFormatSelectionWidget::~DataTypeFormatSelectionWidget()
 {
 }
-
-//void DataTypeFormatSelectionWidget::update (std::string& data_type_str, Format& format)
-//{
-//    loginf << "DataTypeFormatSelectionWidget: update: data type '" << data_type_str
-//           << "' format '" << format << "'";
-
-//    data_type_str_ = data_type_str;
-//    format_ = format_;
-
-//    showValues();
-//}
 
 void DataTypeFormatSelectionWidget::showValues()
 {
@@ -44,7 +31,6 @@ void DataTypeFormatSelectionWidget::showValues()
 void DataTypeFormatSelectionWidget::createMenu()
 {
     logdbg  << "DataTypeFormatSelectionWidget: createMenu";
-    //    menu_.addAction( "" );
 
     for (auto dt_it : format_.getAllFormatOptions())
     {
@@ -92,6 +78,7 @@ void DataTypeFormatSelectionWidget::triggerSlot( QAction* action )
     if (data_type_str.size() && format_str.size())
     {
         PropertyDataType data_type = Property::asDataType(data_type_str);
+        data_type_str_ = data_type_str;
         format_.set(data_type, format_str);
 
 
@@ -103,6 +90,4 @@ void DataTypeFormatSelectionWidget::triggerSlot( QAction* action )
         format_.set(PropertyDataType::BOOL, "");
         setText ("");
     }
-
-    //  emit selectionChanged();
 }

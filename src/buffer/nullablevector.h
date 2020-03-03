@@ -35,6 +35,8 @@
 #include "buffer.h"
 #include "property.h"
 
+//#include "boost/lexical_cast.hpp"
+
 const bool BUFFER_PEDANTIC_CHECKING=false;
 
 /**
@@ -207,6 +209,20 @@ template <class T> void NullableVector<T>::setFromFormat (unsigned int index, co
         QDateTime date_time;
         date_time.setMSecsSinceEpoch(1000*std::stoul(value_str));
         value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+    }
+    else if (format == "bool")
+    {
+        if (value_str == "0")
+            value = 'N';
+        else if (value_str == "1")
+            value = 'Y';
+    }
+    else if (format == "bool_invert")
+    {
+        if (value_str == "1")
+            value = 'N';
+        else if (value_str == "0")
+            value = 'Y';
     }
     else
     {

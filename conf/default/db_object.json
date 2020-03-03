@@ -1682,18 +1682,6 @@
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
-                        "DBOVariableDefinitionADSBreport_type0": {
-                            "parameters": {
-                                "dbo_name": "ADSB",
-                                "dbo_variable_name": "report_type"
-                            }
-                        },
-                        "DBOVariableDefinitionMLATreport_type0": {
-                            "parameters": {
-                                "dbo_name": "MLAT",
-                                "dbo_variable_name": "report_type"
-                            }
-                        },
                         "DBOVariableDefinitionRadarreport_type0": {
                             "parameters": {
                                 "dbo_name": "Radar",

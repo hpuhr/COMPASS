@@ -25,6 +25,7 @@
 #include "jsonmappingjob.h"
 #include "jsonmappingstubsjob.h"
 #include "task.h"
+#include "asterixpostprocess.h"
 
 #include <QObject>
 
@@ -83,7 +84,7 @@ public:
     void addFile (const std::string& filename);
     void removeCurrentFilename ();
     void currentFilename (const std::string& filename);
-    const std::string &currentFilename () { return current_filename_; }
+    const std::string& currentFilename () { return current_filename_; }
 
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
     void refreshjASTERIX();
@@ -120,10 +121,29 @@ public:
     virtual bool isRecommended ();
     virtual bool isRequired ();
 
+    bool overrideActive() const;
+    void overrideActive(bool value);
+
+    unsigned int overrideSacOrg() const;
+    void overrideSacOrg(unsigned int value);
+
+    unsigned int overrideSicOrg() const;
+    void overrideSicOrg(unsigned int value);
+
+    unsigned int overrideSacNew() const;
+    void overrideSacNew(unsigned int value);
+
+    unsigned int overrideSicNew() const;
+    void overrideSicNew(unsigned int value);
+
+    float overrideTodOffset() const;
+    void overrideTodOffset(float value);
+
 protected:
     bool debug_jasterix_;
     bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
+    ASTERIXPostProcess post_process_;
 
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;

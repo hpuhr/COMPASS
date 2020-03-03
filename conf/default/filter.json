@@ -1,12 +1,12 @@
 {
     "parameters": {
-        "db_id": "/home/sk/atsdb_demo/test.db"
+        "db_id": "/home/sk/data/austria/20200224/20191210_1200_300-artas.ff_v8settings.db"
     },
     "sub_configs": {
         "DBFilter": {
             "Barometric Altitude": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "Barometric Altitude",
                     "op_and_": true,
@@ -20,7 +20,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "100",
+                                "value": "0",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -31,7 +31,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "409100",
+                                "value": "45000",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -40,7 +40,7 @@
                     "DBFilterWidget": {
                         "Barometric AltitudeWidget0": {
                             "parameters": {
-                                "visible": true
+                                "visible": false
                             }
                         }
                     }
@@ -71,7 +71,7 @@
                     "DBFilterWidget": {
                         "CallsignWidget0": {
                             "parameters": {
-                                "visible": true
+                                "visible": false
                             }
                         }
                     }
@@ -102,7 +102,7 @@
                     "DBFilterWidget": {
                         "HashCodeWidget0": {
                             "parameters": {
-                                "visible": true
+                                "visible": false
                             }
                         }
                     }
@@ -133,7 +133,7 @@
                     "DBFilterWidget": {
                         "Mode 3A CodesWidget0": {
                             "parameters": {
-                                "visible": true
+                                "visible": false
                             }
                         }
                     }
@@ -197,7 +197,7 @@
                     "DBFilterWidget": {
                         "PositionWidget0": {
                             "parameters": {
-                                "visible": true
+                                "visible": false
                             }
                         }
                     }
@@ -250,7 +250,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "08:59:58.781",
+                                "value": "00:00:00.094",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -261,7 +261,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "09:29:59.898",
+                                "value": "23:59:59.898",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -269,6 +269,99 @@
                     },
                     "DBFilterWidget": {
                         "Time of DayWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            },
+            "TrackNum": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "TrackNum",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "TrackNumCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "4227",
+                                "value": "4227",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "track_num"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "TrackNumWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            },
+            "TrackerDetectionType": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "name": "TrackerDetectionType",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "TrackerDetectionTypeCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "1",
+                                "value": "1",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "detection_type"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "TrackerDetectionTypeWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            },
+            "TrackerMultipleSources": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "name": "TrackerMultipleSources",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "TrackerMultipleSourcesCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "=",
+                                "reset_value": "N",
+                                "value": "N",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "multiple_sources"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "TrackerMultipleSourcesWidget0": {
                             "parameters": {
                                 "visible": true
                             }
@@ -345,6 +438,8 @@
                     "LoadSensorNumber26700": true,
                     "LoadSensorNumber26702": true,
                     "LoadSensorNumber28": true,
+                    "LoadSensorNumber29": true,
+                    "LoadSensorNumber30": true,
                     "active": false,
                     "changed": false,
                     "dbo_name": "MLAT",
@@ -442,7 +537,9 @@
                 "parameters": {
                     "LoadSensorNumber12990": true,
                     "LoadSensorNumber13040": true,
+                    "LoadSensorNumber13041": true,
                     "LoadSensorNumber13044": true,
+                    "LoadSensorNumber17": true,
                     "LoadSensorNumber21": false,
                     "LoadSensorNumber22": true,
                     "LoadSensorNumber23": false,
@@ -452,7 +549,7 @@
                     "LoadSensorNumber26642": true,
                     "LoadSensorNumber26645": true,
                     "LoadSensorNumber26646": true,
-                    "LoadSensorNumber27": true,
+                    "LoadSensorNumber27": false,
                     "LoadSensorNumber30769": true,
                     "LoadSensorNumber30770": true,
                     "active": false,

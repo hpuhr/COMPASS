@@ -11,4 +11,8 @@ experimental_src/
 *.out
 *.backup
 *.toc
+*.pdf
+*.AppImage
+ub14_build/
+
 

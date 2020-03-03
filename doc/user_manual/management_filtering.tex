@@ -3,24 +3,47 @@
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=6cm,frame]{../screenshots/filtering_details.png}
+    \includegraphics[width=8cm,frame]{../screenshots/filtering_details.png}
   \caption{Default filters}
-  \label{fig:filter_default}
 \end{figure}
 
 \subsection{Barometric Altitude Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_baro_alt.png}
+  \caption{Barometric Altitude filter}
+\end{figure}
 
 When active, this filter forces loading of data with a barometric altitude inside the given thresholds (in feet). Target reports without a barometric altitude will not be loaded.
 
 \subsection{Callsign Filter}
 
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_callsign.png}
+  \caption{Callsign filter}
+\end{figure}
+
 When active, this filter forces loading of data only from callsigns matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given callsign will not be loaded.
 
 \subsection{HashCode Filter}
 
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_hashcode.png}
+  \caption{HashCode filter}
+\end{figure}
+
 When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
 
 \subsection{Mode 3/A Codes Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_mode3a.png}
+  \caption{Mode 3/A Codes filter}
+\end{figure}
 
 When active, this filter forces loading of data with the given Mode A code(s), so it is possible to give multiple values (in octal notation, separated by commas). E.g. '7000' is possible, or '7000,7777'. Target reports without a given Mode A will not be loaded. \\
 
@@ -28,15 +51,95 @@ Please note that ADS-B target reports can also contain Mode 3/A code information
 
 \subsection{Position Filter}
 
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_position.png}
+  \caption{Position filter}
+\end{figure}
+
 When active, this filter forces loading of data with latitude/longitude inside the given thresholds (in degrees).
 
 \subsection{Target Address Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_targetaddress.png}
+  \caption{Target Address filter}
+\end{figure}
 
 When active, this filter forces loading of data with the given Mode S address(es), so it is possible to give multiple values (in hexadecimal notation, irrespective of upper or lower case characters, separated by commas). E.g. 'FEFE10' is possible, or 'FEFE10,FEFE11,FEFE12'. Target reports without a given Mode S address will not be loaded.
 
 \subsection{Time of Day Filter}
 
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_tod.png}
+  \caption{Time of Day filter}
+\end{figure}
+
 When active, this filter forces loading of data with the time-of-day inside the given thresholds (in HH:MM:SS.SSS).
+
+\subsection{TrackNum Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_tracknum.png}
+  \caption{TrackNum filter}
+\end{figure}
+
+When active, this filter forces loading of data with the given track numbers, so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Target reports without a given track number will not be loaded. \\
+
+Please note that ADS-B target reports can also contain a track number in ASTERIX, but since the information can not currently be mapped to the database (missing in schema), this filter does not influence ADS-B data loading.
+
+\subsection{Tracker Detection Type Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_trackerdettyp.png}
+  \caption{Tracker Detection Type filter}
+\end{figure}
+
+When active, this filter forces loading of Tracker data with the given detection type, so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Tracker target reports without a given detection type will not be loaded. \\
+
+The following detection types exist:
+\begin{itemize}
+ \item 0: No detection/unknown
+ \item 1: PSR
+ \item 2: SSR
+ \item 3: Combined (PSR+SSR)
+ \item 5: Mode S
+ \item 7: Mode S Combined (PSR+Mode S)
+\end{itemize}
+\  \\
+
+Please note that:
+\begin{itemize}
+ \item The detection type here reflects the technology used to update the track. E.g. an MLAT SSR detection + a PSR detection can form detection type 3 (Combined).
+ \item The method used to determine the detection type is slightly different than in Verif
+ \item The method used to determine the detection type is currently being discussed/tested by users and will be document after being accepted.
+\end{itemize}
+
+\subsection{Tracker Multiple Sources Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_trackermulsrc.png}
+  \caption{Tracker Multiple Sources filter}
+\end{figure}
+
+When active, this filter forces loading of Tracker data with the multiple sources flag, e.g. 'Y' (only track updates formed from multiple sources) or 'N' (only track updates formed using 1 source). Tracker target reports without such information will not be loaded. \\
+
+\subsection{Data Source Filters}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_datasources.png}
+  \caption{Data Sources filter}
+\end{figure}
+
+Multiple of these filters can exist, depending on which DBObjects exist in the database. \\
+
+When active, each of these filters forces loading of data only from the selected data sources. \\
 
 \subsection{Adding a New Filter}
 When clicking the 'Add filter' button, a dialog is opened.

@@ -112,7 +112,7 @@
                 "parameters": null,
                 "sub_configs": {
                     "Unit": {
-                        "Konts": {
+                        "Knots": {
                             "parameters": {
                                 "definition": "",
                                 "factor": 1.0

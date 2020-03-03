@@ -3079,7 +3079,7 @@
                     "dimension": "Speed",
                     "name": "track_groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Konts"
+                    "unit": "Knots"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

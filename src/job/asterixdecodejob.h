@@ -21,7 +21,10 @@
 #include "job.h"
 #include "json.hpp"
 
+#include <functional>
+
 class ASTERIXImportTask;
+class ASTERIXPostProcess;
 
 class ASTERIXDecodeJob : public Job
 {
@@ -30,7 +33,8 @@ signals:
     void decodedASTERIXSignal ();
 
 public:
-    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test);
+    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
+                     ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
     virtual void run ();
@@ -52,12 +56,12 @@ public:
         return std::move(extracted_data_);
     }
 
-
 private:
     ASTERIXImportTask& task_;
     std::string filename_;
     std::string framing_;
     bool test_ {false};
+    ASTERIXPostProcess& post_process_;
 
     volatile bool pause_{false};
 
@@ -71,12 +75,10 @@ private:
     std::unique_ptr<nlohmann::json> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
-    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
-    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
     void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
                            size_t numErrors);
-    void processRecord (unsigned int category, nlohmann::json& record);
+    void countRecord (unsigned int category, nlohmann::json& record);
 };
 
 #endif // ASTERIXDECODEJOB_H

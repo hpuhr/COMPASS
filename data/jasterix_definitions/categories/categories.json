@@ -146,7 +146,7 @@
     },
     "062":{
         "comment":"Category 062 SURVEILLANCE DATA EXCHANGE SDPS Track Messages",
-        "default_edition":"1.16",
+        "default_edition":"1.18",
         "default_ref_edition":"1.2",
         "default_spf_edition":"ARTAS",
         "default_mapping":"",
@@ -160,6 +160,11 @@
                 "document":"SUR.ET1.ST05.2000-STD-09-01",
                 "date":"July 2012",
                 "file":"062/cat062_1.16.json"
+            },
+            "1.18":{
+                "document":"EUROCONTROL-SPEC-0149-9",
+                "date":"13/08/2018",
+                "file":"062/cat062_1.18.json"
             }
         },
         "ref_editions":{
