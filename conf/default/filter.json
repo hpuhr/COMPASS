@@ -77,37 +77,6 @@
                     }
                 }
             },
-            "DetectionType": {
-                "parameters": {
-                    "active": false,
-                    "changed": true,
-                    "name": "DetectionType",
-                    "op_and_": true,
-                    "visible": false
-                },
-                "sub_configs": {
-                    "DBFilterCondition": {
-                        "DetectionTypeCondition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": "IN",
-                                "reset_value": "1",
-                                "value": "1",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "detection_type"
-                            }
-                        }
-                    },
-                    "DBFilterWidget": {
-                        "DetectionTypeWidget0": {
-                            "parameters": {
-                                "visible": true
-                            }
-                        }
-                    }
-                }
-            },
             "HashCode": {
                 "parameters": {
                     "active": false,
