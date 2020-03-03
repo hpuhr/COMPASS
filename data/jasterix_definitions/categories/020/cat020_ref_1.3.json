@@ -163,7 +163,7 @@
                 {
                     "name":"Ground Speed",
                     "type":"fixed_bitfield",
-                    "length":4,
+                    "length":2,
                     "items":[
                         {
                             "name":"RE",
