@@ -16,7 +16,7 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
 {
     QVBoxLayout* main_layout = new QVBoxLayout ();
 
-    active_check_ = new QCheckBox ("Override Active");
+    active_check_ = new QCheckBox ("Override Tracker Data Active");
     connect(active_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::activeCheckedSlot);
     main_layout->addWidget(active_check_);
 
