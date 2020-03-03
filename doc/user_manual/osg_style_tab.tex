@@ -174,7 +174,8 @@ Please note that after changing the style to one of these value a redraw has to 
 \paragraph{Target Report based Style Presets}
 The following Target report based style presets exist:
 \begin{itemize}
- \item Color by ADS-B Quality: Color is defined by the ADS-B MOPS version of the transponder
+ \item Color by ADS-B MOPS: Color is defined by the ADS-B MOPS version of the transponder
+ \item Color by ADS-B Position Quality: Color is defined by the ADS-B NUCp/NACp value of the target report
  \item Color by Flight Level: Color is defined by the Mode C code/Flight level
  \item Color by Speed: Color is defined by groundspeed value
  \item Color by Track Angle: Color is defined by direction of movement value
@@ -211,8 +212,14 @@ To give a few examples, some interesting Layer modes and Style preset combinatio
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_adsb_quality.png}
-  \caption{OSG View Color by ADS-B quality}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_adsb_mops.png}
+  \caption{OSG View Color by ADS-B MOPS version}
+\end{figure}
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_adsb_position_qual.png}
+  \caption{OSG View Color by ADS-B position quality}
 \end{figure}
 
 \begin{figure}[H]
