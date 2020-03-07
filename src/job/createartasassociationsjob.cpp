@@ -361,12 +361,14 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     DBObjectManager& object_man = ATSDB::instance().objectManager();
 
     for (auto& dbo_it : object_man)
-        if (dbo_it.first != tracker_dbo_name_)
+    {
+        if (dbo_it.first != tracker_dbo_name_ && dbo_it.second->hasData())
         {
             std::string status = "Creating "+dbo_it.first+" Hash List";
             emit statusSignal(status.c_str());
             createSensorHashes(*dbo_it.second);
         }
+    }
 
     std::vector<std::string> tri_splits;
     bool match_found;
@@ -404,6 +406,9 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                 for (auto& dbo_it : object_man) // iterate over all dbos
                 {
+                    if (!dbo_it.second->hasData())
+                        continue;
+
                     if (sensor_hashes_.count(dbo_it.first)) // if dbo has hash values
                     {
                         possible_hash_matches = sensor_hashes_.at(dbo_it.first).equal_range(tri);
