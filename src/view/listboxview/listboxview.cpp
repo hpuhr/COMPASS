@@ -78,8 +78,8 @@ bool ListBoxView::init()
 
     connect (data_source_, &ListBoxViewDataSource::loadingStartedSignal,
              widget_->getDataWidget(), &ListBoxViewDataWidget::loadingStartedSlot);
-    connect (data_source_, &ListBoxViewDataSource::updateData,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::updateData);
+    connect (data_source_, &ListBoxViewDataSource::updateDataSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::updateDataSlot);
 
     connect (widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
              widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);

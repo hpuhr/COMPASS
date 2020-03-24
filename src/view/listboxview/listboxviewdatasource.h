@@ -47,7 +47,7 @@ public slots:
 signals:
     void loadingStartedSignal ();
     /// @brief Emitted when resulting buffer was delivered
-    void updateData (DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSignal (DBObject& object, std::shared_ptr<Buffer> buffer);
 
 public:
     /// @brief Constructor

@@ -130,7 +130,7 @@ void ListBoxViewDataSource::newDataSlot (DBObject &object)
     std::shared_ptr <Buffer> buffer = object.data();
     assert (buffer);
 
-    emit updateData (object, buffer);
+    emit updateDataSignal (object, buffer);
 }
 
 void ListBoxViewDataSource::loadingDoneSlot(DBObject &object)

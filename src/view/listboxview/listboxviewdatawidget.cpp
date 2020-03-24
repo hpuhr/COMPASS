@@ -103,7 +103,7 @@ void ListBoxViewDataWidget::loadingStartedSlot()
         buffer_table.second->clear();
 }
 
-void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
+void ListBoxViewDataWidget::updateDataSlot (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
     logdbg  << "ListBoxViewDataWidget: updateTables: start";
 
@@ -111,7 +111,7 @@ void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer
     all_buffer_table_widget_->show(buffer);
 
     assert (buffer_tables_.count (object.name()) > 0);
-    buffer_tables_.at(object.name())->show(buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
+    buffer_tables_.at(object.name())->show(buffer);
 
     logdbg  << "ListBoxViewDataWidget: updateTables: end";
 }

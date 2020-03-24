@@ -139,6 +139,8 @@ DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
     if (this == &source) // self assignment
         return *this;
 
+    set_.clear();
+
     std::vector <DBOVariable*>::const_iterator it;
 
     logdbg  << "DBOVariableSet: copy constructor: copying " << source.set_.size() << " elements";
