@@ -32,6 +32,8 @@ void ASTERIXPostProcess::postProcess (unsigned int category, nlohmann::json& rec
         postProcessCAT001 (sac, sic, record);
     else if (category == 2) // save last tods
         postProcessCAT002 (sac, sic, record);
+    else if (category == 20)
+        postProcessCAT020 (sac, sic, record);
     else if (category == 21)
         postProcessCAT021 (sac, sic, record);
     else if (category == 62)
@@ -69,7 +71,7 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
             }
             else
             {
-                loginf << "ASTERIXDecodeJob: processRecord: removing truncated tod "
+                loginf << "ASTERIXPostProcess: processRecord: removing truncated tod "
                        << String::timeStringFromDouble(record.at("141").at("Truncated Time of Day"))
                        << " since to CAT002 from sensor "<< sac << "/" << sic << " is not present";
                 record["140"]["Time-of-Day"] = nullptr;
@@ -82,7 +84,7 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
         }
         else
         {
-            loginf << "ASTERIXDecodeJob: processRecord: skipping cat001 report without sac/sic";
+            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without sac/sic";
             record["140"]["Time-of-Day"] = nullptr;
         }
     }
@@ -97,11 +99,11 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
                 record["140"]["Time-of-Day"] = cat002_last_tod_.at(sac_sic); // set tod, better than nothing
             }
             else
-                logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+                logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
                        << " or last cat002 time";
         }
         else
-            logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
                    << " or sac/sic";
     }
 }
@@ -123,10 +125,27 @@ void ASTERIXPostProcess::postProcessCAT002 (int sac, int sic, nlohmann::json& re
     }
 }
 
-//void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& record)
-//{
+void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& record)
+{
+    // rdp chain 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("CHN"))
+    {
+        nlohmann::json& item_020 = record.at("020");
+        unsigned int chain = item_020.at("CHN");
+        item_020.at("CHN") = chain + 1;
+    }
 
-//}
+    // altitude capability
+    if (record.contains("230") && record.at("230").contains("ARC"))
+    {
+        nlohmann::json& item_230 = record.at("230");
+        unsigned int arc = item_230.at("ARC");
+        if (arc == 0)
+            item_230["ARC_ft"] = 100.0;
+        else if (arc == 1)
+            item_230["ARC_ft"] = 25.0;
+    }
+}
 
 void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& record)
 {
