@@ -3971,12 +3971,12 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "mediumint",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "ALT_BARO_G": {
@@ -4007,26 +4007,26 @@
                                         "parameters": {
                                             "comment": "Height above WGS-84 ellipsoid in feet",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "ALT_GEO_FT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "mediumint",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "CALC_ALT_GEO_FT": {
                                         "parameters": {
                                             "comment": "Calculated Geographical Altitude in feet",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "CALC_ALT_GEO_FT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "CALLSIGN": {
@@ -4202,13 +4202,13 @@
                                         "parameters": {
                                             "comment": "Height above local coordinate system in feet",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "HEIGHT_3D_FT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "mediumint",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "LINE_ID": {
@@ -4501,13 +4501,13 @@
                                         "parameters": {
                                             "comment": "x coordinate in nautical miles",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Length",
                                             "is_key": false,
                                             "name": "POS_LOCAL_X_NM",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Nautical Mile"
                                         }
                                     },
                                     "POS_LOCAL_X_NM_CALC": {
@@ -4527,13 +4527,13 @@
                                         "parameters": {
                                             "comment": "y coordinate in nautical miles",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Length",
                                             "is_key": false,
                                             "name": "POS_LOCAL_Y_NM",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Nautical Mile"
                                         }
                                     },
                                     "POS_LOCAL_Y_NM_CALC": {
