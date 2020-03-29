@@ -79,6 +79,8 @@ private:
     void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
                            size_t numErrors);
     void countRecord (unsigned int category, nlohmann::json& record);
+    // checks that SAC/SIC are set in all records in same data block
+    void checkCAT001SacSics (nlohmann::json& data_block);
 };
 
 #endif // ASTERIXDECODEJOB_H

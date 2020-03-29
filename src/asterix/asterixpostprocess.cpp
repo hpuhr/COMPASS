@@ -51,6 +51,36 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
 
     // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
 
+    // antenna 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("ANT"))
+    {
+        nlohmann::json& item_020 = record.at("020");
+        unsigned int antenna = item_020.at("ANT");
+        item_020.at("ANT") = antenna + 1;
+    }
+
+    // civil emergency
+    if (record.contains("070") && record.at("070").contains("Mode-3/A reply"))
+    {
+        nlohmann::json& item = record.at("070");
+        unsigned int mode3a_code = item.at("Mode-3/A reply");
+
+        if (mode3a_code == 7500)
+            record["civil_emergency"] = 5;
+        else if (mode3a_code == 7600)
+            record["civil_emergency"] = 6;
+        else if (mode3a_code == 7700)
+            record["civil_emergency"] = 7;
+    }
+
+    // rdpc 0,1 to 1,2
+    if (record.contains("170") && record.at("170").contains("RDPC"))
+    {
+        nlohmann::json& item = record.at("170");
+        unsigned int value = item.at("RDPC");
+        item.at("RDPC") = value + 1;
+    }
+
     if (record.contains("141") && record.at("141").contains("Truncated Time of Day"))
     {
         if (sac > -1 && sic > -1 ) // bingo
