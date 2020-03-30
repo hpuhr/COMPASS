@@ -5214,12 +5214,12 @@
                                         "parameters": {
                                             "comment": "",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "ALT_BARO_FT",
                                             "special_null": "",
                                             "type": "mediumint",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "ALT_BARO_G": {
@@ -5263,13 +5263,13 @@
                                         "parameters": {
                                             "comment": "Calculated Geographical Altitude",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Height",
                                             "is_key": false,
                                             "name": "CALC_ALT_GEO_FT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "CALLSIGN": {

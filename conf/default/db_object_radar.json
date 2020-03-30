@@ -1134,10 +1134,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "Radar",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1219,10 +1219,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Radar",
                     "description": "Calculated Geographical Altitude",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "calc_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

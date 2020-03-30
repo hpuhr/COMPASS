@@ -1258,10 +1258,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_g",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.G",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1274,10 +1274,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_smo",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.L",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1306,10 +1306,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_v",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.V",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1322,10 +1322,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "modec_g",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.G",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1354,10 +1354,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "modec_v",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.V",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1398,7 +1398,7 @@
                                         "parameters": {
                                             "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 0",
+                                            "comment": "Type number, value 0, shifted to 1,2",
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "antenna",
                                             "dimension": "",
@@ -1412,11 +1412,11 @@
                                     },
                                     "JSONDataMapping20": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 1",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "cat",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -1482,10 +1482,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mil_emergency",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.ME",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1498,10 +1498,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mil_ident",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.MI",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1514,10 +1514,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "test_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.TST",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1754,10 +1754,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "from_fft",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.RAB",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1844,11 +1844,11 @@
                                     },
                                     "JSONDataMapping45": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 211",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_num",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -1866,10 +1866,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.CON",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1882,10 +1882,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.DOU",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1914,10 +1914,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.GHO",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1930,10 +1930,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "simulated_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SIM",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1972,11 +1972,11 @@
                                     },
                                     "JSONDataMapping52": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 0",
+                                            "comment": "Type number, value 0, custom to 1,2",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_rdp_chain",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -1988,34 +1988,34 @@
                                     },
                                     "JSONDataMapping53": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0.1412353371",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_groundspeed_kt",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "200.CALCULATED GROUNDSPEED",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "NM/Second"
                                         }
                                     },
                                     "JSONDataMapping54": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 96.1578368703",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_heading_deg",
+                                            "dimension": "Angle",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "200.CALCULATED HEADING",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "JSONDataMapping55": {
@@ -2058,10 +2058,42 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.TRE",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping58": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.Mode-C HEIGHT",
                                             "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping59": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_g",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "090.G",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -2074,9 +2106,41 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "spi",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SPI",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping60": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_v",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "090.V",
+                                            "json_value_format": "bool_invert",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping61": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "custom based on 070.Mode-3/A reply",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "civil_emergency",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "civil_emergency",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
@@ -3664,6 +3728,22 @@
                                             "unit": "Second"
                                         }
                                     },
+                                    "JSONDataMapping100": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "track_sigma_y_nm",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.Sigma (Y)",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping11": {
                                         "parameters": {
                                             "active": true,
@@ -3704,10 +3784,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "from_fft",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.RAB",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3720,10 +3800,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "simulated_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SIM",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3736,10 +3816,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "spi",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SPI",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3768,10 +3848,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_g",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.G",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3800,10 +3880,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_smo",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.L",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3816,10 +3896,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mode3a_v",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "070.V",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3832,10 +3912,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "modec_g",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.G",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3848,21 +3928,21 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "modec_v",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.V",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
                                     },
                                     "JSONDataMapping25": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 1",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "cat",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3908,7 +3988,7 @@
                                         "parameters": {
                                             "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 1",
+                                            "comment": "Type number, value 1, custom to 1,2",
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "rdp_chain",
                                             "dimension": "",
@@ -3960,10 +4040,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_confirmed",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.CNF",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3976,10 +4056,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_doubtful",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.DOU",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4008,10 +4088,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_manoeuvre_hori",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.MAH",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4088,10 +4168,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "acas_aircraft_identification",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "230.AIC",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4168,10 +4248,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "acas_modes_service",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "230.MSSC",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4424,10 +4504,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mil_emergency",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.ME",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4440,10 +4520,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "mil_ident",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.MI",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4456,10 +4536,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "test_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.TST",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4472,10 +4552,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_ghost_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.GHO",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4488,10 +4568,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_sup",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.SUP",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4504,10 +4584,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_slant_corr",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.TCC",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4520,10 +4600,10 @@
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_end",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.TRE",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4864,6 +4944,38 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping88": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"I\", custom based on 170.CDM",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "track_climb_desc_mode",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "track_climb_desc_mode",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping89": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 25.0, custom from 230.ARC",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "acas_alt_capability_ft",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "230.ARC_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping9": {
                                         "parameters": {
                                             "active": true,
@@ -4878,6 +4990,166 @@
                                             "json_value_format": "",
                                             "mandatory": true,
                                             "unit": "Nautical Mile"
+                                        }
+                                    },
+                                    "JSONDataMapping90": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"N\", custom based on 020.FOE/FRI",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "mode4_friendly",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode4_friendly",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping91": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.Flight Level",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Flight Level"
+                                        }
+                                    },
+                                    "JSONDataMapping92": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_g",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "090.G",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping93": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "alt_baro_v",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "090.V",
+                                            "json_value_format": "bool_invert",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping94": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Custom based on 070.Mode-3/A reply",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "civil_emergency",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "civil_emergency",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping95": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "detection_type",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "020.TYP",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping96": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"N\", custom from 230.STAT",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "ground_bit",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "ground_bit",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping97": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "track_sigma_h_deg",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.Sigma (H)",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping98": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "track_sigma_v_kt",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.Sigma (V)",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping99": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "track_sigma_x_nm",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.Sigma (X)",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
                                         }
                                     }
                                 }
