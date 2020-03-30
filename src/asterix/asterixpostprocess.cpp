@@ -36,21 +36,14 @@ void ASTERIXPostProcess::postProcess (unsigned int category, nlohmann::json& rec
         postProcessCAT020 (sac, sic, record);
     else if (category == 21)
         postProcessCAT021 (sac, sic, record);
+    else if (category == 48)
+        postProcessCAT048 (sac, sic, record);
     else if (category == 62)
         postProcessCAT062 (sac, sic, record);
 }
 
 void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& record)
 {
-    //        if (record.find("090") != record.end())
-    //            if (record.at("090").find("Flight Level") != record.at("090").end())
-    //            {
-    //                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
-    //                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
-    //            }
-
-    // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
-
     // antenna 0,1 to 1,2
     if (record.contains("020") && record.at("020").contains("ANT"))
     {
@@ -93,9 +86,9 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
                 //double tod = record.at("140").at("Time-of-Day");
                 tod += cat002_last_tod_period_.at(sac_sic);
 
-                //                    loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-                //                           << " to " << String::timeStringFromDouble(tod)
-                //                           << " last update " << cat002_last_tod_period_.at(sac_sic);
+                //  loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+                //      << " to " << String::timeStringFromDouble(tod)
+                //     << " last update " << cat002_last_tod_period_.at(sac_sic);
 
                 record["140"]["Time-of-Day"] = tod;
             }
@@ -107,10 +100,10 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
                 record["140"]["Time-of-Day"] = nullptr;
             }
 
-            //                loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-            //                       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
+            //     loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+            //       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
 
-            //                assert (record.at("140").at("Time-of-Day") > 3600.0);
+            //    assert (record.at("140").at("Time-of-Day") > 3600.0);
         }
         else
         {
@@ -210,10 +203,129 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
     //        }
 }
 
-//void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
-//{
+void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
+{
+    // altitude capability
+    if (record.contains("230") && record.at("230").contains("ARC"))
+    {
+        nlohmann::json& item_230 = record.at("230");
+        unsigned int arc = item_230.at("ARC");
+        if (arc == 0)
+            item_230["ARC_ft"] = 100.0;
+        else if (arc == 1)
+            item_230["ARC_ft"] = 25.0;
+    }
 
-//}
+    // civil emergency
+    if (record.contains("070") && record.at("070").contains("Mode-3/A reply"))
+    {
+        nlohmann::json& item = record.at("070");
+        unsigned int mode3a_code = item.at("Mode-3/A reply");
+
+        if (mode3a_code == 7500)
+            record["civil_emergency"] = 5;
+        else if (mode3a_code == 7600)
+            record["civil_emergency"] = 6;
+        else if (mode3a_code == 7700)
+            record["civil_emergency"] = 7;
+    }
+
+    // ground bit
+    if (record.contains("230") && record.at("230").contains("STAT"))
+    {
+        nlohmann::json& item = record.at("230");
+        unsigned int stat = item.at("STAT");
+
+        //        # = 0 No alert, no SPI, aircraft airborne
+        //        if stat == 0:
+        //            return 'N'
+        if (stat == 0)
+            record["ground_bit"] = "N";
+        //        # = 1 No alert, no SPI, aircraft on ground
+        //        if stat == 1:
+        //            return 'Y'
+        else if (stat == 1)
+            record["ground_bit"] = "Y";
+        //        # = 2 Alert, no SPI, aircraft airborne
+        //        if stat == 2:
+        //            return 'N'
+        else if (stat == 2)
+            record["ground_bit"] = "N";
+        //        # = 3 Alert, no SPI, aircraft on ground
+        //        if stat == 3:
+        //            return 'Y'
+        else if (stat == 3)
+            record["ground_bit"] = "Y";
+    }
+
+    // mode4 friendly
+    if (record.contains("020") && record.at("020").contains("FOE/FRI"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int foefrie = item.at("FOE/FRI");
+
+        //#Mode-4 interrorgation type:
+        //# - = no interrogation, 0 No Mode 4 interrogation
+        //if frifoe == 0:
+        //    return '-'
+        if (foefrie == 0)
+            record["mode4_friendly"] = "N";
+
+        //# F = Friendly target, 1 Friendly target
+        //if frifoe == 1:
+        //    return 'F'
+        else if (foefrie == 1)
+            record["mode4_friendly"] = "F";
+
+        //# U = Unknown Target, 2 Unknown target
+        //if frifoe == 2:
+        //    return 'U'
+        else if (foefrie == 2)
+            record["mode4_friendly"] = "U";
+
+        //# N = No Reply, 3 No reply
+        //if frifoe == 3:
+        //    return 'N'
+        else if (foefrie == 3)
+            record["mode4_friendly"] = "N";
+    }
+
+    // rdp chain 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("RDP"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int value = item.at("RDP");
+        item.at("RDP") = value + 1;
+    }
+
+    // track climb desc mode
+    if (record.contains("170") && record.at("170").contains("CDM"))
+    {
+        nlohmann::json& item = record.at("170");
+        unsigned int cdm = item.at("CDM");
+
+        //# value record '0' db 'M': 4117 M = Maintaining
+        //if cdm == 0:
+        //    return 'M'
+        if (cdm == 0)
+            record["track_climb_desc_mode"] = "M";
+        //# value record '1' db 'C': 1133 C = Climbing
+        //if cdm == 1:
+        //    return 'C'
+        else if (cdm == 1)
+            record["track_climb_desc_mode"] = "C";
+        //# value record '2' db 'D': 330 D = Descending
+        //if cdm == 2:
+        //    return 'D'
+        else if (cdm == 2)
+            record["track_climb_desc_mode"] = "D";
+        //# value record '3' db 'I': 569 I = Invalid
+        //if cdm == 3:
+        //    return 'I'
+        else if (cdm == 3)
+            record["track_climb_desc_mode"] = "I";
+    }
+}
 
 void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& record)
 {
@@ -290,8 +402,8 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
                 //                return 5
 
                 else if (record.contains("380")
-                        && record.at("380").contains("ADR")
-                        && record.at("380").at("ADR").contains("Target Address"))
+                         && record.at("380").contains("ADR")
+                         && record.at("380").at("ADR").contains("Target Address"))
                     record["detection_type"] = 5;  // ssr, mode-s
 
                 //            if find_value("060.Mode-3/A reply", record) is not None \
