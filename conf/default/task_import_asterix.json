@@ -2148,11 +2148,11 @@
                                     },
                                     "JSONDataMapping7": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "detection_type",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3744,6 +3744,22 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping101": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1, custom based on 161.TRACK NUMBER",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "report_type",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "report_type",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping11": {
                                         "parameters": {
                                             "active": true,
@@ -3820,22 +3836,6 @@
                                             "in_array": false,
                                             "json_key": "020.SPI",
                                             "json_value_format": "bool",
-                                            "mandatory": false,
-                                            "unit": ""
-                                        }
-                                    },
-                                    "JSONDataMapping18": {
-                                        "parameters": {
-                                            "active": true,
-                                            "append_value": false,
-                                            "comment": "Type number, value 0",
-                                            "db_object_name": "Radar",
-                                            "dbovariable_name": "report_type",
-                                            "dimension": "",
-                                            "format_data_type": "",
-                                            "in_array": false,
-                                            "json_key": "020.TYP",
-                                            "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4098,11 +4098,11 @@
                                     },
                                     "JSONDataMapping38": {
                                         "parameters": {
-                                            "active": true,
+                                            "active": false,
                                             "append_value": false,
                                             "comment": "Type number, value 2",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "track_type",
+                                            "dbovariable_name": "",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -5076,7 +5076,7 @@
                                         "parameters": {
                                             "active": true,
                                             "append_value": false,
-                                            "comment": "",
+                                            "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "detection_type",
                                             "dimension": "",
