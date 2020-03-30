@@ -325,6 +325,12 @@ void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& re
         else if (cdm == 3)
             record["track_climb_desc_mode"] = "I";
     }
+
+    // report type
+    if (record.contains("161") && record.at("161").contains("TRACK NUMBER"))
+        record["report_type"] = 1;
+    else
+        record["report_type"] = 0;
 }
 
 void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& record)

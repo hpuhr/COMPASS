@@ -246,34 +246,30 @@ void ASTERIXDecodeJob::checkCAT001SacSics (nlohmann::json& data_block)
     // check if any SAC/SIC info can be found
     for (nlohmann::json& record : records)
     {
-        if (record.contains("010"))
+        if (!found_any_sac_sic)
         {
-            sac = record.at("010").at("SAC");
-            sic = record.at("010").at("SIC");
-            found_any_sac_sic = true;
-        }
-    }
-
-    if (!found_any_sac_sic)
-    {
-        logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: data block without any SAC/SIC found";
-        return;
-    }
-
-    logdbg << "ASTERIXDecodeJob: checkCAT001SacSics: found sac/sic " << sac << "/" << sic;
-
-    // check or set SAC/SICs
-    for (nlohmann::json& record : records)
-    {
-        if (record.contains("010"))
-        {
-            assert (record.at("010").at("SAC") == sac);
-            assert (record.at("010").at("SIC") == sic);
+            if (record.contains("010")) // found, set as transferable values
+            {
+                sac = record.at("010").at("SAC");
+                sic = record.at("010").at("SIC");
+                found_any_sac_sic = true;
+            }
+            else // not found, can not set values
+                logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record without any SAC/SIC found";
         }
         else
         {
-            record["010"]["SAC"] = sac;
-            record["010"]["SIC"] = sic;
+            if (record.contains("010")) // found, check values
+            {
+                if (record.at("010").at("SAC") != sac
+                        || record.at("010").at("SIC") != sic)
+                    logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record with differing SAC/SICs found";
+            }
+            else // not found, set values
+            {
+                record["010"]["SAC"] = sac;
+                record["010"]["SIC"] = sic;
+            }
         }
     }
 }
