@@ -163,6 +163,166 @@
                                             "unit": "Knots"
                                         }
                                     },
+                                    "JSONDataMapping100": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.7000000000000001",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Target Identification.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping101": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type array, value [false,false,false,false,false,false,true,true,true,false,false,false,false,false,false,true,true,true,false,true,false,false,false,false]",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.available",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping102": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"08a002\"",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping103": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 7000.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "146.Altitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping104": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "146.SAS",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping105": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 2",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "146.Source",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping106": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Aircraft Operational Status.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping107": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.4",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Barometric Vertical Rate.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping108": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Intermediate State Selected Altitude.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping109": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 3.5",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Mode 3/A.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping11": {
                                         "parameters": {
                                             "active": true,
@@ -177,6 +337,166 @@
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": "Mach"
+                                        }
+                                    },
+                                    "JSONDataMapping110": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Quality Indicators.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping111": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 3.5",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Target Status.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping112": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.B2 low",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping113": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.CDTI/S",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping114": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.FX",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping115": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.IDENT",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping116": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "aircraft_leng_width",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.L+W",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping117": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.POA",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping118": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "271.RAS",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping119": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 2.1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Surface Capabilities and Characteristics.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
                                         }
                                     },
                                     "JSONDataMapping12": {
@@ -195,17 +515,17 @@
                                             "unit": "Feet"
                                         }
                                     },
-                                    "JSONDataMapping13": {
+                                    "JSONDataMapping120": {
                                         "parameters": {
                                             "active": true,
                                             "append_value": false,
-                                            "comment": "",
+                                            "comment": "Type number, value 33503.015625",
                                             "db_object_name": "ADSB",
-                                            "dbovariable_name": "baro_vertical_rate_ftm",
+                                            "dbovariable_name": "torp",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
-                                            "json_key": "150.Barometric Vertical Rate",
+                                            "json_key": "073.Time of Message Reception for Position",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
@@ -261,11 +581,11 @@
                                     },
                                     "JSONDataMapping17": {
                                         "parameters": {
-                                            "active": true,
+                                            "active": false,
                                             "append_value": false,
                                             "comment": "Type number, value 3",
                                             "db_object_name": "ADSB",
-                                            "dbovariable_name": "emitter_category",
+                                            "dbovariable_name": "",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -283,10 +603,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "from_fft",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "040.RAB",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -347,10 +667,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "ground_bit",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "040.GBS",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -427,10 +747,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "spi",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "200.SS",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -567,7 +887,7 @@
                                         "parameters": {
                                             "active": false,
                                             "append_value": false,
-                                            "comment": "Type number, value 0, weird mapping in SCDB",
+                                            "comment": "Type number, value 0",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "",
                                             "dimension": "",
@@ -635,10 +955,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "selected_alt_capability",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "040.SAA",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -665,7 +985,7 @@
                                             "append_value": false,
                                             "comment": "Type number, value 33502.75, unsure if correct mapping",
                                             "db_object_name": "ADSB",
-                                            "dbovariable_name": "torv_precise",
+                                            "dbovariable_name": "torv",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -805,11 +1125,11 @@
                                     },
                                     "JSONDataMapping51": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 21",
                                             "db_object_name": "ADSB",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "cat",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -827,10 +1147,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "nic_baro",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.NICbaro",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -843,10 +1163,10 @@
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "sil",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.SIL",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -1155,6 +1475,134 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping72": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "008.ARV",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping73": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "008.CDTI/A",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping74": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "op_status_tcas",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "008.Not TCAS",
+                                            "json_value_format": "bool_invert",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping75": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "op_status_ra",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "008.RA",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping76": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "op_status_sa",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "008.SA",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping77": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "008.TC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping78": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "008.TS",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping79": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"NO_INFO\", custom based on 020.ECAT",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "emitter_category",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "020.ECAT_str",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping8": {
                                         "parameters": {
                                             "active": true,
@@ -1171,11 +1619,171 @@
                                             "unit": "Degree"
                                         }
                                     },
+                                    "JSONDataMapping80": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 25.0, custom based on 040.ARC",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_reporting_capability_ft",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "040.ARC_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping81": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "torp_fsi",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "074.FSI",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping82": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.39351637838965975",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "torp_precise",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "074.Time of Message Reception of Position - high precision",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping83": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "torv_fsi",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "076.FSI",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping84": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.8989372451012015",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "torv_precise",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "076.Time of Message Reception of Velocity - high precision",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping85": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.FX3",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping86": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.FX4",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping87": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "geo_height_accuracy",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.GVA",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping88": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 10",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.PIC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping89": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "090.SDA",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping9": {
                                         "parameters": {
                                             "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 33503.015625, unsure if correct mapping",
+                                            "comment": "Type number, value 33503.015625",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "tod",
                                             "dimension": "Time",
@@ -1185,6 +1793,166 @@
                                             "json_value_format": "",
                                             "mandatory": true,
                                             "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping90": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "sils",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "090.SIL-Supplement",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping91": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value -87.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "sam",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "132.MAM",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping92": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 'N',  custom based on 210.LTT",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "link_technology_mds",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.LTT_MDS",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping93": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 'N',  custom based on 210.LTT",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "link_technology_other",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.LTT_OTHER",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping94": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 'N',  custom based on 210.LTT",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "link_technology_uat",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.LTT_UAT",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping95": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 'N',  custom based on 210.LTT",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "link_technology_vdl",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "210.LTT_VDL",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping96": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Flight Level.age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping97": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.5",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Geometric Height.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping98": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.5",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Geometric Vertical Rate.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping99": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.5",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Ground Vector.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
                                         }
                                     }
                                 }

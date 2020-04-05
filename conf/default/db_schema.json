@@ -2849,7 +2849,7 @@
                                             "name": "EMITTER_CATEGORY",
                                             "number_conversion_type": "",
                                             "special_null": "",
-                                            "type": "tinyint",
+                                            "type": "enum",
                                             "unit": ""
                                         }
                                     },

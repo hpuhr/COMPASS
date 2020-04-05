@@ -1831,7 +1831,7 @@
             },
             "DBOVariableADSBemitter_category0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
+                    "data_type_str": "STRING",
                     "dbo_name": "ADSB",
                     "description": " ",
                     "dimension": "",
