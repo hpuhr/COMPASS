@@ -700,7 +700,7 @@
                                     "comment":"Amplitude of Primary Plot",
                                     "type":"fixed_bytes",
                                     "length":1,
-                                    "data_type":"uint"
+                                    "data_type":"int"
                                 }
                             ]
                         },
