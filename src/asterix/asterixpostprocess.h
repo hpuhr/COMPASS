@@ -29,9 +29,9 @@ protected:
 
     void postProcessCAT001 (int sac, int sic, nlohmann::json& record);
     void postProcessCAT002 (int sac, int sic, nlohmann::json& record);
-    //void postProcessCAT020 (nlohmann::json& record);
+    void postProcessCAT020 (int sac, int sic, nlohmann::json& record);
     void postProcessCAT021 (int sac, int sic, nlohmann::json& record);
-    //void postProcessCAT048 (nlohmann::json& record);
+    void postProcessCAT048 (int sac, int sic, nlohmann::json& record);
     void postProcessCAT062 (int sac, int sic, nlohmann::json& record);
 };
 

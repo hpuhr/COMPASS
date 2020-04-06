@@ -181,6 +181,12 @@ ListBoxView &BufferTableWidget::view() const
     return view_;
 }
 
+void BufferTableWidget::resizeColumns()
+{
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
 void BufferTableWidget::keyPressEvent (QKeyEvent* event)
 {
     loginf  << "BufferTableWidget: keyPressEvent: got keypressed";

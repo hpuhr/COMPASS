@@ -63,7 +63,7 @@ protected:
     /// Base view
     ListBoxView* view_;
     /// Variable read list widget
-    DBOVariableOrderedSetWidget *variable_set_widget_{nullptr};
+    DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
 
     QCheckBox* only_selected_check_ {nullptr};
     QCheckBox* presentation_check_ {nullptr};

@@ -746,6 +746,8 @@ void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause
                      std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
                      bool use_order_ascending, const std::string &limit_str)
 {
+    logdbg << "DBObject: load: name " << name_ << " loadable " << is_loadable_;
+
     assert (is_loadable_);
     assert (existsInDB());
 

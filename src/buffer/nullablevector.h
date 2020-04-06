@@ -499,7 +499,7 @@ template <class T> std::map<T, std::vector<unsigned int>> NullableVector<T>::dis
 
     std::map<T, std::vector<unsigned int>> values;
 
-    assert (from_index < to_index);
+    assert (from_index <= to_index);
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -563,7 +563,7 @@ template <class T> std::vector<unsigned int>  NullableVector<T>::nullValueIndexe
 
     std::vector<unsigned int> indexes;
 
-    assert (from_index < to_index);
+    assert (from_index <= to_index);
 
     if (BUFFER_PEDANTIC_CHECKING)
     {

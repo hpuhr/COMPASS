@@ -243,7 +243,7 @@ void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
 
 DBOVariableSet DBOVariableOrderedSet::getFor (const std::string &dbo_name)
 {
-    logdbg  << "DBOVariableOrderedSet: getFor: type " << dbo_name;
+    loginf  << "DBOVariableOrderedSet: getFor: type " << dbo_name;
 
     DBObjectManager &manager = ATSDB::instance().objectManager();
     DBOVariableSet type_set;

@@ -49,7 +49,7 @@ signals:
 public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateData (DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSlot (DBObject& object, std::shared_ptr<Buffer> buffer);
 
     void exportDataSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);

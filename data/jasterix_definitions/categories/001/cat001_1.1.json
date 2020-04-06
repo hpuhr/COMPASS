@@ -400,7 +400,7 @@
         {
             "number":"090",
             "name":"Mode-C Code in Binary Representation",
-            "comment":"CMode-C height converted into binary representation.",
+            "comment":"Mode-C height converted into binary representation.",
             "type":"item",
             "data_fields":[
                 {
@@ -427,7 +427,7 @@
                             "comment":"",
                             "type":"fixed_bits",
                             "start_bit":0,
-                            "bit_length":12,
+                            "bit_length":14,
                             "data_type":"int",
                             "lsb":25.0
                         }

@@ -107,12 +107,12 @@ void CreateARTASAssociationsTask::deleteWidget ()
 
 bool CreateARTASAssociationsTask::checkPrerequisites ()
 {
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: ready " << ATSDB::instance().interface().ready();
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ready " << ATSDB::instance().interface().ready();
 
     if (!ATSDB::instance().interface().ready())
         return false;
 
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: done "
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "
            << ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME);
 
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
@@ -122,13 +122,13 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
         return false;
 
     // check if was post-processed
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: post "
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
            << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
     if (!ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
         return false;
 
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
            << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
     if (ATSDB::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
@@ -137,15 +137,18 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
     // check if hash var exists in all data
     DBObjectManager& object_man = ATSDB::instance().objectManager();
 
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: hashes";
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: hashes";
     for (auto& dbo_it : object_man)
     {
+        if (dbo_it.first != "Tracker" && !dbo_it.second->hasData()) // DBO other than tracker no data is acceptable
+            continue;
+
         DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
         if (hash_var.getMinString() == NULL_STRING || hash_var.getMaxString() == NULL_STRING)
-            return false;
+            return false; // has data but no hashes
     }
 
-    loginf << "CreateARTASAssociationsTask: checkPrerequisites: ok";
+    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ok";
     return true;
 }
 
@@ -163,7 +166,7 @@ bool CreateARTASAssociationsTask::canRun ()
 
     //ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME)
 
-    loginf << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
     if (!object_man.existsObject("Tracker"))
         return false;
@@ -171,11 +174,11 @@ bool CreateARTASAssociationsTask::canRun ()
     DBObject& tracker_object = object_man.object("Tracker");
 
     // tracker stuff
-    loginf << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker loadable " << tracker_object.loadable();
     if (!tracker_object.loadable())
         return false;
 
-    loginf << "CreateARTASAssociationsTask: canRun: tracker count " << tracker_object.count();
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker count " << tracker_object.count();
     if (!tracker_object.count())
         return false;
 
@@ -194,15 +197,15 @@ bool CreateARTASAssociationsTask::canRun ()
         }
     }
 
-    loginf << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
     if (!ds_found)
     {
-        loginf << "CreateARTASAssociationsTask: canRun: resetting current source to "
+        logdbg << "CreateARTASAssociationsTask: canRun: resetting current source to "
                << tracker_object.dsBegin()->second.name();
         current_data_source_name_ = tracker_object.dsBegin()->second.name();
     }
 
-    loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
+    logdbg << "CreateARTASAssociationsTask: canRun: tracker vars";
     if (!tracker_object.hasVariable(tracker_track_num_var_str_)
             || !tracker_object.hasVariable(tracker_track_begin_var_str_)
             || !tracker_object.hasVariable(tracker_track_end_var_str_)
@@ -210,19 +213,19 @@ bool CreateARTASAssociationsTask::canRun ()
         return false;
 
     // meta var stuff
-    loginf << "CreateARTASAssociationsTask: canRun: meta vars";
+    logdbg << "CreateARTASAssociationsTask: canRun: meta vars";
     if (!key_var_str_.size()
             || !hash_var_str_.size()
             || !tod_var_str_.size())
         return false;
 
-    loginf << "CreateARTASAssociationsTask: canRun: metas in tracker";
+    logdbg << "CreateARTASAssociationsTask: canRun: metas in tracker";
     if (!object_man.existsMetaVariable(key_var_str_)
             || !object_man.existsMetaVariable(hash_var_str_)
             || !object_man.existsMetaVariable(tod_var_str_))
         return false;
 
-    loginf << "CreateARTASAssociationsTask: canRun: metas in objects";
+    logdbg << "CreateARTASAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : object_man)
     {
         if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
@@ -231,7 +234,7 @@ bool CreateARTASAssociationsTask::canRun ()
             return false;
     }
 
-    loginf << "CreateARTASAssociationsTask: canRun: ok";
+    logdbg << "CreateARTASAssociationsTask: canRun: ok";
     return true;
 }
 
@@ -269,6 +272,9 @@ void CreateARTASAssociationsTask::run ()
 
     for (auto& dbo_it : object_man)
     {
+        if (!dbo_it.second->hasData())
+            continue;
+
         DBOVariableSet read_set = getReadSetFor(dbo_it.first);
         connect (dbo_it.second, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
         connect (dbo_it.second, &DBObject::loadingDoneSignal, this, &CreateARTASAssociationsTask::loadingDoneSlot);

@@ -1674,10 +1674,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "MLAT",
                     "description": "",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1737,10 +1737,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "MLAT",
                     "description": "Height above WGS-84 ellipsoid in feet",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1759,10 +1759,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "Calculated Geographical Altitude in feet",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "calc_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2067,10 +2067,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "MLAT",
                     "description": "Height above local coordinate system in feet",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "height_3d_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2573,10 +2573,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "x coordinate in nautical miles",
-                    "dimension": "",
+                    "dimension": "Length",
                     "name": "pos_local_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2617,10 +2617,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "y coordinate in nautical miles",
-                    "dimension": "",
+                    "dimension": "Length",
                     "name": "pos_local_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

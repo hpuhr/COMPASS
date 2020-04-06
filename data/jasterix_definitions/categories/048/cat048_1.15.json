@@ -419,7 +419,7 @@
                     "comment":"0 High quality pulse Xi\n1 Low quality pulse Xi",
                     "type":"fixed_bytes",
                     "length":2,
-                    "data_type":"int"
+                    "data_type":"uint"
                 }
             ]
         },
@@ -454,6 +454,7 @@
                             "type":"fixed_bits",
                             "start_bit":0,
                             "bit_length":14,
+                            "data_type":"int",
                             "lsb":0.25
                         }
                     ]

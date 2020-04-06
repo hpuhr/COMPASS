@@ -62,7 +62,6 @@ AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSou
     table_->show();
 
     setLayout (layout);
-
 }
 
 AllBufferTableWidget::~AllBufferTableWidget()

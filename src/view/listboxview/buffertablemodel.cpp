@@ -34,11 +34,31 @@
 BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject &object, ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget), table_widget_(table_widget), object_(object), data_source_(data_source)
 {
+    read_set_ = data_source_.getSet()->getFor(object_.name());
+
+    connect (data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal,
+             this, &BufferTableModel::setChangedSlot);
 }
 
 BufferTableModel::~BufferTableModel()
 {
     buffer_ = nullptr;
+}
+
+void BufferTableModel::setChangedSlot ()
+{
+    logdbg << "BufferTableModel: setChangedSlot";
+
+    beginResetModel();
+    read_set_ = data_source_.getSet()->getFor(object_.name());
+
+    logdbg << "BufferTableModel: setChangedSlot: read set size " << read_set_.getSize();
+
+    //read_set_.print();
+
+    endResetModel();
+    assert (table_widget_);
+    table_widget_->resizeColumns();
 }
 
 int BufferTableModel::rowCount(const QModelIndex & /*parent*/) const
@@ -82,6 +102,7 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
 
         assert (col < read_set_.getSize());
         DBOVariable& variable = read_set_.getVariable(col);
+        logdbg << "BufferTableModel: headerData: col " << col << " variable " << variable.name();
         return QString (variable.name().c_str());
     }
     else if(orientation == Qt::Vertical)
@@ -332,7 +353,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 
 bool BufferTableModel::setData(const QModelIndex& index, const QVariant & value,int role)
 {
-    loginf << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+    logdbg << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
@@ -383,12 +404,13 @@ void BufferTableModel::clearData ()
 
 void BufferTableModel::setData (std::shared_ptr <Buffer> buffer)
 {
+    logdbg << "BufferTableModel: setData";
     assert (buffer);
     beginResetModel();
 
     buffer_ = buffer;
     updateRows();
-    read_set_ = data_source_.getSet()->getFor(object_.name());
+    //read_set_ = data_source_.getSet()->getFor(object_.name());
 
     endResetModel();
 }

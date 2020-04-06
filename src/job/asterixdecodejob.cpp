@@ -125,6 +125,9 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
 
             category = data_block.at("category");
 
+            if (category == 1)
+                checkCAT001SacSics (data_block);
+
             loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
@@ -158,6 +161,9 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
                 }
 
                 category = data_block.at("category");
+
+                if (category == 1)
+                    checkCAT001SacSics (data_block);
 
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
                 JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
@@ -214,5 +220,57 @@ std::string ASTERIXDecodeJob::errorMessage() const
     return error_message_;
 }
 
+void ASTERIXDecodeJob::checkCAT001SacSics (nlohmann::json& data_block)
+{
+    if (!data_block.contains("content"))
+    {
+        logdbg << "ASTERIXDecodeJob: checkCAT001SacSics: no content in data block";
+        return;
+    }
 
+    nlohmann::json& content = data_block.at("content");
+
+    if (!content.contains("records"))
+    {
+        logdbg << "ASTERIXDecodeJob: checkCAT001SacSics: no records in content";
+        return;
+    }
+
+    nlohmann::json& records = content.at("records");
+
+    bool found_any_sac_sic = false;
+
+    unsigned int sac = 0;
+    unsigned int sic = 0;
+
+    // check if any SAC/SIC info can be found
+    for (nlohmann::json& record : records)
+    {
+        if (!found_any_sac_sic)
+        {
+            if (record.contains("010")) // found, set as transferable values
+            {
+                sac = record.at("010").at("SAC");
+                sic = record.at("010").at("SIC");
+                found_any_sac_sic = true;
+            }
+            else // not found, can not set values
+                logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record without any SAC/SIC found";
+        }
+        else
+        {
+            if (record.contains("010")) // found, check values
+            {
+                if (record.at("010").at("SAC") != sac
+                        || record.at("010").at("SIC") != sic)
+                    logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record with differing SAC/SICs found";
+            }
+            else // not found, set values
+            {
+                record["010"]["SAC"] = sac;
+                record["010"]["SIC"] = sic;
+            }
+        }
+    }
+}
 

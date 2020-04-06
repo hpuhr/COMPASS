@@ -109,7 +109,7 @@ public:
     /// @brief Returns number of variables in set
     unsigned int getSize () const { return variable_definitions_.size(); }
 
-    DBOVariableOrderedSetWidget *widget ();
+    DBOVariableOrderedSetWidget* widget ();
 
 protected:
     /// Container with ordered variable definitions (index -> definition pointer)

@@ -32,22 +32,47 @@ void ASTERIXPostProcess::postProcess (unsigned int category, nlohmann::json& rec
         postProcessCAT001 (sac, sic, record);
     else if (category == 2) // save last tods
         postProcessCAT002 (sac, sic, record);
+    else if (category == 20)
+        postProcessCAT020 (sac, sic, record);
     else if (category == 21)
         postProcessCAT021 (sac, sic, record);
+    else if (category == 48)
+        postProcessCAT048 (sac, sic, record);
     else if (category == 62)
         postProcessCAT062 (sac, sic, record);
 }
 
 void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& record)
 {
-    //        if (record.find("090") != record.end())
-    //            if (record.at("090").find("Flight Level") != record.at("090").end())
-    //            {
-    //                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
-    //                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
-    //            }
+    // antenna 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("ANT"))
+    {
+        nlohmann::json& item_020 = record.at("020");
+        unsigned int antenna = item_020.at("ANT");
+        item_020.at("ANT") = antenna + 1;
+    }
 
-    // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
+    // civil emergency
+    if (record.contains("070") && record.at("070").contains("Mode-3/A reply"))
+    {
+        nlohmann::json& item = record.at("070");
+        unsigned int mode3a_code = item.at("Mode-3/A reply");
+
+        if (mode3a_code == 7500)
+            record["civil_emergency"] = 5;
+        else if (mode3a_code == 7600)
+            record["civil_emergency"] = 6;
+        else if (mode3a_code == 7700)
+            record["civil_emergency"] = 7;
+    }
+
+    // rdpc 0,1 to 1,2
+    if (record.contains("170") && record.at("170").contains("RDPC"))
+    {
+        nlohmann::json& item = record.at("170");
+        unsigned int value = item.at("RDPC");
+        item.at("RDPC") = value + 1;
+    }
 
     if (record.contains("141") && record.at("141").contains("Truncated Time of Day"))
     {
@@ -61,28 +86,28 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
                 //double tod = record.at("140").at("Time-of-Day");
                 tod += cat002_last_tod_period_.at(sac_sic);
 
-                //                    loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-                //                           << " to " << String::timeStringFromDouble(tod)
-                //                           << " last update " << cat002_last_tod_period_.at(sac_sic);
+                //  loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+                //      << " to " << String::timeStringFromDouble(tod)
+                //     << " last update " << cat002_last_tod_period_.at(sac_sic);
 
                 record["140"]["Time-of-Day"] = tod;
             }
             else
             {
-                loginf << "ASTERIXDecodeJob: processRecord: removing truncated tod "
+                loginf << "ASTERIXPostProcess: processRecord: removing truncated tod "
                        << String::timeStringFromDouble(record.at("141").at("Truncated Time of Day"))
                        << " since to CAT002 from sensor "<< sac << "/" << sic << " is not present";
                 record["140"]["Time-of-Day"] = nullptr;
             }
 
-            //                loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-            //                       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
+            //     loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+            //       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
 
-            //                assert (record.at("140").at("Time-of-Day") > 3600.0);
+            //    assert (record.at("140").at("Time-of-Day") > 3600.0);
         }
         else
         {
-            loginf << "ASTERIXDecodeJob: processRecord: skipping cat001 report without sac/sic";
+            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without sac/sic";
             record["140"]["Time-of-Day"] = nullptr;
         }
     }
@@ -97,11 +122,11 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
                 record["140"]["Time-of-Day"] = cat002_last_tod_.at(sac_sic); // set tod, better than nothing
             }
             else
-                logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+                logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
                        << " or last cat002 time";
         }
         else
-            logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
                    << " or sac/sic";
     }
 }
@@ -123,10 +148,27 @@ void ASTERIXPostProcess::postProcessCAT002 (int sac, int sic, nlohmann::json& re
     }
 }
 
-//void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& record)
-//{
+void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& record)
+{
+    // rdp chain 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("CHN"))
+    {
+        nlohmann::json& item_020 = record.at("020");
+        unsigned int chain = item_020.at("CHN");
+        item_020.at("CHN") = chain + 1;
+    }
 
-//}
+    // altitude capability
+    if (record.contains("230") && record.at("230").contains("ARC"))
+    {
+        nlohmann::json& item_230 = record.at("230");
+        unsigned int arc = item_230.at("ARC");
+        if (arc == 0)
+            item_230["ARC_ft"] = 100.0;
+        else if (arc == 1)
+            item_230["ARC_ft"] = 25.0;
+    }
+}
 
 void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& record)
 {
@@ -141,30 +183,322 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
 
         if (mach)
         {
-            air_speed_item["Air Speed [knots]"] = airspeed*666.739;
-            air_speed_item["Air Speed [mach]"] = airspeed;
+            air_speed_item["Air Speed [knots]"] = airspeed * 0.001 * 666.739; // lsb, mach 2 kn
+            air_speed_item["Air Speed [mach]"] = airspeed * 0.001; // lsb
         }
         else
         {
-            air_speed_item["Air Speed [knots]"] = airspeed;
-            air_speed_item["Air Speed [mach]"] = airspeed/666.739;
+            air_speed_item["Air Speed [knots]"] = airspeed * 3600.0; // nm/s 2 kn
+            air_speed_item["Air Speed [mach]"] = airspeed * 0.185205; // lsb, nm/s 2 mach
         }
     }
-    //        else if (record.contains("160"))
-    //        {
-    //            json& ground_speed_item = record.at("160");
-    //            //assert (ground_speed_item.contains("IM"));
-    //            assert (ground_speed_item.contains("Air Speed));
 
-    //            double ground_speed = ground_speed_item.at("Ground Speed");
-    //            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
-    //        }
+    // altitude capability
+    if (record.contains("040") && record.at("040").contains("ARC"))
+    {
+        nlohmann::json& item = record.at("040");
+        unsigned int arc = item.at("ARC");
+        if (arc == 0)
+            item["ARC_ft"] = 25.0;
+        else if (arc == 1)
+            item["ARC_ft"] = 100.0;
+    }
+
+    // link technology
+    if (record.contains("210") && record.at("210").contains("LTT"))
+    {
+        nlohmann::json& item = record.at("210");
+        unsigned int ltt = item.at("LTT");
+        // = 0 Other
+        if (ltt == 0)
+        {
+            item["LTT_OTHER"] = "Y";
+            item["LTT_UAT"] = "N";
+            item["LTT_MDS"] = "N";
+            item["LTT_VDL"] = "N";
+        }
+        // = 1 UAT
+        if (ltt == 0)
+        {
+            item["LTT_OTHER"] = "N";
+            item["LTT_UAT"] = "Y";
+            item["LTT_MDS"] = "N";
+            item["LTT_VDL"] = "N";
+        }
+        // = 2 1090 ES
+        else if (ltt == 2)
+        {
+            item["LTT_OTHER"] = "N";
+            item["LTT_UAT"] = "N";
+            item["LTT_MDS"] = "Y";
+            item["LTT_VDL"] = "N";
+        }
+        // = 3 VDL 4
+        else if (ltt == 3)
+        {
+            item["LTT_OTHER"] = "N";
+            item["LTT_UAT"] = "N";
+            item["LTT_MDS"] = "N";
+            item["LTT_VDL"] = "Y";
+        }
+    }
+
+    // ecat str
+    if (record.contains("020") && record.at("020").contains("ECAT"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int ecat = item.at("ECAT");
+
+        //# 0 = No ADS-B Emitter Category Information
+        //# value record '0' db 'NO_INFO': 20672
+        if (ecat == 0)
+            item["ECAT_str"] = "NO_INFO";
+
+        //# 1 = light aircraft <= 15500 lbs
+        //# value record '1' db 'LIGHT_AIRCRAFT': 2479
+        else if (ecat == 1)
+            item["ECAT_str"] = "LIGHT_AIRCRAFT";
+
+        //# 2 = 15500 lbs < small aircraft <75000 lbs
+        //# value record '2' db 'SMALL_AIRCRAFT': 1941
+        else if (ecat == 2)
+            item["ECAT_str"] = "SMALL_AIRCRAFT";
+
+        //# 3 = 75000 lbs < medium a/c < 300000 lbs
+        //# value record '3' db 'MEDIUM_AIRCRAFT': 44098
+        else if (ecat == 3)
+            item["ECAT_str"] = "MEDIUM_AIRCRAFT";
+
+        //# 4 = High Vortex Large
+        //# value record '4' db 'HIGH_VORTEX_LARGE': 7232
+        else if (ecat == 4)
+            item["ECAT_str"] = "HIGH_VORTEX_LARGE";
+
+        //# 5 = 300000 lbs <= heavy aircraft
+        //# value record '5' db 'HEAVY_AIRCRAFT': 56392
+        else if (ecat == 5)
+            item["ECAT_str"] = "HEAVY_AIRCRAFT";
+
+        //# 6 = highly manoeuvrable (5g acceleration capability) and high speed (>400 knots cruise)
+        else if (ecat == 6)
+            item["ECAT_str"] = "HIGHLY_MANOEUVRABLE";
+
+        //# 7 to 9 = reserved
+        //elif ecat in (7, 8, 9):
+        //    return None  # ?
+
+        //# 10 = rotocraft
+        //elif ecat == 10:
+        //    return 'ROTOCRAFT'  # ?
+        else if (ecat == 0)
+            item["ECAT_str"] = "NO_INFO";
+
+        //# 11 = glider / sailplane
+        else if (ecat == 11)
+            item["ECAT_str"] = "GLIDER";
+
+        //# 12 = lighter-than-air
+        //elif ecat == 12:
+        //    return 'LIGHTER_THAN_AIR'  # ?
+        else if (ecat == 12)
+            item["ECAT_str"] = "LIGHTER_THAN_AIR";
+
+        //# 13 = unmanned aerial vehicle
+        else if (ecat == 13)
+            item["ECAT_str"] = "UNMANNED";
+
+        //# 14 = space / transatmospheric vehicle
+        else if (ecat == 14)
+            item["ECAT_str"] = "SPACE_VEHICLE";
+
+        //# 15 = ultralight / handglider / paraglider
+        else if (ecat == 15)
+            item["ECAT_str"] = "ULTRALIGHT";
+
+        //# 16 = parachutist / skydiver
+        else if (ecat == 16)
+            item["ECAT_str"] = "SKYDIVER";
+
+        //# 17 to 19 = reserved
+        //elif ecat in (17, 18, 19):
+        //    return None  # ?
+
+        //# 20 = surface emergency vehicle
+        //# value record '20' db 'SURF_EMERGENCY': 286
+        else if (ecat == 20)
+            item["ECAT_str"] = "SURF_EMERGENCY";
+
+        //# 21 = surface service vehicle
+        //# value record '21' db 'SURF_SERVICE': 12773
+        else if (ecat == 21)
+            item["ECAT_str"] = "SURF_SERVICE";
+
+        //# 22 = fixed ground or tethered obstruction
+        else if (ecat == 22)
+            item["ECAT_str"] = "GROUND_OBSTRUCTION";
+
+        //# 23 = cluster obstacle
+        //elif ecat == 23:
+        //    return 'CLUSTER_OBSTACLE'  # ?
+        else if (ecat == 0)
+            item["ECAT_str"] = "NO_INFO";
+
+        //# 24 = line obstacle
+        else if (ecat == 24)
+            item["ECAT_str"] = "LINE_OBSTACLE";
+    }
+
+    // surveillance status str
+    if (record.contains("020") && record.at("020").contains("SS"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int ss = item.at("SS");
+
+//        # 0 No condition reported
+        if (ss == 0)
+            item["SS_str"] = "NO_CONDITION";
+//        # = 1 Permanent Alert (Emergency condition)
+        else if (ss == 1)
+            item["SS_str"] = "PERMANENT_ALERT";
+//        # = 2 Temporary Alert (change in Mode 3/A Code other than emergency)
+        else if (ss == 2)
+            item["SS_str"] = "TEMPORARY_ALERT";
+//        # = 3 SPI set
+        else if (ss == 3)
+            item["SS_str"] = "SPI_SET";
+    }
+
 }
 
-//void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
-//{
+void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
+{
+    // altitude capability
+    if (record.contains("230") && record.at("230").contains("ARC"))
+    {
+        nlohmann::json& item_230 = record.at("230");
+        unsigned int arc = item_230.at("ARC");
+        if (arc == 0)
+            item_230["ARC_ft"] = 100.0;
+        else if (arc == 1)
+            item_230["ARC_ft"] = 25.0;
+    }
 
-//}
+    // civil emergency
+    if (record.contains("070") && record.at("070").contains("Mode-3/A reply"))
+    {
+        nlohmann::json& item = record.at("070");
+        unsigned int mode3a_code = item.at("Mode-3/A reply");
+
+        if (mode3a_code == 7500)
+            record["civil_emergency"] = 5;
+        else if (mode3a_code == 7600)
+            record["civil_emergency"] = 6;
+        else if (mode3a_code == 7700)
+            record["civil_emergency"] = 7;
+    }
+
+    // ground bit
+    if (record.contains("230") && record.at("230").contains("STAT"))
+    {
+        nlohmann::json& item = record.at("230");
+        unsigned int stat = item.at("STAT");
+
+        //        # = 0 No alert, no SPI, aircraft airborne
+        //        if stat == 0:
+        //            return "N"
+        if (stat == 0)
+            record["ground_bit"] = "N";
+        //        # = 1 No alert, no SPI, aircraft on ground
+        //        if stat == 1:
+        //            return "Y"
+        else if (stat == 1)
+            record["ground_bit"] = "Y";
+        //        # = 2 Alert, no SPI, aircraft airborne
+        //        if stat == 2:
+        //            return "N"
+        else if (stat == 2)
+            record["ground_bit"] = "N";
+        //        # = 3 Alert, no SPI, aircraft on ground
+        //        if stat == 3:
+        //            return "Y"
+        else if (stat == 3)
+            record["ground_bit"] = "Y";
+    }
+
+    // mode4 friendly
+    if (record.contains("020") && record.at("020").contains("FOE/FRI"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int foefrie = item.at("FOE/FRI");
+
+        //#Mode-4 interrorgation type:
+        //# - = no interrogation, 0 No Mode 4 interrogation
+        //if frifoe == 0:
+        //    return '-'
+        if (foefrie == 0)
+            record["mode4_friendly"] = "N";
+
+        //# F = Friendly target, 1 Friendly target
+        //if frifoe == 1:
+        //    return 'F'
+        else if (foefrie == 1)
+            record["mode4_friendly"] = "F";
+
+        //# U = Unknown Target, 2 Unknown target
+        //if frifoe == 2:
+        //    return 'U'
+        else if (foefrie == 2)
+            record["mode4_friendly"] = "U";
+
+        //# N = No Reply, 3 No reply
+        //if frifoe == 3:
+        //    return "N"
+        else if (foefrie == 3)
+            record["mode4_friendly"] = "N";
+    }
+
+    // rdp chain 0,1 to 1,2
+    if (record.contains("020") && record.at("020").contains("RDP"))
+    {
+        nlohmann::json& item = record.at("020");
+        unsigned int value = item.at("RDP");
+        item.at("RDP") = value + 1;
+    }
+
+    // track climb desc mode
+    if (record.contains("170") && record.at("170").contains("CDM"))
+    {
+        nlohmann::json& item = record.at("170");
+        unsigned int cdm = item.at("CDM");
+
+        //# value record '0' db 'M': 4117 M = Maintaining
+        //if cdm == 0:
+        //    return 'M'
+        if (cdm == 0)
+            record["track_climb_desc_mode"] = "M";
+        //# value record '1' db 'C': 1133 C = Climbing
+        //if cdm == 1:
+        //    return 'C'
+        else if (cdm == 1)
+            record["track_climb_desc_mode"] = "C";
+        //# value record '2' db 'D': 330 D = Descending
+        //if cdm == 2:
+        //    return 'D'
+        else if (cdm == 2)
+            record["track_climb_desc_mode"] = "D";
+        //# value record '3' db 'I': 569 I = Invalid
+        //if cdm == 3:
+        //    return 'I'
+        else if (cdm == 3)
+            record["track_climb_desc_mode"] = "I";
+    }
+
+    // report type
+    if (record.contains("161") && record.at("161").contains("TRACK NUMBER"))
+        record["report_type"] = 1;
+    else
+        record["report_type"] = 0;
+}
 
 void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& record)
 {
@@ -241,8 +575,8 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
                 //                return 5
 
                 else if (record.contains("380")
-                        && record.at("380").contains("ADR")
-                        && record.at("380").at("ADR").contains("Target Address"))
+                         && record.at("380").contains("ADR")
+                         && record.at("380").at("ADR").contains("Target Address"))
                     record["detection_type"] = 5;  // ssr, mode-s
 
                 //            if find_value("060.Mode-3/A reply", record) is not None \
