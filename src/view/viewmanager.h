@@ -29,6 +29,7 @@ class ViewContainer;
 class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
+class ViewPoint;
 class QWidget;
 class QTabWidget;
 
@@ -43,7 +44,7 @@ public slots:
     void selectionChangedSlot();
 
 public:
-    ViewManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
     virtual ~ViewManager();
 
     void init (QTabWidget *tab_widget);
@@ -80,6 +81,7 @@ protected:
     std::map <std::string, ViewContainer*> containers_;
     std::map <std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
+    std::map<unsigned int, ViewPoint> view_points_;
 
     unsigned int container_count_{0};
 

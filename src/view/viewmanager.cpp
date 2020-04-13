@@ -28,6 +28,7 @@
 #include "viewcontainer.h"
 #include "viewcontainerwidget.h"
 #include "view.h"
+#include "viewpoint.h"
 #include "stringconv.h"
 
 using namespace Utils;
