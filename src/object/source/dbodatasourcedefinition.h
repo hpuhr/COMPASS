@@ -19,6 +19,7 @@
 #define DBODATASOURCEDEFINITION_H
 
 #include <QObject>
+
 #include "configurable.h"
 
 class DBObject;
@@ -31,52 +32,53 @@ class DBODataSourceDefinition : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
+  signals:
     void definitionChangedSignal();
 
-public:
+  public:
     /// @brief Constructor, registers parameters
-    DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, DBObject* object);
+    DBODataSourceDefinition(const std::string& class_id, const std::string& instance_id,
+                            DBObject* object);
     virtual ~DBODataSourceDefinition();
 
-    const std::string& schema () const { return schema_; }
+    const std::string& schema() const { return schema_; }
 
-    const std::string& localKey () const { return local_key_; }
-    void localKey(const std::string &local_key);
-    const std::string& metaTableName () const { return meta_table_; }
-    void metaTable(const std::string &meta_table);
-    const std::string& foreignKey () const { return foreign_key_; }
-    void foreignKey(const std::string &foreign_key);
-    const std::string& nameColumn () const { return name_column_; }
-    void nameColumn(const std::string &name_column);
+    const std::string& localKey() const { return local_key_; }
+    void localKey(const std::string& local_key);
+    const std::string& metaTableName() const { return meta_table_; }
+    void metaTable(const std::string& meta_table);
+    const std::string& foreignKey() const { return foreign_key_; }
+    void foreignKey(const std::string& foreign_key);
+    const std::string& nameColumn() const { return name_column_; }
+    void nameColumn(const std::string& name_column);
 
-    DBODataSourceDefinitionWidget* widget ();
+    DBODataSourceDefinitionWidget* widget();
 
-    bool hasLatitudeColumn () const { return latitude_column_.size() > 0; }
+    bool hasLatitudeColumn() const { return latitude_column_.size() > 0; }
     std::string latitudeColumn() const;
-    void latitudeColumn(const std::string &latitude_column);
+    void latitudeColumn(const std::string& latitude_column);
 
-    bool hasLongitudeColumn () const { return longitude_column_.size() > 0; }
+    bool hasLongitudeColumn() const { return longitude_column_.size() > 0; }
     std::string longitudeColumn() const;
-    void longitudeColumn(const std::string &longitude_column);
+    void longitudeColumn(const std::string& longitude_column);
 
-    bool hasShortNameColumn () const { return short_name_column_.size() > 0; }
+    bool hasShortNameColumn() const { return short_name_column_.size() > 0; }
     std::string shortNameColumn() const;
-    void shortNameColumn(const std::string &short_name_column);
+    void shortNameColumn(const std::string& short_name_column);
 
-    bool hasSacColumn () const { return sac_column_.size() > 0; }
+    bool hasSacColumn() const { return sac_column_.size() > 0; }
     std::string sacColumn() const;
-    void sacColumn(const std::string &sac_column);
+    void sacColumn(const std::string& sac_column);
 
-    bool hasSicColumn () const { return sic_column_.size() > 0; }
+    bool hasSicColumn() const { return sic_column_.size() > 0; }
     std::string sicColumn() const;
-    void sicColumn(const std::string &sic_column);
+    void sicColumn(const std::string& sic_column);
 
-    bool hasAltitudeColumn () const { return altitude_column_.size() > 0; }
+    bool hasAltitudeColumn() const { return altitude_column_.size() > 0; }
     std::string altitudeColumn() const;
-    void altitudeColumn(const std::string &altitude_column);
+    void altitudeColumn(const std::string& altitude_column);
 
-protected:
+  protected:
     DBObject* object_{nullptr};
 
     /// DBSchema identifier
@@ -102,4 +104,4 @@ protected:
 Q_DECLARE_METATYPE(DBODataSourceDefinition*)
 Q_DECLARE_METATYPE(const DBODataSourceDefinition*)
 
-#endif // DBODATASOURCEDEFINITION_H
+#endif  // DBODATASOURCEDEFINITION_H

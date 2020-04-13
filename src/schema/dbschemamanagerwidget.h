@@ -31,43 +31,43 @@ class DBSchemaManagerWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     void schemaLockedSignal();
 
-public:
-    explicit DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent=0, Qt::WindowFlags f=0);
+  public:
+    explicit DBSchemaManagerWidget(DBSchemaManager& manager, QWidget* parent = 0,
+                                   Qt::WindowFlags f = 0);
     virtual ~DBSchemaManagerWidget();
 
-public slots:
-    void databaseOpenedSlot ();
+  public slots:
+    void databaseOpenedSlot();
 
-    void addSchemaSlot ();
-    void deleteSchemaSlot ();
-    void lockSchemaSlot ();
+    void addSchemaSlot();
+    void deleteSchemaSlot();
+    void lockSchemaSlot();
     /// @brief Sets the schema
-    void schemaSelectedSlot (const QString &value);
+    void schemaSelectedSlot(const QString& value);
 
-public:
-    void lock ();
+  public:
+    void lock();
 
     void updateSchemas();
 
-protected:
+  protected:
     DBSchemaManager& manager_;
 
     /// Current schema selection field
-    QComboBox* schema_select_ {nullptr};
+    QComboBox* schema_select_{nullptr};
 
-    QPushButton* add_button_ {nullptr};
-    QPushButton* delete_button_  {nullptr};
-    QPushButton* lock_button_  {nullptr};
+    QPushButton* add_button_{nullptr};
+    QPushButton* delete_button_{nullptr};
+    QPushButton* lock_button_{nullptr};
 
-    QStackedWidget* schema_widgets_ {nullptr};
+    QStackedWidget* schema_widgets_{nullptr};
 
-    bool locked_ {false};
+    bool locked_{false};
 
-    void showCurrentSchemaWidget ();
-
+    void showCurrentSchemaWidget();
 };
 
-#endif // DBSCHEMAMANAGERWIDGET_H
+#endif  // DBSCHEMAMANAGERWIDGET_H

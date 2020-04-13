@@ -15,38 +15,43 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "allbuffercsvexportjob.h"
+
 #include <fstream>
 #include <sstream>
 
-#include "allbuffercsvexportjob.h"
-#include "dbovariable.h"
-#include "dbovariableorderedset.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "metadbovariable.h"
 #include "atsdb.h"
 #include "dboassociationcollection.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "dbovariable.h"
+#include "dbovariableorderedset.h"
+#include "metadbovariable.h"
 
-AllBufferCSVExportJob::AllBufferCSVExportJob(std::map<std::string, std::shared_ptr <Buffer>> buffers,
-                                             DBOVariableOrderedSet* read_set,
-                                             std::map <unsigned int, std::string> number_to_dbo,
-                                             const std::vector <std::pair<unsigned int, unsigned int>>& row_indexes,
-                                             const std::string& file_name, bool overwrite, bool only_selected,
-                                             bool use_presentation, bool show_associations)
-    : Job("AllBufferCSVExportJob"), buffers_(buffers), read_set_(read_set), number_to_dbo_(number_to_dbo),
-      row_indexes_(row_indexes), file_name_(file_name), overwrite_(overwrite),
-      only_selected_(only_selected), use_presentation_(use_presentation), show_associations_(show_associations)
+AllBufferCSVExportJob::AllBufferCSVExportJob(
+    std::map<std::string, std::shared_ptr<Buffer>> buffers, DBOVariableOrderedSet* read_set,
+    std::map<unsigned int, std::string> number_to_dbo,
+    const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
+    const std::string& file_name, bool overwrite, bool only_selected, bool use_presentation,
+    bool show_associations)
+    : Job("AllBufferCSVExportJob"),
+      buffers_(buffers),
+      read_set_(read_set),
+      number_to_dbo_(number_to_dbo),
+      row_indexes_(row_indexes),
+      file_name_(file_name),
+      overwrite_(overwrite),
+      only_selected_(only_selected),
+      use_presentation_(use_presentation),
+      show_associations_(show_associations)
 {
-    assert (read_set_);
-    assert (file_name_.size());
+    assert(read_set_);
+    assert(file_name_.size());
 }
 
-AllBufferCSVExportJob::~AllBufferCSVExportJob()
-{
+AllBufferCSVExportJob::~AllBufferCSVExportJob() {}
 
-}
-
-void AllBufferCSVExportJob::run ()
+void AllBufferCSVExportJob::run()
 {
     logdbg << "AllBufferCSVExportJob: execute: start";
     started_ = true;
@@ -66,7 +71,7 @@ void AllBufferCSVExportJob::run ()
         unsigned int buffer_index;
 
         unsigned int read_set_size = read_set_->getSize();
-        std::shared_ptr <Buffer> buffer;
+        std::shared_ptr<Buffer> buffer;
 
         std::string dbo_name;
         std::string variable_dbo_name;
@@ -82,7 +87,7 @@ void AllBufferCSVExportJob::run ()
         if (show_associations_)
             ss << ";UTN";
 
-        for (size_t col=0; col < read_set_size; col++)
+        for (size_t col = 0; col < read_set_size; col++)
         {
             ss << ";" << read_set_->variableDefinition(col).variableName();
         }
@@ -97,47 +102,47 @@ void AllBufferCSVExportJob::run ()
             dbo_num = row_index_it.first;
             buffer_index = row_index_it.second;
 
-            assert (number_to_dbo_.count(dbo_num) == 1);
+            assert(number_to_dbo_.count(dbo_num) == 1);
             dbo_name = number_to_dbo_.at(dbo_num);
 
-            assert (buffers_.count(dbo_name) == 1);
+            assert(buffers_.count(dbo_name) == 1);
             buffer = buffers_.at(dbo_name);
 
-            assert (buffer_index < buffer->size());
+            assert(buffer_index < buffer->size());
 
-            assert (buffer->has<bool>("selected"));
+            assert(buffer->has<bool>("selected"));
             NullableVector<bool> selected_vec = buffer->get<bool>("selected");
 
-            assert (buffer->has<int>("rec_num"));
+            assert(buffer->has<int>("rec_num"));
             NullableVector<int> rec_num_vec = buffer->get<int>("rec_num");
 
-
             // check if skipped because not selected
-            if (only_selected_ && (selected_vec.isNull(buffer_index) || !selected_vec.get(buffer_index)))
+            if (only_selected_ &&
+                (selected_vec.isNull(buffer_index) || !selected_vec.get(buffer_index)))
                 continue;
 
-            const PropertyList &properties = buffer->properties();
+            const PropertyList& properties = buffer->properties();
             ss.str("");
 
             // set selected flag
             if (selected_vec.isNull(buffer_index))
                 ss << "0;";
             else
-                ss << selected_vec.get(buffer_index)<< ";";
+                ss << selected_vec.get(buffer_index) << ";";
 
-            ss << dbo_name; // set dboname
+            ss << dbo_name;  // set dboname
 
             if (show_associations_)
             {
                 ss << ";";
 
-                assert (!rec_num_vec.isNull(buffer_index));
+                assert(!rec_num_vec.isNull(buffer_index));
                 unsigned int rec_num = rec_num_vec.get(buffer_index);
 
                 ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
-            for (unsigned int col=0; col < read_set_size; ++col)
+            for (unsigned int col = 0; col < read_set_size; ++col)
             {
                 value_str = "";
 
@@ -145,30 +150,31 @@ void AllBufferCSVExportJob::run ()
                 variable_name = read_set_->variableDefinition(col).variableName();
 
                 // check if data & variables exist
-               if (variable_dbo_name == META_OBJECT_NAME)
-               {
-                   assert (manager.existsMetaVariable(variable_name));
-                   if (!manager.metaVariable(variable_name).existsIn(dbo_name)) // not data if not exist
-                   {
-                       ss << ";";
-                       continue;
-                   }
-               }
-               else
-               {
-                   if (dbo_name != variable_dbo_name) // check if other dbo
-                   {
-                       ss << ";";
-                       continue;
-                   }
+                if (variable_dbo_name == META_OBJECT_NAME)
+                {
+                    assert(manager.existsMetaVariable(variable_name));
+                    if (!manager.metaVariable(variable_name)
+                             .existsIn(dbo_name))  // not data if not exist
+                    {
+                        ss << ";";
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (dbo_name != variable_dbo_name)  // check if other dbo
+                    {
+                        ss << ";";
+                        continue;
+                    }
 
-                   assert (manager.existsObject(dbo_name));
-                   assert (manager.object(dbo_name).hasVariable(variable_name));
-               }
+                    assert(manager.existsObject(dbo_name));
+                    assert(manager.object(dbo_name).hasVariable(variable_name));
+                }
 
-               DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
-                           ? manager.metaVariable(variable_name).getFor(dbo_name)
-                           : manager.object(dbo_name).variable(variable_name);
+                DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
+                                            ? manager.metaVariable(variable_name).getFor(dbo_name)
+                                            : manager.object(dbo_name).variable(variable_name);
 
                 PropertyDataType data_type = variable.dataType();
 
@@ -187,7 +193,7 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<bool>(property_name).getAsString(buffer_index));
+                                buffer->get<bool>(property_name).getAsString(buffer_index));
                         else
                             value_str = buffer->get<bool>(property_name).getAsString(buffer_index);
                     }
@@ -205,7 +211,7 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<char>(property_name).getAsString(buffer_index));
+                                buffer->get<char>(property_name).getAsString(buffer_index));
                         else
                             value_str = buffer->get<char>(property_name).getAsString(buffer_index);
                     }
@@ -223,9 +229,11 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<unsigned char>(property_name).getAsString(buffer_index));
+                                buffer->get<unsigned char>(property_name)
+                                    .getAsString(buffer_index));
                         else
-                            value_str = buffer->get<unsigned char>(property_name).getAsString(buffer_index);
+                            value_str =
+                                buffer->get<unsigned char>(property_name).getAsString(buffer_index);
                     }
                 }
                 else if (data_type == PropertyDataType::INT)
@@ -241,7 +249,7 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<int>(property_name).getAsString(buffer_index));
+                                buffer->get<int>(property_name).getAsString(buffer_index));
                         else
                             value_str = buffer->get<int>(property_name).getAsString(buffer_index);
                     }
@@ -254,14 +262,16 @@ void AllBufferCSVExportJob::run ()
                         continue;
                     }
 
-                    null = buffer->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
+                    null =
+                        buffer->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
                     if (!null)
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<unsigned int>(property_name).getAsString(buffer_index));
+                                buffer->get<unsigned int>(property_name).getAsString(buffer_index));
                         else
-                            value_str = buffer->get<unsigned int>(property_name).getAsString(buffer_index);
+                            value_str =
+                                buffer->get<unsigned int>(property_name).getAsString(buffer_index);
                     }
                 }
                 else if (data_type == PropertyDataType::LONGINT)
@@ -277,9 +287,10 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<long int>(property_name).getAsString(buffer_index));
+                                buffer->get<long int>(property_name).getAsString(buffer_index));
                         else
-                            value_str = buffer->get<long int>(property_name).getAsString(buffer_index);
+                            value_str =
+                                buffer->get<long int>(property_name).getAsString(buffer_index);
                     }
                 }
                 else if (data_type == PropertyDataType::ULONGINT)
@@ -295,9 +306,11 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<unsigned long int>(property_name).getAsString(buffer_index));
+                                buffer->get<unsigned long int>(property_name)
+                                    .getAsString(buffer_index));
                         else
-                            value_str = buffer->get<unsigned long int>(property_name).getAsString(buffer_index);
+                            value_str = buffer->get<unsigned long int>(property_name)
+                                            .getAsString(buffer_index);
                     }
                 }
                 else if (data_type == PropertyDataType::FLOAT)
@@ -313,7 +326,7 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<float>(property_name).getAsString(buffer_index));
+                                buffer->get<float>(property_name).getAsString(buffer_index));
                         else
                             value_str = buffer->get<float>(property_name).getAsString(buffer_index);
                     }
@@ -331,9 +344,10 @@ void AllBufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer->get<double>(property_name).getAsString(buffer_index));
+                                buffer->get<double>(property_name).getAsString(buffer_index));
                         else
-                            value_str = buffer->get<double>(property_name).getAsString(buffer_index);
+                            value_str =
+                                buffer->get<double>(property_name).getAsString(buffer_index);
                     }
                 }
                 else if (data_type == PropertyDataType::STRING)
@@ -347,11 +361,13 @@ void AllBufferCSVExportJob::run ()
                     null = buffer->get<std::string>(property_name).isNull(buffer_index);
                     if (!null)
                     {
-                        value_str = buffer->get<std::string>(property_name).getAsString(buffer_index);
+                        value_str =
+                            buffer->get<std::string>(property_name).getAsString(buffer_index);
                     }
                 }
                 else
-                    throw std::domain_error ("AllBufferCSVExportJob: run: unknown property data type");
+                    throw std::domain_error(
+                        "AllBufferCSVExportJob: run: unknown property data type");
 
                 ss << ";";
                 ss << value_str;
@@ -359,228 +375,243 @@ void AllBufferCSVExportJob::run ()
             output_file << ss.str() << "\n";
         }
 
-//        assert (buffer_->has<bool>("selected"));
-//        NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+        //        assert (buffer_->has<bool>("selected"));
+        //        NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
 
-//        for (; row < buffer_size; ++row)
-//        {
-//            if (only_selected_ && (selected_vec.isNull(row) || !selected_vec.get(row)))
-//                continue;
+        //        for (; row < buffer_size; ++row)
+        //        {
+        //            if (only_selected_ && (selected_vec.isNull(row) || !selected_vec.get(row)))
+        //                continue;
 
-//            ss.str("");
+        //            ss.str("");
 
-//            if (selected_vec.isNull(row))
-//                ss << "0;";
-//            else
-//                ss << selected_vec.get(row)<< ";";
+        //            if (selected_vec.isNull(row))
+        //                ss << "0;";
+        //            else
+        //                ss << selected_vec.get(row)<< ";";
 
-//            for (size_t col=0; col < read_set_size; col++)
-//            {
-//                value_str = "";
+        //            for (size_t col=0; col < read_set_size; col++)
+        //            {
+        //                value_str = "";
 
-//                DBOVariable& variable = read_set_.getVariable(col);
-//                PropertyDataType data_type = variable.dataType();
+        //                DBOVariable& variable = read_set_.getVariable(col);
+        //                PropertyDataType data_type = variable.dataType();
 
-//                std::string property_name = variable.name();
+        //                std::string property_name = variable.name();
 
-//                if (data_type == PropertyDataType::BOOL)
-//                {
-//                    if (!buffer_->has<bool>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                if (data_type == PropertyDataType::BOOL)
+        //                {
+        //                    if (!buffer_->has<bool>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<bool>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<bool>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<bool>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::CHAR)
-//                {
-//                    if (!buffer_->has<char>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<bool>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<bool>(property_name).getAsString(row));
+        //                        else
+        //                            value_str =
+        //                            buffer_->get<bool>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::CHAR)
+        //                {
+        //                    if (!buffer_->has<char>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<char>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<char>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<char>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::UCHAR)
-//                {
-//                    if (!buffer_->has<unsigned char>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<char>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<char>(property_name).getAsString(row));
+        //                        else
+        //                            value_str =
+        //                            buffer_->get<char>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::UCHAR)
+        //                {
+        //                    if (!buffer_->has<unsigned char>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<unsigned char>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<unsigned char>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<unsigned char>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::INT)
-//                {
-//                    if (!buffer_->has<int>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<unsigned char>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<unsigned
+        //                                        char>(property_name).getAsString(row));
+        //                        else
+        //                            value_str = buffer_->get<unsigned
+        //                            char>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::INT)
+        //                {
+        //                    if (!buffer_->has<int>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<int>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<int>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<int>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::UINT)
-//                {
-//                    if (!buffer_->has<unsigned int>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<int>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<int>(property_name).getAsString(row));
+        //                        else
+        //                            value_str = buffer_->get<int>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::UINT)
+        //                {
+        //                    if (!buffer_->has<unsigned int>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<unsigned int>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<unsigned int>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::LONGINT)
-//                {
-//                    if (!buffer_->has<long int>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<unsigned
+        //                    int>(properties.at(col).name()).isNull(row); if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<unsigned
+        //                                        int>(property_name).getAsString(row));
+        //                        else
+        //                            value_str = buffer_->get<unsigned
+        //                            int>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::LONGINT)
+        //                {
+        //                    if (!buffer_->has<long int>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<long int>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<long int>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<long int>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::ULONGINT)
-//                {
-//                    if (!buffer_->has<unsigned long int>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<long int>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<long
+        //                                        int>(property_name).getAsString(row));
+        //                        else
+        //                            value_str = buffer_->get<long
+        //                            int>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::ULONGINT)
+        //                {
+        //                    if (!buffer_->has<unsigned long int>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<unsigned long int>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<unsigned long int>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<unsigned long int>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::FLOAT)
-//                {
-//                    if (!buffer_->has<float>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<unsigned long int>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<unsigned long
+        //                                        int>(property_name).getAsString(row));
+        //                        else
+        //                            value_str = buffer_->get<unsigned long
+        //                            int>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::FLOAT)
+        //                {
+        //                    if (!buffer_->has<float>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<float>(properties.at(col).name()).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<float>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<float>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::DOUBLE)
-//                {
-//                    if (!buffer_->has<double>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<float>(properties.at(col).name()).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<float>(property_name).getAsString(row));
+        //                        else
+        //                            value_str =
+        //                            buffer_->get<float>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::DOUBLE)
+        //                {
+        //                    if (!buffer_->has<double>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<double>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        if (use_presentation_)
-//                            value_str = variable.getRepresentationStringFromValue(
-//                                        buffer_->get<double>(property_name).getAsString(row));
-//                        else
-//                            value_str = buffer_->get<double>(property_name).getAsString(row);
-//                    }
-//                }
-//                else if (data_type == PropertyDataType::STRING)
-//                {
-//                    if (!buffer_->has<std::string>(property_name))
-//                    {
-//                        ss << ";";
-//                        continue;
-//                    }
+        //                    null = buffer_->get<double>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        if (use_presentation_)
+        //                            value_str = variable.getRepresentationStringFromValue(
+        //                                        buffer_->get<double>(property_name).getAsString(row));
+        //                        else
+        //                            value_str =
+        //                            buffer_->get<double>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else if (data_type == PropertyDataType::STRING)
+        //                {
+        //                    if (!buffer_->has<std::string>(property_name))
+        //                    {
+        //                        ss << ";";
+        //                        continue;
+        //                    }
 
-//                    null = buffer_->get<std::string>(property_name).isNull(row);
-//                    if (!null)
-//                    {
-//                        value_str = buffer_->get<std::string>(property_name).getAsString(row);
-//                    }
-//                }
-//                else
-//                    throw std::domain_error ("AllBufferCSVExportJob: run: unknown property data type");
+        //                    null = buffer_->get<std::string>(property_name).isNull(row);
+        //                    if (!null)
+        //                    {
+        //                        value_str =
+        //                        buffer_->get<std::string>(property_name).getAsString(row);
+        //                    }
+        //                }
+        //                else
+        //                    throw std::domain_error ("AllBufferCSVExportJob: run: unknown property
+        //                    data type");
 
-//                ss << ";";
-//                ss << value_str;
-//            }
+        //                ss << ";";
+        //                ss << value_str;
+        //            }
 
-//            output_file << ss.str() << "\n";
-//        }
+        //            output_file << ss.str() << "\n";
+        //        }
 
-//        stop_time_ = boost::posix_time::microsec_clock::local_time();
-//        boost::posix_time::time_duration diff = stop_time_ - start_time_;
+        //        stop_time_ = boost::posix_time::microsec_clock::local_time();
+        //        boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
-//        if (diff.total_seconds() > 0)
-//            loginf  << "AllBufferCSVExportJob: run: done after " << diff << ", " << 1000.0*row/diff.total_milliseconds() << " el/s";
+        //        if (diff.total_seconds() > 0)
+        //            loginf  << "AllBufferCSVExportJob: run: done after " << diff << ", " <<
+        //            1000.0*row/diff.total_milliseconds() << " el/s";
     }
     else
     {
         logerr << "AllBufferCSVExportJob: runFailure opening " << file_name_;
     }
 
-    done_=true;
+    done_ = true;
 
     logdbg << "AllBufferCSVExportJob: execute: done";
     return;

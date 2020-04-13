@@ -25,18 +25,18 @@
 #include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
-//class DBODataSourceWidget;
-//class QGridLayout;
+// class DBODataSourceWidget;
+// class QGridLayout;
 
 class DBODataSource
 {
-public:
+  public:
     DBODataSource(DBObject& object, unsigned int id, const std::string& name);
     DBODataSource() = default;
 
     // copy from dbds, everything but id
     DBODataSource& operator=(StoredDBODataSource& other);
-    //DBODataSource& operator=(DBODataSource&& other);
+    // DBODataSource& operator=(DBODataSource&& other);
 
     // comparison
     bool operator==(const StoredDBODataSource& other) const;
@@ -44,18 +44,18 @@ public:
 
     virtual ~DBODataSource();
 
-    const std::string dboName () const;
+    const std::string dboName() const;
 
     unsigned int id() const;
-    //void id(unsigned int id);
+    // void id(unsigned int id);
 
-    const std::string &name() const;
-    void name(const std::string &name);
+    const std::string& name() const;
+    void name(const std::string& name);
 
     bool hasShortName() const;
     void removeShortName();
-    void shortName(const std::string &short_name);
-    const std::string &shortName() const;
+    void shortName(const std::string& short_name);
+    const std::string& shortName() const;
 
     bool hasSac() const;
     void removeSac();
@@ -83,9 +83,9 @@ public:
     double altitude() const;
 
     DBObject& object();
-    void updateInDatabase (); // not called automatically in setters
+    void updateInDatabase();  // not called automatically in setters
 
-protected:
+  protected:
     DBObject* object_;
     unsigned int id_{0};
 
@@ -94,25 +94,24 @@ protected:
     bool has_short_name_{false};
     std::string short_name_;
 
-    bool has_sac_ {false};
-    unsigned char sac_ {0};
+    bool has_sac_{false};
+    unsigned char sac_{0};
 
     bool has_sic_{false};
-    unsigned char sic_ {0};
+    unsigned char sic_{0};
 
     bool has_latitude_{false};
-    double latitude_ {0}; //degrees
+    double latitude_{0};  // degrees
 
-    bool has_longitude_ {false};
-    double longitude_ {0}; // degrees
+    bool has_longitude_{false};
+    double longitude_{0};  // degrees
 
-    bool has_altitude_ {false};
-    double altitude_ {0};  // meter above msl
+    bool has_altitude_{false};
+    double altitude_{0};  // meter above msl
 
-//    t_CPos grs_pos_;
-//    t_GPos geo_pos_;
-//    t_Mapping_Info mapping_info_;
-
+    //    t_CPos grs_pos_;
+    //    t_GPos geo_pos_;
+    //    t_Mapping_Info mapping_info_;
 };
 
-#endif // DBODATASOURCE_H
+#endif  // DBODATASOURCE_H

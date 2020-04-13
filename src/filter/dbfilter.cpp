@@ -15,29 +15,32 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "dbfilter.h"
+
+#include <QVBoxLayout>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <QVBoxLayout>
 
-#include "dbfilter.h"
-#include "dbfilterwidget.h"
 #include "dbfiltercondition.h"
-#include "logger.h"
+#include "dbfilterwidget.h"
 #include "filtermanager.h"
+#include "logger.h"
 
 /**
  * Initializes members, registers parameters and creates sub-configurables if class id is DBFilter.
  */
-DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent, bool is_generic)
-: Configurable (class_id, instance_id, parent), is_generic_(is_generic) // filter_manager_(*filter_manager),
+DBFilter::DBFilter(const std::string& class_id, const std::string& instance_id,
+                   Configurable* parent, bool is_generic)
+    : Configurable(class_id, instance_id, parent),
+      is_generic_(is_generic)  // filter_manager_(*filter_manager),
 {
-    registerParameter ("active", &active_, false);
-    registerParameter ("op_and_", &op_and_, true);
-    registerParameter ("changed", &changed_, false);
-    registerParameter ("visible", &visible_, false);
-    registerParameter ("name", &name_, instance_id);
+    registerParameter("active", &active_, false);
+    registerParameter("op_and_", &op_and_, true);
+    registerParameter("changed", &changed_, false);
+    registerParameter("visible", &visible_, false);
+    registerParameter("name", &name_, instance_id);
 
-    if (classId().compare("DBFilter")==0) // else do it in subclass
+    if (classId().compare("DBFilter") == 0)  // else do it in subclass
         createSubConfigurables();
 }
 
@@ -46,7 +49,7 @@ DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, 
  */
 DBFilter::~DBFilter()
 {
-    logdbg  << "DBFilter: destructor: instance_id " << instanceId();
+    logdbg << "DBFilter: destructor: instance_id " << instanceId();
 
     if (widget_)
     {
@@ -54,13 +57,13 @@ DBFilter::~DBFilter()
         widget_ = nullptr;
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
         delete sub_filters_.at(cnt);
     }
     sub_filters_.clear();
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
         delete conditions_.at(cnt);
     }
@@ -68,50 +71,47 @@ DBFilter::~DBFilter()
 }
 
 /**
- * Sets changed in FilterManager if required, overwrites active_ and distributes the change to the sub-filters.
- * Updates widget if existing.
+ * Sets changed in FilterManager if required, overwrites active_ and distributes the change to the
+ * sub-filters. Updates widget if existing.
  */
-void DBFilter::setActive (bool active)
+void DBFilter::setActive(bool active)
 {
-//    if (active_ && !active)
-//        FilterManager::getInstance().setChanged();
+    //    if (active_ && !active)
+    //        FilterManager::getInstance().setChanged();
 
-    assert (!disabled_);
+    assert(!disabled_);
 
-    active_=active;
+    active_ = active;
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
         sub_filters_.at(cnt)->setActive(active_);
     }
 
-    changed_=true;
+    changed_ = true;
 
     if (widget_)
         widget_->update();
 }
-bool DBFilter::getActive ()
-{
-    return active_;
-}
+bool DBFilter::getActive() { return active_; }
 
 /**
  * Returns if any change occurred in this filter, a sub-condition or a sub-filter.
  */
-bool DBFilter::getChanged ()
+bool DBFilter::getChanged()
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
     bool ret = changed_;
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
-        ret  |= conditions_.at(cnt)->getChanged();
+        ret |= conditions_.at(cnt)->getChanged();
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
-        ret  |= sub_filters_.at(cnt)->getChanged();
+        ret |= sub_filters_.at(cnt)->getChanged();
     }
 
     return ret;
@@ -121,68 +121,61 @@ bool DBFilter::getChanged ()
  * Sets changed_ and propagates function to all sub-conditions and sub-filters.
  *
  */
-void DBFilter::setChanged (bool changed)
+void DBFilter::setChanged(bool changed)
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
-    changed_=changed;
+    changed_ = changed;
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
         conditions_.at(cnt)->setChanged(changed);
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
         sub_filters_.at(cnt)->setChanged(changed);
     }
-
 }
 
-bool DBFilter::getVisible ()
+bool DBFilter::getVisible() { return visible_; }
+void DBFilter::setVisible(bool visible)
 {
-    return visible_;
-}
-void DBFilter::setVisible (bool visible)
-{
-    assert (!disabled_);
+    assert(!disabled_);
 
     visible_ = visible;
 }
 
-void DBFilter::setName (const std::string &name)
+void DBFilter::setName(const std::string& name)
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
-    name_=name;
+    name_ = name;
 
     if (widget_)
         widget_->update();
 }
 
-void DBFilter::addSubFilter (DBFilter* filter)
-{
-    sub_filters_.push_back (filter);
-}
+void DBFilter::addSubFilter(DBFilter* filter) { sub_filters_.push_back(filter); }
 
 /**
  * Checks if any sub-filter or sub-condition filter the DBO of the supplied type.
  */
-bool DBFilter::filters (const std::string &dbo_type)
+bool DBFilter::filters(const std::string& dbo_type)
 {
     if (disabled_)
         return false;
 
     bool ret = false;
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
-        ret  |= conditions_.at(cnt)->filters(dbo_type);
+        ret |= conditions_.at(cnt)->filters(dbo_type);
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
-        ret  |= sub_filters_.at(cnt)->filters(dbo_type);
+        ret |= sub_filters_.at(cnt)->filters(dbo_type);
     }
 
     logdbg << "DBFilter: filters: object " << dbo_type << " " << ret;
@@ -191,73 +184,77 @@ bool DBFilter::filters (const std::string &dbo_type)
 }
 
 /**
- * If active, returns concatenated condition strings from all sub-conditions and sub-filters, else returns empty string.
+ * If active, returns concatenated condition strings from all sub-conditions and sub-filters, else
+ * returns empty string.
  */
-std::string DBFilter::getConditionString (const std::string &dbo_name, bool &first,
-                                          std::vector <DBOVariable*>& filtered_variables)
+std::string DBFilter::getConditionString(const std::string& dbo_name, bool& first,
+                                         std::vector<DBOVariable*>& filtered_variables)
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
     std::stringstream ss;
 
     if (active_)
     {
-        for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+        for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
         {
             if (conditions_.at(cnt)->valueInvalid())
             {
-                logwrn  << "DBFilter " << instanceId() << ": getConditionString: invalid condition, will be skipped";
+                logwrn << "DBFilter " << instanceId()
+                       << ": getConditionString: invalid condition, will be skipped";
                 continue;
             }
 
-            std::string text = conditions_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
+            std::string text =
+                conditions_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
             ss << text;
         }
 
-        for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt ++)
+        for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
         {
-            std::string text = sub_filters_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
+            std::string text =
+                sub_filters_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
             ss << text;
         }
     }
 
-    loginf  << "DBFilter " << instanceId() << ": getConditionString: object " << dbo_name << " here '" << ss.str()
-            << "' first " << first;
+    loginf << "DBFilter " << instanceId() << ": getConditionString: object " << dbo_name
+           << " here '" << ss.str() << "' first " << first;
 
     return ss.str();
 }
 
-void DBFilter::setAnd (bool op_and)
+void DBFilter::setAnd(bool op_and)
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
     if (op_and_ != op_and)
     {
-        op_and_=op_and;
+        op_and_ = op_and;
 
-        changed_=true;
+        changed_ = true;
 
         if (widget_)
             widget_->update();
     }
 }
 
-void DBFilter::invert ()
+void DBFilter::invert()
 {
-    assert (!disabled_);
+    assert(!disabled_);
 
-    op_and_=!op_and_;
+    op_and_ = !op_and_;
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
         conditions_.at(cnt)->invert();
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
         sub_filters_.at(cnt)->invert();
     }
-    changed_=true;
+    changed_ = true;
 
     if (widget_)
         widget_->update();
@@ -268,29 +265,29 @@ void DBFilter::invert ()
  *
  * \exception std::runtime_error if unknown class_id
  */
-void DBFilter::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "DBFilter: generateSubConfigurable: " << classId() << " instance " << instanceId();
+    logdbg << "DBFilter: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id == "DBFilterWidget")
     {
-        logdbg  << "DBFilter: generateSubConfigurable: generating widget";
-        assert (!widget_);
-        widget_ = new DBFilterWidget (class_id, instance_id, *this);
+        logdbg << "DBFilter: generateSubConfigurable: generating widget";
+        assert(!widget_);
+        widget_ = new DBFilterWidget(class_id, instance_id, *this);
     }
     else if (class_id == "DBFilterCondition")
     {
-        logdbg  << "DBFilter: generateSubConfigurable: generating condition";
-        DBFilterCondition* condition = new DBFilterCondition (class_id, instance_id, this);
-        conditions_.push_back (condition);
+        logdbg << "DBFilter: generateSubConfigurable: generating condition";
+        DBFilterCondition* condition = new DBFilterCondition(class_id, instance_id, this);
+        conditions_.push_back(condition);
 
         disabled_ = disabled_ | !condition->usable();
 
         if (widget_)
         {
-            if (disabled_) // bit of a hack. think about order of generation.
+            if (disabled_)  // bit of a hack. think about order of generation.
             {
-                widget_->setInvisible ();
+                widget_->setInvisible();
                 widget_->setDisabled(true);
             }
             else
@@ -299,76 +296,74 @@ void DBFilter::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id == "DBFilter")
     {
-        DBFilter *filter = new DBFilter (class_id, instance_id, this);
-        addSubFilter (filter);
+        DBFilter* filter = new DBFilter(class_id, instance_id, this);
+        addSubFilter(filter);
     }
     else
-        throw std::runtime_error ("DBFilter: generateSubConfigurable: unknown class_id "+class_id);
+        throw std::runtime_error("DBFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 /**
  * Creates widget_ if required and adds all sub-filter widgets to it.
  */
-void DBFilter::checkSubConfigurables ()
+void DBFilter::checkSubConfigurables()
 {
-    logdbg  << "DBFilter: checkSubConfigurables: " << classId();
+    logdbg << "DBFilter: checkSubConfigurables: " << classId();
 
     if (!widget_)
     {
-        logdbg  << "DBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget ("DBFilterWidget", instanceId()+"Widget0", *this);
+        logdbg << "DBFilter: checkSubConfigurables: generating generic filter widget";
+        widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
 
         if (disabled_)
         {
-            widget_->setInvisible ();
+            widget_->setInvisible();
             widget_->setDisabled(true);
         }
     }
-    assert (widget_);
+    assert(widget_);
 
-    //TODO
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    // TODO
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
-        DBFilterWidget *filter = sub_filters_.at(cnt)->widget();
-        QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ),
-                         (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
-        widget_->addChildWidget (filter);
+        DBFilterWidget* filter = sub_filters_.at(cnt)->widget();
+        QObject::connect((QWidget*)filter, SIGNAL(possibleFilterChange()), (QWidget*)widget_,
+                         SLOT(possibleSubFilterChange()));
+        widget_->addChildWidget(filter);
     }
 }
 
 /**
  * Calls reset on all sub-conditions or sub-filters, sets changed_ flag.
  */
-void DBFilter::reset ()
+void DBFilter::reset()
 {
     if (disabled_)
         return;
 
-    for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
         conditions_.at(cnt)->reset();
     }
 
-    for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
         sub_filters_.at(cnt)->reset();
     }
-    changed_=true;
+    changed_ = true;
 }
 
-void DBFilter::deleteCondition (DBFilterCondition *condition)
+void DBFilter::deleteCondition(DBFilterCondition* condition)
 {
-    std::vector <DBFilterCondition *>::iterator it = find (conditions_.begin(), conditions_.end(), condition);
-    assert (it != conditions_.end());
-    conditions_.erase (it);
+    std::vector<DBFilterCondition*>::iterator it =
+        find(conditions_.begin(), conditions_.end(), condition);
+    assert(it != conditions_.end());
+    conditions_.erase(it);
     delete condition;
 }
 
-DBFilterWidget* DBFilter::widget ()
+DBFilterWidget* DBFilter::widget()
 {
-    assert (widget_);
+    assert(widget_);
     return widget_;
 }
-
-
-

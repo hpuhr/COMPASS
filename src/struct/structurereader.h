@@ -29,43 +29,44 @@ class PropertyList;
 /**
  * @brief Generates data buffers from C structs
  *
- * Uses the defined StructureDescriptions from StructureDescriptionManager, and generates Buffers for the data contents.
- * When add is called, the struct is read using the definition and the data is added to the according buffer.
+ * Uses the defined StructureDescriptions from StructureDescriptionManager, and generates Buffers
+ * for the data contents. When add is called, the struct is read using the definition and the data
+ * is added to the according buffer.
  */
 class StructureReader : public JobOrderer
 {
-public:
+  public:
     /// @brief Constructor
-    StructureReader(DBInterface *db_interface);
+    StructureReader(DBInterface* db_interface);
     /// @brief Destructor
     virtual ~StructureReader();
 
     /// @brief Adds a C struct located at the supplied address
-    void add (DB_OBJECT_TYPE type, void *data);
+    void add(DB_OBJECT_TYPE type, void* data);
 
-    bool hasUnwrittenData ();
+    bool hasUnwrittenData();
 
     /// @brief Moves buffers from data_ to data_set_
-    void finalize ();
+    void finalize();
 
-    void writeBufferDone( Job *job );
-    void jobAborted( Job *job );
+    void writeBufferDone(Job* job);
+    void jobAborted(Job* job);
 
-protected:
-    DBInterface *db_interface_;
+  protected:
+    DBInterface* db_interface_;
     /// Container with temporary buffers
-    std::map <DB_OBJECT_TYPE, Buffer *> data_;
+    std::map<DB_OBJECT_TYPE, Buffer*> data_;
     /// Container with data descriptions for the buffers
-    std::map <DB_OBJECT_TYPE, PropertyList*> property_lists_;
+    std::map<DB_OBJECT_TYPE, PropertyList*> property_lists_;
     /// Container with the structure descriptions
-    std::map <DB_OBJECT_TYPE, StructureDescription*> descriptions_;
+    std::map<DB_OBJECT_TYPE, StructureDescription*> descriptions_;
     /// Container with mutexes for multi-thread access
-    std::map <DB_OBJECT_TYPE, boost::mutex *> mutexes_;
+    std::map<DB_OBJECT_TYPE, boost::mutex*> mutexes_;
 
     /// @brief Creates a new buffer for DBO type
-    Buffer *getNewBuffer (DB_OBJECT_TYPE type);
+    Buffer* getNewBuffer(DB_OBJECT_TYPE type);
 
-    void writeBuffer (Buffer *buffer);
+    void writeBuffer(Buffer* buffer);
 };
 
 #endif /* STRUCTUREREADER_H_ */

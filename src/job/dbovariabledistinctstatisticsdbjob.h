@@ -28,22 +28,28 @@ class DBOVariable;
 
 class DBOVariableDistinctStatisticsDBJob : public DBJob
 {
-public:
-    DBOVariableDistinctStatisticsDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DBInterface *db_interface, DB_OBJECT_TYPE type,
-            DBOVariable *variable, unsigned int sensor_number);
+  public:
+    DBOVariableDistinctStatisticsDBJob(JobOrderer* orderer,
+                                       boost::function<void(Job*)> done_function,
+                                       boost::function<void(Job*)> obsolete_function,
+                                       DBInterface* db_interface, DB_OBJECT_TYPE type,
+                                       DBOVariable* variable, unsigned int sensor_number);
     virtual ~DBOVariableDistinctStatisticsDBJob();
 
-    virtual void execute ();
+    virtual void execute();
 
-    Buffer *getResultBuffer () { assert (result_buffer_); return result_buffer_; }
+    Buffer* getResultBuffer()
+    {
+        assert(result_buffer_);
+        return result_buffer_;
+    }
 
-protected:
+  protected:
     DB_OBJECT_TYPE type_;
-    DBOVariable *variable_;
+    DBOVariable* variable_;
     unsigned int sensor_number_;
 
-    Buffer *result_buffer_;
+    Buffer* result_buffer_;
 };
 
 #endif /* DBOVARIABLEDISTINCTSTATISTICSDBJOB_H_ */

@@ -25,67 +25,69 @@
 
 class MetaDBOVariableWidget;
 
-class MetaDBOVariable: public Configurable
+class MetaDBOVariable : public Configurable
 {
-public:
-    MetaDBOVariable(const std::string &class_id, const std::string &instance_id, DBObjectManager *object_manager);
-    virtual ~MetaDBOVariable ();
+  public:
+    MetaDBOVariable(const std::string& class_id, const std::string& instance_id,
+                    DBObjectManager* object_manager);
+    virtual ~MetaDBOVariable();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    bool hasVariables () const { return variables_.size() > 0; }
-    PropertyDataType dataType () const;
-    const std::string &dataTypeString() const;
-    DBOVariable::Representation representation ();
+    bool hasVariables() const { return variables_.size() > 0; }
+    PropertyDataType dataType() const;
+    const std::string& dataTypeString() const;
+    DBOVariable::Representation representation();
 
     /// @brief Return if variable exist in DBO of type
-    bool existsIn (const std::string &dbo_name);
+    bool existsIn(const std::string& dbo_name);
     /// @brief Returns variable existing in DBO of type
-    DBOVariable &getFor (const std::string &dbo_name);
+    DBOVariable& getFor(const std::string& dbo_name);
     /// @brief Return variable identifier in DBO of type
-    std::string getNameFor (const std::string &dbo_name);
+    std::string getNameFor(const std::string& dbo_name);
 
-    void removeVariable (const std::string &dbo_name);
+    void removeVariable(const std::string& dbo_name);
     /// @brief Sets sub-variable name for DBO of type
-    void addVariable (const std::string &dbo_name, const std::string &dbovariable_name);
+    void addVariable(const std::string& dbo_name, const std::string& dbovariable_name);
 
-    const std::map <std::string, DBOVariable&> &variables () { return variables_; }
-    bool uses (const DBOVariable& variable);
+    const std::map<std::string, DBOVariable&>& variables() { return variables_; }
+    bool uses(const DBOVariable& variable);
 
     std::string name() const;
-    void name(const std::string &name);
+    void name(const std::string& name);
 
     std::string description() const;
-    void description(const std::string &description);
+    void description(const std::string& description);
 
-    std::string getMinString () const;
-    std::string getMaxString () const;
-    std::string getMinStringRepresentation () const;
-    std::string getMaxStringRepresentation () const;
+    std::string getMinString() const;
+    std::string getMaxString() const;
+    std::string getMinStringRepresentation() const;
+    std::string getMaxStringRepresentation() const;
 
-    MetaDBOVariableWidget *widget ();
+    MetaDBOVariableWidget* widget();
 
-    void unlock ();
-    void lock ();
+    void unlock();
+    void lock();
 
-    bool existsInDB () const;
+    bool existsInDB() const;
 
-    void removeOutdatedVariables ();
+    void removeOutdatedVariables();
 
-protected:
+  protected:
     std::string name_;
     std::string description_;
 
-    DBObjectManager &object_manager_;
+    DBObjectManager& object_manager_;
 
-    MetaDBOVariableWidget *widget_;
+    MetaDBOVariableWidget* widget_;
 
-    bool locked_ {false};
+    bool locked_{false};
 
-    std::map <std::string, DBOVariableDefinition*> definitions_;
-    std::map <std::string, DBOVariable&> variables_;
+    std::map<std::string, DBOVariableDefinition*> definitions_;
+    std::map<std::string, DBOVariable&> variables_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
-#endif // METADBOVARIABLE_H
+#endif  // METADBOVARIABLE_H

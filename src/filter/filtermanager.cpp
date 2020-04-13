@@ -15,32 +15,34 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "filtermanager.h"
+
+#include "atsdb.h"
 #include "configurationmanager.h"
+#include "datasourcesfilter.h"
+#include "dbconnection.h"
 #include "dbfilter.h"
+#include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "atsdb.h"
-#include "filtermanager.h"
-#include "logger.h"
-#include "dbinterface.h"
-#include "dbconnection.h"
 #include "filtermanagerwidget.h"
-#include "datasourcesfilter.h"
+#include "logger.h"
 
 using namespace std;
 
-FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-: Configurable (class_id, instance_id, atsdb, "filter.json")
+FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id,
+                             ATSDB* atsdb)
+    : Configurable(class_id, instance_id, atsdb, "filter.json")
 {
-    logdbg  << "FilterManager: constructor";
+    logdbg << "FilterManager: constructor";
 
-    registerParameter ("db_id", &db_id_, "");
+    registerParameter("db_id", &db_id_, "");
 }
 
 FilterManager::~FilterManager()
 {
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < filters_.size(); cnt++)
         delete filters_.at(cnt);
     filters_.clear();
 
@@ -51,7 +53,8 @@ FilterManager::~FilterManager()
     }
 }
 
-void FilterManager::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
+void FilterManager::generateSubConfigurable(const std::string& class_id,
+                                            const std::string& instance_id)
 {
     if (class_id == "DBFilter")
     {
@@ -62,27 +65,27 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
             return;
         }
 
-        DBFilter *filter = new DBFilter (class_id, instance_id, this);
-        filters_.push_back (filter);
+        DBFilter* filter = new DBFilter(class_id, instance_id, this);
+        filters_.push_back(filter);
     }
-    else if (class_id.compare ("DataSourcesFilter") == 0)
+    else if (class_id.compare("DataSourcesFilter") == 0)
     {
         try
         {
             if (hasSubConfigurable(class_id, instance_id))
             {
-                logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
-                       << " already present";
+                logerr << "FilterManager: generateSubConfigurable: data sources filter "
+                       << instance_id << " already present";
                 return;
             }
-            std::string dbo_name = configuration().getSubConfiguration(
-                        class_id, instance_id).getParameterConfigValueString("dbo_name");
-
+            std::string dbo_name = configuration()
+                                       .getSubConfiguration(class_id, instance_id)
+                                       .getParameterConfigValueString("dbo_name");
 
             if (!ATSDB::instance().objectManager().existsObject(dbo_name))
             {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
-                       << " because of non-existing dbobject '" << dbo_name << "'";
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
+                       << instance_id << " because of non-existing dbobject '" << dbo_name << "'";
                 return;
             }
 
@@ -90,36 +93,37 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
 
             if (!object.hasCurrentDataSourceDefinition())
             {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
-                       << " because of missing data source definition";
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
+                       << instance_id << " because of missing data source definition";
                 return;
             }
 
             if (!object.hasDataSources())
             {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
-                       << " because of missing data sources";
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
+                       << instance_id << " because of missing data sources";
                 return;
             }
 
             if (!object.existsInDB())
             {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
-                       << " because of empty dbobject '" << dbo_name << "'";
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
+                       << instance_id << " because of empty dbobject '" << dbo_name << "'";
                 return;
             }
 
-            DataSourcesFilter* filter = new DataSourcesFilter (class_id, instance_id, this);
+            DataSourcesFilter* filter = new DataSourcesFilter(class_id, instance_id, this);
             if (filter->disabled())
             {
-                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source filter for object "
+                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
+                          "filter for object "
                        << filter->dbObjectName();
-                //removeChildConfigurable (*filter);
-                //configuration_.removeSubConfiguration(class_id, instance_id);
+                // removeChildConfigurable (*filter);
+                // configuration_.removeSubConfiguration(class_id, instance_id);
                 delete filter;
             }
             else
-                filters_.push_back (filter);
+                filters_.push_back(filter);
         }
         catch (const std::exception& e)
         {
@@ -129,21 +133,22 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
         }
     }
     else
-        throw std::runtime_error ("FilterManager: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
-void FilterManager::checkSubConfigurables ()
+void FilterManager::checkSubConfigurables()
 {
     // watch those sensors
     for (auto& obj_it : ATSDB::instance().objectManager())
     {
-        if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources()
-                || !obj_it.second->existsInDB())
+        if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources() ||
+            !obj_it.second->existsInDB())
             continue;
 
         bool exists = false;
         for (auto fil_it : filters_)
         {
-            DataSourcesFilter *sensor_filter = dynamic_cast<DataSourcesFilter*> (fil_it);
+            DataSourcesFilter* sensor_filter = dynamic_cast<DataSourcesFilter*>(fil_it);
             if (sensor_filter && sensor_filter->dbObjectName() == obj_it.first)
             {
                 exists = true;
@@ -154,108 +159,108 @@ void FilterManager::checkSubConfigurables ()
         if (exists)
             continue;
 
-        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << obj_it.first;
+        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for "
+               << obj_it.first;
 
-        std::string instance_id = obj_it.second->name()+"DataSources";
+        std::string instance_id = obj_it.second->name() + "DataSources";
         unsigned int cnt = 0;
 
-        while(configuration().hasSubConfiguration("DataSourcesFilter", instance_id+to_string(cnt)))
+        while (
+            configuration().hasSubConfiguration("DataSourcesFilter", instance_id + to_string(cnt)))
             ++cnt;
 
         instance_id += to_string(cnt);
 
-        Configuration &ds_filter_configuration = addNewSubConfiguration ("DataSourcesFilter",instance_id);
+        Configuration& ds_filter_configuration =
+            addNewSubConfiguration("DataSourcesFilter", instance_id);
 
-        ds_filter_configuration.addParameterString ("dbo_name", obj_it.first);
-        generateSubConfigurable ("DataSourcesFilter", instance_id);
+        ds_filter_configuration.addParameterString("dbo_name", obj_it.first);
+        generateSubConfigurable("DataSourcesFilter", instance_id);
     }
 }
 
-std::string FilterManager::getSQLCondition (const std::string& dbo_name, std::vector <DBOVariable*>& filtered_variables)
+std::string FilterManager::getSQLCondition(const std::string& dbo_name,
+                                           std::vector<DBOVariable*>& filtered_variables)
 {
-    assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
+    assert(ATSDB::instance().objectManager().object(dbo_name).loadable());
 
     std::stringstream ss;
 
-    bool first=true;
+    bool first = true;
 
     for (auto* filter : filters_)
     {
-        loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId()
-               << " active " << filter->getActive()
-               << " filters " << dbo_name << " " << filter->filters (dbo_name);
+        loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId() << " active "
+               << filter->getActive() << " filters " << dbo_name << " "
+               << filter->filters(dbo_name);
 
-        if (filter->getActive() && filter->filters (dbo_name))
+        if (filter->getActive() && filter->filters(dbo_name))
         {
-            ss << filter->getConditionString (dbo_name, first, filtered_variables);
+            ss << filter->getConditionString(dbo_name, first, filtered_variables);
         }
     }
 
-    logdbg  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
+    logdbg << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
     return ss.str();
 }
 
+unsigned int FilterManager::getNumFilters() { return filters_.size(); }
 
-unsigned int FilterManager::getNumFilters ()
+DBFilter* FilterManager::getFilter(unsigned int index)
 {
-    return filters_.size();
-}
-
-DBFilter *FilterManager::getFilter (unsigned int index)
-{
-    assert (index < filters_.size());
+    assert(index < filters_.size());
 
     return filters_.at(index);
 }
 
-void FilterManager::reset ()
+void FilterManager::reset()
 {
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
+    for (unsigned int cnt = 0; cnt < filters_.size(); cnt++)
     {
         if (!filters_.at(cnt)->disabled())
             filters_.at(cnt)->reset();
     }
 }
 
-void FilterManager::deleteFilterSlot (DBFilter* filter)
+void FilterManager::deleteFilterSlot(DBFilter* filter)
 {
-    std::vector <DBFilter*>::iterator it;
+    std::vector<DBFilter*>::iterator it;
 
-    it = find (filters_.begin(), filters_.end(), filter);
+    it = find(filters_.begin(), filters_.end(), filter);
     if (it == filters_.end())
-        throw std::runtime_error ("FilterManager: deleteFilter: called with unknown filter");
+        throw std::runtime_error("FilterManager: deleteFilter: called with unknown filter");
     else
     {
-        filters_.erase (it);
+        filters_.erase(it);
         delete filter;
     }
 
     emit changedFiltersSignal();
 }
 
-FilterManagerWidget *FilterManager::widget ()
+FilterManagerWidget* FilterManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new FilterManagerWidget (*this);
-        connect (this, SIGNAL(changedFiltersSignal()), widget_, SLOT(updateFiltersSlot()));
+        widget_ = new FilterManagerWidget(*this);
+        connect(this, SIGNAL(changedFiltersSignal()), widget_, SLOT(updateFiltersSlot()));
     }
 
-    assert (widget_);
+    assert(widget_);
     return widget_;
 }
 
-void FilterManager::startedSlot ()
+void FilterManager::startedSlot()
 {
-    loginf  << "FilterManager: startedSlot";
-    createSubConfigurables ();
+    loginf << "FilterManager: startedSlot";
+    createSubConfigurables();
 
     std::string tmpstr = ATSDB::instance().interface().connection().identifier();
     replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
 
-    if (db_id_.compare (tmpstr) != 0)
+    if (db_id_.compare(tmpstr) != 0)
     {
-        loginf  << "FilterManager: startedSlot: different db id, resetting filters";
+        loginf << "FilterManager: startedSlot: different db id, resetting filters";
         reset();
         db_id_ = tmpstr;
     }

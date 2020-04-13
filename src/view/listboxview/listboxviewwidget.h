@@ -18,8 +18,8 @@
 #ifndef LISTBOXVIEWWIDGET_H_
 #define LISTBOXVIEWWIDGET_H_
 
-#include "viewwidget.h"
 #include "eventprocessor.h"
+#include "viewwidget.h"
 
 class ListBoxView;
 class ListBoxViewDataWidget;
@@ -31,15 +31,15 @@ class QTabWidget;
 /**
  * @brief Used for textual data display in a ListBoxView.
  *
- * Consists of a ListBoxViewDataWidget for data view and a ListBoxViewConfigWidget for configuration and
- * starting the loading process.
+ * Consists of a ListBoxViewDataWidget for data view and a ListBoxViewConfigWidget for configuration
+ * and starting the loading process.
  */
 class ListBoxViewWidget : public ViewWidget
 {
-public:
+  public:
     /// @brief Constructor
-    ListBoxViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent,
-                       ListBoxView* view, QWidget* parent=NULL );
+    ListBoxViewWidget(const std::string& class_id, const std::string& instance_id,
+                      Configurable* config_parent, ListBoxView* view, QWidget* parent = NULL);
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 
@@ -54,14 +54,14 @@ public:
     /// @brief Returns the basis view
     ListBoxView* getView() { return (ListBoxView*)view_; }
     /// @brief Returns the data widget
-    ListBoxViewDataWidget *getDataWidget () { return data_widget_; }
+    ListBoxViewDataWidget* getDataWidget() { return data_widget_; }
 
-protected:
-    QSplitter* main_splitter_ {nullptr};
+  protected:
+    QSplitter* main_splitter_{nullptr};
     /// Data widget with data display
-    ListBoxViewDataWidget* data_widget_ {nullptr};
+    ListBoxViewDataWidget* data_widget_{nullptr};
     /// Config widget with configuration elements
-    ListBoxViewConfigWidget* config_widget_ {nullptr};
+    ListBoxViewConfigWidget* config_widget_{nullptr};
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

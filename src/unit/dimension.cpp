@@ -15,14 +15,15 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "unit.h"
 #include "dimension.h"
 
 #include <cmath>
 
+#include "unit.h"
 
-Dimension::Dimension(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent)
+Dimension::Dimension(const std::string& class_id, const std::string& instance_id,
+                     Configurable* parent)
+    : Configurable(class_id, instance_id, parent)
 {
     createSubConfigurables();
 }
@@ -34,38 +35,37 @@ Dimension::~Dimension()
     units_.clear();
 }
 
-void Dimension::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void Dimension::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
     if (class_id == "Unit")
     {
-        Unit *unit = new Unit (class_id, instance_id, *this);
-        assert (units_.find(unit->instanceId()) == units_.end());
-        units_.insert (std::pair <std::string, Unit*> (unit->instanceId(), unit));
-
+        Unit* unit = new Unit(class_id, instance_id, *this);
+        assert(units_.find(unit->instanceId()) == units_.end());
+        units_.insert(std::pair<std::string, Unit*>(unit->instanceId(), unit));
     }
     else
-        throw std::runtime_error ("UnitManager: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("UnitManager: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
-void Dimension::addUnit (const std::string &name, double factor, const std::string &definition)
+void Dimension::addUnit(const std::string& name, double factor, const std::string& definition)
 {
-    Configuration &config = addNewSubConfiguration ("Unit", name);
-    config.addParameterDouble ("factor", factor);
-    config.addParameterString ("definition", definition);
+    Configuration& config = addNewSubConfiguration("Unit", name);
+    config.addParameterDouble("factor", factor);
+    config.addParameterString("definition", definition);
     generateSubConfigurable("Unit", name);
 }
 
-bool Dimension::hasUnit (const std::string &unit) const
-{
-    return units_.find(unit) != units_.end();
-}
+bool Dimension::hasUnit(const std::string& unit) const { return units_.find(unit) != units_.end(); }
 
-double Dimension::getFactor (const std::string &unit_source, const std::string &unit_destination) const
+double Dimension::getFactor(const std::string& unit_source,
+                            const std::string& unit_destination) const
 {
-    logdbg << "Dimension: getFactor: unit src '" << unit_source << "' dst '" << unit_destination << "'";
+    logdbg << "Dimension: getFactor: unit src '" << unit_source << "' dst '" << unit_destination
+           << "'";
 
-    assert (units_.find(unit_source) != units_.end());
-    assert (units_.find(unit_destination) != units_.end());
+    assert(units_.find(unit_source) != units_.end());
+    assert(units_.find(unit_destination) != units_.end());
     double factor = 1.0;
 
     factor /= units_.at(unit_source)->factor();
@@ -74,8 +74,8 @@ double Dimension::getFactor (const std::string &unit_source, const std::string &
     logdbg << "Dimension: getFactor: src factor " << units_.at(unit_source)->factor()
            << " dest factor " << units_.at(unit_destination)->factor() << " result " << factor;
 
-    assert (factor != 0);
-    assert (!std::isinf(factor));
+    assert(factor != 0);
+    assert(!std::isinf(factor));
 
     return factor;
 }

@@ -15,33 +15,32 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QCloseEvent>
-#include <QStackedWidget>
-#include <QSettings>
+#include "mainwindow.h"
+
 #include <QApplication>
+#include <QCloseEvent>
+#include <QSettings>
+#include <QStackedWidget>
 #include <QTabWidget>
 
-#include "mainwindow.h"
-#include "global.h"
-#include "logger.h"
+#include "atsdb.h"
 #include "config.h"
 #include "configurationmanager.h"
-#include "atsdb.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "files.h"
 #include "filtermanager.h"
+#include "global.h"
+#include "jobmanager.h"
+#include "logger.h"
 #include "managementwidget.h"
 #include "stringconv.h"
-#include "viewmanager.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "files.h"
-#include "config.h"
-#include "jobmanager.h"
+#include "viewmanager.h"
 
 using namespace Utils;
 using namespace std;
-
 
 MainWindow::MainWindow()
 {
@@ -50,13 +49,13 @@ MainWindow::MainWindow()
     setMinimumSize(QSize(1200, 900));
 
     QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
-    setWindowIcon(atsdb_icon); // for the glory of the empire
+    setWindowIcon(atsdb_icon);  // for the glory of the empire
 
     QSettings settings("ATSDB", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    assert (ATSDB::instance().config().existsId("version"));
-    std::string title =  "ATSDB v"+ATSDB::instance().config().getString("version");
+    assert(ATSDB::instance().config().existsId("version"));
+    std::string title = "ATSDB v" + ATSDB::instance().config().getString("version");
 
     if (ATSDB::instance().config().existsId("save_config_on_exit"))
     {
@@ -64,79 +63,76 @@ MainWindow::MainWindow()
         loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
     }
 
-    QWidget::setWindowTitle (title.c_str());
+    QWidget::setWindowTitle(title.c_str());
 
-    tab_widget_ = new QTabWidget ();
+    tab_widget_ = new QTabWidget();
     tab_widget_->setAutoFillBackground(true);
 
     task_manager_widget_ = ATSDB::instance().taskManager().widget();
     tab_widget_->addTab(task_manager_widget_, "Tasks");
 
-    connect (&ATSDB::instance().taskManager(), &TaskManager::startInspectionSignal,
-             this, &MainWindow::startSlot);
+    connect(&ATSDB::instance().taskManager(), &TaskManager::startInspectionSignal, this,
+            &MainWindow::startSlot);
 
     setAutoFillBackground(true);
 
     // management widget
-    management_widget_ = new ManagementWidget ();
+    management_widget_ = new ManagementWidget();
     management_widget_->setAutoFillBackground(true);
 
     setCentralWidget(tab_widget_);
 
     tab_widget_->setCurrentIndex(0);
 
-   QObject::connect (this, &MainWindow::startedSignal,
-                     &ATSDB::instance().filterManager(), &FilterManager::startedSlot);
+    QObject::connect(this, &MainWindow::startedSignal, &ATSDB::instance().filterManager(),
+                     &FilterManager::startedSlot);
 }
 
 MainWindow::~MainWindow()
 {
-    logdbg  << "MainWindow: destructor";
+    logdbg << "MainWindow: destructor";
 
     // remember: this not called! insert deletes into closeEvent function
 }
 
-void MainWindow::disableConfigurationSaving ()
+void MainWindow::disableConfigurationSaving()
 {
     logdbg << "MainWindow: disableConfigurationSaving";
     save_configuration_ = false;
 }
 
-void MainWindow::databaseOpenedSlot()
-{
-    logdbg << "MainWindow: databaseOpenedSlot";
-}
+void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
 
-void MainWindow::startSlot ()
+void MainWindow::startSlot()
 {
     loginf << "MainWindow: startSlot";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    emit startedSignal ();
+    emit startedSignal();
 
-    assert (task_manager_widget_);
+    assert(task_manager_widget_);
     tab_widget_->removeTab(0);
 
     // close any opened dbobject widgets
     for (auto& obj_it : ATSDB::instance().objectManager())
         obj_it.second->closeWidget();
 
-    assert (management_widget_);
-    tab_widget_->addTab (management_widget_, "Management");
+    assert(management_widget_);
+    tab_widget_->addTab(management_widget_, "Management");
 
     ATSDB::instance().viewManager().init(tab_widget_);
 
     tab_widget_->setCurrentIndex(0);
 
-    emit JobManager::instance().databaseIdle(); // to enable ViewManager add button, slightly HACKY
+    emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
 
     QApplication::restoreOverrideCursor();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
-    logdbg  << "MainWindow: closeEvent: start";
+    logdbg << "MainWindow: closeEvent: start";
 
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
@@ -144,14 +140,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
-        loginf  << "MainWindow: closeEvent: configuration not saved";
+        loginf << "MainWindow: closeEvent: configuration not saved";
 
     ATSDB::instance().shutdown();
 
     if (tab_widget_)
     {
         delete tab_widget_;
-        tab_widget_=nullptr;
+        tab_widget_ = nullptr;
     }
 
     event->accept();
@@ -159,8 +155,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     logdbg << "MainWindow: closeEvent: done";
 }
 
-//void MainWindow::keyPressEvent ( QKeyEvent * event )
+// void MainWindow::keyPressEvent ( QKeyEvent * event )
 //{
 //    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
 //}
-

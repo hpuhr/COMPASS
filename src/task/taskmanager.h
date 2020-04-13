@@ -18,12 +18,12 @@
 #ifndef TASKMANAGER_H
 #define TASKMANAGER_H
 
-#include "singleton.h"
+#include <QObject>
+
 #include "configurable.h"
 #include "global.h"
+#include "singleton.h"
 #include "task.h"
-
-#include <QObject>
 
 class ATSDB;
 class DatabaseOpenTask;
@@ -45,31 +45,32 @@ class TaskManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
-    void startInspectionSignal ();
+  signals:
+    void startInspectionSignal();
     void expertModeChangedSignal();
 
-public slots:
-    void taskStatusChangesSlot (std::string task_name);
-    void taskDoneSlot (std::string task_name);
+  public slots:
+    void taskStatusChangesSlot(std::string task_name);
+    void taskDoneSlot(std::string task_name);
 
-    void dbObjectsChangedSlot ();
-    void schemaChangedSlot ();
+    void dbObjectsChangedSlot();
+    void schemaChangedSlot();
 
-public:
+  public:
     TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     virtual ~TaskManager();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    //void deleteWidgets ();
-    void shutdown ();
+    // void deleteWidgets ();
+    void shutdown();
 
-    TaskManagerWidget* widget(); // owned here
+    TaskManagerWidget* widget();  // owned here
 
     std::vector<std::string> taskList() const;
-    std::map<std::string, Task *> tasks() const;
+    std::map<std::string, Task*> tasks() const;
 
     bool expertMode() const;
     void expertMode(bool value);
@@ -79,12 +80,11 @@ public:
     void appendWarning(const std::string& text);
     void appendError(const std::string& text);
 
-    void runTask (const std::string& task_name);
-
+    void runTask(const std::string& task_name);
 
     DatabaseOpenTask& databaseOpenTask() const;
     ManageSchemaTask& manageSchemaTask() const;
-    ManageDataSourcesTask& manageDataSourcesTask () const;
+    ManageDataSourcesTask& manageDataSourcesTask() const;
 #if USE_JASTERIX
     ASTERIXImportTask& asterixImporterTask() const;
 #endif
@@ -95,8 +95,8 @@ public:
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     PostProcessTask& postProcessTask() const;
 
-protected:
-    bool expert_mode_ {false};
+  protected:
+    bool expert_mode_{false};
 
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
@@ -113,12 +113,12 @@ protected:
 
     std::unique_ptr<TaskManagerWidget> widget_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 
-    std::vector <std::string> task_list_;
-    std::map <std::string, Task*> tasks_;
+    std::vector<std::string> task_list_;
+    std::map<std::string, Task*> tasks_;
 
-    void addTask (const std::string& class_id, Task* task);
+    void addTask(const std::string& class_id, Task* task);
 };
 
-#endif // TASKMANAGER_H
+#endif  // TASKMANAGER_H

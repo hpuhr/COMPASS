@@ -15,29 +15,28 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "global.h"
-#include "logger.h"
 #include "client.h"
-#include "config.h"
-#include "logger.h"
-#include "files.h"
-#include "configurationmanager.h"
-#include "stringconv.h"
-#include "mainwindow.h"
-#include "atsdb.h"
-
-#include <QApplication>
-#include <QMessageBox>
-
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-
-#include <string>
 
 #include <locale.h>
 
+#include <QApplication>
+#include <QMessageBox>
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <string>
+
+#include "atsdb.h"
+#include "config.h"
+#include "configurationmanager.h"
+#include "files.h"
+#include "global.h"
+#include "logger.h"
+#include "mainwindow.h"
+#include "stringconv.h"
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
+
 #include "cpl_conv.h"
 #endif
 
@@ -46,20 +45,18 @@ using namespace Utils;
 
 namespace po = boost::program_options;
 
-//namespace ATSDB
+// namespace ATSDB
 //{
 
-Client::Client(int& argc, char** argv)
-    : QApplication(argc, argv)
+Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
 
     po::options_description desc("Allowed options");
-    desc.add_options()
-            ("help", "produce help message")
-            //("compression", po::value<int>(), "set compression level")
-            ("reset,r", po::bool_switch(&config_and_data_reset_wanted_), "reset user configuration and data")
-            ;
+    desc.add_options()("help", "produce help message")
+        //("compression", po::value<int>(), "set compression level")
+        ("reset,r", po::bool_switch(&config_and_data_reset_wanted_),
+         "reset user configuration and data");
 
     try
     {
@@ -76,32 +73,33 @@ Client::Client(int& argc, char** argv)
     }
     catch (exception& e)
     {
-        throw runtime_error ("ATSDBClient: unable to parse command line parameters: "+string(e.what()));
+        throw runtime_error("ATSDBClient: unable to parse command line parameters: " +
+                            string(e.what()));
     }
 
-    checkAndSetupConfig ();
+    checkAndSetupConfig();
 
     if (quit_requested_)
         return;
 
-    //ATSDB::instance().initialize();
-    //atsdb_initialized_ = true;
+    // ATSDB::instance().initialize();
+    // atsdb_initialized_ = true;
 }
 
 Client::~Client()
 {
     loginf << "Client: destructor";
 
-//    if (atsdb_initialized_ && ATSDB::instance().ready())
-//        ATSDB::instance().shutdown();
+    //    if (atsdb_initialized_ && ATSDB::instance().ready())
+    //        ATSDB::instance().shutdown();
 }
 
-MainWindow& Client::mainWindow ()
+MainWindow& Client::mainWindow()
 {
     if (!main_window_)
-        main_window_.reset (new MainWindow ());
+        main_window_.reset(new MainWindow());
 
-    assert (main_window_);
+    assert(main_window_);
     return *main_window_;
 }
 
@@ -111,26 +109,23 @@ bool Client::notify(QObject* receiver, QEvent* event)
     {
         return QApplication::notify(receiver, event);
     }
-    catch(exception& e)
+    catch (exception& e)
     {
-        logerr  << "ATSDBClient: Exception thrown: " << e.what();
-        //assert (false);
+        logerr << "ATSDBClient: Exception thrown: " << e.what();
+        // assert (false);
         QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", QString(e.what()));
     }
-    catch(...)
+    catch (...)
     {
-        //assert (false);
+        // assert (false);
         QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", "Unknown exception");
     }
     return false;
 }
 
-bool Client::quitRequested() const
-{
-    return quit_requested_;
-}
+bool Client::quitRequested() const { return quit_requested_; }
 
-void Client::checkAndSetupConfig ()
+void Client::checkAndSetupConfig()
 {
     // check if basic configuration works
     try
@@ -140,18 +135,18 @@ void Client::checkAndSetupConfig ()
         system_install_path_ = SYSTEM_INSTALL_PATH;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        cout <<"ATSDBClient: includes experimental features" << endl;
+        cout << "ATSDBClient: includes experimental features" << endl;
 
         const char* appdir = getenv("APPDIR");
         if (appdir)
         {
             cout << "ATSDBClient: assuming fuse environment in " << appdir << endl;
-            assert (appdir);
+            assert(appdir);
 
             system_install_path_ = string(appdir) + "/appdir/atsdb/";
 
             cout << "ATSDBClient: set install path to '" << system_install_path_ << "'" << endl;
-            assert (Files::directoryExists(system_install_path_));
+            assert(Files::directoryExists(system_install_path_));
 
             osgDB::FilePathList path_list;
 
@@ -161,29 +156,31 @@ void Client::checkAndSetupConfig ()
 
             osgDB::Registry::instance()->setLibraryFilePathList(string(appdir) + "/appdir/lib");
 
-            string gdal_path = string(appdir)+"/appdir/atsdb/data/gdal";
+            string gdal_path = string(appdir) + "/appdir/atsdb/data/gdal";
             CPLSetConfigOption("GDAL_DATA", gdal_path.c_str());
         }
 #endif
 
-        checkNeededActions ();
+        checkNeededActions();
 
         performNeededActions();
 
-        cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY+"main.conf'" << endl;
+        cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY + "main.conf'"
+             << endl;
 
-        SimpleConfig config ("config.json");
-        assert (config.existsId("version"));
-        assert (config.existsId("configuration_path"));
-        assert (config.existsId("save_config_on_exit"));
-        assert (config.existsId("log_properties_file"));
-        assert (config.existsId("save_config_on_exit"));
+        SimpleConfig config("config.json");
+        assert(config.existsId("version"));
+        assert(config.existsId("configuration_path"));
+        assert(config.existsId("save_config_on_exit"));
+        assert(config.existsId("log_properties_file"));
+        assert(config.existsId("save_config_on_exit"));
 
-        CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY+config.getString("configuration_path")+"/";
+        CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
 
-        cout << "ATSDBClient: current configuration path is '" << CURRENT_CONF_DIRECTORY+"'" << endl;
+        cout << "ATSDBClient: current configuration path is '" << CURRENT_CONF_DIRECTORY + "'"
+             << endl;
 
-        string log_config_path = HOME_CONF_DIRECTORY+config.getString("log_properties_file");
+        string log_config_path = HOME_CONF_DIRECTORY + config.getString("log_properties_file");
         Files::verifyFileExists(log_config_path);
 
         cout << "ATSDBClient: initializing logger using '" << log_config_path << "'" << endl;
@@ -193,29 +190,29 @@ void Client::checkAndSetupConfig ()
         string config_version = config.getString("version");
         loginf << "ATSDBClient: configuration version " << config_version;
 
-        ConfigurationManager::getInstance().init (config.getString("main_configuration_file"));
+        ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
     }
-    catch (exception &ex)
+    catch (exception& ex)
     {
-        logerr  << "ATSDBClient: Caught Exception '" << ex.what() << "'";
+        logerr << "ATSDBClient: Caught Exception '" << ex.what() << "'";
         logerr.flush();
-        //assert (false);
+        // assert (false);
 
         quit_requested_ = true;
         return;
     }
-    catch(...)
+    catch (...)
     {
-        logerr  << "ATSDBClient: Caught Exception";
+        logerr << "ATSDBClient: Caught Exception";
         logerr.flush();
-        //assert (false);
+        // assert (false);
 
         quit_requested_ = true;
         return;
     }
 }
 
-void Client::checkNeededActions ()
+void Client::checkNeededActions()
 {
     cout << "ATSDBClient: checking if local configuration exists ... ";
 
@@ -226,7 +223,7 @@ void Client::checkNeededActions ()
     else
         cout << " no" << endl;
 
-    if (!Files::fileExists(HOME_CONF_DIRECTORY+"config.json"))
+    if (!Files::fileExists(HOME_CONF_DIRECTORY + "config.json"))
     {
         cout << "ATSDBClient: config.json does not exist, delete and upgrade required" << endl;
         config_and_data_deletion_wanted_ = true;
@@ -234,40 +231,42 @@ void Client::checkNeededActions ()
         return;
     }
 
-    if (config_and_data_exists_) // check updating actions
+    if (config_and_data_exists_)  // check updating actions
     {
-        SimpleConfig config ("config.json");
+        SimpleConfig config("config.json");
         string config_version;
 
         if (config.existsId("version"))
             config_version = config.getString("version");
 
-        if (String::compareVersions(VERSION, config_version) != 0) // not same
+        if (String::compareVersions(VERSION, config_version) != 0)  // not same
         {
             upgrade_needed_ = true;
 
             // 0 if same, -1 if v1 > v2, 1 if v1 < v2
             bool app_version_newer = String::compareVersions(VERSION, config_version) == -1;
 
-            cout << "ATSDBClient: configuration mismatch detected, local version '" << config_version << "'"
-                 << (app_version_newer ? " newer" : " older")
+            cout << "ATSDBClient: configuration mismatch detected, local version '"
+                 << config_version << "'" << (app_version_newer ? " newer" : " older")
                  << " application version '" << VERSION << "'" << endl;
 
             if (app_version_newer)  // check if cfg version is so old it needs deleting
                 config_and_data_deletion_wanted_ =
-                        (String::compareVersions(DELETE_CFG_BEFORE_VERSION, config_version) == -1);
+                    (String::compareVersions(DELETE_CFG_BEFORE_VERSION, config_version) == -1);
             else
-                config_and_data_deletion_wanted_ = // check if cfg version is new so it needs deleting
-                        (String::compareVersions(VERSION, config_version) == 1);
+                config_and_data_deletion_wanted_ =  // check if cfg version is new so it needs
+                                                    // deleting
+                    (String::compareVersions(VERSION, config_version) == 1);
         }
         else
-            cout << "ATSDBClient: same configuration version '" << config_version << "' found" << endl;
+            cout << "ATSDBClient: same configuration version '" << config_version << "' found"
+                 << endl;
     }
 }
 
-void Client::performNeededActions ()
+void Client::performNeededActions()
 {
-    if (!config_and_data_exists_) // simple copy of nothing exists
+    if (!config_and_data_exists_)  // simple copy of nothing exists
     {
         cout << "ATSDBClient: no previous installation, copying new information and data" << endl;
 
@@ -279,20 +278,20 @@ void Client::performNeededActions ()
 
     if (upgrade_needed_ || config_and_data_reset_wanted_)
     {
-        if (config_and_data_deletion_wanted_) // version so old it should be deleted before
+        if (config_and_data_deletion_wanted_)  // version so old it should be deleted before
         {
             QMessageBox::StandardButton reply;
             reply = QMessageBox::question(
-                        nullptr, "Delete Previous Configuration & Data",
-                        "Deletion of the existing configuration and data is required. This will delete"
-                        " the folders ~/.atsdb/conf and ~/.atsdb/data. Do you want to continue?",
-                        QMessageBox::Yes|QMessageBox::No);
+                nullptr, "Delete Previous Configuration & Data",
+                "Deletion of the existing configuration and data is required. This will delete"
+                " the folders ~/.atsdb/conf and ~/.atsdb/data. Do you want to continue?",
+                QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes)
             {
                 cout << "ATSDBClient: config & data delete confirmed" << endl;
 
-                deleteConfigurationAndData ();
+                deleteConfigurationAndData();
                 copyConfigurationAndData();
                 return;
             }
@@ -307,9 +306,9 @@ void Client::performNeededActions ()
         // simple upgrade
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
-                    nullptr, "Upgrade Configuration & Data",
-                    "A configuration & data updade is required, do you want to update now?",
-                    QMessageBox::Yes|QMessageBox::No);
+            nullptr, "Upgrade Configuration & Data",
+            "A configuration & data updade is required, do you want to update now?",
+            QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes)
         {
@@ -325,47 +324,50 @@ void Client::performNeededActions ()
     }
 }
 
-void Client::deleteConfigurationAndData ()
+void Client::deleteConfigurationAndData()
 {
     if (!Files::directoryExists(HOME_CONF_DIRECTORY))
-        throw runtime_error ("ATSDBClient: unable to delete conf files at '"+HOME_CONF_DIRECTORY+"'");
+        throw runtime_error("ATSDBClient: unable to delete conf files at '" + HOME_CONF_DIRECTORY +
+                            "'");
 
     if (!Files::directoryExists(HOME_DATA_DIRECTORY))
-        throw runtime_error ("ATSDBClient: unable to delete data files at '"+HOME_DATA_DIRECTORY+"'");
+        throw runtime_error("ATSDBClient: unable to delete data files at '" + HOME_DATA_DIRECTORY +
+                            "'");
 
-    Files::deleteFolder (HOME_CONF_DIRECTORY);
-    Files::deleteFolder (HOME_DATA_DIRECTORY);
+    Files::deleteFolder(HOME_CONF_DIRECTORY);
+    Files::deleteFolder(HOME_DATA_DIRECTORY);
 
-    assert (!Files::directoryExists(HOME_CONF_DIRECTORY));
-    assert (!Files::directoryExists(HOME_DATA_DIRECTORY));
+    assert(!Files::directoryExists(HOME_CONF_DIRECTORY));
+    assert(!Files::directoryExists(HOME_DATA_DIRECTORY));
 }
 
-void Client::copyConfigurationAndData ()
+void Client::copyConfigurationAndData()
 {
     if (!Files::directoryExists(system_install_path_))
-        throw runtime_error ("ATSDBClient: unable to locate system installation files at '"+system_install_path_+"'");
+        throw runtime_error("ATSDBClient: unable to locate system installation files at '" +
+                            system_install_path_ + "'");
 
     cout << "ATSDBClient: copying files from system installation from '" << system_install_path_
-         << "' to '" << HOME_SUBDIRECTORY <<  "' ... ";
+         << "' to '" << HOME_SUBDIRECTORY << "' ... ";
 
     if (!Files::copyRecursively(system_install_path_, HOME_SUBDIRECTORY))
-        throw runtime_error ("ATSDBClient: copying files from system installation from '" + system_install_path_
-                             +"' to '"+HOME_SUBDIRECTORY+" failed");
+        throw runtime_error("ATSDBClient: copying files from system installation from '" +
+                            system_install_path_ + "' to '" + HOME_SUBDIRECTORY + " failed");
 
     cout << " done" << endl;
 }
 
-void Client::copyConfiguration ()
+void Client::copyConfiguration()
 {
-    string system_conf_path = system_install_path_+"conf/";
-    string home_conf_path = HOME_SUBDIRECTORY+"conf/";
+    string system_conf_path = system_install_path_ + "conf/";
+    string home_conf_path = HOME_SUBDIRECTORY + "conf/";
 
-    cout << "ATSDBClient: reset config from from '" << system_conf_path
-         << "' to '" << home_conf_path <<  "' ... ";
+    cout << "ATSDBClient: reset config from from '" << system_conf_path << "' to '"
+         << home_conf_path << "' ... ";
 
     if (!Files::copyRecursively(system_conf_path, home_conf_path))
-        throw runtime_error ("ATSDBClient: reset config from from '" + system_conf_path
-                             +"' to '" + home_conf_path + "' failed");
+        throw runtime_error("ATSDBClient: reset config from from '" + system_conf_path + "' to '" +
+                            home_conf_path + "' failed");
 
     cout << " done" << endl;
 }

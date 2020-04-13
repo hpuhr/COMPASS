@@ -25,13 +25,13 @@ class JSONDataMapping;
 class JSONDataMappingWidget : public QWidget
 {
     Q_OBJECT
-public:
-    explicit JSONDataMappingWidget(JSONDataMapping& mapping, QWidget *parent = nullptr);
+  public:
+    explicit JSONDataMappingWidget(JSONDataMapping& mapping, QWidget* parent = nullptr);
 
-    void setMapping (JSONDataMapping& mapping);
+    void setMapping(JSONDataMapping& mapping);
 
-private:
-    JSONDataMapping* mapping_ {nullptr};
+  private:
+    JSONDataMapping* mapping_{nullptr};
 };
 
-#endif // JSONDATAMAPPINGWIDGET_H
+#endif  // JSONDATAMAPPINGWIDGET_H

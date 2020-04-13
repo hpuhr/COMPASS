@@ -18,25 +18,24 @@
 #ifndef NUMBER_H_
 #define NUMBER_H_
 
-#include "nullablevector.h"
-
 #include <string>
+
+#include "nullablevector.h"
 
 namespace Utils
 {
-
 namespace Number
 {
 /// @brief Returns random number between min and max
-extern float randomNumber (float min, float max);
+extern float randomNumber(float min, float max);
 /// @brief Returns rounded number to nearest integer
 extern float roundToNearest(float num);
 /// @brief Returns angle (degrees) calculated from given values
-extern double calculateAngle( double degrees, double minutes, double seconds );
+extern double calculateAngle(double degrees, double minutes, double seconds);
 
-extern void convert (const std::string& conversion_type, NullableVector<unsigned int> &array_list);
-}
+extern void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list);
+}  // namespace Number
 
-}
+}  // namespace Utils
 
 #endif /* NUMBER_H_ */

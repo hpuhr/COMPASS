@@ -20,15 +20,14 @@
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 {
-    bool tmp_factor = static_cast<bool> (factor);
+    bool tmp_factor = static_cast<bool>(factor);
 
-//    for (auto data_it : data_)
-//        data_it = data_it && tmp_factor;
+    //    for (auto data_it : data_)
+    //        data_it = data_it && tmp_factor;
 
     unsigned int data_size = data_.size();
 
-    tbb::parallel_for( uint(0), data_size, [&] (unsigned int cnt)
-    {
+    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
         if (!isNull(cnt))
         {
             data_.at(cnt) = data_.at(cnt) && tmp_factor;
@@ -39,63 +38,64 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 }
 
 template <>
-void NullableVector<bool>::append (unsigned int index, bool value)
+void NullableVector<bool>::append(unsigned int index, bool value)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
+           << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert (data_.size() <= buffer_.data_size_);
-        assert (null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.data_size_);
+        assert(null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    if (index >= data_.size())  // allocate new stuff, fill all new with not null
     {
-        if (index != data_.size()) // some where left out
-            resizeNullTo(index+1);
+        if (index != data_.size())  // some where left out
+            resizeNullTo(index + 1);
 
-        resizeDataTo (index+1);
+        resizeDataTo(index + 1);
     }
 
     if (BUFFER_PEDANTIC_CHECKING)
-        assert (index < data_.size());
+        assert(index < data_.size());
 
     data_.at(index) = data_.at(index) || value;
 
     unsetNull(index);
 
-    //logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+    // logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
 }
 
 template <>
-void NullableVector<std::string>::append (unsigned int index, std::string value)
+void NullableVector<std::string>::append(unsigned int index, std::string value)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
+           << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert (data_.size() <= buffer_.data_size_);
-        assert (null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.data_size_);
+        assert(null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    if (index >= data_.size())  // allocate new stuff, fill all new with not null
     {
-        if (index != data_.size()) // some where left out
-            resizeNullTo(index+1);
+        if (index != data_.size())  // some where left out
+            resizeNullTo(index + 1);
 
-        resizeDataTo (index+1);
+        resizeDataTo(index + 1);
     }
 
     if (BUFFER_PEDANTIC_CHECKING)
-        assert (index < data_.size());
+        assert(index < data_.size());
 
     if (data_.at(index).size())
-        data_.at(index) += ";"+value;
+        data_.at(index) += ";" + value;
     else
         data_.at(index) = value;
 
     unsetNull(index);
 
-    //logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+    // logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
 }
-

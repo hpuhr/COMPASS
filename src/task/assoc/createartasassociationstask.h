@@ -18,17 +18,15 @@
 #ifndef CREATEARTASASSOCIATIONSTASK_H
 #define CREATEARTASASSOCIATIONSTASK_H
 
+#include <QObject>
+#include <memory>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "configurable.h"
 #include "createartasassociationsjob.h"
 #include "createartasassociationsstatusdialog.h"
 #include "dbovariableset.h"
 #include "task.h"
-
-#include <QObject>
-
-#include <memory>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
@@ -41,32 +39,32 @@ class CreateARTASAssociationsTask : public Task, public Configurable
 {
     Q_OBJECT
 
-public slots:
-    void createDoneSlot ();
-    void createObsoleteSlot ();
+  public slots:
+    void createDoneSlot();
+    void createObsoleteSlot();
 
-    void newDataSlot (DBObject& object);
-    void loadingDoneSlot (DBObject& object);
+    void newDataSlot(DBObject& object);
+    void loadingDoneSlot(DBObject& object);
 
-    void associationStatusSlot (QString status);
-    void saveAssociationsQuestionSlot (QString question_str);
+    void associationStatusSlot(QString status);
+    void saveAssociationsQuestionSlot(QString question_str);
 
     void closeStatusDialogSlot();
 
-public:
+  public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
 
     TaskWidget* widget();
-    virtual void deleteWidget ();
+    virtual void deleteWidget();
 
     std::string currentDataSourceName() const;
-    void currentDataSourceName(const std::string &currentDataSourceName);
+    void currentDataSourceName(const std::string& currentDataSourceName);
 
     std::string trackerDsIdVarStr() const;
     void trackerDsIdVarStr(const std::string& var_str);
-    DBOVariable *trackerDsIdVar() const;
+    DBOVariable* trackerDsIdVar() const;
 
     std::string trackerTrackNumVarStr() const;
     void trackerTrackNumVarStr(const std::string& var_str);
@@ -81,13 +79,13 @@ public:
     void trackerTrackCoastingVarStr(const std::string& var_str);
 
     std::string keyVarStr() const;
-    void keyVarStr(const std::string &keyVarStr);
+    void keyVarStr(const std::string& keyVarStr);
 
     std::string hashVarStr() const;
-    void hashVarStr(const std::string &hashVarStr);
+    void hashVarStr(const std::string& hashVarStr);
 
     std::string todVarStr() const;
-    void todVarStr(const std::string &todVarStr);
+    void todVarStr(const std::string& todVarStr);
 
     MetaDBOVariable* keyVar() const;
 
@@ -128,82 +126,85 @@ public:
     bool markTrackCoastingAssociationsDubious() const;
     void markTrackCoastingAssociationsDubious(bool value);
 
-    virtual bool checkPrerequisites ();
-    virtual bool isRecommended ();
-    virtual bool isRequired ()  { return false; }
+    virtual bool checkPrerequisites();
+    virtual bool isRecommended();
+    virtual bool isRequired() { return false; }
 
-    bool canRun ();
-    void run ();
+    bool canRun();
+    void run();
 
     static const std::string DONE_PROPERTY_NAME;
 
-protected:
+  protected:
     std::string current_data_source_name_;
 
     std::string tracker_ds_id_var_str_;
-    DBOVariable* tracker_ds_id_var_ {nullptr};
+    DBOVariable* tracker_ds_id_var_{nullptr};
 
     std::string tracker_track_num_var_str_;
-    DBOVariable* tracker_track_num_var_ {nullptr};
+    DBOVariable* tracker_track_num_var_{nullptr};
 
     std::string tracker_track_begin_var_str_;
-    DBOVariable* tracker_track_begin_var_ {nullptr};
+    DBOVariable* tracker_track_begin_var_{nullptr};
 
     std::string tracker_track_end_var_str_;
-    DBOVariable* tracker_track_end_var_ {nullptr};
+    DBOVariable* tracker_track_end_var_{nullptr};
 
     std::string tracker_track_coasting_var_str_;
-    DBOVariable* tracker_track_coasting_var_ {nullptr};
+    DBOVariable* tracker_track_coasting_var_{nullptr};
 
     std::string key_var_str_;
-    MetaDBOVariable* key_var_ {nullptr};
+    MetaDBOVariable* key_var_{nullptr};
 
     // contains artas md5 for target reports, tris for tracker
     std::string hash_var_str_;
-    MetaDBOVariable* hash_var_ {nullptr};
+    MetaDBOVariable* hash_var_{nullptr};
 
     std::string tod_var_str_;
-    MetaDBOVariable* tod_var_ {nullptr};
+    MetaDBOVariable* tod_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    float end_track_time_ {0}; // time-delta after which begin a new track
+    float end_track_time_{0};  // time-delta after which begin a new track
 
-    float association_time_past_ {0}; // time_delta for which associations are considered into past time
-    float association_time_future_ {0}; // time_delta for which associations are considered into future time
+    float association_time_past_{
+        0};  // time_delta for which associations are considered into past time
+    float association_time_future_{
+        0};  // time_delta for which associations are considered into future time
 
-    float misses_acceptable_time_ {0}; // time delta at beginning/end of recording where misses are acceptable
+    float misses_acceptable_time_{
+        0};  // time delta at beginning/end of recording where misses are acceptable
 
-    float associations_dubious_distant_time_ {0};
+    float associations_dubious_distant_time_{0};
     // time delta of tou where association is dubious bc too distant in time
-    float association_dubious_close_time_past_ {0};
+    float association_dubious_close_time_past_{0};
     // time delta of tou where association is dubious when multible hashes exist
-    float association_dubious_close_time_future_ {0};
+    float association_dubious_close_time_future_{0};
     // time delta of tou where association is dubious when multible hashes exist
 
-    bool ignore_track_end_associations_ {false};
-    bool mark_track_end_associations_dubious_ {false};
+    bool ignore_track_end_associations_{false};
+    bool mark_track_end_associations_dubious_{false};
 
-    bool ignore_track_coasting_associations_ {false};
-    bool mark_track_coasting_associations_dubious_ {false};
+    bool ignore_track_coasting_associations_{false};
+    bool mark_track_coasting_associations_dubious_{false};
 
     std::unique_ptr<CreateARTASAssociationsTaskWidget> widget_;
 
-    bool save_associations_ {true};
+    bool save_associations_{true};
 
-    std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_ {nullptr};
+    std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_{nullptr};
 
     std::map<std::string, bool> dbo_loading_done_flags_;
-    bool dbo_loading_done_ {false};
+    bool dbo_loading_done_{false};
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
-    bool create_job_done_ {false};
+    bool create_job_done_{false};
 
-    void checkAndSetVariable (std::string &name_str, DBOVariable** var);
-    void checkAndSetMetaVariable (std::string &name_str, MetaDBOVariable** var);
+    void checkAndSetVariable(std::string& name_str, DBOVariable** var);
+    void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
 
-    DBOVariableSet getReadSetFor (const std::string& dbo_name);
+    DBOVariableSet getReadSetFor(const std::string& dbo_name);
 };
 
-#endif // CREATEARTASASSOCIATIONSTASK_H
+#endif  // CREATEARTASASSOCIATIONSTASK_H

@@ -20,12 +20,11 @@
 
 #include <QObject>
 
+#include "buffer.h"
+#include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
-#include "configurable.h"
-#include "buffer.h"
 #include "viewselection.h"
-
 
 class Job;
 
@@ -39,42 +38,48 @@ class Job;
 class ListBoxViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
-public slots:
-    void loadingStartedSlot ();
-    void newDataSlot (DBObject& object);
-    void loadingDoneSlot (DBObject& object);
+  public slots:
+    void loadingStartedSlot();
+    void newDataSlot(DBObject& object);
+    void loadingDoneSlot(DBObject& object);
 
-signals:
-    void loadingStartedSignal ();
+  signals:
+    void loadingStartedSignal();
     /// @brief Emitted when resulting buffer was delivered
-    void updateDataSignal (DBObject& object, std::shared_ptr<Buffer> buffer);
+    void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
 
-public:
+  public:
     /// @brief Constructor
-    ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id, Configurable* parent);
+    ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id,
+                          Configurable* parent);
     /// @brief Destructor
     virtual ~ListBoxViewDataSource();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet () { assert (set_); return set_; }
+    DBOVariableOrderedSet* getSet()
+    {
+        assert(set_);
+        return set_;
+    }
     /// @brief Returns stored result Buffers
-    //std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
+    // std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
 
     /// @brief Sets use selection flag
-    //void setUseSelection (bool use_selection) { use_selection_=use_selection; }
+    // void setUseSelection (bool use_selection) { use_selection_=use_selection; }
     /// @brief Returns use selection flag
-    //bool getUseSelection () { return use_selection_; }
+    // bool getUseSelection () { return use_selection_; }
 
-protected:
+  protected:
     /// Variable read list
-    DBOVariableOrderedSet* set_ {nullptr};
+    DBOVariableOrderedSet* set_{nullptr};
 
     /// Selected DBObject records
     ViewSelectionEntries& selection_entries_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

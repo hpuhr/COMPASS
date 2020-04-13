@@ -18,8 +18,8 @@
 #ifndef UNITSELECTIONWIDGET_H_
 #define UNITSELECTIONWIDGET_H_
 
-#include <QPushButton>
 #include <QMenu>
+#include <QPushButton>
 
 /**
  * @brief Sets a Unit using a context menu
@@ -28,27 +28,26 @@ class UnitSelectionWidget : public QPushButton
 {
     Q_OBJECT
 
-
-protected slots:
+  protected slots:
     /// @brief Called when menu action is executed
-    void triggerSlot( QAction* action );
+    void triggerSlot(QAction* action);
     /// @brief Shows the context menu
     void showMenuSlot();
 
-public:
+  public:
     /// @brief Constructor TODO HACK references directly used
-    UnitSelectionWidget (std::string &dimension, std::string &unit);
+    UnitSelectionWidget(std::string& dimension, std::string& unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
-    void update (std::string &dimension, std::string &unit);
+    void update(std::string& dimension, std::string& unit);
 
-protected:
+  protected:
     /// Unit dimension reference
-    std::string &dimension_;
+    std::string& dimension_;
 
     /// Unit unit reference
-    std::string &unit_;
+    std::string& unit_;
 
     /// Context menu
     QMenu menu_;

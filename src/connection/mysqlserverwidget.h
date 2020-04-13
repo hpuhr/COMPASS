@@ -30,57 +30,55 @@ class MySQLServerWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
-    void updateHostSlot (const QString& value);
-    void updateUserSlot (const QString& value);
-    void updatePasswordSlot (const QString& value);
-    void updatePortSlot (const QString& value);
-    void connectSlot ();
+  public slots:
+    void updateHostSlot(const QString& value);
+    void updateUserSlot(const QString& value);
+    void updatePasswordSlot(const QString& value);
+    void updatePortSlot(const QString& value);
+    void connectSlot();
 
-    void updateDatabaseSlot (const QString& value);
+    void updateDatabaseSlot(const QString& value);
 
-    void newDatabaseSlot ();
-    void clearDatabaseSlot ();
-    void deleteDatabaseSlot ();
-    void openDatabaseSlot ();
+    void newDatabaseSlot();
+    void clearDatabaseSlot();
+    void deleteDatabaseSlot();
+    void openDatabaseSlot();
 
-signals:
-    void serverConnectedSignal ();
-    void databaseOpenedSignal ();
+  signals:
+    void serverConnectedSignal();
+    void databaseOpenedSignal();
 
-public:
-    explicit MySQLServerWidget(MySQLppConnection& connection, MySQLServer& server, QWidget* parent = 0);
-    virtual ~MySQLServerWidget ();
+  public:
+    explicit MySQLServerWidget(MySQLppConnection& connection, MySQLServer& server,
+                               QWidget* parent = 0);
+    virtual ~MySQLServerWidget();
 
-protected:
+  protected:
     MySQLppConnection& connection_;
     MySQLServer& server_;
 
     /// MySQL ip address edit field
-    QLineEdit* host_edit_ {nullptr};
+    QLineEdit* host_edit_{nullptr};
     /// MySQL username edit field
-    QLineEdit* user_edit_ {nullptr};
+    QLineEdit* user_edit_{nullptr};
     /// MySQL password edit field
-    QLineEdit* password_edit_ {nullptr};
+    QLineEdit* password_edit_{nullptr};
     /// MySQL port edit field
-    QLineEdit* port_edit_ {nullptr};
+    QLineEdit* port_edit_{nullptr};
 
     /// Open connection button
-    QPushButton *connect_button_;
+    QPushButton* connect_button_;
 
     /// MySQL database name edit field
-    QComboBox *db_name_box_ {nullptr};
+    QComboBox* db_name_box_{nullptr};
 
+    QPushButton* new_button_{nullptr};
+    QPushButton* clear_button_{nullptr};
+    QPushButton* delete_button_{nullptr};
 
-    QPushButton* new_button_ {nullptr};
-    QPushButton* clear_button_ {nullptr};
-    QPushButton* delete_button_ {nullptr};
+    QPushButton* open_button_{nullptr};
 
-    QPushButton* open_button_ {nullptr};
-
-    void updateDatabases ();
+    void updateDatabases();
 };
 
-
-#endif // MYSQLSERVERWIDGET_H
-
+#endif  // MYSQLSERVERWIDGET_H

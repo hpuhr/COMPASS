@@ -16,31 +16,32 @@
  */
 
 #include "dboeditdatasourceactionoptions.h"
+
+#include "atsdb.h"
 #include "dbobject.h"
 #include "dbodatasource.h"
-#include "storeddbodatasource.h"
 #include "dboeditdatasourceactionoptionswidget.h"
-#include "atsdb.h"
-#include "taskmanager.h"
 #include "managedatasourcestask.h"
+#include "storeddbodatasource.h"
+#include "taskmanager.h"
 
-DBOEditDataSourceActionOptions::DBOEditDataSourceActionOptions(DBObject& object, const std::string& source_type,
+DBOEditDataSourceActionOptions::DBOEditDataSourceActionOptions(DBObject& object,
+                                                               const std::string& source_type,
                                                                const std::string& source_id)
     : object_(&object), source_type_(source_type), source_id_(source_id)
 {
-    addPossibleAction ("None", "", "");
+    addPossibleAction("None", "", "");
 }
 
-void DBOEditDataSourceActionOptions::addPossibleAction (const std::string& action, const std::string& target_type,
-                                                        const std::string& target_id)
+void DBOEditDataSourceActionOptions::addPossibleAction(const std::string& action,
+                                                       const std::string& target_type,
+                                                       const std::string& target_id)
 {
-    possible_actions_[possible_actions_.size()] = DBOEditDataSourceAction(action, target_type, target_id);
+    possible_actions_[possible_actions_.size()] =
+        DBOEditDataSourceAction(action, target_type, target_id);
 }
 
-bool DBOEditDataSourceActionOptions::performFlag() const
-{
-    return perform_;
-}
+bool DBOEditDataSourceActionOptions::performFlag() const { return perform_; }
 
 void DBOEditDataSourceActionOptions::performFlag(bool perform_flag)
 {
@@ -50,30 +51,21 @@ void DBOEditDataSourceActionOptions::performFlag(bool perform_flag)
         widget_->update();
 }
 
-std::string DBOEditDataSourceActionOptions::sourceType() const
-{
-    return source_type_;
-}
+std::string DBOEditDataSourceActionOptions::sourceType() const { return source_type_; }
 
-void DBOEditDataSourceActionOptions::sourceType(const std::string &source_type)
+void DBOEditDataSourceActionOptions::sourceType(const std::string& source_type)
 {
     source_type_ = source_type;
 }
 
-std::string DBOEditDataSourceActionOptions::sourceId() const
-{
-    return source_id_;
-}
+std::string DBOEditDataSourceActionOptions::sourceId() const { return source_id_; }
 
-void DBOEditDataSourceActionOptions::sourceId(const std::string &source_id)
+void DBOEditDataSourceActionOptions::sourceId(const std::string& source_id)
 {
     source_id_ = source_id;
 }
 
-unsigned int DBOEditDataSourceActionOptions::currentActionId() const
-{
-    return current_action_id_;
-}
+unsigned int DBOEditDataSourceActionOptions::currentActionId() const { return current_action_id_; }
 
 void DBOEditDataSourceActionOptions::currentActionId(unsigned int current_action_id)
 {
@@ -85,7 +77,7 @@ DBOEditDataSourceAction& DBOEditDataSourceActionOptions::currentAction()
     return possible_actions_.at(current_action_id_);
 }
 
-DBOEditDataSourceActionOptionsWidget* DBOEditDataSourceActionOptions::widget ()
+DBOEditDataSourceActionOptionsWidget* DBOEditDataSourceActionOptions::widget()
 {
     if (!widget_)
     {
@@ -94,31 +86,31 @@ DBOEditDataSourceActionOptionsWidget* DBOEditDataSourceActionOptions::widget ()
     return widget_.get();
 }
 
-void DBOEditDataSourceActionOptions::perform ()
+void DBOEditDataSourceActionOptions::perform()
 {
-    assert (object_);
-    assert (perform_);
+    assert(object_);
+    assert(perform_);
 
     DBOEditDataSourceAction& selected_action = possible_actions_.at(current_action_id_);
 
-    loginf << "DBOEditDataSourceActionOptions: perform: obj " << object_->name() << " src " << source_type_
-           << " src_id " << source_id_ << " action " << selected_action.getActionString();
+    loginf << "DBOEditDataSourceActionOptions: perform: obj " << object_->name() << " src "
+           << source_type_ << " src_id " << source_id_ << " action "
+           << selected_action.getActionString();
 
     selected_action.perform(*object_, source_type_, source_id_);
 }
 
 namespace DBOEditDataSourceActionOptionsCreator
 {
-
-DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBODataSource& source)
+DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBODataSource& source)
 {
-    DBOEditDataSourceActionOptions options {object, "DB", std::to_string(source.id())};
+    DBOEditDataSourceActionOptions options{object, "DB", std::to_string(source.id())};
     options.addPossibleAction("Add", "Config", "New");
 
     bool found_equivalent = false;
 
     const std::map<unsigned int, StoredDBODataSource>& stored_data_sources =
-            ATSDB::instance().taskManager().manageDataSourcesTask().storedDataSources(object.name());
+        ATSDB::instance().taskManager().manageDataSourcesTask().storedDataSources(object.name());
 
     for (auto& ds_it : stored_data_sources)
     {
@@ -131,7 +123,7 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBO
         }
     }
 
-    assert (options.numOptions() > 0);
+    assert(options.numOptions() > 0);
 
     if (found_equivalent)
     {
@@ -140,32 +132,34 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBO
     }
     else
     {
-        options.currentActionId(options.numOptions()-1);
+        options.currentActionId(options.numOptions() - 1);
         options.performFlag(true);
     }
 
     return options;
 }
 
-DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, const StoredDBODataSource& source)
+DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBObject& object,
+                                                     const StoredDBODataSource& source)
 {
-    DBOEditDataSourceActionOptions options {object, "Config", std::to_string(source.id())};
-    //options.addPossibleAction("Add", "DB", "New");
+    DBOEditDataSourceActionOptions options{object, "Config", std::to_string(source.id())};
+    // options.addPossibleAction("Add", "DB", "New");
 
     for (auto stored_it = object.dsBegin(); stored_it != object.dsEnd(); ++stored_it)
     {
         if (stored_it->second.sac() == source.sac() && stored_it->second.sic() == source.sic())
         {
             if (stored_it->second != source)
-                options.addPossibleAction("Overwrite", "DB", std::to_string(stored_it->second.id()));
+                options.addPossibleAction("Overwrite", "DB",
+                                          std::to_string(stored_it->second.id()));
         }
     }
 
-    assert (options.numOptions() > 0);
-    options.currentActionId(options.numOptions()-1);
+    assert(options.numOptions() > 0);
+    options.currentActionId(options.numOptions() - 1);
     options.performFlag(options.currentActionId() != 0);
 
     return options;
 }
 
-}
+}  // namespace DBOEditDataSourceActionOptionsCreator

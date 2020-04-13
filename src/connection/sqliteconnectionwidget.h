@@ -13,33 +13,33 @@ class SQLiteConnectionWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
-    void databaseOpenedSignal ();
+  signals:
+    void databaseOpenedSignal();
 
-public slots:
-    void newFileSlot ();
-    void addFileSlot ();
-    void deleteFileSlot ();
-    void openFileSlot ();
+  public slots:
+    void newFileSlot();
+    void addFileSlot();
+    void deleteFileSlot();
+    void openFileSlot();
 
-    void updateFileListSlot ();
+    void updateFileListSlot();
 
-public:
-    explicit SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent=0);
+  public:
+    explicit SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent = 0);
     virtual ~SQLiteConnectionWidget();
 
-    void addFile (const std::string& filename);
+    void addFile(const std::string& filename);
 
-protected:
+  protected:
     SQLiteConnection& connection_;
 
-    QListWidget* file_list_ {nullptr};
+    QListWidget* file_list_{nullptr};
 
-    QPushButton* new_button_ {nullptr};
-    QPushButton* add_button_ {nullptr};
-    QPushButton* delete_button_ {nullptr};
+    QPushButton* new_button_{nullptr};
+    QPushButton* add_button_{nullptr};
+    QPushButton* delete_button_{nullptr};
 
-    QPushButton* open_button_ {nullptr};
+    QPushButton* open_button_{nullptr};
 };
 
-#endif // SQLiteCONNECTIONWIDGET_H
+#endif  // SQLiteCONNECTIONWIDGET_H

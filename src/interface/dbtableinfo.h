@@ -22,9 +22,12 @@
 
 class DBTableColumnInfo
 {
-public:
-    DBTableColumnInfo (const std::string &name, const std::string &type, bool key, bool null_allowed, const std::string &comment)
-        : name_(name), type_(type), null_allowed_(null_allowed), key_(key), comment_(comment)  {}
+  public:
+    DBTableColumnInfo(const std::string& name, const std::string& type, bool key, bool null_allowed,
+                      const std::string& comment)
+        : name_(name), type_(type), null_allowed_(null_allowed), key_(key), comment_(comment)
+    {
+    }
     virtual ~DBTableColumnInfo() {}
 
     std::string name() const { return name_; }
@@ -37,7 +40,7 @@ public:
 
     std::string comment() const { return comment_; }
 
-protected:
+  protected:
     std::string name_;
     std::string type_;
     bool null_allowed_;
@@ -47,26 +50,27 @@ protected:
 
 class DBTableInfo
 {
-public:
-    DBTableInfo (const std::string name) : name_(name) {}
+  public:
+    DBTableInfo(const std::string name) : name_(name) {}
     virtual ~DBTableInfo() {}
 
-    bool hasColumn (const std::string &name) const { return columns_.count(name) > 0; }
-    const DBTableColumnInfo &column (const std::string &name) const { return columns_.at(name); }
-    void addColumn (const std::string &name, const std::string &type, bool key, bool null_allowed,
-                    const std::string &comment)
-        {  columns_.insert(std::pair<std::string, DBTableColumnInfo> (
-                               name , DBTableColumnInfo (name, type, key, null_allowed, comment)));  }
+    bool hasColumn(const std::string& name) const { return columns_.count(name) > 0; }
+    const DBTableColumnInfo& column(const std::string& name) const { return columns_.at(name); }
+    void addColumn(const std::string& name, const std::string& type, bool key, bool null_allowed,
+                   const std::string& comment)
+    {
+        columns_.insert(std::pair<std::string, DBTableColumnInfo>(
+            name, DBTableColumnInfo(name, type, key, null_allowed, comment)));
+    }
 
     unsigned int size() { return columns_.size(); }
 
-    const std::map <std::string, DBTableColumnInfo> &columns () const { return columns_; }
+    const std::map<std::string, DBTableColumnInfo>& columns() const { return columns_; }
 
-protected:
+  protected:
     std::string name_;
 
-    std::map <std::string, DBTableColumnInfo> columns_;
+    std::map<std::string, DBTableColumnInfo> columns_;
 };
 
 #endif
-

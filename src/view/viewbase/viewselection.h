@@ -18,8 +18,8 @@
 #ifndef VIEWSELECTION_H
 #define VIEWSELECTION_H
 
-#include <vector>
 #include <set>
+#include <vector>
 //#include <OGRE/Ogre.h>
 #include <QObject>
 
@@ -32,8 +32,7 @@ source id and a key. The source id is actually just a DB_OBJECT_TYPE,
 for non-database entries this can be set to DBO_UNDEFINED. They key can
 be a database key or a DisplayObject id.
   */
-typedef std::pair<unsigned char,unsigned int> ViewSelectionId;
-
+typedef std::pair<unsigned char, unsigned int> ViewSelectionId;
 
 /**
 @brief Represents a unique entry in the view selection.
@@ -44,32 +43,35 @@ It is also possible to directly store a pointer to a display object in the entry
   */
 class ViewSelectionEntry
 {
-public:
+  public:
     /// Type of the entry
-    enum ViewSelectionEntryType { TYPE_UNDEFINED      = 0,
-                                  TYPE_BILLBOARD      = 1<<1,
-                                  TYPE_DISPLAY_OBJECT = 1<<2 };
+    enum ViewSelectionEntryType
+    {
+        TYPE_UNDEFINED = 0,
+        TYPE_BILLBOARD = 1 << 1,
+        TYPE_DISPLAY_OBJECT = 1 << 2
+    };
 
     ViewSelectionEntry();
-    ViewSelectionEntry( const ViewSelectionId& id, unsigned char type );
-    ViewSelectionEntry( const ViewSelectionEntry& cpy );
+    ViewSelectionEntry(const ViewSelectionId& id, unsigned char type);
+    ViewSelectionEntry(const ViewSelectionEntry& cpy);
     ~ViewSelectionEntry();
 
-    void set( const ViewSelectionId& id, unsigned char type );
+    void set(const ViewSelectionId& id, unsigned char type);
 
     bool isBillboard() const;
     bool isDisplayObject() const;
     bool isDBO() const;
     bool isGeneric() const;
 
-    bool operator<( const ViewSelectionEntry& rhs ) const;
+    bool operator<(const ViewSelectionEntry& rhs) const;
 
     /// Identifier of the entry, relates the entry to the database
     ViewSelectionId id_;
     /// Entry type
     unsigned char type_;
     /// DisplayObject assigned to the entry, not used at the moment
-    //DisplayObject* dobj_; // TODO what?
+    // DisplayObject* dobj_; // TODO what?
 };
 
 /// A vector of selection entries.
@@ -87,7 +89,8 @@ The selection process works as follows.
 - A ViewWidget generates a new selection (e.g. scene queries in OgreViewWidget).
 - It clears the selection, which sends an unselect event to all views.
 - The view models use the old selection to unselect the currently selected items.
-- A ViewModel may change/convert/cancel the new selection and then send it to the selection (or not).
+- A ViewModel may change/convert/cancel the new selection and then send it to the selection (or
+not).
 - The selection sends a select event to all views.
 - The view models use the new selection entries to select the items.
 
@@ -97,7 +100,7 @@ for a view specific selection.
 class ViewSelection : public QObject, public Singleton
 {
     Q_OBJECT
-public:
+  public:
     virtual ~ViewSelection();
 
     /// @brief Returns the instance to the singleton.
@@ -109,31 +112,32 @@ public:
 
     const ViewSelectionEntries& getEntries() const;
     ViewSelectionEntries& getEntries();
-    ViewSelectionEntry& getEntry( unsigned int idx );
-    bool hasEntry( const ViewSelectionId& id ) const;
+    ViewSelectionEntry& getEntry(unsigned int idx);
+    bool hasEntry(const ViewSelectionId& id) const;
 
     /// Global selection color
-    //static Ogre::ColourValue selection_col_;
+    // static Ogre::ColourValue selection_col_;
     /// Global selection alpha (unused)
     static float selection_alpha_;
 
-signals:
+  signals:
     /// @brief Sends a signal to update views on a selection change.
-    void selectionChanged( bool selected );
+    void selectionChanged(bool selected);
     /// @brief Sends a signal that the selection has updated.
     void selectionUpdated();
-    /// @brief Sends a follow signal, to synchronize iteration over the selection in more than one view.
-    void follow( unsigned int idx );
+    /// @brief Sends a follow signal, to synchronize iteration over the selection in more than one
+    /// view.
+    void follow(unsigned int idx);
 
-public slots:
-    void setSelection( const ViewSelectionEntries& entries );
-    void addSelection( const ViewSelectionEntries& entries );
+  public slots:
+    void setSelection(const ViewSelectionEntries& entries);
+    void addSelection(const ViewSelectionEntries& entries);
     void clearSelection();
 
-protected:
+  protected:
     ViewSelection();
 
-private:
+  private:
     /// Stored selection entries
     ViewSelectionEntries entries_;
     /// All stored entry id's
@@ -156,7 +160,7 @@ to currentItemChanged().
 class ViewSelectionItemContainer : public QObject
 {
     Q_OBJECT
-public:
+  public:
     ViewSelectionItemContainer();
     virtual ~ViewSelectionItemContainer();
 
@@ -167,23 +171,24 @@ public:
     void previousItem();
     ViewSelectionEntry* currentItem();
 
-    void enableFollowMode( bool enable );
+    void enableFollowMode(bool enable);
 
-protected slots:
+  protected slots:
     void selectionUpdated();
-    void followSlot( unsigned int idx );
+    void followSlot(unsigned int idx);
 
-signals:
+  signals:
     /// @brief Signals that the current item has changed.
     void currentItemChanged();
-    /// @brief Snychronizes the selection of the given item in all other instances with active follow mode.
-    void follow( unsigned int idx );
+    /// @brief Snychronizes the selection of the given item in all other instances with active
+    /// follow mode.
+    void follow(unsigned int idx);
 
-private:
+  private:
     /// Current entry index
     unsigned int idx_;
     /// Follow mode flag
     bool follow_;
 };
 
-#endif //VIEWSELECTION_H
+#endif  // VIEWSELECTION_H

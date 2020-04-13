@@ -19,6 +19,7 @@
 #define UpdateBufferDBJob_H_
 
 #include <list>
+
 #include "job.h"
 
 class Buffer;
@@ -35,23 +36,27 @@ class UpdateBufferDBJob : public Job
 {
     Q_OBJECT
 
-signals:
-    void updateProgressSignal (float percent);
+  signals:
+    void updateProgressSignal(float percent);
 
-public:
-    UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var,
+  public:
+    UpdateBufferDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariable& key_var,
                       std::shared_ptr<Buffer> buffer);
 
     virtual ~UpdateBufferDBJob();
 
-    virtual void run ();
+    virtual void run();
 
-    std::shared_ptr<Buffer> buffer () { assert (buffer_); return buffer_; }
+    std::shared_ptr<Buffer> buffer()
+    {
+        assert(buffer_);
+        return buffer_;
+    }
 
-protected:
-    DBInterface &db_interface_;
-    DBObject &dbobject_;
-    DBOVariable &key_var_;
+  protected:
+    DBInterface& db_interface_;
+    DBObject& dbobject_;
+    DBOVariable& key_var_;
     std::shared_ptr<Buffer> buffer_;
 };
 

@@ -18,17 +18,15 @@
 #ifndef JSONIMPORTERTASK_H
 #define JSONIMPORTERTASK_H
 
-#include "configurable.h"
-#include "json.hpp"
-#include "task.h"
-#include "jsonparsingschema.h"
-
 #include <QObject>
-
 #include <memory>
 #include <set>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "configurable.h"
+#include "json.hpp"
+#include "jsonparsingschema.h"
+#include "task.h"
 
 class TaskManager;
 class JSONImportTaskWidget;
@@ -48,111 +46,113 @@ class JSONImportTask : public Task, public Configurable
 
     using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
 
-public slots:
-    void addReadJSONSlot ();
-    void readJSONFileDoneSlot ();
-    void readJSONFileObsoleteSlot ();
+  public slots:
+    void addReadJSONSlot();
+    void readJSONFileDoneSlot();
+    void readJSONFileObsoleteSlot();
 
-    void parseJSONDoneSlot ();
-    void parseJSONObsoleteSlot ();
+    void parseJSONDoneSlot();
+    void parseJSONObsoleteSlot();
 
-    void mapJSONDoneSlot ();
-    void mapJSONObsoleteSlot ();
+    void mapJSONDoneSlot();
+    void mapJSONObsoleteSlot();
 
-    void insertProgressSlot (float percent);
-    void insertDoneSlot (DBObject& object);
+    void insertProgressSlot(float percent);
+    void insertDoneSlot(DBObject& object);
 
-public:
-    JSONImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
+  public:
+    JSONImportTask(const std::string& class_id, const std::string& instance_id,
+                   TaskManager& task_manager);
     virtual ~JSONImportTask();
 
-    virtual TaskWidget* widget ();
-    virtual void deleteWidget ();
+    virtual TaskWidget* widget();
+    virtual void deleteWidget();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    bool canImportFile ();
+    bool canImportFile();
     virtual bool canRun();
-    virtual void run ();
+    virtual void run();
 
-    const std::map <std::string, SavedFile*>& fileList () { return file_list_; }
-    bool hasFile (const std::string& filename) { return file_list_.count (filename) > 0; }
-    void addFile (const std::string& filename);
-    void removeCurrentFilename ();
-    void currentFilename (const std::string& filename);
-    const std::string& currentFilename () { return current_filename_; }
+    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
+    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    void addFile(const std::string& filename);
+    void removeCurrentFilename();
+    void currentFilename(const std::string& filename);
+    const std::string& currentFilename() { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
     bool hasSchema(const std::string& name) { return schemas_.count(name) > 0; }
-    bool hasCurrentSchema ();
+    bool hasCurrentSchema();
     JSONParsingSchema& currentSchema();
-    void removeCurrentSchema ();
+    void removeCurrentSchema();
 
     std::string currentSchemaName() const;
     void currentSchemaName(const std::string& currentSchema);
 
-    virtual bool checkPrerequisites ();
-    virtual bool isRecommended ();
-    virtual bool isRequired ();
+    virtual bool checkPrerequisites();
+    virtual bool isRecommended();
+    virtual bool isRequired();
 
     void test(bool test);
 
     size_t objectsInserted() const;
 
-protected:
-    std::map <std::string, SavedFile*> file_list_;
+  protected:
+    std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
     std::unique_ptr<JSONImportTaskWidget> widget_;
 
     std::string current_schema_;
-    std::map <std::string, JSONParsingSchema> schemas_;
+    std::map<std::string, JSONParsingSchema> schemas_;
 
-    size_t insert_active_ {0};
+    size_t insert_active_{0};
 
     std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
-    std::set <int> added_data_sources_;
+    std::set<int> added_data_sources_;
 
-    std::shared_ptr <ReadJSONFileJob> read_json_job_;
-    std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
-    std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    std::shared_ptr<ReadJSONFileJob> read_json_job_;
+    std::vector<std::shared_ptr<JSONParseJob>> json_parse_jobs_;
+    std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
 
-    bool test_ {false};
+    bool test_{false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    size_t bytes_read_ {0};
-    size_t bytes_to_read_ {0};
-    float read_status_percent_ {0.0};
+    size_t bytes_read_{0};
+    size_t bytes_to_read_{0};
+    float read_status_percent_{0.0};
 
-    size_t objects_read_ {0};
-    size_t objects_parsed_ {0};
-    size_t objects_parse_errors_ {0};
+    size_t objects_read_{0};
+    size_t objects_parsed_{0};
+    size_t objects_parse_errors_{0};
 
-    size_t objects_mapped_ {0};
-    size_t objects_not_mapped_ {0};
+    size_t objects_mapped_{0};
+    size_t objects_not_mapped_{0};
 
-    size_t objects_created_ {0};
-    size_t objects_inserted_ {0};
-    bool all_done_ {false};
+    size_t objects_created_{0};
+    size_t objects_inserted_{0};
+    bool all_done_{false};
 
-    size_t statistics_calc_objects_inserted_ {0};
+    size_t statistics_calc_objects_inserted_{0};
     std::string object_rate_str_;
     std::string remaining_time_str_;
 
     std::unique_ptr<QMessageBox> msg_box_;
 
-    void insertData (std::map <std::string, std::shared_ptr<Buffer>> job_buffers);
+    void insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers);
 
-    void checkAllDone ();
+    void checkAllDone();
 
-    void updateMsgBox ();
+    void updateMsgBox();
 
-    bool maxLoadReached ();
+    bool maxLoadReached();
 
-    virtual void checkSubConfigurables () {}
+    virtual void checkSubConfigurables() {}
 };
 
-#endif // JSONIMPORTERTASK_H
+#endif  // JSONIMPORTERTASK_H

@@ -16,61 +16,57 @@
  */
 
 #include "databaseopentaskwidget.h"
-#include "databaseopentask.h"
+
+#include <QComboBox>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QStackedWidget>
+#include <QTextEdit>
+#include <QVBoxLayout>
+
 #include "atsdb.h"
-#include "dbinterface.h"
+#include "databaseopentask.h"
 #include "dbconnection.h"
+#include "dbinterface.h"
+#include "global.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "global.h"
 
-#include <QFileDialog>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QRadioButton>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QStackedWidget>
-
-
-
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-
-DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget* parent)
+DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface,
+                                               QWidget* parent)
     : TaskWidget(parent), task_(task), db_interface_(db_interface)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout* main_layout_ = new QVBoxLayout ();
+    QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    QGroupBox *group_box = new QGroupBox(tr("Database System"));
+    QGroupBox* group_box = new QGroupBox(tr("Database System"));
     group_box->setFont(font_bold);
-    QVBoxLayout *grplayout = new QVBoxLayout ();
+    QVBoxLayout* grplayout = new QVBoxLayout();
 
-    connection_stack_ = new QStackedWidget ();
+    connection_stack_ = new QStackedWidget();
 
-    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
+    const std::map<std::string, DBConnection*>& types = db_interface_.connections();
 
     for (auto& con_it : types)
     {
-        QRadioButton *radio = new QRadioButton(con_it.first.c_str(), this);
+        QRadioButton* radio = new QRadioButton(con_it.first.c_str(), this);
         connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
 
         if (db_interface_.usedConnection() == con_it.first)
-            radio->setChecked (true);
+            radio->setChecked(true);
 
-        grplayout->addWidget (radio);
+        grplayout->addWidget(radio);
 
         connection_stack_->addWidget(con_it.second->widget());
-        connect(con_it.second->widget(), SIGNAL(databaseOpenedSignal()),
-                this, SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
+        connect(con_it.second->widget(), SIGNAL(databaseOpenedSignal()), this,
+                SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
     }
     group_box->setLayout(grplayout);
     main_layout_->addWidget(group_box);
@@ -81,7 +77,7 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
     expertModeChangedSlot();
 
-    setLayout (main_layout_);
+    setLayout(main_layout_);
 
     if (db_interface_.usedConnection().size() > 0)
         updateUsedConnection();
@@ -95,26 +91,23 @@ DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
         connection_stack_->removeWidget(connection_stack_->widget(0));
 }
 
-void DatabaseOpenTaskWidget::databaseTypeSelectSlot ()
+void DatabaseOpenTaskWidget::databaseTypeSelectSlot()
 {
-    QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());
+    QRadioButton* radio = dynamic_cast<QRadioButton*>(QObject::sender());
     task_.useConnection(radio->text().toStdString());
 }
 
-void DatabaseOpenTaskWidget::updateUsedConnection ()
+void DatabaseOpenTaskWidget::updateUsedConnection()
 {
-    assert (connection_stack_);
+    assert(connection_stack_);
 
     connection_stack_->setCurrentWidget(db_interface_.connectionWidget());
 }
 
-void DatabaseOpenTaskWidget::databaseOpenedSlot ()
+void DatabaseOpenTaskWidget::databaseOpenedSlot()
 {
     logdbg << "DatabaseOpenTaskWidget: databaseOpenedSlot";
     emit databaseOpenedSignal();
 }
 
-void DatabaseOpenTaskWidget::expertModeChangedSlot ()
-{
-
-}
+void DatabaseOpenTaskWidget::expertModeChangedSlot() {}

@@ -18,13 +18,13 @@
 #ifndef FILTERMANAGER_H_
 #define FILTERMANAGER_H_
 
-#include <map>
-#include <vector>
-#include <string>
 #include <QObject>
+#include <map>
+#include <string>
+#include <vector>
 
-#include "singleton.h"
 #include "configurable.h"
+#include "singleton.h"
 
 class DBFilter;
 class ATSDB;
@@ -43,45 +43,47 @@ class DBOVariable;
 class FilterManager : public QObject, public Configurable
 {
     Q_OBJECT
-signals:
-    void changedFiltersSignal ();
+  signals:
+    void changedFiltersSignal();
 
-public slots:
-    void startedSlot ();
-    void deleteFilterSlot (DBFilter* filter);
+  public slots:
+    void startedSlot();
+    void deleteFilterSlot(DBFilter* filter);
 
-public:
+  public:
     /// @brief Constructor
     FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
     /// @brief Destructor
     virtual ~FilterManager();
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getSQLCondition (const std::string& dbo_name,std::vector <DBOVariable*>& filtered_variables);
+    std::string getSQLCondition(const std::string& dbo_name,
+                                std::vector<DBOVariable*>& filtered_variables);
 
     /// @brief Returns number of existing filters
-    unsigned int getNumFilters ();
+    unsigned int getNumFilters();
     /// @brief Returns filter at a given index
-    DBFilter* getFilter (unsigned int index);
-    std::vector <DBFilter*>& filters () { return filters_; }
+    DBFilter* getFilter(unsigned int index);
+    std::vector<DBFilter*>& filters() { return filters_; }
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Resets all filters
-    void reset ();
+    void reset();
 
-    FilterManagerWidget* widget ();
+    FilterManagerWidget* widget();
 
-protected:
+  protected:
     /// Database definition, resets if changed
     std::string db_id_;
 
-    FilterManagerWidget* widget_ {nullptr};
+    FilterManagerWidget* widget_{nullptr};
 
     /// Container with all DBFilters
-    std::vector <DBFilter*> filters_;
+    std::vector<DBFilter*> filters_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* FILTERMANAGER_H_ */

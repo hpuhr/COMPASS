@@ -26,22 +26,22 @@ class DBObject;
 /**
  * @brief Generates the active data sources information for a DBObject
  *
- * For a given DBObject type, uses the DBInterface to generate the active data sources. The compacted information is
- * added as property string.
+ * For a given DBObject type, uses the DBInterface to generate the active data sources. The
+ * compacted information is added as property string.
  */
 class DBOActiveDataSourcesDBJob : public Job
 {
-public:
-    DBOActiveDataSourcesDBJob(DBInterface& db_interface, DBObject &object);
+  public:
+    DBOActiveDataSourcesDBJob(DBInterface& db_interface, DBObject& object);
     virtual ~DBOActiveDataSourcesDBJob();
 
-    virtual void run ();
+    virtual void run();
 
-    DBObject& dbObject () { return object_; }
+    DBObject& dbObject() { return object_; }
 
-protected:
+  protected:
     DBInterface& db_interface_;
-    DBObject &object_;
+    DBObject& object_;
 };
 
 #endif /* DBOACTIVEDATASOURCESDBJOB_H_ */

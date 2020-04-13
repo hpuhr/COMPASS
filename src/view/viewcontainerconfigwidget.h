@@ -28,20 +28,20 @@ class QVBoxLayout;
 class ViewControlWidget : public QWidget
 {
     Q_OBJECT
-public:
-    ViewControlWidget(View* view, QWidget *parent=nullptr);
+  public:
+    ViewControlWidget(View* view, QWidget* parent = nullptr);
     ~ViewControlWidget();
 
-private slots:
+  private slots:
     void loadingStartedSlot();
     void loadingFinishedSlot();
-    void loadingTimeSlot( double s );
+    void loadingTimeSlot(double s);
     void removeViewSlot();
 
-signals:
+  signals:
     void viewDeleted();
 
-private:
+  private:
     View* view_;
 
     QLabel* load_;
@@ -51,8 +51,8 @@ private:
 class ViewContainerConfigWidget : public QWidget
 {
     Q_OBJECT
-public:
-    ViewContainerConfigWidget (ViewContainer* view_container, QWidget *parent=nullptr);
+  public:
+    ViewContainerConfigWidget(ViewContainer* view_container, QWidget* parent = nullptr);
     virtual ~ViewContainerConfigWidget();
 
     const QString& name() { return name_; }
@@ -61,11 +61,11 @@ public:
 
     //    void addTemplateView (std::string template_name);
 
-public slots:
+  public slots:
     void updateSlot();
     void closeSlot();
 
-private:
+  private:
     ViewContainer* view_container_;
     std::vector<ViewControlWidget*> view_widgets_;
     QVBoxLayout* layout_;
@@ -73,4 +73,4 @@ private:
     QString name_;
 };
 
-#endif // VIEWCONTAINERCONFIGWIDGET_H_
+#endif  // VIEWCONTAINERCONFIGWIDGET_H_

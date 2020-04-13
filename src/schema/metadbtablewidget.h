@@ -31,66 +31,66 @@ class QPushButton;
 /**
  * @brief Edit widget for a MetaDBTable
  */
-class MetaDBTableWidget: public QWidget
+class MetaDBTableWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted when changed
     void changedMetaTable();
 
-public slots:
+  public slots:
     /// @brief Sets name
-    void editNameSlot (const QString &text);
+    void editNameSlot(const QString& text);
     /// @brief Sets info
-    void editInfoSlot (const QString &text);
+    void editInfoSlot(const QString& text);
 
     /// @brief Adds new sub meta table
-    void addSubTableSlot ();
+    void addSubTableSlot();
     /// @brief Updates sub tables grid
-    void updateSubTablesGridSlot ();
-    void updateColumnsGridSlot ();
+    void updateSubTablesGridSlot();
+    void updateColumnsGridSlot();
     /// @brief Updates meta table selection for new meta sub table
     void updateNewSubTableSelectionSlot();
     /// @brief Updates local key selection for new meta sub table
-    void updateLocalKeySelectionSlot ();
+    void updateLocalKeySelectionSlot();
     /// @brief Updates sub key selection for new meta sub table
-    void updateSubKeySelectionSlot ();
+    void updateSubKeySelectionSlot();
 
-    void lock ();
+    void lock();
 
-public:
+  public:
     /// @brief Constructor
-    MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent=0, Qt::WindowFlags f=0);
+    MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~MetaDBTableWidget();
 
-protected:
+  protected:
     /// Represented meta table
     MetaDBTable& meta_table_;
 
     /// Name edit field
-    QLineEdit* name_edit_ {nullptr};
+    QLineEdit* name_edit_{nullptr};
     /// Info edit field
-    QLineEdit* info_edit_ {nullptr};
+    QLineEdit* info_edit_{nullptr};
     /// Key selection field
-    //QComboBox* key_box_ {nullptr};
+    // QComboBox* key_box_ {nullptr};
 
     /// Grid with all sub meta tables
-    QGridLayout* sub_tables_grid_ {nullptr};
+    QGridLayout* sub_tables_grid_{nullptr};
 
-    QGridLayout* column_grid_ {nullptr};
+    QGridLayout* column_grid_{nullptr};
 
     /// New sub meta table local key selection
-    QComboBox* new_local_key_ {nullptr};
+    QComboBox* new_local_key_{nullptr};
     /// New sub meta table meta table selection
-    QComboBox* new_table_ {nullptr};
+    QComboBox* new_table_{nullptr};
     /// New sub meta table sub key selection
-    QComboBox* new_sub_key_ {nullptr};
+    QComboBox* new_sub_key_{nullptr};
 
-    QPushButton* add_button_ {nullptr};
+    QPushButton* add_button_{nullptr};
 
-    bool locked_ {false};
+    bool locked_{false};
 };
 
 #endif /* METADBTABLEEDITWIDGET_H_ */

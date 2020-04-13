@@ -18,10 +18,10 @@
 #ifndef JSONPARSINGSCHEMA_H
 #define JSONPARSINGSCHEMA_H
 
+#include <vector>
+
 #include "configurable.h"
 #include "jsonobjectparser.h"
-
-#include <vector>
 
 class JSONImportTask;
 
@@ -29,8 +29,9 @@ class JSONParsingSchema : public Configurable
 {
     using JSONObjectParserIterator = std::map<std::string, JSONObjectParser>::iterator;
 
-public:
-    JSONParsingSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent);
+  public:
+    JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
+                      Configurable* parent);
     JSONParsingSchema() = default;
     JSONParsingSchema(JSONParsingSchema&& other) { *this = std::move(other); }
 
@@ -40,24 +41,25 @@ public:
     JSONObjectParserIterator begin() { return parsers_.begin(); }
     JSONObjectParserIterator end() { return parsers_.end(); }
 
-    std::map<std::string, JSONObjectParser>& parsers () { return parsers_; }
-    bool hasObjectParser (const std::string& name) { return parsers_.count(name) > 0; }
-    JSONObjectParser& parser (const std::string& name);
-    void removeParser (const std::string& name);
+    std::map<std::string, JSONObjectParser>& parsers() { return parsers_; }
+    bool hasObjectParser(const std::string& name) { return parsers_.count(name) > 0; }
+    JSONObjectParser& parser(const std::string& name);
+    void removeParser(const std::string& name);
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     std::string name() const;
-    void name(const std::string &name);
+    void name(const std::string& name);
 
-    void updateMappings ();
+    void updateMappings();
 
-private:
+  private:
     std::string name_;
-    std::map <std::string, JSONObjectParser> parsers_;
+    std::map<std::string, JSONObjectParser> parsers_;
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 };
 
-#endif // JSONPARSINGSCHEMA_H
+#endif  // JSONPARSINGSCHEMA_H

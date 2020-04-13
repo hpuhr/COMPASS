@@ -18,17 +18,17 @@
 #ifndef JSONOBJECTPARSER_H
 #define JSONOBJECTPARSER_H
 
-#include <string>
 #include <memory>
+#include <string>
 
-#include "propertylist.h"
 #include "configurable.h"
-#include "format.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
-#include "stringconv.h"
+#include "format.h"
 #include "jsondatamapping.h"
 #include "jsonobjectparserwidget.h"
+#include "propertylist.h"
+#include "stringconv.h"
 
 class DBObject;
 class DBOVariable;
@@ -37,15 +37,17 @@ class Buffer;
 class JSONObjectParser : public Configurable
 {
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
-public:
-    JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent);
+
+  public:
+    JSONObjectParser(const std::string& class_id, const std::string& instance_id,
+                     Configurable* parent);
     JSONObjectParser() = default;
     JSONObjectParser(JSONObjectParser&& other) { *this = std::move(other); }
 
     /// @brief Move constructor
     JSONObjectParser& operator=(JSONObjectParser&& other);
 
-    DBObject &dbObject() const;
+    DBObject& dbObject() const;
 
     std::string JSONKey() const;
     void JSONKey(const std::string& json_key);
@@ -58,14 +60,14 @@ public:
 
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
-    bool hasMapping (unsigned int index) const;
-    void removeMapping (unsigned int index);
+    bool hasMapping(unsigned int index) const;
+    void removeMapping(unsigned int index);
 
-    void transformBuffer (Buffer& buffer, size_t index) const;
+    void transformBuffer(Buffer& buffer, size_t index) const;
 
     // returs true on successful parse
-    bool parseJSON (nlohmann::json& j, Buffer& buffer) const;
-    void createMappingStubs (nlohmann::json& j);
+    bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
+    void createMappingStubs(nlohmann::json& j);
 
     const DBOVariableSet& variableList() const;
 
@@ -76,59 +78,61 @@ public:
     void dataSourceVariableName(const std::string& name);
 
     bool initialized() const { return initialized_; }
-    void initialize ();
+    void initialize();
 
-    std::shared_ptr<Buffer> getNewBuffer () const;
-    void appendVariablesToBuffer (Buffer& buffer) const;
+    std::shared_ptr<Buffer> getNewBuffer() const;
+    void appendVariablesToBuffer(Buffer& buffer) const;
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    JSONObjectParserWidget* widget ();
+    JSONObjectParserWidget* widget();
 
     std::string dbObjectName() const;
 
-    void setMappingActive (JSONDataMapping& mapping, bool active);
+    void setMappingActive(JSONDataMapping& mapping, bool active);
 
-    void updateMappings ();
+    void updateMappings();
 
     std::string name() const;
-    void name(const std::string &name);
+    void name(const std::string& name);
 
-private:
+  private:
     std::string name_;
 
     std::string db_object_name_;
-    DBObject* db_object_ {nullptr};
+    DBObject* db_object_{nullptr};
 
     std::string json_container_key_;  // location of container with target report data
-    std::string json_key_; // * for all
+    std::string json_key_;            // * for all
     std::string json_value_;
 
     std::vector<std::string> json_values_vector_;
 
     DBOVariableSet var_list_;
 
-    bool override_data_source_ {false};
+    bool override_data_source_{false};
     std::string data_source_variable_name_;
 
-    bool initialized_ {false};
+    bool initialized_{false};
 
-    bool not_parse_all_ {false};
+    bool not_parse_all_{false};
 
     PropertyList list_;
 
     std::unique_ptr<JSONObjectParserWidget> widget_;
 
-    std::vector <JSONDataMapping> data_mappings_;
+    std::vector<JSONDataMapping> data_mappings_;
 
     // returns true on successful parse
-    bool parseTargetReport (const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
-    void createMappingsFromTargetReport (const nlohmann::json& tr);
+    bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
+    void createMappingsFromTargetReport(const nlohmann::json& tr);
 
-    void checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& tr, bool is_in_array=false);
+    void checkIfKeysExistsInMappings(const std::string& location, const nlohmann::json& tr,
+                                     bool is_in_array = false);
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 };
 
-#endif // JSONOBJECTPARSER_H
+#endif  // JSONOBJECTPARSER_H

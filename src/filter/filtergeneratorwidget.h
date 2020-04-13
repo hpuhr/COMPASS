@@ -31,44 +31,45 @@ class QListWidget;
 
 typedef struct
 {
-  std::string variable_name_;
-  std::string variable_dbo_type_;
-  std::string operator_;
-  std::string value_;
-  std::string reset_value_;
-  bool absolute_value_;
-}ConditionTemplate;
+    std::string variable_name_;
+    std::string variable_dbo_type_;
+    std::string operator_;
+    std::string value_;
+    std::string reset_value_;
+    bool absolute_value_;
+} ConditionTemplate;
 
 class FilterGeneratorWidget : public QWidget
 {
-  Q_OBJECT
-signals:
-void filterWidgetAction (bool generated);
+    Q_OBJECT
+  signals:
+    void filterWidgetAction(bool generated);
 
-public slots:
-  void loadMin ();
-  void loadMax ();
-  void addCondition ();
-  void accept ();
-  void cancel ();
+  public slots:
+    void loadMin();
+    void loadMax();
+    void addCondition();
+    void accept();
+    void cancel();
 
-public:
-  FilterGeneratorWidget(QWidget *parent=0);
-  virtual ~FilterGeneratorWidget();
-protected:
-  QLineEdit *filter_name_;
-  DBOVariableSelectionWidget *condition_variable_widget_;
-  QComboBox *condition_combo_;
-  QCheckBox *condition_absolute_;
-  QLineEdit *condition_value_;
-  QComboBox *condition_reset_combo_;
-  QListWidget *conditions_list_;
+  public:
+    FilterGeneratorWidget(QWidget* parent = 0);
+    virtual ~FilterGeneratorWidget();
 
-  std::vector <ConditionTemplate> data_conditions_;
+  protected:
+    QLineEdit* filter_name_;
+    DBOVariableSelectionWidget* condition_variable_widget_;
+    QComboBox* condition_combo_;
+    QCheckBox* condition_absolute_;
+    QLineEdit* condition_value_;
+    QComboBox* condition_reset_combo_;
+    QListWidget* conditions_list_;
 
-  void createGUIElements ();
-  void updateWidgetList();
-  virtual void  closeEvent ( QCloseEvent * event );
+    std::vector<ConditionTemplate> data_conditions_;
+
+    void createGUIElements();
+    void updateWidgetList();
+    virtual void closeEvent(QCloseEvent* event);
 };
 
 #endif /* FilterGeneratorWidget_H_ */

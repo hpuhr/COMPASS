@@ -15,7 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef DBOVARIABLEWIDGET_H_
 #define DBOVARIABLEWIDGET_H_
 
@@ -41,47 +40,47 @@ class DBOVariableWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     void dboVariableChangedSignal();
 
-public slots:
+  public slots:
     /// @brief Changes DBO name
-    void editNameSlot ();
+    void editNameSlot();
     /// @brief Changes DBO info
-    void editDescriptionSlot ();
+    void editDescriptionSlot();
     void editDataTypeSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBOVariableWidget(DBOVariable& variable, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBOVariableWidget(DBOVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBOVariableWidget();
 
-    void lock ();
-    void unlock ();
+    void lock();
+    void unlock();
 
-    void setVariable (DBOVariable& variable);
-    void update ();
+    void setVariable(DBOVariable& variable);
+    void update();
 
-private:
+  private:
     /// @brief DBObject to be managed
-    DBOVariable* variable_ {nullptr};
-    QGridLayout* properties_layout_ {nullptr};
-    int schema_boxes_row_ {0};
+    DBOVariable* variable_{nullptr};
+    QGridLayout* properties_layout_{nullptr};
+    int schema_boxes_row_{0};
 
-    bool locked_ {false};
+    bool locked_{false};
 
     /// @brief DBOVariable name
-    QLineEdit* name_edit_ {nullptr};
+    QLineEdit* name_edit_{nullptr};
     /// @brief DBOVariable info
-    QLineEdit* description_edit_ {nullptr};
-    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    StringRepresentationComboBox* representation_box_ {nullptr};
-    UnitSelectionWidget* unit_sel_ {nullptr};
+    QLineEdit* description_edit_{nullptr};
+    DBOVariableDataTypeComboBox* type_combo_{nullptr};
+    StringRepresentationComboBox* representation_box_{nullptr};
+    UnitSelectionWidget* unit_sel_{nullptr};
 
-    std::map <std::string, DBTableColumnComboBox*> schema_boxes_;
+    std::map<std::string, DBTableColumnComboBox*> schema_boxes_;
 
-    void createSchemaBoxes ();
+    void createSchemaBoxes();
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

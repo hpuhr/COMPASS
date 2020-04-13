@@ -15,31 +15,32 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "atsdb.h"
 #include "taskmanager.h"
-#include "taskmanagerwidget.h"
-#include "taskmanagerlogwidget.h"
-#include "dbobjectmanager.h"
+
+#include "atsdb.h"
+#include "createartasassociationstask.h"
+#include "createartasassociationstaskwidget.h"
 #include "databaseopentask.h"
 #include "databaseopentaskwidget.h"
-#include "manageschematask.h"
-#include "manageschemataskwidget.h"
-#include "managedbobjectstask.h"
-#include "managedbobjectstaskwidget.h"
+#include "dbobjectmanager.h"
+#include "dboeditdatasourceswidget.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 #include "managedatasourcestask.h"
 #include "managedatasourcestaskwidget.h"
-#include "radarplotpositioncalculatortask.h"
-#include "radarplotpositioncalculatortaskwidget.h"
-#include "createartasassociationstask.h"
-#include "createartasassociationstaskwidget.h"
-#include "postprocesstask.h"
-#include "postprocesstaskwidget.h"
+#include "managedbobjectstask.h"
+#include "managedbobjectstaskwidget.h"
+#include "manageschematask.h"
+#include "manageschemataskwidget.h"
 #include "mysqldbimporttask.h"
 #include "mysqldbimporttaskwidget.h"
-#include "dboeditdatasourceswidget.h"
+#include "postprocesstask.h"
+#include "postprocesstaskwidget.h"
+#include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskwidget.h"
+#include "taskmanagerlogwidget.h"
+#include "taskmanagerwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -48,192 +49,190 @@
 
 #include <cassert>
 
-TaskManager::TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "task.json")
+TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+    : Configurable(class_id, instance_id, atsdb, "task.json")
 {
     registerParameter("expert_mode", &expert_mode_, false);
 
     createSubConfigurables();
 
-    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask", "ManageDBObjectsTask"}; // defines order of tasks
+    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask",
+                  "ManageDBObjectsTask"};  // defines order of tasks
 
 #if USE_JASTERIX
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert (task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "ManageDataSourcesTask",
-                                          "RadarPlotPositionCalculatorTask", "PostProcessTask",
-                                          "CreateARTASAssociationsTask"});
+    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask",
+                                         "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
+                                         "PostProcessTask", "CreateARTASAssociationsTask"});
 
-    for (auto& task_it : task_list_) // check that all tasks in list exist
-        assert (tasks_.count(task_it));
+    for (auto& task_it : task_list_)  // check that all tasks in list exist
+        assert(tasks_.count(task_it));
 }
 
-TaskManager::~TaskManager()
-{
-}
+TaskManager::~TaskManager() {}
 
-void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void TaskManager::generateSubConfigurable(const std::string& class_id,
+                                          const std::string& instance_id)
 {
-    if (class_id.compare ("DatabaseOpenTask") == 0)
+    if (class_id.compare("DatabaseOpenTask") == 0)
     {
-        assert (!database_open_task_);
-        database_open_task_.reset (new DatabaseOpenTask (class_id, instance_id, *this));
-        assert (database_open_task_);
-        addTask (class_id, database_open_task_.get());
+        assert(!database_open_task_);
+        database_open_task_.reset(new DatabaseOpenTask(class_id, instance_id, *this));
+        assert(database_open_task_);
+        addTask(class_id, database_open_task_.get());
     }
-    else if (class_id.compare ("ManageSchemaTask") == 0)
+    else if (class_id.compare("ManageSchemaTask") == 0)
     {
-        assert (!manage_schema_task_);
-        manage_schema_task_.reset (new ManageSchemaTask (class_id, instance_id, *this));
-        assert (manage_schema_task_);
-        addTask (class_id, manage_schema_task_.get());
+        assert(!manage_schema_task_);
+        manage_schema_task_.reset(new ManageSchemaTask(class_id, instance_id, *this));
+        assert(manage_schema_task_);
+        addTask(class_id, manage_schema_task_.get());
     }
-    else if (class_id.compare ("ManageDBObjectsTask") == 0)
+    else if (class_id.compare("ManageDBObjectsTask") == 0)
     {
-        assert (!manage_dbobjects_task_);
-        manage_dbobjects_task_.reset (new ManageDBObjectsTask (class_id, instance_id, *this));
-        assert (manage_dbobjects_task_);
-        addTask (class_id, manage_dbobjects_task_.get());
+        assert(!manage_dbobjects_task_);
+        manage_dbobjects_task_.reset(new ManageDBObjectsTask(class_id, instance_id, *this));
+        assert(manage_dbobjects_task_);
+        addTask(class_id, manage_dbobjects_task_.get());
     }
 #if USE_JASTERIX
-    else if (class_id.compare ("ASTERIXImportTask") == 0)
+    else if (class_id.compare("ASTERIXImportTask") == 0)
     {
-        assert (!asterix_importer_task_);
-        asterix_importer_task_.reset(new ASTERIXImportTask (class_id, instance_id, *this));
-        assert (asterix_importer_task_);
-        addTask (class_id, asterix_importer_task_.get());
+        assert(!asterix_importer_task_);
+        asterix_importer_task_.reset(new ASTERIXImportTask(class_id, instance_id, *this));
+        assert(asterix_importer_task_);
+        addTask(class_id, asterix_importer_task_.get());
     }
 #endif
-    else if (class_id.compare ("JSONImportTask") == 0)
+    else if (class_id.compare("JSONImportTask") == 0)
     {
-        assert (!json_importer_task_);
-        json_importer_task_.reset(new JSONImportTask (class_id, instance_id, *this));
-        assert (json_importer_task_);
-        addTask (class_id, json_importer_task_.get());
+        assert(!json_importer_task_);
+        json_importer_task_.reset(new JSONImportTask(class_id, instance_id, *this));
+        assert(json_importer_task_);
+        addTask(class_id, json_importer_task_.get());
     }
-    else if (class_id.compare ("MySQLDBImportTask") == 0)
+    else if (class_id.compare("MySQLDBImportTask") == 0)
     {
-        assert (!mysqldb_import_task_);
-        mysqldb_import_task_.reset(new MySQLDBImportTask (class_id, instance_id, *this));
-        assert (mysqldb_import_task_);
-        addTask (class_id, mysqldb_import_task_.get());
+        assert(!mysqldb_import_task_);
+        mysqldb_import_task_.reset(new MySQLDBImportTask(class_id, instance_id, *this));
+        assert(mysqldb_import_task_);
+        addTask(class_id, mysqldb_import_task_.get());
     }
-    else if (class_id.compare ("ManageDataSourcesTask") == 0)
+    else if (class_id.compare("ManageDataSourcesTask") == 0)
     {
-        assert (!manage_datasources_task_);
-        manage_datasources_task_.reset(new ManageDataSourcesTask (class_id, instance_id, *this));
-        assert (manage_datasources_task_);
-        addTask (class_id, manage_datasources_task_.get());
+        assert(!manage_datasources_task_);
+        manage_datasources_task_.reset(new ManageDataSourcesTask(class_id, instance_id, *this));
+        assert(manage_datasources_task_);
+        addTask(class_id, manage_datasources_task_.get());
     }
-    else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
+    else if (class_id.compare("RadarPlotPositionCalculatorTask") == 0)
     {
-        assert (!radar_plot_position_calculator_task_);
-        radar_plot_position_calculator_task_.reset(new RadarPlotPositionCalculatorTask (class_id, instance_id, *this));
-        assert (radar_plot_position_calculator_task_);
-        addTask (class_id, radar_plot_position_calculator_task_.get());
+        assert(!radar_plot_position_calculator_task_);
+        radar_plot_position_calculator_task_.reset(
+            new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
+        assert(radar_plot_position_calculator_task_);
+        addTask(class_id, radar_plot_position_calculator_task_.get());
     }
-    else if (class_id.compare ("CreateARTASAssociationsTask") == 0)
+    else if (class_id.compare("CreateARTASAssociationsTask") == 0)
     {
-        assert (!create_artas_associations_task_);
-        create_artas_associations_task_.reset(new CreateARTASAssociationsTask (class_id, instance_id, *this));
-        assert (create_artas_associations_task_);
-        addTask (class_id, create_artas_associations_task_.get());
+        assert(!create_artas_associations_task_);
+        create_artas_associations_task_.reset(
+            new CreateARTASAssociationsTask(class_id, instance_id, *this));
+        assert(create_artas_associations_task_);
+        addTask(class_id, create_artas_associations_task_.get());
     }
-    else if (class_id.compare ("PostProcessTask") == 0)
+    else if (class_id.compare("PostProcessTask") == 0)
     {
-        assert (!post_process_task_);
-        post_process_task_.reset(new PostProcessTask (class_id, instance_id, *this));
-        assert (post_process_task_);
-        addTask (class_id, post_process_task_.get());
+        assert(!post_process_task_);
+        post_process_task_.reset(new PostProcessTask(class_id, instance_id, *this));
+        assert(post_process_task_);
+        addTask(class_id, post_process_task_.get());
     }
     else
-        throw std::runtime_error ("TaskManager: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("TaskManager: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
-void TaskManager::addTask (const std::string& class_id, Task* task)
+void TaskManager::addTask(const std::string& class_id, Task* task)
 {
-    assert (task);
-    assert (!tasks_.count(class_id));
+    assert(task);
+    assert(!tasks_.count(class_id));
     tasks_[class_id] = task;
-    connect (task, &Task::statusChangedSignal, this, &TaskManager::taskStatusChangesSlot);
-    connect (task, &Task::doneSignal, this, &TaskManager::taskDoneSlot);
+    connect(task, &Task::statusChangedSignal, this, &TaskManager::taskStatusChangesSlot);
+    connect(task, &Task::doneSignal, this, &TaskManager::taskDoneSlot);
 }
 
-void TaskManager::checkSubConfigurables ()
+void TaskManager::checkSubConfigurables()
 {
     if (!database_open_task_)
     {
         generateSubConfigurable("DatabaseOpenTask", "DatabaseOpenTask0");
-        assert (database_open_task_);
+        assert(database_open_task_);
     }
 
     if (!manage_schema_task_)
     {
         generateSubConfigurable("ManageSchemaTask", "ManageSchemaTask0");
-        assert (manage_schema_task_);
+        assert(manage_schema_task_);
     }
 
     if (!manage_dbobjects_task_)
     {
         generateSubConfigurable("ManageDBObjectsTask", "ManageDBObjectsTask0");
-        assert (manage_dbobjects_task_);
+        assert(manage_dbobjects_task_);
     }
 
 #if USE_JASTERIX
     if (!asterix_importer_task_)
     {
         generateSubConfigurable("ASTERIXImportTask", "ASTERIXImportTask0");
-        assert (asterix_importer_task_);
+        assert(asterix_importer_task_);
     }
 #endif
 
     if (!json_importer_task_)
     {
         generateSubConfigurable("JSONImportTask", "JSONImportTask0");
-        assert (json_importer_task_);
+        assert(json_importer_task_);
     }
 
     if (!mysqldb_import_task_)
     {
         generateSubConfigurable("MySQLDBImportTask", "MySQLDBImportTask0");
-        assert (mysqldb_import_task_);
+        assert(mysqldb_import_task_);
     }
 
     if (!manage_datasources_task_)
     {
         generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
-        assert (manage_datasources_task_);
+        assert(manage_datasources_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
     {
-        generateSubConfigurable("RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0");
-        assert (radar_plot_position_calculator_task_);
+        generateSubConfigurable("RadarPlotPositionCalculatorTask",
+                                "RadarPlotPositionCalculatorTask0");
+        assert(radar_plot_position_calculator_task_);
     }
 
     if (!create_artas_associations_task_)
     {
         generateSubConfigurable("CreateARTASAssociationsTask", "CreateARTASAssociationsTask0");
-        assert (create_artas_associations_task_);
+        assert(create_artas_associations_task_);
     }
 
     if (!post_process_task_)
     {
         generateSubConfigurable("PostProcessTask", "PostProcessTask0");
-        assert (post_process_task_);
+        assert(post_process_task_);
     }
 }
 
-std::map<std::string, Task *> TaskManager::tasks() const
-{
-    return tasks_;
-}
+std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
 
-bool TaskManager::expertMode() const
-{
-    return expert_mode_;
-}
+bool TaskManager::expertMode() const { return expert_mode_; }
 
 void TaskManager::expertMode(bool value)
 {
@@ -248,12 +247,9 @@ void TaskManager::expertMode(bool value)
     emit expertModeChangedSignal();
 }
 
-std::vector<std::string> TaskManager::taskList() const
-{
-    return task_list_;
-}
+std::vector<std::string> TaskManager::taskList() const { return task_list_; }
 
-void TaskManager::taskStatusChangesSlot (std::string task_name)
+void TaskManager::taskStatusChangesSlot(std::string task_name)
 {
     loginf << "TaskManager: taskStatusChangesSlot: task " << task_name;
 
@@ -264,7 +260,7 @@ void TaskManager::taskStatusChangesSlot (std::string task_name)
     }
 }
 
-void TaskManager::taskDoneSlot (std::string task_name)
+void TaskManager::taskDoneSlot(std::string task_name)
 {
     loginf << "TaskManager: taskDoneSlot: task " << task_name;
 
@@ -275,7 +271,7 @@ void TaskManager::taskDoneSlot (std::string task_name)
     }
 }
 
-void TaskManager::dbObjectsChangedSlot ()
+void TaskManager::dbObjectsChangedSlot()
 {
     loginf << "TaskManager: dbObjectsChangedSlot";
 
@@ -286,7 +282,7 @@ void TaskManager::dbObjectsChangedSlot ()
     }
 }
 
-void TaskManager::schemaChangedSlot ()
+void TaskManager::schemaChangedSlot()
 {
     loginf << "TaskManager: schemaChangedSlot";
 
@@ -297,7 +293,7 @@ void TaskManager::schemaChangedSlot ()
     }
 }
 
-void TaskManager::shutdown ()
+void TaskManager::shutdown()
 {
     loginf << "TaskManager: shutdown";
 
@@ -350,68 +346,68 @@ void TaskManager::appendError(const std::string& text)
         widget_->logWidget()->appendError(text);
 }
 
-void TaskManager::runTask (const std::string& task_name)
+void TaskManager::runTask(const std::string& task_name)
 {
     loginf << "TaskManager: runTask: name " << task_name;
 
-    assert (tasks_.count(task_name));
-    assert (tasks_.at(task_name)->checkPrerequisites());
+    assert(tasks_.count(task_name));
+    assert(tasks_.at(task_name)->checkPrerequisites());
 
     tasks_.at(task_name)->run();
 }
 
 DatabaseOpenTask& TaskManager::databaseOpenTask() const
 {
-    assert (database_open_task_);
+    assert(database_open_task_);
     return *database_open_task_;
 }
 
 ManageSchemaTask& TaskManager::manageSchemaTask() const
 {
-    assert (manage_schema_task_);
+    assert(manage_schema_task_);
     return *manage_schema_task_;
 }
 
-ManageDataSourcesTask& TaskManager::manageDataSourcesTask () const
+ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const
 {
-    assert (manage_datasources_task_);
+    assert(manage_datasources_task_);
     return *manage_datasources_task_;
 }
 
 #if USE_JASTERIX
 ASTERIXImportTask& TaskManager::asterixImporterTask() const
 {
-    assert (asterix_importer_task_);
+    assert(asterix_importer_task_);
     return *asterix_importer_task_;
 }
 #endif
 
 JSONImportTask& TaskManager::jsonImporterTask() const
 {
-    assert (json_importer_task_);
+    assert(json_importer_task_);
     return *json_importer_task_;
 }
 
 MySQLDBImportTask& TaskManager::mysqldbImportTask() const
 {
-    assert (mysqldb_import_task_);
+    assert(mysqldb_import_task_);
     return *mysqldb_import_task_;
 }
 
 RadarPlotPositionCalculatorTask& TaskManager::radarPlotPositionCalculatorTask() const
 {
-    assert (radar_plot_position_calculator_task_);
+    assert(radar_plot_position_calculator_task_);
     return *radar_plot_position_calculator_task_;
 }
 
 CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
 {
-    assert (manage_datasources_task_);
+    assert(manage_datasources_task_);
     return *create_artas_associations_task_;
 }
 
 PostProcessTask& TaskManager::postProcessTask() const
 {
-    assert (manage_datasources_task_);
+    assert(manage_datasources_task_);
     return *post_process_task_;
 }

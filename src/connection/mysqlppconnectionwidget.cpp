@@ -16,118 +16,120 @@
  */
 
 #include "mysqlppconnectionwidget.h"
-#include "mysqlserver.h"
-#include "logger.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
-#include "atsdb.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QComboBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QInputDialog>
-#include <QStackedWidget>
 #include <QFileDialog>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
-MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, QWidget *parent)
+#include "atsdb.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "logger.h"
+#include "mysqlserver.h"
+
+MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent)
     : QWidget(parent), connection_(connection)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel *servers_label = new QLabel ("Server Selection");
+    QLabel* servers_label = new QLabel("Server Selection");
     servers_label->setFont(font_bold);
     layout->addWidget(servers_label);
 
-    server_select_ = new QComboBox ();
-    connect (server_select_, SIGNAL(currentIndexChanged(const QString &)),
-             this, SLOT(serverSelectedSlot(const QString &)));
-    layout->addWidget (server_select_);
+    server_select_ = new QComboBox();
+    connect(server_select_, SIGNAL(currentIndexChanged(const QString&)), this,
+            SLOT(serverSelectedSlot(const QString&)));
+    layout->addWidget(server_select_);
     layout->addStretch();
 
-    QHBoxLayout *button_layout = new QHBoxLayout ();
+    QHBoxLayout* button_layout = new QHBoxLayout();
 
-    add_button_ = new QPushButton ("Add");
-    connect (add_button_, SIGNAL(clicked()), this, SLOT(addServerSlot()));
+    add_button_ = new QPushButton("Add");
+    connect(add_button_, SIGNAL(clicked()), this, SLOT(addServerSlot()));
     button_layout->addWidget(add_button_);
 
-    delete_button_ = new QPushButton ("Delete");
-    connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteServerSlot()));
+    delete_button_ = new QPushButton("Delete");
+    connect(delete_button_, SIGNAL(clicked()), this, SLOT(deleteServerSlot()));
     button_layout->addWidget(delete_button_);
     layout->addLayout(button_layout);
     layout->addStretch();
 
-    server_widgets_ = new QStackedWidget ();
+    server_widgets_ = new QStackedWidget();
     layout->addWidget(server_widgets_);
     layout->addStretch();
 
-    updateServers ();
+    updateServers();
 
-//    import_button_ = new QPushButton ("Import");
-//    connect (import_button_, SIGNAL(clicked()), this, SLOT(showImportMenuSlot()));
-//    import_button_->setDisabled (true);
-//    layout->addWidget(import_button_);
+    //    import_button_ = new QPushButton ("Import");
+    //    connect (import_button_, SIGNAL(clicked()), this, SLOT(showImportMenuSlot()));
+    //    import_button_->setDisabled (true);
+    //    layout->addWidget(import_button_);
 
-//    QAction* import_action = import_menu_.addAction("Import MySQL Text File");
-//    connect(import_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextSlot);
+    //    QAction* import_action = import_menu_.addAction("Import MySQL Text File");
+    //    connect(import_action, &QAction::triggered, this,
+    //    &MySQLppConnectionWidget::importSQLTextSlot);
 
-//    QAction* import_archive_action = import_menu_.addAction("Import MySQL Text Archive File");
-//    connect(import_archive_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextFromArchiveSlot);
+    //    QAction* import_archive_action = import_menu_.addAction("Import MySQL Text Archive File");
+    //    connect(import_archive_action, &QAction::triggered, this,
+    //    &MySQLppConnectionWidget::importSQLTextFromArchiveSlot);
 
-    setLayout (layout);
+    setLayout(layout);
 }
 
 MySQLppConnectionWidget::~MySQLppConnectionWidget()
 {
     logdbg << "MySQLppConnectionWidget: destructor";
 
-//    while (server_widgets_->count())
-//        server_widgets_->removeWidget(server_widgets_->widget(0));
+    //    while (server_widgets_->count())
+    //        server_widgets_->removeWidget(server_widgets_->widget(0));
 }
 
-void MySQLppConnectionWidget::addServerSlot ()
+void MySQLppConnectionWidget::addServerSlot()
 {
     logdbg << "MySQLppConnectionWidget: addServerSlot";
 
     bool ok;
-    QString text = QInputDialog::getText(this, tr("Server Name"),
-                                         tr("Specify a (unique) server name:"), QLineEdit::Normal,
-                                         "", &ok);
+    QString text = QInputDialog::getText(
+        this, tr("Server Name"), tr("Specify a (unique) server name:"), QLineEdit::Normal, "", &ok);
 
     if (ok && !text.isEmpty())
     {
         connection_.addServer(text.toStdString());
-        updateServers ();
+        updateServers();
     }
 }
 
-void MySQLppConnectionWidget::deleteServerSlot ()
+void MySQLppConnectionWidget::deleteServerSlot()
 {
     logdbg << "MySQLppConnectionWidget: deleteServerSlot";
 
     connection_.deleteUsedServer();
 
-    updateServers ();
+    updateServers();
 }
 
-void MySQLppConnectionWidget::serverSelectedSlot (const QString &value)
+void MySQLppConnectionWidget::serverSelectedSlot(const QString& value)
 {
     logdbg << "MySQLppConnectionWidget: serverSelectedSlot: '" << value.toStdString() << "'";
 
-    assert (server_widgets_);
+    assert(server_widgets_);
     while (server_widgets_->count() > 0)
         server_widgets_->removeWidget(server_widgets_->widget(0));
 
     if (value.size() > 0)
     {
-        connection_.setServer (value.toStdString());
+        connection_.setServer(value.toStdString());
 
-        QWidget *widget = connection_.usedServer().widget();
+        QWidget* widget = connection_.usedServer().widget();
         QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()),
                          static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
         QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()),
@@ -140,7 +142,7 @@ void MySQLppConnectionWidget::serverSelectedSlot (const QString &value)
         delete_button_->setDisabled(true);
 }
 
-void MySQLppConnectionWidget::serverConnectedSlot ()
+void MySQLppConnectionWidget::serverConnectedSlot()
 {
     logdbg << "MySQLppConnectionWidget: serverConnectedSlot";
     server_select_->setDisabled(true);
@@ -152,18 +154,18 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 {
     logdbg << "MySQLppConnectionWidget: databaseOpenedSlot";
 
-    //import_button_->setDisabled(false);
+    // import_button_->setDisabled(false);
 
-    emit databaseOpenedSignal ();
+    emit databaseOpenedSignal();
 }
 
-//void MySQLppConnectionWidget::showImportMenuSlot ()
+// void MySQLppConnectionWidget::showImportMenuSlot ()
 //{
 //    logdbg << "MySQLppConnectionWidget: showImportMenuSlot";
 //    import_menu_.exec(QCursor::pos());
 //}
 
-//void MySQLppConnectionWidget::importSQLTextSlot()
+// void MySQLppConnectionWidget::importSQLTextSlot()
 //{
 //    logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
 
@@ -176,9 +178,11 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 //    if (any_data)
 //    {
 //        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the database. Please "
-//                                                               " confirm with 'Yes' to continue, cancel with 'No'"
-//                                                               " to abort import.",
+//        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the
+//        database. Please "
+//                                                               " confirm with 'Yes' to continue,
+//                                                               cancel with 'No'" " to abort
+//                                                               import.",
 //                                      QMessageBox::Yes|QMessageBox::No);
 
 //        if (reply == QMessageBox::No)
@@ -211,7 +215,7 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 //    }
 //}
 
-//void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
+// void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
 //{
 //    logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
 
@@ -224,9 +228,11 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 //    if (any_data)
 //    {
 //        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in the database. Please "
-//                                                               " confirm with 'Yes' to continue, cancel with 'No'"
-//                                                               " to abort import.",
+//        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in
+//        the database. Please "
+//                                                               " confirm with 'Yes' to continue,
+//                                                               cancel with 'No'" " to abort
+//                                                               import.",
 //                                      QMessageBox::Yes|QMessageBox::No);
 
 //        if (reply == QMessageBox::No)
@@ -253,7 +259,8 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 
 //        std::string filename = filenames.at(0).toStdString();
 
-//        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename << "'";
+//        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename <<
+//        "'";
 
 //        connection_.importSQLArchiveFile(filename);
 //    }
@@ -262,7 +269,7 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 void MySQLppConnectionWidget::updateServers()
 {
     logdbg << "MySQLppConnectionWidget: updateServers";
-    const std::map <std::string, MySQLServer*> &servers = connection_.servers();
+    const std::map<std::string, MySQLServer*>& servers = connection_.servers();
     std::string used_server = connection_.usedServerString();
 
     server_select_->clear();
@@ -273,9 +280,8 @@ void MySQLppConnectionWidget::updateServers()
     }
 
     int index = server_select_->findText(used_server.c_str());
-    if (index != -1) // -1 for not found
+    if (index != -1)  // -1 for not found
     {
-       server_select_->setCurrentIndex(index);
-
+        server_select_->setCurrentIndex(index);
     }
 }

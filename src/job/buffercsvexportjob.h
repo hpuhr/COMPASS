@@ -18,23 +18,24 @@
 #ifndef BUFFERCSVEXPORTJOB_H
 #define BUFFERCSVEXPORTJOB_H
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include <memory>
 
-#include "job.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "dbovariableset.h"
+#include "job.h"
 
 class BufferCSVExportJob : public Job
 {
-public:
-    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set, const std::string& file_name,
-                       bool overwrite, bool only_selected, bool use_presentation, bool show_associations);
+  public:
+    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
+                       const std::string& file_name, bool overwrite, bool only_selected,
+                       bool use_presentation, bool show_associations);
     virtual ~BufferCSVExportJob();
 
-    virtual void run ();
+    virtual void run();
 
-protected:
+  protected:
     std::shared_ptr<Buffer> buffer_;
     DBOVariableSet read_set_;
 
@@ -48,4 +49,4 @@ protected:
     boost::posix_time::ptime stop_time_;
 };
 
-#endif // BUFFERCSVEXPORTJOB_H
+#endif  // BUFFERCSVEXPORTJOB_H

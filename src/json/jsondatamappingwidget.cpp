@@ -15,30 +15,27 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QLabel>
-
 #include "jsondatamappingwidget.h"
 
-JSONDataMappingWidget::JSONDataMappingWidget(JSONDataMapping& mapping, QWidget *parent)
+#include <QGridLayout>
+#include <QLabel>
+#include <QVBoxLayout>
+
+JSONDataMappingWidget::JSONDataMappingWidget(JSONDataMapping& mapping, QWidget* parent)
     : QWidget(parent), mapping_(&mapping)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QLabel *main_label = new QLabel ("JSON Mapping ");
-    main_label->setFont (font_bold);
-    main_layout->addWidget (main_label);
+    QLabel* main_label = new QLabel("JSON Mapping ");
+    main_label->setFont(font_bold);
+    main_layout->addWidget(main_label);
 
-    setLayout (main_layout);
+    setLayout(main_layout);
 
     show();
 }
 
-void JSONDataMappingWidget::setMapping (JSONDataMapping& mapping)
-{
-    mapping_ = &mapping;
-}
+void JSONDataMappingWidget::setMapping(JSONDataMapping& mapping) { mapping_ = &mapping; }

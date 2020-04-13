@@ -10,17 +10,17 @@ class SQLiteConnectionInfoWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
-    void updateSlot ();
+  public slots:
+    void updateSlot();
 
-public:
-    explicit SQLiteConnectionInfoWidget(SQLiteConnection& connection, QWidget* parent=nullptr);
+  public:
+    explicit SQLiteConnectionInfoWidget(SQLiteConnection& connection, QWidget* parent = nullptr);
 
-protected:
+  protected:
     SQLiteConnection& connection_;
 
-    QLabel* database_label_ {nullptr};
-    QLabel* status_label_ {nullptr};
+    QLabel* database_label_{nullptr};
+    QLabel* status_label_{nullptr};
 };
 
-#endif // SQLiteCONNECTIONINFOWIDGET_H
+#endif  // SQLiteCONNECTIONINFOWIDGET_H

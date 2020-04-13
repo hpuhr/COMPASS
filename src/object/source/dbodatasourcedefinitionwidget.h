@@ -25,48 +25,48 @@ class DBObject;
 class DBODataSourceDefinition;
 class DBSchemaManager;
 
-class DBODataSourceDefinitionWidget: public QWidget
+class DBODataSourceDefinitionWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
-    void changedForeignKeySlot ();
+  public slots:
+    void changedForeignKeySlot();
     void changedLocalKeySlot();
     void changedMetaTableSlot();
-    void changedShortNameColumnSlot ();
-    void changedNameColumnSlot ();
-    void changedSacColumnSlot ();
-    void changedSicColumnSlot ();
-    void changedLatitudeColumnSlot ();
-    void changedLongitudeColumnSlot ();
-    void changedAltitudeColumnSlot ();
+    void changedShortNameColumnSlot();
+    void changedNameColumnSlot();
+    void changedSacColumnSlot();
+    void changedSicColumnSlot();
+    void changedLatitudeColumnSlot();
+    void changedLongitudeColumnSlot();
+    void changedAltitudeColumnSlot();
 
     /// @brief Updates data source local key selection
     void updateLocalKeySlot();
     /// @brief Updates data source meta table name selection
-    void updateMetaTableSlot ();
+    void updateMetaTableSlot();
     /// @brief Updates data source foreign key selection
-    void updateForeignKeySlot ();
+    void updateForeignKeySlot();
     /// @brief Updates data source name column selection
-    void updateShortNameColumnSlot ();
-    void updateNameColumnSlot ();
-    void updateSacColumnSlot ();
-    void updateSicColumnSlot ();
-    void updateLatitudeColumnSlot ();
-    void updateLongitudeColumnSlot ();
-    void updateAltitudeColumnSlot ();
+    void updateShortNameColumnSlot();
+    void updateNameColumnSlot();
+    void updateSacColumnSlot();
+    void updateSicColumnSlot();
+    void updateLatitudeColumnSlot();
+    void updateLongitudeColumnSlot();
+    void updateAltitudeColumnSlot();
 
-//signals:
-//    void definitionChangedSignal();
-public:
-    DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition& definition, QWidget* parent=0,
-                                  Qt::WindowFlags f=0);
+    // signals:
+    //    void definitionChangedSignal();
+  public:
+    DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition& definition,
+                                  QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~DBODataSourceDefinitionWidget();
 
-private:
+  private:
     DBObject& object_;
-    DBODataSourceDefinition &definition_;
-    DBSchemaManager &schema_manager_;
+    DBODataSourceDefinition& definition_;
+    DBSchemaManager& schema_manager_;
 
     /// @brief Add new data source local key selection
     QComboBox* local_key_box_{nullptr};
@@ -84,10 +84,9 @@ private:
     QComboBox* altitude_box_{nullptr};
 
     /// @brief Updates a variable selection box
-    void updateVariableSelectionBox (QComboBox* box, const std::string& schema_name,
-                                     const std::string& meta_table_name, const std::string& value,
-                                     bool empty_allowed=false);
-
+    void updateVariableSelectionBox(QComboBox* box, const std::string& schema_name,
+                                    const std::string& meta_table_name, const std::string& value,
+                                    bool empty_allowed = false);
 };
 
-#endif // DBODATASOURCEDEFINITIONWIDGET_H
+#endif  // DBODATASOURCEDEFINITIONWIDGET_H

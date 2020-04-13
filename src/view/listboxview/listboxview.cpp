@@ -15,27 +15,27 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "listboxview.h"
-#include "listboxviewwidget.h"
-#include "listboxviewdatasource.h"
-#include "listboxviewdatawidget.h"
-#include "listboxviewconfigwidget.h"
-#include "logger.h"
-#include "viewselection.h"
-#include "atsdb.h"
-#include "dbobjectmanager.h"
 
 #include <QApplication>
 
-ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w,
-                         ViewManager &view_manager)
-    : View (class_id, instance_id, w, view_manager)
+#include "atsdb.h"
+#include "dbobjectmanager.h"
+#include "listboxviewconfigwidget.h"
+#include "listboxviewdatasource.h"
+#include "listboxviewdatawidget.h"
+#include "listboxviewwidget.h"
+#include "logger.h"
+#include "viewselection.h"
+
+ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
+                         ViewContainer* w, ViewManager& view_manager)
+    : View(class_id, instance_id, w, view_manager)
 {
-    registerParameter ("show_only_selected", &show_only_selected_, false);
-    registerParameter ("use_presentation", &use_presentation_, true);
-    registerParameter ("overwrite_csv", &overwrite_csv_, true);
-    registerParameter ("show_associations", &show_associations_, false);
+    registerParameter("show_only_selected", &show_only_selected_, false);
+    registerParameter("use_presentation", &use_presentation_, true);
+    registerParameter("overwrite_csv", &overwrite_csv_, true);
+    registerParameter("show_associations", &show_associations_, false);
 
     can_show_associations_ = ATSDB::instance().objectManager().hasAssociations();
 
@@ -58,45 +58,39 @@ ListBoxView::~ListBoxView()
     }
 }
 
-void ListBoxView::update (bool atOnce)
-{
+void ListBoxView::update(bool atOnce) {}
 
-}
-
-void ListBoxView::clearData()
-{
-
-}
+void ListBoxView::clearData() {}
 
 bool ListBoxView::init()
 {
     View::init();
 
-    createSubConfigurables ();
+    createSubConfigurables();
 
-    assert (data_source_);
+    assert(data_source_);
 
-    connect (data_source_, &ListBoxViewDataSource::loadingStartedSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingStartedSlot);
-    connect (data_source_, &ListBoxViewDataSource::updateDataSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::updateDataSlot);
+    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
+            &ListBoxViewDataWidget::loadingStartedSlot);
+    connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
+            &ListBoxViewDataWidget::updateDataSlot);
 
-    connect (widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
-    connect (widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
-             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
+    connect(widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
+    connect(widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
+            widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect (widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-             &ATSDB::instance().objectManager(), &DBObjectManager::loadSlot);
-    connect (data_source_, &ListBoxViewDataSource::loadingStartedSignal,
-             widget_->configWidget(), &ListBoxViewConfigWidget::loadingStartedSlot);
+    connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
+            &ATSDB::instance().objectManager(), &DBObjectManager::loadSlot);
+    connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
+            &ListBoxViewConfigWidget::loadingStartedSlot);
 
-    connect (this, &ListBoxView::showOnlySelectedSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
-    connect (this, &ListBoxView::usePresentationSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
-    connect (this, &ListBoxView::showAssociationsSignal,
-             widget_->getDataWidget(), &ListBoxViewDataWidget::showAssociationsSlot);
+    connect(this, &ListBoxView::showOnlySelectedSignal, widget_->getDataWidget(),
+            &ListBoxViewDataWidget::showOnlySelectedSlot);
+    connect(this, &ListBoxView::usePresentationSignal, widget_->getDataWidget(),
+            &ListBoxViewDataWidget::usePresentationSlot);
+    connect(this, &ListBoxView::showAssociationsSignal, widget_->getDataWidget(),
+            &ListBoxViewDataWidget::showAssociationsSlot);
 
     widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
@@ -105,58 +99,57 @@ bool ListBoxView::init()
     return true;
 }
 
-void ListBoxView::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void ListBoxView::generateSubConfigurable(const std::string& class_id,
+                                          const std::string& instance_id)
 {
-    logdbg  << "ListBoxView: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
-    if ( class_id == "ListBoxViewDataSource" )
+    logdbg << "ListBoxView: generateSubConfigurable: class_id " << class_id << " instance_id "
+           << instance_id;
+    if (class_id == "ListBoxViewDataSource")
     {
-        assert (!data_source_);
-        data_source_ = new ListBoxViewDataSource (class_id, instance_id, this);
+        assert(!data_source_);
+        data_source_ = new ListBoxViewDataSource(class_id, instance_id, this);
     }
-    else if( class_id == "ListBoxViewWidget" )
+    else if (class_id == "ListBoxViewWidget")
     {
-        widget_ = new ListBoxViewWidget (class_id, instance_id, this, this, central_widget_);
-        setWidget( widget_ );
+        widget_ = new ListBoxViewWidget(class_id, instance_id, this, this, central_widget_);
+        setWidget(widget_);
     }
     else
-        throw std::runtime_error ("ListBoxView: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("ListBoxView: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
-void ListBoxView::checkSubConfigurables ()
+void ListBoxView::checkSubConfigurables()
 {
     if (!data_source_)
     {
-        generateSubConfigurable ("ListBoxViewDataSource", "ListBoxViewDataSource0");
+        generateSubConfigurable("ListBoxViewDataSource", "ListBoxViewDataSource0");
     }
 
-    if( !widget_ )
+    if (!widget_)
     {
-        generateSubConfigurable ("ListBoxViewWidget", "ListBoxViewWidget0");
+        generateSubConfigurable("ListBoxViewWidget", "ListBoxViewWidget0");
     }
 }
 
-DBOVariableSet ListBoxView::getSet (const std::string& dbo_name)
+DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
-    assert (data_source_);
+    assert(data_source_);
 
     return data_source_->getSet()->getExistingInDBFor(dbo_name);
 }
 
-
-//void ListBoxView::selectionChanged()
+// void ListBoxView::selectionChanged()
 //{
 //    //  assert (data_source_);
 //    //  data_source_->updateSelection();
 //}
-//void ListBoxView::selectionToBeCleared()
+// void ListBoxView::selectionToBeCleared()
 //{
 
 //}
 
-bool ListBoxView::usePresentation() const
-{
-    return use_presentation_;
-}
+bool ListBoxView::usePresentation() const { return use_presentation_; }
 
 void ListBoxView::usePresentation(bool use_presentation)
 {
@@ -165,20 +158,11 @@ void ListBoxView::usePresentation(bool use_presentation)
     emit usePresentationSignal(use_presentation_);
 }
 
-bool ListBoxView::overwriteCSV() const
-{
-    return overwrite_csv_;
-}
+bool ListBoxView::overwriteCSV() const { return overwrite_csv_; }
 
-void ListBoxView::overwriteCSV(bool overwrite_csv)
-{
-    overwrite_csv_ = overwrite_csv;
-}
+void ListBoxView::overwriteCSV(bool overwrite_csv) { overwrite_csv_ = overwrite_csv; }
 
-bool ListBoxView::showOnlySelected() const
-{
-    return show_only_selected_;
-}
+bool ListBoxView::showOnlySelected() const { return show_only_selected_; }
 
 void ListBoxView::showOnlySelected(bool value)
 {
@@ -193,10 +177,7 @@ void ListBoxView::showOnlySelected(bool value)
     QApplication::restoreOverrideCursor();
 }
 
-bool ListBoxView::showAssociations() const
-{
-    return show_associations_;
-}
+bool ListBoxView::showAssociations() const { return show_associations_; }
 
 void ListBoxView::showAssociations(bool show_associations)
 {
@@ -206,19 +187,15 @@ void ListBoxView::showAssociations(bool show_associations)
     emit showAssociationsSignal(show_associations_);
 }
 
-bool ListBoxView::canShowAssociations() const
-{
-    return can_show_associations_;
-}
+bool ListBoxView::canShowAssociations() const { return can_show_associations_; }
 
-void ListBoxView::updateSelection ()
+void ListBoxView::updateSelection()
 {
     loginf << "ListBoxView: updateSelection";
-    assert (widget_);
+    assert(widget_);
 
     if (show_only_selected_)
         widget_->getDataWidget()->updateToSelection();
     else
-        widget_->getDataWidget()->resetModels(); // just updates the checkboxes
+        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
-

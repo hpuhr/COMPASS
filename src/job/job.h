@@ -25,51 +25,50 @@
 /**
  * @brief Encapsulates a work-package
  *
- * When created, is automatically added to the JobOrderer. Callbacks are performed either when the Job was
- * canceled (set as obsolete) or was completed (done). The work itself is defined in the execute function, which
- * must be overridden (and MUST set the done_ flag to true).
+ * When created, is automatically added to the JobOrderer. Callbacks are performed either when the
+ * Job was canceled (set as obsolete) or was completed (done). The work itself is defined in the
+ * execute function, which must be overridden (and MUST set the done_ flag to true).
  *
  * Important: The Job and the contained data must be deleted in the callback functions.
  */
 class Job : public QObject, public QRunnable
 {
     Q_OBJECT
-signals:
-    void doneSignal ();
+  signals:
+    void doneSignal();
     void obsoleteSignal();
 
-public:
+  public:
     /// @brief Constructor
-    Job(const std::string& name) : name_(name)
-    { setAutoDelete(false); }
+    Job(const std::string& name) : name_(name) { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}
 
     // @brief Main operation function
     virtual void run() = 0;
 
-    bool started () { return started_; }
+    bool started() { return started_; }
     // @brief Returns done flag
-    bool done () { return done_; }
-    void emitDone () { emit doneSignal(); }
+    bool done() { return done_; }
+    void emitDone() { emit doneSignal(); }
     // @brief Sets obsolete flag
-    void setObsolete () { obsolete_=true; }
+    void setObsolete() { obsolete_ = true; }
     // @brief Returns obsolete flag
-    bool obsolete () { return obsolete_; }
-    void emitObsolete () { emit doneSignal(); }
+    bool obsolete() { return obsolete_; }
+    void emitObsolete() { emit doneSignal(); }
 
-    const std::string &name() { return name_; }
+    const std::string& name() { return name_; }
 
-protected:
+  protected:
     std::string name_;
     ///
-    bool started_ {false};
+    bool started_{false};
     /// Done flag
-    bool done_ {false};
+    bool done_{false};
     /// Obsolete flag
-    bool obsolete_ {false};
+    bool obsolete_{false};
 
-    virtual void setDone () { done_=true; }
+    virtual void setDone() { done_ = true; }
 };
 
 #endif /* JOB_H_ */

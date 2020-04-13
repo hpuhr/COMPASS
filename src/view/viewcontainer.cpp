@@ -17,50 +17,52 @@
 
 #include "viewcontainer.h"
 
+#include "config.h"
+#include "files.h"
+#include "global.h"
+#include "listboxview.h"
+#include "logger.h"
+#include "managementwidget.h"
+#include "stringconv.h"
+#include "view.h"
 #include "viewcontainer.h"
 #include "viewcontainerconfigwidget.h"
-#include "config.h"
-#include "logger.h"
-
-#include "managementwidget.h"
-#include "view.h"
 #include "viewmanager.h"
-#include "listboxview.h"
-
-#include "stringconv.h"
-#include "global.h"
-#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
 #endif
 
 #include <QHBoxLayout>
-#include <QPushButton>
+#include <QInputDialog>
 #include <QMenu>
+#include <QPushButton>
 #include <QTabBar>
 #include <QTabWidget>
-#include <QInputDialog>
 
-unsigned int ViewContainer::view_count_=0;
+unsigned int ViewContainer::view_count_ = 0;
 
 using namespace Utils;
 
-ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent,
-                             ViewManager *view_manager, QTabWidget *tab_widget, int window_cnt)
-    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget),
-      window_cnt_ (window_cnt)
+ViewContainer::ViewContainer(const std::string& class_id, const std::string& instance_id,
+                             Configurable* parent, ViewManager* view_manager,
+                             QTabWidget* tab_widget, int window_cnt)
+    : QObject(),
+      Configurable(class_id, instance_id, parent),
+      view_manager_(*view_manager),
+      tab_widget_(tab_widget),
+      window_cnt_(window_cnt)
 {
-    logdbg  << "ViewContainer: constructor: creating gui elements";
-    assert (tab_widget_);
+    logdbg << "ViewContainer: constructor: creating gui elements";
+    assert(tab_widget_);
 
     //    QAction *template_action = menu_.addAction(tr("Save As Template"));
     //    connect(template_action, SIGNAL(triggered()), this, SLOT(saveViewTemplate()));
 
-    QAction *delete_action = menu_.addAction(tr("Close"));
+    QAction* delete_action = menu_.addAction(tr("Close"));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteView()));
 
-    createSubConfigurables ();
+    createSubConfigurables();
 }
 
 ViewContainer::~ViewContainer()
@@ -82,16 +84,17 @@ ViewContainer::~ViewContainer()
 
 void ViewContainer::addView(const std::string& class_name)
 {
-    generateSubConfigurable (class_name, class_name+std::to_string(view_count_));
+    generateSubConfigurable(class_name, class_name + std::to_string(view_count_));
 
     if (config_widget_)
         config_widget_->updateSlot();
 }
 
-//void ViewContainer::addTemplateView (std::string template_name)
+// void ViewContainer::addTemplateView (std::string template_name)
 //{
 //    std::string view_name = template_name+intToString(ViewContainerWidget::getViewCount());
-//    std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
+//    std::map<std::string, Configuration> &templates =
+//    ViewManager::getInstance().getConfiguration()
 //            .getConfigurationTemplates ();
 //    assert (templates.find (template_name) != templates.end());
 //    Configuration view_config = templates [template_name];
@@ -103,102 +106,100 @@ void ViewContainer::addView(const std::string& class_name)
 //    generateSubConfigurable (view_config.getClassId(), view_config.getInstanceId());
 //}
 
-void ViewContainer::addView (View *view)
+void ViewContainer::addView(View* view)
 {
-    assert (view);
+    assert(view);
     QWidget* w = view->getCentralWidget();
-    assert ( w );
+    assert(w);
 
-    views_.push_back( view );
-    int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
+    views_.push_back(view);
+    int index = tab_widget_->addTab(w, QString::fromStdString(view->getName()));
 
-    QPushButton *manage_button = new QPushButton();
-    manage_button->setIcon (QIcon(Files::getIconFilepath("edit.png").c_str()));
-    manage_button->setFixedSize (UI_ICON_SIZE);
+    QPushButton* manage_button = new QPushButton();
+    manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    manage_button->setFixedSize(UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));
-    connect (manage_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    connect(manage_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 
-    assert (view_manage_buttons_.find (manage_button) == view_manage_buttons_.end());
-    view_manage_buttons_ [manage_button] = view;
+    assert(view_manage_buttons_.find(manage_button) == view_manage_buttons_.end());
+    view_manage_buttons_[manage_button] = view;
     loginf << "ViewContainer: addView: view " << view->getName() << " added";
 }
 
-void ViewContainer::removeView (View *view)
+void ViewContainer::removeView(View* view)
 {
-    assert (view);
+    assert(view);
     QWidget* w = view->getCentralWidget();
-    assert ( w );
+    assert(w);
 
-    int id = tab_widget_->indexOf( view->getCentralWidget() );
-    std::vector<View*>::iterator it = std::find( views_.begin(), views_.end(), view );
+    int id = tab_widget_->indexOf(view->getCentralWidget());
+    std::vector<View*>::iterator it = std::find(views_.begin(), views_.end(), view);
 
-    if( id != -1)
-        tab_widget_->removeTab( id );
+    if (id != -1)
+        tab_widget_->removeTab(id);
 
-    if ( it != views_.end() )
-        views_.erase( it );
+    if (it != views_.end())
+        views_.erase(it);
 
-    bool found=false;
-    std::map <QPushButton*, View*>::iterator it2;
+    bool found = false;
+    std::map<QPushButton*, View*>::iterator it2;
     for (it2 = view_manage_buttons_.begin(); it2 != view_manage_buttons_.end(); it2++)
     {
         if (it2->second == view)
         {
-            found=true;
+            found = true;
             view_manage_buttons_.erase(it2);
             break;
         }
     }
-    assert (found);
+    assert(found);
 
     return;
 }
 
-void ViewContainer::deleteView ()
+void ViewContainer::deleteView()
 {
-    assert (last_active_manage_button_);
+    assert(last_active_manage_button_);
 
-    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
-    View *view = view_manage_buttons_ [last_active_manage_button_];
+    assert(view_manage_buttons_.find(last_active_manage_button_) != view_manage_buttons_.end());
+    View* view = view_manage_buttons_[last_active_manage_button_];
 
     loginf << "ViewContainer: deleteView: for view " << view->instanceId();
     delete view;
 
-    last_active_manage_button_=nullptr;
+    last_active_manage_button_ = nullptr;
 
     if (config_widget_)
         config_widget_->updateSlot();
 }
 
-const std::vector<View*>& ViewContainer::getViews() const
-{
-    return views_;
-}
+const std::vector<View*>& ViewContainer::getViews() const { return views_; }
 
-void ViewContainer::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void ViewContainer::generateSubConfigurable(const std::string& class_id,
+                                            const std::string& instance_id)
 {
-    if (class_id.compare ("ListBoxView") == 0)
+    if (class_id.compare("ListBoxView") == 0)
     {
-        ListBoxView* view = new ListBoxView ( class_id, instance_id, this, view_manager_);
-        unsigned int number = String::getAppendedInt (instance_id);
+        ListBoxView* view = new ListBoxView(class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt(instance_id);
 
         if (number >= view_count_)
-            view_count_ = number+1;
+            view_count_ = number + 1;
 
-        assert( view );
+        assert(view);
         view->init();
     }
 #if USE_EXPERIMENTAL_SOURCE == true
-    else if (class_id.compare ("OSGView") == 0)
+    else if (class_id.compare("OSGView") == 0)
     {
-        OSGView* view = new OSGView (class_id, instance_id, this, view_manager_);
-        unsigned int number = String::getAppendedInt (instance_id);
+        OSGView* view = new OSGView(class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt(instance_id);
         if (number >= view_count_)
-            view_count_ = number+1;
+            view_count_ = number + 1;
 
-        assert( view );
+        assert(view);
         view->init();
     }
 #endif
@@ -233,40 +234,41 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     //    view->init();
     //  }
     else
-        throw std::runtime_error ("ViewContainer: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("ViewContainer: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
-void ViewContainer::checkSubConfigurables ()
+void ViewContainer::checkSubConfigurables()
 {
     // move along sir
 }
 
-std::string ViewContainer::getWindowName ()
+std::string ViewContainer::getWindowName()
 {
     if (window_cnt_ == 0)
         return "MainWindow";
     else
-        return "Window"+std::to_string (window_cnt_);
+        return "Window" + std::to_string(window_cnt_);
 }
 
-ViewContainerConfigWidget *ViewContainer::configWidget ()
+ViewContainerConfigWidget* ViewContainer::configWidget()
 {
     if (!config_widget_)
     {
-        config_widget_ = new ViewContainerConfigWidget (this);
+        config_widget_ = new ViewContainerConfigWidget(this);
     }
 
-    assert (config_widget_);
+    assert(config_widget_);
     return config_widget_;
 }
 
-void ViewContainer::showMenuSlot ()
+void ViewContainer::showMenuSlot()
 {
-    last_active_manage_button_ = (QPushButton*)sender ();
-    menu_.exec( QCursor::pos() );
+    last_active_manage_button_ = (QPushButton*)sender();
+    menu_.exec(QCursor::pos());
 }
 
-//void ViewContainerWidget::saveViewTemplate ()
+// void ViewContainerWidget::saveViewTemplate ()
 //{
 //    assert (last_active_manage_button_);
 
@@ -287,4 +289,3 @@ void ViewContainer::showMenuSlot ()
 
 //    last_active_manage_button_=0;
 //}
-

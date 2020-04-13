@@ -19,6 +19,7 @@
 #define INSERTBUFFERDBJOB_H_
 
 #include <list>
+
 #include "job.h"
 
 class Buffer;
@@ -36,28 +37,32 @@ class InsertBufferDBJob : public Job
 {
     Q_OBJECT
 
-signals:
-    void insertProgressSignal (float percent);
+  signals:
+    void insertProgressSignal(float percent);
 
-public:
+  public:
     InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject, std::shared_ptr<Buffer> buffer,
-                      bool emit_change=true);
+                      bool emit_change = true);
 
     virtual ~InsertBufferDBJob();
 
-    virtual void run ();
+    virtual void run();
 
-    std::shared_ptr<Buffer> buffer () { assert (buffer_); return buffer_; }
+    std::shared_ptr<Buffer> buffer()
+    {
+        assert(buffer_);
+        return buffer_;
+    }
 
     bool emitChange() const;
 
-protected:
+  protected:
     DBInterface& db_interface_;
     DBObject& dbobject_;
     std::shared_ptr<Buffer> buffer_;
-    bool emit_change_ {true};
+    bool emit_change_{true};
 
-    void partialInsertBuffer (DBTable& table);
+    void partialInsertBuffer(DBTable& table);
 };
 
 #endif /* INSERTBUFFERDBJOB_H_ */

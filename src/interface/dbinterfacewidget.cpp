@@ -15,57 +15,58 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "dbinterfacewidget.h"
+
+#include <QComboBox>
 #include <QFileDialog>
-#include <QVBoxLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QRadioButton>
-#include <QTextEdit>
-#include <QPushButton>
 #include <QLineEdit>
-#include <QComboBox>
-#include <QGroupBox>
+#include <QPushButton>
+#include <QRadioButton>
 #include <QStackedWidget>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
 #include "atsdb.h"
-#include "dbinterfacewidget.h"
-#include "dbinterface.h"
 #include "dbconnection.h"
+#include "dbinterface.h"
+#include "global.h"
 #include "logger.h"
 #include "stringconv.h"
-#include "global.h"
 
 using namespace Utils;
 
-
-DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt::WindowFlags f)
-    : interface_(interface), connection_stack_ (nullptr)
+DBInterfaceWidget::DBInterfaceWidget(DBInterface& interface, QWidget* parent, Qt::WindowFlags f)
+    : interface_(interface), connection_stack_(nullptr)
 {
     setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QGroupBox *groupBox = new QGroupBox(tr("Database System"));
+    QGroupBox* groupBox = new QGroupBox(tr("Database System"));
     groupBox->setFont(font_bold);
-    QVBoxLayout *grplayout = new QVBoxLayout ();
+    QVBoxLayout* grplayout = new QVBoxLayout();
 
-    connection_stack_ = new QStackedWidget ();
+    connection_stack_ = new QStackedWidget();
 
-    const std::map<std::string, DBConnection*> &types = interface_.connections();
+    const std::map<std::string, DBConnection*>& types = interface_.connections();
     for (auto it : types)
     {
-        QRadioButton *radio = new QRadioButton(it.first.c_str(), this);
+        QRadioButton* radio = new QRadioButton(it.first.c_str(), this);
         connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
         if (interface_.usedConnection() == it.first)
-            radio->setChecked (true);
-        grplayout->addWidget (radio);
+            radio->setChecked(true);
+        grplayout->addWidget(radio);
 
         connection_stack_->addWidget(it.second->widget());
-        QObject::connect(it.second->widget(), SIGNAL(databaseOpenedSignal()),
-                         this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        QObject::connect(it.second->widget(), SIGNAL(databaseOpenedSignal()), this,
+                         SLOT(databaseOpenedSlot()),
+                         static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
     }
     groupBox->setLayout(grplayout);
     layout->addWidget(groupBox);
@@ -74,35 +75,32 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
 
     layout->addWidget(connection_stack_);
 
-    setLayout (layout);
+    setLayout(layout);
 
     if (interface_.usedConnection().size() > 0)
     {
-        useConnection (interface_.usedConnection());
+        useConnection(interface_.usedConnection());
     }
 }
 
-DBInterfaceWidget::~DBInterfaceWidget()
-{
-    connection_stack_ = nullptr;
-}
+DBInterfaceWidget::~DBInterfaceWidget() { connection_stack_ = nullptr; }
 
-void DBInterfaceWidget::databaseTypeSelectSlot ()
+void DBInterfaceWidget::databaseTypeSelectSlot()
 {
-    QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());
+    QRadioButton* radio = dynamic_cast<QRadioButton*>(QObject::sender());
     useConnection(radio->text().toStdString());
 }
 
-void DBInterfaceWidget::useConnection (std::string connection_type)
+void DBInterfaceWidget::useConnection(std::string connection_type)
 {
     interface_.useConnection(connection_type);
 
-    assert (connection_stack_);
+    assert(connection_stack_);
 
     connection_stack_->setCurrentWidget(interface_.connectionWidget());
 }
 
-void DBInterfaceWidget::databaseOpenedSlot ()
+void DBInterfaceWidget::databaseOpenedSlot()
 {
     logdbg << "DBInterfaceWidget: databaseOpenedSlot";
     emit databaseOpenedSignal();

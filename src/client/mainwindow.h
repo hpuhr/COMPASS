@@ -46,38 +46,38 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-signals:
-    void startedSignal ();
+  signals:
+    void startedSignal();
 
-private slots:
+  private slots:
     /// @brief Called when database was opened
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
-    void startSlot ();
+    void startSlot();
 
     /// @brief Handles key press events
-    //void keyPressEvent ( QKeyEvent * event );
+    // void keyPressEvent ( QKeyEvent * event );
 
-public:
+  public:
     /// @brief Constructor
     MainWindow();
     /// @brief Destructor
     virtual ~MainWindow();
 
-    void disableConfigurationSaving ();
+    void disableConfigurationSaving();
 
-protected:
+  protected:
     /// Widget stack for startup to usage switch
-    QTabWidget* tab_widget_ {nullptr};
+    QTabWidget* tab_widget_{nullptr};
 
-    TaskManagerWidget* task_manager_widget_ {nullptr};
+    TaskManagerWidget* task_manager_widget_{nullptr};
 
-    ManagementWidget* management_widget_ {nullptr};
+    ManagementWidget* management_widget_{nullptr};
 
-    bool save_configuration_ {true};
+    bool save_configuration_{true};
 
     /// @brief Called when application closes
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent* event);
 };
 
 //}

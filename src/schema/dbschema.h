@@ -18,10 +18,11 @@
 #ifndef DBSCHEMA_H_
 #define DBSCHEMA_H_
 
-#include "configurable.h"
-
 #include <qobject.h>
+
 #include <cassert>
+
+#include "configurable.h"
 
 class DBTable;
 class MetaDBTable;
@@ -37,72 +38,77 @@ class DBInterface;
 class DBSchema : public QObject, public Configurable
 {
     Q_OBJECT
-signals:
+  signals:
     void changedSignal();
 
-public:
+  public:
     /// @brief Constructor
     DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent,
              DBInterface& db_interface);
     /// @brief Destructor
     virtual ~DBSchema();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Sets the schema name
-    void name (const std::string& name) { assert (name.size() != 0); name_=name; }
+    void name(const std::string& name)
+    {
+        assert(name.size() != 0);
+        name_ = name;
+    }
     /// @brief Returns the schema name
-    const std::string& name () const { return name_; }
+    const std::string& name() const { return name_; }
 
     /// @brief Returns the DBTable with the supplied name
-    DBTable& table (const std::string& name) const;
+    DBTable& table(const std::string& name) const;
     /// @brief returns flag if a table with the given name exists
-    bool hasTable (const std::string& name) const { return tables_.find(name) != tables_.end(); }
-    void addTable (const std::string& name);
-    void deleteTable (const std::string& name);
+    bool hasTable(const std::string& name) const { return tables_.find(name) != tables_.end(); }
+    void addTable(const std::string& name);
+    void deleteTable(const std::string& name);
 
-    bool hasMetaTable (const std::string& name) const;
-    MetaDBTable &metaTable (const std::string& name) const;
-    void addMetaTable (const std::string& name, const std::string& main_table_name);
-    void deleteMetaTable (const std::string& name);
+    bool hasMetaTable(const std::string& name) const;
+    MetaDBTable& metaTable(const std::string& name) const;
+    void addMetaTable(const std::string& name, const std::string& main_table_name);
+    void deleteMetaTable(const std::string& name);
 
     /// @brief Returns container with all tables
-    const std::map <std::string, DBTable*>& tables () const { return tables_; }
+    const std::map<std::string, DBTable*>& tables() const { return tables_; }
     /// @brief Returns container with all meta-tables
-    const std::map <std::string, MetaDBTable*>& metaTables ()  const{ return meta_tables_; }
+    const std::map<std::string, MetaDBTable*>& metaTables() const { return meta_tables_; }
 
     /// @brief Updates table container (if name of a table changed)
-    void updateTables ();
+    void updateTables();
     /// @brief Updates meta-table container (if name of meta-table changed)
-    void updateMetaTables ();
+    void updateMetaTables();
 
-    void populateTable (const std::string& name);
+    void populateTable(const std::string& name);
 
-    DBSchemaWidget* widget ();
+    DBSchemaWidget* widget();
 
-    void lock ();
-    void updateOnDatabase(); // check what informations is present in the current db
+    void lock();
+    void updateOnDatabase();  // check what informations is present in the current db
 
-    bool existsInDB () const { return exists_in_db_; }
+    bool existsInDB() const { return exists_in_db_; }
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 
-private:
+  private:
     DBInterface& db_interface_;
     /// Name of the schema
     std::string name_;
 
-    bool locked_ {false};
+    bool locked_{false};
 
     /// Container with all tables (table name -> DBTable)
-    std::map <std::string, DBTable*> tables_;
+    std::map<std::string, DBTable*> tables_;
     /// Container with all meta-tables (meta-table name -> MetaDBTable)
-    std::map <std::string, MetaDBTable*> meta_tables_;
+    std::map<std::string, MetaDBTable*> meta_tables_;
 
-    DBSchemaWidget* widget_ {nullptr};
+    DBSchemaWidget* widget_{nullptr};
 
-    bool exists_in_db_ {false};
+    bool exists_in_db_{false};
 };
 
 #endif /* DBSCHEMA_H_ */

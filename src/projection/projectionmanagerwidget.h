@@ -28,18 +28,18 @@ class ProjectionManagerWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void selectedObjectParserSlot(const QString& name);
 
-public:
-    ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent=0, Qt::WindowFlags f=0);
+  public:
+    ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent = 0,
+                            Qt::WindowFlags f = 0);
     virtual ~ProjectionManagerWidget();
 
-protected:
+  protected:
     ProjectionManager& projection_manager_;
 
-    QComboBox* projection_box_ {nullptr};
+    QComboBox* projection_box_{nullptr};
 };
-
 
 #endif /* PROJECTIONMANAGERWIDGET_H_ */

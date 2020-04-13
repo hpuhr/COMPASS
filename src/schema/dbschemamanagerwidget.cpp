@@ -15,91 +15,88 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 
-#include "dbtable.h"
-#include "metadbtable.h"
-#include "dbschema.h"
-#include "dbschemawidget.h"
-#include "dbschemamanager.h"
-#include "logger.h"
-#include "global.h"
-#include "atsdb.h"
-#include "dbinterface.h"
-
-#include <QLabel>
-#include <QPushButton>
 #include <QComboBox>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QStackedWidget>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
-DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent, Qt::WindowFlags f)
- : QWidget(parent), manager_(manager)
+#include "atsdb.h"
+#include "dbinterface.h"
+#include "dbschema.h"
+#include "dbschemamanager.h"
+#include "dbschemawidget.h"
+#include "dbtable.h"
+#include "global.h"
+#include "logger.h"
+#include "metadbtable.h"
+
+DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager& manager, QWidget* parent,
+                                             Qt::WindowFlags f)
+    : QWidget(parent), manager_(manager)
 {
-    //unsigned int frame_width = FRAME_SIZE;
+    // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
     font_bold.setBold(true);
 
-//    setFrameStyle(QFrame::Panel | QFrame::Raised);
-//    setLineWidth(frame_width);
+    //    setFrameStyle(QFrame::Panel | QFrame::Raised);
+    //    setLineWidth(frame_width);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel *db_schema_label = new QLabel (tr("Database Schema"));
-    db_schema_label->setFont (font_bold);
-    layout->addWidget (db_schema_label);
+    QLabel* db_schema_label = new QLabel(tr("Database Schema"));
+    db_schema_label->setFont(font_bold);
+    layout->addWidget(db_schema_label);
 
-    schema_select_ = new QComboBox ();
-    connect (schema_select_, SIGNAL(activated(const QString &)),
-             this, SLOT(schemaSelectedSlot(const QString&)));
+    schema_select_ = new QComboBox();
+    connect(schema_select_, SIGNAL(activated(const QString&)), this,
+            SLOT(schemaSelectedSlot(const QString&)));
 
     layout->addWidget(schema_select_);
 
-    QHBoxLayout *button_layout = new QHBoxLayout ();
+    QHBoxLayout* button_layout = new QHBoxLayout();
 
     add_button_ = new QPushButton(tr("Add"));
     connect(add_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::addSchemaSlot);
-    button_layout->addWidget (add_button_);
+    button_layout->addWidget(add_button_);
 
     delete_button_ = new QPushButton(tr("Delete"));
     connect(delete_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::deleteSchemaSlot);
-    button_layout->addWidget (delete_button_);
+    button_layout->addWidget(delete_button_);
 
     lock_button_ = new QPushButton(tr("Lock"));
     connect(lock_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::lockSchemaSlot);
-    button_layout->addWidget (lock_button_);
+    button_layout->addWidget(lock_button_);
 
     layout->addLayout(button_layout);
     layout->addStretch();
 
-    schema_widgets_ = new QStackedWidget ();
+    schema_widgets_ = new QStackedWidget();
     layout->addWidget(schema_widgets_);
 
     updateSchemas();
 
-    setLayout (layout);
+    setLayout(layout);
 
-    //setDisabled(true);
+    // setDisabled(true);
 }
 
-DBSchemaManagerWidget::~DBSchemaManagerWidget()
-{
-}
+DBSchemaManagerWidget::~DBSchemaManagerWidget() {}
 
 void DBSchemaManagerWidget::addSchemaSlot()
 {
     logdbg << "DBSchemaManagerWidget: addSchemaSlot";
 
     bool ok;
-    QString text = QInputDialog::getText(this, tr("Schema Name"),
-                                         tr("Specify a (unique) schema name:"), QLineEdit::Normal,
-                                         "", &ok);
+    QString text = QInputDialog::getText(
+        this, tr("Schema Name"), tr("Specify a (unique) schema name:"), QLineEdit::Normal, "", &ok);
 
     if (ok && !text.isEmpty())
     {
@@ -108,16 +105,16 @@ void DBSchemaManagerWidget::addSchemaSlot()
     }
 }
 
-void DBSchemaManagerWidget::deleteSchemaSlot ()
+void DBSchemaManagerWidget::deleteSchemaSlot()
 {
     logdbg << "DBSchemaManagerWidget: deleteSchemaSlot";
 
     manager_.deleteCurrentSchema();
 
-    updateSchemas ();
+    updateSchemas();
 }
 
-void DBSchemaManagerWidget::lockSchemaSlot ()
+void DBSchemaManagerWidget::lockSchemaSlot()
 {
     logdbg << "DBSchemaManagerWidget: lockSchemaSlot";
 
@@ -133,7 +130,7 @@ void DBSchemaManagerWidget::lockSchemaSlot ()
     emit schemaLockedSignal();
 }
 
-void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
+void DBSchemaManagerWidget::schemaSelectedSlot(const QString& value)
 {
     loginf << "DBSchemaManagerWidget: schemaSelectedSlot: '" << value.toStdString() << "'";
 
@@ -142,11 +139,13 @@ void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
         manager_.setCurrentSchema(value.toStdString());
 
         if (!manager_.getCurrentSchema().existsInDB())
-            schema_select_->setStyleSheet("QComboBox { background: rgb(255, 100, 100); selection-background-color:"
-                                          " rgb(255, 200, 200); }");
+            schema_select_->setStyleSheet(
+                "QComboBox { background: rgb(255, 100, 100); selection-background-color:"
+                " rgb(255, 200, 200); }");
         else
-            schema_select_->setStyleSheet("QComboBox { background: rgb(255, 255, 255); selection-background-color:"
-                                         " rgb(200, 200, 200); }");
+            schema_select_->setStyleSheet(
+                "QComboBox { background: rgb(255, 255, 255); selection-background-color:"
+                " rgb(200, 200, 200); }");
 
         showCurrentSchemaWidget();
 
@@ -156,26 +155,26 @@ void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
         delete_button_->setDisabled(true);
 }
 
-void DBSchemaManagerWidget::lock ()
+void DBSchemaManagerWidget::lock()
 {
     locked_ = true;
 
-    assert (schema_select_);
-    schema_select_->setDisabled (true);
+    assert(schema_select_);
+    schema_select_->setDisabled(true);
 
-    assert (add_button_);
-    add_button_->setDisabled (true);
+    assert(add_button_);
+    add_button_->setDisabled(true);
 
-    assert (delete_button_);
-    delete_button_->setDisabled (true);
+    assert(delete_button_);
+    delete_button_->setDisabled(true);
 
-    assert (lock_button_);
-    lock_button_->setDisabled (true);
+    assert(lock_button_);
+    lock_button_->setDisabled(true);
 }
 
 void DBSchemaManagerWidget::updateSchemas()
 {
-    assert (schema_select_);
+    assert(schema_select_);
 
     schema_select_->clear();
 
@@ -183,17 +182,17 @@ void DBSchemaManagerWidget::updateSchemas()
 
     for (auto it : manager_.getSchemas())
     {
-        schema_select_->addItem (it.first.c_str());
+        schema_select_->addItem(it.first.c_str());
     }
 
     if (manager_.hasCurrentSchema())
     {
         std::string current_schema = manager_.getCurrentSchemaName();
         int index = schema_select_->findText(current_schema.c_str());
-        if (index != -1) // -1 for not found
+        if (index != -1)  // -1 for not found
         {
-           schema_select_->setCurrentIndex(index);
-           showCurrentSchemaWidget();
+            schema_select_->setCurrentIndex(index);
+            showCurrentSchemaWidget();
         }
         else
             schema_wrong = true;
@@ -205,35 +204,36 @@ void DBSchemaManagerWidget::updateSchemas()
         schema_wrong = true;
 
     if (schema_wrong && ATSDB::instance().interface().ready())
-        schema_select_->setStyleSheet("QComboBox { background: rgb(255, 100, 100); selection-background-color:"
-                                      " rgb(255, 200, 200); }");
+        schema_select_->setStyleSheet(
+            "QComboBox { background: rgb(255, 100, 100); selection-background-color:"
+            " rgb(255, 200, 200); }");
     else
-        schema_select_->setStyleSheet("QComboBox { background: rgb(255, 255, 255); selection-background-color:"
-                                     " rgb(200, 200, 200); }");
+        schema_select_->setStyleSheet(
+            "QComboBox { background: rgb(255, 255, 255); selection-background-color:"
+            " rgb(200, 200, 200); }");
 }
 
-void DBSchemaManagerWidget::showCurrentSchemaWidget ()
+void DBSchemaManagerWidget::showCurrentSchemaWidget()
 {
-    assert (schema_widgets_);
+    assert(schema_widgets_);
     while (schema_widgets_->count() > 0)
         schema_widgets_->removeWidget(schema_widgets_->widget(0));
 
     if (manager_.hasCurrentSchema())
     {
-        DBSchemaWidget *widget = manager_.getCurrentSchema().widget();
+        DBSchemaWidget* widget = manager_.getCurrentSchema().widget();
         schema_widgets_->addWidget(widget);
     }
 }
 
-
-void DBSchemaManagerWidget::databaseOpenedSlot ()
+void DBSchemaManagerWidget::databaseOpenedSlot()
 {
     setDisabled(false);
     updateSchemas();
 }
 
 // and who are you? the proud lord said...
-//void DBSchemaWidget::addRDLSchema ()
+// void DBSchemaWidget::addRDLSchema ()
 //{
 //    assert (new_schema_name_edit_);
 //    manager_.addRDLSchema(new_schema_name_edit_->text().toStdString());

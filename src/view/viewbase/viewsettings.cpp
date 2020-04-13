@@ -20,13 +20,9 @@
 /**
 @brief Constructor.
 */
-ViewSettings::ViewSettings()
-{
-}
+ViewSettings::ViewSettings() {}
 
 /**
 @brief Destructor.
 */
-ViewSettings::~ViewSettings()
-{
-}
+ViewSettings::~ViewSettings() {}

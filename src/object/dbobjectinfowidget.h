@@ -35,25 +35,25 @@ class DBObjectInfoWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void loadChangedSlot();
     void updateSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBObjectInfoWidget(DBObject& object, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBObjectInfoWidget(DBObject& object, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBObjectInfoWidget();
 
-private:
+  private:
     /// @brief DBObject to be managed
-    DBObject &object_;
+    DBObject& object_;
 
-    QGridLayout* main_layout_ {nullptr};
-    QCheckBox* main_check_ {nullptr};
+    QGridLayout* main_layout_{nullptr};
+    QCheckBox* main_check_{nullptr};
 
-    QLabel* status_label_ {nullptr};
-    QLabel* loaded_count_label_ {nullptr};
+    QLabel* status_label_{nullptr};
+    QLabel* loaded_count_label_{nullptr};
 };
 
 #endif /* DBOBJECTINFOWIDGET_H_ */

@@ -24,8 +24,8 @@ class TaskManagerLogWidget : public QPlainTextEdit
 {
     Q_OBJECT
 
-public:
-    TaskManagerLogWidget(QWidget* parent=nullptr);
+  public:
+    TaskManagerLogWidget(QWidget* parent = nullptr);
 
     void appendSuccess(const std::string& text);
     void appendInfo(const std::string& text);
@@ -33,4 +33,4 @@ public:
     void appendError(const std::string& text);
 };
 
-#endif // TASKMANAGERLOGWIDGET_H
+#endif  // TASKMANAGERLOGWIDGET_H

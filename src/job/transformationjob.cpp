@@ -16,8 +16,9 @@
  */
 
 #include "TransformationJob.h"
-#include "Transformation.h"
+
 #include "Logger.h"
+#include "Transformation.h"
 #include "WorkerThreadManager.h"
 
 /**
@@ -25,38 +26,35 @@
  *
  * \param transformation encapsulates working package
  */
-TransformationJob::TransformationJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-    boost::function<void (Job*)> obsolete_function, Transformation *transformation)
-: Job (orderer, done_function, obsolete_function)
+TransformationJob::TransformationJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                                     boost::function<void(Job*)> obsolete_function,
+                                     Transformation* transformation)
+    : Job(orderer, done_function, obsolete_function)
 {
-  WorkerThreadManager::getInstance().addJob(this);
+    WorkerThreadManager::getInstance().addJob(this);
 
-  logdbg  << "TransformationJob: constructor";
+    logdbg << "TransformationJob: constructor";
 
-  assert (transformation);
-  transformation_=transformation;
-
+    assert(transformation);
+    transformation_ = transformation;
 }
 
-TransformationJob::~TransformationJob()
-{
-}
+TransformationJob::~TransformationJob() {}
 
 /**
  * Calls the transformation's execute function
  */
-void TransformationJob::execute ()
+void TransformationJob::execute()
 {
-  logdbg  << "TransformationJob: execute";
-  assert (!done_);
-  assert (transformation_);
-  transformation_->doExecute();
-  done_=true;
+    logdbg << "TransformationJob: execute";
+    assert(!done_);
+    assert(transformation_);
+    transformation_->doExecute();
+    done_ = true;
 }
 
-Transformation *TransformationJob::getTransformation ()
+Transformation* TransformationJob::getTransformation()
 {
-  assert (transformation_);
-  return transformation_;
+    assert(transformation_);
+    return transformation_;
 }
-

@@ -15,10 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef DBOVARIABLESELECTIONWIDGET_H
 #define DBOVARIABLESELECTIONWIDGET_H
-
 
 #include <QFrame>
 #include <QMenu>
@@ -28,8 +26,7 @@ class QLabel;
 class DBOVariable;
 class MetaDBOVariable;
 
-
-//typedef struct {
+// typedef struct {
 //    std::string id;
 //    unsigned int dbo_type;
 //} SelectionId;
@@ -37,27 +34,26 @@ class MetaDBOVariable;
 /**
  * @brief Widget for selection of a DBOVariable
  *
- * Selection is made using a context menu (which is triggered by a button), definition of the variable is shown in two
- * QLineEdit fields. Provides getter and setter methods for access.
+ * Selection is made using a context menu (which is triggered by a button), definition of the
+ * variable is shown in two QLineEdit fields. Provides getter and setter methods for access.
  */
 class DBOVariableSelectionWidget : public QFrame
 {
     Q_OBJECT
 
-protected slots:
+  protected slots:
     /// @brief Slot for menu triggered action
     void triggerSlot(QAction* action);
     /// @brief Slot for show menu
     void showMenuSlot();
 
-signals:
+  signals:
     /// @brief Signal if variable was changed
     void selectionChanged();
 
-
-public:
+  public:
     /// @brief Constructor without variable
-    DBOVariableSelectionWidget (bool h_box=true, QWidget* parent=nullptr );
+    DBOVariableSelectionWidget(bool h_box = true, QWidget* parent = nullptr);
     /// @brief Destructor
     ~DBOVariableSelectionWidget();
 
@@ -66,14 +62,14 @@ public:
     /// @brief Return selected variable
     DBOVariable& selectedVariable() const;
     /// @brief Sets the selected variable
-    void selectedVariable (DBOVariable &variable);
+    void selectedVariable(DBOVariable& variable);
 
     /// @brief Returns if a variable is selected
     bool hasMetaVariable() const { return meta_variable_selected_; }
     /// @brief Return selected variable
     MetaDBOVariable& selectedMetaVariable() const;
     /// @brief Sets the selected variable
-    void selectedMetaVariable (MetaDBOVariable &variable);
+    void selectedMetaVariable(MetaDBOVariable& variable);
 
     bool showMetaVariables() const;
     void showMetaVariables(bool show_meta_variables);
@@ -81,7 +77,7 @@ public:
     bool showMetaVariablesOnly() const;
     void showMetaVariablesOnly(bool show_meta_variables_only);
 
-    void showDBOOnly(const std::string &only_dbo_name);
+    void showDBOOnly(const std::string& only_dbo_name);
     void disableShowDBOOnly();
 
     bool showDBOOnly() const;
@@ -93,30 +89,29 @@ public:
     bool showExistingInDBOnly() const;
     void showExistingInDBOnly(bool show);
 
-private:
+  private:
     /// Variable type information
-    QLabel* object_label_ {nullptr};
+    QLabel* object_label_{nullptr};
     /// Variable name information
-    QLabel* variable_label_ {nullptr};
+    QLabel* variable_label_{nullptr};
     /// Context menu for variable selection
     QMenu menu_;
 
-    bool variable_selected_ {false};
-    bool meta_variable_selected_ {false};
+    bool variable_selected_{false};
+    bool meta_variable_selected_{false};
 
-    bool show_empty_variable_ {true};
+    bool show_empty_variable_{true};
 
-    bool show_meta_variables_ {false};
-    bool show_meta_variables_only_ {false};
+    bool show_meta_variables_{false};
+    bool show_meta_variables_only_{false};
 
-    bool show_existing_in_db_only_ {false};
+    bool show_existing_in_db_only_{false};
 
-    bool show_dbo_only_ {false};
+    bool show_dbo_only_{false};
     std::string only_dbo_name_;
 
     /// @brief Updates selection menu entries
     void updateMenuEntries();
-
 };
 
-#endif //DBOVARIABLESELECTIONWIDGET_H
+#endif  // DBOVARIABLESELECTIONWIDGET_H

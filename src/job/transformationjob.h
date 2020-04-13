@@ -29,22 +29,23 @@ class Transformation;
  */
 class TransformationJob : public Job
 {
-public:
-  // @brief Constructor
-  TransformationJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-      boost::function<void (Job*)> obsolete_function, Transformation *transformation);
-  // @brief Desctructor
-  virtual ~TransformationJob();
+  public:
+    // @brief Constructor
+    TransformationJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                      boost::function<void(Job*)> obsolete_function,
+                      Transformation* transformation);
+    // @brief Desctructor
+    virtual ~TransformationJob();
 
-  // @brief Main operation function
-  virtual void execute ();
+    // @brief Main operation function
+    virtual void execute();
 
-  // @brief Returns held Transformation
-  Transformation *getTransformation();
+    // @brief Returns held Transformation
+    Transformation* getTransformation();
 
-protected:
-  /// Encapsulation of the working package
-  Transformation *transformation_;
+  protected:
+    /// Encapsulation of the working package
+    Transformation* transformation_;
 };
 
 #endif /* TRANSFORMATIONJOB_H_ */

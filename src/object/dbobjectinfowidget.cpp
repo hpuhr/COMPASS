@@ -15,49 +15,46 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QLineEdit>
-#include <QVBoxLayout>
+#include "dbobjectinfowidget.h"
+
+#include <QCheckBox>
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QComboBox>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QCheckBox>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 #include "dbobject.h"
-#include "dbobjectinfowidget.h"
 #include "dbovariable.h"
-#include "logger.h"
 #include "global.h"
+#include "logger.h"
 
-
-DBObjectInfoWidget::DBObjectInfoWidget(DBObject &object, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object)
+DBObjectInfoWidget::DBObjectInfoWidget(DBObject& object, QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f), object_(object)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    main_layout_ = new QGridLayout ();
+    main_layout_ = new QGridLayout();
 
-    main_check_ = new QCheckBox (object.name().c_str());
-    connect (main_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
-    main_check_->setFont (font_bold);
-    main_layout_->addWidget (main_check_);
+    main_check_ = new QCheckBox(object.name().c_str());
+    connect(main_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
+    main_check_->setFont(font_bold);
+    main_layout_->addWidget(main_check_);
 
     updateSlot();
 
-    setLayout (main_layout_);
+    setLayout(main_layout_);
 }
 
-DBObjectInfoWidget::~DBObjectInfoWidget()
-{
-
-}
+DBObjectInfoWidget::~DBObjectInfoWidget() {}
 
 void DBObjectInfoWidget::loadChangedSlot()
 {
-    assert (main_check_);
+    assert(main_check_);
 
     object_.loadingWanted(main_check_->checkState() == Qt::Checked);
     logdbg << "DBObjectInfoWidget: loadChangedSlot: wanted " << object_.loadingWanted();
@@ -65,7 +62,7 @@ void DBObjectInfoWidget::loadChangedSlot()
 
 void DBObjectInfoWidget::updateSlot()
 {
-    assert (main_check_);
+    assert(main_check_);
     if (!object_.hasData())
     {
         main_check_->setEnabled(false);
@@ -75,30 +72,32 @@ void DBObjectInfoWidget::updateSlot()
 
     if (!status_label_)
     {
-        assert (main_layout_);
-        assert (!loaded_count_label_);
+        assert(main_layout_);
+        assert(!loaded_count_label_);
 
-        status_label_ = new QLabel (object_.status().c_str());
+        status_label_ = new QLabel(object_.status().c_str());
         status_label_->setAlignment(Qt::AlignRight);
         main_layout_->addWidget(status_label_, 0, 1);
 
-        main_layout_->addWidget(new QLabel ("Loaded"), 1, 0);
+        main_layout_->addWidget(new QLabel("Loaded"), 1, 0);
 
-        loaded_count_label_ = new QLabel ("?");
+        loaded_count_label_ = new QLabel("?");
         loaded_count_label_->setAlignment(Qt::AlignRight);
         main_layout_->addWidget(loaded_count_label_, 1, 1);
 
         object_.loadingWanted(true);
     }
 
-    assert (main_check_);
-    assert (loaded_count_label_);
+    assert(main_check_);
+    assert(loaded_count_label_);
 
     main_check_->setEnabled(object_.hasData());
     main_check_->setChecked(object_.loadingWanted());
     status_label_->setText(object_.status().c_str());
 
-    logdbg << "DBObjectInfoWidget: updateSlot: " << object_.name() << " loaded " << object_.loadedCount();
+    logdbg << "DBObjectInfoWidget: updateSlot: " << object_.name() << " loaded "
+           << object_.loadedCount();
 
-    loaded_count_label_->setText(QString::number(object_.loadedCount())+" / "+QString::number(object_.count()));
+    loaded_count_label_->setText(QString::number(object_.loadedCount()) + " / " +
+                                 QString::number(object_.count()));
 }

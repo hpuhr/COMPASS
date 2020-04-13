@@ -38,52 +38,52 @@ class DBObjectManagerLoadWidget : public QFrame
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     /// @brief Called when the order-by variable was changed
-    void orderVariableChanged ();
+    void orderVariableChanged();
     /// @brief Called when the use order checkbox is un/checked
-    void toggleUseOrder ();
+    void toggleUseOrder();
     /// @brief Called when order ascending checkbox is un/checked
-    void toggleOrderAscending ();
+    void toggleOrderAscending();
 
-    void toggleUseFilters ();
-    void toggleUseLimit ();
+    void toggleUseFilters();
+    void toggleUseLimit();
     /// @brief Called when limit minimum is changed
     void limitMinChanged();
     /// @brief Called when limit maximum is changed
     void limitMaxChanged();
 
-    void loadButtonSlot ();
-    void updateSlot ();
+    void loadButtonSlot();
+    void updateSlot();
 
-public:
+  public:
     /// @brief Constructor
     DBObjectManagerLoadWidget(DBObjectManager& object_manager);
     /// @brief Destructor
     virtual ~DBObjectManagerLoadWidget();
 
-    void loadingDone ();
+    void loadingDone();
 
-private:
+  private:
     DBObjectManager& object_manager_;
-    QVBoxLayout* info_layout_ {nullptr};
+    QVBoxLayout* info_layout_{nullptr};
 
-    QLabel* associations_label_ {nullptr};
+    QLabel* associations_label_{nullptr};
 
-    QCheckBox* filters_check_ {nullptr};
-    QCheckBox* order_check_ {nullptr};
-    QCheckBox* order_ascending_check_ {nullptr};
+    QCheckBox* filters_check_{nullptr};
+    QCheckBox* order_check_{nullptr};
+    QCheckBox* order_ascending_check_{nullptr};
     /// Order-by variable selection widget
-    DBOVariableSelectionWidget* order_variable_widget_ {nullptr};
-    QCheckBox* limit_check_ {nullptr};
+    DBOVariableSelectionWidget* order_variable_widget_{nullptr};
+    QCheckBox* limit_check_{nullptr};
     /// Limit minimum edit field
-    QLineEdit* limit_min_edit_ {nullptr};
+    QLineEdit* limit_min_edit_{nullptr};
     /// Limit maximum edit field
-    QLineEdit* limit_max_edit_ {nullptr};
+    QLineEdit* limit_max_edit_{nullptr};
 
-    QPushButton* load_button_ {nullptr};
+    QPushButton* load_button_{nullptr};
 
-    bool loading_ {false};
+    bool loading_{false};
 };
 
 #endif /* DBOBJECTMANAGERINFOWIDGET_H_ */

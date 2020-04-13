@@ -21,8 +21,8 @@
 #include <QComboBox>
 #include <stdexcept>
 
-#include "global.h"
 #include "dbovariable.h"
+#include "global.h"
 #include "logger.h"
 
 /**
@@ -32,30 +32,30 @@ class StringRepresentationComboBox : public QComboBox
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted if representation was changed
     void changedRepresentation();
 
-public slots:
+  public slots:
     /// @brief Sets the representation
-    void changedSlot ()
+    void changedSlot()
     {
         loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
         variable_->representation(representation());
     }
 
-
-public:
+  public:
     /// @brief Constructor
-    StringRepresentationComboBox(DBOVariable &variable, QWidget * parent = 0)
-    : QComboBox(parent), variable_(&variable)
+    StringRepresentationComboBox(DBOVariable& variable, QWidget* parent = 0)
+        : QComboBox(parent), variable_(&variable)
     {
         for (auto it : DBOVariable::Representations())
-            addItem (it.second.c_str());
+            addItem(it.second.c_str());
 
-        update ();
+        update();
 
-        //connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
+        // connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation()
+        // ));
         connect(this, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changedSlot()));
     }
 
@@ -63,34 +63,33 @@ public:
     virtual ~StringRepresentationComboBox() {}
 
     /// @brief Returns the currently selected representation
-    DBOVariable::Representation representation ()
+    DBOVariable::Representation representation()
     {
         std::string text = currentText().toStdString();
         return DBOVariable::stringToRepresentation(text);
     }
 
     /// @brief Sets the currently selected representation
-    void representation (DBOVariable::Representation type)
+    void representation(DBOVariable::Representation type)
     {
-        setCurrentText (DBOVariable::representationToString(type).c_str());
+        setCurrentText(DBOVariable::representationToString(type).c_str());
     }
 
-    void setVariable (DBOVariable& variable)
+    void setVariable(DBOVariable& variable)
     {
         variable_ = &variable;
 
         update();
     }
 
-protected:
+  protected:
     /// Used variable
-    DBOVariable* variable_ {nullptr};
+    DBOVariable* variable_{nullptr};
 
-    void update ()
+    void update()
     {
-        setCurrentText (DBOVariable::representationToString(variable_->representation()).c_str());
+        setCurrentText(DBOVariable::representationToString(variable_->representation()).c_str());
     }
 };
-
 
 #endif /* STRINGREPRESENTATIONCOMBOBOX_H_ */

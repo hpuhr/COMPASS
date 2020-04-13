@@ -18,12 +18,13 @@
 #ifndef DBOBJECTMANAGER_H_
 #define DBOBJECTMANAGER_H_
 
-#include <vector>
 #include <qobject.h>
 
-#include "singleton.h"
+#include <vector>
+
 #include "configurable.h"
 #include "global.h"
+#include "singleton.h"
 
 class ATSDB;
 class DBObject;
@@ -43,29 +44,29 @@ class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-public slots:
-    //void schemaLockedSlot ();
-    void loadSlot ();
-    void updateSchemaInformationSlot ();
-    void databaseContentChangedSlot ();
-    void loadingDoneSlot (DBObject& object);
+  public slots:
+    // void schemaLockedSlot ();
+    void loadSlot();
+    void updateSchemaInformationSlot();
+    void databaseContentChangedSlot();
+    void loadingDoneSlot(DBObject& object);
 
-signals:
-    void dbObjectsChangedSignal ();
-    void schemaChangedSignal ();
+  signals:
+    void dbObjectsChangedSignal();
+    void schemaChangedSignal();
 
-    void loadingStartedSignal ();
-    void allLoadingDoneSignal ();
+    void loadingStartedSignal();
+    void allLoadingDoneSignal();
 
-public:
+  public:
     /// @brief Constructor
     DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     /// @brief Returns if an object of type exists
-    bool existsObject (const std::string& dbo_name);
+    bool existsObject(const std::string& dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &object (const std::string& dbo_name);
-    void deleteObject (const std::string& dbo_name);
+    DBObject& object(const std::string& dbo_name);
+    void deleteObject(const std::string& dbo_name);
     bool hasData();
 
     using DBObjectIterator = typename std::map<std::string, DBObject*>::iterator;
@@ -73,16 +74,17 @@ public:
     DBObjectIterator end() { return objects_.end(); }
     size_t size() { return objects_.size(); }
 
-    bool existsMetaVariable (const std::string& var_name);
+    bool existsMetaVariable(const std::string& var_name);
     /// @brief Returns the a meta variable, if existing
-    MetaDBOVariable &metaVariable (const std::string& var_name);
-    void deleteMetaVariable (const std::string& var_name);
+    MetaDBOVariable& metaVariable(const std::string& var_name);
+    void deleteMetaVariable(const std::string& var_name);
     /// @brief Returns container with all MetaVariables
-    std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
+    std::map<std::string, MetaDBOVariable*>& metaVariables() { return meta_variables_; }
 
-    bool usedInMetaVariable (const DBOVariable& variable);
+    bool usedInMetaVariable(const DBOVariable& variable);
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Destructor
     virtual ~DBObjectManager();
@@ -108,61 +110,61 @@ public:
     bool useOrderAscending() const;
     void useOrderAscending(bool useOrderAscending);
 
-    bool hasOrderVariable ();
-    DBOVariable& orderVariable ();
+    bool hasOrderVariable();
+    DBOVariable& orderVariable();
     void orderVariable(DBOVariable& variable);
-    bool hasOrderMetaVariable ();
-    MetaDBOVariable& orderMetaVariable ();
+    bool hasOrderMetaVariable();
+    MetaDBOVariable& orderMetaVariable();
     void orderMetaVariable(MetaDBOVariable& variable);
-    void clearOrderVariable ();
+    void clearOrderVariable();
 
-//    void lock ();
-//    void unlock ();
+    //    void lock ();
+    //    void unlock ();
 
-    void quitLoading ();
+    void quitLoading();
 
-    void removeDependenciesForSchema (const std::string& schema_name);
+    void removeDependenciesForSchema(const std::string& schema_name);
 
     bool hasAssociations() const;
-    void setAssociations (const std::string& dbo, const std::string& data_source_name);
-    void removeAssociations ();
+    void setAssociations(const std::string& dbo, const std::string& data_source_name);
+    void removeAssociations();
 
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 
-    bool isOtherDBObjectPostProcessing (DBObject& object);
+    bool isOtherDBObjectPostProcessing(DBObject& object);
 
     bool loadInProgress() const;
 
-protected:
+  protected:
     ATSDB& atsdb_;
-    bool use_filters_ {false};
+    bool use_filters_{false};
 
-    bool use_order_ {false};
-    bool use_order_ascending_ {false};
+    bool use_order_{false};
+    bool use_order_ascending_{false};
     std::string order_variable_dbo_name_;
     std::string order_variable_name_;
 
-    bool use_limit_ {false};
-    unsigned int limit_min_ {0};
-    unsigned int limit_max_ {100000};
+    bool use_limit_{false};
+    unsigned int limit_min_{0};
+    unsigned int limit_max_{100000};
 
-    bool locked_ {false};
+    bool locked_{false};
 
-    bool has_associations_ {false};
+    bool has_associations_{false};
     std::string associations_dbo_;
     std::string associations_ds_;
 
-    bool load_in_progress_ {false};
+    bool load_in_progress_{false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
-    std::map <std::string, DBObject*> objects_;
-    std::map <std::string, MetaDBOVariable*> meta_variables_;
+    std::map<std::string, DBObject*> objects_;
+    std::map<std::string, MetaDBOVariable*> meta_variables_;
 
-    DBObjectManagerWidget* widget_ {nullptr};
-    DBObjectManagerLoadWidget* load_widget_ {nullptr};
+    DBObjectManagerWidget* widget_{nullptr};
+    DBObjectManagerLoadWidget* load_widget_{nullptr};
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

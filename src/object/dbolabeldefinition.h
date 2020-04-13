@@ -33,8 +33,9 @@ class DBOLabelEntry : public QObject, public Configurable
 {
     Q_OBJECT
 
-public:
-    DBOLabelEntry(const std::string& class_id, const std::string& instance_id, DBOLabelDefinition* parent);
+  public:
+    DBOLabelEntry(const std::string& class_id, const std::string& instance_id,
+                  DBOLabelDefinition* parent);
 
     virtual ~DBOLabelEntry();
 
@@ -50,15 +51,15 @@ public:
     std::string suffix() const;
     void suffix(const std::string& suffix);
 
-protected:
-    DBOLabelDefinition* def_parent_ {nullptr};
+  protected:
+    DBOLabelDefinition* def_parent_{nullptr};
     std::string variable_name_;
 
-    bool show_; // show in label
+    bool show_;  // show in label
     std::string prefix_;
     std::string suffix_;
 
-    virtual void checkSubConfigurables () {}
+    virtual void checkSubConfigurables() {}
 };
 
 class DBOLabelDefinitionWidget;
@@ -68,37 +69,38 @@ class DBOLabelDefinition : public QObject, public Configurable
 {
     Q_OBJECT
 
-public slots:
-    void labelDefinitionChangedSlot ();
+  public slots:
+    void labelDefinitionChangedSlot();
 
-public:
-    DBOLabelDefinition(const std::string& class_id, const std::string& instance_id, DBObject* parent);
+  public:
+    DBOLabelDefinition(const std::string& class_id, const std::string& instance_id,
+                       DBObject* parent);
     virtual ~DBOLabelDefinition();
 
-    DBOVariableSet &readList ();
-    const std::map<std::string, DBOLabelEntry*>& entries () { return entries_; }
-    DBOLabelEntry& entry (const std::string& variable_name);
+    DBOVariableSet& readList();
+    const std::map<std::string, DBOLabelEntry*>& entries() { return entries_; }
+    DBOLabelEntry& entry(const std::string& variable_name);
 
-    void updateReadList ();
+    void updateReadList();
     void checkLabelDefintions();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    DBOLabelDefinitionWidget* widget ();
+    DBOLabelDefinitionWidget* widget();
 
-    std::map<int, std::string> generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer,
-                                               int break_item_cnt);
+    std::map<int, std::string> generateLabels(std::vector<int> rec_nums,
+                                              std::shared_ptr<Buffer> buffer, int break_item_cnt);
 
-protected:
-    DBObject* db_object_ {nullptr};
-    std::map<std::string, DBOLabelEntry*> entries_; //varname -> labelentry
+  protected:
+    DBObject* db_object_{nullptr};
+    std::map<std::string, DBOLabelEntry*> entries_;  // varname -> labelentry
 
     DBOVariableSet read_list_;
 
-    DBOLabelDefinitionWidget* widget_ {nullptr};
+    DBOLabelDefinitionWidget* widget_{nullptr};
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
-
-#endif // DBOLABELDEFINITION_H
+#endif  // DBOLABELDEFINITION_H

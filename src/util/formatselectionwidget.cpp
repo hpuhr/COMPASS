@@ -16,34 +16,33 @@
  */
 
 #include "formatselectionwidget.h"
+
 #include "logger.h"
 
 FormatSelectionWidget::FormatSelectionWidget(PropertyDataType data_type, Format& format)
-    : QPushButton (), data_type_(data_type), format_(format)
+    : QPushButton(), data_type_(data_type), format_(format)
 {
-    logdbg  << "FormatSelectionWidget: constructor";
+    logdbg << "FormatSelectionWidget: constructor";
 
-    update (data_type, format);
+    update(data_type, format);
 
     createMenu();
 
-    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-    connect( this, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
+    connect(&menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+    connect(this, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
 }
 
-FormatSelectionWidget::~FormatSelectionWidget()
-{
-}
+FormatSelectionWidget::~FormatSelectionWidget() {}
 
-void FormatSelectionWidget::update (PropertyDataType data_type, Format& format)
+void FormatSelectionWidget::update(PropertyDataType data_type, Format& format)
 {
     logdbg << "FormatSelectionWidget: update: data type '" << Property::asString(data_type)
            << "' format '" << format << "'";
 
     if (format_.size() > 0)
     {
-        std::string data_type_str = Property::asString (data_type) + +":"+ format;
-        setText (QString::fromStdString(data_type_str));
+        std::string data_type_str = Property::asString(data_type) + +":" + format;
+        setText(QString::fromStdString(data_type_str));
     }
     else
         setText("");
@@ -54,30 +53,27 @@ void FormatSelectionWidget::update (PropertyDataType data_type, Format& format)
 
 void FormatSelectionWidget::createMenu()
 {
-    logdbg  << "FormatSelectionWidget: createMenu";
+    logdbg << "FormatSelectionWidget: createMenu";
     //    menu_.addAction( "" );
 
     std::string data_type_str = Property::asString(data_type_);
 
-    for (auto ft_it: format_.getAllFormatOptions().at(data_type_))
+    for (auto ft_it : format_.getAllFormatOptions().at(data_type_))
     {
         QAction* action = menu_.addAction(QString::fromStdString(ft_it));
 
         QVariantMap vmap;
-        vmap.insert( QString::fromStdString(data_type_str), QVariant(QString::fromStdString(ft_it)));
-        action->setData( QVariant( vmap ) );
+        vmap.insert(QString::fromStdString(data_type_str), QVariant(QString::fromStdString(ft_it)));
+        action->setData(QVariant(vmap));
     }
-    logdbg  << "FormatSelectionWidget: createMenu: end";
+    logdbg << "FormatSelectionWidget: createMenu: end";
 }
 
-void FormatSelectionWidget::showMenuSlot()
-{
-    menu_.exec( QCursor::pos() );
-}
+void FormatSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
-void FormatSelectionWidget::triggerSlot (QAction* action)
+void FormatSelectionWidget::triggerSlot(QAction* action)
 {
-    logdbg  << "FormatSelectionWidget: triggerSlot";
+    logdbg << "FormatSelectionWidget: triggerSlot";
 
     QVariantMap vmap = action->data().toMap();
     std::string data_type_str, format_str;
@@ -88,19 +84,19 @@ void FormatSelectionWidget::triggerSlot (QAction* action)
         format_str = vmap.begin().value().toString().toStdString();
     }
 
-    loginf  << "FormatSelectionWidget: triggerSlot: got data type '" << data_type_str
-            << "' format '" << format_str << "'";
+    loginf << "FormatSelectionWidget: triggerSlot: got data type '" << data_type_str << "' format '"
+           << format_str << "'";
 
     PropertyDataType data_type = Property::asDataType(data_type_str);
     format_.set(data_type, format_str);
 
     if (format_.size() > 0)
     {
-        std::string tmp_str = data_type_str +":"+ format_;
-        setText (QString::fromStdString(tmp_str));
+        std::string tmp_str = data_type_str + ":" + format_;
+        setText(QString::fromStdString(tmp_str));
     }
     else
-        setText ("");
+        setText("");
 
     //  emit selectionChanged();
 }

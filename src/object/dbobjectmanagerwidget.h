@@ -40,62 +40,62 @@ class DBObjectManagerWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     /// @brief Adds a DBObject
-    void addDBOSlot ();
+    void addDBOSlot();
     /// @brief Is called when a DBObject was changed
-    void changedDBOSlot ();
+    void changedDBOSlot();
     /// @brief Edits a DBObject
-    void editDBOSlot ();
+    void editDBOSlot();
     /// @brief Deletes a DBObject
-    void deleteDBOSlot ();
+    void deleteDBOSlot();
     /// @brief Updates the DBObject list
-    void updateDBOsSlot ();
+    void updateDBOsSlot();
 
-    void addMetaVariableSlot ();
-    void editMetaVariableSlot ();
-    void deleteMetaVariableSlot ();
-    void addAllMetaVariablesSlot ();
-    void updateMetaVariablesSlot ();
+    void addMetaVariableSlot();
+    void editMetaVariableSlot();
+    void deleteMetaVariableSlot();
+    void addAllMetaVariablesSlot();
+    void updateMetaVariablesSlot();
 
     /// @brief Unlocks editing functionality
-    //void databaseOpenedSlot ();
+    // void databaseOpenedSlot ();
 
-public:
+  public:
     /// @brief Constructor
-    DBObjectManagerWidget(DBObjectManager &object_manager);
+    DBObjectManagerWidget(DBObjectManager& object_manager);
     /// @brief Destructor
     virtual ~DBObjectManagerWidget();
 
-//    void lock ();
-//    void unlock ();
+    //    void lock ();
+    //    void unlock ();
 
-private:
+  private:
     DBObjectManager& object_manager_;
     DBSchemaManager& schema_manager_;
     /// Grid with all DBObjects
-    QGridLayout* dbobjects_grid_ {nullptr};
-    QGridLayout* meta_variables_grid_ {nullptr};
+    QGridLayout* dbobjects_grid_{nullptr};
+    QGridLayout* meta_variables_grid_{nullptr};
 
     /// Editing functionality unlocked flag
-    //bool locked_ {false};
+    // bool locked_ {false};
 
     /// New DBO add button
-    QPushButton* add_dbo_button_ {nullptr};
-    QPushButton* add_metavar_button_ {nullptr};
+    QPushButton* add_dbo_button_{nullptr};
+    QPushButton* add_metavar_button_{nullptr};
 
     /// Container with DBO edit buttons
-    std::map <QPushButton*, DBObject*> edit_dbo_buttons_;
+    std::map<QPushButton*, DBObject*> edit_dbo_buttons_;
     /// Container with DBO edit buttons
-    std::map <QPushButton*, DBObject*> delete_dbo_buttons_;
+    std::map<QPushButton*, DBObject*> delete_dbo_buttons_;
 
     /// Container with already existing edit DBO widgets
-    std::map <DBObject*, DBObjectWidget*> edit_dbo_widgets_;
+    std::map<DBObject*, DBObjectWidget*> edit_dbo_widgets_;
 
-    std::map <QPushButton*, MetaDBOVariable*> edit_meta_buttons_;
+    std::map<QPushButton*, MetaDBOVariable*> edit_meta_buttons_;
     /// Container with DBO edit buttons
-    std::map <QPushButton*, MetaDBOVariable*> delete_meta_buttons_;
-    std::map <MetaDBOVariable*, MetaDBOVariableWidget*> edit_meta_widgets_;
+    std::map<QPushButton*, MetaDBOVariable*> delete_meta_buttons_;
+    std::map<MetaDBOVariable*, MetaDBOVariableWidget*> edit_meta_widgets_;
 };
 
 #endif /* DBOBJECTMANAGERWIDGET_H_ */

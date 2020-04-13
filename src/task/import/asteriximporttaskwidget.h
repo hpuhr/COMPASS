@@ -18,12 +18,10 @@
 #ifndef ASTERIXIMPORTTASKWIDGET_H
 #define ASTERIXIMPORTTASKWIDGET_H
 
+#include <jasterix/jasterix.h>
 #include <taskwidget.h>
 
-#include <jasterix/jasterix.h>
-
 #include <memory>
-
 
 class ASTERIXImportTask;
 class ASTERIXConfigWidget;
@@ -41,65 +39,65 @@ class ASTERIXImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void addFileSlot ();
-    void deleteFileSlot ();
-    void selectedFileSlot ();
-    void updateFileListSlot ();
+  public slots:
+    void addFileSlot();
+    void deleteFileSlot();
+    void selectedFileSlot();
+    void updateFileListSlot();
 
-    void addObjectParserSlot ();
-    void removeObjectParserSlot ();
-    void selectedObjectParserSlot (const QString& text);
+    void addObjectParserSlot();
+    void removeObjectParserSlot();
+    void selectedObjectParserSlot(const QString& text);
 
-    void debugChangedSlot ();
-    void limitRAMChangedSlot ();
+    void debugChangedSlot();
+    void limitRAMChangedSlot();
     void createMappingsSlot();
     void testImportSlot();
 
-    void expertModeChangedSlot ();
+    void expertModeChangedSlot();
 
-public:
-    ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
+  public:
+    ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~ASTERIXImportTaskWidget();
 
-    void addFile (const std::string& filename);
+    void addFile(const std::string& filename);
 
-    void updateLimitRAM ();
+    void updateLimitRAM();
 
-    void runStarted ();
-    void runDone ();
+    void runStarted();
+    void runDone();
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
 
-    QHBoxLayout *main_layout_ {nullptr};
+    QHBoxLayout* main_layout_{nullptr};
 
-    QTabWidget* tab_widget_ {nullptr};
+    QTabWidget* tab_widget_{nullptr};
 
-    QListWidget* file_list_ {nullptr};
-    QPushButton* add_file_button_ {nullptr};
-    QPushButton* delete_file_button_ {nullptr};
+    QListWidget* file_list_{nullptr};
+    QPushButton* add_file_button_{nullptr};
+    QPushButton* delete_file_button_{nullptr};
 
-    QComboBox* object_parser_box_ {nullptr};
-    QPushButton* add_object_parser_button_ {nullptr};
-    QPushButton* delete_object_parser_button_ {nullptr};
+    QComboBox* object_parser_box_{nullptr};
+    QPushButton* add_object_parser_button_{nullptr};
+    QPushButton* delete_object_parser_button_{nullptr};
 
-    QStackedWidget* object_parser_widget_ {nullptr};
+    QStackedWidget* object_parser_widget_{nullptr};
 
-    ASTERIXConfigWidget* config_widget_ {nullptr};
-    ASTERIXOverrideWidget* override_widget_ {nullptr};
+    ASTERIXConfigWidget* config_widget_{nullptr};
+    ASTERIXOverrideWidget* override_widget_{nullptr};
 
-    QCheckBox* debug_check_ {nullptr};
-    QCheckBox* limit_ram_check_ {nullptr};
-    QPushButton* create_mapping_stubs_button_ {nullptr};
-    QPushButton* test_button_ {nullptr};
+    QCheckBox* debug_check_{nullptr};
+    QCheckBox* limit_ram_check_{nullptr};
+    QPushButton* create_mapping_stubs_button_{nullptr};
+    QPushButton* test_button_{nullptr};
 
-    void addMainTab ();
+    void addMainTab();
     void addASTERIXConfigTab();
     void addOverrideTab();
     void addMappingsTab();
 
-    void updateParserBox ();
+    void updateParserBox();
 };
 
-#endif // ASTERIXIMPORTTASKWIDGET_H
+#endif  // ASTERIXIMPORTTASKWIDGET_H

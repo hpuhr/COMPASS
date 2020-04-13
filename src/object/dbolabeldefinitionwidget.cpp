@@ -16,20 +16,20 @@
  */
 
 #include "dbolabeldefinitionwidget.h"
-#include "dbovariable.h"
 
+#include <QLabel>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QVBoxLayout>
-#include <QLabel>
 
+#include "dbovariable.h"
 
 DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definition)
-    : QWidget (), definition_ (definition) //, entries_ (definition->getEntries())
+    : QWidget(), definition_(definition)  //, entries_ (definition->getEntries())
 {
-    assert (definition_);
+    assert(definition_);
 
-    table_=0;
+    table_ = 0;
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -37,10 +37,10 @@ DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definitio
     QFont font_big;
     font_big.setPointSize(18);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel *label = new QLabel ("Label Definition");
-    label->setFont (font_bold);
+    QLabel* label = new QLabel("Label Definition");
+    label->setFont(font_bold);
     layout->addWidget(label);
 
     list_.append("Show");
@@ -48,11 +48,11 @@ DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definitio
     list_.append("Prefix");
     list_.append("Suffix");
 
-    //table_items_.resize (entries_.size(), std::vector<QTableWidgetItem*> (list_.size()));
+    // table_items_.resize (entries_.size(), std::vector<QTableWidgetItem*> (list_.size()));
 
-    table_ = new QTableWidget ();  //entries_.size(), list_.size()
+    table_ = new QTableWidget();  // entries_.size(), list_.size()
     table_->setColumnCount(list_.size());
-    table_->setHorizontalHeaderLabels (list_);
+    table_->setHorizontalHeaderLabels(list_);
 
     table_->setEditTriggers(QAbstractItemView::DoubleClicked);
     table_->setColumnWidth(0, 60);
@@ -62,37 +62,33 @@ DBOLabelDefinitionWidget::DBOLabelDefinitionWidget(DBOLabelDefinition* definitio
 
     setTable();
 
-    layout->addWidget (table_);
+    layout->addWidget(table_);
 
-    setLayout (layout);
+    setLayout(layout);
 
     connect(table_, SIGNAL(cellChanged(int, int)), this, SLOT(cellChangedSlot(int, int)));
 
-
     setMinimumSize(QSize(800, 600));
-    //target_->show();
+    // target_->show();
 }
 
-DBOLabelDefinitionWidget::~DBOLabelDefinitionWidget()
+DBOLabelDefinitionWidget::~DBOLabelDefinitionWidget() {}
+
+void DBOLabelDefinitionWidget::cellChangedSlot(int row, int column)
 {
+    logdbg << "DBOLabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
 
-}
-
-void DBOLabelDefinitionWidget::cellChangedSlot (int row, int column)
-{
-    logdbg  << "DBOLabelDefinitionWidget: cellChangedSlot: row  " << row << " col " << column;
-
-    QTableWidgetItem *item = table_->item(row,column);
-    assert (item);
+    QTableWidgetItem* item = table_->item(row, column);
+    assert(item);
 
     const std::map<std::string, DBOLabelEntry*>& entries = definition_->entries();
 
-    assert (row < static_cast<int>(entries.size()));
+    assert(row < static_cast<int>(entries.size()));
 
     auto it = entries.begin();
-    std::advance( it, row );
+    std::advance(it, row);
     std::string variable_name = it->first;
-    DBOLabelEntry& entry = definition_->entry (variable_name);
+    DBOLabelEntry& entry = definition_->entry(variable_name);
 
     if (column == 0)
     {
@@ -100,21 +96,21 @@ void DBOLabelDefinitionWidget::cellChangedSlot (int row, int column)
     }
     else if (column == 2)
     {
-        entry.prefix(item->text().toStdString ());
+        entry.prefix(item->text().toStdString());
     }
     else if (column == 3)
     {
         entry.suffix(item->text().toStdString());
     }
     else
-        throw std::runtime_error ("DBOLabelDefinitionWidget: cellChangedSlot: wrong column");
+        throw std::runtime_error("DBOLabelDefinitionWidget: cellChangedSlot: wrong column");
 
     definition_->updateReadList();
 }
 
-void DBOLabelDefinitionWidget::setTable ()
+void DBOLabelDefinitionWidget::setTable()
 {
-    int row=0;
+    int row = 0;
 
     const std::map<std::string, DBOLabelEntry*>& entries = definition_->entries();
 
@@ -122,23 +118,23 @@ void DBOLabelDefinitionWidget::setTable ()
 
     for (auto& it : entries)
     {
-        for (int col=0; col < list_.size(); col++)
+        for (int col = 0; col < list_.size(); col++)
         {
-            QTableWidgetItem *newItem;
+            QTableWidgetItem* newItem;
 
             if (col == 0)
             {
                 newItem = new QTableWidgetItem();
 
                 if (it.second->show())
-                    newItem->setCheckState (Qt::Checked);
+                    newItem->setCheckState(Qt::Checked);
                 else
-                    newItem->setCheckState (Qt::Unchecked);
+                    newItem->setCheckState(Qt::Unchecked);
             }
             else if (col == 1)
             {
                 newItem = new QTableWidgetItem(it.second->variableName().c_str());
-                newItem->setFlags ( Qt::ItemIsSelectable );
+                newItem->setFlags(Qt::ItemIsSelectable);
             }
             else if (col == 2)
             {
@@ -152,7 +148,7 @@ void DBOLabelDefinitionWidget::setTable ()
                 newItem = new QTableWidgetItem();
 
             table_->setItem(row, col, newItem);
-            //table_items_ [row] [col] = newItem;
+            // table_items_ [row] [col] = newItem;
         }
         row++;
     }

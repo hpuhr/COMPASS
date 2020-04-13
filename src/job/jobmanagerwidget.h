@@ -26,7 +26,6 @@ class JobManager;
 class QLabel;
 class QVBoxLayout;
 
-
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
  */
@@ -34,23 +33,23 @@ class JobManagerWidget : public QFrame
 {
     Q_OBJECT
 
-public slots:
-    void updateSlot ();
+  public slots:
+    void updateSlot();
 
-public:
+  public:
     /// @brief Constructor
-    JobManagerWidget(JobManager &job_manager);
+    JobManagerWidget(JobManager& job_manager);
     /// @brief Destructor
     virtual ~JobManagerWidget();
 
-private:
-    JobManager &job_manager_;
+  private:
+    JobManager& job_manager_;
 
-    QLabel *num_jobs_label_;
-    QLabel *num_dbjobs_label_;
-    QLabel *num_threads_label_;
+    QLabel* num_jobs_label_;
+    QLabel* num_dbjobs_label_;
+    QLabel* num_threads_label_;
 
-    QVBoxLayout *info_layout_;
+    QVBoxLayout* info_layout_;
 };
 
 #endif /* DBOBJECTMANAGERINFOWIDGET_H_ */

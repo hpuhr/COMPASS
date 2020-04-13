@@ -20,8 +20,8 @@
 
 #include <QObject>
 
-#include "dbovariableset.h"
 #include "configurable.h"
+#include "dbovariableset.h"
 
 class ATSDB;
 class Buffer;
@@ -37,55 +37,56 @@ class ViewManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
+  signals:
     void selectionChangedSignal();
 
-public slots:
+  public slots:
     void selectionChangedSlot();
 
-public:
+  public:
     ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
     virtual ~ViewManager();
 
-    void init (QTabWidget *tab_widget);
-    void close ();
+    void init(QTabWidget* tab_widget);
+    void close();
 
-    void registerView (View *view);
-    void unregisterView (View *view);
-    bool isRegistered (View *view);
+    void registerView(View* view);
+    void unregisterView(View* view);
+    bool isRegistered(View* view);
 
-    ViewContainerWidget* addNewContainerWidget ();
+    ViewContainerWidget* addNewContainerWidget();
 
-    //void deleteContainer (std::string instance_id);
-    void removeContainer (std::string instance_id);
-    void deleteContainerWidget (std::string instance_id);
-    void removeContainerWidget (std::string instance_id);
+    // void deleteContainer (std::string instance_id);
+    void removeContainer(std::string instance_id);
+    void deleteContainerWidget(std::string instance_id);
+    void removeContainerWidget(std::string instance_id);
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    void viewShutdown( View* view, const std::string& err = "" );
+    void viewShutdown(View* view, const std::string& err = "");
 
-    std::map <std::string, ViewContainer*> getContainers () {return containers_;}
-    std::map <std::string, View *> getViews () {return views_;}
-    DBOVariableSet getReadSet (const std::string &dbo_name);
+    std::map<std::string, ViewContainer*> getContainers() { return containers_; }
+    std::map<std::string, View*> getViews() { return views_; }
+    DBOVariableSet getReadSet(const std::string& dbo_name);
 
-    ViewManagerWidget *widget();
+    ViewManagerWidget* widget();
 
-protected:
-    ATSDB &atsdb_;
+  protected:
+    ATSDB& atsdb_;
 
     ViewManagerWidget* widget_{nullptr};
     bool initialized_{false};
     QTabWidget* main_tab_widget_{nullptr};
 
-    std::map <std::string, ViewContainer*> containers_;
-    std::map <std::string, ViewContainerWidget*> container_widgets_;
+    std::map<std::string, ViewContainer*> containers_;
+    std::map<std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
     std::map<unsigned int, ViewPoint> view_points_;
 
     unsigned int container_count_{0};
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* VIEWMANAGER_H_ */

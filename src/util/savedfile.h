@@ -22,19 +22,19 @@
 
 class SavedFile : public Configurable
 {
-public:
-    SavedFile(const std::string class_id, const std::string &instance_id, Configurable *parent)
-        : Configurable (class_id, instance_id, parent)
+  public:
+    SavedFile(const std::string class_id, const std::string& instance_id, Configurable* parent)
+        : Configurable(class_id, instance_id, parent)
     {
-        registerParameter ("name", &name_, "");
+        registerParameter("name", &name_, "");
     }
-    virtual ~SavedFile () {}
+    virtual ~SavedFile() {}
 
-    const std::string &name () const { return name_; }
-    void name (const std::string &name) { name_ = name; }
+    const std::string& name() const { return name_; }
+    void name(const std::string& name) { name_ = name; }
 
-protected:
+  protected:
     std::string name_;
 };
 
-#endif // SQLITE_FILE_H
+#endif  // SQLITE_FILE_H

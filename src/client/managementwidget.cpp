@@ -15,12 +15,13 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QResizeEvent>
-#include <QPushButton>
-
 #include "managementwidget.h"
+
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QVBoxLayout>
+
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbinterfaceinfowidget.h"
@@ -28,65 +29,63 @@
 #include "dbobjectmanagerloadwidget.h"
 #include "filtermanager.h"
 #include "filtermanagerwidget.h"
-#include "viewmanager.h"
-#include "viewmanagerwidget.h"
+#include "global.h"
 #include "jobmanager.h"
 #include "jobmanagerwidget.h"
 #include "logger.h"
-#include "global.h"
+#include "viewmanager.h"
+#include "viewmanagerwidget.h"
 
-ManagementWidget::ManagementWidget() : QWidget ()
+ManagementWidget::ManagementWidget() : QWidget()
 {
-    QVBoxLayout *vlayout = new QVBoxLayout ();
-    QHBoxLayout *hlayout = new QHBoxLayout ();
+    QVBoxLayout* vlayout = new QVBoxLayout();
+    QHBoxLayout* hlayout = new QHBoxLayout();
 
     unsigned int frame_width = FRAME_SIZE;
 
-    vlayout->addLayout (hlayout);
+    vlayout->addLayout(hlayout);
 
-    QVBoxLayout *left_layout = new QVBoxLayout ();
+    QVBoxLayout* left_layout = new QVBoxLayout();
 
-    DBInterfaceInfoWidget *interface_widget = ATSDB::instance().interface().infoWidget();
+    DBInterfaceInfoWidget* interface_widget = ATSDB::instance().interface().infoWidget();
     interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     interface_widget->setLineWidth(frame_width);
-    left_layout->addWidget (interface_widget);
+    left_layout->addWidget(interface_widget);
 
-    DBObjectManagerLoadWidget *objman_widget = ATSDB::instance().objectManager().loadWidget();
+    DBObjectManagerLoadWidget* objman_widget = ATSDB::instance().objectManager().loadWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
-    left_layout->addWidget (objman_widget);
+    left_layout->addWidget(objman_widget);
 
-    hlayout->addLayout (left_layout, 1);
+    hlayout->addLayout(left_layout, 1);
 
-    FilterManagerWidget *filman_widget = ATSDB::instance().filterManager().widget();
+    FilterManagerWidget* filman_widget = ATSDB::instance().filterManager().widget();
     filman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     filman_widget->setLineWidth(frame_width);
-    hlayout->addWidget (filman_widget, 1);
+    hlayout->addWidget(filman_widget, 1);
 
-    QVBoxLayout *right_layout = new QVBoxLayout ();
+    QVBoxLayout* right_layout = new QVBoxLayout();
 
-    ViewManagerWidget *viewman_widget = ATSDB::instance().viewManager().widget();
+    ViewManagerWidget* viewman_widget = ATSDB::instance().viewManager().widget();
     viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     viewman_widget->setLineWidth(frame_width);
-    right_layout->addWidget (viewman_widget);
+    right_layout->addWidget(viewman_widget);
 
-    JobManagerWidget *jobman_widget = JobManager::instance().widget();
+    JobManagerWidget* jobman_widget = JobManager::instance().widget();
     jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     jobman_widget->setLineWidth(frame_width);
-    right_layout->addWidget (jobman_widget);
+    right_layout->addWidget(jobman_widget);
 
-    hlayout->addLayout (right_layout, 1);
+    hlayout->addLayout(right_layout, 1);
 
     setLayout(vlayout);
 }
 
-ManagementWidget::~ManagementWidget()
-{
-}
+ManagementWidget::~ManagementWidget() {}
 
-void ManagementWidget::resizeEvent (QResizeEvent *event)
+void ManagementWidget::resizeEvent(QResizeEvent* event)
 {
-    logdbg  << "ManagementWidget: resizeEvent";
+    logdbg << "ManagementWidget: resizeEvent";
     //  int tmp_width = event->size().width();
 
     //  if (tmp_width > 1000)
@@ -109,4 +108,3 @@ void ManagementWidget::resizeEvent (QResizeEvent *event)
     //  views_->setMinimumWidth (min_width);
     //  views_->setMaximumWidth (min_width);
 }
-

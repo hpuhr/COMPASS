@@ -27,16 +27,16 @@ class ManageDBObjectsTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void expertModeChangedSlot ();
+  public slots:
+    void expertModeChangedSlot();
 
-public:
-    ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget *parent=nullptr);
+  public:
+    ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget* parent = nullptr);
 
-protected:
+  protected:
     ManageDBObjectsTask& task_;
 
-    DBObjectManagerWidget* object_manager_widget_ {nullptr};
+    DBObjectManagerWidget* object_manager_widget_{nullptr};
 };
 
-#endif // MANAGEDBOBJECTSTASKWIDGET_H
+#endif  // MANAGEDBOBJECTSTASKWIDGET_H

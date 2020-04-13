@@ -25,27 +25,33 @@
 ///**
 // * @brief Description for Radar sensor data struct t_Radar_Description
 // */
-//class StructureDescriptionSensor : public StructureDescription
+// class StructureDescriptionSensor : public StructureDescription
 //{
-//public:
-//  StructureDescriptionSensor () : StructureDescription (DBO_SENSOR_INFORMATION, "Sensor", "RDL sensor structure", 0)
+// public:
+//  StructureDescriptionSensor () : StructureDescription (DBO_SENSOR_INFORMATION, "Sensor", "RDL
+//  sensor structure", 0)
 //  {
 //    create ();
 //  }
 //  virtual ~StructureDescriptionSensor() {}
 //
-//protected:
+// protected:
 //  void create ()
 //  {
-//    addStructureVariable("altitude", SE_TYPE_DOUBLE, 1, "Geographical altitude; metres", offsetof(t_Radar_Description,altitude));
-//    addStructureVariable("context", SE_TYPE_INT, 1, "Context", offsetof(t_Radar_Description,context));
-//    addStructureVariable("latitude", SE_TYPE_DOUBLE, 1, "Geographical latitude; degrees", offsetof(t_Radar_Description,latitude));
-//    addStructureVariable("longitude", SE_TYPE_DOUBLE, 1, "Geographical longitude; degrees", offsetof(t_Radar_Description,longitude));
-//    addStructureVariable("max_psr_range", SE_TYPE_DOUBLE, 1, "PSR range meters", offsetof(t_Radar_Description,max_psr_range));
-//    addStructureVariable("max_ssr_range", SE_TYPE_DOUBLE, 1, "SSR range meters", offsetof(t_Radar_Description,max_ssr_range));
-//    addStructureVariable("radar_number", SE_TYPE_SMALLINT, 1, "Radar number (within the defined context; 0 otherwise)", offsetof(t_Radar_Description,radar_number));
-//    addStructureVariable("remarks", SE_TYPE_VARCHAR, 50, "Pointer to remarks (e. g. full name)", offsetof(t_Radar_Description,remarks));
-//    addStructureVariable("sensor_short_name", SE_TYPE_VARCHAR_ARRAY, M_SENSOR_SHORT_NAME_LENGTH + 1, "Short name of sensor", offsetof(t_Radar_Description,sensor_short_name));
+//    addStructureVariable("altitude", SE_TYPE_DOUBLE, 1, "Geographical altitude; metres",
+//    offsetof(t_Radar_Description,altitude)); addStructureVariable("context", SE_TYPE_INT, 1,
+//    "Context", offsetof(t_Radar_Description,context)); addStructureVariable("latitude",
+//    SE_TYPE_DOUBLE, 1, "Geographical latitude; degrees", offsetof(t_Radar_Description,latitude));
+//    addStructureVariable("longitude", SE_TYPE_DOUBLE, 1, "Geographical longitude; degrees",
+//    offsetof(t_Radar_Description,longitude)); addStructureVariable("max_psr_range",
+//    SE_TYPE_DOUBLE, 1, "PSR range meters", offsetof(t_Radar_Description,max_psr_range));
+//    addStructureVariable("max_ssr_range", SE_TYPE_DOUBLE, 1, "SSR range meters",
+//    offsetof(t_Radar_Description,max_ssr_range)); addStructureVariable("radar_number",
+//    SE_TYPE_SMALLINT, 1, "Radar number (within the defined context; 0 otherwise)",
+//    offsetof(t_Radar_Description,radar_number)); addStructureVariable("remarks", SE_TYPE_VARCHAR,
+//    50, "Pointer to remarks (e. g. full name)", offsetof(t_Radar_Description,remarks));
+//    addStructureVariable("sensor_short_name", SE_TYPE_VARCHAR_ARRAY, M_SENSOR_SHORT_NAME_LENGTH +
+//    1, "Short name of sensor", offsetof(t_Radar_Description,sensor_short_name));
 //  }
 //};
 //

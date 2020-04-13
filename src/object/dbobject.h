@@ -18,18 +18,19 @@
 #ifndef DBOBJECT_H_
 #define DBOBJECT_H_
 
-#include <string>
 #include <qobject.h>
-#include <memory>
 
-#include "global.h"
-#include "dbovariableset.h"
+#include <memory>
+#include <string>
+
+#include "configurable.h"
+#include "dboassociationcollection.h"
 #include "dbodatasource.h"
 #include "dbodatasourcedefinition.h"
-#include "configurable.h"
-#include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
-#include "dboassociationcollection.h"
+#include "dbovariable.h"
+#include "dbovariableset.h"
+#include "global.h"
 
 class ATSDB;
 class PropertyList;
@@ -51,151 +52,170 @@ class DBObjectManager;
 /**
  * @brief Abstract data description of an object stored in a database
  *
- * A database object serves as definition of a data container stored in a database. It is identified by name and a type,
- * and mainly consists of one or a number of meta tables. One meta table is considered the main meta table, all others
- * are sub meta tables. Columns from all such meta tables are collected and abstracted as DBOVariables of an DBObject.
+ * A database object serves as definition of a data container stored in a database. It is identified
+ * by name and a type, and mainly consists of one or a number of meta tables. One meta table is
+ * considered the main meta table, all others are sub meta tables. Columns from all such meta tables
+ * are collected and abstracted as DBOVariables of an DBObject.
  *
- * The meta table information is depended on the DBSchema, since for different schemas different table structures might exist.
- * With such a construct it is possible to abstract from different database schemas, by creating one set of DBObjects, which
- * are based on different meta tables (depended on the used schema). All DBOVariable instances have a different table variable,
- * also based on the schema.
+ * The meta table information is depended on the DBSchema, since for different schemas different
+ * table structures might exist. With such a construct it is possible to abstract from different
+ * database schemas, by creating one set of DBObjects, which are based on different meta tables
+ * (depended on the used schema). All DBOVariable instances have a different table variable, also
+ * based on the schema.
  *
- * From an outside view, a DBObject is a collection of DBOVariables. However, a specialization exists, which is called the
- * meta DBObject (of type DBO_UNKNOWN), which serves only as an collection of meta DBOVariables and does not have a meta table.
+ * From an outside view, a DBObject is a collection of DBOVariables. However, a specialization
+ * exists, which is called the meta DBObject (of type DBO_UNKNOWN), which serves only as an
+ * collection of meta DBOVariables and does not have a meta table.
  *
- * The distinction between meta DBOjects and normal ones can be made using the is_meta_ flag or is_loadable_ flag.
+ * The distinction between meta DBOjects and normal ones can be made using the is_meta_ flag or
+ * is_loadable_ flag.
  *
- * For loadable DBObjects, a read list is held. This list contains the information, which variables are to be loaded on
- * read statements from the database. This read list is only held, and other classes can add variables to the retrieved
- * reference of the list.
+ * For loadable DBObjects, a read list is held. This list contains the information, which variables
+ * are to be loaded on read statements from the database. This read list is only held, and other
+ * classes can add variables to the retrieved reference of the list.
  *
- * Also holds functionality about its data sources. If such information is present (marked in the database schema),
- * such information can be generated and is executed asynchronously. Interested instances have to be registered as observer
- * and receive a callback once the information is present.
+ * Also holds functionality about its data sources. If such information is present (marked in the
+ * database schema), such information can be generated and is executed asynchronously. Interested
+ * instances have to be registered as observer and receive a callback once the information is
+ * present.
  *
  * \todo Check if DBOVariables can exist only in some schemas, finish checkVariables
  */
 class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
-signals:
-    void newDataSignal (DBObject& object);
-    void loadingDoneSignal (DBObject& object);
+  signals:
+    void newDataSignal(DBObject& object);
+    void loadingDoneSignal(DBObject& object);
 
-    void insertProgressSignal (float percent);
-    void insertDoneSignal (DBObject& object);
+    void insertProgressSignal(float percent);
+    void insertDoneSignal(DBObject& object);
 
-    void updateProgressSignal (float percent);
-    void updateDoneSignal (DBObject& object);
+    void updateProgressSignal(float percent);
+    void updateDoneSignal(DBObject& object);
 
-    void labelDefinitionChangedSignal ();
+    void labelDefinitionChangedSignal();
 
-public slots:
-    void schemaChangedSlot ();
+  public slots:
+    void schemaChangedSlot();
 
-    void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
-    void readJobObsoleteSlot ();
+    void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
+    void readJobObsoleteSlot();
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
 
-    void insertProgressSlot (float percent);
-    void insertDoneSlot ();
+    void insertProgressSlot(float percent);
+    void insertDoneSlot();
 
-    void updateProgressSlot (float percent);
-    void updateDoneSlot ();
+    void updateProgressSlot(float percent);
+    void updateDoneSlot();
 
-    void dataSourceDefinitionChanged ();
+    void dataSourceDefinitionChanged();
 
-public:
+  public:
     /// @brief Constructor
-    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
+    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id,
+             DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
 
     /// @brief Returns flag indication if a DBOVariable identified by id exists
-    bool hasVariable (const std::string& name) const;
+    bool hasVariable(const std::string& name) const;
     /// @brief Returns variable identified by id
-    DBOVariable& variable (const std::string& name);
-    void renameVariable (const std::string& name, const std::string& new_name);
+    DBOVariable& variable(const std::string& name);
+    void renameVariable(const std::string& name, const std::string& new_name);
     /// @brief Deletes a variable identified by id
-    void deleteVariable (const std::string& name);
+    void deleteVariable(const std::string& name);
 
-    bool uses (const DBTableColumn& column) const;
+    bool uses(const DBTableColumn& column) const;
 
     using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }
 
     /// @brief Returns number of existing variables
-    size_t numVariables () const { return variables_.size(); }
+    size_t numVariables() const { return variables_.size(); }
 
     /// @brief Returns name of the object
-    const std::string& name () const { return name_; }
+    const std::string& name() const { return name_; }
     /// @brief Sets name of the object
-    void name (const std::string& name) { assert (name.size() > 0); name_=name; }
+    void name(const std::string& name)
+    {
+        assert(name.size() > 0);
+        name_ = name;
+    }
 
     /// @brief Returns description of the object
-    const std::string& info () const { return info_; }
+    const std::string& info() const { return info_; }
     /// @brief Sets description of the object
-    void info(const std::string& info) { info_=info; }
+    void info(const std::string& info) { info_ = info; }
 
     /// @brief Returns if an object can be loaded
-    bool loadable () const { return is_loadable_; }
+    bool loadable() const { return is_loadable_; }
 
-    void loadingWanted (bool wanted) { loading_wanted_=wanted; }
-    bool loadingWanted () { return loading_wanted_; }
+    void loadingWanted(bool wanted) { loading_wanted_ = wanted; }
+    bool loadingWanted() { return loading_wanted_; }
 
-    void load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
-               bool use_order_ascending, const std::string& limit_str="");
-    void load (DBOVariableSet& read_set, std::string custom_filter_clause,
-               std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
-               bool use_order_ascending, const std::string& limit_str="");
-    void quitLoading ();
-    void clearData ();
+    void load(DBOVariableSet& read_set, bool use_filters, bool use_order,
+              DBOVariable* order_variable, bool use_order_ascending,
+              const std::string& limit_str = "");
+    void load(DBOVariableSet& read_set, std::string custom_filter_clause,
+              std::vector<DBOVariable*> filtered_variables, bool use_order,
+              DBOVariable* order_variable, bool use_order_ascending,
+              const std::string& limit_str = "");
+    void quitLoading();
+    void clearData();
 
     // takes buffers with dbovar names & datatypes & units, converts itself
-    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change=true);
+    void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
     // takes buffers with dbovar names & datatypes & units, converts itself
-    void updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
+    void updateData(DBOVariable& key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 
-    std::map<int, std::string> loadLabelData (std::vector<int> rec_nums, int break_item_cnt);
+    std::map<int, std::string> loadLabelData(std::vector<int> rec_nums, int break_item_cnt);
 
     /// @brief Returns if incremental read for DBO type was prepared
-    bool isLoading ();
-    bool isPostProcessing ();
+    bool isLoading();
+    bool isPostProcessing();
     /// @brief Returns if DBO exists and has data in the database
-    bool hasData ();
+    bool hasData();
     /// @brief Returns number of elements for DBO type
-    size_t count ();
-    size_t loadedCount ();
+    size_t count();
+    size_t loadedCount();
 
     /// @brief Returns container with all meta tables
-    const std::map <std::string, DBOSchemaMetaTableDefinition>& metaTables () const {
-        return meta_table_definitions_; }
+    const std::map<std::string, DBOSchemaMetaTableDefinition>& metaTables() const
+    {
+        return meta_table_definitions_;
+    }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
-    bool hasMetaTable (const std::string& schema) const;
-    const std::string& metaTable (const std::string& schema) const;
-    void deleteMetaTable (const std::string& schema);
+    bool hasMetaTable(const std::string& schema) const;
+    const std::string& metaTable(const std::string& schema) const;
+    void deleteMetaTable(const std::string& schema);
 
     /// @brief Returns main meta table for current schema
-    MetaDBTable& currentMetaTable () const;
+    MetaDBTable& currentMetaTable() const;
     /// @brief Returns if current schema has main meta table
-    bool hasCurrentMetaTable () const;
+    bool hasCurrentMetaTable() const;
 
     /// @brief Returns if a data source is defined in the current schema
-    bool hasCurrentDataSourceDefinition () const;
+    bool hasCurrentDataSourceDefinition() const;
     /// @brief Returns current data source definition
-    const DBODataSourceDefinition& currentDataSourceDefinition () const;
-    bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
-    void deleteDataSourceDefinition (const std::string& schema);
+    const DBODataSourceDefinition& currentDataSourceDefinition() const;
+    bool hasDataSourceDefinition(const std::string& schema)
+    {
+        return data_source_definitions_.count(schema);
+    }
+    void deleteDataSourceDefinition(const std::string& schema);
     /// @brief Returns container with all data source definitions
-    std::map <std::string, DBODataSourceDefinition>& dataSourceDefinitions () {
+    std::map<std::string, DBODataSourceDefinition>& dataSourceDefinitions()
+    {
         return data_source_definitions_;
     }
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    bool hasKeyVariable ();
+    bool hasKeyVariable();
     DBOVariable& getKeyVariable();
 
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
@@ -203,50 +223,50 @@ public:
     DataSourceIterator dsEnd() { return data_sources_.end(); }
 
     ///@brief Returns flag if data sources are defined for DBO type.
-    bool hasDataSources () { return data_sources_.size() > 0; }
-    void addDataSource (int key_value, const std::string& name); // needs postprocessing after
-    void addDataSources (std::map <int, std::pair<int,int>>& sources);
-    bool hasDataSource (int id);
-    DBODataSource& getDataSource (int id);
-    void updateDataSource (int id);
+    bool hasDataSources() { return data_sources_.size() > 0; }
+    void addDataSource(int key_value, const std::string& name);  // needs postprocessing after
+    void addDataSources(std::map<int, std::pair<int, int>>& sources);
+    bool hasDataSource(int id);
+    DBODataSource& getDataSource(int id);
+    void updateDataSource(int id);
     ///@brief Returns data source name for a DBO type and data source number.
-    const std::string& getNameOfSensor (int id);
+    const std::string& getNameOfSensor(int id);
     const std::map<int, DBODataSource>& dataSources() const { return data_sources_; }
 
     /// @brief Return if active data sources info is available
-    bool hasActiveDataSourcesInfo ();
+    bool hasActiveDataSourcesInfo();
 
     /// @brief Returns container with the active data sources information
-    const std::set<int> getActiveDataSources ();
+    const std::set<int> getActiveDataSources();
 
-    std::string status ();
+    std::string status();
 
-    DBObjectWidget* widget ();
-    void closeWidget ();
+    DBObjectWidget* widget();
+    void closeWidget();
 
-    DBObjectInfoWidget* infoWidget ();
+    DBObjectInfoWidget* infoWidget();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
 
-    std::shared_ptr<Buffer> data () { return data_; }
+    std::shared_ptr<Buffer> data() { return data_; }
 
-    bool existsInDB () const;
+    bool existsInDB() const;
 
-    void print ();
+    void print();
 
-    void removeDependenciesForSchema (const std::string& schema_name);
+    void removeDependenciesForSchema(const std::string& schema_name);
 
     // association stuff
-    void loadAssociationsIfRequired (); // starts loading job if required
-    void loadAssociations (); // actually loads associations, should be called from job
-    bool hasAssociations ();
-    void addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
+    void loadAssociationsIfRequired();  // starts loading job if required
+    void loadAssociations();            // actually loads associations, should be called from job
+    bool hasAssociations();
+    void addAssociation(unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }
-    void clearAssociations ();
-    void saveAssociations ();
+    void clearAssociations();
+    void saveAssociations();
 
-    void updateToDatabaseContent ();
+    void updateToDatabaseContent();
 
-protected:
+  protected:
     ATSDB& atsdb_;
     DBObjectManager& manager_;
     /// DBO name
@@ -254,23 +274,23 @@ protected:
     /// DBO description
     std::string info_;
     /// DBO is loadable flag
-    bool is_loadable_ {false}; // loadable on its own
-    bool loading_wanted_ {false};
-    size_t count_ {0};
+    bool is_loadable_{false};  // loadable on its own
+    bool loading_wanted_{false};
+    size_t count_{0};
 
     std::unique_ptr<DBOLabelDefinition> label_definition_;
 
-    std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
-    std::vector <std::shared_ptr<Buffer>> read_job_data_;
-    std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
+    std::shared_ptr<DBOReadDBJob> read_job_{nullptr};
+    std::vector<std::shared_ptr<Buffer>> read_job_data_;
+    std::vector<std::shared_ptr<FinalizeDBOReadJob>> finalize_jobs_;
 
-    std::shared_ptr <InsertBufferDBJob> insert_job_ {nullptr};
-    std::shared_ptr <UpdateBufferDBJob> update_job_ {nullptr};
+    std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
+    std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
 
     std::shared_ptr<Buffer> data_;
 
     /// Container with all DBOSchemaMetaTableDefinitions
-    std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
+    std::map<std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
@@ -279,21 +299,21 @@ protected:
     std::map<std::string, DBOVariable> variables_;
 
     /// Current (in the current schema) main meta table
-    MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
+    MetaDBTable* current_meta_table_{nullptr};  // TODO rework const?
     std::string associations_table_name_;
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
-    bool associations_changed_ {false};
-    bool associations_loaded_ {false};
+    bool associations_changed_{false};
+    bool associations_loaded_{false};
     DBOAssociationCollection associations_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
-    void removeVariableInfoForSchema (const std::string& schema_name);
+    void removeVariableInfoForSchema(const std::string& schema_name);
 };
 
 #endif /* DBOBJECT_H_ */

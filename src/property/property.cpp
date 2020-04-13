@@ -15,84 +15,73 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <limits>
-#include <boost/assign/list_of.hpp>
-
 #include "property.h"
+
+#include <boost/assign/list_of.hpp>
+#include <limits>
+
 #include "logger.h"
 
-std::map<PropertyDataType,std::string> Property::data_types_2_strings_ = boost::assign::map_list_of
-        (PropertyDataType::BOOL,       "BOOL")
-        (PropertyDataType::CHAR,       "CHAR")
-        (PropertyDataType::UCHAR,      "UCHAR")
-        (PropertyDataType::INT,        "INT")
-        (PropertyDataType::UINT,       "UINT")
-        (PropertyDataType::LONGINT,    "LONGINT")
-        (PropertyDataType::ULONGINT,   "ULONGINT")
-        (PropertyDataType::FLOAT,      "FLOAT")
-        (PropertyDataType::DOUBLE,     "DOUBLE")
-        (PropertyDataType::STRING,     "STRING");
+std::map<PropertyDataType, std::string> Property::data_types_2_strings_ =
+    boost::assign::map_list_of(PropertyDataType::BOOL, "BOOL")(PropertyDataType::CHAR, "CHAR")(
+        PropertyDataType::UCHAR, "UCHAR")(PropertyDataType::INT, "INT")(
+        PropertyDataType::UINT, "UINT")(PropertyDataType::LONGINT, "LONGINT")(
+        PropertyDataType::ULONGINT, "ULONGINT")(PropertyDataType::FLOAT, "FLOAT")(
+        PropertyDataType::DOUBLE, "DOUBLE")(PropertyDataType::STRING, "STRING");
 
-std::map<std::string, PropertyDataType> Property::strings_2_data_types_ = boost::assign::map_list_of
-        ("BOOL", PropertyDataType::BOOL)
-        ("CHAR", PropertyDataType::CHAR)
-        ("UCHAR", PropertyDataType::UCHAR)
-        ("INT", PropertyDataType::INT)
-        ("UINT", PropertyDataType::UINT)
-        ("LONGINT", PropertyDataType::LONGINT)
-        ("ULONGINT", PropertyDataType::ULONGINT)
-        ("FLOAT", PropertyDataType::FLOAT)
-        ("DOUBLE", PropertyDataType::DOUBLE)
-        ("STRING", PropertyDataType::STRING);
+std::map<std::string, PropertyDataType> Property::strings_2_data_types_ =
+    boost::assign::map_list_of("BOOL", PropertyDataType::BOOL)("CHAR", PropertyDataType::CHAR)(
+        "UCHAR", PropertyDataType::UCHAR)("INT", PropertyDataType::INT)(
+        "UINT", PropertyDataType::UINT)("LONGINT", PropertyDataType::LONGINT)(
+        "ULONGINT", PropertyDataType::ULONGINT)("FLOAT", PropertyDataType::FLOAT)(
+        "DOUBLE", PropertyDataType::DOUBLE)("STRING", PropertyDataType::STRING);
 
-Property::Property(std::string id, PropertyDataType type)
-    : data_type_(type), name_(id)
+Property::Property(std::string id, PropertyDataType type) : data_type_(type), name_(id)
 {
     data_type_str_ = asString(data_type_);
-    //size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
+    // size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
 }
 
-const std::string &Property::asString (PropertyDataType type)
+const std::string& Property::asString(PropertyDataType type)
 {
-    assert (data_types_2_strings_.count(type) > 0);
+    assert(data_types_2_strings_.count(type) > 0);
     return data_types_2_strings_.at(type);
 }
 
-PropertyDataType &Property::asDataType (const std::string &type)
+PropertyDataType& Property::asDataType(const std::string& type)
 {
     logdbg << "Property: asDataType: " << type;
-    assert (strings_2_data_types_.count(type) > 0);
+    assert(strings_2_data_types_.count(type) > 0);
     return strings_2_data_types_.at(type);
 }
 
-
-//PROPERTY_DATA_TYPE Property::getDataType() const
+// PROPERTY_DATA_TYPE Property::getDataType() const
 //{
 //    return (PROPERTY_DATA_TYPE) data_type_int_;
 //}
 
-//unsigned int Property::getDataTypeInt() const
+// unsigned int Property::getDataTypeInt() const
 //{
 //    return data_type_int_;
 //}
 
-//std::string &Property::getDataTypeStr() const
+// std::string &Property::getDataTypeStr() const
 //{
 //    assert (data_type_int_ > 0 && data_type_int_ < P_TYPE_SENTINEL);
 //    return data_type_strings[(PROPERTY_DATA_TYPE) data_type_int_];
 //}
 
-//std::string Property::getID() const
+// std::string Property::getID() const
 //{
 //    return id_;
 //}
 
-//unsigned int Property::getSize() const
+// unsigned int Property::getSize() const
 //{
 //    return size_;
 //}
 
-//bool Property::isNan (void *ptr)
+// bool Property::isNan (void *ptr)
 //{
 //  switch (data_type_int_)
 //  {
@@ -149,8 +138,7 @@ PropertyDataType &Property::asDataType (const std::string &type)
 //  return isNan ((PROPERTY_DATA_TYPE) data_type_int_, ptr);
 //}
 
-
-//void Property::setNan (void *ptr)
+// void Property::setNan (void *ptr)
 //{
 //  switch (data_type_int_)
 //  {
@@ -202,7 +190,7 @@ PropertyDataType &Property::asDataType (const std::string &type)
 //  setNan ((PROPERTY_DATA_TYPE) data_type_int_, ptr);
 //}
 
-//void Property::setValue (void *source, void *target, bool null)
+// void Property::setValue (void *source, void *target, bool null)
 //{
 //  switch (data_type_int_)
 //  {

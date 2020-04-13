@@ -16,42 +16,44 @@
  */
 
 #include "sqliteconnectioninfowidget.h"
-#include "sqliteconnection.h"
-#include "logger.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QGridLayout>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QVBoxLayout>
 
-SQLiteConnectionInfoWidget::SQLiteConnectionInfoWidget(SQLiteConnection& connection, QWidget* parent)
+#include "logger.h"
+#include "sqliteconnection.h"
+
+SQLiteConnectionInfoWidget::SQLiteConnectionInfoWidget(SQLiteConnection& connection,
+                                                       QWidget* parent)
     : QWidget(parent), connection_(connection)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout* layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel* main_label = new QLabel ("SQLite Database");
+    QLabel* main_label = new QLabel("SQLite Database");
     main_label->setFont(font_bold);
     layout->addWidget(main_label);
 
-    QGridLayout* grid = new QGridLayout ();
+    QGridLayout* grid = new QGridLayout();
 
-    grid->addWidget(new QLabel ("Database"), 0, 0);
+    grid->addWidget(new QLabel("Database"), 0, 0);
 
-    database_label_ = new QLabel ();
+    database_label_ = new QLabel();
     database_label_->setWordWrap(true);
     grid->addWidget(database_label_, 0, 1);
 
-    grid->addWidget(new QLabel ("Status"), 1, 0);
+    grid->addWidget(new QLabel("Status"), 1, 0);
 
-    status_label_ = new QLabel ();
+    status_label_ = new QLabel();
     grid->addWidget(status_label_, 1, 1);
 
     layout->addLayout(grid);
 
-    setLayout (layout);
+    setLayout(layout);
 
     updateSlot();
 }
@@ -60,15 +62,13 @@ void SQLiteConnectionInfoWidget::updateSlot()
 {
     loginf << "SQLiteConnectionInfoWidget: updateSlot";
 
-    assert (database_label_);
-    assert (status_label_);
+    assert(database_label_);
+    assert(status_label_);
 
     if (connection_.ready())
-        database_label_->setText (connection_.identifier().c_str());
+        database_label_->setText(connection_.identifier().c_str());
     else
-        database_label_->setText ("");
+        database_label_->setText("");
 
     status_label_->setText(connection_.status().c_str());
 }
-
-

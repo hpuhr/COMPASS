@@ -18,13 +18,13 @@
 #ifndef DBOVARIABLE_H_
 #define DBOVARIABLE_H_
 
+#include <QObject>
 #include <string>
 #include <vector>
-#include <QObject>
 
+#include "configurable.h"
 #include "global.h"
 #include "property.h"
-#include "configurable.h"
 #include "stringconv.h"
 //#include "dbobject.h"
 #include "dbovariableschema.h"
@@ -39,21 +39,23 @@ class DBOVariableWidget;
  *
  * Abstracted variable, which has two basic mechanisms.
  *
- * For one, the variable might not really exist in a table, but is a surrogate abstraction for a number of variables in
- * different DBObjects (meta variable) which carry the same content. When used, depending on the DBO type, one can get
- * the really existing DBOVariable using the getFor function.
+ * For one, the variable might not really exist in a table, but is a surrogate abstraction for a
+ * number of variables in different DBObjects (meta variable) which carry the same content. When
+ * used, depending on the DBO type, one can get the really existing DBOVariable using the getFor
+ * function.
  *
- * For the second, a DBOVariable is an abstraction of the underlying variable in the meta table which may differ for
- * different schemas. Therefore, a DBOSchemaVariableDefinition is used, which defines the all possible underlying
- * variables.
+ * For the second, a DBOVariable is an abstraction of the underlying variable in the meta table
+ * which may differ for different schemas. Therefore, a DBOSchemaVariableDefinition is used, which
+ * defines the all possible underlying variables.
  *
  * Based on Property (data type definition).
  */
 class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
-public:
-    enum class Representation { // TODO rework to m3a/ta
+  public:
+    enum class Representation
+    {  // TODO rework to m3a/ta
         STANDARD,
         SECONDS_TO_TIME,
         DEC_TO_OCTAL,
@@ -62,9 +64,12 @@ public:
         DATA_SRC_NAME
     };
 
-    static Representation stringToRepresentation (const std::string &representation_str);
-    static std::string representationToString (Representation representation);
-    static const std::map<Representation, std::string>& Representations() { return representation_2_string_; }
+    static Representation stringToRepresentation(const std::string& representation_str);
+    static std::string representationToString(Representation representation);
+    static const std::map<Representation, std::string>& Representations()
+    {
+        return representation_2_string_;
+    }
 
     /// @brief Constructor
     DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
@@ -74,136 +79,147 @@ public:
     /// @brief Desctructor
     virtual ~DBOVariable();
 
-    //DBOVariable& operator=(DBOVariable&& other);
+    // DBOVariable& operator=(DBOVariable&& other);
     /// @brief Comparison operator
     bool operator==(const DBOVariable& var);
 
     /// @brief Prints information for debugging
-    void print ();
+    void print();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Returns variable identifier
-    const std::string& name () const { return name_; }
+    const std::string& name() const { return name_; }
     /// @brief Sets variable identifier
-    void name (const std::string& name);
+    void name(const std::string& name);
 
-    const std::string& dboName () const;
+    const std::string& dboName() const;
 
     /// @brief Returns variable description
-    const std::string& description () const { return description_; }
+    const std::string& description() const { return description_; }
     /// @brief Sets variable description
-    void description (const std::string& description) { description_=description; }
+    void description(const std::string& description) { description_ = description; }
 
     /// @brief Returns of schema is present in schema_variables_
-    bool hasSchema (const std::string& schema) const;
+    bool hasSchema(const std::string& schema) const;
     /// @brief Returns meta table identifier for a given schema
-    const std::string& metaTable (const std::string& schema) const;
+    const std::string& metaTable(const std::string& schema) const;
 
-    bool hasVariableName (const std::string& schema) const;
+    bool hasVariableName(const std::string& schema) const;
     /// @brief Returns variable identifier for a given schema
-    const std::string& variableName (const std::string& schema) const;
-    void setVariableName (const std::string& schema, const std::string& name);
+    const std::string& variableName(const std::string& schema) const;
+    void setVariableName(const std::string& schema, const std::string& name);
 
-    bool hasCurrentDBColumn () const;
-    const DBTableColumn& currentDBColumn () const;
+    bool hasCurrentDBColumn() const;
+    const DBTableColumn& currentDBColumn() const;
 
-    bool isKey ();
+    bool isKey();
 
     /// @brief Returns if current schema is present in schema_variables_
-    bool hasCurrentSchema () const;
+    bool hasCurrentSchema() const;
     /// @brief Returns meta table identifier for current schema
-    const std::string& currentMetaTableString () const;
+    const std::string& currentMetaTableString() const;
     /// @brief Returns meta table for current schema
-    const MetaDBTable& currentMetaTable () const;
+    const MetaDBTable& currentMetaTable() const;
     /// @brief Returns variable identifier for current schema
-    const std::string& currentVariableIdentifier () const;
+    const std::string& currentVariableIdentifier() const;
 
     /// @brief Returns if dimension information is present
-    bool hasDimension () { return dimension_.size() > 0;}
+    bool hasDimension() { return dimension_.size() > 0; }
     /// @brief Returns unit dimension
-    const std::string& dimensionConst () const{ return dimension_; } //TODO should be const
-    std::string& dimension () { return dimension_; } //TODO should be const
+    const std::string& dimensionConst() const { return dimension_; }  // TODO should be const
+    std::string& dimension() { return dimension_; }                   // TODO should be const
     /// @brief  Returns unit unit
-    const std::string& unitConst () const { return unit_; }
-    std::string& unit () { return unit_; }
+    const std::string& unitConst() const { return unit_; }
+    std::string& unit() { return unit_; }
 
-    DBObject& dbObject () const { assert (db_object_); return *db_object_; }
+    DBObject& dbObject() const
+    {
+        assert(db_object_);
+        return *db_object_;
+    }
 
-    std::string getMinString ();
-    std::string getMaxString ();
-    std::string getMinStringRepresentation ();
-    std::string getMaxStringRepresentation ();
+    std::string getMinString();
+    std::string getMaxString();
+    std::string getMinStringRepresentation();
+    std::string getMaxStringRepresentation();
 
-    DBOVariableWidget* widget ();
+    DBOVariableWidget* widget();
 
     Representation representation() const;
-    const std::string& representationString () const;
+    const std::string& representationString() const;
     void representation(const Representation& representation);
 
-    template <typename T> std::string getAsSpecialRepresentationString (T value) const
+    template <typename T>
+    std::string getAsSpecialRepresentationString(T value) const
     {
-        assert (representation_ != DBOVariable::Representation::STANDARD);
+        assert(representation_ != DBOVariable::Representation::STANDARD);
 
         std::ostringstream out;
         try
         {
             if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
             {
-                return Utils::String::timeStringFromDouble (value);
+                return Utils::String::timeStringFromDouble(value);
             }
             else if (representation_ == DBOVariable::Representation::DEC_TO_OCTAL)
             {
-                out << std::oct << std::setfill ('0') << std::setw (4) << value;
+                out << std::oct << std::setfill('0') << std::setw(4) << value;
             }
             else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
             {
-                out << std::uppercase << std::hex << std::setfill ('0') << std::setw (6) << value;
+                out << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << value;
             }
             else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
             {
-                out << value/100.0;
+                out << value / 100.0;
             }
             else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
             {
-                 return getDataSourcesAsString(std::to_string(value)); 
+                return getDataSourcesAsString(std::to_string(value));
             }
             else
             {
-                throw std::runtime_error ("DBOVariable: getAsSpecialRepresentationString: unknown representation "
-                                          +std::to_string((int) representation_));
+                throw std::runtime_error(
+                    "DBOVariable: getAsSpecialRepresentationString: unknown representation " +
+                    std::to_string((int)representation_));
             }
         }
-        catch(std::exception& e)
+        catch (std::exception& e)
         {
-            logerr  << "DBOVariable: getAsSpecialRepresentationString: exception thrown: " << e.what();
+            logerr << "DBOVariable: getAsSpecialRepresentationString: exception thrown: "
+                   << e.what();
         }
-        catch(...)
+        catch (...)
         {
-            logerr  << "DBOVariable: getAsSpecialRepresentationString: exception thrown";;
+            logerr << "DBOVariable: getAsSpecialRepresentationString: exception thrown";
+            ;
         }
 
         return out.str();
     }
 
-    std::string getRepresentationStringFromValue (const std::string& value_str) const;
-    std::string getValueStringFromRepresentation (const std::string& representation_str) const;
+    std::string getRepresentationStringFromValue(const std::string& value_str) const;
+    std::string getValueStringFromRepresentation(const std::string& representation_str) const;
 
-    std::string multiplyString (const std::string& value_str, double factor) const;
-    const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
-    const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
+    std::string multiplyString(const std::string& value_str, double factor) const;
+    const std::string& getLargerValueString(const std::string& value_a_str,
+                                            const std::string& value_b_str) const;
+    const std::string& getSmallerValueString(const std::string& value_a_str,
+                                             const std::string& value_b_str) const;
 
-    bool existsInDB () const;
-    bool onlyExistsInSchema (const std::string& schema_name);
+    bool existsInDB() const;
+    bool onlyExistsInSchema(const std::string& schema_name);
 
-    void removeInfoForSchema (const std::string& schema_name);
+    void removeInfoForSchema(const std::string& schema_name);
 
-private:
+  private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
     /// DBO parent
-    DBObject* db_object_ {nullptr};
+    DBObject* db_object_{nullptr};
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
     Representation representation_;
@@ -211,7 +227,7 @@ private:
     /// Description
     std::string description_;
 
-    bool min_max_set_ {false};
+    bool min_max_set_{false};
     /// Minimum as string
     std::string min_;
     /// Maximum as string
@@ -223,18 +239,18 @@ private:
     std::string unit_;
 
     /// Container with schema identified->schema-variable definitions
-    std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;
+    std::map<std::string, DBOSchemaVariableDefinition*> schema_variables_;
 
-    DBOVariableWidget* widget_ {nullptr};
+    DBOVariableWidget* widget_{nullptr};
 
     std::string getDataSourcesAsString(const std::string& value) const;
 
-protected:
-    virtual void checkSubConfigurables ();
-    void setMinMax ();
+  protected:
+    virtual void checkSubConfigurables();
+    void setMinMax();
 };
 
 Q_DECLARE_METATYPE(DBOVariable*)
-//Q_DECLARE_METATYPE(DBOVariable)
+// Q_DECLARE_METATYPE(DBOVariable)
 
 #endif /* DBOVARIABLE_H_ */

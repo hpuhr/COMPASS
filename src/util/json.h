@@ -5,26 +5,27 @@
 
 namespace Utils
 {
-    namespace JSON
+namespace JSON
+{
+inline std::string toString(const nlohmann::json& j)
+{
+    if (j.type() == nlohmann::json::value_t::string)
     {
-
-        inline std::string toString(const nlohmann::json& j)
-        {
-            if (j.type() == nlohmann::json::value_t::string) {
-                return j.get<std::string>();
-            }
-
-            return j.dump();
-        }
-
-        extern bool canFindKey (const nlohmann::json& j, const std::vector<std::string>& keys);
-        extern const nlohmann::json& findKey (const nlohmann::json& j, const std::vector<std::string>& keys);
-        extern const nlohmann::json& findParentKey (const nlohmann::json& j, const std::vector<std::string>& keys);
-
-        extern void applyFunctionToValues (nlohmann::json& j, const std::vector<std::string>& keys,
-                                    std::vector<std::string>::const_iterator current_key_it,
-                                    std::function<void(nlohmann::json&)> function, bool required);
+        return j.get<std::string>();
     }
+
+    return j.dump();
 }
 
-#endif // JSON_H
+extern bool canFindKey(const nlohmann::json& j, const std::vector<std::string>& keys);
+extern const nlohmann::json& findKey(const nlohmann::json& j, const std::vector<std::string>& keys);
+extern const nlohmann::json& findParentKey(const nlohmann::json& j,
+                                           const std::vector<std::string>& keys);
+
+extern void applyFunctionToValues(nlohmann::json& j, const std::vector<std::string>& keys,
+                                  std::vector<std::string>::const_iterator current_key_it,
+                                  std::function<void(nlohmann::json&)> function, bool required);
+}  // namespace JSON
+}  // namespace Utils
+
+#endif  // JSON_H

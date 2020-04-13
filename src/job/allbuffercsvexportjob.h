@@ -18,31 +18,32 @@
 #ifndef ALLBUFFERCSVEXPORTJOB_H
 #define ALLBUFFERCSVEXPORTJOB_H
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include <memory>
 
-#include "job.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
+#include "job.h"
 
 class DBOVariableOrderedSet;
 
 class AllBufferCSVExportJob : public Job
 {
-public:
-    AllBufferCSVExportJob(std::map<std::string, std::shared_ptr <Buffer>> buffers, DBOVariableOrderedSet* read_set,
-                          std::map <unsigned int, std::string> number_to_dbo,
-                          const std::vector <std::pair<unsigned int, unsigned int>>& row_indexes,
-                          const std::string& file_name, bool overwrite, bool only_selected, bool use_presentation,
-                          bool show_associations);
+  public:
+    AllBufferCSVExportJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
+                          DBOVariableOrderedSet* read_set,
+                          std::map<unsigned int, std::string> number_to_dbo,
+                          const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
+                          const std::string& file_name, bool overwrite, bool only_selected,
+                          bool use_presentation, bool show_associations);
     virtual ~AllBufferCSVExportJob();
 
-    virtual void run ();
+    virtual void run();
 
-protected:
-    std::map<std::string, std::shared_ptr <Buffer>> buffers_;
+  protected:
+    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
     DBOVariableOrderedSet* read_set_;
-    std::map <unsigned int, std::string> number_to_dbo_;
-    const std::vector <std::pair<unsigned int, unsigned int>>& row_indexes_;
+    std::map<unsigned int, std::string> number_to_dbo_;
+    const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes_;
 
     std::string file_name_;
     bool overwrite_;
@@ -54,4 +55,4 @@ protected:
     boost::posix_time::ptime stop_time_;
 };
 
-#endif // AllBufferCSVExportJob_H
+#endif  // AllBufferCSVExportJob_H

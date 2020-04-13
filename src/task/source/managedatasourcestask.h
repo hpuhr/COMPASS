@@ -15,73 +15,72 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef MANAGEDATASOURCESTASK_H
 #define MANAGEDATASOURCESTASK_H
 
+#include <QObject>
+#include <memory>
 
 #include "configurable.h"
-#include "task.h"
-#include "storeddbodatasource.h"
 #include "dboeditdatasourceactionoptions.h"
-
-#include <QObject>
-
-#include <memory>
+#include "storeddbodatasource.h"
+#include "task.h"
 
 class TaskManager;
 class ManageDataSourcesTaskWidget;
 class DBOEditDataSourcesWidget;
 
-class ManageDataSourcesTask: public Task, public Configurable
+class ManageDataSourcesTask : public Task, public Configurable
 {
-public:
+  public:
     ManageDataSourcesTask(const std::string& class_id, const std::string& instance_id,
-                     TaskManager& task_manager);
+                          TaskManager& task_manager);
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    virtual TaskWidget* widget ();
-    virtual void deleteWidget ();
+    virtual TaskWidget* widget();
+    virtual void deleteWidget();
 
-    virtual bool checkPrerequisites ();
-    virtual bool isRecommended ();
-    virtual bool isRequired () { return false; }
+    virtual bool checkPrerequisites();
+    virtual bool isRecommended();
+    virtual bool isRequired() { return false; }
 
     /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
-    bool hasStoredDataSource (const std::string& dbo_name, unsigned int id);
+    bool hasStoredDataSource(const std::string& dbo_name, unsigned int id);
     /// @brief Returns variable identified by id
-    StoredDBODataSource& storedDataSource (const std::string& dbo_name, unsigned int id);
-    StoredDBODataSource& addNewStoredDataSource (const std::string& dbo_name);
-    void deleteStoredDataSource (const std::string& dbo_name, unsigned int id);
-    const std::map<unsigned int, StoredDBODataSource>& storedDataSources(const std::string& dbo_name);
+    StoredDBODataSource& storedDataSource(const std::string& dbo_name, unsigned int id);
+    StoredDBODataSource& addNewStoredDataSource(const std::string& dbo_name);
+    void deleteStoredDataSource(const std::string& dbo_name, unsigned int id);
+    const std::map<unsigned int, StoredDBODataSource>& storedDataSources(
+        const std::string& dbo_name);
 
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB (const std::string& dbo_name);
-    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg (const std::string& dbo_name);
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB(const std::string& dbo_name);
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg(const std::string& dbo_name);
 
     DBOEditDataSourcesWidget* editDataSourcesWidget(const std::string& dbo_name);
 
-    void exportConfigDataSources ();
-    void clearConfigDataSources ();
-    void importConfigDataSources ();
-    void importConfigDataSources (const std::string& filename);
-    void autoSyncAllConfigDataSourcesToDB ();
+    void exportConfigDataSources();
+    void clearConfigDataSources();
+    void importConfigDataSources();
+    void importConfigDataSources(const std::string& filename);
+    void autoSyncAllConfigDataSourcesToDB();
 
-    bool hasDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);
-    StoredDBODataSource& getDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);
-    bool hasDataSource (const std::string& dbo_name, const std::string& name);
-    StoredDBODataSource& getDataSource (const std::string& dbo_name, const std::string& name);
+    bool hasDataSource(const std::string& dbo_name, unsigned int sac, unsigned int sic);
+    StoredDBODataSource& getDataSource(const std::string& dbo_name, unsigned int sac,
+                                       unsigned int sic);
+    bool hasDataSource(const std::string& dbo_name, const std::string& name);
+    StoredDBODataSource& getDataSource(const std::string& dbo_name, const std::string& name);
 
-protected:
+  protected:
     std::unique_ptr<ManageDataSourcesTaskWidget> widget_;
 
-    virtual void checkSubConfigurables () {}
+    virtual void checkSubConfigurables() {}
 
     std::map<std::string, std::unique_ptr<DBOEditDataSourcesWidget>> edit_ds_widgets_;
 
     std::map<std::string, std::map<unsigned int, StoredDBODataSource>> stored_data_sources_;
     // dbo -> id -> ds
-
 };
 
-#endif // MANAGEDATASOURCESTASK_H
+#endif  // MANAGEDATASOURCESTASK_H

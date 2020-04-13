@@ -47,28 +47,28 @@ class DatabaseOpenTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void databaseTypeSelectSlot ();
-    void databaseOpenedSlot ();
+  public slots:
+    void databaseTypeSelectSlot();
+    void databaseOpenedSlot();
 
-    void expertModeChangedSlot ();
+    void expertModeChangedSlot();
 
-signals:
-    void databaseOpenedSignal ();
+  signals:
+    void databaseOpenedSignal();
 
-public:
-    DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget *parent=nullptr);
+  public:
+    DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface,
+                           QWidget* parent = nullptr);
     virtual ~DatabaseOpenTaskWidget();
 
-    void updateUsedConnection ();
+    void updateUsedConnection();
 
-protected:
+  protected:
     DatabaseOpenTask& task_;
 
     DBInterface& db_interface_;
 
-    QStackedWidget* connection_stack_ {nullptr};
-
+    QStackedWidget* connection_stack_{nullptr};
 };
 
-#endif // DATABASEOPENTASKWIDGET_H
+#endif  // DATABASEOPENTASKWIDGET_H

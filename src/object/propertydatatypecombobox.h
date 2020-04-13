@@ -28,69 +28,67 @@
 /**
  *  @brief Property data type selection for a DBOVariable
  */
-class PropertyDataTypeComboBox: public QComboBox
+class PropertyDataTypeComboBox : public QComboBox
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted if type was changed
     void changedType();
 
-public slots:
+  public slots:
     /// @brief Sets the data type
-    void changed ()
+    void changed()
     {
-        assert (false);
-        //TODO
-//        std::string text = currentText().toStdString();
-//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-//        {
-//            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) == 0)
-//            {
-//                data_type_ = (PROPERTY_DATA_TYPE) cnt;
-//                //loginf << "uga " << text << " " << PROPERTY_DATA_TYPE_STRINGS [(PROPERTY_DATA_TYPE) cnt];
-//                return;
-//            }
-//        }
-//        throw std::runtime_error ("PropertyDataTypeComboBox: getType: unknown type");
+        assert(false);
+        // TODO
+        //        std::string text = currentText().toStdString();
+        //        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
+        //        {
+        //            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) ==
+        //            0)
+        //            {
+        //                data_type_ = (PROPERTY_DATA_TYPE) cnt;
+        //                //loginf << "uga " << text << " " << PROPERTY_DATA_TYPE_STRINGS
+        //                [(PROPERTY_DATA_TYPE) cnt]; return;
+        //            }
+        //        }
+        //        throw std::runtime_error ("PropertyDataTypeComboBox: getType: unknown type");
     }
 
-public:
+  public:
     /// @brief Constructor
-    PropertyDataTypeComboBox(QWidget * parent = 0)
-    : QComboBox(parent)
+    PropertyDataTypeComboBox(QWidget* parent = 0) : QComboBox(parent)
     {
-        assert (false);
-        //TODO
-//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-//        {
-//            addItem (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt).c_str(), cnt);
-//        }
-//        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
-//        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
+        assert(false);
+        // TODO
+        //        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
+        //        {
+        //            addItem (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt).c_str(),
+        //            cnt);
+        //        }
+        //        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType()
+        //        )); connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
 
-//        setType (P_TYPE_BOOL);
+        //        setType (P_TYPE_BOOL);
     }
     /// @brief Destructor
     virtual ~PropertyDataTypeComboBox() {}
     /// @brief Returns the currently selected data type
-    PropertyDataType getType ()
-    {
-        return data_type_;
-    }
+    PropertyDataType getType() { return data_type_; }
     /// @brief Sets the currently selected data type
-    void setType (PropertyDataType type)
+    void setType(PropertyDataType type)
     {
         data_type_ = type;
 
-        assert (false);
-        //TODO
-//        int index = findData((unsigned int) type);
-//        assert (index != -1);
-//        setCurrentIndex (index);
+        assert(false);
+        // TODO
+        //        int index = findData((unsigned int) type);
+        //        assert (index != -1);
+        //        setCurrentIndex (index);
     }
 
-protected:
+  protected:
     PropertyDataType data_type_;
 };
 

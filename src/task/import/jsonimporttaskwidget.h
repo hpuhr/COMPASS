@@ -38,61 +38,61 @@ class JSONImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void testImportSlot ();
+  public slots:
+    void testImportSlot();
 
-    void addFileSlot ();
-    void deleteFileSlot ();
-    void selectedFileSlot ();
-    void updateFileListSlot ();
+    void addFileSlot();
+    void deleteFileSlot();
+    void selectedFileSlot();
+    void updateFileListSlot();
 
     void addSchemaSlot();
     void removeSchemaSlot();
     void selectedSchemaChangedSlot(const QString& text);
 
-    void addObjectParserSlot ();
-    void removeObjectParserSlot ();
+    void addObjectParserSlot();
+    void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
 
-    void expertModeChangedSlot ();
+    void expertModeChangedSlot();
 
-public:
-    JSONImportTaskWidget(JSONImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
+  public:
+    JSONImportTaskWidget(JSONImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~JSONImportTaskWidget();
 
-    void addFile (const std::string& filename);
+    void addFile(const std::string& filename);
 
-    void runStarted ();
-    void runDone ();
+    void runStarted();
+    void runDone();
 
-protected:
+  protected:
     JSONImportTask& task_;
 
-    QHBoxLayout* main_layout_ {nullptr};
+    QHBoxLayout* main_layout_{nullptr};
 
-    QTabWidget* tab_widget_ {nullptr};
+    QTabWidget* tab_widget_{nullptr};
 
-    QListWidget* file_list_ {nullptr};
-    QPushButton* add_file_button_ {nullptr};
-    QPushButton* delete_file_button_ {nullptr};
+    QListWidget* file_list_{nullptr};
+    QPushButton* add_file_button_{nullptr};
+    QPushButton* delete_file_button_{nullptr};
 
-    QComboBox* schema_box_ {nullptr};
-    QPushButton* add_schema_button_ {nullptr};
-    QPushButton* delete_schema_button_ {nullptr};
+    QComboBox* schema_box_{nullptr};
+    QPushButton* add_schema_button_{nullptr};
+    QPushButton* delete_schema_button_{nullptr};
 
-    QComboBox* object_parser_box_ {nullptr};
-    QPushButton* add_object_parser_button_ {nullptr};
-    QPushButton* delete_object_parser_button_ {nullptr};
+    QComboBox* object_parser_box_{nullptr};
+    QPushButton* add_object_parser_button_{nullptr};
+    QPushButton* delete_object_parser_button_{nullptr};
 
-    QStackedWidget* object_parser_widget_ {nullptr};
+    QStackedWidget* object_parser_widget_{nullptr};
 
-    QPushButton* test_button_ {nullptr};
+    QPushButton* test_button_{nullptr};
 
-    void addMainTab ();
-    void addMappingsTab ();
+    void addMainTab();
+    void addMappingsTab();
 
     void updateSchemasBox();
-    void updateParserBox ();
+    void updateParserBox();
 };
 
-#endif // JSONIMPORTERTASKWIDGET_H
+#endif  // JSONIMPORTERTASKWIDGET_H

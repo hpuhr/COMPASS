@@ -27,23 +27,26 @@ class ViewManager;
 class ViewContainer;
 
 /**
- * Serves as container for different views. May be embedded in a parent widget, or in new window, which is decided by constructor.
+ * Serves as container for different views. May be embedded in a parent widget, or in new window,
+ * which is decided by constructor.
  *
  * Includes DBConfigTab, therefore DB HAS to be loaded before a constructor is called.
  */
 class ViewContainerWidget : public QWidget, public Configurable
 {
-public:
-    ViewContainerWidget(const std::string &class_id, const std::string &instance_id, ViewManager *parent);
+  public:
+    ViewContainerWidget(const std::string& class_id, const std::string& instance_id,
+                        ViewManager* parent);
     virtual ~ViewContainerWidget();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    const std::string &name () { return name_; }
-    ViewContainer &viewContainer() const;
+    const std::string& name() { return name_; }
+    ViewContainer& viewContainer() const;
 
-protected:
-    ViewManager &view_manager_;
+  protected:
+    ViewManager& view_manager_;
     std::string name_;
 
     unsigned int pos_x_;
@@ -53,14 +56,14 @@ protected:
     unsigned int min_width_;
     unsigned int min_height_;
 
-    QTabWidget *tab_widget_{nullptr};
-    ViewContainer *view_container_{nullptr};
+    QTabWidget* tab_widget_{nullptr};
+    ViewContainer* view_container_{nullptr};
 
-    void closeEvent ( QCloseEvent * event );
-    virtual void moveEvent (QMoveEvent *event);
-    virtual void resizeEvent (QResizeEvent *event);
+    void closeEvent(QCloseEvent* event);
+    virtual void moveEvent(QMoveEvent* event);
+    virtual void resizeEvent(QResizeEvent* event);
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* VIEWCONTAINERWIDGET_H_ */

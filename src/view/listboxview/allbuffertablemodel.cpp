@@ -17,55 +17,54 @@
 
 #include "allbuffertablemodel.h"
 
-#include "buffer.h"
+#include <QApplication>
+
+#include "allbuffercsvexportjob.h"
+#include "allbuffertablewidget.h"
 #include "atsdb.h"
+#include "buffer.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "metadbovariable.h"
-#include "allbuffercsvexportjob.h"
-#include "jobmanager.h"
-#include "global.h"
 #include "dbovariableset.h"
+#include "global.h"
+#include "jobmanager.h"
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
-#include "allbuffertablewidget.h"
+#include "metadbovariable.h"
 
-#include <QApplication>
-
-AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget, ListBoxViewDataSource& data_source)
+AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget,
+                                         ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget), table_widget_(table_widget), data_source_(data_source)
 {
-    connect (data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal,
-             this, &AllBufferTableModel::setChangedSlot);
+    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+            &AllBufferTableModel::setChangedSlot);
 }
 
-AllBufferTableModel::~AllBufferTableModel()
-{
-}
+AllBufferTableModel::~AllBufferTableModel() {}
 
-void AllBufferTableModel::setChangedSlot ()
+void AllBufferTableModel::setChangedSlot()
 {
     beginResetModel();
     endResetModel();
-    assert (table_widget_);
+    assert(table_widget_);
     table_widget_->resizeColumns();
 }
 
-int AllBufferTableModel::rowCount(const QModelIndex & /*parent*/) const
+int AllBufferTableModel::rowCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "AllBufferTableModel: rowCount: " << row_indexes_.size();
     return row_indexes_.size();
 }
 
-int AllBufferTableModel::columnCount(const QModelIndex & /*parent*/) const
+int AllBufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "AllBufferTableModel: columnCount: " << data_source_.getSet()->getSize();
 
-    if (show_associations_) // selected, DBO, UTN
-        return data_source_.getSet()->getSize()+3;
-    else // cnt, DBO
-        return data_source_.getSet()->getSize()+2;
+    if (show_associations_)  // selected, DBO, UTN
+        return data_source_.getSet()->getSize() + 3;
+    else  // cnt, DBO
+        return data_source_.getSet()->getSize() + 2;
 }
 
 QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -79,31 +78,31 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
         unsigned int col = section;
 
         if (col == 0)
-            return QString ();
+            return QString();
         if (col == 1)
-            return QString ("DBObject");
+            return QString("DBObject");
 
         if (show_associations_)
         {
             if (col == 2)
-                return QString ("UTN");
+                return QString("UTN");
 
-            col -= 3; // for the actual properties
+            col -= 3;  // for the actual properties
         }
         else
-            col -= 2; // for the actual properties
+            col -= 2;  // for the actual properties
 
-        assert (col < data_source_.getSet()->getSize());
+        assert(col < data_source_.getSet()->getSize());
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
-        return QString (variable_name.c_str());
+        return QString(variable_name.c_str());
     }
-    else if(orientation == Qt::Vertical)
+    else if (orientation == Qt::Vertical)
         return section;
 
     return QVariant();
 }
 
-Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex &index) const
+Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags flags;
 
@@ -112,7 +111,7 @@ Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex &index) const
         flags |= Qt::ItemIsEnabled;
         flags |= Qt::ItemIsUserCheckable;
         flags |= Qt::ItemIsEditable;
-        //flags |= Qt::ItemIsSelectable;
+        // flags |= Qt::ItemIsSelectable;
     }
     else
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -120,29 +119,29 @@ Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex &index) const
     return flags;
 }
 
-QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
+QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 {
-    logdbg << "AllBufferTableModel: data: row " << index.row()-1 << " col " << index.column()-1;
+    logdbg << "AllBufferTableModel: data: row " << index.row() - 1 << " col " << index.column() - 1;
 
-    bool null=false;
+    bool null = false;
 
-    assert (index.row() >= 0);
-    assert ((unsigned int)index.row() < row_indexes_.size());
+    assert(index.row() >= 0);
+    assert((unsigned int)index.row() < row_indexes_.size());
     unsigned int dbo_num = row_indexes_.at(index.row()).first;
     unsigned int buffer_index = row_indexes_.at(index.row()).second;
     unsigned int col = index.column();
 
-    assert (number_to_dbo_.count(dbo_num) == 1);
+    assert(number_to_dbo_.count(dbo_num) == 1);
     std::string dbo_name = number_to_dbo_.at(dbo_num);
 
-    assert (buffers_.count(dbo_name) == 1);
-    std::shared_ptr <Buffer> buffer = buffers_.at(dbo_name);
+    assert(buffers_.count(dbo_name) == 1);
+    std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
     if (role == Qt::CheckStateRole)
     {
-        if (col == 0) // selected special case
+        if (col == 0)  // selected special case
         {
-            assert (buffer->has<bool>("selected"));
+            assert(buffer->has<bool>("selected"));
 
             if (buffer->get<bool>("selected").isNull(buffer_index))
                 return Qt::Unchecked;
@@ -155,23 +154,24 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DisplayRole)
     {
-        assert (buffer);
+        assert(buffer);
 
         std::string value_str;
 
-        const PropertyList &properties = buffer->properties();
+        const PropertyList& properties = buffer->properties();
 
         if (buffer_index >= buffer->size())
         {
-            logerr << "AllBufferTableModel: data: index " << buffer_index << " too large for " << dbo_name << "  size " << buffer->size();
+            logerr << "AllBufferTableModel: data: index " << buffer_index << " too large for "
+                   << dbo_name << "  size " << buffer->size();
             return QVariant();
         }
 
-        assert (buffer_index < buffer->size());
+        assert(buffer_index < buffer->size());
 
-        if (col == 0) // selected special case
+        if (col == 0)  // selected special case
             return QVariant();
-        if (col == 1) // selected special case
+        if (col == 1)  // selected special case
             return QVariant(dbo_name.c_str());
 
         if (show_associations_)
@@ -179,61 +179,64 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
             if (col == 2)
             {
                 DBObjectManager& manager = ATSDB::instance().objectManager();
-                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+                const DBOAssociationCollection& associations =
+                    manager.object(dbo_name).associations();
 
-                assert (buffer->has<int>("rec_num"));
-                assert (!buffer->get<int>("rec_num").isNull(buffer_index));
+                assert(buffer->has<int>("rec_num"));
+                assert(!buffer->get<int>("rec_num").isNull(buffer_index));
                 unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
 
                 if (associations.contains(rec_num))
                 {
-                    return QVariant(manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
+                    return QVariant(
+                        manager.object(dbo_name).associations().getUTNsStringFor(rec_num).c_str());
                 }
                 else
                     return QVariant();
-
             }
 
-            col -= 3; // for the actual properties
+            col -= 3;  // for the actual properties
         }
         else
-            col -= 2; // for the actual properties
+            col -= 2;  // for the actual properties
 
-//        loginf << "AllBufferTableModel: data: col " << col << " set size " << data_source_.getSet()->getSize()
-//               << " show assoc " << show_associations_;
-        assert (col < data_source_.getSet()->getSize());
+        //        loginf << "AllBufferTableModel: data: col " << col << " set size " <<
+        //        data_source_.getSet()->getSize()
+        //               << " show assoc " << show_associations_;
+        assert(col < data_source_.getSet()->getSize());
 
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
-        DBObjectManager &manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = ATSDB::instance().objectManager();
 
-         // check if data & variables exist
+        // check if data & variables exist
         if (variable_dbo_name == META_OBJECT_NAME)
         {
-            assert (manager.existsMetaVariable(variable_name));
-            if (!manager.metaVariable(variable_name).existsIn(dbo_name)) // not data if not exist
+            assert(manager.existsMetaVariable(variable_name));
+            if (!manager.metaVariable(variable_name).existsIn(dbo_name))  // not data if not exist
                 return QString();
         }
         else
         {
-            if (dbo_name != variable_dbo_name) // check if other dbo
+            if (dbo_name != variable_dbo_name)  // check if other dbo
                 return QString();
 
-            assert (manager.existsObject(dbo_name));
-            assert (manager.object(dbo_name).hasVariable(variable_name));
+            assert(manager.existsObject(dbo_name));
+            assert(manager.object(dbo_name).hasVariable(variable_name));
         }
 
         DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
-                    ? manager.metaVariable(variable_name).getFor(dbo_name)
-                    : manager.object(dbo_name).variable(variable_name);
+                                    ? manager.metaVariable(variable_name).getFor(dbo_name)
+                                    : manager.object(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
 
         if (!properties.hasProperty(variable.name()))
         {
-            logdbg << "AllBufferTableModel: data: variable " << variable.name() << " not present in buffer";
+            logdbg << "AllBufferTableModel: data: variable " << variable.name()
+                   << " not present in buffer";
         }
         else
         {
@@ -241,124 +244,128 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
 
             if (data_type == PropertyDataType::BOOL)
             {
-                assert (buffer->has<bool>(property_name));
+                assert(buffer->has<bool>(property_name));
                 null = buffer->get<bool>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<bool>(property_name).getAsString(buffer_index));
+                            buffer->get<bool>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<bool>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
             {
-                assert (buffer->has<char>(property_name));
+                assert(buffer->has<char>(property_name));
                 null = buffer->get<char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<char>(property_name).getAsString(buffer_index));
+                            buffer->get<char>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<char>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
-                assert (buffer->has<unsigned char>(property_name));
+                assert(buffer->has<unsigned char>(property_name));
                 null = buffer->get<unsigned char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<unsigned char>(property_name).getAsString(buffer_index));
+                            buffer->get<unsigned char>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer->get<unsigned char>(property_name).getAsString(buffer_index);
+                        value_str =
+                            buffer->get<unsigned char>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::INT)
             {
-                assert (buffer->has<int>(property_name));
+                assert(buffer->has<int>(property_name));
                 null = buffer->get<int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<int>(property_name).getAsString(buffer_index));
+                            buffer->get<int>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::UINT)
             {
-                assert (buffer->has<unsigned int>(property_name));
+                assert(buffer->has<unsigned int>(property_name));
                 null = buffer->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<unsigned int>(property_name).getAsString(buffer_index));
+                            buffer->get<unsigned int>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer->get<unsigned int>(property_name).getAsString(buffer_index);
+                        value_str =
+                            buffer->get<unsigned int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
-                assert (buffer->has<long int>(property_name));
+                assert(buffer->has<long int>(property_name));
                 null = buffer->get<long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<long int>(property_name).getAsString(buffer_index));
+                            buffer->get<long int>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<long int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
-                assert (buffer->has<unsigned long int>(property_name));
+                assert(buffer->has<unsigned long int>(property_name));
                 null = buffer->get<unsigned long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<unsigned long int>(property_name).getAsString(buffer_index));
+                            buffer->get<unsigned long int>(property_name)
+                                .getAsString(buffer_index));
                     else
-                        value_str = buffer->get<unsigned long int>(property_name).getAsString(buffer_index);
+                        value_str =
+                            buffer->get<unsigned long int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
-                assert (buffer->has<float>(property_name));
+                assert(buffer->has<float>(property_name));
                 null = buffer->get<float>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<float>(property_name).getAsString(buffer_index));
+                            buffer->get<float>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<float>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
-                assert (buffer->has<double>(property_name));
+                assert(buffer->has<double>(property_name));
                 null = buffer->get<double>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer->get<double>(property_name).getAsString(buffer_index));
+                            buffer->get<double>(property_name).getAsString(buffer_index));
                     else
                         value_str = buffer->get<double>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::STRING)
             {
-                assert (buffer->has<std::string>(property_name));
+                assert(buffer->has<std::string>(property_name));
                 null = buffer->get<std::string>(property_name).isNull(buffer_index);
                 if (!null)
                 {
@@ -366,38 +373,39 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
                 }
             }
             else
-                throw std::domain_error ("BufferTableWidget: show: unknown property data type");
+                throw std::domain_error("BufferTableWidget: show: unknown property data type");
 
             if (null)
                 return QVariant();
             else
-                return QString (value_str.c_str());
+                return QString(value_str.c_str());
         }
     }
     return QVariant();
 }
 
-bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & value,int role)
+bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col "
+           << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        assert (index.row() >= 0);
-        assert ((unsigned int)index.row() < row_indexes_.size());
+        assert(index.row() >= 0);
+        assert((unsigned int)index.row() < row_indexes_.size());
         unsigned int dbo_num = row_indexes_.at(index.row()).first;
         unsigned int buffer_index = row_indexes_.at(index.row()).second;
 
-        assert (number_to_dbo_.count(dbo_num) == 1);
+        assert(number_to_dbo_.count(dbo_num) == 1);
         std::string dbo_name = number_to_dbo_.at(dbo_num);
 
-        assert (buffers_.count(dbo_name) == 1);
-        std::shared_ptr <Buffer> buffer = buffers_.at(dbo_name);
+        assert(buffers_.count(dbo_name) == 1);
+        std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
 
-        assert (buffer);
-        assert (buffer->has<bool>("selected"));
+        assert(buffer);
+        assert(buffer->has<bool>("selected"));
 
         if (value == Qt::Checked)
         {
@@ -409,7 +417,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
             logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
             buffer->get<bool>("selected").set(buffer_index, false);
         }
-        assert (table_widget_);
+        assert(table_widget_);
         table_widget_->view().emitSelectionChange();
 
         if (show_only_selected_)
@@ -420,8 +428,8 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
             time_to_indexes_.clear();
             row_indexes_.clear();
 
-            updateTimeIndexes ();
-            rebuildRowIndexes ();
+            updateTimeIndexes();
+            rebuildRowIndexes();
 
             endResetModel();
         }
@@ -431,7 +439,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
     return true;
 }
 
-void AllBufferTableModel::clearData ()
+void AllBufferTableModel::clearData()
 {
     logdbg << "AllBufferTableModel: clearData";
 
@@ -445,35 +453,35 @@ void AllBufferTableModel::clearData ()
     endResetModel();
 }
 
-void AllBufferTableModel::setData (std::shared_ptr <Buffer> buffer)
+void AllBufferTableModel::setData(std::shared_ptr<Buffer> buffer)
 {
-    assert (buffer);
+    assert(buffer);
     beginResetModel();
 
     std::string dbo_name = buffer->dboName();
 
-    if (dbo_to_number_.count(dbo_name) == 0) // new dbo from the wild
+    if (dbo_to_number_.count(dbo_name) == 0)  // new dbo from the wild
     {
         unsigned int num = dbo_to_number_.size();
         number_to_dbo_[num] = dbo_name;
         dbo_to_number_[dbo_name] = num;
     }
 
-    assert (dbo_to_number_.size() == number_to_dbo_.size());
+    assert(dbo_to_number_.size() == number_to_dbo_.size());
 
     buffers_[dbo_name] = buffer;
 
     updateTimeIndexes();
     rebuildRowIndexes();
 
-//    buffer = buffer;
-//    updateRows();
-//    read_set_ = data_source_.getSet()->getFor(object_.name());
+    //    buffer = buffer;
+    //    updateRows();
+    //    read_set_ = data_source_.getSet()->getFor(object_.name());
 
     endResetModel();
 }
 
-void AllBufferTableModel::updateTimeIndexes ()
+void AllBufferTableModel::updateTimeIndexes()
 {
     logdbg << "AllBufferTableModel: updateTimeIndexes";
 
@@ -490,25 +498,25 @@ void AllBufferTableModel::updateTimeIndexes ()
         dbo_name = buf_it.first;
         num_time_none = 0;
 
-        assert (dbo_to_number_.count(dbo_name) == 1);
+        assert(dbo_to_number_.count(dbo_name) == 1);
         dbo_num = dbo_to_number_.at(dbo_name);
 
         if (dbo_last_processed_index_.count(dbo_name) == 1)
-            buffer_index = dbo_last_processed_index_.at(dbo_name)+1; // last one + 1
+            buffer_index = dbo_last_processed_index_.at(dbo_name) + 1;  // last one + 1
 
         buffer_size = buf_it.second->size();
 
-        if (buffer_size > buffer_index+1) // new data
+        if (buffer_size > buffer_index + 1)  // new data
         {
-            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
-                   << buffer_index << " size " << buf_it.second->size();
+            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name
+                   << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             DBObjectManager& object_manager = ATSDB::instance().objectManager();
-            const DBOVariable &tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
-            assert (buf_it.second->has<float>(tod_var.name()));
-            NullableVector<float> &tods = buf_it.second->get<float> (tod_var.name());
+            const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+            assert(buf_it.second->has<float>(tod_var.name()));
+            NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());
 
-            assert (buf_it.second->has<bool>("selected"));
+            assert(buf_it.second->has<bool>("selected"));
             NullableVector<bool> selected_vec = buf_it.second->get<bool>("selected");
 
             for (; buffer_index < buffer_size; ++buffer_index)
@@ -521,28 +529,28 @@ void AllBufferTableModel::updateTimeIndexes ()
 
                 if (show_only_selected_)
                 {
-                    if (selected_vec.isNull(buffer_index)) // check if null, skip if so
+                    if (selected_vec.isNull(buffer_index))  // check if null, skip if so
                         continue;
 
-                    if (selected_vec.get(buffer_index)) // add if set
-                        time_to_indexes_.insert(
-                                    std::make_pair(tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
+                    if (selected_vec.get(buffer_index))  // add if set
+                        time_to_indexes_.insert(std::make_pair(
+                            tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
                 }
                 else
-                    time_to_indexes_.insert(
-                                std::make_pair(tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
+                    time_to_indexes_.insert(std::make_pair(tods.get(buffer_index),
+                                                           std::make_pair(dbo_num, buffer_index)));
             }
 
-            dbo_last_processed_index_[dbo_name] = buffer_size-1; // set to last index
+            dbo_last_processed_index_[dbo_name] = buffer_size - 1;  // set to last index
 
             if (num_time_none)
-                logwrn << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
-                       << " indexes with no time";
+                logwrn << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped "
+                       << num_time_none << " indexes with no time";
         }
     }
 }
 
-void AllBufferTableModel::rebuildRowIndexes ()
+void AllBufferTableModel::rebuildRowIndexes()
 {
     row_indexes_.clear();
 
@@ -552,48 +560,48 @@ void AllBufferTableModel::rebuildRowIndexes ()
     }
 }
 
-void AllBufferTableModel::reset ()
+void AllBufferTableModel::reset()
 {
     beginResetModel();
     endResetModel();
 }
 
-void AllBufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
+void AllBufferTableModel::saveAsCSV(const std::string& file_name, bool overwrite)
 {
-    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name << " overwrite " << overwrite;
+    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name << " overwrite "
+           << overwrite;
 
     if (!buffers_.size())
         return;
 
-    AllBufferCSVExportJob *export_job = new AllBufferCSVExportJob (buffers_, data_source_.getSet(), number_to_dbo_,
-                                                                   row_indexes_, file_name, overwrite,
-                                                                   show_only_selected_, use_presentation_,
-                                                                   show_associations_);
+    AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
+        buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, overwrite,
+        show_only_selected_, use_presentation_, show_associations_);
 
-    export_job_ = std::shared_ptr<AllBufferCSVExportJob> (export_job);
-    connect (export_job, &AllBufferCSVExportJob::obsoleteSignal, this, &AllBufferTableModel::exportJobObsoleteSlot,
-             Qt::QueuedConnection);
-    connect (export_job, &AllBufferCSVExportJob::doneSignal, this, &AllBufferTableModel::exportJobDoneSlot,
-             Qt::QueuedConnection);
+    export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);
+    connect(export_job, &AllBufferCSVExportJob::obsoleteSignal, this,
+            &AllBufferTableModel::exportJobObsoleteSlot, Qt::QueuedConnection);
+    connect(export_job, &AllBufferCSVExportJob::doneSignal, this,
+            &AllBufferTableModel::exportJobDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(export_job_);
 }
 
-void AllBufferTableModel::exportJobObsoleteSlot ()
+void AllBufferTableModel::exportJobObsoleteSlot()
 {
     logdbg << "AllBufferTableModel: exportJobObsoleteSlot";
 
-    emit exportDoneSignal (true);
+    emit exportDoneSignal(true);
 }
 
 void AllBufferTableModel::exportJobDoneSlot()
 {
     logdbg << "AllBufferTableModel: exportJobDoneSlot";
 
-    emit exportDoneSignal (false);
+    emit exportDoneSignal(false);
 }
 
-void AllBufferTableModel::usePresentation (bool use_presentation)
+void AllBufferTableModel::usePresentation(bool use_presentation)
 {
     loginf << "AllBufferTableModel: usePresentation: " << use_presentation;
     beginResetModel();
@@ -601,7 +609,7 @@ void AllBufferTableModel::usePresentation (bool use_presentation)
     endResetModel();
 }
 
-void AllBufferTableModel::showOnlySelected (bool value)
+void AllBufferTableModel::showOnlySelected(bool value)
 {
     loginf << "AllBufferTableModel: showOnlySelected: " << value;
     show_only_selected_ = value;
@@ -609,7 +617,7 @@ void AllBufferTableModel::showOnlySelected (bool value)
     updateToSelection();
 }
 
-void AllBufferTableModel::showAssociations (bool value)
+void AllBufferTableModel::showAssociations(bool value)
 {
     loginf << "AllBufferTableModel: showAssociations: " << value;
     beginResetModel();
@@ -625,9 +633,8 @@ void AllBufferTableModel::updateToSelection()
     time_to_indexes_.clear();
     row_indexes_.clear();
 
-    updateTimeIndexes ();
-    rebuildRowIndexes ();
+    updateTimeIndexes();
+    rebuildRowIndexes();
 
     endResetModel();
 }
-

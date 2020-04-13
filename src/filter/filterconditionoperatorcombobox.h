@@ -23,8 +23,8 @@
 
 class FilterConditionOperatorComboBox : public QComboBox
 {
-public:
-    FilterConditionOperatorComboBox (bool numeric_only=false, bool string_only=false)
+  public:
+    FilterConditionOperatorComboBox(bool numeric_only = false, bool string_only = false)
     {
         QList<QString> stringlist;
 
@@ -55,9 +55,7 @@ public:
         /* Populate the comboBox */
         addItems(stringlist);
     }
-    virtual ~FilterConditionOperatorComboBox () {}
-
-
+    virtual ~FilterConditionOperatorComboBox() {}
 };
 
 #endif /* FILTERCONDITIONOPERATORCOMBOBOX_H_ */

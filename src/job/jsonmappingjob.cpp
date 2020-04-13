@@ -1,27 +1,28 @@
 #include "jsonmappingjob.h"
-#include "jsonobjectparser.h"
+
 #include "buffer.h"
 #include "dbobject.h"
-#include "logger.h"
 #include "json.h"
+#include "jsonobjectparser.h"
+#include "logger.h"
 
 using namespace Utils;
 using namespace nlohmann;
 
 JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
                                const std::vector<std::string>& data_record_keys,
-                               const std::map <std::string, JSONObjectParser>& parsers)
-    : Job ("JSONMappingJob"), data_(std::move(data)), data_record_keys_(data_record_keys), parsers_(parsers)
+                               const std::map<std::string, JSONObjectParser>& parsers)
+    : Job("JSONMappingJob"),
+      data_(std::move(data)),
+      data_record_keys_(data_record_keys),
+      parsers_(parsers)
 {
     logdbg << "JSONMappingJob: ctor";
 }
 
-JSONMappingJob::~JSONMappingJob()
-{
-    logdbg << "JSONMappingJob: dtor";
-}
+JSONMappingJob::~JSONMappingJob() { logdbg << "JSONMappingJob: dtor"; }
 
-void JSONMappingJob::run ()
+void JSONMappingJob::run()
 {
     logdbg << "JSONMappingJob: run";
 
@@ -32,31 +33,31 @@ void JSONMappingJob::run ()
         if (!buffers_.count(parser_it.second.dbObject().name()))
             buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
         else
-            parser_it.second.appendVariablesToBuffer(*buffers_.at(parser_it.second.dbObject().name()));
+            parser_it.second.appendVariablesToBuffer(
+                *buffers_.at(parser_it.second.dbObject().name()));
     }
 
-    auto process_lambda = [this](nlohmann::json& record)
-    {
-        //loginf << "UGA '" << record.dump(4) << "'";
+    auto process_lambda = [this](nlohmann::json& record) {
+        // loginf << "UGA '" << record.dump(4) << "'";
 
-        unsigned int category {0};
+        unsigned int category{0};
         bool has_cat = record.contains("category");
 
         if (has_cat)
             category = record.at("category");
 
-        bool parsed {false};
-        bool parsed_any {false};
+        bool parsed{false};
+        bool parsed_any{false};
 
         for (auto& map_it : parsers_)
         {
             logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
-            assert (buffer);
+            assert(buffer);
             parsed = map_it.second.parseJSON(record, *buffer);
 
             if (parsed)
-                map_it.second.transformBuffer(*buffer, buffer->size()-1);
+                map_it.second.transformBuffer(*buffer, buffer->size() - 1);
 
             parsed_any |= parsed;
         }
@@ -75,9 +76,10 @@ void JSONMappingJob::run ()
         }
     };
 
-    assert (data_);
-    //loginf << "JSONMappingJob: run: applying JSON function";
-    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(), process_lambda, false);
+    assert(data_);
+    // loginf << "JSONMappingJob: run: applying JSON function";
+    JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
+                                process_lambda, false);
 
     std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
 
@@ -90,31 +92,22 @@ void JSONMappingJob::run ()
             not_empty_buffers[buf_it.first] = buf_it.second;
         }
     }
-    buffers_ = not_empty_buffers; // cleaner
+    buffers_ = not_empty_buffers;  // cleaner
 
     done_ = true;
     data_ = nullptr;
 
-    logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped " << num_not_mapped_;
+    logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped "
+           << num_not_mapped_;
 }
 
-size_t JSONMappingJob::numMapped() const
-{
-    return num_mapped_;
-}
+size_t JSONMappingJob::numMapped() const { return num_mapped_; }
 
+size_t JSONMappingJob::numNotMapped() const { return num_not_mapped_; }
 
-size_t JSONMappingJob::numNotMapped() const
-{
-    return num_not_mapped_;
-}
+size_t JSONMappingJob::numCreated() const { return num_created_; }
 
-size_t JSONMappingJob::numCreated() const
-{
-    return num_created_;
-}
-
-std::map<unsigned int, std::pair<size_t, size_t> > JSONMappingJob::categoryMappedCounts() const
+std::map<unsigned int, std::pair<size_t, size_t>> JSONMappingJob::categoryMappedCounts() const
 {
     return category_mapped_counts_;
 }

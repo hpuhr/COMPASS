@@ -7,26 +7,30 @@ class ProjectionManager;
 
 class Projection : public Configurable
 {
-public:
-    Projection(const std::string& class_id, const std::string& instance_id, ProjectionManager& proj_manager);
+  public:
+    Projection(const std::string& class_id, const std::string& instance_id,
+               ProjectionManager& proj_manager);
     virtual ~Projection();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    virtual bool hasCoordinateSystem (unsigned int id)=0;
-    virtual void addCoordinateSystem (unsigned int id, double latitude_deg, double longitude_deg, double altitude_m)=0;
-    virtual bool polarToWGS84 (unsigned int id, double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-                               double baro_altitude_ft, double& latitude, double& longitude)=0;
+    virtual bool hasCoordinateSystem(unsigned int id) = 0;
+    virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
+                                     double altitude_m) = 0;
+    virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
+                              bool has_baro_altitude, double baro_altitude_ft, double& latitude,
+                              double& longitude) = 0;
 
     std::string name() const;
     void name(const std::string& name);
 
-protected:
+  protected:
     ProjectionManager& proj_manager_;
 
     std::string name_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
-#endif // PROJECTION_H
+#endif  // PROJECTION_H

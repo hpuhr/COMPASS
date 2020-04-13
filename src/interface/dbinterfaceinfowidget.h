@@ -18,8 +18,8 @@
 #ifndef DBINTERFACEINFOWIDGET_H_
 #define DBINTERFACEINFOWIDGET_H_
 
-#include <QFrame>
 #include <QComboBox>
+#include <QFrame>
 
 class DBInterface;
 class QVBoxLayout;
@@ -31,19 +31,20 @@ class DBInterfaceInfoWidget : public QFrame
 {
     Q_OBJECT
 
-public slots:
-    //void update ();
-    void databaseContentChangedSlot ();
+  public slots:
+    // void update ();
+    void databaseContentChangedSlot();
 
-public:
+  public:
     /// @brief Constructor
-    explicit DBInterfaceInfoWidget(DBInterface &interface, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit DBInterfaceInfoWidget(DBInterface& interface, QWidget* parent = 0,
+                                   Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBInterfaceInfoWidget();
 
-protected:
-    DBInterface &interface_;
-    QVBoxLayout *layout_;
+  protected:
+    DBInterface& interface_;
+    QVBoxLayout* layout_;
 };
 
 #endif /* DBINTERFACEINFOWIDGET_H_ */

@@ -12,33 +12,33 @@ class ASTERIXOverrideWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void updateSlot();
 
-    void activeCheckedSlot ();
+    void activeCheckedSlot();
 
-    void sacOrgEditedSlot (const QString& value);
-    void sicOrgEditedSlot (const QString& value);
-    void sacNewEditedSlot (const QString& value);
-    void sicNewEditedSlot (const QString& value);
-    void todOffsetEditedSlot (const QString& value);
+    void sacOrgEditedSlot(const QString& value);
+    void sicOrgEditedSlot(const QString& value);
+    void sacNewEditedSlot(const QString& value);
+    void sicNewEditedSlot(const QString& value);
+    void todOffsetEditedSlot(const QString& value);
 
-public:
-    ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent=nullptr);
+  public:
+    ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent = nullptr);
     virtual ~ASTERIXOverrideWidget();
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
 
-    QCheckBox* active_check_ {nullptr};
+    QCheckBox* active_check_{nullptr};
 
-    QLineEdit* sac_org_edit_ {nullptr};
-    QLineEdit* sic_org_edit_ {nullptr};
+    QLineEdit* sac_org_edit_{nullptr};
+    QLineEdit* sic_org_edit_{nullptr};
 
-    QLineEdit* sac_new_edit_ {nullptr};
-    QLineEdit* sic_new_edit_ {nullptr};
+    QLineEdit* sac_new_edit_{nullptr};
+    QLineEdit* sic_new_edit_{nullptr};
 
-    QLineEdit* tod_offset_edit_ {nullptr};
+    QLineEdit* tod_offset_edit_{nullptr};
 };
 
-#endif // ASTERIXOVERRIDEWIDGET_H
+#endif  // ASTERIXOVERRIDEWIDGET_H

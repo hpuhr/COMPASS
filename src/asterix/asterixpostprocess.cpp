@@ -1,4 +1,5 @@
 #include "asterixpostprocess.h"
+
 #include "global.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -7,42 +8,39 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const float tod_24h = 24*60*60;
+const float tod_24h = 24 * 60 * 60;
 
-ASTERIXPostProcess::ASTERIXPostProcess()
-{
-}
+ASTERIXPostProcess::ASTERIXPostProcess() {}
 
-
-void ASTERIXPostProcess::postProcess (unsigned int category, nlohmann::json& record)
+void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& record)
 {
     record["category"] = category;
 
-    int sac {-1};
-    int sic {-1};
+    int sac{-1};
+    int sic{-1};
 
     if (record.contains("010"))
     {
         sac = record.at("010").at("SAC");
         sic = record.at("010").at("SIC");
-        record["ds_id"] =  sac*256 + sic;
+        record["ds_id"] = sac * 256 + sic;
     }
 
-    if (category == 1) // CAT001 coversion hack
-        postProcessCAT001 (sac, sic, record);
-    else if (category == 2) // save last tods
-        postProcessCAT002 (sac, sic, record);
+    if (category == 1)  // CAT001 coversion hack
+        postProcessCAT001(sac, sic, record);
+    else if (category == 2)  // save last tods
+        postProcessCAT002(sac, sic, record);
     else if (category == 20)
-        postProcessCAT020 (sac, sic, record);
+        postProcessCAT020(sac, sic, record);
     else if (category == 21)
-        postProcessCAT021 (sac, sic, record);
+        postProcessCAT021(sac, sic, record);
     else if (category == 48)
-        postProcessCAT048 (sac, sic, record);
+        postProcessCAT048(sac, sic, record);
     else if (category == 62)
-        postProcessCAT062 (sac, sic, record);
+        postProcessCAT062(sac, sic, record);
 }
 
-void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& record)
 {
     // antenna 0,1 to 1,2
     if (record.contains("020") && record.at("020").contains("ANT"))
@@ -76,17 +74,18 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
 
     if (record.contains("141") && record.at("141").contains("Truncated Time of Day"))
     {
-        if (sac > -1 && sic > -1 ) // bingo
+        if (sac > -1 && sic > -1)  // bingo
         {
-            std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
+            std::pair<unsigned int, unsigned int> sac_sic({sac, sic});
 
             if (cat002_last_tod_period_.count(sac_sic) > 0)
             {
                 double tod = record.at("141").at("Truncated Time of Day");
-                //double tod = record.at("140").at("Time-of-Day");
+                // double tod = record.at("140").at("Time-of-Day");
                 tod += cat002_last_tod_period_.at(sac_sic);
 
-                //  loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+                //  loginf << "corrected " <<
+                //  String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
                 //      << " to " << String::timeStringFromDouble(tod)
                 //     << " last update " << cat002_last_tod_period_.at(sac_sic);
 
@@ -96,12 +95,14 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
             {
                 loginf << "ASTERIXPostProcess: processRecord: removing truncated tod "
                        << String::timeStringFromDouble(record.at("141").at("Truncated Time of Day"))
-                       << " since to CAT002 from sensor "<< sac << "/" << sic << " is not present";
+                       << " since to CAT002 from sensor " << sac << "/" << sic << " is not present";
                 record["140"]["Time-of-Day"] = nullptr;
             }
 
-            //     loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-            //       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
+            //     loginf << "UGA " <<
+            //     String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+            //       << " sac " << sac << " sic " << sic << " cnt " <<
+            //       cat002_last_tod_period_.count(sac_sic);
 
             //    assert (record.at("140").at("Time-of-Day") > 3600.0);
         }
@@ -113,42 +114,45 @@ void ASTERIXPostProcess::postProcessCAT001 (int sac, int sic, nlohmann::json& re
     }
     else
     {
-        if (sac > -1 && sic > -1 )
+        if (sac > -1 && sic > -1)
         {
-            std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
+            std::pair<unsigned int, unsigned int> sac_sic({sac, sic});
 
             if (cat002_last_tod_.count(sac_sic) > 0)
             {
-                record["140"]["Time-of-Day"] = cat002_last_tod_.at(sac_sic); // set tod, better than nothing
+                record["140"]["Time-of-Day"] =
+                    cat002_last_tod_.at(sac_sic);  // set tod, better than nothing
             }
             else
-                logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
+                logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without "
+                          "truncated time of day"
                        << " or last cat002 time";
         }
         else
-            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated time of day"
+            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated "
+                      "time of day"
                    << " or sac/sic";
     }
 }
 
-void ASTERIXPostProcess::postProcessCAT002 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT002(int sac, int sic, nlohmann::json& record)
 {
     //"030": "Time of Day": 33501.4140625
 
     if (record.contains("030"))
     {
-        if (sac > -1 && sic > -1) // bingo
+        if (sac > -1 && sic > -1)  // bingo
         {
-            //std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
+            // std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
             double cat002_last_tod = record.at("030").at("Time of Day");
             double cat002_last_tod_period = 512.0 * ((int)(cat002_last_tod / 512));
-            cat002_last_tod_period_ [std::make_pair(sac, sic)] = cat002_last_tod_period;
-            cat002_last_tod_ [std::make_pair(sac, sic)] = cat002_last_tod;
+            cat002_last_tod_period_[std::make_pair(sac, sic)] = cat002_last_tod_period;
+            cat002_last_tod_[std::make_pair(sac, sic)] = cat002_last_tod;
         }
     }
 }
 
-void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& record)
 {
     // rdp chain 0,1 to 1,2
     if (record.contains("020") && record.at("020").contains("CHN"))
@@ -170,26 +174,26 @@ void ASTERIXPostProcess::postProcessCAT020 (int sac, int sic, nlohmann::json& re
     }
 }
 
-void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT021(int sac, int sic, nlohmann::json& record)
 {
-    if (record.contains("150")) // true airspeed
+    if (record.contains("150"))  // true airspeed
     {
         json& air_speed_item = record.at("150");
-        assert (air_speed_item.contains("IM"));
-        assert (air_speed_item.contains("Air Speed"));
+        assert(air_speed_item.contains("IM"));
+        assert(air_speed_item.contains("Air Speed"));
 
         bool mach = air_speed_item.at("IM") == 1;
         double airspeed = air_speed_item.at("Air Speed");
 
         if (mach)
         {
-            air_speed_item["Air Speed [knots]"] = airspeed * 0.001 * 666.739; // lsb, mach 2 kn
-            air_speed_item["Air Speed [mach]"] = airspeed * 0.001; // lsb
+            air_speed_item["Air Speed [knots]"] = airspeed * 0.001 * 666.739;  // lsb, mach 2 kn
+            air_speed_item["Air Speed [mach]"] = airspeed * 0.001;             // lsb
         }
         else
         {
-            air_speed_item["Air Speed [knots]"] = airspeed * 3600.0; // nm/s 2 kn
-            air_speed_item["Air Speed [mach]"] = airspeed * 0.185205; // lsb, nm/s 2 mach
+            air_speed_item["Air Speed [knots]"] = airspeed * 3600.0;   // nm/s 2 kn
+            air_speed_item["Air Speed [mach]"] = airspeed * 0.185205;  // lsb, nm/s 2 mach
         }
     }
 
@@ -284,11 +288,11 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
             item["ECAT_str"] = "HIGHLY_MANOEUVRABLE";
 
         //# 7 to 9 = reserved
-        //elif ecat in (7, 8, 9):
+        // elif ecat in (7, 8, 9):
         //    return None  # ?
 
         //# 10 = rotocraft
-        //elif ecat == 10:
+        // elif ecat == 10:
         //    return 'ROTOCRAFT'  # ?
         else if (ecat == 0)
             item["ECAT_str"] = "NO_INFO";
@@ -298,7 +302,7 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
             item["ECAT_str"] = "GLIDER";
 
         //# 12 = lighter-than-air
-        //elif ecat == 12:
+        // elif ecat == 12:
         //    return 'LIGHTER_THAN_AIR'  # ?
         else if (ecat == 12)
             item["ECAT_str"] = "LIGHTER_THAN_AIR";
@@ -320,7 +324,7 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
             item["ECAT_str"] = "SKYDIVER";
 
         //# 17 to 19 = reserved
-        //elif ecat in (17, 18, 19):
+        // elif ecat in (17, 18, 19):
         //    return None  # ?
 
         //# 20 = surface emergency vehicle
@@ -338,7 +342,7 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
             item["ECAT_str"] = "GROUND_OBSTRUCTION";
 
         //# 23 = cluster obstacle
-        //elif ecat == 23:
+        // elif ecat == 23:
         //    return 'CLUSTER_OBSTACLE'  # ?
         else if (ecat == 0)
             item["ECAT_str"] = "NO_INFO";
@@ -354,23 +358,22 @@ void ASTERIXPostProcess::postProcessCAT021 (int sac, int sic, nlohmann::json& re
         nlohmann::json& item = record.at("020");
         unsigned int ss = item.at("SS");
 
-//        # 0 No condition reported
+        //        # 0 No condition reported
         if (ss == 0)
             item["SS_str"] = "NO_CONDITION";
-//        # = 1 Permanent Alert (Emergency condition)
+        //        # = 1 Permanent Alert (Emergency condition)
         else if (ss == 1)
             item["SS_str"] = "PERMANENT_ALERT";
-//        # = 2 Temporary Alert (change in Mode 3/A Code other than emergency)
+        //        # = 2 Temporary Alert (change in Mode 3/A Code other than emergency)
         else if (ss == 2)
             item["SS_str"] = "TEMPORARY_ALERT";
-//        # = 3 SPI set
+        //        # = 3 SPI set
         else if (ss == 3)
             item["SS_str"] = "SPI_SET";
     }
-
 }
 
-void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT048(int sac, int sic, nlohmann::json& record)
 {
     // altitude capability
     if (record.contains("230") && record.at("230").contains("ARC"))
@@ -433,25 +436,25 @@ void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& re
 
         //#Mode-4 interrorgation type:
         //# - = no interrogation, 0 No Mode 4 interrogation
-        //if frifoe == 0:
+        // if frifoe == 0:
         //    return '-'
         if (foefrie == 0)
             record["mode4_friendly"] = "N";
 
         //# F = Friendly target, 1 Friendly target
-        //if frifoe == 1:
+        // if frifoe == 1:
         //    return 'F'
         else if (foefrie == 1)
             record["mode4_friendly"] = "F";
 
         //# U = Unknown Target, 2 Unknown target
-        //if frifoe == 2:
+        // if frifoe == 2:
         //    return 'U'
         else if (foefrie == 2)
             record["mode4_friendly"] = "U";
 
         //# N = No Reply, 3 No reply
-        //if frifoe == 3:
+        // if frifoe == 3:
         //    return "N"
         else if (foefrie == 3)
             record["mode4_friendly"] = "N";
@@ -472,22 +475,22 @@ void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& re
         unsigned int cdm = item.at("CDM");
 
         //# value record '0' db 'M': 4117 M = Maintaining
-        //if cdm == 0:
+        // if cdm == 0:
         //    return 'M'
         if (cdm == 0)
             record["track_climb_desc_mode"] = "M";
         //# value record '1' db 'C': 1133 C = Climbing
-        //if cdm == 1:
+        // if cdm == 1:
         //    return 'C'
         else if (cdm == 1)
             record["track_climb_desc_mode"] = "C";
         //# value record '2' db 'D': 330 D = Descending
-        //if cdm == 2:
+        // if cdm == 2:
         //    return 'D'
         else if (cdm == 2)
             record["track_climb_desc_mode"] = "D";
         //# value record '3' db 'I': 569 I = Invalid
-        //if cdm == 3:
+        // if cdm == 3:
         //    return 'I'
         else if (cdm == 3)
             record["track_climb_desc_mode"] = "I";
@@ -500,29 +503,28 @@ void ASTERIXPostProcess::postProcessCAT048 (int sac, int sic, nlohmann::json& re
         record["report_type"] = 0;
 }
 
-void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& record)
+void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& record)
 {
     if (record.contains("185"))
     {
-        //185.Vx Vy
+        // 185.Vx Vy
         json& speed_item = record.at("185");
-        assert (speed_item.contains("Vx"));
-        assert (speed_item.contains("Vy"));
+        assert(speed_item.contains("Vx"));
+        assert(speed_item.contains("Vy"));
 
         double v_x = speed_item.at("Vx");
         double v_y = speed_item.at("Vy");
 
-        double speed = sqrt(pow(v_x, 2) + pow(v_y, 2)) * 1.94384; // ms2kn
+        double speed = sqrt(pow(v_x, 2) + pow(v_y, 2)) * 1.94384;  // ms2kn
         double track_angle = atan2(v_x, v_y) * RAD2DEG;
 
         speed_item["Ground Speed"] = speed;
         speed_item["Track Angle"] = track_angle;
     }
 
-    if (record.contains("080")
-            && record.at("080").contains("PSR")
-            && record.at("080").contains("SSR")
-            && record.at("080").contains("MDS")) // && record.at("080").contains("ADS") not used
+    if (record.contains("080") && record.at("080").contains("PSR") &&
+        record.at("080").contains("SSR") &&
+        record.at("080").contains("MDS"))  // && record.at("080").contains("ADS") not used
     {
         //            if find_value("080.CST", record) == 1:
         //                return 0  # no detection
@@ -537,53 +539,51 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
             bool psr_updated = record.at("080").at("PSR") == 0;
             bool ssr_updated = record.at("080").at("SSR") == 0;
             bool mds_updated = record.at("080").at("MDS") == 0;
-            //bool ads_updated = record.at("080").at("ADS");
+            // bool ads_updated = record.at("080").at("ADS");
 
             //            if not mds_updated:
             if (!mds_updated)
             {
-
                 //                if psr_updated and not ssr_updated:
                 if (psr_updated && !ssr_updated)
                 {
                     //                    if find_value("290.MLT.Age", record) is not None:
                     //                        # age not 63.75
                     //                        mlat_age = find_value("290.MLT.Age", record)
-                    if (record.contains("290")
-                            && record.at("290").contains("MLT")
-                            && record.at("290").at("MLT").contains("Age")
-                            && record.at("290").at("MLT").at("Age") <= 12.0)
+                    if (record.contains("290") && record.at("290").contains("MLT") &&
+                        record.at("290").at("MLT").contains("Age") &&
+                        record.at("290").at("MLT").at("Age") <= 12.0)
                         //                        if mlat_age <= 12.0:
                         //                            return 3
-                        record["detection_type"] = 3; // combined psr & mlat ssr
+                        record["detection_type"] = 3;  // combined psr & mlat ssr
                     else
                         //                    return 1  # single psr, no mode-s
-                        record["detection_type"] = 1; //single psr, no mode-s
+                        record["detection_type"] = 1;  // single psr, no mode-s
                 }
                 //                if not psr_updated and ssr_updated:
                 //                    return 2  # single ssr, no mode-s
                 else if (!psr_updated && ssr_updated)
-                    record["detection_type"] = 2; // single ssr, no mode-s
+                    record["detection_type"] = 2;  // single ssr, no mode-s
                 //                if psr_updated and ssr_updated:
                 //                    return 3  # cmb, no mode-s
                 else if (psr_updated && ssr_updated)
-                    record["detection_type"] = 2; // single ssr, no mode-s
+                    record["detection_type"] = 2;  // single ssr, no mode-s
 
                 // not psr_updated and not ssr_updated:
 
                 //            if find_value("380.ADR.Target Address", record) is not None:
                 //                return 5
 
-                else if (record.contains("380")
-                         && record.at("380").contains("ADR")
-                         && record.at("380").at("ADR").contains("Target Address"))
+                else if (record.contains("380") && record.at("380").contains("ADR") &&
+                         record.at("380").at("ADR").contains("Target Address"))
                     record["detection_type"] = 5;  // ssr, mode-s
 
                 //            if find_value("060.Mode-3/A reply", record) is not None \
                 //                    or find_value("136.Measured Flight Level", record) is not None:
                 //                return 2
-                else if ((record.contains("060") && record.at("060").contains("Mode-3/A reply"))
-                         || (record.contains("136") && record.at("136").contains("Measured Flight Level")))
+                else if ((record.contains("060") && record.at("060").contains("Mode-3/A reply")) ||
+                         (record.contains("136") &&
+                          record.at("136").contains("Measured Flight Level")))
                     record["detection_type"] = 5;  // ssr, mode-s
 
                 //            return 0  # unknown
@@ -598,9 +598,9 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
                 //                else:
                 //                    return 7  # cmb, mode-s
                 if (!psr_updated)
-                    record["detection_type"] = 5; // ssr, mode-s
+                    record["detection_type"] = 5;  // ssr, mode-s
                 else
-                    record["detection_type"] = 7; // cmb, mode-s
+                    record["detection_type"] = 7;  // cmb, mode-s
             }
         }
     }
@@ -608,21 +608,19 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
     // overrides
     if (override_active_)
     {
-        if (record.contains("010")
-                && record.at("010").contains("SAC")
-                && record.at("010").contains("SIC")
-                && record.at("010").at("SAC") == this->override_sac_org_
-                && record.at("010").at("SIC") == this->override_sic_org_)
+        if (record.contains("010") && record.at("010").contains("SAC") &&
+            record.at("010").contains("SIC") &&
+            record.at("010").at("SAC") == this->override_sac_org_ &&
+            record.at("010").at("SIC") == this->override_sic_org_)
         {
             record.at("010").at("SAC") = override_sac_new_;
             record.at("010").at("SIC") = override_sic_new_;
-            record["ds_id"] =  override_sac_new_*256 + override_sic_new_;
+            record["ds_id"] = override_sac_new_ * 256 + override_sic_new_;
         }
 
-        if (record.contains("070")
-                && record.at("070").contains("Time Of Track Information"))
+        if (record.contains("070") && record.at("070").contains("Time Of Track Information"))
         {
-            float tod = record.at("070").at("Time Of Track Information"); // in seconds
+            float tod = record.at("070").at("Time Of Track Information");  // in seconds
 
             tod += override_tod_offset_;
 
@@ -632,8 +630,8 @@ void ASTERIXPostProcess::postProcessCAT062 (int sac, int sic, nlohmann::json& re
             while (tod > tod_24h)
                 tod -= tod_24h;
 
-            assert (tod >= 0.0f);
-            assert (tod <= tod_24h);
+            assert(tod >= 0.0f);
+            assert(tod <= tod_24h);
 
             record.at("070").at("Time Of Track Information") = tod;
         }

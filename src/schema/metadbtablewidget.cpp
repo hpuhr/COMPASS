@@ -15,27 +15,28 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QLineEdit>
-#include <QVBoxLayout>
+#include "metadbtablewidget.h"
+
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QComboBox>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QMessageBox>
 #include <QSettings>
+#include <QVBoxLayout>
 
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "dbtable.h"
 #include "dbtablecolumn.h"
-#include "metadbtablewidget.h"
-#include "metadbtable.h"
 #include "logger.h"
+#include "metadbtable.h"
 #include "stringconv.h"
 
 MetaDBTableWidget::MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), meta_table_ (meta_table)
+    : QWidget(parent, f), meta_table_(meta_table)
 {
     QSettings settings("ATSDB", "MetaDBTableWidget");
     restoreGeometry(settings.value("MetaDBTableWidget/geometry").toByteArray());
@@ -50,107 +51,107 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent, Q
     QFont font_big;
     font_big.setPointSize(18);
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QLabel *main_label = new QLabel ("Edit table");
-    main_label->setFont (font_big);
-    main_layout->addWidget (main_label);
+    QLabel* main_label = new QLabel("Edit table");
+    main_label->setFont(font_big);
+    main_layout->addWidget(main_label);
 
-    QGridLayout *properties_layout = new QGridLayout ();
+    QGridLayout* properties_layout = new QGridLayout();
 
-    QLabel *name_label = new QLabel ("Table name");
-    properties_layout->addWidget (name_label, 0, 0);
+    QLabel* name_label = new QLabel("Table name");
+    properties_layout->addWidget(name_label, 0, 0);
 
-    name_edit_ = new QLineEdit (meta_table_.name().c_str());
+    name_edit_ = new QLineEdit(meta_table_.name().c_str());
     connect(name_edit_, &QLineEdit::textChanged, this, &MetaDBTableWidget::editNameSlot);
-    properties_layout->addWidget (name_edit_, 0, 1);
+    properties_layout->addWidget(name_edit_, 0, 1);
 
-    QLabel *info_label = new QLabel ("Description");
-    properties_layout->addWidget (info_label, 1, 0);
+    QLabel* info_label = new QLabel("Description");
+    properties_layout->addWidget(info_label, 1, 0);
 
-    info_edit_ = new QLineEdit (meta_table_.info().c_str());
+    info_edit_ = new QLineEdit(meta_table_.info().c_str());
     connect(info_edit_, &QLineEdit::textChanged, this, &MetaDBTableWidget::editInfoSlot);
-    properties_layout->addWidget (info_edit_, 1, 1);
+    properties_layout->addWidget(info_edit_, 1, 1);
 
-    main_layout->addLayout (properties_layout);
+    main_layout->addLayout(properties_layout);
 
-    QLabel *sub_tables_label = new QLabel ("Sub tables");
-    sub_tables_label->setFont (font_big);
-    main_layout->addWidget (sub_tables_label);
+    QLabel* sub_tables_label = new QLabel("Sub tables");
+    sub_tables_label->setFont(font_big);
+    main_layout->addWidget(sub_tables_label);
 
-    QFrame *sub_tables_frame = new QFrame ();
+    QFrame* sub_tables_frame = new QFrame();
     sub_tables_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     sub_tables_frame->setLineWidth(frame_width);
 
-    sub_tables_grid_ = new QGridLayout ();
-    updateSubTablesGridSlot ();
+    sub_tables_grid_ = new QGridLayout();
+    updateSubTablesGridSlot();
 
-    sub_tables_frame->setLayout (sub_tables_grid_);
+    sub_tables_frame->setLayout(sub_tables_grid_);
 
-    QScrollArea *sub_tables_scroll = new QScrollArea ();
-    sub_tables_scroll->setWidgetResizable (true);
+    QScrollArea* sub_tables_scroll = new QScrollArea();
+    sub_tables_scroll->setWidgetResizable(true);
     sub_tables_scroll->setWidget(sub_tables_frame);
 
-    main_layout->addWidget (sub_tables_scroll);
+    main_layout->addWidget(sub_tables_scroll);
 
     // add new sub structures
 
-    QVBoxLayout *new_sub_table_layout = new QVBoxLayout ();
+    QVBoxLayout* new_sub_table_layout = new QVBoxLayout();
 
-    QLabel *new_sub_table_label = new QLabel ("New sub table");
-    new_sub_table_label->setFont (font_bold);
-    new_sub_table_layout->addWidget (new_sub_table_label);
+    QLabel* new_sub_table_label = new QLabel("New sub table");
+    new_sub_table_label->setFont(font_bold);
+    new_sub_table_layout->addWidget(new_sub_table_label);
 
-    QGridLayout *new_grid = new QGridLayout ();
+    QGridLayout* new_grid = new QGridLayout();
 
-    QLabel *local_key_label = new QLabel ("Local key");
-    new_grid->addWidget (local_key_label,0,0);
+    QLabel* local_key_label = new QLabel("Local key");
+    new_grid->addWidget(local_key_label, 0, 0);
 
-    new_local_key_ = new QComboBox ();
-    updateLocalKeySelectionSlot ();
-    new_grid->addWidget (new_local_key_,1,0);
+    new_local_key_ = new QComboBox();
+    updateLocalKeySelectionSlot();
+    new_grid->addWidget(new_local_key_, 1, 0);
 
-    QLabel *new_table_label = new QLabel ("Sub table");
-    new_grid->addWidget (new_table_label,0,1);
+    QLabel* new_table_label = new QLabel("Sub table");
+    new_grid->addWidget(new_table_label, 0, 1);
 
-    new_table_ = new QComboBox ();
+    new_table_ = new QComboBox();
     updateNewSubTableSelectionSlot();
     connect(new_table_, SIGNAL(activated(const QString&)), this, SLOT(updateSubKeySelectionSlot()));
-    new_grid->addWidget (new_table_,1,1);
+    new_grid->addWidget(new_table_, 1, 1);
 
-    QLabel *subkey_label = new QLabel ("Sub table key");
-    new_grid->addWidget (subkey_label,0,2);
+    QLabel* subkey_label = new QLabel("Sub table key");
+    new_grid->addWidget(subkey_label, 0, 2);
 
-    new_sub_key_ = new QComboBox ();
+    new_sub_key_ = new QComboBox();
     updateSubKeySelectionSlot();
-    new_grid->addWidget (new_sub_key_,1,2);
+    new_grid->addWidget(new_sub_key_, 1, 2);
 
-    add_button_ = new QPushButton ("Add");
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addSubTableSlot() ));
-    new_grid->addWidget (add_button_, 1, 3);
+    add_button_ = new QPushButton("Add");
+    connect(add_button_, SIGNAL(clicked()), this, SLOT(addSubTableSlot()));
+    new_grid->addWidget(add_button_, 1, 3);
 
-    new_sub_table_layout->addLayout (new_grid);
-    main_layout->addLayout (new_sub_table_layout);
+    new_sub_table_layout->addLayout(new_grid);
+    main_layout->addLayout(new_sub_table_layout);
 
     // columns list
-    QFrame *columns_frame = new QFrame ();
+    QFrame* columns_frame = new QFrame();
     columns_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     columns_frame->setLineWidth(frame_width);
 
-    column_grid_ = new QGridLayout ();
-    updateColumnsGridSlot ();
+    column_grid_ = new QGridLayout();
+    updateColumnsGridSlot();
 
-    columns_frame->setLayout (column_grid_);
+    columns_frame->setLayout(column_grid_);
 
-    QScrollArea *columns_scroll = new QScrollArea ();
-    columns_scroll->setWidgetResizable (true);
+    QScrollArea* columns_scroll = new QScrollArea();
+    columns_scroll->setWidgetResizable(true);
     columns_scroll->setWidget(columns_frame);
 
-    main_layout->addWidget (columns_scroll);
+    main_layout->addWidget(columns_scroll);
 
-    //main_layout->addStretch ();
+    // main_layout->addStretch ();
 
-    setLayout (main_layout);
+    setLayout(main_layout);
 
     show();
 }
@@ -161,11 +162,11 @@ MetaDBTableWidget::~MetaDBTableWidget()
     settings.setValue("MetaDBTableWidget/geometry", saveGeometry());
 }
 
-void MetaDBTableWidget::addSubTableSlot ()
+void MetaDBTableWidget::addSubTableSlot()
 {
-    assert (new_local_key_);
-    assert (new_table_);
-    assert (new_sub_key_);
+    assert(new_local_key_);
+    assert(new_table_);
+    assert(new_sub_key_);
 
     std::string local_key = new_local_key_->currentText().toStdString();
     std::string sub_table_name = new_table_->currentText().toStdString();
@@ -173,7 +174,7 @@ void MetaDBTableWidget::addSubTableSlot ()
 
     if (sub_table_name.size() > 0 && !meta_table_.hasSubTable(sub_table_name))
     {
-        meta_table_.addSubTable (local_key, sub_table_name, sub_table_key);
+        meta_table_.addSubTable(local_key, sub_table_name, sub_table_key);
         updateSubTablesGridSlot();
         emit changedMetaTable();
     }
@@ -185,19 +186,19 @@ void MetaDBTableWidget::addSubTableSlot ()
     }
 }
 
-void MetaDBTableWidget::editNameSlot (const QString& text)
+void MetaDBTableWidget::editNameSlot(const QString& text)
 {
-    meta_table_.name (text.toStdString());
+    meta_table_.name(text.toStdString());
     emit changedMetaTable();
 }
-void MetaDBTableWidget::editInfoSlot (const QString& text)
+void MetaDBTableWidget::editInfoSlot(const QString& text)
 {
-    assert (info_edit_);
-    meta_table_.info (text.toStdString());
+    assert(info_edit_);
+    meta_table_.info(text.toStdString());
     emit changedMetaTable();
 }
 
-void MetaDBTableWidget::lock ()
+void MetaDBTableWidget::lock()
 {
     locked_ = true;
 
@@ -210,7 +211,7 @@ void MetaDBTableWidget::lock ()
     add_button_->setDisabled(true);
 }
 
-//void MetaDBTableWidget::selectTable ()
+// void MetaDBTableWidget::selectTable ()
 //{
 //    assert (table_box_);
 //    meta_table_->setTableName (table_box_->currentText().toStdString());
@@ -218,7 +219,7 @@ void MetaDBTableWidget::lock ()
 //    emit changedMetaTable();
 //}
 
-//void MetaDBTableWidget::updateTableSelection()
+// void MetaDBTableWidget::updateTableSelection()
 //{
 //    loginf  << "MetaDBTableEditWidget: updateTableSelection";
 
@@ -233,9 +234,9 @@ void MetaDBTableWidget::lock ()
 //    while (table_box_->count() > 0)
 //        table_box_->removeItem (0);
 
-//    std::map <std::string, DBTable*> &tables = DBSchemaManager::getInstance().getCurrentSchema()->getTables ();
-//    std::map <std::string, DBTable*>::iterator it;
-
+//    std::map <std::string, DBTable*> &tables =
+//    DBSchemaManager::getInstance().getCurrentSchema()->getTables (); std::map <std::string,
+//    DBTable*>::iterator it;
 
 //    int index_cnt=-1;
 //    int cnt=0;
@@ -258,137 +259,134 @@ void MetaDBTableWidget::lock ()
 
 void MetaDBTableWidget::updateNewSubTableSelectionSlot()
 {
-    logdbg  << "MetaDBTableEditWidget: updateNewSubTableSelection";
+    logdbg << "MetaDBTableEditWidget: updateNewSubTableSelection";
 
-    assert (new_table_);
+    assert(new_table_);
 
     std::string selection;
     if (new_table_->count() > 0)
         selection = new_table_->currentText().toStdString();
 
     while (new_table_->count() > 0)
-        new_table_->removeItem (0);
+        new_table_->removeItem(0);
 
-    int index_cnt=-1;
-    int cnt=0;
+    int index_cnt = -1;
+    int cnt = 0;
     for (auto it : meta_table_.schema().tables())
     {
         if (meta_table_.hasSubTable(it.first))
             continue;
 
-        new_table_->addItem (it.second->name().c_str());
+        new_table_->addItem(it.second->name().c_str());
 
         if (selection.size() > 0 && it.second->name().compare(selection) == 0)
-            index_cnt=cnt;
+            index_cnt = cnt;
 
         cnt++;
     }
 
     if (index_cnt != -1)
     {
-        new_table_->setCurrentIndex (index_cnt);
+        new_table_->setCurrentIndex(index_cnt);
     }
-
 }
 
-void MetaDBTableWidget::updateLocalKeySelectionSlot ()
+void MetaDBTableWidget::updateLocalKeySelectionSlot()
 {
-    //assert (table_box_);
-    assert (new_local_key_);
+    // assert (table_box_);
+    assert(new_local_key_);
 
-//    if (table_box_->count() == 0)
-//        return;
+    //    if (table_box_->count() == 0)
+    //        return;
 
-//    std::string tablename = meta_table_.mainTableName();
-//    assert (tablename.size() > 0);
+    //    std::string tablename = meta_table_.mainTableName();
+    //    assert (tablename.size() > 0);
 
-//    DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
-//    assert (schema->hasTable (tablename));
-//    DBTable *table = schema->getTable (tablename);
+    //    DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
+    //    assert (schema->hasTable (tablename));
+    //    DBTable *table = schema->getTable (tablename);
 
     std::string selection;
     if (new_local_key_->count() > 0)
         selection = new_local_key_->currentText().toStdString();
 
     while (new_local_key_->count() > 0)
-        new_local_key_->removeItem (0);
+        new_local_key_->removeItem(0);
 
+    //    std::map <std::string, DBTableColumn *> &columns = table->getColumns ();
+    //    std::map <std::string, DBTableColumn *>::iterator it;
 
-//    std::map <std::string, DBTableColumn *> &columns = table->getColumns ();
-//    std::map <std::string, DBTableColumn *>::iterator it;
+    // loginf  << "MetaDBTable: updateSubKeySelection: " << columns.size();
 
-    //loginf  << "MetaDBTable: updateSubKeySelection: " << columns.size();
-
-    int index_cnt=-1;
-    int cnt=0;
+    int index_cnt = -1;
+    int cnt = 0;
     for (auto it : meta_table_.mainTable().columns())
     {
         std::string name = it.first;
 
         if (selection.size() > 0 && selection.compare(name) == 0)
-            index_cnt=cnt;
+            index_cnt = cnt;
 
-        new_local_key_->addItem (name.c_str());
+        new_local_key_->addItem(name.c_str());
         cnt++;
     }
 
     if (index_cnt != -1)
     {
-        new_local_key_->setCurrentIndex (index_cnt);
+        new_local_key_->setCurrentIndex(index_cnt);
     }
 }
 
-void MetaDBTableWidget::updateSubKeySelectionSlot ()
+void MetaDBTableWidget::updateSubKeySelectionSlot()
 {
-    assert (new_table_);
-    assert (new_sub_key_);
+    assert(new_table_);
+    assert(new_sub_key_);
 
     if (new_table_->count() == 0)
         return;
 
     std::string metatablename = new_table_->currentText().toStdString();
-    assert (metatablename.size() > 0);
+    assert(metatablename.size() > 0);
 
     logdbg << "MetaDBTableWidget: updateSubKeySelectionSlot: new table '" << metatablename << "'";
 
-    const DBSchema &schema = meta_table_.schema();
-    assert (schema.hasTable (metatablename));
-    const DBTable &metatable = schema.table(metatablename);
+    const DBSchema& schema = meta_table_.schema();
+    assert(schema.hasTable(metatablename));
+    const DBTable& metatable = schema.table(metatablename);
 
     std::string selection;
     if (new_sub_key_->count() > 0)
         selection = new_sub_key_->currentText().toStdString();
 
     while (new_sub_key_->count() > 0)
-        new_sub_key_->removeItem (0);
+        new_sub_key_->removeItem(0);
 
+    // loginf  << "MetaDBTable: updateSubKeySelection: " << columns.size();
 
-    //loginf  << "MetaDBTable: updateSubKeySelection: " << columns.size();
-
-    int index_cnt=-1;
-    int cnt=0;
+    int index_cnt = -1;
+    int cnt = 0;
     for (auto it : metatable.columns())
     {
         std::string name = it.second->name();
 
         if (selection.size() > 0 && selection.compare(name) == 0)
-            index_cnt=cnt;
+            index_cnt = cnt;
 
-        new_sub_key_->addItem (name.c_str());
+        new_sub_key_->addItem(name.c_str());
         cnt++;
     }
 
     if (index_cnt != -1)
     {
-        new_sub_key_->setCurrentIndex (index_cnt);
+        new_sub_key_->setCurrentIndex(index_cnt);
     }
 }
 
-void MetaDBTableWidget::updateSubTablesGridSlot ()
+void MetaDBTableWidget::updateSubTablesGridSlot()
 {
-    assert (sub_tables_grid_);
+    assert(sub_tables_grid_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = sub_tables_grid_->takeAt(0)) != 0)
     {
         if (child->widget())
@@ -399,44 +397,44 @@ void MetaDBTableWidget::updateSubTablesGridSlot ()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QLabel *local_key_label = new QLabel ("Main table key");
+    QLabel* local_key_label = new QLabel("Main table key");
     local_key_label->setFont(font_bold);
-    sub_tables_grid_->addWidget (local_key_label, 0,0);
+    sub_tables_grid_->addWidget(local_key_label, 0, 0);
 
-    QLabel *sub_table_name_label = new QLabel ("Sub table name");
+    QLabel* sub_table_name_label = new QLabel("Sub table name");
     sub_table_name_label->setFont(font_bold);
-    sub_tables_grid_->addWidget (sub_table_name_label, 0,1);
+    sub_tables_grid_->addWidget(sub_table_name_label, 0, 1);
 
-    QLabel *sub_table_key_label = new QLabel ("Sub table key");
+    QLabel* sub_table_key_label = new QLabel("Sub table key");
     sub_table_key_label->setFont(font_bold);
-    sub_tables_grid_->addWidget (sub_table_key_label, 0,2);
+    sub_tables_grid_->addWidget(sub_table_key_label, 0, 2);
 
-    unsigned int row=1;
+    unsigned int row = 1;
 
     for (auto it : meta_table_.subTableDefinitions())
     {
-        QLabel *local_key = new QLabel (it.second->mainTableKey().c_str());
-        sub_tables_grid_->addWidget (local_key, row,0);
+        QLabel* local_key = new QLabel(it.second->mainTableKey().c_str());
+        sub_tables_grid_->addWidget(local_key, row, 0);
 
-        QLabel *table = new QLabel (it.second->subTableName().c_str());
-        sub_tables_grid_->addWidget (table, row,1);
+        QLabel* table = new QLabel(it.second->subTableName().c_str());
+        sub_tables_grid_->addWidget(table, row, 1);
 
-        QLabel *sub_key = new QLabel (it.second->subTableKey().c_str());
-        sub_tables_grid_->addWidget (sub_key, row,2);
+        QLabel* sub_key = new QLabel(it.second->subTableKey().c_str());
+        sub_tables_grid_->addWidget(sub_key, row, 2);
 
-//        QPushButton *edit = new QPushButton ("Edit");
-//        connect(edit, SIGNAL( clicked() ), this, SLOT( editSubMetaTable() ));
-//        sub_tables_grid_->addWidget (edit, row, 4);
-//        edit_sub_meta_table_buttons_ [edit] = it->second;
+        //        QPushButton *edit = new QPushButton ("Edit");
+        //        connect(edit, SIGNAL( clicked() ), this, SLOT( editSubMetaTable() ));
+        //        sub_tables_grid_->addWidget (edit, row, 4);
+        //        edit_sub_meta_table_buttons_ [edit] = it->second;
         row++;
     }
 }
 
-void MetaDBTableWidget::updateColumnsGridSlot ()
+void MetaDBTableWidget::updateColumnsGridSlot()
 {
-    assert (column_grid_);
+    assert(column_grid_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = column_grid_->takeAt(0)) != 0)
     {
         if (child->widget())
@@ -447,59 +445,59 @@ void MetaDBTableWidget::updateColumnsGridSlot ()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QLabel *name_label = new QLabel ("Name");
+    QLabel* name_label = new QLabel("Name");
     name_label->setFont(font_bold);
-    column_grid_->addWidget (name_label, 0,0);
+    column_grid_->addWidget(name_label, 0, 0);
 
-    QLabel *type_label = new QLabel ("Data type");
+    QLabel* type_label = new QLabel("Data type");
     type_label->setFont(font_bold);
-    column_grid_->addWidget (type_label, 0,1);
+    column_grid_->addWidget(type_label, 0, 1);
 
-    QLabel *key_label = new QLabel ("Is key");
+    QLabel* key_label = new QLabel("Is key");
     key_label->setFont(font_bold);
-    column_grid_->addWidget (key_label, 0,2);
+    column_grid_->addWidget(key_label, 0, 2);
 
-    QLabel *unit_label = new QLabel ("Unit");
+    QLabel* unit_label = new QLabel("Unit");
     unit_label->setFont(font_bold);
-    column_grid_->addWidget (unit_label, 0,3);
+    column_grid_->addWidget(unit_label, 0, 3);
 
-//    QLabel *null_label = new QLabel ("Special null"); //TODO
-//    null_label->setFont(font_bold);
-//    column_grid_->addWidget (null_label, 0,4);
+    //    QLabel *null_label = new QLabel ("Special null"); //TODO
+    //    null_label->setFont(font_bold);
+    //    column_grid_->addWidget (null_label, 0,4);
 
-    QLabel *comment_label = new QLabel ("Comment");
+    QLabel* comment_label = new QLabel("Comment");
     comment_label->setFont(font_bold);
-    column_grid_->addWidget (comment_label, 0,4);
+    column_grid_->addWidget(comment_label, 0, 4);
 
-
-    unsigned int row=1;
-    for (auto it : meta_table_.columns ())
+    unsigned int row = 1;
+    for (auto it : meta_table_.columns())
     {
-        QLabel *name = new QLabel (it.second.name().c_str());
-        column_grid_->addWidget (name, row, 0);
+        QLabel* name = new QLabel(it.second.name().c_str());
+        column_grid_->addWidget(name, row, 0);
 
-        QLabel *type = new QLabel (it.second.type().c_str());
-        column_grid_->addWidget (type, row, 1);
+        QLabel* type = new QLabel(it.second.type().c_str());
+        column_grid_->addWidget(type, row, 1);
 
-        QLabel *key = new QLabel (QString::number(it.second.isKey()));
-        column_grid_->addWidget (key, row, 2);
+        QLabel* key = new QLabel(QString::number(it.second.isKey()));
+        column_grid_->addWidget(key, row, 2);
 
-        QLabel *unit = new QLabel ((it.second.unit()+":"+it.second.dimension()).c_str());
-        column_grid_->addWidget (unit, row, 3);
+        QLabel* unit = new QLabel((it.second.unit() + ":" + it.second.dimension()).c_str());
+        column_grid_->addWidget(unit, row, 3);
 
-//        QLabel *edit = new QLabel (it.second.specialNull().c_str());
-//        column_grid_->addWidget (edit, row, 4);
+        //        QLabel *edit = new QLabel (it.second.specialNull().c_str());
+        //        column_grid_->addWidget (edit, row, 4);
 
-        QLabel *comment = new QLabel (it.second.comment().c_str());
-        column_grid_->addWidget (comment, row, 4);
+        QLabel* comment = new QLabel(it.second.comment().c_str());
+        column_grid_->addWidget(comment, row, 4);
 
         row++;
     }
 }
 
-//void MetaDBTableWidget::editSubMetaTable ()
+// void MetaDBTableWidget::editSubMetaTable ()
 //{
-//    assert (edit_sub_meta_table_buttons_.find((QPushButton*)sender()) != edit_sub_meta_table_buttons_.end());
+//    assert (edit_sub_meta_table_buttons_.find((QPushButton*)sender()) !=
+//    edit_sub_meta_table_buttons_.end());
 
 //    MetaDBTable *table_structure = edit_sub_meta_table_buttons_ [(QPushButton*)sender()];
 

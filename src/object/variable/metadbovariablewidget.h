@@ -15,7 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef METADBOVARIABLEWIDGET_H_
 #define METADBOVARIABLEWIDGET_H_
 
@@ -31,7 +30,6 @@ class MetaDBOVariable;
 class QGridLayout;
 class DBOVariableSelectionWidget;
 
-
 /**
  * @brief Edit widget for a DBObject
  */
@@ -39,41 +37,41 @@ class MetaDBOVariableWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     void metaVariableChangedSignal();
 
-public slots:
+  public slots:
     /// @brief Changes DBO name
-    void editNameSlot ();
+    void editNameSlot();
     /// @brief Changes DBO info
-    void editDescriptionSlot ();
-    void subVariableChangedSlot ();
+    void editDescriptionSlot();
+    void subVariableChangedSlot();
 
-    void updateSlot ();
+    void updateSlot();
 
-public:
+  public:
     /// @brief Constructor
-    MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent=0, Qt::WindowFlags f=0);
+    MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~MetaDBOVariableWidget();
 
-    void lock ();
-    void unlock ();
+    void lock();
+    void unlock();
 
-private:
+  private:
     /// @brief DBObject to be managed
     MetaDBOVariable& variable_;
 
     /// @brief DBOVariable name
-    QLineEdit* name_edit_ {nullptr};
+    QLineEdit* name_edit_{nullptr};
     /// @brief DBOVariable info
-    QLineEdit* description_edit_ {nullptr};
+    QLineEdit* description_edit_{nullptr};
 
-    QGridLayout* grid_layout_ {nullptr};
+    QGridLayout* grid_layout_{nullptr};
 
-    bool locked_ {false};
+    bool locked_{false};
 
-    std::map <DBOVariableSelectionWidget*, std::string> selection_widgets_;
+    std::map<DBOVariableSelectionWidget*, std::string> selection_widgets_;
 };
 
 #endif /* METADBOVARIABLEWIDGET_H_ */

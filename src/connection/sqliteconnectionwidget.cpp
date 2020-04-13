@@ -16,61 +16,62 @@
  */
 
 #include "sqliteconnectionwidget.h"
-#include "sqliteconnection.h"
-#include "mysqlserver.h"
-#include "logger.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QComboBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QInputDialog>
-#include <QStackedWidget>
-#include <QListWidget>
-#include <QFileDialog>
-#include <QMessageBox>
 #include <QApplication>
+#include <QComboBox>
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
-SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWidget *parent)
+#include "logger.h"
+#include "mysqlserver.h"
+#include "sqliteconnection.h"
+
+SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent)
     : QWidget(parent), connection_(connection)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel *files_label = new QLabel ("File Selection");
+    QLabel* files_label = new QLabel("File Selection");
     files_label->setFont(font_bold);
     layout->addWidget(files_label);
 
-    file_list_ = new QListWidget ();
+    file_list_ = new QListWidget();
     file_list_->setWordWrap(true);
-    file_list_->setTextElideMode (Qt::ElideNone);
-    file_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
-    file_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+    file_list_->setTextElideMode(Qt::ElideNone);
+    file_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
+    file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
     layout->addWidget(file_list_);
 
-    new_button_ = new QPushButton ("New");
-    connect (new_button_, SIGNAL(clicked()), this, SLOT(newFileSlot()));
+    new_button_ = new QPushButton("New");
+    connect(new_button_, SIGNAL(clicked()), this, SLOT(newFileSlot()));
     layout->addWidget(new_button_);
 
-    add_button_ = new QPushButton ("Add");
-    connect (add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
+    add_button_ = new QPushButton("Add");
+    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
     layout->addWidget(add_button_);
 
-    delete_button_ = new QPushButton ("Remove");
-    connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
+    delete_button_ = new QPushButton("Remove");
+    connect(delete_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
     layout->addWidget(delete_button_);
     layout->addStretch();
 
-    open_button_ = new QPushButton ("Open");
-    connect (open_button_, SIGNAL(clicked()), this, SLOT(openFileSlot()));
+    open_button_ = new QPushButton("Open");
+    connect(open_button_, SIGNAL(clicked()), this, SLOT(openFileSlot()));
     layout->addWidget(open_button_);
 
-    updateFileListSlot ();
+    updateFileListSlot();
 
-    setLayout (layout);
+    setLayout(layout);
 }
 
 SQLiteConnectionWidget::~SQLiteConnectionWidget()
@@ -78,10 +79,9 @@ SQLiteConnectionWidget::~SQLiteConnectionWidget()
     logdbg << "SQLiteConnectionWidget: destructor";
 }
 
-void SQLiteConnectionWidget::newFileSlot ()
+void SQLiteConnectionWidget::newFileSlot()
 {
-    QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"),
-                                                    "", tr(""));
+    QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"), "", tr(""));
 
     if (filename.size() > 0)
     {
@@ -90,15 +90,15 @@ void SQLiteConnectionWidget::newFileSlot ()
     }
 }
 
-void SQLiteConnectionWidget::addFileSlot ()
+void SQLiteConnectionWidget::addFileSlot()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Add SQLite3 File"));
 
     if (filename.size() > 0)
-        addFile (filename.toStdString());
+        addFile(filename.toStdString());
 }
 
-void SQLiteConnectionWidget::addFile (const std::string& filename)
+void SQLiteConnectionWidget::addFile(const std::string& filename)
 {
     if (!connection_.hasFile(filename))
     {
@@ -107,13 +107,12 @@ void SQLiteConnectionWidget::addFile (const std::string& filename)
     }
 }
 
-void SQLiteConnectionWidget::deleteFileSlot ()
+void SQLiteConnectionWidget::deleteFileSlot()
 {
     if (!file_list_->currentItem())
     {
-        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 File Deletion Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+        QMessageBox m_warning(QMessageBox::Warning, "SQLite3 File Deletion Failed",
+                              "Please select a file in the list.", QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -122,49 +121,47 @@ void SQLiteConnectionWidget::deleteFileSlot ()
 
     if (filename.size() > 0)
     {
-        assert (connection_.hasFile(filename.toStdString()));
-        connection_.removeFile (filename.toStdString());
+        assert(connection_.hasFile(filename.toStdString()));
+        connection_.removeFile(filename.toStdString());
     }
 }
 
-void SQLiteConnectionWidget::openFileSlot ()
+void SQLiteConnectionWidget::openFileSlot()
 {
     loginf << "SQLiteConnectionWidget: openFileSlot";
 
     if (!file_list_->currentItem())
     {
-        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 Database Open Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+        QMessageBox m_warning(QMessageBox::Warning, "SQLite3 Database Open Failed",
+                              "Please select a file in the list.", QMessageBox::Ok);
         m_warning.exec();
         return;
     }
 
-    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    // QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     QString filename = file_list_->currentItem()->text();
     if (filename.size() > 0)
     {
         open_button_->setDisabled(true);
 
-        assert (connection_.hasFile(filename.toStdString()));
+        assert(connection_.hasFile(filename.toStdString()));
         connection_.openFile(filename.toStdString());
 
         emit databaseOpenedSignal();
     }
-    //QApplication::restoreOverrideCursor();
+    // QApplication::restoreOverrideCursor();
     loginf << "SQLiteConnectionWidget: openFileSlot: done";
 }
 
-void SQLiteConnectionWidget::updateFileListSlot ()
+void SQLiteConnectionWidget::updateFileListSlot()
 {
     file_list_->clear();
 
     for (auto it : connection_.fileList())
     {
-        QListWidgetItem *item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
         if (it.first == connection_.lastFilename())
             file_list_->setCurrentItem(item);
     }
 }
-

@@ -20,8 +20,9 @@
 
 class QListWidget;
 
-#include <QWidget>
 #include <QMenu>
+#include <QWidget>
+
 #include "dbovariableorderedset.h"
 #include "dbovariableselectionwidget.h"
 
@@ -32,41 +33,41 @@ class DBOVariableOrderedSetWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     /// @brief Updates the variables list
-    void updateVariableListSlot ();
+    void updateVariableListSlot();
     /// @brief Removes the selected variable
-    void removeSlot ();
+    void removeSlot();
     /// @brief Moves the selected variable up
-    void moveUpSlot ();
+    void moveUpSlot();
     /// @brief Moves the selected variable down
-    void moveDownSlot ();
+    void moveDownSlot();
 
-protected slots:
+  protected slots:
     /// @brief Called when menu action is executed
-    void triggerSlot (QAction* action);
+    void triggerSlot(QAction* action);
     /// @brief Shows the context menu
     void showMenuSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBOVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBOVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent = 0,
+                                Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBOVariableOrderedSetWidget();
 
-protected:
+  protected:
     /// Represented set
-    DBOVariableOrderedSet &set_;
+    DBOVariableOrderedSet& set_;
     /// Context menu for adding a variable
     QMenu menu_;
 
     /// Variable list
-    QListWidget* list_widget_ {nullptr};
-    int current_index_ {-1};
+    QListWidget* list_widget_{nullptr};
+    int current_index_{-1};
 
     /// @brief Updates variables list
     void updateMenuEntries();
-
 };
 
 #endif /* DBOVariableOrderedSetWidget_H_ */

@@ -15,23 +15,24 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
-#include <cmath>
-
 #include "projectionmanager.h"
-#include "projectionmanagerwidget.h"
-#include "rs2gprojection.h"
-#include "ogrprojection.h"
+
+#include <math.h>
+
+#include <cmath>
 
 #include "global.h"
 #include "logger.h"
+#include "ogrprojection.h"
+#include "projectionmanagerwidget.h"
+#include "rs2gprojection.h"
 
 ProjectionManager::ProjectionManager()
-    : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.json")
+    : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
 {
-    loginf  << "ProjectionManager: constructor";
+    loginf << "ProjectionManager: constructor";
 
-    registerParameter ("current_projection_name", &current_projection_name_, "RS2G");
+    registerParameter("current_projection_name", &current_projection_name_, "RS2G");
 
     //    // init sdl
     //    t_GPos geo_pos;
@@ -52,7 +53,7 @@ ProjectionManager::ProjectionManager()
 
     createSubConfigurables();
 
-    assert (hasCurrentProjection());
+    assert(hasCurrentProjection());
 
     // init radSlt2Geo
 }
@@ -66,52 +67,55 @@ ProjectionManager::~ProjectionManager()
     }
 }
 
-void ProjectionManager::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
+void ProjectionManager::generateSubConfigurable(const std::string& class_id,
+                                                const std::string& instance_id)
 {
     if (class_id == "RS2GProjection")
     {
-        std::string name = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueString("name");
+        std::string name = configuration()
+                               .getSubConfiguration(class_id, instance_id)
+                               .getParameterConfigValueString("name");
 
-        assert (!projections_.count(name));
+        assert(!projections_.count(name));
 
-        projections_[name].reset (new RS2GProjection (class_id, instance_id, *this));
+        projections_[name].reset(new RS2GProjection(class_id, instance_id, *this));
     }
     else if (class_id == "OGRProjection")
     {
-        std::string name = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueString("name");
+        std::string name = configuration()
+                               .getSubConfiguration(class_id, instance_id)
+                               .getParameterConfigValueString("name");
 
-        assert (!projections_.count(name));
+        assert(!projections_.count(name));
 
-        projections_[name].reset (new OGRProjection (class_id, instance_id, *this));
+        projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
     }
     else
-        throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-void ProjectionManager::checkSubConfigurables ()
+void ProjectionManager::checkSubConfigurables()
 {
     if (!projections_.count("RS2G"))
     {
-        Configuration& configuration = addNewSubConfiguration ("RS2GProjection");
+        Configuration& configuration = addNewSubConfiguration("RS2GProjection");
 
-        configuration.addParameterString ("name", "RS2G");
-        generateSubConfigurable ("RS2GProjection", configuration.getInstanceId());
+        configuration.addParameterString("name", "RS2G");
+        generateSubConfigurable("RS2GProjection", configuration.getInstanceId());
     }
 
     if (!projections_.count("OGR"))
     {
-        Configuration& configuration = addNewSubConfiguration ("OGRProjection");
+        Configuration& configuration = addNewSubConfiguration("OGRProjection");
 
-        configuration.addParameterString ("name", "OGR");
-        generateSubConfigurable ("OGRProjection", configuration.getInstanceId());
+        configuration.addParameterString("name", "OGR");
+        generateSubConfigurable("OGRProjection", configuration.getInstanceId());
     }
 }
 
-void ProjectionManager::shutdown ()
+void ProjectionManager::shutdown()
 {
-    loginf  << "ProjectionManager: shutdown";
+    loginf << "ProjectionManager: shutdown";
 
     if (widget_)
     {
@@ -120,10 +124,7 @@ void ProjectionManager::shutdown ()
     }
 }
 
-std::string ProjectionManager::currentProjectionName() const
-{
-    return current_projection_name_;
-}
+std::string ProjectionManager::currentProjectionName() const { return current_projection_name_; }
 
 void ProjectionManager::currentProjectionName(const std::string& name)
 {
@@ -131,17 +132,11 @@ void ProjectionManager::currentProjectionName(const std::string& name)
     current_projection_name_ = name;
 }
 
-bool ProjectionManager::hasProjection (const std::string& name)
-{
-    return projections_.count(name);
-}
+bool ProjectionManager::hasProjection(const std::string& name) { return projections_.count(name); }
 
-bool ProjectionManager::hasCurrentProjection ()
-{
-    return hasProjection(current_projection_name_);
-}
+bool ProjectionManager::hasCurrentProjection() { return hasProjection(current_projection_name_); }
 
-Projection& ProjectionManager::currentProjection ()
+Projection& ProjectionManager::currentProjection()
 {
     return *projections_.at(current_projection_name_);
 }
@@ -151,9 +146,7 @@ std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projectio
     return projections_;
 }
 
-
-
-//bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
+// bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
 //{
 //    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
 
@@ -172,14 +165,12 @@ std::map<std::string, std::unique_ptr<Projection>>& ProjectionManager::projectio
 //    return true;
 //}
 
-ProjectionManagerWidget* ProjectionManager::widget ()
+ProjectionManagerWidget* ProjectionManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new ProjectionManagerWidget (*this);
+        widget_ = new ProjectionManagerWidget(*this);
     }
-    assert (widget_);
+    assert(widget_);
     return widget_;
 }
-
-

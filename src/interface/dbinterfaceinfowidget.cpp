@@ -15,6 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "dbinterfaceinfowidget.h"
+
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -22,15 +24,14 @@
 
 #include "atsdb.h"
 #include "dbconnection.h"
-#include "dbinterfaceinfowidget.h"
 #include "dbinterface.h"
 #include "logger.h"
 #include "stringconv.h"
 
 using namespace Utils;
 
-
-DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface &interface, QWidget* parent, Qt::WindowFlags f)
+DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface& interface, QWidget* parent,
+                                             Qt::WindowFlags f)
     : interface_(interface), layout_(nullptr)
 {
     unsigned int frame_width = 2;
@@ -40,20 +41,18 @@ DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface &interface, QWidget* pa
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(frame_width);
 
-    layout_ = new QVBoxLayout ();
-    setLayout (layout_);
+    layout_ = new QVBoxLayout();
+    setLayout(layout_);
 
-    connect (&interface_, SIGNAL(databaseContentChangedSignal()), this, SLOT(databaseContentChangedSlot()));
+    connect(&interface_, SIGNAL(databaseContentChangedSignal()), this,
+            SLOT(databaseContentChangedSlot()));
 }
 
-DBInterfaceInfoWidget::~DBInterfaceInfoWidget()
-{
-}
+DBInterfaceInfoWidget::~DBInterfaceInfoWidget() {}
 
-
-void DBInterfaceInfoWidget::databaseContentChangedSlot ()
+void DBInterfaceInfoWidget::databaseContentChangedSlot()
 {
-    assert (layout_);
+    assert(layout_);
     layout_->addWidget(interface_.connection().infoWidget());
     layout_->addStretch();
 }

@@ -18,22 +18,23 @@
 #ifndef JSONDATAMAPPING_H
 #define JSONDATAMAPPING_H
 
-#include "json.hpp"
-#include "logger.h"
-#include "format.h"
-#include "nullablevector.h"
-#include "configurable.h"
-#include "jsondatamappingwidget.h"
-
 #include <memory>
+
+#include "configurable.h"
+#include "format.h"
+#include "json.hpp"
+#include "jsondatamappingwidget.h"
+#include "logger.h"
+#include "nullablevector.h"
 
 class DBOVariable;
 class JSONObjectParser;
 
 class JSONDataMapping : public Configurable
 {
-public:
-    JSONDataMapping (const std::string& class_id, const std::string& instance_id, JSONObjectParser& parent);
+  public:
+    JSONDataMapping(const std::string& class_id, const std::string& instance_id,
+                    JSONObjectParser& parent);
     JSONDataMapping() = default;
     JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 
@@ -43,24 +44,25 @@ public:
     JSONDataMapping& operator=(JSONDataMapping&& other);
 
     // return bool mandatory missing
-    template<typename T>
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, size_t row_cnt) const;
+    template <typename T>
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list,
+                         size_t row_cnt) const;
 
-    bool hasDimension () const { return dimension_.size() > 0; }
+    bool hasDimension() const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
-    std::string& dimensionRef () { return dimension_; }
-    const std::string& dimension () const { return dimension_; }
+    std::string& dimensionRef() { return dimension_; }
+    const std::string& dimension() const { return dimension_; }
     /// @brief Returns unit
-    std::string& unitRef () { return unit_; }
-    const std::string& unit () const { return unit_; }
+    std::string& unitRef() { return unit_; }
+    const std::string& unit() const { return unit_; }
 
     const std::string& jsonKey() const;
-    void jsonKey(const std::string &json_key);
+    void jsonKey(const std::string& json_key);
 
     bool active() const;
     void active(bool active);
 
-    bool hasVariable () { return variable_ != nullptr; }
+    bool hasVariable() { return variable_ != nullptr; }
     DBOVariable& variable() const;
 
     bool mandatory() const;
@@ -74,16 +76,19 @@ public:
     void dboVariableName(const std::string& name);
     std::string dboVariableName() const;
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id)
+    {
+    }
 
-    void initializeIfRequired ();
+    void initializeIfRequired();
 
     std::string& formatDataTypeRef();
 
     bool initialized() const;
 
     std::string comment() const;
-    void comment(const std::string &comment);
+    void comment(const std::string& comment);
 
     bool appendValue() const;
     void appendValue(bool appendValue);
@@ -91,17 +96,17 @@ public:
     bool inArray() const;
     void inArray(bool inArray);
 
-private:
-    bool initialized_ {false};
+  private:
+    bool initialized_{false};
 
-    bool active_ {false};
+    bool active_{false};
     std::string json_key_;
 
     std::string db_object_name_;
     std::string dbovariable_name_;
-    DBOVariable* variable_ {nullptr};
+    DBOVariable* variable_{nullptr};
 
-    bool mandatory_ {false};
+    bool mandatory_{false};
 
     std::string comment_;
 
@@ -113,10 +118,10 @@ private:
     /// Unit
     std::string unit_;
 
-    bool in_array_ {false};
-    bool append_value_ {false};
+    bool in_array_{false};
+    bool append_value_{false};
 
-    bool has_sub_keys_ {false};
+    bool has_sub_keys_{false};
     std::vector<std::string> sub_keys_;
     size_t num_sub_keys_;
     std::vector<std::string>::iterator last_key_;
@@ -124,32 +129,40 @@ private:
 
     std::unique_ptr<JSONDataMappingWidget> widget_;
 
-    void initialize ();
+    void initialize();
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 
     // TODO change to Utils::JSON?
-    const nlohmann::json* findKey (const nlohmann::json& j) const;
-    const nlohmann::json* findParentKey (const nlohmann::json& j) const;
+    const nlohmann::json* findKey(const nlohmann::json& j) const;
+    const nlohmann::json* findParentKey(const nlohmann::json& j) const;
 
     // generic template functions
-    template<typename T>
-    void setValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list, size_t row_cnt) const;
+    template <typename T>
+    void setValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list,
+                  size_t row_cnt) const;
 
-    template<typename T>
-    void appendValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list, size_t row_cnt) const;
+    template <typename T>
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list,
+                     size_t row_cnt) const;
     // bool template functions
-    void setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list, size_t row_cnt) const;
-    void appendValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list, size_t row_cnt) const;
+    void setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list,
+                  size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list,
+                     size_t row_cnt) const;
     // char template functions
-    void setValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list, size_t row_cnt) const;
-    void appendValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list, size_t row_cnt) const;
+    void setValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list,
+                  size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list,
+                     size_t row_cnt) const;
     // string template functions
-    void setValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list, size_t row_cnt) const;
-    void appendValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list, size_t row_cnt) const;
+    void setValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list,
+                  size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list,
+                     size_t row_cnt) const;
 };
 
 Q_DECLARE_METATYPE(JSONDataMapping*)
 
-#endif // JSONDATAMAPPING_H
+#endif  // JSONDATAMAPPING_H

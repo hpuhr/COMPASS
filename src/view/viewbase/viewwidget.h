@@ -18,14 +18,13 @@
 #ifndef VIEWWIDGET_H
 #define VIEWWIDGET_H
 
-#include "viewselection.h"
-#include "configurable.h"
-
 #include <QWidget>
+
+#include "configurable.h"
+#include "viewselection.h"
 
 class EventProcessor;
 class View;
-
 
 /**
 @brief Base class for a views "display" component.
@@ -43,36 +42,36 @@ event processor for each part.
 class ViewWidget : public QWidget, public Configurable
 {
     Q_OBJECT
-public:
-    ViewWidget (const std::string &class_id, const std::string &instance_id, Configurable *config_parent,
-                View* view, QWidget *parent=nullptr);
+  public:
+    ViewWidget(const std::string& class_id, const std::string& instance_id,
+               Configurable* config_parent, View* view, QWidget* parent = nullptr);
     virtual ~ViewWidget();
 
     /// @brief Updates the display (only the display, the OGRE render window e.g.)
-    virtual void updateView ()=0;
+    virtual void updateView() = 0;
 
-    void setEventProcessor (EventProcessor* ep);
+    void setEventProcessor(EventProcessor* ep);
     /// @brief Returns the view widget's event processor
     EventProcessor* getEventProcessor() { return event_processor_; }
 
-    virtual void mousePressEvent (QMouseEvent *e);
-    virtual void mouseReleaseEvent (QMouseEvent *e);
-    virtual void mouseMoveEvent (QMouseEvent *e);
-    virtual void wheelEvent (QWheelEvent *e);
-    virtual void keyPressEvent (QKeyEvent *e);
-    virtual void keyReleaseEvent (QKeyEvent *e);
-    virtual void mouseDoubleClickEvent (QMouseEvent *e);
+    virtual void mousePressEvent(QMouseEvent* e);
+    virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
+    virtual void wheelEvent(QWheelEvent* e);
+    virtual void keyPressEvent(QKeyEvent* e);
+    virtual void keyReleaseEvent(QKeyEvent* e);
+    virtual void mouseDoubleClickEvent(QMouseEvent* e);
 
     View* getView() { return view_; }
 
-signals:
-    void itemsSelected (ViewSelectionEntries &entries);
+  signals:
+    void itemsSelected(ViewSelectionEntries& entries);
 
-protected:
+  protected:
     /// The widget's event processor
     EventProcessor* event_processor_;
     /// The view the widget is part of
     View* view_;
 };
 
-#endif //VIEWWIDGET_H
+#endif  // VIEWWIDGET_H
