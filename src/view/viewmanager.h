@@ -72,6 +72,14 @@ class ViewManager : public QObject, public Configurable
 
     ViewManagerWidget* widget();
 
+    unsigned int addNewViewPoint();
+    bool existsViewPoint(unsigned int id);
+    ViewPoint& viewPoint(unsigned int id);
+    void removeViewPoint(unsigned int id);
+
+    void printViewPoints();
+    void saveViewPoints();
+
   protected:
     ATSDB& atsdb_;
 

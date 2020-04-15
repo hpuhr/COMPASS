@@ -30,8 +30,12 @@
 #include "viewcontainerwidget.h"
 #include "viewmanagerwidget.h"
 #include "viewpoint.h"
+#include "dbinterface.h"
+
+#include "json.hpp"
 
 using namespace Utils;
+using namespace nlohmann;
 
 ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
     : Configurable(class_id, instance_id, atsdb, "views.json"), atsdb_(*atsdb)
@@ -50,6 +54,18 @@ void ViewManager::init(QTabWidget* tab_widget)
     initialized_ = true;
 
     createSubConfigurables();
+
+    if (ATSDB::instance().interface().existsViewPointsTable())
+    {
+        for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
+        {
+            assert (!view_points_.count(vp_it.first));
+            json data = json::parse(vp_it.second);
+            view_points_.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(vp_it.first),   // args for key
+                                 std::forward_as_tuple(vp_it.first, data, *this));  // args for mapped value
+        }
+    }
 }
 
 void ViewManager::close()
@@ -79,6 +95,8 @@ void ViewManager::close()
         delete widget_;
         widget_ = nullptr;
     }
+
+    saveViewPoints();
 }
 
 ViewManager::~ViewManager()
@@ -102,7 +120,7 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
     if (class_id.compare("ViewContainer") == 0)
     {
         ViewContainer* container =
-            new ViewContainer(class_id, instance_id, this, this, main_tab_widget_, 0);
+                new ViewContainer(class_id, instance_id, this, this, main_tab_widget_, 0);
         assert(containers_.count(instance_id) == 0);
         containers_.insert(std::pair<std::string, ViewContainer*>(instance_id, container));
 
@@ -113,13 +131,13 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id.compare("ViewContainerWidget") == 0)
     {
         ViewContainerWidget* container_widget =
-            new ViewContainerWidget(class_id, instance_id, this);
+                new ViewContainerWidget(class_id, instance_id, this);
         assert(containers_.count(container_widget->viewContainer().instanceId()) == 0);
         containers_.insert(std::pair<std::string, ViewContainer*>(
-            container_widget->viewContainer().instanceId(), &container_widget->viewContainer()));
+                               container_widget->viewContainer().instanceId(), &container_widget->viewContainer()));
         assert(container_widgets_.count(instance_id) == 0);
         container_widgets_.insert(
-            std::pair<std::string, ViewContainerWidget*>(instance_id, container_widget));
+                    std::pair<std::string, ViewContainerWidget*>(instance_id, container_widget));
 
         unsigned int number = String::getAppendedInt(instance_id);
         if (number >= container_count_)
@@ -164,6 +182,64 @@ ViewManagerWidget* ViewManager::widget()
 
     assert(widget_);
     return widget_;
+}
+
+unsigned int ViewManager::addNewViewPoint()
+{
+    unsigned int new_id {0};
+
+    if (view_points_.size())
+        new_id = view_points_.rbegin()->first + 1;
+
+    assert (!existsViewPoint(new_id));
+
+    view_points_.emplace(std::piecewise_construct,
+                         std::forward_as_tuple(new_id),   // args for key
+                         std::forward_as_tuple(new_id, *this));  // args for mapped value
+
+    assert (existsViewPoint(new_id));
+    view_points_.at(new_id).dirty(true);
+
+    return new_id;
+}
+
+bool ViewManager::existsViewPoint(unsigned int id)
+{
+    return view_points_.count(id) == 1;
+}
+
+ViewPoint& ViewManager::viewPoint(unsigned int id)
+{
+    assert (existsViewPoint(id));
+    return view_points_.at(id);
+}
+
+void ViewManager::removeViewPoint(unsigned int id)
+{
+    assert (existsViewPoint(id));
+    view_points_.erase(id);
+}
+
+void ViewManager::printViewPoints()
+{
+    for (auto& vp_it : view_points_)
+        vp_it.second.print();
+}
+
+void ViewManager::saveViewPoints()
+{
+    loginf << "ViewManager: saveViewPoints";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    for (auto& vp_it : view_points_)
+    {
+        if (vp_it.second.dirty())
+        {
+            db_interface.setViewPoint(vp_it.first, vp_it.second.data().dump());
+            vp_it.second.dirty(false);
+        }
+    }
 }
 
 ViewContainerWidget* ViewManager::addNewContainerWidget()

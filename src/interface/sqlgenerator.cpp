@@ -59,6 +59,11 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
        << "(id VARCHAR(255), value VARCHAR(1701), PRIMARY KEY (id));";
     table_properties_create_statement_ = ss.str();
     ss.str(std::string());
+
+    ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
+       << "(id INT, json VARCHAR(65535), PRIMARY KEY (id));";
+    table_view_points_create_statement_ = ss.str();
+    ss.str(std::string());
 }
 
 SQLGenerator::~SQLGenerator() {}
@@ -614,6 +619,23 @@ std::string SQLGenerator::getSelectAllPropertiesStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const std::string& json)
+{
+    stringstream ss;
+
+    // REPLACE into table (id, name, age) values(1, "A", 19)
+    ss << "REPLACE INTO " << TABLE_NAME_VIEWPOINTS << " VALUES ('" << id << "', '" << json
+       << "');";
+    return ss.str();
+}
+
+std::string SQLGenerator::getSelectAllViewPointsStatement()
+{
+    stringstream ss;
+    ss << "SELECT id, json FROM " << TABLE_NAME_VIEWPOINTS << ";";
+    return ss.str();
+}
+
 std::string SQLGenerator::getInsertMinMaxStatement(const std::string& variable_name,
                                                    const std::string& object_name,
                                                    const std::string& min, const std::string& max)
@@ -644,6 +666,11 @@ std::string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_
 std::string SQLGenerator::getTablePropertiesCreateStatement()
 {
     return table_properties_create_statement_;
+}
+
+std::string SQLGenerator::getTableViewPointsCreateStatement()
+{
+    return table_view_points_create_statement_;
 }
 
 // std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string tablename)

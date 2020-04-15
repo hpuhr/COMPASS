@@ -89,6 +89,7 @@ class SQLGenerator
     std::string getTableMinMaxCreateStatement();
     /// @brief Returns properties table creation statement
     std::string getTablePropertiesCreateStatement();
+    std::string getTableViewPointsCreateStatement();
 
     /// @brief Returns property insertion statement
     std::string getInsertPropertyStatement(const std::string& id, const std::string& value);
@@ -104,6 +105,9 @@ class SQLGenerator
     std::string getSelectMinMaxStatement(const std::string& variable_name,
                                          const std::string& object_name);
     std::string getSelectMinMaxStatement();
+
+    std::string getInsertViewPointStatement(const unsigned int id, const std::string& json);
+    std::string getSelectAllViewPointsStatement();
 
     //    /// @brief Returns general info select statement
     //    DBCommand *getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned int>
@@ -137,6 +141,7 @@ class SQLGenerator
     std::string table_minmax_create_statement_;
     /// Properties table create SQL statement
     std::string table_properties_create_statement_;
+    std::string table_view_points_create_statement_;
 
     /// @brief Returns SQL where clause with all used meta sub-tables
     std::string subTablesWhereClause(const MetaDBTable& meta_table,

@@ -33,6 +33,7 @@
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
 static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
+static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 
 class ATSDB;
 class Buffer;
@@ -159,6 +160,11 @@ class DBInterface : public QObject, public Configurable
     /// @brief Inserts a minimum/maximum value pair
     void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
                       const std::string& max);
+
+    bool existsViewPointsTable();
+    void createViewPointsTable();
+    void setViewPoint(const unsigned int id, const std::string& value);
+    std::map<unsigned int, std::string> viewPoints();
 
     /// @brief Deletes table content for given table name
     void clearTableContent(const std::string& table_name);

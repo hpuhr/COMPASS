@@ -830,6 +830,86 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariab
     return std::pair<std::string, std::string>(min, max);
 }
 
+bool DBInterface::existsViewPointsTable()
+{
+    return existsTable(TABLE_NAME_VIEWPOINTS);
+}
+
+void DBInterface::createViewPointsTable()
+{
+    assert(!existsViewPointsTable());
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo();
+}
+
+void DBInterface::setViewPoint(const unsigned int id, const std::string& value)
+{
+    if (!current_connection_)
+    {
+        logwrn << "DBInterface: setViewPoint: failed since no database connection exists";
+        return;
+    }
+
+    // QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    assert(current_connection_);
+
+    if (!existsViewPointsTable())
+        createViewPointsTable();
+
+    std::string str = sql_generator_.getInsertViewPointStatement(id, value);
+
+    loginf << "DBInterface: setViewPoint: cmd '" << str << "'";
+    current_connection_->executeSQL(str);
+}
+
+std::map<unsigned int, std::string> DBInterface::viewPoints()
+{
+    loginf << "DBInterface: viewPoints";
+
+    assert (existsViewPointsTable());
+
+    QMutexLocker locker(&connection_mutex_);
+
+    DBCommand command;
+    command.set(sql_generator_.getSelectAllViewPointsStatement());
+
+    PropertyList list;
+    list.addProperty("id", PropertyDataType::UINT);
+    list.addProperty("json", PropertyDataType::STRING);
+    command.list(list);
+
+    std::shared_ptr<DBResult> result = current_connection_->execute(command);
+
+    assert(result->containsData());
+
+    std::shared_ptr<Buffer> buffer = result->buffer();
+
+    assert(buffer);
+    assert(buffer->has<unsigned int>("id"));
+    assert(buffer->has<std::string>("json"));
+
+    NullableVector<unsigned int> id_vec = buffer->get<unsigned int>("id");
+    NullableVector<std::string> json_vec = buffer->get<std::string>("json");
+
+    std::map<unsigned int, std::string> view_points;
+
+    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+    {
+        assert(!id_vec.isNull(cnt));
+        assert(!view_points.count(id_vec.get(cnt)));
+        if (!json_vec.isNull(cnt))
+            view_points[id_vec.get(cnt)] = json_vec.get(cnt);
+    }
+
+    loginf << "DBInterface: loadViewPoints: loaded " << view_points.size() << " view points";
+
+    return view_points;
+}
+
+
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {
     if (!object.existsInDB())
