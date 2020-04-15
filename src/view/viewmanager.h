@@ -30,6 +30,8 @@ class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
 class ViewPoint;
+class ViewPointsWidget;
+
 class QWidget;
 class QTabWidget;
 
@@ -80,11 +82,16 @@ class ViewManager : public QObject, public Configurable
     void printViewPoints();
     void saveViewPoints();
 
-  protected:
+    ViewPointsWidget* viewPointsWidget() const;
+
+protected:
     ATSDB& atsdb_;
 
     ViewManagerWidget* widget_{nullptr};
+    ViewPointsWidget* view_points_widget_{nullptr};
+
     bool initialized_{false};
+
     QTabWidget* main_tab_widget_{nullptr};
 
     std::map<std::string, ViewContainer*> containers_;

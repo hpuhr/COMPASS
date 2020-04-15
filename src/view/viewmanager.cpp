@@ -19,6 +19,8 @@
 
 #include <QMessageBox>
 #include <QWidget>
+#include <QTabWidget>
+
 #include <cassert>
 
 #include "atsdb.h"
@@ -31,6 +33,7 @@
 #include "viewmanagerwidget.h"
 #include "viewpoint.h"
 #include "dbinterface.h"
+#include "viewpointswidget.h"
 
 #include "json.hpp"
 
@@ -50,6 +53,12 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(!main_tab_widget_);
     assert(!initialized_);
     main_tab_widget_ = tab_widget;
+
+    view_points_widget_ = new ViewPointsWidget(*this);
+    view_points_widget_->setAutoFillBackground(true);
+
+    assert(view_points_widget_);
+    tab_widget->addTab(view_points_widget_, "View Points");
 
     initialized_ = true;
 
@@ -240,6 +249,11 @@ void ViewManager::saveViewPoints()
             vp_it.second.dirty(false);
         }
     }
+}
+
+ViewPointsWidget* ViewManager::viewPointsWidget() const
+{
+    return view_points_widget_;
 }
 
 ViewContainerWidget* ViewManager::addNewContainerWidget()

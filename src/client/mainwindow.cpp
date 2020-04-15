@@ -38,6 +38,7 @@
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
+#include "viewpointswidget.h"
 
 using namespace Utils;
 using namespace std;
@@ -121,7 +122,7 @@ void MainWindow::startSlot()
     assert(management_widget_);
     tab_widget_->addTab(management_widget_, "Management");
 
-    ATSDB::instance().viewManager().init(tab_widget_);
+    ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
 

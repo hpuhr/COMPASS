@@ -14,6 +14,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/viewcontainerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewcontainerconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpoint.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/viewmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewmanagerwidget.cpp"
@@ -21,6 +22,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/viewcontainerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewcontainerconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewpoint.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.cpp"
 )
 
 
