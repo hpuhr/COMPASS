@@ -54,16 +54,6 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(!initialized_);
     main_tab_widget_ = tab_widget;
 
-    view_points_widget_ = new ViewPointsWidget(*this);
-    view_points_widget_->setAutoFillBackground(true);
-
-    assert(view_points_widget_);
-    tab_widget->addTab(view_points_widget_, "View Points");
-
-    initialized_ = true;
-
-    createSubConfigurables();
-
     if (ATSDB::instance().interface().existsViewPointsTable())
     {
         for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
@@ -75,6 +65,16 @@ void ViewManager::init(QTabWidget* tab_widget)
                                  std::forward_as_tuple(vp_it.first, data, *this));  // args for mapped value
         }
     }
+
+    view_points_widget_ = new ViewPointsWidget(*this);
+    view_points_widget_->setAutoFillBackground(true);
+
+    assert(view_points_widget_);
+    tab_widget->addTab(view_points_widget_, "View Points");
+
+    initialized_ = true;
+
+    createSubConfigurables();
 }
 
 void ViewManager::close()
