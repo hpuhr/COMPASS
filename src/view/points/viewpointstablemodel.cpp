@@ -37,7 +37,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
     {
         case Qt::DisplayRole:
         {
-            loginf << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
+            logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 
             auto map_it = view_points_.begin();
             std::advance(map_it, index.row());
@@ -45,7 +45,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
             if (map_it == view_points_.end())
                 return QVariant();
 
-            loginf << "ViewPointsTableModel: data: got key " << map_it->first;
+            logdbg << "ViewPointsTableModel: data: got key " << map_it->first;
 
             assert (index.column() < table_columns_.size());
             std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -92,10 +92,18 @@ void ViewPointsTableModel::updateTableColumns()
         assert (data.is_object());
         for (auto& j_it : data.get<json::object_t>())
         {
-            loginf << "ViewPointsTableModel: updateTableColumns: '" << j_it.first << "'";
+            logdbg << "ViewPointsTableModel: updateTableColumns: '" << j_it.first << "'";
 
             if (!table_columns_.contains(j_it.first.c_str()))
                 table_columns_.append(j_it.first.c_str());
         }
     }
 }
+
+void ViewPointsTableModel::update()
+{
+    beginResetModel();
+    updateTableColumns();
+    endResetModel();
+}
+

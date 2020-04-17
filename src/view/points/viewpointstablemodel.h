@@ -19,6 +19,8 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& index) const override;
 
+    void update();
+
 private:
     ViewManager& view_manager_;
 

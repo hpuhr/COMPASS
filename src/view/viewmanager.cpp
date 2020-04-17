@@ -209,6 +209,9 @@ unsigned int ViewManager::addNewViewPoint()
     assert (existsViewPoint(new_id));
     view_points_.at(new_id).dirty(true);
 
+    if (view_points_widget_)
+        view_points_widget_->update();
+
     return new_id;
 }
 

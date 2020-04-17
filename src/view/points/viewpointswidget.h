@@ -7,12 +7,15 @@ class ViewManager;
 class ViewPointsTableModel;
 
 class QTableView;
+class QPushButton;
 
 class ViewPointsWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
+    void exportSlot();
+    void importSlot();
 
 public:
     ViewPointsWidget(ViewManager& view_manager);
@@ -25,6 +28,11 @@ private:
 
     QTableView* table_view_{nullptr};
     ViewPointsTableModel* table_model_{nullptr};
+
+    QPushButton* export_button_{nullptr};
+    QPushButton* import_button_{nullptr};
+
+    void importFile (const std::string& filename);
 };
 
 #endif // VIEWPOINTSWIDGET_H
