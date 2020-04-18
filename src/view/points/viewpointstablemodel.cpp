@@ -3,6 +3,7 @@
 #include "viewpoint.h"
 #include "json.hpp"
 #include "json.h"
+#include "stringconv.h"
 
 using namespace nlohmann;
 using namespace Utils;
@@ -53,7 +54,19 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
             if (!map_it->second.data().contains(col_name))
                 return QVariant();
 
-            return JSON::toString(map_it->second.data().at(col_name)).c_str();
+            json& data = map_it->second.data().at(col_name);
+
+            // s1.find(s2) != std::string::npos
+            if (data.is_number() && col_name.find("time") != std::string::npos)
+                return String::timeStringFromDouble(data).c_str();
+
+            if (data.is_boolean())
+                return data.get<bool>();
+
+            if (data.is_number())
+                return data.get<float>();
+
+            return JSON::toString(data).c_str();
         }
         default:
         {
@@ -93,6 +106,9 @@ void ViewPointsTableModel::updateTableColumns()
         for (auto& j_it : data.get<json::object_t>())
         {
             logdbg << "ViewPointsTableModel: updateTableColumns: '" << j_it.first << "'";
+
+            if (j_it.second.is_object() || j_it.second.is_array())
+                continue;
 
             if (!table_columns_.contains(j_it.first.c_str()))
                 table_columns_.append(j_it.first.c_str());

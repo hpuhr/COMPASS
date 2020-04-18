@@ -861,7 +861,7 @@ void DBInterface::setViewPoint(const unsigned int id, const std::string& value)
 
     std::string str = sql_generator_.getInsertViewPointStatement(id, value);
 
-    loginf << "DBInterface: setViewPoint: cmd '" << str << "'";
+    logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
     current_connection_->executeSQL(str);
 }
 

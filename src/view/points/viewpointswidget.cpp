@@ -67,6 +67,7 @@ void ViewPointsWidget::update()
 {
     loginf << "ViewPointsWidget: update";
     table_model_->update();
+    table_view_->resizeColumnsToContents();
 }
 
 void ViewPointsWidget::exportSlot()
@@ -94,24 +95,21 @@ void ViewPointsWidget::importSlot()
 {
     loginf << "ViewPointsWidget: importSlot";
 
-//    QFileDialog dialog(this);
-//    dialog.setWindowTitle("Import View Points JSON");
-//    // dialog.setDirectory(QDir::homePath());
-//    dialog.setFileMode(QFileDialog::ExistingFile);
-//    dialog.setNameFilter(trUtf8("JSON (*.json)"));
-//    QStringList fileNames;
-//    if (dialog.exec())
-//    {
-//        for (auto& filename : dialog.selectedFiles())
-//            addFile(filename.toStdString());
-//    }
+    QFileDialog dialog(this);
+    dialog.setWindowTitle("Import View Points JSON");
+    // dialog.setDirectory(QDir::homePath());
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setNameFilter(trUtf8("JSON (*.json)"));
+
+    QStringList fileNames;
+    if (dialog.exec())
+    {
+        for (auto& filename : dialog.selectedFiles())
+            view_manager_.importViewPoints(filename.toStdString());
+    }
 }
 
 
-void ViewPointsWidget::importFile (const std::string& filename)
-{
-
-}
 
 
 

@@ -31,8 +31,6 @@ private:
 
     QPushButton* export_button_{nullptr};
     QPushButton* import_button_{nullptr};
-
-    void importFile (const std::string& filename);
 };
 
 #endif // VIEWPOINTSWIDGET_H

@@ -16,13 +16,6 @@
  */
 
 #include "viewmanager.h"
-
-#include <QMessageBox>
-#include <QWidget>
-#include <QTabWidget>
-
-#include <cassert>
-
 #include "atsdb.h"
 #include "buffer.h"
 #include "logger.h"
@@ -34,8 +27,16 @@
 #include "viewpoint.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
+#include "files.h"
 
 #include "json.hpp"
+
+#include <QMessageBox>
+#include <QWidget>
+#include <QTabWidget>
+
+#include <cassert>
+#include <fstream>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -193,7 +194,7 @@ ViewManagerWidget* ViewManager::widget()
     return widget_;
 }
 
-unsigned int ViewManager::addNewViewPoint()
+unsigned int ViewManager::addNewViewPoint(bool update)
 {
     unsigned int new_id {0};
 
@@ -209,10 +210,28 @@ unsigned int ViewManager::addNewViewPoint()
     assert (existsViewPoint(new_id));
     view_points_.at(new_id).dirty(true);
 
-    if (view_points_widget_)
+    if (update && view_points_widget_)
         view_points_widget_->update();
 
     return new_id;
+}
+
+ViewPoint& ViewManager::addNewViewPoint(unsigned int id, bool update)
+{
+    if (view_points_.count(id))
+        throw std::runtime_error ("ViewManager: addNewViewPoint: id "+std::to_string(id)+" already exists");
+
+    view_points_.emplace(std::piecewise_construct,
+                         std::forward_as_tuple(id),   // args for key
+                         std::forward_as_tuple(id, *this));  // args for mapped value
+
+    assert (existsViewPoint(id));
+    view_points_.at(id).dirty(true);
+
+    if (update && view_points_widget_)
+        view_points_widget_->update();
+
+    return view_points_.at(id);
 }
 
 bool ViewManager::existsViewPoint(unsigned int id)
@@ -257,6 +276,56 @@ void ViewManager::saveViewPoints()
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
     return view_points_widget_;
+}
+
+void ViewManager::importViewPoints (const std::string& filename)
+{
+    loginf << "ViewManager: importViewPoints: filename '" << filename << "'";
+
+    try
+    {
+        if (!Files::fileExists(filename))
+            throw std::runtime_error ("File '"+filename+"' not found.");
+
+        std::ifstream ifs(filename);
+        json j = json::parse(ifs);
+
+        if (j.contains("view_point_context"))
+            loginf << "ViewManager: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
+
+        if (!j.contains("view_points"))
+            throw std::runtime_error ("File '"+filename+"' does not contain view points.");
+
+        json& view_points = j.at("view_points");
+
+        if (!view_points.is_array())
+            throw std::runtime_error ("View points are not in an array.");
+
+        unsigned int id;
+        for (auto& vp_it : view_points.get<json::array_t>())
+        {
+            if (!vp_it.contains("id"))
+                throw std::runtime_error ("View point does not contain id");
+
+            id = vp_it.at("id");
+
+            ViewPoint& vp = addNewViewPoint(id, false);
+            vp.data() = vp_it;
+        }
+
+        if (view_points_widget_)
+            view_points_widget_->update();
+
+        QMessageBox m_info(QMessageBox::Information, "View Points Import File",
+                           "File import: '"+QString(filename.c_str())+"' done.\n"
+                           +QString::number(view_points.size())+" View Points added.", QMessageBox::Ok);
+    }
+    catch (std::exception& e)
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "View Points Import File",
+                              "File import error: '"+QString(e.what())+"'.", QMessageBox::Ok);
+        return;
+    }
 }
 
 ViewContainerWidget* ViewManager::addNewContainerWidget()
