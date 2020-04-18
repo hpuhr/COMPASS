@@ -73,20 +73,20 @@ void ViewPointsWidget::exportSlot()
 {
     loginf << "ViewPointsWidget: exportSlot";
 
-    QFileDialog dialog(nullptr);
-    dialog.setFileMode(QFileDialog::AnyFile);
-    dialog.setNameFilter("CSV Files (*.csv)");
-    dialog.setDefaultSuffix("csv");
-    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+//    QFileDialog dialog(nullptr);
+//    dialog.setFileMode(QFileDialog::AnyFile);
+//    dialog.setNameFilter("CSV Files (*.csv)");
+//    dialog.setDefaultSuffix("csv");
+//    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
 
-    if (!overwrite)
-        dialog.setOption(QFileDialog::DontConfirmOverwrite);
+//    if (!overwrite)
+//        dialog.setOption(QFileDialog::DontConfirmOverwrite);
 
-    QStringList file_names;
-    if (dialog.exec())
-        file_names = dialog.selectedFiles();
+//    QStringList file_names;
+//    if (dialog.exec())
+//        file_names = dialog.selectedFiles();
 
-    QString filename;
+//    QString filename;
 
 
 }
@@ -94,17 +94,17 @@ void ViewPointsWidget::importSlot()
 {
     loginf << "ViewPointsWidget: importSlot";
 
-    QFileDialog dialog(this);
-    dialog.setWindowTitle("Import View Points JSON");
-    // dialog.setDirectory(QDir::homePath());
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(trUtf8("JSON (*.json)"));
-    QStringList fileNames;
-    if (dialog.exec())
-    {
-        for (auto& filename : dialog.selectedFiles())
-            addFile(filename.toStdString());
-    }
+//    QFileDialog dialog(this);
+//    dialog.setWindowTitle("Import View Points JSON");
+//    // dialog.setDirectory(QDir::homePath());
+//    dialog.setFileMode(QFileDialog::ExistingFile);
+//    dialog.setNameFilter(trUtf8("JSON (*.json)"));
+//    QStringList fileNames;
+//    if (dialog.exec())
+//    {
+//        for (auto& filename : dialog.selectedFiles())
+//            addFile(filename.toStdString());
+//    }
 }
 
 

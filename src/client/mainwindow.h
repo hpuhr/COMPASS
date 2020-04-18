@@ -58,6 +58,8 @@ class MainWindow : public QMainWindow
     /// @brief Handles key press events
     // void keyPressEvent ( QKeyEvent * event );
 
+    void quitRequestedSlot();
+
   public:
     /// @brief Constructor
     MainWindow();
@@ -78,6 +80,8 @@ class MainWindow : public QMainWindow
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);
+
+    void shutdown();
 };
 
 //}

@@ -69,11 +69,13 @@ MainWindow::MainWindow()
     tab_widget_ = new QTabWidget();
     tab_widget_->setAutoFillBackground(true);
 
-    task_manager_widget_ = ATSDB::instance().taskManager().widget();
+    TaskManager& task_man = ATSDB::instance().taskManager();
+
+    task_manager_widget_ = task_man.widget();
     tab_widget_->addTab(task_manager_widget_, "Tasks");
 
-    connect(&ATSDB::instance().taskManager(), &TaskManager::startInspectionSignal, this,
-            &MainWindow::startSlot);
+    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
+    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
 
     setAutoFillBackground(true);
 
@@ -87,6 +89,7 @@ MainWindow::MainWindow()
 
     QObject::connect(this, &MainWindow::startedSignal, &ATSDB::instance().filterManager(),
                      &FilterManager::startedSlot);
+
 }
 
 MainWindow::~MainWindow()
@@ -131,10 +134,25 @@ void MainWindow::startSlot()
     QApplication::restoreOverrideCursor();
 }
 
+void MainWindow::quitRequestedSlot()
+{
+    shutdown();
+    QApplication::quit();
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     logdbg << "MainWindow: closeEvent: start";
 
+    shutdown();
+    event->accept();
+
+    logdbg << "MainWindow: closeEvent: done";
+}
+
+
+void MainWindow::shutdown()
+{
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
@@ -150,10 +168,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
         delete tab_widget_;
         tab_widget_ = nullptr;
     }
-
-    event->accept();
-
-    logdbg << "MainWindow: closeEvent: done";
 }
 
 // void MainWindow::keyPressEvent ( QKeyEvent * event )

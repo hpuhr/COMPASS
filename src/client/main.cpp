@@ -2,6 +2,10 @@
 
 #include "client.h"
 #include "mainwindow.h"
+#include "atsdb.h"
+#include "taskmanager.h"
+
+#include <QThread>
 
 using namespace std;
 
@@ -15,6 +19,17 @@ int main(int argc, char** argv)
             return 0;
 
         client.mainWindow().show();
+
+        if (ATSDB::instance().taskManager().automaticTasksDefined())
+        {
+            QThread::msleep(100);
+
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
+            ATSDB::instance().taskManager().performAutomaticTasks();
+        }
+
         return client.exec();
     }
     catch (std::exception& ex)

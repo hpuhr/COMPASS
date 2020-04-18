@@ -33,6 +33,7 @@
 #include "logger.h"
 #include "mainwindow.h"
 #include "stringconv.h"
+#include "taskmanager.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -52,11 +53,29 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
 
+    std::string create_new_sqlite3_db_filename;
+    std::string open_sqlite3_db_filename;
+#if USE_JASTERIX
+    std::string import_asterix_filename;
+#endif
+    bool auto_process {false};
+    bool quit_after_auto_process {false};
+    bool start_after_auto_process {false};
+
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
-        //("compression", po::value<int>(), "set compression level")
-        ("reset,r", po::bool_switch(&config_and_data_reset_wanted_),
-         "reset user configuration and data");
+            ("reset,r", po::bool_switch(&config_and_data_reset_wanted_) ,"reset user configuration and data")
+            ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename),
+                "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
+            ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
+                "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+#if USE_JASTERIX
+            ("import_asterix", po::value<std::string>(&import_asterix_filename),
+                "imports existing ASTERIX file with given filename, e.g. '/data/file1.ff'")
+#endif
+            ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+            ("quit_after_auto_process", po::bool_switch(&quit_after_auto_process), "quit after automatic processing")
+            ("start_after_auto_process", po::bool_switch(&start_after_auto_process), "start after automatic processing");
 
     try
     {
@@ -82,16 +101,35 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (quit_requested_)
         return;
 
-    // ATSDB::instance().initialize();
-    // atsdb_initialized_ = true;
+    TaskManager& task_man = ATSDB::instance().taskManager();
+
+    if (create_new_sqlite3_db_filename.size())
+        task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+
+    if (open_sqlite3_db_filename.size())
+        task_man.openSqlite3DB(open_sqlite3_db_filename);
+
+#if USE_JASTERIX
+    if (import_asterix_filename.size())
+        task_man.importASTERIXFile(import_asterix_filename);
+#endif
+
+    if (auto_process)
+        task_man.autoProcess(auto_process);
+
+    if (quit_after_auto_process)
+        task_man.quitAfterAutoProcess(quit_after_auto_process);
+
+    if (quit_after_auto_process)
+        task_man.quitAfterAutoProcess(quit_after_auto_process);
+
+    if (start_after_auto_process)
+        task_man.startAfterAutoProcess(start_after_auto_process);
 }
 
 Client::~Client()
 {
     loginf << "Client: destructor";
-
-    //    if (atsdb_initialized_ && ATSDB::instance().ready())
-    //        ATSDB::instance().shutdown();
 }
 
 MainWindow& Client::mainWindow()

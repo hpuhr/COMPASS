@@ -409,6 +409,9 @@ void CreateARTASAssociationsTask::createDoneSlot()
 
     status_dialog_->setDone();
 
+    if (!show_done_summary_)
+        status_dialog_->close();
+
     // updateProgressSlot();
     create_job_ = nullptr;
 

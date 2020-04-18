@@ -41,6 +41,9 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "taskmanagerlogwidget.h"
 #include "taskmanagerwidget.h"
+#include "sqliteconnectionwidget.h"
+#include "dbinterface.h"
+#include "files.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -48,6 +51,10 @@
 #endif
 
 #include <cassert>
+
+#include <QCoreApplication>
+
+using namespace Utils;
 
 TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
     : Configurable(class_id, instance_id, atsdb, "task.json")
@@ -410,4 +417,226 @@ PostProcessTask& TaskManager::postProcessTask() const
 {
     assert(manage_datasources_task_);
     return *post_process_task_;
+}
+
+void TaskManager::createAndOpenNewSqlite3DB(const std::string& filename)
+{
+    loginf << "TaskManager: sqlite3CreateNewDB: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    sqlite3_create_new_db_ = true;
+    sqlite3_create_new_db_filename_ = filename;
+}
+
+void TaskManager::openSqlite3DB(const std::string& filename)
+{
+    loginf << "TaskManager: sqlite3OpenDB: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    sqlite3_open_db_ = true;
+    sqlite3_open_db_filename_ = filename;
+}
+
+void TaskManager::importASTERIXFile(const std::string& filename)
+{
+    loginf << "TaskManager: asterixImportFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    asterix_import_file_ = true;
+    asterix_import_filename_ = filename;
+}
+
+void TaskManager::autoProcess(bool value)
+{
+    loginf << "TaskManager: autoProcess: value " << value;
+
+    automatic_tasks_defined_ = true;
+    auto_process_ = value;
+}
+
+void TaskManager::quitAfterAutoProcess(bool value)
+{
+    loginf << "TaskManager: autoQuitAfterProcess: value " << value;
+
+    automatic_tasks_defined_ = true;
+    quit_after_auto_process_ = value;
+}
+
+void TaskManager::startAfterAutoProcess(bool value)
+{
+    loginf << "TaskManager: startAfterAutoProcess: value " << value;
+
+    automatic_tasks_defined_ = true;
+    start_after_auto_process_ = value;
+}
+
+bool TaskManager::automaticTasksDefined() const
+{
+    return automatic_tasks_defined_;
+}
+
+void TaskManager::performAutomaticTasks ()
+{
+    loginf << "TaskManager: performAutomaticTasks";
+    assert (automatic_tasks_defined_);
+
+    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
+    {
+        logerr << "TaskManager: performAutomaticTasks: neither create nor open sqlite3 is set";
+        return;
+    }
+
+    if (sqlite3_create_new_db_ && sqlite3_open_db_)
+    {
+        logerr << "TaskManager: performAutomaticTasks: both create and open sqlite3 are set";
+        return;
+    }
+
+    database_open_task_->useConnection("SQLite Connection");
+    SQLiteConnectionWidget* connection_widget =
+        dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+
+    if (sqlite3_create_new_db_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: creating and opening new sqlite3 database '"
+               << sqlite3_create_new_db_filename_ << "'";
+
+        if (Files::fileExists(sqlite3_create_new_db_filename_))
+            Files::deleteFile(sqlite3_create_new_db_filename_);
+
+        connection_widget->addFile(sqlite3_create_new_db_filename_);
+        connection_widget->openFileSlot();
+    }
+    else if (sqlite3_open_db_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: opening existing sqlite3 database '"
+               << sqlite3_open_db_filename_ << "'";
+
+        if (!Files::fileExists(sqlite3_open_db_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: sqlite3 database '" << sqlite3_open_db_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        connection_widget->addFile(sqlite3_open_db_filename_);
+        connection_widget->openFileSlot();
+    }
+
+    #if USE_JASTERIX
+    if (asterix_import_file_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
+               << asterix_import_filename_ << "'";
+
+        if (!Files::fileExists(asterix_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*asterix_importer_task_);
+        if(widget_->getCurrentTaskName() != asterix_importer_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        ASTERIXImportTaskWidget* asterix_import_task_widget =
+            dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
+        assert(asterix_import_task_widget);
+
+        asterix_import_task_widget->addFile(asterix_import_filename_);
+
+        assert(asterix_importer_task_->canRun());
+        asterix_importer_task_->showDoneSummary(false);
+
+        widget_->runCurrentTaskSlot();
+
+        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+    #endif
+
+    if (auto_process_)
+    {
+        // calculate radar plot positions
+        if (radar_plot_position_calculator_task_->isRecommended())
+        {
+            loginf << "TaskManager: performAutomaticTasks: starting radar plot position calculation task";
+
+            if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
+            {
+                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                       << "' selected, aborting";
+                return;
+            }
+            radar_plot_position_calculator_task_->showDoneSummary(false);
+
+            widget_->runCurrentTaskSlot();
+
+            while (QCoreApplication::hasPendingEvents() || !radar_plot_position_calculator_task_->done())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+
+
+        // post-process
+        loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
+
+        if(widget_->getCurrentTaskName() != post_process_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        assert(post_process_task_->isRecommended());
+        assert(post_process_task_->isRequired());
+
+        widget_->runCurrentTaskSlot();
+
+        while (QCoreApplication::hasPendingEvents() || !post_process_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        // assocs
+        if (create_artas_associations_task_->isRecommended())
+        {
+            loginf << "TaskManager: performAutomaticTasks: starting association task";
+
+            if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
+            {
+                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                       << "' selected, aborting";
+                return;
+            }
+
+            create_artas_associations_task_->showDoneSummary(false);
+
+            widget_->runCurrentTaskSlot();
+
+            while (QCoreApplication::hasPendingEvents() || !create_artas_associations_task_->done())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+    }
+
+    if (quit_after_auto_process_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: quit requested";
+        emit quitRequestedSignal();
+    }
+
+    if (start_after_auto_process_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: starting";
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents();
+
+        if(widget_->isStartPossible())
+            widget_->startSlot();
+        else
+            loginf << "TaskManager: performAutomaticTasks: start not possible";
+    }
 }

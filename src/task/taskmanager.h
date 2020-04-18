@@ -49,6 +49,8 @@ class TaskManager : public QObject, public Configurable
     void startInspectionSignal();
     void expertModeChangedSignal();
 
+    void quitRequestedSignal ();
+
   public slots:
     void taskStatusChangesSlot(std::string task_name);
     void taskDoneSlot(std::string task_name);
@@ -95,8 +97,38 @@ class TaskManager : public QObject, public Configurable
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     PostProcessTask& postProcessTask() const;
 
-  protected:
+    void createAndOpenNewSqlite3DB(const std::string& filename);
+    void openSqlite3DB(const std::string& filename);
+
+#if USE_JASTERIX
+    void importASTERIXFile(const std::string& filename);
+#endif
+    void autoProcess(bool value);
+
+    void quitAfterAutoProcess(bool value);
+    void startAfterAutoProcess(bool value);
+
+    bool automaticTasksDefined() const;
+    void performAutomaticTasks ();
+
+protected:
     bool expert_mode_{false};
+
+    bool automatic_tasks_defined_ {false};
+    bool sqlite3_create_new_db_ {false};
+    std::string sqlite3_create_new_db_filename_;
+
+    bool sqlite3_open_db_ {false};
+    std::string sqlite3_open_db_filename_;
+
+#if USE_JASTERIX
+    bool asterix_import_file_ {false};
+    std::string asterix_import_filename_;
+#endif
+
+    bool auto_process_ {false};
+    bool quit_after_auto_process_ {false};
+    bool start_after_auto_process_ {false};
 
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
