@@ -909,6 +909,18 @@ std::map<unsigned int, std::string> DBInterface::viewPoints()
     return view_points;
 }
 
+void DBInterface::deleteViewPoint(const unsigned int id)
+{
+    QMutexLocker locker(&connection_mutex_);
+    current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
+                                                                      "id="+std::to_string(id)));
+}
+
+void DBInterface::deleteAllViewPoints()
+{
+    clearTableContent(TABLE_NAME_VIEWPOINTS);
+}
+
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {

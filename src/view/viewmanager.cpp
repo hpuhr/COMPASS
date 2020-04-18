@@ -249,6 +249,13 @@ void ViewManager::removeViewPoint(unsigned int id)
 {
     assert (existsViewPoint(id));
     view_points_.erase(id);
+    ATSDB::instance().interface().deleteViewPoint(id);
+}
+
+void ViewManager::deleteAllViewPoints ()
+{
+    view_points_.clear();
+    ATSDB::instance().interface().deleteAllViewPoints();
 }
 
 void ViewManager::printViewPoints()
@@ -319,11 +326,13 @@ void ViewManager::importViewPoints (const std::string& filename)
         QMessageBox m_info(QMessageBox::Information, "View Points Import File",
                            "File import: '"+QString(filename.c_str())+"' done.\n"
                            +QString::number(view_points.size())+" View Points added.", QMessageBox::Ok);
+        m_info.exec();
     }
     catch (std::exception& e)
     {
         QMessageBox m_warning(QMessageBox::Warning, "View Points Import File",
                               "File import error: '"+QString(e.what())+"'.", QMessageBox::Ok);
+        m_warning.exec();
         return;
     }
 }

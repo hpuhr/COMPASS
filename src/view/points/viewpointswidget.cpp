@@ -11,7 +11,7 @@
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QFileDialog>
-
+#include <QMessageBox>
 
 ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     : QWidget(), view_manager_(view_manager)
@@ -27,6 +27,8 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setModel(proxy_model);
     table_view_->setSortingEnabled(true);
     table_view_->sortByColumn(0, Qt::AscendingOrder);
+    table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->reset();
     table_view_->show();
 //    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -43,13 +45,18 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     {
         QHBoxLayout* button_layout = new QHBoxLayout();
 
+        import_button_ = new QPushButton("Import");
+        connect (import_button_, &QPushButton::clicked, this, &ViewPointsWidget::importSlot);
+        button_layout->addWidget(import_button_);
+
+        delete_all_button_ = new QPushButton("Delete All");
+        connect (delete_all_button_, &QPushButton::clicked, this, &ViewPointsWidget::deleteAllSlot);
+        button_layout->addWidget(delete_all_button_);
+
         export_button_ = new QPushButton("Export");
         connect (export_button_, &QPushButton::clicked, this, &ViewPointsWidget::exportSlot);
         button_layout->addWidget(export_button_);
 
-        import_button_ = new QPushButton("Import");
-        connect (import_button_, &QPushButton::clicked, this, &ViewPointsWidget::importSlot);
-        button_layout->addWidget(import_button_);
 
         main_layout->addLayout(button_layout);
     }
@@ -88,9 +95,23 @@ void ViewPointsWidget::exportSlot()
 //        file_names = dialog.selectedFiles();
 
 //    QString filename;
-
-
 }
+
+void ViewPointsWidget::deleteAllSlot()
+{
+    loginf << "ViewPointsWidget: deleteAllSlot";
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, "Delete All", "Delete All Viewpoints?",
+    QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        view_manager_.deleteAllViewPoints();
+        update();
+    }
+}
+
 void ViewPointsWidget::importSlot()
 {
     loginf << "ViewPointsWidget: importSlot";

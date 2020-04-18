@@ -165,6 +165,8 @@ class DBInterface : public QObject, public Configurable
     void createViewPointsTable();
     void setViewPoint(const unsigned int id, const std::string& value);
     std::map<unsigned int, std::string> viewPoints();
+    void deleteViewPoint(const unsigned int id);
+    void deleteAllViewPoints();
 
     /// @brief Deletes table content for given table name
     void clearTableContent(const std::string& table_name);

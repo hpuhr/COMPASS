@@ -90,6 +90,7 @@ class SQLGenerator
     /// @brief Returns properties table creation statement
     std::string getTablePropertiesCreateStatement();
     std::string getTableViewPointsCreateStatement();
+    std::string getDeleteStatement (const std::string& table, const std::string& filter);
 
     /// @brief Returns property insertion statement
     std::string getInsertPropertyStatement(const std::string& id, const std::string& value);

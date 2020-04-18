@@ -15,6 +15,7 @@ class ViewPointsWidget : public QWidget
 
   public slots:
     void exportSlot();
+    void deleteAllSlot();
     void importSlot();
 
 public:
@@ -29,8 +30,9 @@ private:
     QTableView* table_view_{nullptr};
     ViewPointsTableModel* table_model_{nullptr};
 
-    QPushButton* export_button_{nullptr};
     QPushButton* import_button_{nullptr};
+    QPushButton* delete_all_button_{nullptr};
+    QPushButton* export_button_{nullptr};
 };
 
 #endif // VIEWPOINTSWIDGET_H

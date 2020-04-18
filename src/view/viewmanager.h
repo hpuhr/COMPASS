@@ -79,6 +79,7 @@ class ViewManager : public QObject, public Configurable
     bool existsViewPoint(unsigned int id);
     ViewPoint& viewPoint(unsigned int id);
     void removeViewPoint(unsigned int id);
+    void deleteAllViewPoints ();
 
     std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
     void printViewPoints();

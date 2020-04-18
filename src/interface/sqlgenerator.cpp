@@ -1300,14 +1300,11 @@ std::string SQLGenerator::subTableKeyClause(const MetaDBTable& meta_table,
     return ss.str();
 }
 
-// std::string SQLGenerator::getDeleteStatement (DBTableColumn *column, std::string value,
-// std::string filter)
-//{
-//    assert (column);
-//    // DELETE FROM table_name [WHERE Clause]
-//    return "DELETE FROM "+column->getDBTableName()+" WHERE "+column->getName()+"="+value+" AND
-//    "+filter+";";
-//}
+std::string SQLGenerator::getDeleteStatement (const std::string& table, const std::string& filter)
+{
+    // DELETE FROM table_name [WHERE Clause]
+    return "DELETE FROM "+table+" WHERE "+filter+";";
+}
 
 // std::string SQLGenerator::getUpdateStatement (DBTableColumn *column, std::string value,
 // std::string new_value, std::string filter)
