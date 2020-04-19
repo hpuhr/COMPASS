@@ -20,6 +20,7 @@ public:
     QModelIndex parent(const QModelIndex& index) const override;
 
     void update();
+    unsigned int getIdOf (const QModelIndex& index);
 
 private:
     ViewManager& view_manager_;

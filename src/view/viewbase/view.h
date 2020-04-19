@@ -30,6 +30,8 @@ class ViewWidget;
 class QQWidget;
 class Workflow;
 
+class ViewPoint;
+
 /**
 @brief Serves as base class for all views. Subclasses can be embedded in a ViewContainerWidget.
 
@@ -59,6 +61,8 @@ class View : public QObject, public Configurable
 
   public slots:
     void selectionChangedSlot();
+    virtual void unshowViewPointSlot (ViewPoint* vp)=0;
+    virtual void showViewPointSlot (ViewPoint* vp)=0;
 
   public:
     View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,

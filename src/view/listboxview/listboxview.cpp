@@ -199,3 +199,14 @@ void ListBoxView::updateSelection()
     else
         widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
+
+void ListBoxView::unshowViewPointSlot (ViewPoint* vp)
+{
+    loginf << "ListBoxView: unshowViewPoint";
+}
+
+void ListBoxView::showViewPointSlot (ViewPoint* vp)
+{
+    loginf << "ListBoxView: showViewPoint";
+}
+

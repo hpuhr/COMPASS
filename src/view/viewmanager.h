@@ -41,6 +41,8 @@ class ViewManager : public QObject, public Configurable
 
   signals:
     void selectionChangedSignal();
+    void unshowViewPointSignal (ViewPoint* vp);
+    void showViewPointSignal (ViewPoint* vp);
 
   public slots:
     void selectionChangedSlot();
@@ -88,6 +90,9 @@ class ViewManager : public QObject, public Configurable
     ViewPointsWidget* viewPointsWidget() const;
     void importViewPoints (const std::string& filename);
 
+    void setCurrentViewPoint (unsigned int id);
+    void unsetCurrentViewPoint ();
+
 protected:
     ATSDB& atsdb_;
 
@@ -102,6 +107,9 @@ protected:
     std::map<std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
     std::map<unsigned int, ViewPoint> view_points_;
+
+    bool current_view_point_set_ {false};
+    unsigned int current_view_point_ {0};
 
     unsigned int container_count_{0};
 

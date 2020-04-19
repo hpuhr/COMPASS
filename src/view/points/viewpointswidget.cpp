@@ -20,11 +20,11 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     table_model_ = new ViewPointsTableModel(view_manager_);
 
-    QSortFilterProxyModel* proxy_model = new QSortFilterProxyModel();
-    proxy_model->setSourceModel(table_model_);
+    proxy_model_ = new QSortFilterProxyModel();
+    proxy_model_->setSourceModel(table_model_);
 
     table_view_ = new QTableView();
-    table_view_->setModel(proxy_model);
+    table_view_->setModel(proxy_model_);
     table_view_->setSortingEnabled(true);
     table_view_->sortByColumn(0, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -38,6 +38,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 //    connect(table_, &QTableWidget::itemChanged, this,
 //            &DBOEditDataSourcesWidget::configItemChangedSlot);
     // update done later
+
+    connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+            this, &ViewPointsWidget::currentRowChanged);
 
     table_view_->resizeColumnsToContents();
     main_layout->addWidget(table_view_);
@@ -128,6 +131,23 @@ void ViewPointsWidget::importSlot()
         for (auto& filename : dialog.selectedFiles())
             view_manager_.importViewPoints(filename.toStdString());
     }
+}
+
+void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    if (!current.isValid())
+    {
+        loginf << "ViewPointsWidget: currentRowChanged: invalid index";
+        return;
+    }
+
+    auto const source_index = proxy_model_->mapToSource(current);
+    assert (source_index.isValid());
+
+    unsigned int id = table_model_->getIdOf(source_index);
+
+    loginf << "ViewPointsWidget: currentRowChanged: current id " << id;
+    view_manager_.setCurrentViewPoint(id);
 }
 
 

@@ -8,6 +8,7 @@ class ViewPointsTableModel;
 
 class QTableView;
 class QPushButton;
+class QSortFilterProxyModel;
 
 class ViewPointsWidget : public QWidget
 {
@@ -17,6 +18,8 @@ class ViewPointsWidget : public QWidget
     void exportSlot();
     void deleteAllSlot();
     void importSlot();
+
+    void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
 public:
     ViewPointsWidget(ViewManager& view_manager);
@@ -28,6 +31,7 @@ private:
     ViewManager& view_manager_;
 
     QTableView* table_view_{nullptr};
+    QSortFilterProxyModel* proxy_model_{nullptr};
     ViewPointsTableModel* table_model_{nullptr};
 
     QPushButton* import_button_{nullptr};

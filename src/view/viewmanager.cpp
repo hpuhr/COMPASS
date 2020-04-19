@@ -34,6 +34,7 @@
 #include <QMessageBox>
 #include <QWidget>
 #include <QTabWidget>
+#include <QMetaType>
 
 #include <cassert>
 #include <fstream>
@@ -45,6 +46,8 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     : Configurable(class_id, instance_id, atsdb, "views.json"), atsdb_(*atsdb)
 {
     logdbg << "ViewManager: constructor";
+
+    qRegisterMetaType<ViewPoint*>("ViewPoint*");
 }
 
 void ViewManager::init(QTabWidget* tab_widget)
@@ -334,6 +337,29 @@ void ViewManager::importViewPoints (const std::string& filename)
                               "File import error: '"+QString(e.what())+"'.", QMessageBox::Ok);
         m_warning.exec();
         return;
+    }
+}
+
+void ViewManager::setCurrentViewPoint (unsigned int id)
+{
+    if (current_view_point_set_)
+        unsetCurrentViewPoint();
+
+    assert (existsViewPoint(id));
+    current_view_point_set_ = true;
+    current_view_point_ = id;
+    emit showViewPointSignal(&view_points_.at(current_view_point_));
+}
+
+
+void ViewManager::unsetCurrentViewPoint ()
+{
+    if (current_view_point_set_)
+    {
+        assert (existsViewPoint(current_view_point_));
+        emit unshowViewPointSignal(&view_points_.at(current_view_point_));
+        current_view_point_set_ = false;
+        current_view_point_ = 0;
     }
 }
 

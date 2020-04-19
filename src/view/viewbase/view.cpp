@@ -26,6 +26,7 @@
 #include "viewmanager.h"
 #include "viewmodel.h"
 #include "viewwidget.h"
+#include "viewpoint.h"
 
 unsigned int View::cnt_ = 0;
 
@@ -48,10 +49,11 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
     central_widget_ = new QWidget();
     central_widget_->setAutoFillBackground(true);
 
-    connect(this, &View::selectionChangedSignal, &view_manager_,
-            &ViewManager::selectionChangedSlot);
-    connect(&view_manager_, &ViewManager::selectionChangedSignal, this,
-            &View::selectionChangedSlot);
+    connect(this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
+
+    connect(&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
+    connect(&view_manager_, &ViewManager::unshowViewPointSignal, this, &View::unshowViewPointSlot);
+    connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
 }
 
 /**

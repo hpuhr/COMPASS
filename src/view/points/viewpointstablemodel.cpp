@@ -123,3 +123,12 @@ void ViewPointsTableModel::update()
     endResetModel();
 }
 
+unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
+{
+     assert (index.isValid());
+     auto map_it = view_points_.begin();
+     std::advance(map_it, index.row());
+     assert (map_it != view_points_.end());
+
+     return map_it->first;
+}
