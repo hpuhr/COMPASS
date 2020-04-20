@@ -1,6 +1,9 @@
 #include "viewpoint.h"
 #include "viewmanager.h"
 #include "logger.h"
+#include "json.hpp"
+
+using namespace nlohmann;
 
 ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
     : id_(id), view_manager_(view_manager)
@@ -59,9 +62,10 @@ ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
 
 }
 
-ViewPoint::ViewPoint(unsigned int id, nlohmann::json& data, ViewManager& view_manager)
-    : id_(id), data_(data), view_manager_(view_manager)
+ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager)
+    : id_(id), view_manager_(view_manager)
 {
+    data_ = json::parse(json_str);
     assert (data_.contains("id"));
     assert (data_.at("id") == id_);
 }

@@ -22,6 +22,8 @@
 
 #include "job.h"
 
+#include <cassert>
+
 class Buffer;
 class DBObject;
 class DBInterface;

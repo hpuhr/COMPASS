@@ -63,10 +63,9 @@ void ViewManager::init(QTabWidget* tab_widget)
         for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
         {
             assert (!view_points_.count(vp_it.first));
-            json data = json::parse(vp_it.second);
             view_points_.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(vp_it.first),   // args for key
-                                 std::forward_as_tuple(vp_it.first, data, *this));  // args for mapped value
+                                 std::forward_as_tuple(vp_it.first, vp_it.second, *this));  // args for mapped value
         }
     }
 
