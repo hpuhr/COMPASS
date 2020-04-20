@@ -61,6 +61,7 @@ class ASTERIXImportTaskWidget : public TaskWidget
     virtual ~ASTERIXImportTaskWidget();
 
     void addFile(const std::string& filename);
+    void selectFile(const std::string& filename);
 
     void updateLimitRAM();
 

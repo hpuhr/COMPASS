@@ -53,6 +53,7 @@
 #include <cassert>
 
 #include <QCoreApplication>
+#include <QThread>
 
 using namespace Utils;
 
@@ -498,6 +499,9 @@ void TaskManager::performAutomaticTasks ()
 
     if (sqlite3_create_new_db_)
     {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         loginf << "TaskManager: performAutomaticTasks: creating and opening new sqlite3 database '"
                << sqlite3_create_new_db_filename_ << "'";
 
@@ -506,9 +510,17 @@ void TaskManager::performAutomaticTasks ()
 
         connection_widget->addFile(sqlite3_create_new_db_filename_);
         connection_widget->openFileSlot();
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
     }
     else if (sqlite3_open_db_)
     {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         loginf << "TaskManager: performAutomaticTasks: opening existing sqlite3 database '"
                << sqlite3_open_db_filename_ << "'";
 
@@ -521,11 +533,19 @@ void TaskManager::performAutomaticTasks ()
 
         connection_widget->addFile(sqlite3_open_db_filename_);
         connection_widget->openFileSlot();
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
     }
 
     #if USE_JASTERIX
     if (asterix_import_file_)
     {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
                << asterix_import_filename_ << "'";
 
@@ -549,6 +569,7 @@ void TaskManager::performAutomaticTasks ()
         assert(asterix_import_task_widget);
 
         asterix_import_task_widget->addFile(asterix_import_filename_);
+        asterix_import_task_widget->selectFile(asterix_import_filename_);
 
         assert(asterix_importer_task_->canRun());
         asterix_importer_task_->showDoneSummary(false);
@@ -557,11 +578,16 @@ void TaskManager::performAutomaticTasks ()
 
         while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
     }
     #endif
 
     if (auto_process_)
     {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         // calculate radar plot positions
         if (radar_plot_position_calculator_task_->isRecommended())
         {
@@ -579,14 +605,19 @@ void TaskManager::performAutomaticTasks ()
 
             while (QCoreApplication::hasPendingEvents() || !radar_plot_position_calculator_task_->done())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+            QThread::msleep(100);  // delay
         }
 
-
         // post-process
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
 
-        if(widget_->getCurrentTaskName() != post_process_task_->name())
+        if (!post_process_task_->isRecommended())
         {
+
             logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
                    << "' selected, aborting";
             return;
@@ -595,14 +626,22 @@ void TaskManager::performAutomaticTasks ()
         assert(post_process_task_->isRecommended());
         assert(post_process_task_->isRequired());
 
+        if(widget_->getCurrentTaskName() != post_process_task_->name())
+            widget_->setCurrentTask(*post_process_task_);
+
         widget_->runCurrentTaskSlot();
 
         while (QCoreApplication::hasPendingEvents() || !post_process_task_->done())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
+        QThread::msleep(100);  // delay
+
         // assocs
         if (create_artas_associations_task_->isRecommended())
         {
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
             loginf << "TaskManager: performAutomaticTasks: starting association task";
 
             if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
@@ -618,8 +657,12 @@ void TaskManager::performAutomaticTasks ()
 
             while (QCoreApplication::hasPendingEvents() || !create_artas_associations_task_->done())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+            QThread::msleep(100);  // delay
         }
     }
+
+    loginf << "TaskManager: performAutomaticTasks: done";
 
     if (quit_after_auto_process_)
     {

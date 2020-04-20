@@ -74,8 +74,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
                 "imports existing ASTERIX file with given filename, e.g. '/data/file1.ff'")
 #endif
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-            ("quit_after_auto_process", po::bool_switch(&quit_after_auto_process), "quit after automatic processing")
-            ("start_after_auto_process", po::bool_switch(&start_after_auto_process), "start after automatic processing");
+            ("auto_quit", po::bool_switch(&quit_after_auto_process), "quit after automatic processing")
+            ("auto_start", po::bool_switch(&start_after_auto_process), "start after automatic processing");
 
     try
     {

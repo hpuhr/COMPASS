@@ -570,6 +570,8 @@ bool ASTERIXImportTask::canRun() { return canImportFile(); }
 
 void ASTERIXImportTask::run()
 {
+    done_ = false; // since can be run multiple times
+
     float free_ram = System::getFreeRAMinGB();
 
     loginf << "ASTERIXImporterTask: run: filename " << current_filename_ << " test " << test_
