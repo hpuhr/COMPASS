@@ -341,6 +341,32 @@ void ViewManager::importViewPoints (const std::string& filename)
     }
 }
 
+void ViewManager::exportViewPoints (const std::string& filename)
+{
+    loginf << "ViewManager: exportViewPoints: filename '" << filename << "'";
+
+    json data;
+
+    data["view_points"] = json::array();
+    json& view_points = data.at("view_points");
+
+    unsigned int cnt = 0;
+    for (auto& vp_it : view_points_)
+    {
+        view_points[cnt] = vp_it.second.data();
+        ++cnt;
+    }
+
+    std::ofstream file(filename);
+    file << data.dump(4);
+
+    QMessageBox m_info(QMessageBox::Information, "View Points Export File",
+                       "File export: '"+QString(filename.c_str())+"' done.\n"
+                       +QString::number(view_points.size())+" View Points saved.", QMessageBox::Ok);
+    m_info.exec();
+}
+
+
 void ViewManager::setCurrentViewPoint (unsigned int id)
 {
     if (current_view_point_set_)

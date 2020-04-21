@@ -89,6 +89,7 @@ class ViewManager : public QObject, public Configurable
 
     ViewPointsWidget* viewPointsWidget() const;
     void importViewPoints (const std::string& filename);
+    void exportViewPoints (const std::string& filename);
 
     void setCurrentViewPoint (unsigned int id);
     void unsetCurrentViewPoint ();

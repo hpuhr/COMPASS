@@ -93,20 +93,24 @@ void ViewPointsWidget::exportSlot()
 {
     loginf << "ViewPointsWidget: exportSlot";
 
-//    QFileDialog dialog(nullptr);
-//    dialog.setFileMode(QFileDialog::AnyFile);
-//    dialog.setNameFilter("CSV Files (*.csv)");
-//    dialog.setDefaultSuffix("csv");
-//    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+    QFileDialog dialog(nullptr);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("JSON Files (*.json)");
+    dialog.setDefaultSuffix("json");
+    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
 
 //    if (!overwrite)
 //        dialog.setOption(QFileDialog::DontConfirmOverwrite);
 
-//    QStringList file_names;
-//    if (dialog.exec())
-//        file_names = dialog.selectedFiles();
+    if (dialog.exec())
+    {
+        QStringList file_names = dialog.selectedFiles();
+        assert (file_names.size() == 1);
+        std::string filename = file_names.at(0).toStdString();
 
-//    QString filename;
+        loginf << "ViewPointsWidget: exportSlot: filename '" << filename << "'";
+        view_manager_.exportViewPoints(filename);
+    }
 }
 
 void ViewPointsWidget::deleteAllSlot()
