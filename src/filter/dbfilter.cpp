@@ -26,6 +26,8 @@
 #include "filtermanager.h"
 #include "logger.h"
 
+using namespace nlohmann;
+
 /**
  * Initializes members, registers parameters and creates sub-configurables if class id is DBFilter.
  */
@@ -366,4 +368,35 @@ DBFilterWidget* DBFilter::widget()
 {
     assert(widget_);
     return widget_;
+}
+
+void DBFilter::saveViewPointConditions (nlohmann::json& cond_array)
+{
+    for (auto cond_it : conditions_)
+    {
+        nlohmann::json& condition = cond_array[cond_array.size()];
+        condition["name"] = cond_it->instanceId();
+        condition["value"] = cond_it->getValue();
+    }
+}
+
+void DBFilter::loadViewPointConditions (nlohmann::json& cond_array)
+{
+    assert (cond_array.is_array());
+
+    for (auto& cond_it : cond_array.get<json::array_t>())
+    {
+
+        assert (cond_it.contains("name"));
+        assert (cond_it.contains("value"));
+
+        const std::string& cond_name = cond_it.at("name");
+
+        auto it = find_if(conditions_.begin(), conditions_.end(),
+                          [cond_name] (const DBFilterCondition* c) { return c->instanceId() == cond_name; } );
+
+        assert (it != conditions_.end());
+        (*it)->setValue(cond_it.at("value"));
+
+    }
 }

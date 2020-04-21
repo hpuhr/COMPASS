@@ -79,6 +79,7 @@ class FilterManager : public QObject, public Configurable
     FilterManagerWidget* widget();
 
     void setConfigInViewPoint (ViewPoint& vp);
+    void disableAllFilters ();
 
   protected:
     /// Database definition, resets if changed

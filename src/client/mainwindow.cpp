@@ -17,12 +17,6 @@
 
 #include "mainwindow.h"
 
-#include <QApplication>
-#include <QCloseEvent>
-#include <QSettings>
-#include <QStackedWidget>
-#include <QTabWidget>
-
 #include "atsdb.h"
 #include "config.h"
 #include "configurationmanager.h"
@@ -40,12 +34,22 @@
 #include "viewmanager.h"
 #include "viewpointswidget.h"
 
+#include <QApplication>
+#include <QCloseEvent>
+#include <QSettings>
+#include <QStackedWidget>
+#include <QTabWidget>
+#include <QLocale>
+
 using namespace Utils;
 using namespace std;
 
 MainWindow::MainWindow()
 {
     logdbg << "MainWindow: constructor";
+
+    QLocale::setDefault(QLocale::c());
+    setLocale(QLocale::c());
 
     setMinimumSize(QSize(1200, 900));
 

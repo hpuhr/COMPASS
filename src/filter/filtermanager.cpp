@@ -270,6 +270,31 @@ void FilterManager::showViewPointSlot (ViewPoint* vp)
         for (auto& obj_it : obj_man)
             obj_it.second->loadingWanted(true);
     }
+
+    // add filters
+    obj_man.useFilters(data.contains("filters"));
+
+    if (data.contains("filters"))
+    {
+        json& filters = data.at("filters");
+        assert (filters.is_array());
+
+        disableAllFilters();
+
+        for (auto& fil_it : filters.get<json::array_t>())
+        {
+            assert (fil_it.contains("name"));
+            assert (fil_it.contains("conditions"));
+            const std::string& fil_name = fil_it.at("name");
+
+            auto it = find_if(filters_.begin(), filters_.end(),
+                              [fil_name] (const DBFilter* f) { return f->getName() == fil_name; } );
+
+            assert (it != filters_.end());
+            (*it)->setActive(true);
+            (*it)->loadViewPointConditions(fil_it.at("conditions"));
+        }
+    }
 }
 
 void FilterManager::setConfigInViewPoint (ViewPoint& vp)
@@ -290,6 +315,32 @@ void FilterManager::setConfigInViewPoint (ViewPoint& vp)
            db_objects[cnt] = obj_it.first;
            ++cnt;
         }
+    }
+
+    // add filters
+    if (obj_man.useFilters())
+    {
+        vp.data()["filters"] = json::array();
+        json& filters = vp.data().at("filters");
+
+        unsigned int cnt=0;
+        for (auto fil_it : filters_)
+        {
+            if (fil_it->getActive())
+            {
+                json& filter = filters[cnt];
+
+                filter["name"] = fil_it->getName();
+                filter["conditions"] = json::array();
+                json& conditions = filter.at("conditions");
+
+                fil_it->saveViewPointConditions(conditions);
+
+                ++cnt;
+            }
+        }
+
+        loginf << "FilterManager: setConfigInViewPoint: filters: '" << filters.dump(4) << "'";
     }
 }
 
@@ -324,4 +375,10 @@ void FilterManager::startedSlot()
 
     if (widget_)
         widget_->databaseOpenedSlot();
+}
+
+void FilterManager::disableAllFilters ()
+{
+    for (auto fil_it : filters_)
+        fil_it->setActive(false);
 }

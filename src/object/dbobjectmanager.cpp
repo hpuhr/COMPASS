@@ -245,6 +245,9 @@ void DBObjectManager::useFilters(bool use_filters)
 {
     use_filters_ = use_filters;
     loginf << "DBObjectManager: useFilters: " << use_filters_;
+
+    if (load_widget_)
+        load_widget_->updateUseFilters();
 }
 
 bool DBObjectManager::useOrder() const { return use_order_; }

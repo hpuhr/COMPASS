@@ -64,6 +64,8 @@ class DBObjectManagerLoadWidget : public QFrame
 
     void loadingDone();
 
+    void updateUseFilters ();
+
   private:
     DBObjectManager& object_manager_;
     QVBoxLayout* info_layout_{nullptr};

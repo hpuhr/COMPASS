@@ -270,6 +270,12 @@ void DBObjectManagerLoadWidget::loadingDone()
     load_button_->setDisabled(false);
 }
 
+void DBObjectManagerLoadWidget::updateUseFilters ()
+{
+    assert (filters_check_);
+    filters_check_->setChecked(object_manager_.useFilters());
+}
+
 void DBObjectManagerLoadWidget::updateSlot()
 {
     QLayoutItem* item;

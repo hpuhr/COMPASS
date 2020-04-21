@@ -101,7 +101,7 @@ class DBFilterCondition : public QObject, public Configurable
     /// @brief Returns the current value
     std::string getValue() { return value_; }
     /// @brief Sets the current value
-    void setValue(std::string value) { value_ = value; }
+    void setValue(std::string value);
 
     /// @brief Returns the reset value
     std::string getResetValue() { return reset_value_; }

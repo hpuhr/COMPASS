@@ -3,6 +3,8 @@
 #include "viewpoint.h"
 #include "logger.h"
 #include "viewpointstablemodel.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -42,6 +44,8 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
             this, &ViewPointsWidget::currentRowChanged);
 
+    //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
+
     table_view_->resizeColumnsToContents();
     main_layout->addWidget(table_view_);
 
@@ -65,6 +69,11 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     }
 
     setLayout(main_layout);
+
+    DBObjectManager& dbo_man = ATSDB::instance().objectManager();
+
+    connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
+    connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
 }
 
 ViewPointsWidget::~ViewPointsWidget()
@@ -150,6 +159,32 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
     view_manager_.setCurrentViewPoint(id);
 }
 
+void ViewPointsWidget::loadingStartedSlot()
+{
+    table_view_->setDisabled(true);
+}
+
+void ViewPointsWidget::allLoadingDoneSlot()
+{
+    table_view_->setDisabled(false);
+}
+
+//void ViewPointsWidget::onTableClickedSlot (const QModelIndex& current)
+//{
+//    if (!current.isValid())
+//    {
+//        loginf << "ViewPointsWidget: onTableClickedSlot: invalid index";
+//        return;
+//    }
+
+//    auto const source_index = proxy_model_->mapToSource(current);
+//    assert (source_index.isValid());
+
+//    unsigned int id = table_model_->getIdOf(source_index);
+
+//    loginf << "ViewPointsWidget: onTableClickedSlot: current id " << id;
+//    view_manager_.setCurrentViewPoint(id);
+//}
 
 
 

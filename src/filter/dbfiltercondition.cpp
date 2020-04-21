@@ -269,6 +269,13 @@ void DBFilterCondition::update()
     edit_->setText(tr(value_.c_str()));
 }
 
+void DBFilterCondition::setValue(std::string value)
+{
+    value_ = value;
+
+    update();
+}
+
 void DBFilterCondition::reset()
 {
     assert(usable_);

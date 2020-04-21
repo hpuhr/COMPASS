@@ -257,6 +257,7 @@ void ViewManager::removeViewPoint(unsigned int id)
 
 void ViewManager::deleteAllViewPoints ()
 {
+    unsetCurrentViewPoint();
     view_points_.clear();
     ATSDB::instance().interface().deleteAllViewPoints();
 }

@@ -20,6 +20,10 @@ class ViewPointsWidget : public QWidget
     void importSlot();
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+    //void onTableClickedSlot(const QModelIndex& current);
+
+    void loadingStartedSlot();
+    void allLoadingDoneSlot();
 
 public:
     ViewPointsWidget(ViewManager& view_manager);

@@ -23,6 +23,8 @@
 
 #include "configurable.h"
 
+#include "json.hpp"
+
 class DBFilterWidget;
 class DBFilterCondition;
 class FilterManager;
@@ -68,7 +70,7 @@ class DBFilter : public Configurable
     void setVisible(bool visible);
 
     /// @brief Returns the filter name
-    const std::string& getName() { return name_; }
+    const std::string& getName() const { return name_; }
     /// @brief Sets the filter name
     void setName(const std::string& name);
 
@@ -105,6 +107,9 @@ class DBFilter : public Configurable
     DBFilterWidget* widget();
 
     bool disabled() const { return disabled_; }
+
+    void saveViewPointConditions (nlohmann::json& cond_array);
+    void loadViewPointConditions (nlohmann::json& cond_array);
 
   protected:
     // FilterManager &filter_manager_;
