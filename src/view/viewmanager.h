@@ -76,8 +76,8 @@ class ViewManager : public QObject, public Configurable
 
     ViewManagerWidget* widget();
 
-    unsigned int addNewViewPoint(bool update=true);
-    ViewPoint& addNewViewPoint(unsigned int id, bool update=true);
+    unsigned int saveNewViewPoint(bool update=true);
+    ViewPoint& saveNewViewPoint(unsigned int id, bool update=true);
     bool existsViewPoint(unsigned int id);
     ViewPoint& viewPoint(unsigned int id);
     void removeViewPoint(unsigned int id);

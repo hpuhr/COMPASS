@@ -738,6 +738,14 @@ void DBObject::schemaChangedSlot()
     updateToDatabaseContent();
 }
 
+void DBObject::loadingWanted(bool wanted)
+{
+    loading_wanted_ = wanted;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+}
+
 void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
                     const std::string& limit_str)

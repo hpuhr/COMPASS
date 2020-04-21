@@ -28,6 +28,8 @@
 #include "dbinterface.h"
 #include "viewpointswidget.h"
 #include "files.h"
+#include "filtermanager.h"
+#include "dbobjectmanager.h"
 
 #include "json.hpp"
 
@@ -74,6 +76,11 @@ void ViewManager::init(QTabWidget* tab_widget)
 
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
+
+    FilterManager& filter_man = ATSDB::instance().filterManager();
+
+    connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
+    connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
     initialized_ = true;
 
@@ -196,7 +203,7 @@ ViewManagerWidget* ViewManager::widget()
     return widget_;
 }
 
-unsigned int ViewManager::addNewViewPoint(bool update)
+unsigned int ViewManager::saveNewViewPoint(bool update)
 {
     unsigned int new_id {0};
 
@@ -205,20 +212,12 @@ unsigned int ViewManager::addNewViewPoint(bool update)
 
     assert (!existsViewPoint(new_id));
 
-    view_points_.emplace(std::piecewise_construct,
-                         std::forward_as_tuple(new_id),   // args for key
-                         std::forward_as_tuple(new_id, *this));  // args for mapped value
-
-    assert (existsViewPoint(new_id));
-    view_points_.at(new_id).dirty(true);
-
-    if (update && view_points_widget_)
-        view_points_widget_->update();
+    saveNewViewPoint(new_id, update);
 
     return new_id;
 }
 
-ViewPoint& ViewManager::addNewViewPoint(unsigned int id, bool update)
+ViewPoint& ViewManager::saveNewViewPoint(unsigned int id, bool update)
 {
     if (view_points_.count(id))
         throw std::runtime_error ("ViewManager: addNewViewPoint: id "+std::to_string(id)+" already exists");
@@ -228,6 +227,8 @@ ViewPoint& ViewManager::addNewViewPoint(unsigned int id, bool update)
                          std::forward_as_tuple(id, *this));  // args for mapped value
 
     assert (existsViewPoint(id));
+
+    ATSDB::instance().filterManager().setConfigInViewPoint(view_points_.at(id));
     view_points_.at(id).dirty(true);
 
     if (update && view_points_widget_)
@@ -318,7 +319,7 @@ void ViewManager::importViewPoints (const std::string& filename)
 
             id = vp_it.at("id");
 
-            ViewPoint& vp = addNewViewPoint(id, false);
+            ViewPoint& vp = saveNewViewPoint(id, false);
             vp.data() = vp_it;
         }
 
@@ -348,6 +349,8 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
     current_view_point_set_ = true;
     current_view_point_ = id;
     emit showViewPointSignal(&view_points_.at(current_view_point_));
+
+    ATSDB::instance().objectManager().loadSlot();
 }
 
 

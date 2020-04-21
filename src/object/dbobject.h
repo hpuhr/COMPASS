@@ -153,7 +153,7 @@ class DBObject : public QObject, public Configurable
     /// @brief Returns if an object can be loaded
     bool loadable() const { return is_loadable_; }
 
-    void loadingWanted(bool wanted) { loading_wanted_ = wanted; }
+    void loadingWanted(bool wanted);
     bool loadingWanted() { return loading_wanted_; }
 
     void load(DBOVariableSet& read_set, bool use_filters, bool use_order,

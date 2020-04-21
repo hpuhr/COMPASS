@@ -28,8 +28,12 @@
 #include "dbovariable.h"
 #include "filtermanagerwidget.h"
 #include "logger.h"
+#include "viewpoint.h"
+
+#include "json.hpp"
 
 using namespace std;
+using namespace nlohmann;
 
 FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id,
                              ATSDB* atsdb)
@@ -236,6 +240,57 @@ void FilterManager::deleteFilterSlot(DBFilter* filter)
     }
 
     emit changedFiltersSignal();
+}
+
+void FilterManager::unshowViewPointSlot (ViewPoint* vp)
+{
+    loginf << "FilterManager: unshowViewPointSlot";
+    assert (vp);
+}
+
+void FilterManager::showViewPointSlot (ViewPoint* vp)
+{
+    loginf << "FilterManager: showViewPointSlot";
+    assert (vp);
+
+    json& data = vp->data();
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    // add all db objects that need loading
+    if (data.contains("db_objects")) // the listed ones should be loaded
+    {
+        json& db_objects  = data.at("db_objects");
+        for (auto& obj_it : obj_man)
+            obj_it.second->loadingWanted(
+                        std::find(db_objects.begin(), db_objects.end(), obj_it.first) != db_objects.end());
+    }
+    else // all should be loaded
+    {
+        for (auto& obj_it : obj_man)
+            obj_it.second->loadingWanted(true);
+    }
+}
+
+void FilterManager::setConfigInViewPoint (ViewPoint& vp)
+{
+    loginf << "FilterManager: setConfigInViewPoint";
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    vp.data()["db_objects"] = json::array();
+    json& db_objects = vp.data()["db_objects"];
+
+    // add all db objects that need loading
+    unsigned int cnt=0;
+    for (auto& obj_it : obj_man)
+    {
+        if (obj_it.second->loadable() && obj_it.second->loadingWanted())
+        {
+           db_objects[cnt] = obj_it.first;
+           ++cnt;
+        }
+    }
 }
 
 FilterManagerWidget* FilterManager::widget()

@@ -30,6 +30,7 @@ class DBFilter;
 class ATSDB;
 class FilterManagerWidget;
 class DBOVariable;
+class ViewPoint;
 
 /**
  * @brief Manages all filters and generates SQL conditions
@@ -49,6 +50,9 @@ class FilterManager : public QObject, public Configurable
   public slots:
     void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
+
+    void unshowViewPointSlot (ViewPoint* vp);
+    void showViewPointSlot (ViewPoint* vp);
 
   public:
     /// @brief Constructor
@@ -73,6 +77,8 @@ class FilterManager : public QObject, public Configurable
     void reset();
 
     FilterManagerWidget* widget();
+
+    void setConfigInViewPoint (ViewPoint& vp);
 
   protected:
     /// Database definition, resets if changed
