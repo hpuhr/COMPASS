@@ -5,6 +5,7 @@
 #include "viewpointstablemodel.h"
 #include "atsdb.h"
 #include "dbobjectmanager.h"
+#include "viewpointstoolwidget.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -19,6 +20,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     : QWidget(), view_manager_(view_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
+
+    tool_widget_ = new ViewPointsToolWidget(this);
+    main_layout->addWidget(tool_widget_);
 
     table_model_ = new ViewPointsTableModel(view_manager_);
 
@@ -165,11 +169,17 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 
 void ViewPointsWidget::loadingStartedSlot()
 {
+    assert (tool_widget_);
+    tool_widget_->setDisabled(true);
+    assert (table_view_);
     table_view_->setDisabled(true);
 }
 
 void ViewPointsWidget::allLoadingDoneSlot()
 {
+    assert (tool_widget_);
+    tool_widget_->setDisabled(false);
+    assert (table_view_);
     table_view_->setDisabled(false);
 }
 

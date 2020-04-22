@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class ViewManager;
+class ViewPointsToolWidget;
 class ViewPointsTableModel;
 
 class QTableView;
@@ -33,6 +34,8 @@ public:
 
 private:
     ViewManager& view_manager_;
+
+    ViewPointsToolWidget* tool_widget_{nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

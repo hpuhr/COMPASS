@@ -25,7 +25,7 @@ public:
 private:
     ViewManager& view_manager_;
 
-    QStringList table_columns_{"id", "name", "type"};
+    QStringList table_columns_{"id", "name", "type", "status", "comment"};
 
     std::map<unsigned int, ViewPoint>& view_points_;
 
