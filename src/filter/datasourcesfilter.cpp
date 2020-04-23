@@ -253,3 +253,88 @@ void DataSourcesFilter::reset()
     widget_->update();
 }
 
+void DataSourcesFilter::saveViewPointConditions (nlohmann::json& cond_array)
+{
+    assert (conditions_.size() == 0);
+
+    nlohmann::json& condition = cond_array[cond_array.size()];
+    condition["name"] = "active_sources";
+
+    condition["value"] = json::array();
+
+    unsigned int cnt=0;
+
+    for (auto& ds_it : data_sources_)
+    {
+        if (ds_it.second.isActiveInFilter())
+        {
+            condition["value"][cnt] = ds_it.second.getNumber();
+            ++cnt;
+        }
+    }
+}
+
+void DataSourcesFilter::loadViewPointConditions (nlohmann::json& cond_array)
+{
+    assert (conditions_.size() == 0);
+
+    assert (cond_array.is_array());
+    assert (cond_array.size() == 1);
+
+    json& condition = cond_array[0];
+    assert (condition.contains("name"));
+    assert (condition.at("name") == "active_sources");
+    assert (condition.contains("value"));
+    assert (condition.at("value").is_array());
+
+    json& active_sources = condition.at("value");
+
+    for (auto& ds_it : data_sources_)
+    {
+        ds_it.second.setActiveInFilter(false);
+
+        if (find(active_sources.begin(), active_sources.end(), ds_it.second.getNumber()) != active_sources.end())
+            ds_it.second.setActiveInFilter(true);
+    }
+
+    if (widget())
+        widget()->update();
+}
+
+//std::string DataSourcesFilter::getActiveSourcesString()
+//{
+//    std::stringstream ss;
+
+//    bool first = true;
+//    for (auto& ds_it : data_sources_)
+//    {
+//        if (ds_it.second.isActiveInFilter())
+//        {
+//            if (first)
+//                ss << to_string(ds_it.second.getNumber());
+//            else
+//                ss << ";" << to_string(ds_it.second.getNumber());
+//            first = false;
+//        }
+//    }
+
+//    loginf << "DataSourcesFilter " << name_ << ": getActiveSourcesString: string '" << ss.str() << "'";
+
+//    return ss.str();
+//}
+
+//void DataSourcesFilter::setActiveSourcesFromString(const std::string& values_str)
+//{
+//    loginf << "DataSourcesFilter " << name_ << ": setActiveSourcesFromString: string '" << values_str << "'";
+
+//    std::vector<std::string> active_sources_parts = String::split(values_str, ';');
+
+//    for (auto& ds_it : data_sources_)
+//    {
+//        ds_it.second.setActiveInFilter(false);
+
+//        if (find(active_sources_parts.begin(), active_sources_parts.end(), to_string(ds_it.second.getNumber()))
+//                != active_sources_parts.end())
+//            ds_it.second.setActiveInFilter(true);
+//    }
+//}

@@ -94,6 +94,9 @@ class DataSourcesFilter : public DBFilter
 
     std::map<int, DataSourcesFilterDataSource>& dataSources() { return data_sources_; }
 
+    virtual void saveViewPointConditions (nlohmann::json& cond_array);
+    virtual void loadViewPointConditions (nlohmann::json& cond_array);
+
   protected:
     /// DBO type
     std::string dbo_name_;
@@ -111,6 +114,9 @@ class DataSourcesFilter : public DBFilter
 
     /// @brief Does nothing.
     virtual void checkSubConfigurables();
+
+//    std::string getActiveSourcesString();
+//    void setActiveSourcesFromString(const std::string& values_str);
 };
 
 #endif /* DATASOURCESFILTER_H_ */

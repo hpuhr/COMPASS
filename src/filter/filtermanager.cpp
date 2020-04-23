@@ -167,14 +167,13 @@ void FilterManager::checkSubConfigurables()
                << obj_it.first;
 
         std::string instance_id = obj_it.second->name() + "DataSources";
-        unsigned int cnt = 0;
 
-        while (
-            configuration().hasSubConfiguration("DataSourcesFilter", instance_id + to_string(cnt)))
-            ++cnt;
-
-        instance_id += to_string(cnt);
-
+        if (configuration().hasSubConfiguration("DataSourcesFilter", instance_id))
+        {
+            loginf << "FilterManager: checkSubConfigurables: unable to create sensor filter for "
+                   << obj_it.first << " with instance_id " << instance_id;
+            continue;
+        }
         Configuration& ds_filter_configuration =
             addNewSubConfiguration("DataSourcesFilter", instance_id);
 

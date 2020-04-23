@@ -108,8 +108,8 @@ class DBFilter : public Configurable
 
     bool disabled() const { return disabled_; }
 
-    void saveViewPointConditions (nlohmann::json& cond_array);
-    void loadViewPointConditions (nlohmann::json& cond_array);
+    virtual void saveViewPointConditions (nlohmann::json& cond_array);
+    virtual void loadViewPointConditions (nlohmann::json& cond_array);
 
   protected:
     // FilterManager &filter_manager_;
