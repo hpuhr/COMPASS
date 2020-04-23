@@ -114,9 +114,6 @@ class DataSourcesFilter : public DBFilter
 
     /// @brief Does nothing.
     virtual void checkSubConfigurables();
-
-//    std::string getActiveSourcesString();
-//    void setActiveSourcesFromString(const std::string& values_str);
 };
 
 #endif /* DATASOURCESFILTER_H_ */

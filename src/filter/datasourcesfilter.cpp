@@ -289,52 +289,23 @@ void DataSourcesFilter::loadViewPointConditions (nlohmann::json& cond_array)
 
     json& active_sources = condition.at("value");
 
+    // disable all sources
     for (auto& ds_it : data_sources_)
-    {
         ds_it.second.setActiveInFilter(false);
 
-        if (find(active_sources.begin(), active_sources.end(), ds_it.second.getNumber()) != active_sources.end())
-            ds_it.second.setActiveInFilter(true);
+    // set active sources
+    for (auto& ds_it : active_sources.get<json::array_t>())
+    {
+        int number = ds_it;
+
+        if (data_sources_.count(number))
+            data_sources_.at(number).setActiveInFilter(true);
+        else
+            logwrn << "DataSourcesFilter: loadViewPointConditions: source " << number << " not found";
     }
 
     if (widget())
         widget()->update();
 }
 
-//std::string DataSourcesFilter::getActiveSourcesString()
-//{
-//    std::stringstream ss;
 
-//    bool first = true;
-//    for (auto& ds_it : data_sources_)
-//    {
-//        if (ds_it.second.isActiveInFilter())
-//        {
-//            if (first)
-//                ss << to_string(ds_it.second.getNumber());
-//            else
-//                ss << ";" << to_string(ds_it.second.getNumber());
-//            first = false;
-//        }
-//    }
-
-//    loginf << "DataSourcesFilter " << name_ << ": getActiveSourcesString: string '" << ss.str() << "'";
-
-//    return ss.str();
-//}
-
-//void DataSourcesFilter::setActiveSourcesFromString(const std::string& values_str)
-//{
-//    loginf << "DataSourcesFilter " << name_ << ": setActiveSourcesFromString: string '" << values_str << "'";
-
-//    std::vector<std::string> active_sources_parts = String::split(values_str, ';');
-
-//    for (auto& ds_it : data_sources_)
-//    {
-//        ds_it.second.setActiveInFilter(false);
-
-//        if (find(active_sources_parts.begin(), active_sources_parts.end(), to_string(ds_it.second.getNumber()))
-//                != active_sources_parts.end())
-//            ds_it.second.setActiveInFilter(true);
-//    }
-//}
