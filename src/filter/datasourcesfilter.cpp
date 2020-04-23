@@ -36,8 +36,6 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
     registerParameter("dbo_name", &dbo_name_, "");
     registerParameter("active_sources", &active_sources_, json::object());
 
-    loginf << "UGA active" << active_sources_.dump(4);
-
     if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
@@ -125,13 +123,13 @@ std::string DataSourcesFilter::getConditionString(const std::string& dbo_name, b
 
             std::map<int, DataSourcesFilterDataSource>::iterator it;
 
-            for (it = data_sources_.begin(); it != data_sources_.end(); it++)
+            for (auto& it : data_sources_)
             {
-                if (it->second.isActiveInFilter())  // in selection
+                if (it.second.isActiveInFilter())  // in selection
                 {
                     if (values.str().size() > 0)
                         values << ",";
-                    values << it->first;
+                    values << it.first;
                     got_one = true;
                 }
                 else
@@ -179,21 +177,13 @@ void DataSourcesFilter::updateDataSources()
                                   std::forward_as_tuple(ds_it->first),  // args for key
                                   std::forward_as_tuple(ds_it->first, ds_it->second.name(),
                                                         active_sources_[to_string(ds_it->first)]));
-
-            //data_sources_.at(ds_it->first).setNumber(ds_it->first);
-            //data_sources_.at(ds_it->first).setName(ds_it->second.name());
-//            data_sources_.at(ds_it->first).setActiveInFilter(true);
-//            data_sources_.at(ds_it->first).setActiveInData(true);
-
-//            registerParameter("LoadSensorNumber" + std::to_string(ds_it->first),
-//                              &data_sources_[ds_it->first].getActiveInFilterReference(), true);
         }
     }
 }
 
 void DataSourcesFilter::updateDataSourcesActive()
 {
-    loginf << "DataSourcesFilter: updateDataSourcesActive";
+    logdbg << "DataSourcesFilter: updateDataSourcesActive";
 
     if (!object_->hasActiveDataSourcesInfo())
     {
@@ -202,24 +192,20 @@ void DataSourcesFilter::updateDataSourcesActive()
         return;
     }
 
-    std::map<int, DataSourcesFilterDataSource>::iterator srcit;
-    for (srcit = data_sources_.begin(); srcit != data_sources_.end(); srcit++)
-        srcit->second.setActiveInData(false);
+    for (auto& srcit : data_sources_)
+        srcit.second.setActiveInData(false);
 
-    std::set<int> active_sources = object_->getActiveDataSources();
-    std::set<int>::iterator it;
-
-    for (it = active_sources.begin(); it != active_sources.end(); it++)
+    for (auto& it : object_->getActiveDataSources())
     {
-        assert(data_sources_.find(*it) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(*it);
+        assert(data_sources_.find(it) != data_sources_.end());
+        DataSourcesFilterDataSource& src = data_sources_.at(it);
         src.setActiveInData(true);
     }
 
-    for (srcit = data_sources_.begin(); srcit != data_sources_.end(); srcit++)
+    for (auto& srcit : data_sources_)
     {
-        if (!srcit->second.isActiveInData())
-            srcit->second.setActiveInFilter(false);
+        if (!srcit.second.isActiveInData())
+            srcit.second.setActiveInFilter(false);
     }
 }
 
@@ -252,28 +238,18 @@ void DataSourcesFilter::checkSubConfigurables()
 
     for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
     {
-        DBFilterWidget* filter = sub_filters_.at(cnt)->widget();
-        QObject::connect((QWidget*)filter, SIGNAL(possibleFilterChange()), (QWidget*)widget_,
+        DBFilterWidget* filter_widget = sub_filters_.at(cnt)->widget();
+        QObject::connect((QWidget*)filter_widget, SIGNAL(possibleFilterChange()), (QWidget*)widget_,
                          SLOT(possibleSubFilterChange()));
-        widget_->addChildWidget(filter);
+        widget_->addChildWidget(filter_widget);
     }
 }
 
 void DataSourcesFilter::reset()
 {
-    std::map<int, DataSourcesFilterDataSource>::iterator it;
-    for (it = data_sources_.begin(); it != data_sources_.end(); it++)
-    {
-        it->second.setActiveInFilter(true);
-    }
+    for (auto& it : data_sources_)
+        it.second.setActiveInFilter(true);
+
     widget_->update();
 }
 
-// void DataSourcesFilter::notifyActiveSources ()
-//{
-//    logdbg << "DataSourcesFilter: notifyActiveSources";
-//    updateDataSourcesActive();
-
-//    if (widget_)
-//        widget_->update();
-//}

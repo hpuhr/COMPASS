@@ -19,7 +19,6 @@
 #define DATASOURCESFILTER_H_
 
 #include "dbfilter.h"
-#include "logger.h"
 
 /**
  * @brief Definition for a data source in a DataSourcesFilter
@@ -30,10 +29,7 @@ class DataSourcesFilterDataSource
     /// @brief Constructor
     DataSourcesFilterDataSource(unsigned int number, const std::string& name, nlohmann::json& active_in_filter)
         : number_(number), name_(name), active_in_filter_(active_in_filter)
-    {
-        loginf << "DataSourcesFilterDataSource: constructor: number " << number_ << " name " << name_
-               << " json " << active_in_filter_.dump();
-    }
+    {}
     /// @brief Destructor
     virtual ~DataSourcesFilterDataSource() {}
 
@@ -54,26 +50,17 @@ class DataSourcesFilterDataSource
 
     bool isActiveInFilter() const
     {
-        bool tmp = active_in_filter_;
-        loginf << "DataSourcesFilterDataSource name " << name_ << ": isActiveInFilter: " << tmp;
         return active_in_filter_;
     }
 
     void setActiveInFilter(bool active_in_filter)
     {
-        loginf << "DataSourcesFilterDataSource name " << name_ << ": setActiveInFilter: " << active_in_filter;
         active_in_filter_ = active_in_filter;
     }
 
-    //bool& getActiveInFilterReference() { return active_in_filter_; }
-
     std::string getName() const { return name_; }
 
-    //void setName(std::string name) { name_ = name; }
-
     unsigned int getNumber() const { return number_; }
-
-    //void setNumber(unsigned int number) { number_ = number; }
 };
 
 class DBObject;

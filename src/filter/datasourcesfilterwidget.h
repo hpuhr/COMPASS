@@ -50,9 +50,6 @@ class DataSourcesFilterWidget : public DBFilterWidget
     /// @brief Destructor
     virtual ~DataSourcesFilterWidget();
 
-    /// @brief Returns the sensors active container
-    // std::map<int, QCheckBox*> &getSensorActiveCheckboxes ();
-
     /// @brief Sets the sensor active checkboxes according to sensor active container
     virtual void update();
 
@@ -65,8 +62,6 @@ class DataSourcesFilterWidget : public DBFilterWidget
     DataSourcesFilter& filter_;
     /// Filtered DBObject type
     std::string dbo_name_;
-    /// Grid layout for all sensor checkboxes
-    // QGridLayout *sensorboxlay_;
     /// Container with checkboxes for all sensors (sensor number -> checkbox)
     std::map<int, DataSourcesFilterDataSource>& data_sources_;
 
