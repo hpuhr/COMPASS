@@ -1,6 +1,6 @@
 {
     "parameters": {
-        "db_id": "/home/sk/data/austria/20200224/20191210_1200_300-artas.ff_v8settings.db"
+        "db_id": "/home/sk/data/austria/20200417_CommandLine_Sample/test.db"
     },
     "sub_configs": {
         "DBFilter": {
@@ -14,24 +14,24 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "Barometric AltitudeCondition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": ">=",
-                                "reset_value": "MIN",
-                                "value": "0",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "modec_code_ft"
-                            }
-                        },
-                        "Barometric AltitudeCondition1": {
+                        "Barometric Altitude Maxmimum": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "45000",
+                                "value": "124600",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "modec_code_ft"
+                            }
+                        },
+                        "Barometric Altitude Minimum": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": ">=",
+                                "reset_value": "MIN",
+                                "value": "-1000",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -40,7 +40,7 @@
                     "DBFilterWidget": {
                         "Barometric AltitudeWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
@@ -56,7 +56,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "CallsignCondition0": {
+                        "Callsign Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -87,7 +87,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "HashCodeCondition0": {
+                        "HashCode Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -118,7 +118,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "Mode 3A CodesCondition0": {
+                        "Mode 3A Code Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -133,7 +133,7 @@
                     "DBFilterWidget": {
                         "Mode 3A CodesWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
@@ -149,7 +149,18 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "PositionCondition1": {
+                        "Latitude Maximum": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": "<=",
+                                "reset_value": "175.067021796",
+                                "value": "175.067021796",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "pos_long_deg"
+                            }
+                        },
+                        "Latitude Minimum": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -160,35 +171,13 @@
                                 "variable_name": "pos_lat_deg"
                             }
                         },
-                        "PositionCondition2": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": "<=",
-                                "reset_value": "68.0724334717",
-                                "value": "68.0724334717",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "pos_lat_deg"
-                            }
-                        },
-                        "PositionCondition3": {
+                        "Longitude Minimum": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "-157.4582330112",
                                 "value": "-157.4582330112",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "pos_long_deg"
-                            }
-                        },
-                        "PositionCondition4": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": "<=",
-                                "reset_value": "175.067021796",
-                                "value": "175.067021796",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_long_deg"
                             }
@@ -213,13 +202,13 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "TargetAddressCondition0": {
+                        "Target Address Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
                                 "operator": "IN",
                                 "reset_value": "FEFE10",
-                                "value": "FEFE10",
+                                "value": "3e1688\n",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "target_addr"
                             }
@@ -244,24 +233,24 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "Time of DayCondition0": {
-                            "parameters": {
-                                "absolute_value": false,
-                                "op_and": true,
-                                "operator": ">=",
-                                "reset_value": "MIN",
-                                "value": "00:00:00.094",
-                                "variable_dbo_name": "Meta",
-                                "variable_name": "tod"
-                            }
-                        },
-                        "Time of DayCondition1": {
+                        "Time of Day Maximum": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "23:59:59.898",
+                                "value": "11:46:12.836\n",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "tod"
+                            }
+                        },
+                        "Time of Day Minimum": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "op_and": true,
+                                "operator": ">=",
+                                "reset_value": "MIN",
+                                "value": "11:40:05.023\n",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -286,7 +275,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "TrackNumCondition0": {
+                        "Track Number Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -309,7 +298,7 @@
             },
             "TrackerDetectionType": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "TrackerDetectionType",
                     "op_and_": true,
@@ -317,7 +306,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "TrackerDetectionTypeCondition0": {
+                        "Tracker Detection Types": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -340,7 +329,7 @@
             },
             "TrackerMultipleSources": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "TrackerMultipleSources",
                     "op_and_": true,
@@ -348,7 +337,7 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "TrackerMultipleSourcesCondition0": {
+                        "Tracker Multiple Sources Value": {
                             "parameters": {
                                 "absolute_value": false,
                                 "op_and": true,
@@ -373,18 +362,11 @@
         "DataSourcesFilter": {
             "ADSBDataSources": {
                 "parameters": {
-                    "LoadSensorNumber0": true,
-                    "LoadSensorNumber12830": true,
-                    "LoadSensorNumber12880": true,
-                    "LoadSensorNumber26": true,
-                    "LoadSensorNumber26662": true,
-                    "LoadSensorNumber26694": true,
-                    "LoadSensorNumber26696": true,
-                    "LoadSensorNumber26699": true,
-                    "LoadSensorNumber26701": true,
-                    "LoadSensorNumber5640": true,
                     "active": false,
-                    "changed": false,
+                    "active_sources": {
+                        "12880": true
+                    },
+                    "changed": true,
                     "dbo_name": "ADSB",
                     "name": "ADSBDataSources",
                     "op_and_": true,
@@ -394,174 +376,89 @@
                     "DataSourcesFilterWidget": {
                         "ADSBDataSourcesWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
                 }
             },
-            "MLATDataSources0": {
+            "MLATDataSources": {
                 "parameters": {
-                    "LoadSensorNumber12820": true,
-                    "LoadSensorNumber12821": true,
-                    "LoadSensorNumber12822": true,
-                    "LoadSensorNumber12823": true,
-                    "LoadSensorNumber12824": true,
-                    "LoadSensorNumber12825": true,
-                    "LoadSensorNumber12826": true,
-                    "LoadSensorNumber12827": true,
-                    "LoadSensorNumber12828": true,
-                    "LoadSensorNumber12831": true,
-                    "LoadSensorNumber12870": true,
-                    "LoadSensorNumber12871": true,
-                    "LoadSensorNumber12872": true,
-                    "LoadSensorNumber12873": true,
-                    "LoadSensorNumber12874": true,
-                    "LoadSensorNumber12875": true,
-                    "LoadSensorNumber12876": true,
-                    "LoadSensorNumber12877": true,
-                    "LoadSensorNumber12878": true,
-                    "LoadSensorNumber12881": true,
-                    "LoadSensorNumber17": true,
-                    "LoadSensorNumber18": true,
-                    "LoadSensorNumber19": true,
-                    "LoadSensorNumber2": true,
-                    "LoadSensorNumber20": true,
-                    "LoadSensorNumber21": true,
-                    "LoadSensorNumber22": true,
-                    "LoadSensorNumber23": true,
-                    "LoadSensorNumber24": true,
-                    "LoadSensorNumber25": true,
-                    "LoadSensorNumber26661": true,
-                    "LoadSensorNumber26695": true,
-                    "LoadSensorNumber26697": true,
-                    "LoadSensorNumber26700": true,
-                    "LoadSensorNumber26702": true,
-                    "LoadSensorNumber28": true,
-                    "LoadSensorNumber29": true,
-                    "LoadSensorNumber30": true,
-                    "active": false,
-                    "changed": false,
+                    "active": true,
+                    "active_sources": {
+                        "12870": true,
+                        "12871": false,
+                        "12872": false,
+                        "12873": false,
+                        "12874": false,
+                        "12875": false,
+                        "12876": false,
+                        "12877": false,
+                        "12878": false,
+                        "12881": false
+                    },
+                    "changed": true,
                     "dbo_name": "MLAT",
-                    "name": "MLATDataSources0",
+                    "name": "MLATDataSources",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DataSourcesFilterWidget": {
-                        "MLATDataSources0Widget0": {
+                        "MLATDataSourcesWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
                 }
             },
-            "RadarDataSources0": {
+            "RadarDataSources": {
                 "parameters": {
-                    "LoadSensorNumber1": true,
-                    "LoadSensorNumber10": true,
-                    "LoadSensorNumber11": true,
-                    "LoadSensorNumber12": true,
-                    "LoadSensorNumber12289": true,
-                    "LoadSensorNumber12290": true,
-                    "LoadSensorNumber12291": true,
-                    "LoadSensorNumber12688": true,
-                    "LoadSensorNumber12763": true,
-                    "LoadSensorNumber12770": true,
-                    "LoadSensorNumber12800": true,
-                    "LoadSensorNumber12807": true,
-                    "LoadSensorNumber12809": true,
-                    "LoadSensorNumber12810": false,
-                    "LoadSensorNumber12811": true,
-                    "LoadSensorNumber12813": true,
-                    "LoadSensorNumber12820": true,
-                    "LoadSensorNumber12848": true,
-                    "LoadSensorNumber13": true,
-                    "LoadSensorNumber14": true,
-                    "LoadSensorNumber15": true,
-                    "LoadSensorNumber16": true,
-                    "LoadSensorNumber17": true,
-                    "LoadSensorNumber18": true,
-                    "LoadSensorNumber2": true,
-                    "LoadSensorNumber20": false,
-                    "LoadSensorNumber25005": true,
-                    "LoadSensorNumber25006": true,
-                    "LoadSensorNumber25103": true,
-                    "LoadSensorNumber25104": true,
-                    "LoadSensorNumber26625": true,
-                    "LoadSensorNumber26626": true,
-                    "LoadSensorNumber26627": true,
-                    "LoadSensorNumber26628": true,
-                    "LoadSensorNumber26629": true,
-                    "LoadSensorNumber26631": true,
-                    "LoadSensorNumber27": true,
-                    "LoadSensorNumber3": true,
-                    "LoadSensorNumber30721": true,
-                    "LoadSensorNumber30722": true,
-                    "LoadSensorNumber30723": true,
-                    "LoadSensorNumber30724": true,
-                    "LoadSensorNumber37641": true,
-                    "LoadSensorNumber4": true,
-                    "LoadSensorNumber5": true,
-                    "LoadSensorNumber513": true,
-                    "LoadSensorNumber514": true,
-                    "LoadSensorNumber5636": true,
-                    "LoadSensorNumber5637": true,
-                    "LoadSensorNumber5642": true,
-                    "LoadSensorNumber5645": true,
-                    "LoadSensorNumber6": true,
-                    "LoadSensorNumber7": true,
-                    "LoadSensorNumber8": true,
-                    "LoadSensorNumber8715": true,
-                    "LoadSensorNumber9": true,
-                    "LoadSensorNumber9745": true,
-                    "active": false,
+                    "active": true,
+                    "active_sources": {
+                        "12289": false,
+                        "12688": false,
+                        "12800": false,
+                        "12807": false,
+                        "12813": true,
+                        "12820": false,
+                        "12848": false,
+                        "25103": false,
+                        "25104": false,
+                        "37641": false
+                    },
                     "changed": true,
                     "dbo_name": "Radar",
-                    "name": "RadarDataSources0",
+                    "name": "RadarDataSources",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DataSourcesFilterWidget": {
-                        "RadarDataSources0Widget0": {
+                        "RadarDataSourcesWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
                 }
             },
-            "TrackerDataSources0": {
+            "TrackerDataSources": {
                 "parameters": {
-                    "LoadSensorNumber12990": true,
-                    "LoadSensorNumber13040": true,
-                    "LoadSensorNumber13041": true,
-                    "LoadSensorNumber13044": true,
-                    "LoadSensorNumber17": true,
-                    "LoadSensorNumber21": false,
-                    "LoadSensorNumber22": true,
-                    "LoadSensorNumber23": false,
-                    "LoadSensorNumber24": false,
-                    "LoadSensorNumber25": false,
-                    "LoadSensorNumber26": true,
-                    "LoadSensorNumber26642": true,
-                    "LoadSensorNumber26645": true,
-                    "LoadSensorNumber26646": true,
-                    "LoadSensorNumber27": false,
-                    "LoadSensorNumber30769": true,
-                    "LoadSensorNumber30770": true,
                     "active": false,
+                    "active_sources": {
+                        "13040": true
+                    },
                     "changed": true,
                     "dbo_name": "Tracker",
-                    "name": "TrackerDataSources0",
+                    "name": "TrackerDataSources",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DataSourcesFilterWidget": {
-                        "TrackerDataSources0Widget0": {
+                        "TrackerDataSourcesWidget0": {
                             "parameters": {
                                 "visible": true
                             }
