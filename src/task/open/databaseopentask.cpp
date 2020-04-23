@@ -30,8 +30,7 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
 {
     tooltip_ =
         "Allows creating new databases, or managing and accessing existing ones. This task can not "
-        "be run,"
-        " but is performed using the 'Open' button.";
+        "be run, but is performed using the 'Open' button.";
 }
 
 void DatabaseOpenTask::useConnection(const std::string& connection_type)

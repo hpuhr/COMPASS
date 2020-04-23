@@ -44,6 +44,8 @@
 #include "sqliteconnectionwidget.h"
 #include "dbinterface.h"
 #include "files.h"
+#include "viewpointsimporttask.h"
+#include "viewpointsimporttaskwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -71,7 +73,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask",
+    task_list_.insert(task_list_.end(), {"ViewPointsImportTask", "JSONImportTask", "MySQLDBImportTask",
                                          "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
                                          "PostProcessTask", "CreateARTASAssociationsTask"});
 
@@ -114,12 +116,19 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         addTask(class_id, asterix_importer_task_.get());
     }
 #endif
+    else if (class_id.compare("ViewPointsImportTask") == 0)
+    {
+        assert(!view_points_import_task_);
+        view_points_import_task_.reset(new ViewPointsImportTask(class_id, instance_id, *this));
+        assert(view_points_import_task_);
+        addTask(class_id, view_points_import_task_.get());
+    }
     else if (class_id.compare("JSONImportTask") == 0)
     {
-        assert(!json_importer_task_);
-        json_importer_task_.reset(new JSONImportTask(class_id, instance_id, *this));
-        assert(json_importer_task_);
-        addTask(class_id, json_importer_task_.get());
+        assert(!json_import_task_);
+        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
+        assert(json_import_task_);
+        addTask(class_id, json_import_task_.get());
     }
     else if (class_id.compare("MySQLDBImportTask") == 0)
     {
@@ -200,10 +209,16 @@ void TaskManager::checkSubConfigurables()
     }
 #endif
 
-    if (!json_importer_task_)
+    if (!view_points_import_task_)
+    {
+        generateSubConfigurable("ViewPointsImportTask", "ViewPointsImportTask0");
+        assert(view_points_import_task_);
+    }
+
+    if (!json_import_task_)
     {
         generateSubConfigurable("JSONImportTask", "JSONImportTask0");
-        assert(json_importer_task_);
+        assert(json_import_task_);
     }
 
     if (!mysqldb_import_task_)
@@ -313,7 +328,8 @@ void TaskManager::shutdown()
     asterix_importer_task_ = nullptr;
 #endif
 
-    json_importer_task_ = nullptr;
+    view_points_import_task_ = nullptr;
+    json_import_task_ = nullptr;
     mysqldb_import_task_ = nullptr;
     manage_datasources_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
@@ -390,10 +406,16 @@ ASTERIXImportTask& TaskManager::asterixImporterTask() const
 }
 #endif
 
+ViewPointsImportTask& TaskManager::viewPointsImportTask() const
+{
+    assert(view_points_import_task_);
+    return *view_points_import_task_;
+}
+
 JSONImportTask& TaskManager::jsonImporterTask() const
 {
-    assert(json_importer_task_);
-    return *json_importer_task_;
+    assert(json_import_task_);
+    return *json_import_task_;
 }
 
 MySQLDBImportTask& TaskManager::mysqldbImportTask() const

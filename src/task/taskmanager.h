@@ -32,6 +32,7 @@ class ManageDBObjectsTask;
 class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
 class JSONImportTask;
+class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
 class PostProcessTask;
 class TaskManagerWidget;
@@ -90,6 +91,7 @@ class TaskManager : public QObject, public Configurable
 #if USE_JASTERIX
     ASTERIXImportTask& asterixImporterTask() const;
 #endif
+    ViewPointsImportTask& viewPointsImportTask() const;
     JSONImportTask& jsonImporterTask() const;
     MySQLDBImportTask& mysqldbImportTask() const;
     ManageDataSourcesTask& manageDatasourcesTask() const;
@@ -136,7 +138,8 @@ protected:
 #if USE_JASTERIX
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
 #endif
-    std::unique_ptr<JSONImportTask> json_importer_task_;
+    std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
+    std::unique_ptr<JSONImportTask> json_import_task_;
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
     std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;

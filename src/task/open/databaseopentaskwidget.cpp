@@ -16,6 +16,13 @@
  */
 
 #include "databaseopentaskwidget.h"
+#include "atsdb.h"
+#include "databaseopentask.h"
+#include "dbconnection.h"
+#include "dbinterface.h"
+#include "global.h"
+#include "logger.h"
+#include "stringconv.h"
 
 #include <QComboBox>
 #include <QFileDialog>
@@ -28,14 +35,6 @@
 #include <QStackedWidget>
 #include <QTextEdit>
 #include <QVBoxLayout>
-
-#include "atsdb.h"
-#include "databaseopentask.h"
-#include "dbconnection.h"
-#include "dbinterface.h"
-#include "global.h"
-#include "logger.h"
-#include "stringconv.h"
 
 DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface,
                                                QWidget* parent)

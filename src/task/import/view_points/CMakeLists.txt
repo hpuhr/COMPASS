@@ -4,11 +4,11 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
-#        "${CMAKE_CURRENT_LIST_DIR}/jsonimporttask.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/jsonimporttaskwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointsimporttask.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointsimporttaskwidget.h"
     PRIVATE
-#        "${CMAKE_CURRENT_LIST_DIR}/jsonimporttask.cpp"
-#        "${CMAKE_CURRENT_LIST_DIR}/jsonimporttaskwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointsimporttask.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewpointsimporttaskwidget.cpp"
 )
 
 
