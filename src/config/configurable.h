@@ -21,10 +21,12 @@
 //#include <tinyxml2.h>
 #include <assert.h>
 
+#include "configuration.h"
+
 #include <map>
 #include <vector>
 
-#include "configuration.h"
+#include "json.hpp"
 
 /**
  * @brief Configuration storage and retrieval functionality with sub-class generation
@@ -139,6 +141,8 @@ class Configurable
     /// @brief Registers a string parameter
     void registerParameter(const std::string& parameter_id, std::string* pointer,
                            const std::string& default_value);
+    void registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
+                           const nlohmann::json& default_value);
 
     /// @brief Override to check if required sub-configurables exist
     virtual void checkSubConfigurables();

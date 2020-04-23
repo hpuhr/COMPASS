@@ -93,6 +93,26 @@ void ViewPointsWidget::update()
     table_view_->resizeColumnsToContents();
 }
 
+void ViewPointsWidget::selectNext()
+{
+    loginf << "ViewPointsWidget: selectNext";
+}
+
+void ViewPointsWidget::selectNextOpen()
+{
+    loginf << "ViewPointsWidget: selectNextOpen";
+}
+
+void ViewPointsWidget::openCurrentSelectNext()
+{
+    loginf << "ViewPointsWidget: openCurrentSelectNext";
+}
+
+void ViewPointsWidget::closeCurrentSelectNext()
+{
+    loginf << "ViewPointsWidget: closeCurrentSelectNext";
+}
+
 void ViewPointsWidget::exportSlot()
 {
     loginf << "ViewPointsWidget: exportSlot";

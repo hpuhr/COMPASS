@@ -19,6 +19,7 @@
 #define DATASOURCESFILTER_H_
 
 #include "dbfilter.h"
+#include "logger.h"
 
 /**
  * @brief Definition for a data source in a DataSourcesFilter
@@ -27,38 +28,52 @@ class DataSourcesFilterDataSource
 {
   public:
     /// @brief Constructor
-    DataSourcesFilterDataSource() {}
+    DataSourcesFilterDataSource(unsigned int number, const std::string& name, nlohmann::json& active_in_filter)
+        : number_(number), name_(name), active_in_filter_(active_in_filter)
+    {
+        loginf << "DataSourcesFilterDataSource: constructor: number " << number_ << " name " << name_
+               << " json " << active_in_filter_.dump();
+    }
     /// @brief Destructor
     virtual ~DataSourcesFilterDataSource() {}
 
   protected:
     /// Number id
-    unsigned int number_;
+    unsigned int number_ {0};
     /// Name id
     std::string name_;
     /// Flag indicating if active in data
-    bool active_in_data_;
+    bool active_in_data_ {false};
     /// Flag indicating if active in filter
-    bool active_in_filter_;
+    nlohmann::json& active_in_filter_;
 
   public:
     bool isActiveInData() const { return active_in_data_; }
 
     void setActiveInData(bool active_in_data) { active_in_data_ = active_in_data; }
 
-    bool isActiveInFilter() const { return active_in_filter_; }
+    bool isActiveInFilter() const
+    {
+        bool tmp = active_in_filter_;
+        loginf << "DataSourcesFilterDataSource name " << name_ << ": isActiveInFilter: " << tmp;
+        return active_in_filter_;
+    }
 
-    void setActiveInFilter(bool active_in_filter) { active_in_filter_ = active_in_filter; }
+    void setActiveInFilter(bool active_in_filter)
+    {
+        loginf << "DataSourcesFilterDataSource name " << name_ << ": setActiveInFilter: " << active_in_filter;
+        active_in_filter_ = active_in_filter;
+    }
 
-    bool& getActiveInFilterReference() { return active_in_filter_; }
+    //bool& getActiveInFilterReference() { return active_in_filter_; }
 
     std::string getName() const { return name_; }
 
-    void setName(std::string name) { name_ = name; }
+    //void setName(std::string name) { name_ = name; }
 
     unsigned int getNumber() const { return number_; }
 
-    void setNumber(unsigned int number) { number_ = number; }
+    //void setNumber(unsigned int number) { number_ = number; }
 };
 
 class DBObject;
@@ -100,6 +115,7 @@ class DataSourcesFilter : public DBFilter
     std::string ds_column_name_;
     /// Container with all possible data sources and active flag pointers
     std::map<int, DataSourcesFilterDataSource> data_sources_;
+    nlohmann::json active_sources_;
 
     /// @brief Load data sources and updates data_sources_ container
     void updateDataSources();

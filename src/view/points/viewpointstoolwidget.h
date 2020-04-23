@@ -17,10 +17,8 @@ enum ViewPointsTool
 {
     SELECT_NEXT_TOOL = 0,
     SELECT_NEXT_OPEN_TOOL,
-    STEP_NEXT_TOOL,
-    STEP_NEXT_OPEN_TOOL,
-    OPEN_CURRENT_STEP_NEXT_TOOL,
-    CLOSE_CURRENT_STEP_NEXT_TOOL
+    OPEN_CURRENT_SELECT_NEXT_TOOL,
+    CLOSE_CURRENT_SELECT_NEXT_TOOL
 };
 
 class QToolButton;
@@ -33,13 +31,9 @@ class ViewPointsToolWidget : public QWidget
     Q_OBJECT
 
 signals:
-    //void toolChangedSignal(ViewPointsTool selected, QCursor cursor);
 
 public slots:
     void actionTriggeredSlot(QAction* action);
-
-//    void loadingStartedSlot();
-//    void loadingDoneSlot();
 
 public:
     ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget* parent = nullptr);

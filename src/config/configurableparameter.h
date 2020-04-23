@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "json.hpp"
+
 class Configurable;
 
 /**
@@ -72,6 +74,8 @@ template <>
 std::string ConfigurableParameter<double>::getParameterType() const;
 template <>
 std::string ConfigurableParameter<std::string>::getParameterType() const;
+template <>
+std::string ConfigurableParameter<nlohmann::json>::getParameterType() const;
 
 template <>
 std::string ConfigurableParameter<bool>::getParameterValueString() const;
@@ -85,5 +89,7 @@ template <>
 std::string ConfigurableParameter<double>::getParameterValueString() const;
 template <>
 std::string ConfigurableParameter<std::string>::getParameterValueString() const;
+template <>
+std::string ConfigurableParameter<nlohmann::json>::getParameterValueString() const;
 
 #endif  // CONFIGURABLPPARAMETER_H

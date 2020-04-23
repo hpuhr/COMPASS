@@ -215,6 +215,16 @@ void Configurable::registerParameter(const std::string& parameter_id, std::strin
     configuration_->registerParameter(parameter_id, pointer, default_value);
 }
 
+void Configurable::registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
+                                     const nlohmann::json& default_value)
+{
+    logdbg << "Configurable " << instance_id_ << ": registerParameter: json parameter_id "
+           << parameter_id;
+    assert(configuration_);
+    assert(pointer);
+    configuration_->registerParameter(parameter_id, pointer, default_value);
+}
+
 Configuration& Configurable::registerSubConfigurable(Configurable& child, bool config_must_exist)
 {
     logdbg << "Configurable " << instance_id_ << " registerSubConfigurable: child "

@@ -136,8 +136,10 @@ void DataSourcesFilterWidget::updateCheckboxesChecked()
          checkit++)
     {
         assert(data_sources_.find(checkit->second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_[checkit->second];
+        DataSourcesFilterDataSource& src = data_sources_.at(checkit->second);
         checkit->first->setChecked(src.isActiveInFilter());
+        loginf << "DataSourcesFilterWidget: updateCheckboxesChecked: name " << src.getName()
+               << " active " << src.isActiveInFilter();
     }
 }
 
@@ -151,7 +153,7 @@ void DataSourcesFilterWidget::updateCheckboxesDisabled()
          checkit++)
     {
         assert(data_sources_.find(checkit->second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_[checkit->second];
+        DataSourcesFilterDataSource& src = data_sources_.at(checkit->second);
         checkit->first->setEnabled(src.isActiveInData());
         logdbg << "DataSourcesFilterWidget: updateCheckboxesDisabled: src " << src.getName()
                << " active " << src.isActiveInData();
@@ -166,7 +168,7 @@ void DataSourcesFilterWidget::toggleDataSource()
     int number = data_sources_checkboxes_[check];
 
     assert(data_sources_.find(number) != data_sources_.end());
-    data_sources_[number].setActiveInFilter(check->checkState() == Qt::Checked);
+    data_sources_.at(number).setActiveInFilter(check->checkState() == Qt::Checked);
 
     filter_.setChanged(true);
 

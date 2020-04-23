@@ -89,6 +89,7 @@ Configuration::~Configuration()
     parameters_float_.clear();
     parameters_double_.clear();
     parameters_string_.clear();
+    parameters_json_.clear();
 }
 
 /*
@@ -109,6 +110,8 @@ void Configuration::resetToDefault()
     for (auto it = parameters_double_.begin(); it != parameters_double_.end(); it++)
         it->second.resetToDefault();
     for (auto it = parameters_string_.begin(); it != parameters_string_.end(); it++)
+        it->second.resetToDefault();
+    for (auto it = parameters_json_.begin(); it != parameters_json_.end(); it++)
         it->second.resetToDefault();
 }
 
@@ -331,6 +334,44 @@ void Configuration::registerParameter(const std::string& parameter_id, std::stri
            << ": string, value is " << *(parameters_string_.at(parameter_id).pointer_);
 }
 
+void Configuration::registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
+                                      const nlohmann::json& default_value)
+{
+    logdbg << "Configuration " << instance_id_ << ": registerParameter: json: " << parameter_id;
+
+    assert(pointer);
+
+    if (org_config_parameters_.contains(parameter_id) &&
+        parameters_json_.find(parameter_id) == parameters_json_.end())
+    // if exists in org json config and not yet stored in parameters
+    {
+        parameters_json_.insert(
+            std::make_pair(parameter_id, ConfigurableParameter<nlohmann::json>()));
+        //assert(org_config_parameters_.at(parameter_id).is_string());
+        parameters_json_.at(parameter_id).parameter_id_ = parameter_id;
+        parameters_json_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
+
+    if (parameters_json_.find(parameter_id) ==
+        parameters_json_.end())  // new parameter, didnt exist in config
+    {
+        parameters_json_.insert(std::pair<std::string, ConfigurableParameter<nlohmann::json>>(
+            parameter_id, ConfigurableParameter<nlohmann::json>()));
+
+        parameters_json_.at(parameter_id).parameter_id_ = parameter_id;
+        parameters_json_.at(parameter_id).config_value_ = default_value;
+    }
+
+    parameters_json_.at(parameter_id).pointer_ = pointer;
+    parameters_json_.at(parameter_id).default_value_ = default_value;
+    *(parameters_json_.at(parameter_id).pointer_) =
+        parameters_json_.at(parameter_id).config_value_;
+    used_ = true;
+
+    logdbg << "Configuration " << instance_id_ << ": registerParameter " << parameter_id
+           << ": json, value is " << *(parameters_json_.at(parameter_id).pointer_);
+}
+
 void Configuration::updateParameterPointer(const std::string& parameter_id, bool* pointer)
 {
     logdbg << "Configuration " << instance_id_
@@ -400,6 +441,18 @@ void Configuration::updateParameterPointer(const std::string& parameter_id, std:
     assert(parameters_string_.find(parameter_id) != parameters_string_.end());
 
     parameters_string_.at(parameter_id).pointer_ = pointer;
+    used_ = true;
+}
+
+void Configuration::updateParameterPointer(const std::string& parameter_id, nlohmann::json* pointer)
+{
+    logdbg << "Configuration " << instance_id_
+           << ": updateParameterPointer: json: " << parameter_id;
+
+    assert(pointer);
+    assert(parameters_json_.find(parameter_id) != parameters_json_.end());
+
+    parameters_json_.at(parameter_id).pointer_ = pointer;
     used_ = true;
 }
 
@@ -524,6 +577,27 @@ void Configuration::addParameterString(const std::string& parameter_id,
     parameters_string_.at(parameter_id).config_value_ = default_value;
 }
 
+void Configuration::addParameterJSON(const std::string& parameter_id,
+                                       const nlohmann::json& default_value)
+{
+    logdbg << "Configuration: addParameterJSON: parameter " << parameter_id << " default "
+           << default_value;
+    if (parameters_json_.find(parameter_id) != parameters_json_.end())
+    {
+        logwrn << "Configuration " << instance_id_ << ": addParameterJSON: " << parameter_id
+               << " already exists";
+        return;
+    }
+
+    parameters_json_.insert(std::pair<std::string, ConfigurableParameter<nlohmann::json>>(
+        parameter_id, ConfigurableParameter<nlohmann::json>()));
+
+    parameters_json_.at(parameter_id).parameter_id_ = parameter_id;
+    parameters_json_.at(parameter_id).pointer_ = nullptr;
+    parameters_json_.at(parameter_id).default_value_ = default_value;
+    parameters_json_.at(parameter_id).config_value_ = default_value;
+}
+
 void Configuration::getParameter(const std::string& parameter_id, bool& value)
 {
     if (parameters_bool_.count(parameter_id) == 0)
@@ -599,6 +673,7 @@ void Configuration::getParameter(const std::string& parameter_id, double& value)
 
     value = *(parameters_double_.at(parameter_id).pointer_);
 }
+
 void Configuration::getParameter(const std::string& parameter_id, std::string& value)
 {
     if (parameters_string_.count(parameter_id) == 0)
@@ -612,6 +687,21 @@ void Configuration::getParameter(const std::string& parameter_id, std::string& v
                                  " not in use");
 
     value = *(parameters_string_.at(parameter_id).pointer_);
+}
+
+void Configuration::getParameter(const std::string& parameter_id, nlohmann::json& value)
+{
+    if (parameters_json_.count(parameter_id) == 0)
+        throw std::runtime_error("Configuration: getParameter: json: unknown parameter id " +
+                                 parameter_id);
+
+    assert(parameters_json_.at(parameter_id).getParameterType().compare("ParameterJSON") == 0);
+
+    if (parameters_json_.at(parameter_id).pointer_ == nullptr)
+        throw std::runtime_error("Configuration: getParameter: string " + parameter_id +
+                                 " not in use");
+
+    value = *(parameters_json_.at(parameter_id).pointer_);
 }
 
 bool Configuration::hasParameterConfigValueBool(const std::string& parameter_id)
@@ -771,6 +861,22 @@ std::string Configuration::getParameterConfigValueString(const std::string& para
     return parameters_string_.at(parameter_id).config_value_;
 }
 
+nlohmann::json Configuration::getParameterConfigValueJSON(const std::string& parameter_id)
+{
+    if (org_config_parameters_.contains(parameter_id) &&
+        parameters_json_.find(parameter_id) == parameters_json_.end())
+    // if exists in org json config and not yet stored in parameters
+    {
+        //assert(org_config_parameters_.at(parameter_id).is_string());
+        return org_config_parameters_.at(parameter_id);
+    }
+
+    assert(parameters_json_.count(parameter_id));
+    assert(parameters_json_.at(parameter_id).getParameterType().compare("ParameterJSON") == 0);
+
+    return parameters_json_.at(parameter_id).config_value_;
+}
+
 void Configuration::parseJSONConfigFile()
 {
     assert(hasConfigurationFilename());
@@ -877,7 +983,7 @@ void Configuration::parseJSONParameters(nlohmann::json& parameters_config)
     // store paramaters in member
     for (auto& it : parameters_config.items())
     {
-        assert(it.value().is_primitive());
+        //assert(it.value().is_primitive());
         assert(!org_config_parameters_.contains(it.key()));
         // logdbg << "param key " << it.key() << " value '" << it.value() << "'";
         org_config_parameters_[it.key()] = it.value();
@@ -1024,6 +1130,14 @@ void Configuration::generateJSON(nlohmann::json& target) const
     {
         logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                << ": generateJSON: writing string '" << par_it.second.getParameterId() << "'";
+        // assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_json_)
+    {
+        logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+               << ": generateJSON: writing json '" << par_it.second.getParameterId() << "'";
         // assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }

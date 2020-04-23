@@ -114,6 +114,12 @@ std::string ConfigurableParameter<std::string>::getParameterType() const
 }
 
 template <>
+std::string ConfigurableParameter<nlohmann::json>::getParameterType() const
+{
+    return "ParameterJSON";
+}
+
+template <>
 std::string ConfigurableParameter<bool>::getParameterValueString() const
 {
     if (pointer_)
@@ -187,9 +193,24 @@ std::string ConfigurableParameter<std::string>::getParameterValueString() const
     }
 }
 
+template <>
+std::string ConfigurableParameter<nlohmann::json>::getParameterValueString() const
+{
+    if (pointer_)
+    {
+        assert(pointer_);
+        return pointer_->dump(4);
+    }
+    else
+    {
+        return config_value_.dump(4);
+    }
+}
+
 template class ConfigurableParameter<bool>;
 template class ConfigurableParameter<int>;
 template class ConfigurableParameter<unsigned int>;
 template class ConfigurableParameter<float>;
 template class ConfigurableParameter<double>;
 template class ConfigurableParameter<std::string>;
+template class ConfigurableParameter<nlohmann::json>;

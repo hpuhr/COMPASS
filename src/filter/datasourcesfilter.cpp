@@ -26,12 +26,17 @@
 #include "stringconv.h"
 
 using namespace Utils;
+using namespace nlohmann;
+using namespace std;
 
 DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::string& instance_id,
                                      Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
     registerParameter("dbo_name", &dbo_name_, "");
+    registerParameter("active_sources", &active_sources_, json::object());
+
+    loginf << "UGA active" << active_sources_.dump(4);
 
     if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
@@ -170,13 +175,18 @@ void DataSourcesFilter::updateDataSources()
     {
         if (data_sources_.find(ds_it->first) == data_sources_.end())
         {
-            data_sources_[ds_it->first].setNumber(ds_it->first);
-            data_sources_[ds_it->first].setName(ds_it->second.name());
-            data_sources_[ds_it->first].setActiveInFilter(true);
-            data_sources_[ds_it->first].setActiveInData(true);
+            data_sources_.emplace(std::piecewise_construct,
+                                  std::forward_as_tuple(ds_it->first),  // args for key
+                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+                                                        active_sources_[to_string(ds_it->first)]));
 
-            registerParameter("LoadSensorNumber" + std::to_string(ds_it->first),
-                              &data_sources_[ds_it->first].getActiveInFilterReference(), true);
+            //data_sources_.at(ds_it->first).setNumber(ds_it->first);
+            //data_sources_.at(ds_it->first).setName(ds_it->second.name());
+//            data_sources_.at(ds_it->first).setActiveInFilter(true);
+//            data_sources_.at(ds_it->first).setActiveInData(true);
+
+//            registerParameter("LoadSensorNumber" + std::to_string(ds_it->first),
+//                              &data_sources_[ds_it->first].getActiveInFilterReference(), true);
         }
     }
 }
@@ -202,7 +212,7 @@ void DataSourcesFilter::updateDataSourcesActive()
     for (it = active_sources.begin(); it != active_sources.end(); it++)
     {
         assert(data_sources_.find(*it) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_[*it];
+        DataSourcesFilterDataSource& src = data_sources_.at(*it);
         src.setActiveInData(true);
     }
 

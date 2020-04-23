@@ -320,6 +320,9 @@ void ViewManager::importViewPoints (const std::string& filename)
 
             id = vp_it.at("id");
 
+            if (!vp_it.contains("status"))
+                vp_it["status"] = "open";
+
             ViewPoint& vp = saveNewViewPoint(id, false);
             vp.data() = vp_it;
         }

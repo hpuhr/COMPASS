@@ -9,6 +9,7 @@ ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
     : id_(id), view_manager_(view_manager)
 {
     data_["id"] = id_;
+    data_["status"] = "open";
 
 //    "id":0,
 //    "type":"any string",

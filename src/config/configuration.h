@@ -67,6 +67,8 @@ class Configuration
     /// @brief Registers a string parameter
     void registerParameter(const std::string& parameter_id, std::string* pointer,
                            const std::string& default_value);
+    void registerParameter(const std::string& parameter_id, nlohmann::json* pointer,
+                           const nlohmann::json& default_value);
 
     /// @brief Updates a boolean parameter pointer
     void updateParameterPointer(const std::string& parameter_id, bool* pointer);
@@ -80,6 +82,7 @@ class Configuration
     void updateParameterPointer(const std::string& parameter_id, double* pointer);
     /// @brief Updates a string parameter pointer
     void updateParameterPointer(const std::string& parameter_id, std::string* pointer);
+    void updateParameterPointer(const std::string& parameter_id, nlohmann::json* pointer);
 
     /// @brief Adds a boolean parameter
     void addParameterBool(const std::string& parameter_id, bool default_value);
@@ -93,6 +96,7 @@ class Configuration
     void addParameterDouble(const std::string& parameter_id, double default_value);
     /// @brief Adds a string parameter
     void addParameterString(const std::string&, const std::string& default_value);
+    void addParameterJSON(const std::string&, const nlohmann::json& default_value);
 
     /// @brief Writes data value if a boolean parameter to an argument
     void getParameter(const std::string& parameter_id, bool& value);
@@ -106,6 +110,7 @@ class Configuration
     void getParameter(const std::string& parameter_id, double& value);
     /// @brief Writes data value if a string parameter to an argument
     void getParameter(const std::string& parameter_id, std::string& value);
+    void getParameter(const std::string& parameter_id, nlohmann::json& value);
 
     bool hasParameterConfigValueBool(const std::string& parameter_id);
     bool getParameterConfigValueBool(const std::string& parameter_id);
@@ -119,6 +124,7 @@ class Configuration
     double getParameterConfigValueDouble(const std::string& parameter_id);
     bool hasParameterConfigValueString(const std::string& parameter_id);
     std::string getParameterConfigValueString(const std::string& parameter_id);
+    nlohmann::json getParameterConfigValueJSON(const std::string& parameter_id);
 
     // parses the member config file
     void parseJSONConfigFile();
@@ -202,6 +208,7 @@ class Configuration
     std::map<std::string, ConfigurableParameter<float> > parameters_float_;
     std::map<std::string, ConfigurableParameter<double> > parameters_double_;
     std::map<std::string, ConfigurableParameter<std::string> > parameters_string_;
+    std::map<std::string, ConfigurableParameter<nlohmann::json> > parameters_json_;
     /// Container for all added sub-configurables
     std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 

@@ -32,6 +32,11 @@ public:
 
     void update();
 
+    void selectNext();
+    void selectNextOpen();
+    void openCurrentSelectNext();
+    void closeCurrentSelectNext();
+
 private:
     ViewManager& view_manager_;
 
