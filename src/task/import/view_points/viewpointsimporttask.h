@@ -84,7 +84,7 @@ protected:
     virtual void checkSubConfigurables() {}
 
     void parseCurrentFile ();
-    void checkParsedData ();
+    void checkParsedData (); // throws exceptions for errors
 };
 
 #endif // VIEWPOINTSIMPORTTASK_H
