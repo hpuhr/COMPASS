@@ -41,8 +41,9 @@
 #include "files.h"
 #include "logger.h"
 #include "taskmanagerwidget.h"
-#include "asteriximporttask.h"
-#include "asteriximporttaskwidget.h"
+#include "viewpointsimporttask.h"
+#include "viewpointsimporttaskwidget.h"
+#include "savedfile.h"
 
 #include <fstream>
 
@@ -66,6 +67,17 @@ ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const st
     registerParameter("current_filename", &current_filename_, "");
 
     createSubConfigurables(); // no thing
+
+    if (current_filename_.size())
+        parseCurrentFile();
+}
+
+ViewPointsImportTask::~ViewPointsImportTask()
+{
+    for (auto it : file_list_)
+        delete it.second;
+
+    file_list_.clear();
 }
 
 TaskWidget* ViewPointsImportTask::widget()
@@ -88,8 +100,15 @@ void ViewPointsImportTask::deleteWidget() { widget_.reset(nullptr); }
 void ViewPointsImportTask::generateSubConfigurable(const std::string& class_id,
                                                    const std::string& instance_id)
 {
-    throw std::runtime_error("ViewPointsImportTask: generateSubConfigurable: unknown class_id " +
-                             class_id);
+    if (class_id == "JSONFile")
+    {
+        SavedFile* file = new SavedFile(class_id, instance_id, this);
+        assert(file_list_.count(file->name()) == 0);
+        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
+    }
+    else
+        throw std::runtime_error("ViewPointsImportTask: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
 bool ViewPointsImportTask::checkPrerequisites()
@@ -116,6 +135,56 @@ bool ViewPointsImportTask::isRequired()
 std::string ViewPointsImportTask::currentFilename() const
 {
     return current_filename_;
+}
+
+void ViewPointsImportTask::addFile(const std::string& filename)
+{
+    loginf << "ViewPointsImportTask: addFile: filename '" << filename << "'";
+
+    if (file_list_.count(filename) != 0)
+        throw std::invalid_argument("ViewPointsImportTask: addFile: name '" + filename +
+                                    "' already in use");
+
+    std::string instancename = filename;
+    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
+                       instancename.end());
+
+    Configuration& config = addNewSubConfiguration("JSONFile", "JSONFile" + instancename);
+    config.addParameterString("name", filename);
+    generateSubConfigurable("JSONFile", "JSONFile" + instancename);
+
+    current_filename_ = filename;
+    parseCurrentFile();
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
+void ViewPointsImportTask::removeCurrentFilename()
+{
+    loginf << "ViewPointsImportTask: removeCurrentFilename: filename '" << current_filename_ << "'";
+
+    assert(current_filename_.size());
+    assert(hasFile(current_filename_));
+
+    if (file_list_.count(current_filename_) != 1)
+        throw std::invalid_argument("ViewPointsImportTask: removeCurrentFilename: name '" +
+                                    current_filename_ + "' not in use");
+
+    delete file_list_.at(current_filename_);
+    file_list_.erase(current_filename_);
+    current_filename_ = "";
+    current_data_ = json::object();
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+    {
+        widget_->updateFileListSlot();
+        widget_->updateContext();
+    }
 }
 
 void ViewPointsImportTask::currentFilename(const std::string& value)
@@ -151,6 +220,9 @@ void ViewPointsImportTask::parseCurrentFile ()
         current_data_ = json::parse(ifs);
 
         checkParsedData();
+
+        if (widget_)
+            widget_->updateContext();
     }
     catch (exception& e)
     {
@@ -322,7 +394,7 @@ void ViewPointsImportTask::import ()
                 TaskManagerWidget* widget = task_manager_.widget();
                 assert (widget);
 
-                ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
+                ViewPointsImportTask& asterix_importer_task = task_manager_.viewPointsImportTask();
 
                 widget->setCurrentTask(asterix_importer_task);
                 if(widget->getCurrentTaskName() != asterix_importer_task.name())
@@ -332,8 +404,8 @@ void ViewPointsImportTask::import ()
                     return;
                 }
 
-                ASTERIXImportTaskWidget* asterix_import_task_widget =
-                    dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
+                ViewPointsImportTaskWidget* asterix_import_task_widget =
+                    dynamic_cast<ViewPointsImportTaskWidget*>(asterix_importer_task.widget());
                 assert(asterix_import_task_widget);
 
                 asterix_import_task_widget->addFile(filename);
@@ -359,4 +431,9 @@ void ViewPointsImportTask::import ()
     }
 
     loginf << "ViewPointsImportTask: done";
+}
+
+const nlohmann::json& ViewPointsImportTask::currentData() const
+{
+    return current_data_;
 }

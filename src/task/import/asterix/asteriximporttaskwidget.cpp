@@ -88,11 +88,11 @@ void ASTERIXImportTaskWidget::addMainTab()
         QHBoxLayout* button_layout = new QHBoxLayout();
 
         add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
+        connect(add_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::addFileSlot);
         button_layout->addWidget(add_file_button_);
 
         delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
+        connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
         button_layout->addWidget(delete_file_button_);
 
         files_layout->addLayout(button_layout);
@@ -225,7 +225,7 @@ void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
 
 void ASTERIXImportTaskWidget::deleteFileSlot()
 {
-    loginf << "ASTERIXImporterTaskWidget: deleteFileSlot";
+    loginf << "ASTERIXImportTaskWidget: deleteFileSlot";
 
     if (!file_list_->currentItem() || !task_.currentFilename().size())
     {
@@ -242,7 +242,7 @@ void ASTERIXImportTaskWidget::deleteFileSlot()
 
 void ASTERIXImportTaskWidget::selectedFileSlot()
 {
-    loginf << "ASTERIXImporterTaskWidget: selectedFileSlot";
+    loginf << "ASTERIXImportTaskWidget: selectedFileSlot";
     assert(file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
@@ -283,7 +283,7 @@ void ASTERIXImportTaskWidget::addObjectParserSlot()
     {
         std::string name = dialog.name();
         std::string dbo_name = dialog.selectedObject();
-        loginf << "ASTERIXImporterTaskWidget: addObjectParserSlot: name " << name << " obj "
+        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: name " << name << " obj "
                << dbo_name;
 
         std::shared_ptr<JSONParsingSchema> current = task_.schema();
@@ -309,7 +309,7 @@ void ASTERIXImportTaskWidget::addObjectParserSlot()
 }
 void ASTERIXImportTaskWidget::removeObjectParserSlot()
 {
-    loginf << "ASTERIXImporterTaskWidget: removeObjectParserSlot";
+    loginf << "ASTERIXImportTaskWidget: removeObjectParserSlot";
 
     assert(object_parser_box_);
 
@@ -330,7 +330,7 @@ void ASTERIXImportTaskWidget::removeObjectParserSlot()
 
 void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
 {
-    loginf << "ASTERIXImporterTaskWidget: selectedObjectParserSlot: text '" << text.toStdString()
+    loginf << "ASTERIXImportTaskWidget: selectedObjectParserSlot: text '" << text.toStdString()
            << "'";
 
     assert(object_parser_widget_);
@@ -358,7 +358,7 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
 
 void ASTERIXImportTaskWidget::updateParserBox()
 {
-    loginf << "ASTERIXImporterTaskWidget: updateParserList";
+    loginf << "ASTERIXImportTaskWidget: updateParserList";
 
     assert(object_parser_box_);
     object_parser_box_->clear();
@@ -390,7 +390,7 @@ void ASTERIXImportTaskWidget::limitRAMChangedSlot()
 
 void ASTERIXImportTaskWidget::createMappingsSlot()
 {
-    loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
+    loginf << "ASTERIXImportTaskWidget: createMappingsSlot";
 
     if (!task_.canImportFile())
     {
@@ -407,7 +407,7 @@ void ASTERIXImportTaskWidget::createMappingsSlot()
 
 void ASTERIXImportTaskWidget::testImportSlot()
 {
-    loginf << "ASTERIXImporterTaskWidget: testImportSlot";
+    loginf << "ASTERIXImportTaskWidget: testImportSlot";
 
     if (!task_.canImportFile())
     {
@@ -432,7 +432,7 @@ void ASTERIXImportTaskWidget::updateLimitRAM()
 
 void ASTERIXImportTaskWidget::runStarted()
 {
-    loginf << "ASTERIXImporterTaskWidget: runStarted";
+    loginf << "ASTERIXImportTaskWidget: runStarted";
 
     create_mapping_stubs_button_->setDisabled(true);
     test_button_->setDisabled(true);
@@ -440,7 +440,7 @@ void ASTERIXImportTaskWidget::runStarted()
 
 void ASTERIXImportTaskWidget::runDone()
 {
-    loginf << "ASTERIXImporterTaskWidget: runDone";
+    loginf << "ASTERIXImportTaskWidget: runDone";
 
     create_mapping_stubs_button_->setDisabled(false);
     test_button_->setDisabled(false);

@@ -44,6 +44,7 @@
 
 class ViewPointsImportTaskWidget;
 class TaskManager;
+class SavedFile;
 
 class ViewPointsImportTask : public Task, public Configurable
 {
@@ -54,6 +55,7 @@ public slots:
 public:
     ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                          TaskManager& task_manager);
+    virtual ~ViewPointsImportTask();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -65,6 +67,10 @@ public:
     virtual bool isRecommended();
     virtual bool isRequired();
 
+    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
+    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    void addFile(const std::string& filename);
+    void removeCurrentFilename();
     std::string currentFilename() const;
     void currentFilename(const std::string& value);
 
@@ -73,9 +79,13 @@ public:
     bool canImport ();
     void import ();
 
+    const nlohmann::json& currentData() const;
+
 protected:
     std::string current_filename_;
     nlohmann::json current_data_;
+
+    std::map<std::string, SavedFile*> file_list_;
 
     std::string current_error_;
 

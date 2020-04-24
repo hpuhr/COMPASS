@@ -39,6 +39,8 @@
 class ViewPointsImportTask;
 
 class QPushButton;
+class QListWidget;
+class QTextEdit;
 
 class ViewPointsImportTaskWidget : public TaskWidget
 {
@@ -46,6 +48,11 @@ class ViewPointsImportTaskWidget : public TaskWidget
 
 public slots:
     void expertModeChangedSlot();
+
+    void addFileSlot();
+    void deleteFileSlot();
+    void selectedFileSlot();
+    void updateFileListSlot();
 
     void importSlot();
 
@@ -55,8 +62,19 @@ public:
     ViewPointsImportTaskWidget(ViewPointsImportTask& task, QWidget* parent = nullptr);
     virtual ~ViewPointsImportTaskWidget();
 
+    void addFile(const std::string& filename);
+    void selectFile(const std::string& filename);
+
+    void updateContext ();
+
 protected:
     ViewPointsImportTask& task_;
+
+    QListWidget* file_list_{nullptr};
+    QPushButton* add_file_button_{nullptr};
+    QPushButton* delete_file_button_{nullptr};
+
+    QTextEdit* context_edit_ {nullptr};
 
     QPushButton* import_button_ {nullptr};
 };
