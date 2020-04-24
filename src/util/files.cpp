@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/filesystem.hpp>
+
 std::string CURRENT_CONF_DIRECTORY;
 
 namespace Utils
@@ -114,6 +116,22 @@ void deleteFolder(const std::string& path)
 {
     QDir dir(path.c_str());
     dir.removeRecursively();
+}
+
+std::string getDirectoryFromPath (const std::string& path)
+{
+    boost::filesystem::path p(path);
+    boost::filesystem::path dir = p.parent_path();
+
+    return dir.string();
+}
+
+std::string getFilenameFromPath (const std::string& path)
+{
+    boost::filesystem::path p(path);
+    boost::filesystem::path file = p.filename();
+
+    return file.string();
 }
 
 }  // namespace Files

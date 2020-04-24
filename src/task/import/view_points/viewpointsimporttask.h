@@ -40,6 +40,8 @@
 #include <QObject>
 #include <memory>
 
+#include "json.hpp"
+
 class ViewPointsImportTaskWidget;
 class TaskManager;
 
@@ -63,10 +65,26 @@ public:
     virtual bool isRecommended();
     virtual bool isRequired();
 
-protected:
-  std::unique_ptr<ViewPointsImportTaskWidget> widget_;
+    std::string currentFilename() const;
+    void currentFilename(const std::string& value);
 
-  virtual void checkSubConfigurables() {}
+    std::string currentError() const;
+
+    bool canImport ();
+    void import ();
+
+protected:
+    std::string current_filename_;
+    nlohmann::json current_data_;
+
+    std::string current_error_;
+
+    std::unique_ptr<ViewPointsImportTaskWidget> widget_;
+
+    virtual void checkSubConfigurables() {}
+
+    void parseCurrentFile ();
+    void checkParsedData ();
 };
 
 #endif // VIEWPOINTSIMPORTTASK_H

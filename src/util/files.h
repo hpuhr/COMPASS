@@ -33,6 +33,9 @@ std::string getIconFilepath(const std::string& filename);
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);
 
+std::string getDirectoryFromPath (const std::string& path);
+std::string getFilenameFromPath (const std::string& path);
+
 }  // namespace Files
 }  // namespace Utils
 

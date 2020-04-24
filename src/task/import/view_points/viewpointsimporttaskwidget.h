@@ -38,12 +38,16 @@
 
 class ViewPointsImportTask;
 
+class QPushButton;
+
 class ViewPointsImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
 public slots:
     void expertModeChangedSlot();
+
+    void importSlot();
 
 signals:
 
@@ -53,6 +57,8 @@ public:
 
 protected:
     ViewPointsImportTask& task_;
+
+    QPushButton* import_button_ {nullptr};
 };
 
 #endif // VIEWPOINTSIMPORTTASKWIDGET_H

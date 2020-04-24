@@ -41,7 +41,7 @@ DBObjectInfoWidget::DBObjectInfoWidget(DBObject& object, QWidget* parent, Qt::Wi
     main_layout_ = new QGridLayout();
 
     main_check_ = new QCheckBox(object.name().c_str());
-    connect(main_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
+    connect(main_check_, &QCheckBox::clicked, this, &DBObjectInfoWidget::loadChangedSlot);
     main_check_->setFont(font_bold);
     main_layout_->addWidget(main_check_);
 

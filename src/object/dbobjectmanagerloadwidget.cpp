@@ -89,7 +89,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     // use filters stuff
     filters_check_ = new QCheckBox("Use Filters");
     filters_check_->setChecked(object_manager_.useFilters());
-    connect(filters_check_, SIGNAL(toggled(bool)), this, SLOT(toggleUseFilters()));
+    connect(filters_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseFilters);
     main_layout->addWidget(filters_check_);
 
     QFrame* line2 = new QFrame(this);
@@ -101,12 +101,12 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     // there is to be order!
     order_check_ = new QCheckBox("Use Order");
     order_check_->setChecked(object_manager.useOrder());
-    connect(order_check_, SIGNAL(clicked()), this, SLOT(toggleUseOrder()));
+    connect(order_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseOrder);
     main_layout->addWidget(order_check_);
 
     order_ascending_check_ = new QCheckBox("Order Ascending");
     order_ascending_check_->setChecked(object_manager.useOrderAscending());
-    connect(order_ascending_check_, SIGNAL(clicked()), this, SLOT(toggleOrderAscending()));
+    connect(order_ascending_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleOrderAscending);
     main_layout->addWidget(order_ascending_check_);
 
     main_layout->addWidget(new QLabel("Order Variable:"));
@@ -131,7 +131,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
     bool use_limit = object_manager_.useLimit();
     limit_check_ = new QCheckBox("Use Limit");
     limit_check_->setChecked(use_limit);
-    connect(limit_check_, SIGNAL(toggled(bool)), this, SLOT(toggleUseLimit()));
+    connect(limit_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseLimit);
     main_layout->addWidget(limit_check_);
 
     QGridLayout* limit_layout = new QGridLayout();
@@ -156,7 +156,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     // load
     load_button_ = new QPushButton("Load");
-    connect(load_button_, SIGNAL(clicked()), this, SLOT(loadButtonSlot()));
+    connect(load_button_, &QPushButton::clicked, this, &DBObjectManagerLoadWidget::loadButtonSlot);
     main_layout->addWidget(load_button_);
 
     setLayout(main_layout);

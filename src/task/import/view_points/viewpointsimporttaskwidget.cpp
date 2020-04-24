@@ -32,6 +32,7 @@
  */
 
 #include "viewpointsimporttaskwidget.h"
+#include "viewpointsimporttask.h"
 #include "atsdb.h"
 #include "global.h"
 #include "logger.h"
@@ -58,6 +59,10 @@ ViewPointsImportTaskWidget::ViewPointsImportTaskWidget(ViewPointsImportTask& tas
 
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
+    import_button_ = new QPushButton("Import");
+    connect (import_button_, &QPushButton::clicked, this, &ViewPointsImportTaskWidget::importSlot);
+    main_layout_->addWidget(import_button_);
+
     setLayout(main_layout_);
 }
 
@@ -68,3 +73,22 @@ ViewPointsImportTaskWidget::~ViewPointsImportTaskWidget()
 }
 
 void ViewPointsImportTaskWidget::expertModeChangedSlot() {}
+
+void ViewPointsImportTaskWidget::importSlot()
+{
+    task_.currentFilename("/home/sk/data/austria/20200417_CommandLine_Sample/view_points_test.json");
+
+    if (task_.currentError().size())
+    {
+        loginf << "ViewPointsImportTaskWidget: importSlot: error '" << task_.currentError() << "'";
+        return;
+    }
+
+    if (!task_.canImport())
+    {
+        loginf << "ViewPointsImportTaskWidget: importSlot: task can not import";
+        return;
+    }
+
+    task_.import();
+}
