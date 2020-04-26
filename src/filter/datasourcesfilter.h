@@ -95,8 +95,8 @@ class DataSourcesFilter : public DBFilter
 
     std::map<int, DataSourcesFilterDataSource>& dataSources() { return data_sources_; }
 
-    virtual void saveViewPointConditions (nlohmann::json& cond_array);
-    virtual void loadViewPointConditions (nlohmann::json& cond_array);
+    virtual void saveViewPointConditions (nlohmann::json& filters);
+    virtual void loadViewPointConditions (nlohmann::json& filters);
 
   protected:
     /// DBO type

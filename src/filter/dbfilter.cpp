@@ -370,33 +370,40 @@ DBFilterWidget* DBFilter::widget()
     return widget_;
 }
 
-void DBFilter::saveViewPointConditions (nlohmann::json& cond_array)
+void DBFilter::saveViewPointConditions (nlohmann::json& filters)
 {
+    assert (!filters.contains(name_));
+    filters[name_] = json::object();
+    json& filter = filters.at(name_);
+
     for (auto cond_it : conditions_)
     {
-        nlohmann::json& condition = cond_array[cond_array.size()];
-        condition["name"] = cond_it->instanceId();
-        condition["value"] = cond_it->getValue();
+        assert (!filter.contains(cond_it->instanceId()));
+        filter[cond_it->instanceId()] = cond_it->getValue();
     }
 }
 
-void DBFilter::loadViewPointConditions (nlohmann::json& cond_array)
+void DBFilter::loadViewPointConditions (nlohmann::json& filters)
 {
-    assert (cond_array.is_array());
+    assert (filters.is_object());
+    assert (filters.contains(name_));
+    nlohmann::json& filter = filters.at(name_);
+    assert (filter.is_object());
 
-    for (auto& cond_it : cond_array.get<json::array_t>())
+    for (auto& cond_it : filter.get<json::object_t>())
     {
+        std::string cond_name = cond_it.first;
+        logdbg << "DBFilter: loadViewPointConditions: cond_name '"
+               << cond_name << "' value '" << cond_it.second.dump() << "'";
 
-        assert (cond_it.contains("name"));
-        assert (cond_it.contains("value"));
+        assert (cond_it.second.is_string());
+        std::string value = cond_it.second;
 
-        const std::string& cond_name = cond_it.at("name");
 
         auto it = find_if(conditions_.begin(), conditions_.end(),
                           [cond_name] (const DBFilterCondition* c) { return c->instanceId() == cond_name; } );
 
         assert (it != conditions_.end());
-        (*it)->setValue(cond_it.at("value"));
-
+        (*it)->setValue(value);
     }
 }

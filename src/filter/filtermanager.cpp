@@ -276,22 +276,20 @@ void FilterManager::showViewPointSlot (ViewPoint* vp)
     if (data.contains("filters"))
     {
         json& filters = data.at("filters");
-        assert (filters.is_array());
+        assert (filters.is_object());
 
         disableAllFilters();
 
-        for (auto& fil_it : filters.get<json::array_t>())
+        for (auto& fil_it : filters.get<json::object_t>())
         {
-            assert (fil_it.contains("name"));
-            assert (fil_it.contains("conditions"));
-            const std::string& fil_name = fil_it.at("name");
+            std::string filter_name = fil_it.first;
 
             auto it = find_if(filters_.begin(), filters_.end(),
-                              [fil_name] (const DBFilter* f) { return f->getName() == fil_name; } );
+                              [filter_name] (const DBFilter* f) { return f->getName() == filter_name; } );
 
             assert (it != filters_.end());
             (*it)->setActive(true);
-            (*it)->loadViewPointConditions(fil_it.at("conditions"));
+            (*it)->loadViewPointConditions(filters);
         }
     }
 }
@@ -319,24 +317,13 @@ void FilterManager::setConfigInViewPoint (ViewPoint& vp)
     // add filters
     if (obj_man.useFilters())
     {
-        vp.data()["filters"] = json::array();
+        vp.data()["filters"] = json::object();
         json& filters = vp.data().at("filters");
 
-        unsigned int cnt=0;
         for (auto fil_it : filters_)
         {
             if (fil_it->getActive())
-            {
-                json& filter = filters[cnt];
-
-                filter["name"] = fil_it->getName();
-                filter["conditions"] = json::array();
-                json& conditions = filter.at("conditions");
-
-                fil_it->saveViewPointConditions(conditions);
-
-                ++cnt;
-            }
+                fil_it->saveViewPointConditions(filters);
         }
 
         loginf << "FilterManager: setConfigInViewPoint: filters: '" << filters.dump(4) << "'";

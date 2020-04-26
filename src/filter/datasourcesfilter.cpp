@@ -256,14 +256,16 @@ void DataSourcesFilter::reset()
     widget_->update();
 }
 
-void DataSourcesFilter::saveViewPointConditions (nlohmann::json& cond_array)
+void DataSourcesFilter::saveViewPointConditions (nlohmann::json& filters)
 {
     assert (conditions_.size() == 0);
 
-    nlohmann::json& condition = cond_array[cond_array.size()];
-    condition["name"] = "active_sources";
+    assert (!filters.contains(name_));
+    filters[name_] = json::object();
+    json& filter = filters.at(name_);
 
-    condition["value"] = json::array();
+    filter["active_sources"] = json::array();
+    json& values = filter.at("active_sources");
 
     unsigned int cnt=0;
 
@@ -271,26 +273,23 @@ void DataSourcesFilter::saveViewPointConditions (nlohmann::json& cond_array)
     {
         if (ds_it.second.isActiveInFilter())
         {
-            condition["value"][cnt] = ds_it.second.getNumber();
+            values[cnt] = ds_it.second.getNumber();
             ++cnt;
         }
     }
 }
 
-void DataSourcesFilter::loadViewPointConditions (nlohmann::json& cond_array)
+void DataSourcesFilter::loadViewPointConditions (nlohmann::json& filters)
 {
     assert (conditions_.size() == 0);
 
-    assert (cond_array.is_array());
-    assert (cond_array.size() == 1);
+    assert (filters.contains(name_));
+    json& filter = filters.at(name_);
 
-    json& condition = cond_array[0];
-    assert (condition.contains("name"));
-    assert (condition.at("name") == "active_sources");
-    assert (condition.contains("value"));
-    assert (condition.at("value").is_array());
+    assert (filter.contains("active_sources"));
+    json& active_sources = filter.at("active_sources");
 
-    json& active_sources = condition.at("value");
+    assert (active_sources.is_array());
 
     // disable all sources
     for (auto& ds_it : data_sources_)
