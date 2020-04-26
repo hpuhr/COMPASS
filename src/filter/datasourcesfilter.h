@@ -29,7 +29,8 @@ class DataSourcesFilterDataSource
     /// @brief Constructor
     DataSourcesFilterDataSource(unsigned int number, const std::string& name, nlohmann::json& active_in_filter)
         : number_(number), name_(name), active_in_filter_(active_in_filter)
-    {}
+    {
+    }
     /// @brief Destructor
     virtual ~DataSourcesFilterDataSource() {}
 

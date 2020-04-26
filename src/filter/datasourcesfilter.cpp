@@ -173,6 +173,9 @@ void DataSourcesFilter::updateDataSources()
     {
         if (data_sources_.find(ds_it->first) == data_sources_.end())
         {
+            if (!active_sources_.contains(to_string(ds_it->first)))
+                active_sources_[to_string(ds_it->first)] = true; // init with default true
+
             data_sources_.emplace(std::piecewise_construct,
                                   std::forward_as_tuple(ds_it->first),  // args for key
                                   std::forward_as_tuple(ds_it->first, ds_it->second.name(),

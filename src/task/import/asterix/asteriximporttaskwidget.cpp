@@ -445,3 +445,8 @@ void ASTERIXImportTaskWidget::runDone()
     create_mapping_stubs_button_->setDisabled(false);
     test_button_->setDisabled(false);
 }
+
+ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
+{
+    return override_widget_;
+}

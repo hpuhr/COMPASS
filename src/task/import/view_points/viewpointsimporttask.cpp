@@ -46,6 +46,7 @@
 #include "savedfile.h"
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
+#include "asterixoverridewidget.h"
 
 #include <fstream>
 
@@ -416,6 +417,38 @@ void ViewPointsImportTask::import ()
 
                 asterix_import_task_widget->addFile(filename);
                 asterix_import_task_widget->selectFile(filename);
+
+                ASTERIXOverrideWidget* asterix_override_widget = asterix_import_task_widget->overrideWidget();
+                assert (asterix_override_widget);
+
+                if (ds_it.contains("ds_sac") && ds_it.contains("ds_sic")
+                        && ds_it.contains("ds_sac_override") && ds_it.contains("ds_sic_override")
+                        && ds_it.contains("time_offset"))
+                {
+                    loginf << "ViewPointsImportTask: import: override information set";
+                    asterix_importer_task.overrideActive(true);
+
+                    assert (ds_it.at("ds_sac").is_number());
+                    asterix_importer_task.overrideSacOrg(ds_it.at("ds_sac"));
+
+                    assert (ds_it.at("ds_sic").is_number());
+                    asterix_importer_task.overrideSicOrg(ds_it.at("ds_sic"));
+
+                    assert (ds_it.at("ds_sac_override").is_number());
+                    asterix_importer_task.overrideSacNew(ds_it.at("ds_sac_override"));
+
+                    assert (ds_it.at("ds_sic_override").is_number());
+                    asterix_importer_task.overrideSicNew(ds_it.at("ds_sic_override"));
+
+                    assert (ds_it.at("time_offset").is_number());
+                    asterix_importer_task.overrideTodOffset(ds_it.at("time_offset"));
+                }
+                else
+                {
+                    loginf << "ViewPointsImportTask: import: override information not set";
+                    asterix_importer_task.overrideActive(false);
+                }
+                asterix_override_widget->updateSlot();
 
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.showDoneSummary(false);

@@ -68,7 +68,9 @@ class ASTERIXImportTaskWidget : public TaskWidget
     void runStarted();
     void runDone();
 
-  protected:
+    ASTERIXOverrideWidget* overrideWidget() const;
+
+protected:
     ASTERIXImportTask& task_;
 
     QHBoxLayout* main_layout_{nullptr};
