@@ -58,6 +58,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 #if USE_JASTERIX
     std::string import_asterix_filename;
 #endif
+    std::string import_view_points_filename;
     bool auto_process {false};
     bool quit_after_auto_process {false};
     bool start_after_auto_process {false};
@@ -71,8 +72,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
                 "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
 #if USE_JASTERIX
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
-                "imports existing ASTERIX file with given filename, e.g. '/data/file1.ff'")
+                "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
 #endif
+            ("import_view_points", po::value<std::string>(&import_view_points_filename),
+                "imports view points JSON file with given filename, e.g. '/data/file1.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("auto_quit", po::bool_switch(&quit_after_auto_process), "quit after automatic processing")
             ("auto_start", po::bool_switch(&start_after_auto_process), "start after automatic processing");
@@ -113,6 +116,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (import_asterix_filename.size())
         task_man.importASTERIXFile(import_asterix_filename);
 #endif
+
+    if (import_view_points_filename.size())
+        task_man.importViewPointsFile(import_view_points_filename);
 
     if (auto_process)
         task_man.autoProcess(auto_process);

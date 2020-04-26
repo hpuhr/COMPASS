@@ -29,6 +29,7 @@ class SQLiteConnectionWidget : public QWidget
     virtual ~SQLiteConnectionWidget();
 
     void addFile(const std::string& filename);
+    void selectFile(const std::string& filename);
 
   protected:
     SQLiteConnection& connection_;

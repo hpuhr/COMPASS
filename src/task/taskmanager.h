@@ -105,6 +105,7 @@ class TaskManager : public QObject, public Configurable
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
 #endif
+    void importViewPointsFile(const std::string& filename);
     void autoProcess(bool value);
 
     void quitAfterAutoProcess(bool value);
@@ -127,6 +128,9 @@ protected:
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
 #endif
+
+    bool view_points_import_file_ {false};
+    std::string view_points_import_filename_;
 
     bool auto_process_ {false};
     bool quit_after_auto_process_ {false};

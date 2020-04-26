@@ -44,6 +44,8 @@
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
 #include "savedfile.h"
+#include "asteriximporttask.h"
+#include "asteriximporttaskwidget.h"
 
 #include <fstream>
 
@@ -202,6 +204,8 @@ std::string ViewPointsImportTask::currentError() const
 
 void ViewPointsImportTask::parseCurrentFile ()
 {
+    loginf << "ViewPointsImportTask: parseCurrentFile: file '" << current_filename_ << "'";
+
     current_error_ = "";
 
     current_data_.clear();
@@ -234,6 +238,8 @@ void ViewPointsImportTask::parseCurrentFile ()
 
 void ViewPointsImportTask::checkParsedData ()
 {
+    loginf << "ViewPointsImportTask: checkParsedData";
+
     if (!current_data_.is_object())
         throw std::runtime_error("current data is not an object");
 
@@ -394,7 +400,7 @@ void ViewPointsImportTask::import ()
                 TaskManagerWidget* widget = task_manager_.widget();
                 assert (widget);
 
-                ViewPointsImportTask& asterix_importer_task = task_manager_.viewPointsImportTask();
+                ASTERIXImportTask& asterix_importer_task = task_manager_.asterixImporterTask();
 
                 widget->setCurrentTask(asterix_importer_task);
                 if(widget->getCurrentTaskName() != asterix_importer_task.name())
@@ -404,8 +410,8 @@ void ViewPointsImportTask::import ()
                     return;
                 }
 
-                ViewPointsImportTaskWidget* asterix_import_task_widget =
-                    dynamic_cast<ViewPointsImportTaskWidget*>(asterix_importer_task.widget());
+                ASTERIXImportTaskWidget* asterix_import_task_widget =
+                    dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
                 assert(asterix_import_task_widget);
 
                 asterix_import_task_widget->addFile(filename);

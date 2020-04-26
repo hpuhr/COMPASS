@@ -107,6 +107,14 @@ void SQLiteConnectionWidget::addFile(const std::string& filename)
     }
 }
 
+void SQLiteConnectionWidget::selectFile(const std::string& filename)
+{
+    assert (connection_.hasFile(filename));
+    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+    assert (items.size() == 1);
+    file_list_->setCurrentItem(items.at(0));
+}
+
 void SQLiteConnectionWidget::deleteFileSlot()
 {
     if (!file_list_->currentItem())

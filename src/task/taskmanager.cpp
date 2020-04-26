@@ -469,6 +469,15 @@ void TaskManager::importASTERIXFile(const std::string& filename)
     asterix_import_filename_ = filename;
 }
 
+void TaskManager::importViewPointsFile(const std::string& filename)
+{
+    loginf << "TaskManager: importViewPointsFile: filename '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    view_points_import_file_ = true;
+    view_points_import_filename_ = filename;
+}
+
 void TaskManager::autoProcess(bool value)
 {
     loginf << "TaskManager: autoProcess: value " << value;
@@ -531,6 +540,7 @@ void TaskManager::performAutomaticTasks ()
             Files::deleteFile(sqlite3_create_new_db_filename_);
 
         connection_widget->addFile(sqlite3_create_new_db_filename_);
+        connection_widget->selectFile(sqlite3_create_new_db_filename_);
         connection_widget->openFileSlot();
 
         while (QCoreApplication::hasPendingEvents())
@@ -554,6 +564,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         connection_widget->addFile(sqlite3_open_db_filename_);
+        connection_widget->selectFile(sqlite3_open_db_filename_);
         connection_widget->openFileSlot();
 
         while (QCoreApplication::hasPendingEvents())
@@ -604,6 +615,48 @@ void TaskManager::performAutomaticTasks ()
         QThread::msleep(100);  // delay
     }
     #endif
+
+    if (view_points_import_file_)
+    {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        loginf << "TaskManager: performAutomaticTasks: importing view points file '"
+               << view_points_import_filename_ << "'";
+
+        if (!Files::fileExists(view_points_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: view points file '" << view_points_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*view_points_import_task_);
+        if(widget_->getCurrentTaskName() != view_points_import_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        ViewPointsImportTaskWidget* view_points_import_task_widget =
+            dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
+        assert(view_points_import_task_widget);
+
+        view_points_import_task_widget->addFile(view_points_import_filename_);
+        view_points_import_task_widget->selectFile(view_points_import_filename_);
+
+        assert(view_points_import_task_->canImport());
+        view_points_import_task_->showDoneSummary(false);
+
+        view_points_import_task_widget->importSlot();
+
+        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
+    }
+
 
     if (auto_process_)
     {
