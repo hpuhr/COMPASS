@@ -36,6 +36,8 @@ protected:
   DBObject* object_{nullptr};
   DBOVariable* variable_ {nullptr};
 
+  std::string ds_column_name_;
+
   //nlohmann::json values_;
 
   //void updateConditions();

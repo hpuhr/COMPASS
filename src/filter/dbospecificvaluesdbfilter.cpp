@@ -51,6 +51,9 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
         return;
     }
 
+    ds_column_name_ = object_->currentDataSourceDefinition().localKey();
+
+
     // variable
     assert (variable_name_.size());
     if (!object_->hasVariable(variable_name_))
@@ -80,7 +83,7 @@ DBOSpecificValuesDBFilter::~DBOSpecificValuesDBFilter() {}
 bool DBOSpecificValuesDBFilter::filters(const std::string& dbo_type) { return dbo_name_ == dbo_type; }
 
 std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                                  std::vector<DBOVariable*>& filtered_variables)
+                                                          std::vector<DBOVariable*>& filtered_variables)
 {
     assert(!disabled_);
     assert (object_->hasDataSources());
@@ -91,59 +94,67 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
     if (active_)
     {
-        if (!first)
+        if (dbo_name == dbo_name_)
         {
-            if (op_and_)
-                ss << " AND ";
-            else
-                ss << " OR ";
-        }
-
-        ss << "("; // first condition
-
-        for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
-        {
-            if (conditions_.at(cnt)->valueInvalid())
+            if (!first)
             {
-                logwrn << "DBOSpecificValuesDBFilter " << instanceId()
-                       << ": getConditionString: invalid condition, will be skipped";
-                continue;
+                if (op_and_)
+                    ss << " AND ";
+                else
+                    ss << " OR ";
             }
 
-            if (condition_set)
-                ss << " OR ";
+            ss << "("; // first condition
 
-            string cond_name = conditions_.at(cnt)->instanceId();
+            for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
+            {
+                if (conditions_.at(cnt)->valueInvalid())
+                {
+                    logwrn << "DBOSpecificValuesDBFilter " << instanceId()
+                           << ": getConditionString: invalid condition, will be skipped";
+                    continue;
+                }
 
-//            assert (cond_id.find(" "+variable_name_) != std::string::npos);
-//            string ds_name = cond_id.substr(0, cond_id.find(" "+variable_name_));
+                if (condition_set)
+                    ss << " OR ";
 
-            DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
-                                                       [cond_name, this] (const pair<int, DBODataSource>& s) {
-                                                       return s.second.hasShortName() ?
-                                                       (s.second.shortName()+" "+variable_name_) == cond_name
-                                                       : (s.second.name()+" "+variable_name_) == cond_name; } );
-            assert (it != object_->dsEnd());
-            int ds_id = it->first;
+                string cond_name = conditions_.at(cnt)->instanceId();
 
-            bool cond_first = true;
-            std::string text =
-                conditions_.at(cnt)->getConditionString(dbo_name, cond_first, filtered_variables);
+                //            assert (cond_id.find(" "+variable_name_) != std::string::npos);
+                //            string ds_name = cond_id.substr(0, cond_id.find(" "+variable_name_));
 
-            ss << "(sd_track.ds_id=" << ds_id << " AND " << text << ")";
+                DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
+                                                           [cond_name, this] (const pair<int, DBODataSource>& s) {
+                    return s.second.hasShortName() ?
+                                (s.second.shortName()+" "+variable_name_) == cond_name
+                              : (s.second.name()+" "+variable_name_) == cond_name; } );
+                assert (it != object_->dsEnd());
+                int ds_id = it->first;
 
-            condition_set = true;
+                bool cond_first = true;
+                std::string text =
+                        conditions_.at(cnt)->getConditionString(dbo_name, cond_first, filtered_variables);
+
+                ss << "(" << ds_column_name_ << "=" << ds_id << " AND " << text << ")";
+
+
+                if (!condition_set) // first time only
+                    filtered_variables.push_back(&object_->variable(ds_column_name_));
+
+                condition_set = true;
+
+            }
+
+            ss << ")"; // there be conditions
+
+
+            //        for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
+            //        {
+            //            std::string text =
+            //                sub_filters_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
+            //            ss << text;
+            //        }
         }
-
-        ss << ")"; // there be conditions
-
-
-//        for (unsigned int cnt = 0; cnt < sub_filters_.size(); cnt++)
-//        {
-//            std::string text =
-//                sub_filters_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
-//            ss << text;
-//        }
     }
 
     loginf << "DBOSpecificValuesDBFilter " << instanceId() << ": getConditionString: object " << dbo_name
@@ -205,7 +216,7 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
     {
         string ds_name = ds_it->second.name();
         if (ds_it->second.hasShortName())
-                ds_name = ds_it->second.shortName();
+            ds_name = ds_it->second.shortName();
 
         ds_name += " "+variable_name_;
 
