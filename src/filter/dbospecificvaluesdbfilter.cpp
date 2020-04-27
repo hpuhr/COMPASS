@@ -16,12 +16,11 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
                                                      Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
-    loginf << "DBOSpecificValuesDBFilter: constructor";
+    logdbg << "DBOSpecificValuesDBFilter: constructor";
 
     registerParameter("dbo_name", &dbo_name_, "");
     registerParameter("variable_name", &variable_name_, "");
     registerParameter("condition_operator", &condition_operator_, "");
-    //registerParameter("values", &values_, json::object());
 
     // dbobject
     if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
@@ -120,9 +119,6 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
                 string cond_name = conditions_.at(cnt)->instanceId();
 
-                //            assert (cond_id.find(" "+variable_name_) != std::string::npos);
-                //            string ds_name = cond_id.substr(0, cond_id.find(" "+variable_name_));
-
                 DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
                                                            [cond_name, this] (const pair<int, DBODataSource>& s) {
                     return s.second.hasShortName() ?
@@ -157,7 +153,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
         }
     }
 
-    loginf << "DBOSpecificValuesDBFilter " << instanceId() << ": getConditionString: object " << dbo_name
+    logdbg << "DBOSpecificValuesDBFilter " << instanceId() << ": getConditionString: object " << dbo_name
            << " here '" << ss.str() << "' first " << first << " condition_set " << condition_set;
 
     if (condition_set)
@@ -166,24 +162,9 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
         return "";
 }
 
-//void DBOSpecificValuesDBFilter::generateSubConfigurable(const std::string& class_id,
-//                                                const std::string& instance_id)
-//{
-//    logdbg << "DBOSpecificValuesDBFilter: generateSubConfigurable: class_id " << class_id;
-
-//    if (class_id.compare("DBOSpecificValuesDBFilterWidget") == 0)
-//    {
-//        assert(!widget_);
-//        widget_ = new DBOSpecificValuesDBFilterWidget(*this, class_id, instance_id);
-//    }
-//    else
-//        throw std::runtime_error("DBOSpecificValuesDBFilter: generateSubConfigurable: unknown class_id " +
-//                                 class_id);
-//}
-
 void DBOSpecificValuesDBFilter::checkSubConfigurables()
 {
-    loginf << "DBOSpecificValuesDBFilter: checkSubConfigurables";
+    logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables";
 
     assert (object_->hasDataSources());
 
@@ -205,7 +186,7 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 
     for (auto cond_it : conditions_to_delete)
     {
-        loginf << "DBOSpecificValuesDBFilter: checkSubConfigurables: deleting condition " << cond_it->instanceId();
+        logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: deleting condition " << cond_it->instanceId();
         deleteCondition(cond_it);
     }
 
@@ -225,7 +206,7 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 
         if (it == conditions_.end()) // add
         {
-            loginf << "DBOSpecificValuesDBFilter: checkSubConfigurables: creating new condition " << ds_name;
+            logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: creating new condition " << ds_name;
             Configuration& config = addNewSubConfiguration("DBFilterCondition", ds_name);
             config.addParameterString("reset_value", "4227");
             config.addParameterString("value", "4227");

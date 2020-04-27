@@ -107,8 +107,8 @@ void ViewPointsTableModel::updateTableColumns()
         {
             logdbg << "ViewPointsTableModel: updateTableColumns: '" << j_it.first << "'";
 
-//            if (j_it.second.is_object() || j_it.second.is_array()) // skip complex items
-//                continue;
+            if (j_it.second.is_object() || j_it.second.is_array()) // skip complex items
+                continue;
 
             if (!table_columns_.contains(j_it.first.c_str()))
                 table_columns_.append(j_it.first.c_str());

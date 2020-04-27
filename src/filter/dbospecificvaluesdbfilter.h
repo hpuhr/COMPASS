@@ -16,17 +16,9 @@ public:
     virtual std::string getConditionString(const std::string& dbo_name, bool& first,
                                            std::vector<DBOVariable*>& filtered_variables) override;
 
-    // use from parent
-//    virtual void generateSubConfigurable(const std::string& class_id,
-//                                         const std::string& instance_id);
-
     virtual bool filters(const std::string& dbo_name) override;
-    //virtual void reset();
 
     const std::string& dbObjectName() { return dbo_name_; }
-
-//    virtual void saveViewPointConditions (nlohmann::json& filters);
-//    virtual void loadViewPointConditions (nlohmann::json& filters);
 
 protected:
   std::string dbo_name_;
@@ -37,10 +29,6 @@ protected:
   DBOVariable* variable_ {nullptr};
 
   std::string ds_column_name_;
-
-  //nlohmann::json values_;
-
-  //void updateConditions();
 
   virtual void checkSubConfigurables() override;
 };
