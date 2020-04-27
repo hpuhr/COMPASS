@@ -96,6 +96,40 @@ QModelIndex ViewPointsTableModel::parent(const QModelIndex& index) const
     return QModelIndex();
 }
 
+Qt::ItemFlags ViewPointsTableModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    assert (index.column() < table_columns_.size());
+
+    if (table_columns_.at(index.column()) == "comment")
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    else
+        return QAbstractItemModel::flags(index);
+}
+
+bool ViewPointsTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.isValid() && role == Qt::EditRole)
+    {
+        unsigned int id = getIdOf(index);
+
+        loginf << "ViewPointsTableModel: setData: row " << index.row() << " col " << index.column()
+               << " id " << id << " '" << value.toString().toStdString() << "'";
+
+        assert (id < view_points_.size());
+
+        view_points_.at(id).data()["comment"] = value.toString().toStdString();
+        view_points_.at(id).dirty(true);
+
+        emit dataChanged(index, index);
+
+        return true;
+    }
+    return false;
+}
+
 void ViewPointsTableModel::updateTableColumns()
 {
     for (auto& vp_it : view_points_)

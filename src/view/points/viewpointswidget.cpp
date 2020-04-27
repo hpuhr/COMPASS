@@ -36,7 +36,8 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->sortByColumn(0, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
-    //table_view_->setWordWrap(true);
+    table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    table_view_->setWordWrap(true);
     table_view_->reset();
     table_view_->show();
 //    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -53,7 +54,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
 
     table_view_->resizeColumnsToContents();
-    table_view_->resizeRowsToContents();
+    //table_view_->resizeRowsToContents();
     main_layout->addWidget(table_view_);
 
     {

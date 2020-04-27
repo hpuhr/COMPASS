@@ -19,6 +19,10 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& index) const override;
 
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+
     void update();
     unsigned int getIdOf (const QModelIndex& index);
 
