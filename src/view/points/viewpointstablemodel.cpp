@@ -147,7 +147,7 @@ Qt::ItemFlags ViewPointsTableModel::flags(const QModelIndex &index) const
         return QAbstractItemModel::flags(index);
 }
 
-bool ViewPointsTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole)
     {
@@ -158,7 +158,13 @@ bool ViewPointsTableModel::setData(const QModelIndex &index, const QVariant &val
 
         assert (id < view_points_.size());
 
-        view_points_.at(id).data()["comment"] = value.toString().toStdString();
+        assert (index.column() == statusColumn() || index.column() == commentColumn());
+
+        if (index.column() == statusColumn())
+            view_points_.at(id).data()["status"] = value.toString().toStdString();
+        else
+            view_points_.at(id).data()["comment"] = value.toString().toStdString();
+
         view_points_.at(id).dirty(true);
 
         emit dataChanged(index, index);
@@ -206,15 +212,21 @@ unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
      return map_it->first;
 }
 
-void ViewPointsTableModel::setStatus (const QModelIndex &index, const std::string& value)
+void ViewPointsTableModel::setStatus (const QModelIndex& row_index, const std::string& value)
 {
-    assert (index.isValid());
-    unsigned int id = getIdOf(index);
-    assert (id < view_points_.size());
-    loginf << "ViewPointsTableModel: setStatus: id " << id << " status " << value;
-    view_points_.at(id).data()["status"] = value;
-    view_points_.at(id).dirty(true);
+    assert (row_index.isValid());
 
-    emit dataChanged(index, index);
+    QModelIndex status_index = index(row_index.row(), statusColumn(), QModelIndex());
+    assert (status_index.isValid());
+
+    setData(status_index, value.c_str(), Qt::EditRole);
+
+//    unsigned int id = getIdOf(index);
+//    assert (id < view_points_.size());
+//    loginf << "ViewPointsTableModel: setStatus: id " << id << " status " << value;
+//    view_points_.at(id).data()["status"] = value;
+//    view_points_.at(id).dirty(true);
+
+//    emit dataChanged(index, index, {Qt::UserRole});
 }
 

@@ -26,6 +26,7 @@ class ViewPointsWidget : public QWidget
     void setSelectedOpenSlot();
     void setSelectedClosedSlot();
     void setSelectedTodoSlot();
+    void editCommentSlot();
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     //void onTableClickedSlot(const QModelIndex& current);
@@ -57,6 +58,7 @@ private:
     QPushButton* export_button_{nullptr};
 
     bool load_in_progress_ {false};
+    bool restore_focus_ {false};
 };
 
 #endif // VIEWPOINTSWIDGET_H

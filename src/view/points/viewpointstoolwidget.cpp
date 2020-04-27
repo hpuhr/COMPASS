@@ -28,8 +28,8 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
     // previous
     {
-        toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_left.png").c_str()),
-                            "Select Previous [P]");
+        toolbar_->addAction(QIcon(Files::getIconFilepath("up.png").c_str()),
+                            "Select Previous [Up]");
     }
 
     toolbar_->addSeparator();
@@ -45,6 +45,16 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
         toolbar_->addAction(QIcon(Files::getIconFilepath("todo.png").c_str()),
                             "Set Selected Status ToDo [T]");
+
+    }
+
+    toolbar_->addSeparator();
+
+    // comment
+
+    {
+        toolbar_->addAction(QIcon(Files::getIconFilepath("comment.png").c_str()),
+                            "Edit Comment [E]");
     }
 
 
@@ -52,8 +62,8 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
      // next
      {
-         toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_right.png").c_str()),
-                             "Select Next [N]");
+         toolbar_->addAction(QIcon(Files::getIconFilepath("down.png").c_str()),
+                             "Select Next [Down]");
      }
 
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
@@ -70,7 +80,7 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
 {
     std::string text = action->text().toStdString();
 
-    if (text == "Select Previous [P]")
+    if (text == "Select Previous [Up]")
     {
         vp_widget_->selectPreviousSlot();
     }
@@ -86,7 +96,11 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
     {
         vp_widget_->setSelectedTodoSlot();
     }
-    else if (text == "Select Next [N]")
+    else if (text == "Edit Comment [E]")
+    {
+        vp_widget_->editCommentSlot();
+    }
+    else if (text == "Select Next [Down]")
     {
         vp_widget_->selectNextSlot();
     }

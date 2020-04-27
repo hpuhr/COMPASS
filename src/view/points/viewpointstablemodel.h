@@ -27,7 +27,10 @@ public:
     void update();
     unsigned int getIdOf (const QModelIndex& index);
 
-    void setStatus (const QModelIndex &index, const std::string& value);
+    void setStatus (const QModelIndex &row_index, const std::string& value);
+
+    int commentColumn () { return table_columns_.indexOf("comment"); }
+    int statusColumn () { return table_columns_.indexOf("status"); }
 
 private:
     ViewManager& view_manager_;

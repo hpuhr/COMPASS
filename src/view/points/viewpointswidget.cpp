@@ -86,7 +86,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     // shortcuts
     {
-        QShortcut* n_shortcut = new QShortcut(QKeySequence(tr("N", "Next")), this);
+        QShortcut* n_shortcut = new QShortcut(QKeySequence(tr("Down", "Next")), this);
         connect (n_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectNextSlot);
 
         QShortcut* o_shortcut = new QShortcut(QKeySequence(tr("O", "Open")), this);
@@ -98,7 +98,10 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         QShortcut* t_shortcut = new QShortcut(QKeySequence(tr("T", "Todo")), this);
         connect (t_shortcut, &QShortcut::activated, this, &ViewPointsWidget::setSelectedTodoSlot);
 
-        QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("P", "Previous")), this);
+        QShortcut* e_shortcut = new QShortcut(QKeySequence(tr("E", "Edit")), this);
+        connect (e_shortcut, &QShortcut::activated, this, &ViewPointsWidget::editCommentSlot);
+
+        QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("Up", "Previous")), this);
         connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
     }
 }
@@ -258,6 +261,36 @@ void ViewPointsWidget::setSelectedTodoSlot()
         logwrn << "ViewPointsWidget: setSelectedTodoSlot: invalid current index";
 }
 
+void ViewPointsWidget::editCommentSlot()
+{
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        logwrn << "ViewPointsWidget: editCommentSlot: no row selected";
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        auto const source_index = proxy_model_->mapToSource(current_index);
+        assert (source_index.isValid());
+
+        QModelIndex src_comment_index = table_model_->index(source_index.row(), table_model_->commentColumn(),
+                                                        QModelIndex());
+        assert (src_comment_index.isValid());
+        QModelIndex comment_index = proxy_model_->mapFromSource(src_comment_index);
+        assert (comment_index.isValid());
+
+        table_view_->edit(comment_index);
+    }
+    else
+        logwrn << "ViewPointsWidget: setSelectedTodoSlot: invalid current index";
+}
+
 
 //void ViewPointsWidget::openCurrentSelectNext()
 //{
@@ -340,6 +373,8 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
     unsigned int id = table_model_->getIdOf(source_index);
 
     loginf << "ViewPointsWidget: currentRowChanged: current id " << id;
+    restore_focus_ = true;
+
     view_manager_.setCurrentViewPoint(id);
 }
 
@@ -359,6 +394,12 @@ void ViewPointsWidget::allLoadingDoneSlot()
     tool_widget_->setDisabled(false);
     assert (table_view_);
     table_view_->setDisabled(false);
+
+    if (restore_focus_)
+    {
+        setFocus();
+        restore_focus_ = false;
+    }
 }
 
 //void ViewPointsWidget::onTableClickedSlot (const QModelIndex& current)
