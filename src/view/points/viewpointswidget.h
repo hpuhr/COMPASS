@@ -23,6 +23,10 @@ class ViewPointsWidget : public QWidget
     void selectPreviousSlot();
     void selectNextSlot();
 
+    void setSelectedOpenSlot();
+    void setSelectedClosedSlot();
+    void setSelectedTodoSlot();
+
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     //void onTableClickedSlot(const QModelIndex& current);
 

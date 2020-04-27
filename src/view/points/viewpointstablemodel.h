@@ -2,6 +2,7 @@
 #define VIEWPOINTSTABLEMODEL_H
 
 #include <QAbstractItemModel>
+#include <QIcon>
 
 class ViewManager;
 class ViewPoint;
@@ -26,10 +27,17 @@ public:
     void update();
     unsigned int getIdOf (const QModelIndex& index);
 
+    void setStatus (const QModelIndex &index, const std::string& value);
+
 private:
     ViewManager& view_manager_;
 
     QStringList table_columns_{"id", "name", "type", "status", "comment"};
+
+    QIcon open_icon_;
+    QIcon closed_icon_;
+    QIcon todo_icon_;
+    QIcon unknown_icon_;
 
     std::map<unsigned int, ViewPoint>& view_points_;
 

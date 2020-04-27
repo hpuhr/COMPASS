@@ -26,17 +26,34 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
     toolbar_ = new QToolBar("Tools");
 
-    // tool actions
+    // previous
     {
         toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_left.png").c_str()),
-                            "Select Previous");
+                            "Select Previous [P]");
     }
 
-     toolbar_->addSeparator();
+    toolbar_->addSeparator();
 
+    // selected
+
+    {
+        toolbar_->addAction(QIcon(Files::getIconFilepath("not_recommended.png").c_str()),
+                            "Set Selected Status Open [O]");
+
+        toolbar_->addAction(QIcon(Files::getIconFilepath("not_todo.png").c_str()),
+                            "Set Selected Status Closed [C]");
+
+        toolbar_->addAction(QIcon(Files::getIconFilepath("todo.png").c_str()),
+                            "Set Selected Status ToDo [T]");
+    }
+
+
+    toolbar_->addSeparator();
+
+     // next
      {
          toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_right.png").c_str()),
-                             "Select Next");
+                             "Select Next [N]");
      }
 
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
@@ -53,11 +70,23 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
 {
     std::string text = action->text().toStdString();
 
-    if (text == "Select Previous")
+    if (text == "Select Previous [P]")
     {
         vp_widget_->selectPreviousSlot();
     }
-    else if (text == "Select Next")
+    else if (text == "Set Selected Status Open [O]")
+    {
+        vp_widget_->setSelectedOpenSlot();
+    }
+    else if (text == "Set Selected Status Closed [C]")
+    {
+        vp_widget_->setSelectedClosedSlot();
+    }
+    else if (text == "Set Selected Status ToDo [T]")
+    {
+        vp_widget_->setSelectedTodoSlot();
+    }
+    else if (text == "Select Next [N]")
     {
         vp_widget_->selectNextSlot();
     }

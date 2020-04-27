@@ -37,6 +37,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
     table_view_->show();
@@ -54,7 +55,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
 
     table_view_->resizeColumnsToContents();
-    //table_view_->resizeRowsToContents();
+    table_view_->resizeRowsToContents();
     main_layout->addWidget(table_view_);
 
     {
@@ -87,6 +88,15 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     {
         QShortcut* n_shortcut = new QShortcut(QKeySequence(tr("N", "Next")), this);
         connect (n_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectNextSlot);
+
+        QShortcut* o_shortcut = new QShortcut(QKeySequence(tr("O", "Open")), this);
+        connect (o_shortcut, &QShortcut::activated, this, &ViewPointsWidget::setSelectedOpenSlot);
+
+        QShortcut* c_shortcut = new QShortcut(QKeySequence(tr("C", "Closed")), this);
+        connect (c_shortcut, &QShortcut::activated, this, &ViewPointsWidget::setSelectedClosedSlot);
+
+        QShortcut* t_shortcut = new QShortcut(QKeySequence(tr("T", "Todo")), this);
+        connect (t_shortcut, &QShortcut::activated, this, &ViewPointsWidget::setSelectedTodoSlot);
 
         QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("P", "Previous")), this);
         connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
@@ -177,6 +187,75 @@ void ViewPointsWidget::selectNextSlot()
     }
     else
         logwrn << "ViewPointsWidget: selectNext: invalid current index";
+}
+
+void ViewPointsWidget::setSelectedOpenSlot()
+{
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        logwrn << "ViewPointsWidget: setSelectedOpenSlot: no row selected";
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        auto const source_index = proxy_model_->mapToSource(current_index);
+        assert (source_index.isValid());
+        table_model_->setStatus(source_index, "open");
+    }
+    else
+        logwrn << "ViewPointsWidget: setSelectedOpenSlot: invalid current index";
+}
+
+void ViewPointsWidget::setSelectedClosedSlot()
+{
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        logwrn << "ViewPointsWidget: setSelectedClosedSlot: no row selected";
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        auto const source_index = proxy_model_->mapToSource(current_index);
+        assert (source_index.isValid());
+        table_model_->setStatus(source_index, "closed");
+    }
+    else
+        logwrn << "ViewPointsWidget: setSelectedClosedSlot: invalid current index";
+}
+
+void ViewPointsWidget::setSelectedTodoSlot()
+{
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        logwrn << "ViewPointsWidget: setSelectedTodoSlot: no row selected";
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        auto const source_index = proxy_model_->mapToSource(current_index);
+        assert (source_index.isValid());
+        table_model_->setStatus(source_index, "todo");
+    }
+    else
+        logwrn << "ViewPointsWidget: setSelectedTodoSlot: invalid current index";
 }
 
 

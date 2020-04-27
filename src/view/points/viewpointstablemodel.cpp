@@ -4,6 +4,7 @@
 #include "json.hpp"
 #include "json.h"
 #include "stringconv.h"
+#include "files.h"
 
 using namespace nlohmann;
 using namespace Utils;
@@ -12,6 +13,11 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     : view_manager_(view_manager), view_points_(view_manager_.viewPoints())
 {
     updateTableColumns();
+
+    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
+    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
+    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
+    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
 }
 
 //ViewPointsTableModel::~ViewPointsTableModel()
@@ -56,6 +62,9 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
 
             json& data = map_it->second.data().at(col_name);
 
+//            if (col_name == "status" && (data == "open" || data == "closed" || data == "todo"))
+//                return QVariant();
+
             // s1.find(s2) != std::string::npos
             if (data.is_number() && col_name.find("time") != std::string::npos)
                 return String::timeStringFromDouble(data).c_str();
@@ -67,6 +76,35 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
                 return data.get<float>();
 
             return JSON::toString(data).c_str();
+        }
+        case Qt::DecorationRole:
+        {
+            assert (index.column() < table_columns_.size());
+
+            if (table_columns_.at(index.column()) == "status")
+            {
+                auto map_it = view_points_.begin();
+                std::advance(map_it, index.row());
+
+                if (map_it == view_points_.end())
+                    return QVariant();
+
+                json& data = map_it->second.data().at("status");
+                assert (data.is_string());
+
+                std::string status = data;
+
+                if (status == "open")
+                    return open_icon_;
+                else if (status == "closed")
+                    return closed_icon_;
+                else if (status == "todo")
+                    return todo_icon_;
+                else
+                    return unknown_icon_;
+            }
+            else
+                return QVariant();
         }
         default:
         {
@@ -167,3 +205,16 @@ unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
 
      return map_it->first;
 }
+
+void ViewPointsTableModel::setStatus (const QModelIndex &index, const std::string& value)
+{
+    assert (index.isValid());
+    unsigned int id = getIdOf(index);
+    assert (id < view_points_.size());
+    loginf << "ViewPointsTableModel: setStatus: id " << id << " status " << value;
+    view_points_.at(id).data()["status"] = value;
+    view_points_.at(id).dirty(true);
+
+    emit dataChanged(index, index);
+}
+
