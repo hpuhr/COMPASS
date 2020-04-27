@@ -29,6 +29,7 @@
 #include "filtermanagerwidget.h"
 #include "logger.h"
 #include "viewpoint.h"
+#include "dbospecificvaluesdbfilter.h"
 
 #include "json.hpp"
 
@@ -60,19 +61,24 @@ FilterManager::~FilterManager()
 void FilterManager::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
+    if (hasSubConfigurable(class_id, instance_id))
+    {
+        logerr << "FilterManager: generateSubConfigurable: filter " << instance_id
+               << " already present";
+        return;
+    }
+
     if (class_id == "DBFilter")
     {
-        if (hasSubConfigurable(class_id, instance_id))
-        {
-            logerr << "FilterManager: generateSubConfigurable: filter " << instance_id
-                   << " already present";
-            return;
-        }
-
         DBFilter* filter = new DBFilter(class_id, instance_id, this);
         filters_.push_back(filter);
     }
-    else if (class_id.compare("DataSourcesFilter") == 0)
+    else if (class_id == "DBOSpecificValuesDBFilter")
+    {
+        DBOSpecificValuesDBFilter* filter = new DBOSpecificValuesDBFilter(class_id, instance_id, this);
+        filters_.push_back(filter);
+    }
+    else if (class_id == "DataSourcesFilter")
     {
         try
         {

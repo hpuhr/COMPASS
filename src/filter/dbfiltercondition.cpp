@@ -54,6 +54,8 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     registerParameter("absolute_value", &absolute_value_, false);
     registerParameter("variable_dbo_name", &variable_dbo_name_, "");
     registerParameter("variable_name", &variable_name_, "");
+    //registerParameter("variable_name", &variable_name_, "");
+    registerParameter("display_instance_id", &display_instance_id_, false);
 
     // DBOVAR LOWERCASE HACK
     // boost::algorithm::to_lower(variable_name_);
@@ -88,7 +90,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
             usable_ = false;
     }
 
-    registerParameter("reset_value", &reset_value_, std::string("value"));
+    registerParameter("reset_value", &reset_value_, std::string(""));
     registerParameter("value", &value_, "");
 
     if (usable_)
@@ -102,7 +104,11 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    label_ = new QLabel(tr((variable_name_ + " " + operator_).c_str()));
+    label_ = new QLabel();
+    if (display_instance_id_)
+        label_->setText(tr((instanceId() + " " + operator_).c_str()));
+    else
+        label_->setText(tr((variable_name_ + " " + operator_).c_str()));
     layout->addWidget(label_);
 
     edit_ = new QLineEdit(tr(value_.c_str()));
@@ -265,7 +271,11 @@ void DBFilterCondition::update()
 {
     assert(variable_ || meta_variable_);
 
-    label_->setText(tr((variable_name_ + " " + operator_).c_str()));
+    if (display_instance_id_)
+        label_->setText(tr((instanceId() + " " + operator_).c_str()));
+    else
+        label_->setText(tr((variable_name_ + " " + operator_).c_str()));
+
     edit_->setText(tr(value_.c_str()));
 }
 
@@ -322,6 +332,11 @@ void DBFilterCondition::reset()
     loginf << "DBFilterCondition: reset: value '" << value_ << " invalid " << value_invalid_;
 
     update();
+}
+
+bool DBFilterCondition::getDisplayInstanceId() const
+{
+    return display_instance_id_;
 }
 
 bool DBFilterCondition::checkValueInvalid(const std::string& new_value)

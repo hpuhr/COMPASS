@@ -114,7 +114,9 @@ class DBFilterCondition : public QObject, public Configurable
     bool valueInvalid() const { return value_invalid_; }
     bool usable() const { return usable_; }
 
-  private:
+    bool getDisplayInstanceId() const;
+
+private:
     /// @brief Parent filter
     DBFilter* filter_parent_{nullptr};
     /// @brief Operator
@@ -131,6 +133,7 @@ class DBFilterCondition : public QObject, public Configurable
     std::string variable_dbo_name_;
     /// @brief DBO variable identifier
     std::string variable_name_;
+    bool display_instance_id_ {false};
 
     /// @brief Pointer to DBO variable
     DBOVariable* variable_{nullptr};

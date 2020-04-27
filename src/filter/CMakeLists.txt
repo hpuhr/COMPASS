@@ -16,6 +16,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/filterconditionresetvaluecombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcesfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/datasourcesfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilter.h"
+        #"${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbfiltercondition.cpp"
@@ -26,6 +28,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/datasourcesfilterwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/filtereditwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/filtergeneratorwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilter.cpp"
+        #"${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilterwidget.cpp"
 )
 
 
