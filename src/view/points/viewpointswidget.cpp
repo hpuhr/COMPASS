@@ -15,6 +15,7 @@
 #include <QSortFilterProxyModel>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QShortcut>
 
 ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     : QWidget(), view_manager_(view_manager)
@@ -35,6 +36,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->sortByColumn(0, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+    //table_view_->setWordWrap(true);
     table_view_->reset();
     table_view_->show();
 //    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
@@ -51,6 +53,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
 
     table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
     main_layout->addWidget(table_view_);
 
     {
@@ -78,11 +81,19 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
     connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
+
+    // shortcuts
+    {
+        QShortcut* n_shortcut = new QShortcut(QKeySequence(tr("N", "Next")), this);
+        connect (n_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectNextSlot);
+
+        QShortcut* p_shortcut = new QShortcut(QKeySequence(tr("P", "Previous")), this);
+        connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
+    }
 }
 
 ViewPointsWidget::~ViewPointsWidget()
 {
-
 }
 
 
@@ -93,25 +104,90 @@ void ViewPointsWidget::update()
     table_view_->resizeColumnsToContents();
 }
 
-void ViewPointsWidget::selectNext()
+void ViewPointsWidget::selectPreviousSlot()
 {
-    loginf << "ViewPointsWidget: selectNext";
+    logdbg << "ViewPointsWidget: selectPrevious";
+
+    if (load_in_progress_)
+        return;
+
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        table_view_->selectRow(table_view_->model()->rowCount()-1);
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        QModelIndex next_index = table_view_->model()->index(current_index.row()-1, 0);
+
+        if (next_index.isValid())
+        {
+            logdbg << "ViewPointsWidget: selectNext: setting index row " << next_index.row();
+            table_view_->selectRow(next_index.row());
+        }
+        else
+        {
+            logdbg << "ViewPointsWidget: selectNext: invalid next index, step to last";
+            table_view_->selectRow(table_view_->model()->rowCount()-1);
+        }
+    }
+    else
+        logwrn << "ViewPointsWidget: selectNext: invalid current index";
 }
 
-void ViewPointsWidget::selectNextOpen()
+void ViewPointsWidget::selectNextSlot()
 {
-    loginf << "ViewPointsWidget: selectNextOpen";
+    logdbg << "ViewPointsWidget: selectNext";
+
+    if (load_in_progress_)
+        return;
+
+    QModelIndexList list = table_view_->selectionModel()->selectedRows();
+    assert (list.size() <= 1);
+
+    if (!list.size()) // none selected yet, start with first
+    {
+        table_view_->selectRow(0);
+        return;
+    }
+
+    QModelIndex current_index = list.at(0);
+
+    if (current_index.isValid())
+    {
+        QModelIndex next_index = table_view_->model()->index(current_index.row()+1, 0);
+
+        if (next_index.isValid())
+        {
+            logdbg << "ViewPointsWidget: selectNext: setting index row " << next_index.row();
+            table_view_->selectRow(next_index.row());
+        }
+        else
+        {
+            logdbg << "ViewPointsWidget: selectNext: invalid next index, step to first";
+            table_view_->selectRow(0);
+        }
+    }
+    else
+        logwrn << "ViewPointsWidget: selectNext: invalid current index";
 }
 
-void ViewPointsWidget::openCurrentSelectNext()
-{
-    loginf << "ViewPointsWidget: openCurrentSelectNext";
-}
 
-void ViewPointsWidget::closeCurrentSelectNext()
-{
-    loginf << "ViewPointsWidget: closeCurrentSelectNext";
-}
+//void ViewPointsWidget::openCurrentSelectNext()
+//{
+//    loginf << "ViewPointsWidget: openCurrentSelectNext";
+//}
+
+//void ViewPointsWidget::closeCurrentSelectNext()
+//{
+//    loginf << "ViewPointsWidget: closeCurrentSelectNext";
+//}
 
 void ViewPointsWidget::exportSlot()
 {
@@ -189,6 +265,7 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 
 void ViewPointsWidget::loadingStartedSlot()
 {
+    load_in_progress_ = true;
     assert (tool_widget_);
     tool_widget_->setDisabled(true);
     assert (table_view_);
@@ -197,6 +274,7 @@ void ViewPointsWidget::loadingStartedSlot()
 
 void ViewPointsWidget::allLoadingDoneSlot()
 {
+    load_in_progress_ = false;
     assert (tool_widget_);
     tool_widget_->setDisabled(false);
     assert (table_view_);

@@ -20,6 +20,9 @@ class ViewPointsWidget : public QWidget
     void deleteAllSlot();
     void importSlot();
 
+    void selectPreviousSlot();
+    void selectNextSlot();
+
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     //void onTableClickedSlot(const QModelIndex& current);
 
@@ -32,10 +35,9 @@ public:
 
     void update();
 
-    void selectNext();
-    void selectNextOpen();
-    void openCurrentSelectNext();
-    void closeCurrentSelectNext();
+    //    void selectNextOpen();
+//    void openCurrentSelectNext();
+//    void closeCurrentSelectNext();
 
 private:
     ViewManager& view_manager_;
@@ -49,6 +51,8 @@ private:
     QPushButton* import_button_{nullptr};
     QPushButton* delete_all_button_{nullptr};
     QPushButton* export_button_{nullptr};
+
+    bool load_in_progress_ {false};
 };
 
 #endif // VIEWPOINTSWIDGET_H

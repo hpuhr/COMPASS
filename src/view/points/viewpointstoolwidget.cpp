@@ -1,4 +1,5 @@
 #include "viewpointstoolwidget.h"
+#include "viewpointswidget.h"
 
 #include <QApplication>
 #include <QColorDialog>
@@ -15,6 +16,8 @@ using namespace Utils;
 ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget* parent)
 : QWidget(parent), vp_widget_(vp_widget)
 {
+    assert (vp_widget_);
+
     setMaximumHeight(40);
 
     QHBoxLayout* layout = new QHBoxLayout(this);
@@ -25,15 +28,15 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
     // tool actions
     {
-        toolbar_->addAction(QIcon(Files::getIconFilepath("vp_save.png").c_str()),
-                            "Select Next");
+        toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_left.png").c_str()),
+                            "Select Previous");
     }
 
      toolbar_->addSeparator();
 
      {
-         toolbar_->addAction(QIcon(Files::getIconFilepath("vp_save.png").c_str()),
-                             "Select Next2");
+         toolbar_->addAction(QIcon(Files::getIconFilepath("arrow_to_right.png").c_str()),
+                             "Select Next");
      }
 
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
@@ -50,13 +53,13 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
 {
     std::string text = action->text().toStdString();
 
-    if (text == "Select Next")
+    if (text == "Select Previous")
     {
-        //emit clearMeasurementsSignal();
+        vp_widget_->selectPreviousSlot();
     }
-    else if (text == "Select Next2")
+    else if (text == "Select Next")
     {
-        //emit clearMeasurementsSignal();
+        vp_widget_->selectNextSlot();
     }
 }
 
