@@ -52,7 +52,6 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
 
     ds_column_name_ = object_->currentDataSourceDefinition().localKey();
 
-
     // variable
     assert (variable_name_.size());
     if (!object_->hasVariable(variable_name_))
@@ -166,6 +165,23 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
 {
     logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables";
 
+    // widget
+
+    if (!widget_)
+    {
+        logdbg << "DBOSpecificValuesDBFilter: checkSubConfigurables: generating generic filter widget";
+        widget_ = new DBFilterWidget("DBFilterWidget", instanceId() + "Widget0", *this);
+
+        if (disabled_)
+        {
+            widget_->setInvisible();
+            widget_->setDisabled(true);
+        }
+    }
+    assert(widget_);
+
+
+    // data sources
     assert (object_->hasDataSources());
 
     // find and delete outdated data source conditions

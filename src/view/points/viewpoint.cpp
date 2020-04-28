@@ -16,13 +16,11 @@ ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
 //    "text":"any string",
 //    "position_latitude":49.5,
 //    "position_longitude":12.2,
+//    "position_window_latitude":0.05,
+//    "position_window_longitude":0.02,
 //    "time":666.0,
-//    "position_window_interest_latitude":0.05,
-//    "position_window_interest_longitude":0.02,
-//    "time_window_interest":4.0,
-//    "position_window_context_latitude":0.5,
-//    "position_window_context_longitude":0.2,
-//    "time_window_context":4.0,
+//    "time_window":4.0,
+
 //    "dbo_data":
 //    [
 //    {
@@ -69,6 +67,12 @@ ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& 
     data_ = json::parse(json_str);
     assert (data_.contains("id"));
     assert (data_.at("id") == id_);
+
+    if (!data_.contains("status"))
+    {
+        data_["status"] = "open";
+        dirty_ = true;
+    }
 }
 
 unsigned int ViewPoint::id() const { return id_; }

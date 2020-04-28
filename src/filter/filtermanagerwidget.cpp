@@ -107,6 +107,7 @@ void FilterManagerWidget::updateFiltersSlot()
     std::vector<DBFilter*>& filters = filter_manager_.filters();
     for (auto it : filters)
     {
+        loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
         filter_layout_->addWidget(it->widget());
     }
 }

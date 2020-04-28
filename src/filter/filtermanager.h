@@ -91,6 +91,8 @@ class FilterManager : public QObject, public Configurable
     std::vector<DBFilter*> filters_;
 
     virtual void checkSubConfigurables();
+
+    bool checkDBObject (const std::string& dbo_name); // returns true if ok
 };
 
 #endif /* FILTERMANAGER_H_ */

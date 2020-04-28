@@ -68,6 +68,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         return;
     }
 
+    logdbg << "FilterManager: generateSubConfigurable: filter class_id " << class_id << " instance_id " << instance_id;
+
     if (class_id == "DBFilter")
     {
         DBFilter* filter = new DBFilter(class_id, instance_id, this);
@@ -75,8 +77,32 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "DBOSpecificValuesDBFilter")
     {
+        if (hasSubConfigurable(class_id, instance_id))
+        {
+            logerr << "FilterManager: generateSubConfigurable: dbo specific filter "
+                   << instance_id << " already present";
+            return;
+        }
+        std::string dbo_name = configuration()
+                                   .getSubConfiguration(class_id, instance_id)
+                                   .getParameterConfigValueString("dbo_name");
+
+        if (!checkDBObject(dbo_name))
+        {
+            loginf << "FilterManager: generateSubConfigurable: disabling dbo specific filter "
+                   << instance_id << " for failed check dbobject '" << dbo_name << "'";
+            return;
+        }
+
         DBOSpecificValuesDBFilter* filter = new DBOSpecificValuesDBFilter(class_id, instance_id, this);
-        filters_.push_back(filter);
+        if (filter->disabled())
+        {
+            loginf << "FilterManager: generateSubConfigurable: deleting disabled dbo specific filter"
+                   << filter->instanceId();
+            delete filter;
+        }
+        else
+            filters_.push_back(filter);
     }
     else if (class_id == "DataSourcesFilter")
     {
@@ -92,33 +118,10 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
                                        .getSubConfiguration(class_id, instance_id)
                                        .getParameterConfigValueString("dbo_name");
 
-            if (!ATSDB::instance().objectManager().existsObject(dbo_name))
+            if (!checkDBObject(dbo_name))
             {
                 loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
-                       << instance_id << " because of non-existing dbobject '" << dbo_name << "'";
-                return;
-            }
-
-            DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
-
-            if (!object.hasCurrentDataSourceDefinition())
-            {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
-                       << instance_id << " because of missing data source definition";
-                return;
-            }
-
-            if (!object.hasDataSources())
-            {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
-                       << instance_id << " because of missing data sources";
-                return;
-            }
-
-            if (!object.existsInDB())
-            {
-                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter "
-                       << instance_id << " because of empty dbobject '" << dbo_name << "'";
+                       << instance_id << " for failed check dbobject '" << dbo_name << "'";
                 return;
             }
 
@@ -128,8 +131,6 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
                 loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
                           "filter for object "
                        << filter->dbObjectName();
-                // removeChildConfigurable (*filter);
-                // configuration_.removeSubConfiguration(class_id, instance_id);
                 delete filter;
             }
             else
@@ -146,6 +147,39 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
+
+bool FilterManager::checkDBObject (const std::string& dbo_name)
+{
+    if (!ATSDB::instance().objectManager().existsObject(dbo_name))
+    {
+        loginf << "FilterManager: checkDBObject: failed because of non-existing dbobject '" << dbo_name << "'";
+        return false;
+    }
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
+
+    if (!object.hasCurrentDataSourceDefinition())
+    {
+        loginf << "FilterManager: checkDBObject: failed because of missing data source definition in '"
+               << dbo_name << "'";
+        return false;
+    }
+
+    if (!object.hasDataSources())
+    {
+        loginf << "FilterManager: checkDBObject: failed because of missing data sources";
+        return false;
+    }
+
+    if (!object.existsInDB())
+    {
+        loginf << "FilterManager: checkDBObject: failed because of empty dbobject '" << dbo_name << "'";
+        return false;
+    }
+
+    return true;
+}
+
 void FilterManager::checkSubConfigurables()
 {
     // watch those sensors
