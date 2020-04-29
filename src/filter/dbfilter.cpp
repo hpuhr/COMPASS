@@ -390,6 +390,10 @@ void DBFilter::loadViewPointConditions (nlohmann::json& filters)
     nlohmann::json& filter = filters.at(name_);
     assert (filter.is_object());
 
+    // clear previous conditions
+    for (auto cond_it : conditions_)
+        cond_it->setValue("");
+
     for (auto& cond_it : filter.get<json::object_t>())
     {
         std::string cond_name = cond_it.first;
@@ -398,7 +402,6 @@ void DBFilter::loadViewPointConditions (nlohmann::json& filters)
 
         assert (cond_it.second.is_string());
         std::string value = cond_it.second;
-
 
         auto it = find_if(conditions_.begin(), conditions_.end(),
                           [cond_name] (const DBFilterCondition* c) { return c->instanceId() == cond_name; } );

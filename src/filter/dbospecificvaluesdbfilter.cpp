@@ -106,6 +106,9 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
             for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
             {
+                if (!conditions_.at(cnt)->getValue().size())
+                    continue; // skip for empty strings
+
                 if (conditions_.at(cnt)->valueInvalid())
                 {
                     logwrn << "DBOSpecificValuesDBFilter " << instanceId()
