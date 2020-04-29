@@ -468,6 +468,8 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
 
         if (load_widget_)
             load_widget_->loadingDone();
+
+        ATSDB::instance().viewManager().doViewPointAfterLoad();
     }
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";

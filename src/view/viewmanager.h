@@ -94,6 +94,8 @@ class ViewManager : public QObject, public Configurable
     void setCurrentViewPoint (unsigned int id);
     void unsetCurrentViewPoint ();
 
+    void doViewPointAfterLoad ();
+
 protected:
     ATSDB& atsdb_;
 

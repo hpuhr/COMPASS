@@ -30,6 +30,9 @@
 #include "files.h"
 #include "filtermanager.h"
 #include "dbobjectmanager.h"
+#include "dbobject.h"
+#include "metadbovariable.h"
+#include "dbovariable.h"
 
 #include "json.hpp"
 
@@ -392,6 +395,130 @@ void ViewManager::unsetCurrentViewPoint ()
         emit unshowViewPointSignal(&view_points_.at(current_view_point_));
         current_view_point_set_ = false;
         current_view_point_ = 0;
+    }
+}
+
+void ViewManager::doViewPointAfterLoad ()
+{
+    loginf << "ViewManager: doViewPointAfterLoad";
+
+    if (!current_view_point_set_)
+        return; // nothing to do
+
+    ViewPoint& vp = view_points_.at(current_view_point_);
+
+    json& data = vp.data();
+
+    bool contains_time = data.contains("time");
+    float time;
+    bool contains_time_window = data.contains("time_window");
+    float time_window, time_min, time_max;
+
+    if (!contains_time)
+        return; // nothing to do
+    else
+    {
+        assert (data.at("time").is_number());
+        time = data.at("time");
+    }
+
+    if (contains_time_window)
+    {
+        assert (data.at("time_window").is_number());
+        time_window = data.at("time_window");
+        time_min = time-time_window/2.0;
+        time_max = time+time_window/2.0;
+
+        loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
+    }
+
+    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+
+    if (!object_manager.existsMetaVariable("tod") ||
+        !object_manager.existsMetaVariable("pos_lat_deg") ||
+        !object_manager.existsMetaVariable("pos_long_deg"))
+    {
+        logerr << "ViewManager: doViewPointAfterLoad: required variables missing, quitting";
+        return;
+    }
+
+    bool selection_changed = false;
+    for (auto& dbo_it : object_manager)
+    {
+        std::string dbo_name = dbo_it.first;
+
+        if (!object_manager.metaVariable("tod").existsIn(dbo_name) ||
+            !object_manager.metaVariable("pos_lat_deg").existsIn(dbo_name) ||
+            !object_manager.metaVariable("pos_long_deg").existsIn(dbo_name))
+        {
+            logerr << "ViewManager: doViewPointAfterLoad: required variables missing for " << dbo_name;
+            continue;
+        }
+
+        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+        const DBOVariable& latitude_var =
+            object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
+        const DBOVariable& longitude_var =
+            object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
+
+        if (!tod_var.existsInDB() || !latitude_var.existsInDB() || !longitude_var.existsInDB())
+        {
+            logdbg << "ViewManager: doViewPointAfterLoad: required variables not in db for " << dbo_name;
+            continue;
+        }
+
+        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
+
+        if (buffer)
+        {
+            assert(buffer->has<bool>("selected"));
+            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+
+            assert(buffer->has<float>(tod_var.name()));
+            NullableVector<float>& tods = buffer->get<float>(tod_var.name());
+            assert(buffer->has<double>(latitude_var.name()));
+            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
+            assert(buffer->has<double>(longitude_var.name()));
+            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
+
+            unsigned int buffer_size = buffer->size();
+
+            bool tod_null;
+            float tod;
+
+            for (unsigned int cnt =0; cnt < buffer_size; ++cnt)
+            {
+                tod_null = tods.isNull(cnt);
+
+                if (tod_null)
+                    continue; // nothing to do
+
+                tod = tods.get(cnt);
+
+                if (contains_time_window)
+                {
+                    if (tod >= time_min && tod <= time_max)
+                    {
+                        selected_vec.set(cnt, true);
+                        selection_changed = true;
+
+                        loginf << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
+
+                    }
+                    else if (tod == time)// only time set
+                    {
+                        selected_vec.set(cnt, true);
+                        selection_changed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if (selection_changed)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: selection changed";
+        emit selectionChangedSignal();
     }
 }
 

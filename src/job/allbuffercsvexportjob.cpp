@@ -111,10 +111,10 @@ void AllBufferCSVExportJob::run()
             assert(buffer_index < buffer->size());
 
             assert(buffer->has<bool>("selected"));
-            NullableVector<bool> selected_vec = buffer->get<bool>("selected");
+            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
 
             assert(buffer->has<int>("rec_num"));
-            NullableVector<int> rec_num_vec = buffer->get<int>("rec_num");
+            NullableVector<int>& rec_num_vec = buffer->get<int>("rec_num");
 
             // check if skipped because not selected
             if (only_selected_ &&
