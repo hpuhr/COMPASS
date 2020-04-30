@@ -37,6 +37,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
@@ -51,6 +54,13 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
             this, &ViewPointsWidget::currentRowChanged);
+    // HACKY but works
+    connect(
+        table_view_->horizontalHeader(),
+        SIGNAL(sectionResized(int, int, int)),
+        table_view_,
+        SLOT(resizeRowsToContents()));
+
 
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
 

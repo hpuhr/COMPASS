@@ -160,6 +160,8 @@ void MainWindow::shutdown()
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
+    ATSDB::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
+
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else

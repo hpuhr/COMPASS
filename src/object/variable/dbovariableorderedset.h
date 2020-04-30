@@ -79,6 +79,8 @@ class DBOVariableOrderedSet : public QObject, public Configurable
     // void addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type);
     /// @brief Removes a variable at a given index
     void removeVariableAt(unsigned int index);
+    void removeVariable(const DBOVariable& variable);
+    void removeMetaVariable(const MetaDBOVariable& variable);
 
     /// @brief Decreases index of a variable at a given index
     void moveVariableUp(unsigned int index);
@@ -120,6 +122,8 @@ class DBOVariableOrderedSet : public QObject, public Configurable
     DBOVariableOrderedSetWidget* widget_;
 
     virtual void checkSubConfigurables();
+
+    void reorderVariables ();
 };
 
 #endif /* DBOVariableOrderedSet_H_ */

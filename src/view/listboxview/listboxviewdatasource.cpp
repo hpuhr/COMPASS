@@ -26,6 +26,15 @@
 #include "dbobjectmanager.h"
 #include "job.h"
 #include "logger.h"
+#include "viewpoint.h"
+
+#include <algorithm>
+#include <cassert>
+
+#include "json.hpp"
+
+using namespace std;
+using namespace nlohmann;
 
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
@@ -51,6 +60,8 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 
 ListBoxViewDataSource::~ListBoxViewDataSource()
 {
+    unshowViewPoint(nullptr); // removes tmps TODO not done yet
+
     if (set_)
     {
         delete set_;
@@ -119,6 +130,119 @@ void ListBoxViewDataSource::checkSubConfigurables()
         //        Track Number
         if (obj_man.existsMetaVariable("track_num"))
             set_->add(obj_man.metaVariable("track_num"));
+    }
+}
+
+void ListBoxViewDataSource::unshowViewPoint (ViewPoint* vp)
+{
+    for (auto& var_it : temporary_added_variables_)
+    {
+        loginf << "ListBoxViewDataSource: unshowViewPoint: removing var " << var_it.first << ", " << var_it.second;
+
+        removeTemporaryVariable(var_it.first, var_it.second);
+    }
+
+    temporary_added_variables_.clear();
+}
+
+void ListBoxViewDataSource::showViewPoint (ViewPoint* vp)
+{
+    assert (vp);
+    json& data = vp->data();
+
+//    "context_variables": {
+//        "Tracker": [
+//            "mof_long",
+//            "mof_trans",
+//            "mof_vert"
+//        ]
+//    }
+
+    if (data.contains("context_variables"))
+    {
+        json& context_variables = data.at("context_variables");
+        assert (context_variables.is_object());
+
+        for (auto& obj_it : context_variables.get<json::object_t>())
+        {
+            string dbo_name = obj_it.first;
+            json& variable_names = obj_it.second;
+
+            assert (variable_names.is_array());
+
+            for (auto& var_it : variable_names.get<json::array_t>())
+            {
+                string var_name = var_it;
+
+                if (addTemporaryVariable(dbo_name, var_name))
+                {
+                    loginf << "ListBoxViewDataSource: showViewPoint: added var " << dbo_name << ", " << var_name;
+                    temporary_added_variables_.push_back({dbo_name, var_name});
+                }
+            }
+        }
+    }
+}
+
+bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+{
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    if (dbo_name == META_OBJECT_NAME)
+    {
+        assert (obj_man.existsMetaVariable(var_name));
+        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        if (!set_->hasMetaVariable(meta_var))
+        {
+            set_->add(meta_var);
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        assert (obj_man.existsObject(dbo_name));
+        DBObject& obj = obj_man.object(dbo_name);
+
+        assert (obj.hasVariable(var_name));
+        DBOVariable& var = obj.variable(var_name);
+
+        if (!set_->hasVariable(var))
+        {
+            set_->add(var);
+            return true;
+        }
+        else
+            return false;
+    }
+}
+
+void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
+{
+//    auto el = find(temporary_added_variables_.begin(), temporary_added_variables_.end(),
+//                   pair<string, string>{dbo_name, var_name});
+//    assert (el != temporary_added_variables_.end());
+//    temporary_added_variables_.erase(el);
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    if (dbo_name == META_OBJECT_NAME)
+    {
+        assert (obj_man.existsMetaVariable(var_name));
+        MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
+        assert (set_->hasMetaVariable(meta_var));
+        set_->removeMetaVariable(meta_var);
+    }
+    else
+    {
+        assert (obj_man.existsObject(dbo_name));
+        DBObject& obj = obj_man.object(dbo_name);
+
+        assert (obj.hasVariable(var_name));
+        DBOVariable& var = obj.variable(var_name);
+        assert (set_->hasVariable(var));
+        set_->removeVariable(var);
     }
 }
 

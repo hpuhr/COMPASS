@@ -203,10 +203,18 @@ void ListBoxView::updateSelection()
 void ListBoxView::unshowViewPointSlot (ViewPoint* vp)
 {
     loginf << "ListBoxView: unshowViewPoint";
+
+    assert (vp);
+    assert (data_source_);
+    data_source_->unshowViewPoint(vp);
 }
 
 void ListBoxView::showViewPointSlot (ViewPoint* vp)
 {
     loginf << "ListBoxView: showViewPoint";
+
+    assert (vp);
+    assert (data_source_);
+    data_source_->showViewPoint(vp);
 }
 

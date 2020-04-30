@@ -27,6 +27,7 @@
 #include "viewselection.h"
 
 class Job;
+class ViewPoint;
 
 /**
  * @brief Handles database queries and resulting data for ListBoxView
@@ -72,6 +73,9 @@ class ListBoxViewDataSource : public QObject, public Configurable
     /// @brief Returns use selection flag
     // bool getUseSelection () { return use_selection_; }
 
+    void unshowViewPoint (ViewPoint* vp); // vp can be nullptr
+    void showViewPoint (ViewPoint* vp);
+
   protected:
     /// Variable read list
     DBOVariableOrderedSet* set_{nullptr};
@@ -79,7 +83,12 @@ class ListBoxViewDataSource : public QObject, public Configurable
     /// Selected DBObject records
     ViewSelectionEntries& selection_entries_;
 
+    std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
+
     virtual void checkSubConfigurables();
+
+    bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
+    void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

@@ -43,6 +43,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
     switch (role)
     {
         case Qt::DisplayRole:
+        case Qt::EditRole:
         {
             logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 

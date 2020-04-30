@@ -181,6 +181,48 @@ void DBOVariableOrderedSet::removeVariableAt(unsigned int index)
 
     delete tmp;
 
+    reorderVariables();
+
+    emit setChangedSignal();
+}
+
+void DBOVariableOrderedSet::removeVariable(const DBOVariable& variable)
+{
+    assert (hasVariable(variable));
+
+    int index = -1;
+    for (auto it : variable_definitions_)
+        if (it.second->variableName() == variable.name() &&
+            it.second->dboName() == variable.dbObject().name())
+        {
+            index = it.first;
+            break;
+        }
+
+    assert (index >= 0);
+    removeVariableAt(index);
+}
+
+void DBOVariableOrderedSet::removeMetaVariable(const MetaDBOVariable& variable)
+{
+    assert (hasMetaVariable(variable));
+
+    int index = -1;
+    for (auto it : variable_definitions_)
+        if (it.second->variableName() == variable.name() &&
+            it.second->dboName() == META_OBJECT_NAME)
+        {
+            index = it.first;
+            break;
+        }
+
+    assert (index >= 0);
+    removeVariableAt(index);
+}
+
+
+void DBOVariableOrderedSet::reorderVariables ()
+{
     std::map<unsigned int, DBOVariableOrderDefinition*> new_variable_definitions;
 
     unsigned int key{0};
@@ -193,8 +235,6 @@ void DBOVariableOrderedSet::removeVariableAt(unsigned int index)
     }
 
     variable_definitions_ = new_variable_definitions;
-
-    emit setChangedSignal();
 }
 
 void DBOVariableOrderedSet::moveVariableUp(unsigned int index)

@@ -27,7 +27,8 @@ class DataSourcesFilterDataSource
 {
   public:
     /// @brief Constructor
-    DataSourcesFilterDataSource(unsigned int number, const std::string& name, nlohmann::json& active_in_filter)
+    DataSourcesFilterDataSource(unsigned int number, const std::string& name,
+                                nlohmann::json::boolean_t& active_in_filter)
         : number_(number), name_(name), active_in_filter_(active_in_filter)
     {
     }
@@ -42,7 +43,7 @@ class DataSourcesFilterDataSource
     /// Flag indicating if active in data
     bool active_in_data_ {false};
     /// Flag indicating if active in filter
-    nlohmann::json& active_in_filter_;
+    nlohmann::json::boolean_t& active_in_filter_;
 
   public:
     bool isActiveInData() const { return active_in_data_; }
