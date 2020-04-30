@@ -172,6 +172,36 @@ void AllBufferTableWidget::resizeColumns()
     table_->resizeColumnsToContents();
 }
 
+void AllBufferTableWidget::selectSelectedRows()
+{
+    loginf << "AllBufferTableWidget: selectSelectedRows";
+
+    assert(table_);
+    assert(model_);
+    std::pair<int,int> rows = model_->getSelectedRows();
+
+    if (rows.first >= 0 && rows.second >= 0)
+    {
+        loginf << "AllBufferTableWidget: selectSelectedRows: rows " << rows.first << " to " << rows.second;
+
+        assert (rows.first <= rows.second);
+
+        QModelIndex first = model_->index(rows.first, 0, QModelIndex());
+        assert (first.isValid());
+
+        table_->setSelectionMode(QAbstractItemView::MultiSelection);
+
+        for (unsigned int cnt = rows.first; cnt <= rows.second; ++cnt)
+            table_->selectRow(cnt);
+
+        table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
+
+        table_->scrollTo(first, QAbstractItemView::PositionAtCenter);
+    }
+    else
+        loginf << "AllBufferTableWidget: selectSelectedRows: nothing selected";
+}
+
 ListBoxView& AllBufferTableWidget::view() const { return view_; }
 
 void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)

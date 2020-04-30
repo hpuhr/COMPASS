@@ -65,6 +65,8 @@ class AllBufferTableModel : public QAbstractTableModel
 
     void updateToSelection();
 
+    std::pair<int,int> getSelectedRows(); // min, max, selected row
+
   protected:
     AllBufferTableWidget* table_widget_{nullptr};
     ListBoxViewDataSource& data_source_;

@@ -45,6 +45,7 @@ class ListBoxView : public View
     //    void selectionToBeCleared();
     virtual void unshowViewPointSlot (ViewPoint* vp) override;
     virtual void showViewPointSlot (ViewPoint* vp) override;
+    void allLoadingDoneSlot();
 
   signals:
     //    /// @brief Is emitted when selection was changed locally

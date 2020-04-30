@@ -70,6 +70,9 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
+
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
             &ListBoxViewDataWidget::loadingStartedSlot);
     connect(data_source_, &ListBoxViewDataSource::updateDataSignal, widget_->getDataWidget(),
@@ -216,5 +219,13 @@ void ListBoxView::showViewPointSlot (ViewPoint* vp)
     assert (vp);
     assert (data_source_);
     data_source_->showViewPoint(vp);
+    assert (widget_);
+}
+
+void ListBoxView::allLoadingDoneSlot()
+{
+    loginf << "ListBoxView: allLoadingDoneSlot";
+    assert(widget_);
+    widget_->getDataWidget()->selectFirstSelectedRow();
 }
 

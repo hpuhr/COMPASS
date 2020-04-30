@@ -69,6 +69,8 @@ class ListBoxViewDataWidget : public QWidget
     void resetModels();
     void updateToSelection();
 
+    void selectFirstSelectedRow();
+
   protected:
     ListBoxView* view_{nullptr};
     /// Data source

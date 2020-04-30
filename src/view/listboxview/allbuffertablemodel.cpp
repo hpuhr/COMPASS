@@ -132,7 +132,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
     unsigned int col = index.column();
 
     assert(number_to_dbo_.count(dbo_num) == 1);
-    std::string dbo_name = number_to_dbo_.at(dbo_num);
+    const std::string& dbo_name = number_to_dbo_.at(dbo_num);
 
     assert(buffers_.count(dbo_name) == 1);
     std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
@@ -637,4 +637,42 @@ void AllBufferTableModel::updateToSelection()
     rebuildRowIndexes();
 
     endResetModel();
+}
+
+std::pair<int,int> AllBufferTableModel::getSelectedRows()
+{
+    loginf << "AllBufferTableModel: getFirstSelectedRow";
+
+    unsigned int dbo_num;
+    unsigned int buffer_index;
+
+    int first_row = -1;
+    int last_row = -1;
+
+    for (unsigned int cnt=0; cnt < row_indexes_.size(); ++cnt)
+    {
+        dbo_num = row_indexes_.at(cnt).first;
+        buffer_index = row_indexes_.at(cnt).second;
+
+        assert(number_to_dbo_.count(dbo_num) == 1);
+        const std::string& dbo_name = number_to_dbo_.at(dbo_num);
+
+        assert(buffers_.count(dbo_name) == 1);
+
+        std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
+
+        assert(buffer->has<bool>("selected"));
+        if (buffer->get<bool>("selected").isNull(buffer_index))
+            continue;
+
+        if (buffer->get<bool>("selected").get(buffer_index))
+        {
+            if (first_row == -1)
+                first_row = cnt;
+
+            last_row = cnt;
+        }
+    }
+
+    return std::make_pair(first_row, last_row);
 }

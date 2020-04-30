@@ -188,3 +188,9 @@ void ListBoxViewDataWidget::updateToSelection()
     for (auto& table_widget_it : buffer_tables_)
         table_widget_it.second->updateToSelection();
 }
+
+void ListBoxViewDataWidget::selectFirstSelectedRow()
+{
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->selectSelectedRows();
+}

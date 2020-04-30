@@ -77,6 +77,8 @@ class AllBufferTableWidget : public QWidget
     ListBoxView& view() const;
     void resizeColumns();
 
+    void selectSelectedRows();
+
   protected:
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;

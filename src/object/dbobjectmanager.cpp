@@ -464,12 +464,14 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
     {
         loginf << "DBObjectManager: loadingDoneSlot: all done";
         load_in_progress_ = false;
+
+        ATSDB::instance().viewManager().doViewPointAfterLoad();
+
         emit allLoadingDoneSignal();
 
         if (load_widget_)
             load_widget_->loadingDone();
 
-        ATSDB::instance().viewManager().doViewPointAfterLoad();
     }
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";
