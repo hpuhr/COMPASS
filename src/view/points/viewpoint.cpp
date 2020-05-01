@@ -79,6 +79,8 @@ unsigned int ViewPoint::id() const { return id_; }
 
 nlohmann::json& ViewPoint::data() { return data_; }
 
+const nlohmann::json& ViewPoint::data() const { return data_; }
+
 void ViewPoint::print()
 {
     loginf << "ViewPoint id " << id_ <<": print: dirty " << dirty_ << " json '" << data_.dump(4) << "'";

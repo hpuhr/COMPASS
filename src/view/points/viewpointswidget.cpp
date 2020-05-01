@@ -54,12 +54,10 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
             this, &ViewPointsWidget::currentRowChanged);
-    // HACKY but works
-    connect(
-        table_view_->horizontalHeader(),
-        SIGNAL(sectionResized(int, int, int)),
-        table_view_,
-        SLOT(resizeRowsToContents()));
+
+    // HACKY adjust row size but works
+    connect(table_view_->horizontalHeader(), SIGNAL(sectionResized(int, int, int)),
+            table_view_, SLOT(resizeRowsToContents()));
 
 
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
@@ -121,11 +119,16 @@ ViewPointsWidget::~ViewPointsWidget()
 }
 
 
-void ViewPointsWidget::update()
+void ViewPointsWidget::resizeColumnsToContents()
 {
-    loginf << "ViewPointsWidget: update";
-    table_model_->update();
+    loginf << "ViewPointsWidget: resizeColumnsToContents";
+    //table_model_->update();
     table_view_->resizeColumnsToContents();
+}
+
+ViewPointsTableModel* ViewPointsWidget::tableModel() const
+{
+    return table_model_;
 }
 
 void ViewPointsWidget::selectPreviousSlot()
@@ -332,7 +335,8 @@ void ViewPointsWidget::exportSlot()
         std::string filename = file_names.at(0).toStdString();
 
         loginf << "ViewPointsWidget: exportSlot: filename '" << filename << "'";
-        view_manager_.exportViewPoints(filename);
+        assert (table_model_);
+        table_model_->exportViewPoints(filename);
     }
 }
 
@@ -346,8 +350,9 @@ void ViewPointsWidget::deleteAllSlot()
 
     if (reply == QMessageBox::Yes)
     {
-        view_manager_.deleteAllViewPoints();
-        update();
+        assert (table_model_);
+        table_model_->deleteAllViewPoints();
+        resizeColumnsToContents();
     }
 }
 
@@ -364,8 +369,14 @@ void ViewPointsWidget::importSlot()
     QStringList fileNames;
     if (dialog.exec())
     {
+        assert (table_model_);
+
         for (auto& filename : dialog.selectedFiles())
-            view_manager_.importViewPoints(filename.toStdString());
+        {
+            table_model_->importViewPoints(filename.toStdString());
+
+            resizeColumnsToContents();
+        }
     }
 }
 

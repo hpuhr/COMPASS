@@ -14,6 +14,7 @@ class ViewPoint
     unsigned int id() const;
 
     nlohmann::json& data();
+    const nlohmann::json& data() const;
 
     void print();
 

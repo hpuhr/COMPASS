@@ -24,7 +24,21 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    void update();
+    unsigned int saveNewViewPoint(bool update=true);
+    ViewPoint& saveNewViewPoint(unsigned int id, bool update=true);
+    bool existsViewPoint(unsigned int id);
+    ViewPoint& viewPoint(unsigned int id);
+    //void removeViewPoint(unsigned int id);
+    void deleteAllViewPoints ();
+
+    std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
+    void printViewPoints();
+    void saveViewPoints();
+
+    void importViewPoints (const std::string& filename);
+    void exportViewPoints (const std::string& filename);
+
+    //void update();
     unsigned int getIdOf (const QModelIndex& index);
 
     void setStatus (const QModelIndex &row_index, const std::string& value);
@@ -32,19 +46,20 @@ public:
     int commentColumn () { return table_columns_.indexOf("comment"); }
     int statusColumn () { return table_columns_.indexOf("status"); }
 
+    bool updateTableColumns(); // true if changed
+
 private:
     ViewManager& view_manager_;
 
-    QStringList table_columns_{"id", "name", "type", "status", "comment"};
+    QStringList default_table_columns_ {"id", "name", "type", "status", "comment"};
+    QStringList table_columns_;
 
     QIcon open_icon_;
     QIcon closed_icon_;
     QIcon todo_icon_;
     QIcon unknown_icon_;
 
-    std::map<unsigned int, ViewPoint>& view_points_;
-
-    void updateTableColumns();
+    std::map<unsigned int, ViewPoint> view_points_;
 };
 
 #endif // VIEWPOINTSTABLEMODEL_H

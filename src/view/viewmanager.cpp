@@ -33,6 +33,7 @@
 #include "dbobject.h"
 #include "metadbovariable.h"
 #include "dbovariable.h"
+#include "viewpointstablemodel.h"
 
 #include "json.hpp"
 
@@ -42,7 +43,6 @@
 #include <QMetaType>
 
 #include <cassert>
-#include <fstream>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -62,17 +62,6 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(!main_tab_widget_);
     assert(!initialized_);
     main_tab_widget_ = tab_widget;
-
-    if (ATSDB::instance().interface().existsViewPointsTable())
-    {
-        for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
-        {
-            assert (!view_points_.count(vp_it.first));
-            view_points_.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(vp_it.first),   // args for key
-                                 std::forward_as_tuple(vp_it.first, vp_it.second, *this));  // args for mapped value
-        }
-    }
 
     view_points_widget_ = new ViewPointsWidget(*this);
     view_points_widget_->setAutoFillBackground(true);
@@ -112,13 +101,18 @@ void ViewManager::close()
         delete first_it->second;
     }
 
+    if (view_points_widget_)
+    {
+        view_points_widget_->tableModel()->saveViewPoints();
+        delete view_points_widget_;
+        view_points_widget_ = nullptr;
+    }
+
     if (widget_)
     {
         delete widget_;
         widget_ = nullptr;
     }
-
-    saveViewPoints();
 }
 
 ViewManager::~ViewManager()
@@ -206,171 +200,14 @@ ViewManagerWidget* ViewManager::widget()
     return widget_;
 }
 
-unsigned int ViewManager::saveNewViewPoint(bool update)
-{
-    unsigned int new_id {0};
 
-    if (view_points_.size())
-        new_id = view_points_.rbegin()->first + 1;
-
-    assert (!existsViewPoint(new_id));
-
-    saveNewViewPoint(new_id, update);
-
-    return new_id;
-}
-
-ViewPoint& ViewManager::saveNewViewPoint(unsigned int id, bool update)
-{
-    if (view_points_.count(id))
-        throw std::runtime_error ("ViewManager: addNewViewPoint: id "+std::to_string(id)+" already exists");
-
-    view_points_.emplace(std::piecewise_construct,
-                         std::forward_as_tuple(id),   // args for key
-                         std::forward_as_tuple(id, *this));  // args for mapped value
-
-    assert (existsViewPoint(id));
-
-    ATSDB::instance().filterManager().setConfigInViewPoint(view_points_.at(id));
-    view_points_.at(id).dirty(true);
-
-    if (update && view_points_widget_)
-        view_points_widget_->update();
-
-    return view_points_.at(id);
-}
-
-bool ViewManager::existsViewPoint(unsigned int id)
-{
-    return view_points_.count(id) == 1;
-}
-
-ViewPoint& ViewManager::viewPoint(unsigned int id)
-{
-    assert (existsViewPoint(id));
-    return view_points_.at(id);
-}
-
-void ViewManager::removeViewPoint(unsigned int id)
-{
-    assert (existsViewPoint(id));
-    view_points_.erase(id);
-    ATSDB::instance().interface().deleteViewPoint(id);
-}
-
-void ViewManager::deleteAllViewPoints ()
-{
-    unsetCurrentViewPoint();
-    view_points_.clear();
-    ATSDB::instance().interface().deleteAllViewPoints();
-}
-
-void ViewManager::printViewPoints()
-{
-    for (auto& vp_it : view_points_)
-        vp_it.second.print();
-}
-
-void ViewManager::saveViewPoints()
-{
-    loginf << "ViewManager: saveViewPoints";
-
-    DBInterface& db_interface = ATSDB::instance().interface();
-
-    for (auto& vp_it : view_points_)
-    {
-        if (vp_it.second.dirty())
-        {
-            db_interface.setViewPoint(vp_it.first, vp_it.second.data().dump());
-            vp_it.second.dirty(false);
-        }
-    }
-}
 
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
     return view_points_widget_;
 }
 
-void ViewManager::importViewPoints (const std::string& filename)
-{
-    loginf << "ViewManager: importViewPoints: filename '" << filename << "'";
 
-    try
-    {
-        if (!Files::fileExists(filename))
-            throw std::runtime_error ("File '"+filename+"' not found.");
-
-        std::ifstream ifs(filename);
-        json j = json::parse(ifs);
-
-        if (j.contains("view_point_context"))
-            loginf << "ViewManager: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
-
-        if (!j.contains("view_points"))
-            throw std::runtime_error ("File '"+filename+"' does not contain view points.");
-
-        json& view_points = j.at("view_points");
-
-        if (!view_points.is_array())
-            throw std::runtime_error ("View points are not in an array.");
-
-        unsigned int id;
-        for (auto& vp_it : view_points.get<json::array_t>())
-        {
-            if (!vp_it.contains("id"))
-                throw std::runtime_error ("View point does not contain id");
-
-            id = vp_it.at("id");
-
-            if (!vp_it.contains("status"))
-                vp_it["status"] = "open";
-
-            ViewPoint& vp = saveNewViewPoint(id, false);
-            vp.data() = vp_it;
-        }
-
-        if (view_points_widget_)
-            view_points_widget_->update();
-
-        QMessageBox m_info(QMessageBox::Information, "View Points Import File",
-                           "File import: '"+QString(filename.c_str())+"' done.\n"
-                           +QString::number(view_points.size())+" View Points added.", QMessageBox::Ok);
-        m_info.exec();
-    }
-    catch (std::exception& e)
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "View Points Import File",
-                              "File import error: '"+QString(e.what())+"'.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-}
-
-void ViewManager::exportViewPoints (const std::string& filename)
-{
-    loginf << "ViewManager: exportViewPoints: filename '" << filename << "'";
-
-    json data;
-
-    data["view_points"] = json::array();
-    json& view_points = data.at("view_points");
-
-    unsigned int cnt = 0;
-    for (auto& vp_it : view_points_)
-    {
-        view_points[cnt] = vp_it.second.data();
-        ++cnt;
-    }
-
-    std::ofstream file(filename);
-    file << data.dump(4);
-
-    QMessageBox m_info(QMessageBox::Information, "View Points Export File",
-                       "File export: '"+QString(filename.c_str())+"' done.\n"
-                       +QString::number(view_points.size())+" View Points saved.", QMessageBox::Ok);
-    m_info.exec();
-}
 
 
 void ViewManager::setCurrentViewPoint (unsigned int id)
@@ -378,10 +215,13 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
     if (current_view_point_set_)
         unsetCurrentViewPoint();
 
-    assert (existsViewPoint(id));
+    assert (view_points_widget_);
+    assert (view_points_widget_->tableModel()->existsViewPoint(id));
+
     current_view_point_set_ = true;
     current_view_point_ = id;
-    emit showViewPointSignal(&view_points_.at(current_view_point_));
+
+    emit showViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
     ATSDB::instance().objectManager().loadSlot();
 }
@@ -391,8 +231,11 @@ void ViewManager::unsetCurrentViewPoint ()
 {
     if (current_view_point_set_)
     {
-        assert (existsViewPoint(current_view_point_));
-        emit unshowViewPointSignal(&view_points_.at(current_view_point_));
+        assert (view_points_widget_);
+        assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
+
+        emit unshowViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
+
         current_view_point_set_ = false;
         current_view_point_ = 0;
     }
@@ -405,7 +248,9 @@ void ViewManager::doViewPointAfterLoad ()
     if (!current_view_point_set_)
         return; // nothing to do
 
-    ViewPoint& vp = view_points_.at(current_view_point_);
+    assert (view_points_widget_);
+    assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
+    ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
     json& data = vp.data();
 

@@ -38,11 +38,13 @@ public:
     ViewPointsWidget(ViewManager& view_manager);
     virtual ~ViewPointsWidget();
 
-    void update();
+    void resizeColumnsToContents();
 
     //    void selectNextOpen();
 //    void openCurrentSelectNext();
 //    void closeCurrentSelectNext();
+
+    ViewPointsTableModel* tableModel() const;
 
 private:
     ViewManager& view_manager_;
