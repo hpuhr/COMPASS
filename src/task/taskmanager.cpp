@@ -67,13 +67,13 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 
     task_list_ = {"DatabaseOpenTask", "ManageSchemaTask",
-                  "ManageDBObjectsTask"};  // defines order of tasks
+                  "ManageDBObjectsTask", "ViewPointsImportTask"};  // defines order of tasks
 
 #if USE_JASTERIX
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert(task_list_.end(), {"ViewPointsImportTask", "JSONImportTask", "MySQLDBImportTask",
+    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask",
                                          "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
                                          "PostProcessTask", "CreateARTASAssociationsTask"});
 
