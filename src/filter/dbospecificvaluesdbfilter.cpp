@@ -129,11 +129,18 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
                 assert (it != object_->dsEnd());
                 int ds_id = it->first;
 
-                bool cond_first = true;
-                std::string text =
-                        conditions_.at(cnt)->getConditionString(dbo_name, cond_first, filtered_variables);
+                if (conditions_.at(cnt)->getValue() == "*")
+                {
+                    ss << "(" << ds_column_name_ << "=" << ds_id << ")";
+                }
+                else
+                {
+                    bool cond_first = true;
+                    std::string text =
+                            conditions_.at(cnt)->getConditionString(dbo_name, cond_first, filtered_variables);
 
-                ss << "(" << ds_column_name_ << "=" << ds_id << " AND " << text << ")";
+                    ss << "(" << ds_column_name_ << "=" << ds_id << " AND " << text << ")";
+                }
 
 
                 if (!condition_set) // first time only
