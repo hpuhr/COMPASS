@@ -685,7 +685,7 @@
                         "LabelEntrytrack_coasted0": {
                             "parameters": {
                                 "prefix": "",
-                                "show": true,
+                                "show": false,
                                 "suffix": "",
                                 "variable_name": "track_coasted"
                             }
@@ -709,7 +709,7 @@
                         "LabelEntrytrack_end0": {
                             "parameters": {
                                 "prefix": "",
-                                "show": true,
+                                "show": false,
                                 "suffix": "",
                                 "variable_name": "track_end"
                             }
