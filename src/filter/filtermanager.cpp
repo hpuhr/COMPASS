@@ -206,7 +206,7 @@ void FilterManager::checkSubConfigurables()
         loginf << "FilterManager: checkSubConfigurables: generating sensor filter for "
                << obj_it.first;
 
-        std::string instance_id = obj_it.second->name() + "DataSources";
+        std::string instance_id = obj_it.second->name() + " Data Sources";
 
         if (configuration().hasSubConfiguration("DataSourcesFilter", instance_id))
         {
@@ -327,7 +327,12 @@ void FilterManager::showViewPointSlot (ViewPoint* vp)
             auto it = find_if(filters_.begin(), filters_.end(),
                               [filter_name] (const DBFilter* f) { return f->getName() == filter_name; } );
 
-            assert (it != filters_.end());
+            if (it == filters_.end())
+            {
+                logerr << "FilterManager: showViewPointSlot: filter '" << filter_name << "' not found";
+                continue;
+            }
+
             (*it)->setActive(true);
             (*it)->loadViewPointConditions(filters);
         }
