@@ -517,7 +517,8 @@ void ViewPointsImportTask::import ()
                 assert(asterix_importer_task.canRun());
                 asterix_importer_task.showDoneSummary(false);
 
-                widget->runCurrentTaskSlot();
+                //widget->runCurrentTaskSlot();
+                widget->runTask(asterix_importer_task);
 
                 while (QCoreApplication::hasPendingEvents() || !asterix_importer_task.done())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);

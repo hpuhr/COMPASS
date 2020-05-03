@@ -52,6 +52,7 @@ class TaskManagerWidget : public QWidget
     void updateTaskStates();
     void selectNextTask();
     void setCurrentTask(Task& task);
+    void runTask(Task& task); // set and run
 
     std::string getCurrentTaskName();
 

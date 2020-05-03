@@ -95,6 +95,10 @@ void ASTERIXImportTaskWidget::addMainTab()
         connect(delete_file_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteFileSlot);
         button_layout->addWidget(delete_file_button_);
 
+        delete_all_files_button_ = new QPushButton("Remove All");
+        connect(delete_all_files_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::deleteAllFilesSlot);
+        button_layout->addWidget(delete_all_files_button_);
+
         files_layout->addLayout(button_layout);
 
         main_tab_layout->addLayout(files_layout);
@@ -238,6 +242,12 @@ void ASTERIXImportTaskWidget::deleteFileSlot()
     assert(task_.currentFilename().size());
     assert(task_.hasFile(task_.currentFilename()));
     task_.removeCurrentFilename();
+}
+
+void ASTERIXImportTaskWidget::deleteAllFilesSlot()
+{
+    loginf << "ASTERIXImportTaskWidget: deleteAllFilesSlot";
+    task_.removeAllFiles();
 }
 
 void ASTERIXImportTaskWidget::selectedFileSlot()

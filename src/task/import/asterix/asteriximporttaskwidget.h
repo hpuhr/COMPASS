@@ -42,6 +42,7 @@ class ASTERIXImportTaskWidget : public TaskWidget
   public slots:
     void addFileSlot();
     void deleteFileSlot();
+    void deleteAllFilesSlot();
     void selectedFileSlot();
     void updateFileListSlot();
 
@@ -80,6 +81,7 @@ protected:
     QListWidget* file_list_{nullptr};
     QPushButton* add_file_button_{nullptr};
     QPushButton* delete_file_button_{nullptr};
+    QPushButton* delete_all_files_button_{nullptr};
 
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};

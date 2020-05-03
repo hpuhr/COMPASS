@@ -573,49 +573,6 @@ void TaskManager::performAutomaticTasks ()
         QThread::msleep(100);  // delay
     }
 
-    #if USE_JASTERIX
-    if (asterix_import_file_)
-    {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
-               << asterix_import_filename_ << "'";
-
-        if (!Files::fileExists(asterix_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
-                   << "' does not exist";
-            return;
-        }
-
-        widget_->setCurrentTask(*asterix_importer_task_);
-        if(widget_->getCurrentTaskName() != asterix_importer_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
-
-        ASTERIXImportTaskWidget* asterix_import_task_widget =
-            dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
-        assert(asterix_import_task_widget);
-
-        asterix_import_task_widget->addFile(asterix_import_filename_);
-        asterix_import_task_widget->selectFile(asterix_import_filename_);
-
-        assert(asterix_importer_task_->canRun());
-        asterix_importer_task_->showDoneSummary(false);
-
-        widget_->runCurrentTaskSlot();
-
-        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
-    }
-    #endif
-
     if (view_points_import_file_)
     {
         while (QCoreApplication::hasPendingEvents())
@@ -657,6 +614,49 @@ void TaskManager::performAutomaticTasks ()
         QThread::msleep(100);  // delay
     }
 
+    #if USE_JASTERIX
+    if (asterix_import_file_)
+    {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
+               << asterix_import_filename_ << "'";
+
+        if (!Files::fileExists(asterix_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*asterix_importer_task_);
+        if(widget_->getCurrentTaskName() != asterix_importer_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        ASTERIXImportTaskWidget* asterix_import_task_widget =
+            dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
+        assert(asterix_import_task_widget);
+
+        asterix_import_task_widget->addFile(asterix_import_filename_);
+        asterix_import_task_widget->selectFile(asterix_import_filename_);
+
+        assert(asterix_importer_task_->canRun());
+        asterix_importer_task_->showDoneSummary(false);
+
+        //widget_->runCurrentTaskSlot();
+        widget_->runTask(*asterix_importer_task_);
+
+        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
+    }
+    #endif
 
     if (auto_process_)
     {
@@ -676,7 +676,8 @@ void TaskManager::performAutomaticTasks ()
             }
             radar_plot_position_calculator_task_->showDoneSummary(false);
 
-            widget_->runCurrentTaskSlot();
+            //widget_->runCurrentTaskSlot();
+            widget_->runTask(*radar_plot_position_calculator_task_);
 
             while (QCoreApplication::hasPendingEvents() || !radar_plot_position_calculator_task_->done())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -704,12 +705,15 @@ void TaskManager::performAutomaticTasks ()
         if(widget_->getCurrentTaskName() != post_process_task_->name())
             widget_->setCurrentTask(*post_process_task_);
 
-        widget_->runCurrentTaskSlot();
+        //widget_->runCurrentTaskSlot();
+        widget_->runTask(*post_process_task_);
 
         while (QCoreApplication::hasPendingEvents() || !post_process_task_->done())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         QThread::msleep(100);  // delay
+
+        loginf << "TaskManager: performAutomaticTasks: post-processing task done";
 
         // assocs
         if (create_artas_associations_task_->isRecommended())
@@ -728,7 +732,8 @@ void TaskManager::performAutomaticTasks ()
 
             create_artas_associations_task_->showDoneSummary(false);
 
-            widget_->runCurrentTaskSlot();
+            //widget_->runCurrentTaskSlot();
+            widget_->runTask(*create_artas_associations_task_);
 
             while (QCoreApplication::hasPendingEvents() || !create_artas_associations_task_->done())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);

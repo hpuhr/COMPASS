@@ -260,6 +260,24 @@ void ASTERIXImportTask::removeCurrentFilename()
         widget_->updateFileListSlot();
 }
 
+void ASTERIXImportTask::removeAllFiles ()
+{
+    loginf << "ASTERIXImportTask: removeAllFiles";
+
+    while (file_list_.size())
+    {
+        delete file_list_.begin()->second;
+        file_list_.erase(file_list_.begin());
+    }
+
+    current_filename_ = "";
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
 void ASTERIXImportTask::currentFilename(const std::string& filename)
 {
     loginf << "ASTERIXImporterTask: currentFilename: filename '" << filename << "'";

@@ -346,10 +346,18 @@ void TaskManagerWidget::expertModeToggledSlot()
 
 void TaskManagerWidget::runCurrentTaskSlot()
 {
-    loginf << "TaskManagerWidget: runCurrentTaskSlot";
+    loginf << "TaskManagerWidget: runCurrentTaskSlot: task " << getCurrentTaskName();
 
     task_manager_.runTask(getCurrentTaskName());
 }
+
+void TaskManagerWidget::runTask(Task& task)
+{
+    loginf << "TaskManagerWidget: runTask: name '" << task.name() << "'";
+    setCurrentTask(task);
+    task_manager_.runTask(task.name());
+}
+
 
 void TaskManagerWidget::startSlot()
 {
