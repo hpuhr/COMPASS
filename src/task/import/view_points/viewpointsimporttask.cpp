@@ -248,16 +248,17 @@ void ViewPointsImportTask::parseCurrentFile ()
         current_data_ = json::parse(ifs);
 
         checkParsedData();
-
-        if (widget_)
-            widget_->updateContext();
     }
     catch (exception& e)
     {
         current_error_ = "parsing file '" + current_filename_ + "' resulted in error '" + e.what() + "'";
         logerr << "ViewPointsImportTask: parseCurrentFile: " << current_error_;
-        return;
     }
+
+    if (widget_)
+        widget_->updateContext();
+
+    loginf << "ViewPointsImportTask: parseCurrentFile: done";
 }
 
 void ViewPointsImportTask::checkParsedData ()

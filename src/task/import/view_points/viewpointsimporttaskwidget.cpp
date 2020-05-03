@@ -207,21 +207,25 @@ void ViewPointsImportTaskWidget::expertModeChangedSlot() {}
 
 void ViewPointsImportTaskWidget::updateContext ()
 {
+    loginf << "ViewPointsImportTaskWidget: updateContext";
+
     assert (context_edit_);
     context_edit_->setText("");
 
     if (task_.currentError().size())
     {
         context_edit_->setText(QString("Error: ")+task_.currentError().c_str());
+        import_button_->setDisabled(true);
     }
     else
     {
         const nlohmann::json& data = task_.currentData();
 
-        if (data.contains("view_point_context"))
-            context_edit_->setText(data.at("view_point_context").dump(4).c_str());
-        else
-            context_edit_->setText("No view point context defined");
+        assert (data.contains("view_point_context"));
+
+        context_edit_->setText(data.at("view_point_context").dump(4).c_str());
+
+        import_button_->setDisabled(false);
     }
 }
 
