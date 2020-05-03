@@ -26,6 +26,7 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <QVBoxLayout>
+#include <QTimer>
 
 #include "allbuffertablemodel.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -189,14 +190,15 @@ void AllBufferTableWidget::selectSelectedRows()
         QModelIndex first = model_->index(rows.first, 0, QModelIndex());
         assert (first.isValid());
 
-        table_->setSelectionMode(QAbstractItemView::MultiSelection);
+        QModelIndex last = model_->index(rows.second, 0, QModelIndex());
+        assert (last.isValid());
 
-        for (unsigned int cnt = rows.first; cnt <= rows.second; ++cnt)
-            table_->selectRow(cnt);
+        table_->selectionModel()->select(QItemSelection(first, last),
+                                         QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
-        table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
-
-        table_->scrollTo(first, QAbstractItemView::PositionAtCenter);
+        //table_->scrollTo(first, QAbstractItemView::PositionAtCenter);
+        // needed, maybe because model is reset
+        QTimer::singleShot(10, [this,first]{table_->scrollTo(first, QAbstractItemView::PositionAtCenter);});
     }
     else
         loginf << "AllBufferTableWidget: selectSelectedRows: nothing selected";

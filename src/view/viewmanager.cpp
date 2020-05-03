@@ -207,9 +207,6 @@ ViewPointsWidget* ViewManager::viewPointsWidget() const
     return view_points_widget_;
 }
 
-
-
-
 void ViewManager::setCurrentViewPoint (unsigned int id)
 {
     if (current_view_point_set_)
@@ -220,6 +217,8 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
 
     current_view_point_set_ = true;
     current_view_point_ = id;
+
+    view_point_data_selected_ = false;
 
     emit showViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
@@ -238,6 +237,8 @@ void ViewManager::unsetCurrentViewPoint ()
 
         current_view_point_set_ = false;
         current_view_point_ = 0;
+
+        view_point_data_selected_ = false;
     }
 }
 
@@ -247,6 +248,9 @@ void ViewManager::doViewPointAfterLoad ()
 
     if (!current_view_point_set_)
         return; // nothing to do
+
+    if (view_point_data_selected_)
+        return; // already done, this is a re-load
 
     assert (view_points_widget_);
     assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
@@ -347,7 +351,7 @@ void ViewManager::doViewPointAfterLoad ()
                         selected_vec.set(cnt, true);
                         selection_changed = true;
 
-                        loginf << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
+                        logdbg << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
 
                     }
                     else if (tod == time)// only time set
@@ -359,6 +363,8 @@ void ViewManager::doViewPointAfterLoad ()
             }
         }
     }
+
+    view_point_data_selected_ = true;
 
     if (selection_changed)
     {

@@ -99,6 +99,7 @@ protected:
 
     bool current_view_point_set_ {false};
     unsigned int current_view_point_ {0};
+    bool view_point_data_selected_ {false};
 
     unsigned int container_count_{0};
 
