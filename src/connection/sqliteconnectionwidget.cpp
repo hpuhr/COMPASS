@@ -52,21 +52,30 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection& connection, QWi
     file_list_->setSelectionMode(QAbstractItemView::SingleSelection);
     layout->addWidget(file_list_);
 
+    QHBoxLayout* file_button_layout = new QHBoxLayout();
+
     new_button_ = new QPushButton("New");
-    connect(new_button_, SIGNAL(clicked()), this, SLOT(newFileSlot()));
-    layout->addWidget(new_button_);
+    connect(new_button_, &QPushButton::clicked, this, &SQLiteConnectionWidget::newFileSlot);
+    file_button_layout->addWidget(new_button_);
 
     add_button_ = new QPushButton("Add");
-    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
-    layout->addWidget(add_button_);
+    connect(add_button_, &QPushButton::clicked, this, &SQLiteConnectionWidget::addFileSlot);
+    file_button_layout->addWidget(add_button_);
 
     delete_button_ = new QPushButton("Remove");
-    connect(delete_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
-    layout->addWidget(delete_button_);
-    layout->addStretch();
+    connect(delete_button_, &QPushButton::clicked, this, &SQLiteConnectionWidget::deleteFileSlot);
+    file_button_layout->addWidget(delete_button_);
+
+    delete_all_button_ = new QPushButton("Remove All");
+    connect(delete_all_button_, &QPushButton::clicked, this, &SQLiteConnectionWidget::deleteAllFilesSlot);
+    file_button_layout->addWidget(delete_all_button_);
+
+    layout->addLayout(file_button_layout);
+
+    layout->addSpacing(50);
 
     open_button_ = new QPushButton("Open");
-    connect(open_button_, SIGNAL(clicked()), this, SLOT(openFileSlot()));
+    connect(open_button_, &QPushButton::clicked, this, &SQLiteConnectionWidget::openFileSlot);
     layout->addWidget(open_button_);
 
     updateFileListSlot();
@@ -132,6 +141,12 @@ void SQLiteConnectionWidget::deleteFileSlot()
         assert(connection_.hasFile(filename.toStdString()));
         connection_.removeFile(filename.toStdString());
     }
+}
+
+void SQLiteConnectionWidget::deleteAllFilesSlot()
+{
+    loginf << "SQLiteConnectionWidget: deleteAllFilesSlot";
+    connection_.removeAllFiles();
 }
 
 void SQLiteConnectionWidget::openFileSlot()

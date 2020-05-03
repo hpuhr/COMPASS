@@ -673,3 +673,17 @@ void SQLiteConnection::removeFile(const std::string& filename)
     if (widget_)
         widget_->updateFileListSlot();
 }
+
+void SQLiteConnection::removeAllFiles ()
+{
+    loginf << "SQLiteConnection: removeAllFiles";
+
+    while (file_list_.size())
+    {
+        delete file_list_.begin()->second;
+        file_list_.erase(file_list_.begin());
+    }
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}

@@ -20,6 +20,7 @@ class SQLiteConnectionWidget : public QWidget
     void newFileSlot();
     void addFileSlot();
     void deleteFileSlot();
+    void deleteAllFilesSlot();
     void openFileSlot();
 
     void updateFileListSlot();
@@ -39,6 +40,7 @@ class SQLiteConnectionWidget : public QWidget
     QPushButton* new_button_{nullptr};
     QPushButton* add_button_{nullptr};
     QPushButton* delete_button_{nullptr};
+    QPushButton* delete_all_button_{nullptr};
 
     QPushButton* open_button_{nullptr};
 };

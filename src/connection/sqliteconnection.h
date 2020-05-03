@@ -85,6 +85,7 @@ class SQLiteConnection : public DBConnection
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
     void addFile(const std::string& filename);
     void removeFile(const std::string& filename);
+    void removeAllFiles ();
 
     const std::string& lastFilename() { return last_filename_; }
 
