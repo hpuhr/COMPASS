@@ -267,53 +267,66 @@ void ViewPointsImportTask::checkParsedData ()
     if (!current_data_.is_object())
         throw std::runtime_error("current data is not an object");
 
-    if (current_data_.contains("view_point_context"))
+    if (!current_data_.contains("view_point_context"))
+        throw std::runtime_error("current data has no context information");
+
+    json& context = current_data_.at("view_point_context");
+
+    if (!context.contains("version"))
+        throw std::runtime_error("current data context has no version");
+
+    json& version = context.at("version");
+
+    if (!version.is_string())
+        throw std::runtime_error("current data context version is not string");
+
+    string version_str = version;
+
+    if (version_str != "0.1")
+        throw std::runtime_error("current data context version '"+version_str+"' is not supported");
+
+    if (context.contains("datasets"))
     {
-        json& context = current_data_.at("view_point_context");
+        if (!context.at("datasets").is_array())
+            throw std::runtime_error("datasets is not an array");
 
-        if (context.contains("datasets"))
+        for (auto& ds_it : context.at("datasets").get<json::array_t>())
         {
-            if (!context.at("datasets").is_array())
-                throw std::runtime_error("datasets is not an array");
+            if (!ds_it.contains("name") || !ds_it.at("name").is_string())
+                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
 
-            for (auto& ds_it : context.at("datasets").get<json::array_t>())
+            if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
+                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
+
+            std::string filename = ds_it.at("filename");
+
+            bool found = true;
+
+            if (!Files::fileExists(filename))
             {
-                if (!ds_it.contains("name") || !ds_it.at("name").is_string())
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
+                found = false;
 
-                if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
+                std::string file = Files::getFilenameFromPath(filename);
+                std::string dir = Files::getDirectoryFromPath(current_filename_);
 
-                std::string filename = ds_it.at("filename");
+                loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
+                       << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
 
-                bool found = true;
+                filename = dir+"/"+file;
 
-                if (!Files::fileExists(filename))
+                if (Files::fileExists(filename))
                 {
-                    found = false;
-
-                    std::string file = Files::getFilenameFromPath(filename);
-                    std::string dir = Files::getDirectoryFromPath(current_filename_);
+                    found = true;
 
                     loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
-                           << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
+                           << "' found, re-writing path";
 
-                    filename = dir+"/"+file;
-
-                    if (Files::fileExists(filename))
-                    {
-                        found = true;
-
-                        loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
-                               << "' found, re-writing path";
-
-                        ds_it.at("filename") = filename;
-                    }
+                    ds_it.at("filename") = filename;
                 }
-
-                if (!found)
-                    throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
             }
+
+            if (!found)
+                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
         }
     }
 
@@ -366,10 +379,10 @@ void ViewPointsImportTask::import ()
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
-            nullptr, "Clear Existing View Points",
-            "There are already view points defined in the database.\n\n"
-            "Do you agree to delete all view points?",
-            QMessageBox::Yes | QMessageBox::No);
+                    nullptr, "Clear Existing View Points",
+                    "There are already view points defined in the database.\n\n"
+                    "Do you agree to delete all view points?",
+                    QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
             loginf << "ViewPointsImportTask: import: deleting all view points";
@@ -435,7 +448,7 @@ void ViewPointsImportTask::import ()
                 }
 
                 ASTERIXImportTaskWidget* asterix_import_task_widget =
-                    dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
+                        dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task.widget());
                 assert(asterix_import_task_widget);
 
                 asterix_import_task_widget->addFile(filename);

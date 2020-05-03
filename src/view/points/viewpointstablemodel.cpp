@@ -15,6 +15,7 @@
 
 using namespace nlohmann;
 using namespace Utils;
+using namespace std;
 
 ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     : view_manager_(view_manager)
@@ -347,8 +348,25 @@ void ViewPointsTableModel::importViewPoints (const std::string& filename)
         std::ifstream ifs(filename);
         json j = json::parse(ifs);
 
-        if (j.contains("view_point_context"))
-            loginf << "ViewPointsTableModel: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
+        if (!j.contains("view_point_context"))
+            throw std::runtime_error("File '"+filename+"' has no context information");
+
+        json& context = j.at("view_point_context");
+
+        if (!context.contains("version"))
+            throw std::runtime_error("File '"+filename+"' context has no version");
+
+        json& version = context.at("version");
+
+        if (!version.is_string())
+            throw std::runtime_error("File '"+filename+"' context version is not number");
+
+        string version_str = version;
+
+        if (version_str != "0.1")
+            throw std::runtime_error("File '"+filename+"' context version "+version_str+" is not supported");
+
+        loginf << "ViewPointsTableModel: importViewPoints: context '" << j.at("view_point_context").dump(4) << "'";
 
         if (!j.contains("view_points"))
             throw std::runtime_error ("File '"+filename+"' does not contain view points.");
@@ -404,6 +422,10 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
     loginf << "ViewPointsTableModel: exportViewPoints: filename '" << filename << "'";
 
     json data;
+
+    data["view_point_context"] = json::object();
+    json& context = data.at("view_point_context");
+    context["version"] = "0.1";
 
     data["view_points"] = json::array();
     json& view_points = data.at("view_points");
