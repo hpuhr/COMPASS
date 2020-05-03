@@ -6,7 +6,7 @@
         "DBFilter": {
             "Barometric Altitude": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Barometric Altitude",
                     "op_and_": true,
@@ -17,10 +17,11 @@
                         "Barometric Altitude Maxmimum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "124600",
+                                "value": "43000",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -28,10 +29,11 @@
                         "Barometric Altitude Minimum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "-1000",
+                                "value": "500",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -48,7 +50,7 @@
             },
             "Callsign": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Callsign",
                     "op_and_": true,
@@ -59,6 +61,7 @@
                         "Callsign Values": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "LIKE",
                                 "reset_value": "%TEST%",
@@ -71,17 +74,17 @@
                     "DBFilterWidget": {
                         "CallsignWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
                 }
             },
-            "HashCode": {
+            "Hash Code": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
-                    "name": "HashCode",
+                    "name": "Hash Code",
                     "op_and_": true,
                     "visible": false
                 },
@@ -90,6 +93,7 @@
                         "HashCode Values": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "LIKE",
                                 "reset_value": "%81c20819%",
@@ -102,7 +106,7 @@
                     "DBFilterWidget": {
                         "HashCodeWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
@@ -110,7 +114,7 @@
             },
             "Mode 3A Codes": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Mode 3A Codes",
                     "op_and_": true,
@@ -121,6 +125,7 @@
                         "Mode 3A Code Values": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "IN",
                                 "reset_value": "7000",
@@ -141,7 +146,7 @@
             },
             "Position": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Position",
                     "op_and_": true,
@@ -152,32 +157,47 @@
                         "Latitude Maximum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "<=",
-                                "reset_value": "175.067021796",
-                                "value": "175.067021796",
+                                "reset_value": "MAX",
+                                "value": "50.78493920733",
                                 "variable_dbo_name": "Meta",
-                                "variable_name": "pos_long_deg"
+                                "variable_name": "pos_lat_deg"
                             }
                         },
                         "Latitude Minimum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": ">=",
-                                "reset_value": "-43.648169566",
-                                "value": "-43.648169566",
+                                "reset_value": "MIN",
+                                "value": "44.31547147615",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_lat_deg"
+                            }
+                        },
+                        "Longitude Maximum": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "<=",
+                                "reset_value": "MAX",
+                                "value": "20.76559892354",
+                                "variable_dbo_name": "Meta",
+                                "variable_name": "pos_long_deg"
                             }
                         },
                         "Longitude Minimum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": ">=",
-                                "reset_value": "-157.4582330112",
-                                "value": "-157.4582330112",
+                                "reset_value": "MIN",
+                                "value": "8.5801592186",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_long_deg"
                             }
@@ -186,17 +206,17 @@
                     "DBFilterWidget": {
                         "PositionWidget0": {
                             "parameters": {
-                                "visible": false
+                                "visible": true
                             }
                         }
                     }
                 }
             },
-            "TargetAddress": {
+            "Target Address": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
-                    "name": "TargetAddress",
+                    "name": "Target Address",
                     "op_and_": true,
                     "visible": false
                 },
@@ -205,10 +225,11 @@
                         "Target Address Values": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "IN",
                                 "reset_value": "FEFE10",
-                                "value": "3e1688\n",
+                                "value": "FEFE10",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "target_addr"
                             }
@@ -225,7 +246,7 @@
             },
             "Time of Day": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Time of Day",
                     "op_and_": true,
@@ -236,10 +257,11 @@
                         "Time of Day Maximum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "11:46:12.836\n",
+                                "value": "05:59:56.297",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -247,10 +269,11 @@
                         "Time of Day Minimum": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "11:40:05.023\n",
+                                "value": "05:44:58.242",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -265,11 +288,11 @@
                     }
                 }
             },
-            "TrackNum": {
+            "Track Number": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
-                    "name": "TrackNum",
+                    "name": "Track Number",
                     "op_and_": true,
                     "visible": false
                 },
@@ -278,6 +301,7 @@
                         "Track Number Values": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "IN",
                                 "reset_value": "4227",
@@ -296,11 +320,11 @@
                     }
                 }
             },
-            "TrackerDetectionType": {
+            "Tracker Detection Type": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
-                    "name": "TrackerDetectionType",
+                    "name": "Tracker Detection Type",
                     "op_and_": true,
                     "visible": false
                 },
@@ -309,6 +333,7 @@
                         "Tracker Detection Types": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "IN",
                                 "reset_value": "1",
@@ -327,11 +352,11 @@
                     }
                 }
             },
-            "TrackerMultipleSources": {
+            "Tracker Multiple Sources": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
-                    "name": "TrackerMultipleSources",
+                    "name": "Tracker Multiple Sources",
                     "op_and_": true,
                     "visible": false
                 },
@@ -340,6 +365,7 @@
                         "Tracker Multiple Sources Value": {
                             "parameters": {
                                 "absolute_value": false,
+                                "display_instance_id": false,
                                 "op_and": true,
                                 "operator": "=",
                                 "reset_value": "N",
@@ -359,106 +385,72 @@
                 }
             }
         },
+        "DBOSpecificValuesDBFilter": {
+            "Tracker Track Number": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "condition_operator": "IN",
+                    "dbo_name": "Tracker",
+                    "name": "Tracker Track Number",
+                    "op_and_": true,
+                    "variable_name": "track_num",
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "ARTAS_REF track_num": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": true,
+                                "op_and": false,
+                                "operator": "IN",
+                                "reset_value": "4227",
+                                "value": "7594",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_num"
+                            }
+                        },
+                        "ARTAS_TST track_num": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": true,
+                                "op_and": false,
+                                "operator": "IN",
+                                "reset_value": "4227",
+                                "value": "8008",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_num"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "Tracker TrackNumWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "DataSourcesFilter": {
-            "ADSBDataSources": {
-                "parameters": {
-                    "active": false,
-                    "active_sources": {
-                        "12880": true
-                    },
-                    "changed": true,
-                    "dbo_name": "ADSB",
-                    "name": "ADSBDataSources",
-                    "op_and_": true,
-                    "visible": false
-                },
-                "sub_configs": {
-                    "DataSourcesFilterWidget": {
-                        "ADSBDataSourcesWidget0": {
-                            "parameters": {
-                                "visible": true
-                            }
-                        }
-                    }
-                }
-            },
-            "MLATDataSources": {
+            "Tracker Data Sources": {
                 "parameters": {
                     "active": true,
                     "active_sources": {
-                        "12870": true,
-                        "12871": false,
-                        "12872": false,
-                        "12873": false,
-                        "12874": false,
-                        "12875": false,
-                        "12876": false,
-                        "12877": false,
-                        "12878": false,
-                        "12881": false
-                    },
-                    "changed": true,
-                    "dbo_name": "MLAT",
-                    "name": "MLATDataSources",
-                    "op_and_": true,
-                    "visible": false
-                },
-                "sub_configs": {
-                    "DataSourcesFilterWidget": {
-                        "MLATDataSourcesWidget0": {
-                            "parameters": {
-                                "visible": true
-                            }
-                        }
-                    }
-                }
-            },
-            "RadarDataSources": {
-                "parameters": {
-                    "active": true,
-                    "active_sources": {
-                        "12289": false,
-                        "12688": false,
-                        "12800": false,
-                        "12807": false,
-                        "12813": true,
-                        "12820": false,
-                        "12848": false,
-                        "25103": false,
-                        "25104": false,
-                        "37641": false
-                    },
-                    "changed": true,
-                    "dbo_name": "Radar",
-                    "name": "RadarDataSources",
-                    "op_and_": true,
-                    "visible": false
-                },
-                "sub_configs": {
-                    "DataSourcesFilterWidget": {
-                        "RadarDataSourcesWidget0": {
-                            "parameters": {
-                                "visible": true
-                            }
-                        }
-                    }
-                }
-            },
-            "TrackerDataSources": {
-                "parameters": {
-                    "active": false,
-                    "active_sources": {
-                        "13040": true
+                        "13040": true,
+                        "13041": true
                     },
                     "changed": true,
                     "dbo_name": "Tracker",
-                    "name": "TrackerDataSources",
+                    "name": "Tracker Data Sources",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DataSourcesFilterWidget": {
-                        "TrackerDataSourcesWidget0": {
+                        "Tracker Data SourcesWidget0": {
                             "parameters": {
                                 "visible": true
                             }

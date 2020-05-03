@@ -84,8 +84,8 @@
                         },
                         "LabelEntryalt_baro_ft0": {
                             "parameters": {
-                                "prefix": "",
-                                "show": false,
+                                "prefix": "C ",
+                                "show": true,
                                 "suffix": "",
                                 "variable_name": "alt_baro_ft"
                             }
