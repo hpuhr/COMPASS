@@ -91,12 +91,16 @@ void JSONImportTaskWidget::addMainTab()
         QHBoxLayout* button_layout = new QHBoxLayout();
 
         add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
+        connect(add_file_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::addFileSlot);
         button_layout->addWidget(add_file_button_);
 
         delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
+        connect(delete_file_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::deleteFileSlot);
         button_layout->addWidget(delete_file_button_);
+
+        delete_all_files_button_ = new QPushButton("Remove All");
+        connect(delete_all_files_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::deleteAllFilesSlot);
+        button_layout->addWidget(delete_all_files_button_);
 
         main_tab_layout->addLayout(button_layout);
     }
@@ -231,6 +235,13 @@ void JSONImportTaskWidget::deleteFileSlot()
     assert(task_.hasFile(task_.currentFilename()));
     task_.removeCurrentFilename();
 }
+
+void JSONImportTaskWidget::deleteAllFilesSlot()
+{
+    loginf << "JSONImportTaskWidget: deleteAllFilesSlot";
+    task_.removeAllFiles();
+}
+
 
 void JSONImportTaskWidget::selectedFileSlot()
 {

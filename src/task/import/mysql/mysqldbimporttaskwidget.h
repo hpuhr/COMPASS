@@ -32,6 +32,7 @@ class MySQLDBImportTaskWidget : public TaskWidget
   public slots:
     void addFileSlot();
     void deleteFileSlot();
+    void deleteAllFilesSlot();
     void selectedFileSlot();
     void updateFileListSlot();
 
@@ -47,6 +48,7 @@ class MySQLDBImportTaskWidget : public TaskWidget
     QListWidget* file_list_{nullptr};
     QPushButton* add_file_button_{nullptr};
     QPushButton* delete_file_button_{nullptr};
+    QPushButton* delete_all_files_button_{nullptr};
 };
 
 #endif  // MYSQLDBIMPORTTASKWIDGET_H

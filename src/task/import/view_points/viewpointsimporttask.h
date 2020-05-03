@@ -71,6 +71,7 @@ public:
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
     void addFile(const std::string& filename);
     void removeCurrentFilename();
+    void removeAllFiles ();
     std::string currentFilename() const;
     void currentFilename(const std::string& value);
 

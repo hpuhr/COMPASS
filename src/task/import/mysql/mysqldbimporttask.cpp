@@ -137,6 +137,24 @@ void MySQLDBImportTask::removeCurrentFilename()
         widget_->updateFileListSlot();
 }
 
+void MySQLDBImportTask::removeAllFiles ()
+{
+    loginf << "MySQLDBImportTask: removeAllFiles";
+
+    while (file_list_.size())
+    {
+        delete file_list_.begin()->second;
+        file_list_.erase(file_list_.begin());
+    }
+
+    current_filename_ = "";
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
 void MySQLDBImportTask::currentFilename(const std::string& filename)
 {
     loginf << "MySQLDBImportTask: currentFilename: filename '" << filename << "'";

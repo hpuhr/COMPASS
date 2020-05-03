@@ -60,12 +60,16 @@ MySQLDBImportTaskWidget::MySQLDBImportTaskWidget(MySQLDBImportTask& task, QWidge
         QHBoxLayout* button_layout = new QHBoxLayout();
 
         add_file_button_ = new QPushButton("Add");
-        connect(add_file_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
+        connect(add_file_button_, &QPushButton::clicked, this, &MySQLDBImportTaskWidget::addFileSlot);
         button_layout->addWidget(add_file_button_);
 
         delete_file_button_ = new QPushButton("Remove");
-        connect(delete_file_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
+        connect(delete_file_button_, &QPushButton::clicked, this, &MySQLDBImportTaskWidget::deleteFileSlot);
         button_layout->addWidget(delete_file_button_);
+
+        delete_all_files_button_ = new QPushButton("Remove All");
+        connect(delete_all_files_button_, &QPushButton::clicked, this, &MySQLDBImportTaskWidget::deleteAllFilesSlot);
+        button_layout->addWidget(delete_all_files_button_);
 
         files_layout->addLayout(button_layout);
 
@@ -130,6 +134,12 @@ void MySQLDBImportTaskWidget::deleteFileSlot()
     assert(task_.currentFilename().size());
     assert(task_.hasFile(task_.currentFilename()));
     task_.removeCurrentFilename();
+}
+
+void MySQLDBImportTaskWidget::deleteAllFilesSlot()
+{
+    loginf << "MySQLDBImportTaskWidget: deleteAllFilesSlot";
+    task_.removeAllFiles();
 }
 
 void MySQLDBImportTaskWidget::selectedFileSlot()

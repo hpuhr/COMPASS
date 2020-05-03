@@ -51,6 +51,7 @@ public slots:
 
     void addFileSlot();
     void deleteFileSlot();
+    void deleteAllFilesSlot();
     void selectedFileSlot();
     void updateFileListSlot();
 
@@ -73,6 +74,7 @@ protected:
     QListWidget* file_list_{nullptr};
     QPushButton* add_file_button_{nullptr};
     QPushButton* delete_file_button_{nullptr};
+    QPushButton* delete_all_files_button_{nullptr};
 
     QTextEdit* context_edit_ {nullptr};
 

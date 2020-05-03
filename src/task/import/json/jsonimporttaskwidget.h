@@ -43,6 +43,7 @@ class JSONImportTaskWidget : public TaskWidget
 
     void addFileSlot();
     void deleteFileSlot();
+    void deleteAllFilesSlot();
     void selectedFileSlot();
     void updateFileListSlot();
 
@@ -75,6 +76,7 @@ class JSONImportTaskWidget : public TaskWidget
     QListWidget* file_list_{nullptr};
     QPushButton* add_file_button_{nullptr};
     QPushButton* delete_file_button_{nullptr};
+    QPushButton* delete_all_files_button_{nullptr};
 
     QComboBox* schema_box_{nullptr};
     QPushButton* add_schema_button_{nullptr};

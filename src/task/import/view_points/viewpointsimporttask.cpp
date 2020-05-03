@@ -191,6 +191,28 @@ void ViewPointsImportTask::removeCurrentFilename()
     }
 }
 
+void ViewPointsImportTask::removeAllFiles ()
+{
+    loginf << "ViewPointsImportTask: removeAllFiles";
+
+    while (file_list_.size())
+    {
+        delete file_list_.begin()->second;
+        file_list_.erase(file_list_.begin());
+    }
+
+    current_filename_ = "";
+    current_data_ = json::object();
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+    {
+        widget_->updateFileListSlot();
+        widget_->updateContext();
+    }
+}
+
 void ViewPointsImportTask::currentFilename(const std::string& value)
 {
     loginf << "ViewPointsImportTask: currentFilename: value '" << value << "'";

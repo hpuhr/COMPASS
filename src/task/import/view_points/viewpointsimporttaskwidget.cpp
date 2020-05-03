@@ -89,6 +89,9 @@ ViewPointsImportTaskWidget::ViewPointsImportTaskWidget(ViewPointsImportTask& tas
         connect(delete_file_button_, &QPushButton::clicked, this, &ViewPointsImportTaskWidget::deleteFileSlot);
         button_layout->addWidget(delete_file_button_);
 
+        delete_all_files_button_ = new QPushButton("Remove All");
+        connect(delete_all_files_button_, &QPushButton::clicked, this, &ViewPointsImportTaskWidget::deleteAllFilesSlot);
+        button_layout->addWidget(delete_all_files_button_);
         files_layout->addLayout(button_layout);
 
         main_layout_->addLayout(files_layout);
@@ -167,6 +170,14 @@ void ViewPointsImportTaskWidget::deleteFileSlot()
     assert(task_.hasFile(task_.currentFilename()));
     task_.removeCurrentFilename();
 }
+
+void ViewPointsImportTaskWidget::deleteAllFilesSlot()
+{
+    loginf << "ViewPointsImportTaskWidget: deleteAllFilesSlot";
+    task_.removeAllFiles();
+}
+
+
 
 void ViewPointsImportTaskWidget::selectedFileSlot()
 {

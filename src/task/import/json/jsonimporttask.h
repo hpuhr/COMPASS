@@ -79,6 +79,7 @@ class JSONImportTask : public Task, public Configurable
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
     void addFile(const std::string& filename);
     void removeCurrentFilename();
+    void removeAllFiles ();
     void currentFilename(const std::string& filename);
     const std::string& currentFilename() { return current_filename_; }
 

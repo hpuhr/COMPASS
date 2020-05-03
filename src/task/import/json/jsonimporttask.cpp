@@ -170,6 +170,24 @@ void JSONImportTask::removeCurrentFilename()
         widget_->updateFileListSlot();
 }
 
+void JSONImportTask::removeAllFiles ()
+{
+    loginf << "JSONImportTask: removeAllFiles";
+
+    while (file_list_.size())
+    {
+        delete file_list_.begin()->second;
+        file_list_.erase(file_list_.begin());
+    }
+
+    current_filename_ = "";
+
+    emit statusChangedSignal(name_);
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
 void JSONImportTask::currentFilename(const std::string& filename)
 {
     loginf << "JSONImporterTask: currentFilename: filename '" << filename << "'";
