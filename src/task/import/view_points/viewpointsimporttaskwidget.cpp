@@ -103,7 +103,8 @@ ViewPointsImportTaskWidget::ViewPointsImportTaskWidget(ViewPointsImportTask& tas
 
     import_button_ = new QPushButton("Import");
     connect (import_button_, &QPushButton::clicked, this, &ViewPointsImportTaskWidget::importSlot);
-    main_layout_->addWidget(import_button_);
+    import_button_->setDisabled(true);
+    main_layout_->addWidget(import_button_); // is enabled in updateContext
 
     if (task_.currentFilename().size())
         updateContext();

@@ -69,28 +69,28 @@ Using ATSDB, database operations can be performed which might impede results lat
 If a remote server is used, e.g. a SASS-C workstation, remote access might be prohibited, which will result in an access permissions error during connecting. To resolve this, (generally) remote access can be enabled in the servers MySQL configuration. As a superuser, edit the file 'my.cnf', which is commonly found under '/etc/mysql/my.cnf'. 
 
 Find the line that states:
-\begin{cverbatim}
+\begin{lstlisting}
 bind-address = 127.0.0.1
-\end{cverbatim}
+\end{lstlisting}
 
 Change the line to:
 
-\begin{cverbatim}
+\begin{lstlisting}
 #bind-address = 127.0.0.1
-\end{cverbatim}
+\end{lstlisting}
 
 Then, restart the MySQL server using one the following commands:
 
-\begin{cverbatim}
+\begin{lstlisting}
 /etc/init.d/mysqld restart
 
 #OR, depending on your distribution
 service mysql restart
-\end{cverbatim}
+\end{lstlisting}
 
 Then, to allow access to the databases, log into a MySQL client on the server as root and execute the following commands:
 
-\begin{cverbatim}
+\begin{lstlisting}
 # log in as root, must be done as superuser
 mysql -u root
 
@@ -104,7 +104,7 @@ FLUSH PRIVILEGES;
 
 # exit the MySQL client
 exit
-\end{cverbatim}
+\end{lstlisting}
 
 After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
 

@@ -8,14 +8,14 @@ In this section, the first steps are described to run the application, create a 
 After an \nameref{sec:installation}, simply run the application.
 
 For an AppImage, use e.g.:
-\begin{cverbatim}
+\begin{lstlisting}
 ./ATSDB-release_x86_64.AppImage
-\end{cverbatim}
+\end{lstlisting}
 
 For a self-built application, use e.g.:
-\begin{cverbatim}
+\begin{lstlisting}
 ./build/bin/atsdb_client
-\end{cverbatim}
+\end{lstlisting}
 
 It is recommended to run the application from a console terminal (for issue analysis of the log text), but that is not mandatory.
 
@@ -61,6 +61,7 @@ The following tasks exist:
  \item Open a Database
  \item Manage DB Schema
  \item Manage DBObjects
+ \item Import View Points
  \item Import ASTERIX Data
  \item Import JSON Data
  \item Import MySQL DB
@@ -103,6 +104,7 @@ Depending on the use-case, some tasks are required, e.g. the Post-Process task. 
 \subfile{task_manage_schema}
 \subfile{task_manage_dbo}
 
+\subfile{task_import_view_points}
 \subfile{task_import_asterix}
 \subfile{task_import_json}
 \subfile{task_import_mysql}

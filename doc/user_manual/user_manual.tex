@@ -31,33 +31,48 @@
 \usepackage{dpfloat}     % floats on facing pages
 \usepackage{fonttable}[2009/04/01]   % font tables
 \usepackage[export]{adjustbox}
+\usepackage{listings}
 
-\usepackage{fancyvrb,newverbs,xcolor}
 
-\definecolor{cverbbg}{gray}{0.93}
+\usepackage{color}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}  
 
-\newenvironment{cverbatim}
- {\SaveVerbatim{cverb}}
- {\endSaveVerbatim
-  \flushleft\fboxrule=0pt\fboxsep=.5em
-  \colorbox{cverbbg}{\BUseVerbatim{cverb}}%
-  \endflushleft
-}
-\newenvironment{lcverbatim}
- {\SaveVerbatim{cverb}}
- {\endSaveVerbatim
-  \flushleft\fboxrule=0pt\fboxsep=.5em
-  \colorbox{cverbbg}{%
-    \makebox[\dimexpr\linewidth-2\fboxsep][l]{\BUseVerbatim{cverb}}%
-  }
-  \endflushleft
-}
+%\usepackage{fancyvrb,newverbs,xcolor}
 
-\newcommand{\ctexttt}[1]{\colorbox{cverbbg}{\texttt{#1}}}
-\newverbcommand{\cverb}
-  {\setbox\verbbox\hbox\bgroup}
-  {\egroup\colorbox{cverbbg}{\box\verbbox}}
+%\definecolor{cverbbg}{gray}{0.93}
 
+%\newenvironment{cverbatim}
+% {\SaveVerbatim{cverb}}
+% {\endSaveVerbatim
+%  \flushleft\fboxrule=0pt\fboxsep=.5em
+%  \colorbox{cverbbg}{\BUseVerbatim{cverb}}%
+% \endflushleft
+%}
+%\newenvironment{lcverbatim}
+% {\SaveVerbatim{cverb}}
+% {\endSaveVerbatim
+%  \flushleft\fboxrule=0pt\fboxsep=.5em
+%  \colorbox{cverbbg}{%
+%    \makebox[\dimexpr\linewidth-2\fboxsep][l]{\BUseVerbatim{cverb}}%
+%  }
+%  \endflushleft
+%}
+
+%\newcommand{\ctexttt}[1]{\colorbox{cverbbg}{\texttt{#1}}}
+%\newverbcommand{\cverb}
+%  {\setbox\verbbox\hbox\bgroup}
+%  {\egroup\colorbox{cverbbg}{\box\verbbox}}
+
+\lstset{
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  %frame=single,
+  breaklines=true,
+  backgroundcolor=\color{lbcolor},
+  %postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+  postbreak=\mbox{$\hookrightarrow$\space},
+}  
+  
 %%%%\usepackage{xr-hyper} \externaldocument{memdesign} Doesn't work, 
 %%%%                      Idea won't work in general for memman/memdesign
 %%%%                      as at display time, who knows where everything
@@ -202,7 +217,7 @@
 \begin{center}
 \normalsize\textsf{by Helmut Puhr}\par
 \medskip
-\normalsize\textsf{Version 0.5.1 \textit{Kindly Kakapo}}\par
+\normalsize\textsf{Version 0.5.3 \textit{Musty Mammoth}}\par
 \end{center}
 \vspace*{\fill}
 \begin{center}
@@ -243,7 +258,11 @@
 
 \subfile{task}
 
+\subfile{command_line}
+
 \subfile{management}
+
+\subfile {view_points}
 
 \subfile {listbox_view}
 
@@ -251,9 +270,9 @@
 
 \subfile {issues}
 
-\subfile {utils}
+\subfile {appendix}
 
-\subfile {licensing}
+
 
 %\section{Glossary}
 %Buffer
