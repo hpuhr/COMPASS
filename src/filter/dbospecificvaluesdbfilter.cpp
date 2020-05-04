@@ -121,11 +121,16 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
 
                 string cond_name = conditions_.at(cnt)->instanceId();
 
+//                DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
+//                                                           [cond_name, this] (const pair<int, DBODataSource>& s) {
+//                    return s.second.hasShortName() ?
+//                                (s.second.shortName()+" "+variable_name_) == cond_name
+//                              : (s.second.name()+" "+variable_name_) == cond_name; } );
+
                 DBObject:: DataSourceIterator it = find_if(object_->dsBegin(), object_->dsEnd(),
                                                            [cond_name, this] (const pair<int, DBODataSource>& s) {
-                    return s.second.hasShortName() ?
-                                (s.second.shortName()+" "+variable_name_) == cond_name
-                              : (s.second.name()+" "+variable_name_) == cond_name; } );
+                    return (s.second.name()+" "+variable_name_) == cond_name; } );
+
                 assert (it != object_->dsEnd());
                 int ds_id = it->first;
 
@@ -201,11 +206,17 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
     {
         string cond_name = cond_it->instanceId();
 
+//        if (find_if(object_->dsBegin(), object_->dsEnd(),
+//                    [cond_name, this] (const pair<int, DBODataSource>& s) {
+//                    return s.second.hasShortName() ?
+//                    (s.second.shortName()+" "+variable_name_) == cond_name
+//                    : (s.second.name()+" "+variable_name_) == cond_name; } )
+//                == object_->dsEnd())
+//            conditions_to_delete.push_back(cond_it);
+
         if (find_if(object_->dsBegin(), object_->dsEnd(),
                     [cond_name, this] (const pair<int, DBODataSource>& s) {
-                    return s.second.hasShortName() ?
-                    (s.second.shortName()+" "+variable_name_) == cond_name
-                    : (s.second.name()+" "+variable_name_) == cond_name; } )
+                    return (s.second.name()+" "+variable_name_) == cond_name; } )
                 == object_->dsEnd())
             conditions_to_delete.push_back(cond_it);
     }
@@ -222,8 +233,8 @@ void DBOSpecificValuesDBFilter::checkSubConfigurables()
     for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
     {
         string ds_name = ds_it->second.name();
-        if (ds_it->second.hasShortName())
-            ds_name = ds_it->second.shortName();
+//        if (ds_it->second.hasShortName())
+//            ds_name = ds_it->second.shortName();
 
         ds_name += " "+variable_name_;
 

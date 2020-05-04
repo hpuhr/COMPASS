@@ -3,7 +3,7 @@
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/filtering_details.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_filters.png}
   \caption{Default filters}
 \end{figure}
 
@@ -27,22 +27,22 @@ When active, this filter forces loading of data with a barometric altitude insid
 
 When active, this filter forces loading of data only from callsigns matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given callsign will not be loaded.
 
-\subsection{HashCode Filter}
+\subsection{Hash Code Filter}
 
 \begin{figure}[H]
   \center
     \includegraphics[width=8cm,frame]{../screenshots/filter_hashcode.png}
-  \caption{HashCode filter}
+  \caption{Hash Code filter}
 \end{figure}
 
 When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
 
-\subsection{Mode 3/A Codes Filter}
+\subsection{Mode 3/A Code Filter}
 
 \begin{figure}[H]
   \center
     \includegraphics[width=8cm,frame]{../screenshots/filter_mode3a.png}
-  \caption{Mode 3/A Codes filter}
+  \caption{Mode 3/A Code filter}
 \end{figure}
 
 When active, this filter forces loading of data with the given Mode A code(s), so it is possible to give multiple values (in octal notation, separated by commas). E.g. '7000' is possible, or '7000,7777'. Target reports without a given Mode A will not be loaded. \\
@@ -79,12 +79,12 @@ When active, this filter forces loading of data with the given Mode S address(es
 
 When active, this filter forces loading of data with the time-of-day inside the given thresholds (in HH:MM:SS.SSS).
 
-\subsection{TrackNum Filter}
+\subsection{Track Number Filter}
 
 \begin{figure}[H]
   \center
     \includegraphics[width=8cm,frame]{../screenshots/filter_tracknum.png}
-  \caption{TrackNum filter}
+  \caption{Track Number filter}
 \end{figure}
 
 When active, this filter forces loading of data with the given track numbers, so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Target reports without a given track number will not be loaded. \\
@@ -127,7 +127,19 @@ Please note that:
   \caption{Tracker Multiple Sources filter}
 \end{figure}
 
-When active, this filter forces loading of Tracker data with the multiple sources flag, e.g. 'Y' (only track updates formed from multiple sources) or 'N' (only track updates formed using 1 source). Tracker target reports without such information will not be loaded. \\
+When active, this filter forces loading of Tracker data with the multiple sources flag, e.g. 'Y' (only track updates formed from multiple sources) or 'N' (only track updates formed using 1 source). Tracker target reports without such information will not be loaded.
+
+\subsection{Tracker Track Number Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_trackertracknum.png}
+  \caption{Tracker Track Number filter}
+\end{figure}
+
+This filter works similiar to the 'Track Number' filter, but filters only DBObject Tracker, and allows for track numbers specific for each data source. E.g. '1' is possible, or '1,2,3', or '*' (all tracks).\\
+
+It can be used when e.g. several Tracker runs were added, so that track numbers (from the same target) for each run can be specified seperately. \\
 
 \subsection{Data Source Filters}
 

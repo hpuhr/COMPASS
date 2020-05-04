@@ -98,7 +98,37 @@ In this section, a few possible use cases are given.
 
 \subsection{Create, Import ASTERIX \& Start}
 
+This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
+
 \begin{lstlisting}
 ./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --auto_start
+\end{lstlisting}
+\ \\
+
+\subsection{Open \& Start}
+
+This command opens an existing database and starts the management window.
+
+\begin{lstlisting}
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --auto_start
+\end{lstlisting}
+\ \\
+
+\subsection{Create, Import multiple ASTERIX \& Start}
+
+This commands create a new database, imports multiple ASTERIX data files, processess the data and starts the management window.
+
+\begin{lstlisting}
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_quit
+./ATSDB-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --auto_start
+\end{lstlisting}
+\ \\
+
+\subsection{Create, Import View Points \& Start}
+
+This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
+
+\begin{lstlisting}
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --auto_start
 \end{lstlisting}
 \ \\
