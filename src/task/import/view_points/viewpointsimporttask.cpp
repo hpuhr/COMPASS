@@ -291,7 +291,7 @@ void ViewPointsImportTask::checkParsedData ()
         if (!context.at("datasets").is_array())
             throw std::runtime_error("datasets is not an array");
 
-        for (auto& ds_it : context.at("datasets").get<json::array_t>())
+        for (json& ds_it : context.at("datasets").get<json::array_t>())
         {
             if (!ds_it.contains("name") || !ds_it.at("name").is_string())
                 throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
@@ -320,9 +320,7 @@ void ViewPointsImportTask::checkParsedData ()
                     found = true;
 
                     loginf << "ViewPointsImportTask: checkParsedData: filename '" << filename
-                           << "' found, re-writing path";
-
-                    ds_it.at("filename") = filename;
+                           << "' found at different path";
                 }
             }
 
@@ -430,7 +428,15 @@ void ViewPointsImportTask::import ()
 #if USE_JASTERIX
                 loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' file '" << filename << "'";
 
-                assert (Files::fileExists(filename));
+                if (!Files::fileExists(filename))
+                {
+                    std::string file = Files::getFilenameFromPath(filename);
+                    std::string dir = Files::getDirectoryFromPath(current_filename_);
+
+                    filename = dir+"/"+file;
+
+                    assert (Files::fileExists(filename));
+                }
 
                 while (QCoreApplication::hasPendingEvents())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
