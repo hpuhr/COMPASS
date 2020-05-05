@@ -1,5 +1,424 @@
 \section{Appendix: View Points}
 \label{sec:appendix_view_points} 
 
+This section defines how the view point files have to be structured and written by view point generators (applications which generate such files). \\
+
+View point files are written in the JSON format, and includes a version number (currently version number is 0.1). \\
+
+Please \textbf{note} that basic JSON format knowledge is required to understand the topics in this section. \\
+
+Please \textbf{note} that the format definition has to be fulfilled rigorously, otherwise the application may not show the view point or (in rare cases) crash. \\
+
+Please \textbf{note} that two different use cases were considered: a general one and one for tracker run comparison. The latter has additional parameters defined, to be used only in such circumstances.
+
+\subsection{File Content}
+
+The following content is commonly stored in a view point file:
+ \begin{itemize}
+ \item View points context information
+ \begin{itemize}
+ \item Information about all later view points
+ \item Defines version
+ \item Can be used for importing the relevant data files
+ \item Also giving contextual information
+ \end{itemize}
+ \item View point collection, each consisting of information about
+ \begin{itemize}
+ \item Unique identifier
+ \item View Point type
+ \item Description text
+ \item A point in time with a time window
+ \item A position with a position window
+ \item A list of DBObjects to be loaded
+ \item A list of filters
+ \item A list of context variables
+  \end{itemize}
+ \end{itemize}
+
 \subsection{Custom Attributes}
 \label{sec:view_points_custom_attributes} 
+
+The view point context, as well as view points, can contain additional information. For the context, this additional information is shown in the 'Import View Points' task and not stored. \\
+
+Additional data in each view point is read in as is, and persisted in the database. In the 'View Points' tab, all primitive variables (non-object, non-list) are shown as columns. \\
+
+Therefore, when generating view points, it might be useful to add such variables (e.g. for ordering according to error magnitude, priority etc.). This is recommended and will be supported further.
+ 
+\subsection{Version 0.1}
+
+The most simple example of a view points file is as follows:
+
+\lstset{
+    string=[s]{"}{"},
+    stringstyle=\color{blue},
+    showstringspaces=false,
+}
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version":"0.1"
+    },
+    "view_points": 
+    [
+        {
+            "id": 0,
+            "type": "Test"
+        }    
+    ]
+}
+\end{lstlisting}
+\ \\
+
+There is an encompassing JSON object, which contains the view point context (object) and view points (list with one entry). \\
+
+\subsubsection{View Point Context}
+
+The 'version' attribute is mandatory, and only version 0.1 is currently supported. \\
+
+In the context, optinally datasets can be added, which define related data to be imported.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version": "0.1"
+        "datasets":
+        [
+            {
+                "name": "test_data",
+                "filename": "/home/sk/demo/20190506.ff",
+            }
+        ]
+    },
+    ...
+}
+\end{lstlisting}
+\ \\
+
+Each dataset has to have a name (indicating what the contained data is) and a filename. \\
+
+Several datasets are also possible:
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version": "0.1"
+        "datasets":
+        [
+            {
+                "name": "test_data",
+                "filename": "/home/sk/demo/20190506.ff",
+            },
+            {
+                "name": "other test_data",
+                "filename": "/home/sk/demo/20190507.ff",
+            }
+        ]
+    },
+    ...
+}
+\end{lstlisting}
+\ \\
+
+Each of the defined datasets will be automatically imported when using the 'Import View Points' task. \\
+
+For the tracker run comparison case, additional attributes are used. The assumption is that there are two recordings, each containing a tracker run. The tracker runs will possibly also have the same SAC/SIC and a time shift, which can be currected during ASTERIX import using the features described in \nameref{sec:task_import_asterix_override}. \\
+
+Such an import without overrides can look as follows:
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version": "0.1"
+        "datasets":
+        [
+            {
+                "name": "reference_run",
+                "filename": "/home/sk/data/tracker_test/ref.ff",
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_name":"ARTAS"
+            },
+            {
+                "name": "test_run",
+                "filename": "/home/sk/data/tracker_test/tst.ff",
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_name":"ARTAS2"
+            }
+        ]
+    },
+    ...
+}
+\end{lstlisting}
+\ \\
+
+The optional 'ds\_sac', 'ds\_sic', 'ds\_name' are used to generate a configuration data source and therefore can set a wanted name. \\
+
+With override information:
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version": "0.1"
+        "datasets":
+        [
+            {
+                "name": "reference_run",
+                "filename": "/home/sk/data/tracker_test/ref.ff",
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_name":"ARTAS"
+            },
+            {
+                "name": "test_run",
+                "filename": "/home/sk/data/tracker_test/tst.ff",
+                "time_offset": -19501.8515625,
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_sac_override":1,
+                "ds_sic_override":2,
+                "ds_name":"ARTAS2"
+            }
+        ]
+    },
+    ...
+}
+\end{lstlisting}
+\ \\
+
+In this case, the 'test\_run' dataset will be time shifted by the 'time\_offset' (as Time of Day in seconds), and the SAC/SIC information for this specific data source will be changed. \\
+
+With additional information, for display purposes only:
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "view_point_context": 
+    {
+        "version": "0.1"
+        "start_date":"2020-01-01",
+        "time_now":"2020-01-01 12:56:32",
+        "some_additional_number": 897.953125,
+        "sensor_context":"Greenland",
+        "area_of_interest":"/path/to/aoi",        
+        "datasets":
+        [
+            {
+                "name": "reference_run",
+                "filename": "/home/sk/data/tracker_test/ref.ff",
+                "time_start": 20700.09375,
+                "time_end": 21599.8984375,
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_name":"ARTAS"
+            },
+            {
+                "name": "test_run",
+                "filename": "/home/sk/data/tracker_test/tst.ff",
+                "time_start": 40200.09375,
+                "time_end": 41099.8984375,
+                "time_offset": -19501.8515625,
+                "time_offset_stddev": 0.002255274489021976
+                "ds_sac":1,
+                "ds_sic":1,
+                "ds_sac_override":1,
+                "ds_sic_override":2,
+                "ds_name":"ARTAS2"
+            }
+        ]
+    },
+    ...
+}
+\end{lstlisting}
+\ \\
+
+Exact definition:
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X | c | X | }
+    \hline
+    \textbf{Key} & \textbf{Value Description} & \textbf{Required} & \textbf{Comment} \\ \hline
+    name & Name of the dataset as string & Y & Needed for identification purposes \\ \hline
+    filename & File path and name (absolute) as string & Y & Needed for import \\ \hline
+    time\_start & ASTERIX tod of first message, as number in seconds & & \\ \hline
+    time\_end & ASTERIX tod of last message, as number in seconds & & \\ \hline
+    time\_offset & ASTERIX tod offset as reference time minus dataset time, as number in seconds & & \\ \hline
+    time\_offset\_stddev & ASTERIX tod offset standard deviation, as number in seconds$^2$ & & \\ \hline
+    ds\_name & Name of the data source, as string &  & Needed for tracker run comparison \\ \hline
+    ds\_sac & SAC of the data source, as number & & Needed for tracker run comparison \\ \hline
+    ds\_sic & SIC of the data source, as number & & Needed for tracker run comparison \\ \hline
+    ds\_sac\_override & SAC of the data source to be set in the database, as number & & Needed for tracker run comparison \\ \hline
+    ds\_sic\_override & SIC of the data source to be set in the database, as number & & Needed for tracker run comparison \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+\subsubsection{View Point}
+
+View points are stored in the 'view\_points' attribute, which is a simle list. \\
+
+A view point only has to contain and 'id' and 'type' attribute, but additional attributes make it more meaninful.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "id":0,
+            "type":"any string",
+            "text":"any string",
+            "position_latitude":49.5,
+            "position_longitude":12.2,
+            "position_window_latitude":0.05,
+            "position_window_longitude":0.02,
+            "time":666.0,
+            "time_window":4.0,
+            "db_objects": [
+                "Tracker"
+            ],
+            "filters": {
+                "Time of Day": {
+                    "Time of Day Minimum": "05:44:58.242",
+                    "Time of Day Maximum": "05:59:57.094"
+                }
+            },
+            "context_variables": {
+                "Tracker": [
+                    "calc_vertical_rate_ftm"
+                ]
+            }
+        },
+        ...
+}
+\end{lstlisting}
+
+In each View Point object, the following values can be defined:
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X | c | }
+    \hline
+    \textbf{Key} & \textbf{Value Description} & \textbf{Required} \\ \hline
+    id & Identifier, as number & Y \\ \hline
+    type & Type, as string, e.g. 'Short track', 'Extra track', 'Content deviation X' & Y   \\ \hline
+    text & Description text as string &    \\ \hline
+    position\_latitude & Center position WGS-84 latitude, as number &    \\ \hline
+    position\_longitude & Center position WGS-84 longitude, as number &    \\ \hline
+    position\_window\_latitude & Geographic window size in WGS-84 latitude, as number &    \\ \hline
+    position\_window\_longitude & Geographic window size in WGS-84 longitude, as number &    \\ \hline
+    time & Center time, as number in seconds &    \\ \hline
+    time\_window & Time window size, as number in seconds &    \\ \hline
+    db\_objects & List of DBObjects to load, as strings &    \\ \hline
+    filters & List of filters defining which data to load, as JSON objects &   \\ \hline
+    context\_variables & List of extra content data variables to load and display &    \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+If the 'db\_objects' attribute is not defined, all data will be loaded.
+
+\subsubsection{View Point Filters}
+
+The 'filters' attribute contains a JSON object, where each filter name is used as a key, and the value is again an JSON object encompassing the filter conditions. Each filter condition value is a string, the same as a user would enter in the GUI.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            ...
+            "filters": {
+                "Filter Name 1": {
+                    "Filter Condition 1": "Value 1"
+                },
+                "Filter Name 2": {
+                    "Filter Condition 1": "Value 1",
+                    "Filter Condition 2": "Value 2"
+                }
+                ...
+            }
+            ...
+        },
+        ...
+}
+\end{lstlisting}      
+
+When a view point is set, only the filters that are defined will be activated, all others will be disabled. If no 'filter' is defined, filtering will be disabled (load all data). \\
+
+All possible filters existing in ATSDB can be set using view points, e.g.:
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "id": 0,
+            "name": "all filters",
+            "position_latitude": 47.550205341739996,
+            "position_longitude": 14.672879071070001,
+            "position_window_latitude": 4.913833554478789,
+            "position_window_longitude": 7.054962643339518,
+            "status": "open",
+            "type": "Saved",
+            "db_objects": [
+                "Tracker"
+            ],
+            "filters": {
+                "Barometric Altitude": {
+                    "Barometric Altitude Maxmimum": "43000",
+                    "Barometric Altitude Minimum": "500"
+                },
+                "Callsign": {
+                    "Callsign Values": "%TEST%"
+                },
+                "Hash Code": {
+                    "HashCode Values": "%81c20819%"
+                },
+                "Mode 3/A Code": {
+                    "Mode 3/A Code Values": "7000"
+                },
+                "Position": {
+                    "Latitude Maximum": "50.78493920733",
+                    "Latitude Minimum": "44.31547147615",
+                    "Longitude Maximum": "20.76559892354",
+                    "Longitude Minimum": "8.5801592186"
+                },
+                "Target Address": {
+                    "Target Address Values": "FEFE10"
+                },
+                "Time of Day": {
+                    "Time of Day Maximum": "05:56:32.297",
+                    "Time of Day Minimum": "05:44:58.445"
+                },
+                "Tracker Data Sources": {
+                    "active_sources": [
+                        13040,
+                        13041
+                    ]
+                },
+                "Tracker Detection Type": {
+                    "Tracker Detection Types": "1"
+                },
+                "Tracker Multiple Sources": {
+                    "Tracker Multiple Sources Value": "N"
+                },
+                "Tracker Track Number": {
+                    "ARTAS_REF track_num": "7287",
+                    "ARTAS_TST track_num": "4479"
+                }
+            }
+        },
+        ...
+}
+\end{lstlisting}        
+
+The filter values have to be defined exactly as a user would enter them in the DBFilter conditions in the GUI. \\
+
+One exception are the data source filters, which need a 'active\_sources' condition list with integer values for all sources to be loaded, identified as number. Each source number is calculated by $SAC*255+SIC$. \\
+
+For the 'Tracker Track Number' filter, the data source condition is identified by its data source name. Using the dataset in the context information, the view point file can ensure that the same name is used. \\
+
+Please \textbf{note} that setting custom filters (created by the user) is also possible using view points. Please contact the author for further information.
