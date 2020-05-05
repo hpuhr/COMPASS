@@ -1166,7 +1166,7 @@
                                             "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "090.SIL",
-                                            "json_value_format": "bool",
+                                            "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
                                         }
