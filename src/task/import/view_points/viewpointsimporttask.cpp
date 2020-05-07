@@ -59,6 +59,8 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
+const std::string DONE_PROPERTY_NAME = "view_points_imported";
+
 ViewPointsImportTask::ViewPointsImportTask(const std::string& class_id, const std::string& instance_id,
                                            TaskManager& task_manager)
     : Task("ViewPointsImportTask", "Import View Points", true, false, task_manager),
@@ -117,6 +119,9 @@ void ViewPointsImportTask::generateSubConfigurable(const std::string& class_id,
 
 bool ViewPointsImportTask::checkPrerequisites()
 {
+    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+
     return ATSDB::instance().interface().ready();  // must be connected
 }
 
@@ -573,6 +578,10 @@ void ViewPointsImportTask::import ()
             }
 
             task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
+
+            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+            emit doneSignal(name_);
         }
     }
 
