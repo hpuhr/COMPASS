@@ -23,9 +23,12 @@
 #include "logger.h"
 #include "metadbtable.h"
 
+#include <boost/algorithm/string.hpp>
+
 DBSchema::DBSchema(const std::string& class_id, const std::string& instance_id,
                    Configurable* parent, DBInterface& db_interface)
-    : Configurable(class_id, instance_id, parent), db_interface_(db_interface)
+    : Configurable(class_id, instance_id, parent,
+                   "db_schema_" + boost::algorithm::to_lower_copy(instance_id) + ".json"), db_interface_(db_interface)
 {
     registerParameter("name", &name_, (std::string) "");
     assert(name_.size() != 0);
