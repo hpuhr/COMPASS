@@ -6561,6 +6561,44 @@
                 },
                 "sub_configs": {
                     "DBTableColumn": {
+                        "ACCELERATION_MS2": {
+                            "parameters": {
+                                "comment": "Acceleration in meters per square second",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "ACCELERATION_MS2",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "ALT_BARO_FT": {
+                            "parameters": {
+                                "comment": "",
+                                "data_format": "",
+                                "dimension": "Height",
+                                "is_key": false,
+                                "name": "ALT_BARO_FT",
+                                "special_null": "",
+                                "type": "mediumint",
+                                "unit": "Feet"
+                            }
+                        },
+                        "ALT_BARO_STD_DEV_FT": {
+                            "parameters": {
+                                "comment": "",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "ALT_BARO_STD_DEV_FT",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
                         "ALT_GEO_FT": {
                             "parameters": {
                                 "comment": "Geometric altitude",
@@ -6572,6 +6610,19 @@
                                 "special_null": "",
                                 "type": "double",
                                 "unit": "Feet"
+                            }
+                        },
+                        "ALT_GEO_STD_DEV_FT": {
+                            "parameters": {
+                                "comment": "",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "ALT_GEO_STD_DEV_FT",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
                             }
                         },
                         "CALC_VERTICAL_RATE_FTM": {
@@ -6650,6 +6701,19 @@
                                 "special_null": "",
                                 "type": "double",
                                 "unit": "Degree"
+                            }
+                        },
+                        "MANOEUVRE_HORI": {
+                            "parameters": {
+                                "comment": "Y = horizontal Manoeuvre, N = No Manoeuvre",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "MANOEUVRE_HORI",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "enum",
+                                "unit": ""
                             }
                         },
                         "MIL_EMERGENCY": {
@@ -6756,6 +6820,45 @@
                                 "unit": "Degree"
                             }
                         },
+                        "POS_STD_DEV_LATLONG_CORR_COEFF": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_LATLONG_CORR_COEFF",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_LAT_DEG": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_LAT_DEG",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_LONG_DEG": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_LONG_DEG",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
                         "REC_NUM": {
                             "parameters": {
                                 "comment": "Unique record id starting with 0 on every new recording",
@@ -6821,6 +6924,19 @@
                                 "unit": ""
                             }
                         },
+                        "TIMESTAMP": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "TIMESTAMP",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "bigint",
+                                "unit": ""
+                            }
+                        },
                         "TOD": {
                             "parameters": {
                                 "comment": "Time of Message / Time of Day (= ms since last midnight)",
@@ -6883,6 +6999,19 @@
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "USABLE": {
+                            "parameters": {
+                                "comment": "Y = to be used for evaluation, N = not to be used",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "USABLE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "enum",
                                 "unit": ""
                             }
                         }
