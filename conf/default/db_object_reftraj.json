@@ -1,0 +1,775 @@
+{
+    "parameters": {
+        "info": "",
+        "name": "RefTraj"
+    },
+    "sub_configs": {
+        "DBODataSourceDefinition": {
+            "DBODataSourceDefinitionRefTrajSCDB Extended0": {
+                "parameters": {
+                    "altitude_column": "",
+                    "foreign_key": "",
+                    "latitude_column": "",
+                    "local_key": "",
+                    "longitude_column": "",
+                    "meta_table": "RefTrajDataSources",
+                    "name_column": "",
+                    "sac_column": "",
+                    "schema": "SCDB Extended",
+                    "short_name_column": "",
+                    "sic_column": ""
+                }
+            }
+        },
+        "DBOLabelDefinition": {
+            "DBOLabelDefinition0": {
+                "parameters": null
+            }
+        },
+        "DBOSchemaMetaTableDefinition": {
+            "DBOSchemaMetaTableDefinition0": {
+                "parameters": {
+                    "meta_table": "RefTraj",
+                    "schema": "SCDB Extended"
+                }
+            }
+        },
+        "DBOVariable": {
+            "DBOVariableRefTrajacceleration_ms20": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "Acceleration in meters per square second",
+                    "dimension": "",
+                    "name": "acceleration_ms2",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajacceleration_ms20": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.ACCELERATION_MS2"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajalt_baro_ft0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "Height",
+                    "name": "alt_baro_ft",
+                    "representation_str": "STANDARD",
+                    "unit": "Feet"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajalt_baro_ft0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.ALT_BARO_FT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajalt_baro_std_dev_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "",
+                    "name": "alt_baro_std_dev_ft",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajalt_baro_std_dev_ft0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.ALT_BARO_STD_DEV_FT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajalt_geo_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "Geometric altitude",
+                    "dimension": "Height",
+                    "name": "alt_geo_ft",
+                    "representation_str": "STANDARD",
+                    "unit": "Feet"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajalt_geo_ft0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.ALT_GEO_FT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajalt_geo_std_dev_ft0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "",
+                    "dimension": "",
+                    "name": "alt_geo_std_dev_ft",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajalt_geo_std_dev_ft0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.ALT_GEO_STD_DEV_FT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajcalc_vertical_rate_ftm0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "calc_vertical_rate_ftm",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajcalc_vertical_rate_ftm0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.CALC_VERTICAL_RATE_FTM"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajcallsign0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": "Aircraft identification",
+                    "dimension": "",
+                    "name": "callsign",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajcallsign0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.CALLSIGN"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajcivil_emergency0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "Civil emergency",
+                    "dimension": "",
+                    "name": "civil_emergency",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajcivil_emergency0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.CIVIL_EMERGENCY"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajds_id0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
+                    "dimension": "",
+                    "name": "ds_id",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajds_id0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.DS_ID"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajgroundspeed_kt0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "Speed",
+                    "name": "groundspeed_kt",
+                    "representation_str": "STANDARD",
+                    "unit": "Knots"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajgroundspeed_kt0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.GROUNDSPEED_KT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajheading_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "Angle",
+                    "name": "heading_deg",
+                    "representation_str": "STANDARD",
+                    "unit": "Degree"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajheading_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.HEADING_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmanoeuvre_hori0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
+                    "dimension": "",
+                    "name": "manoeuvre_hori",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmanoeuvre_hori0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MANOEUVRE_HORI"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmil_emergency0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "mil_emergency",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmil_emergency0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MIL_EMERGENCY"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmode3a_code0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "Code, 4 octels",
+                    "dimension": "",
+                    "name": "mode3a_code",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmode3a_code0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MODE3A_CODE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmodec_code_ft0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "Flight Level / Altitude in Ft",
+                    "dimension": "Height",
+                    "name": "modec_code_ft",
+                    "representation_str": "STANDARD",
+                    "unit": "Feet"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmodec_code_ft0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MODEC_CODE_FT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmof_long0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined",
+                    "dimension": "",
+                    "name": "mof_long",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmof_long0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MOF_LONG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmof_trans0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined",
+                    "dimension": "",
+                    "name": "mof_trans",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmof_trans0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MOF_TRANS"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajmof_vert0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined",
+                    "dimension": "",
+                    "name": "mof_vert",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajmof_vert0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.MOF_VERT"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajpos_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "WGS84 latitude position",
+                    "dimension": "",
+                    "name": "pos_lat_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajpos_lat_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.POS_LAT_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajpos_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "WGS84 longitude position",
+                    "dimension": "",
+                    "name": "pos_long_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajpos_long_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.POS_LONG_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajpos_std_dev_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "pos_std_dev_lat_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LAT_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajpos_std_dev_latlong_corr_coeff0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "pos_std_dev_latlong_corr_coeff",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_latlong_corr_coeff0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LATLONG_CORR_COEFF"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajpos_std_dev_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "pos_std_dev_long_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_long_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LONG_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajrec_num0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "Unique record id starting with 0 on every new recording",
+                    "dimension": "",
+                    "name": "rec_num",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajrec_num0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.REC_NUM"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajsac0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "ASTERIX System Area Code",
+                    "dimension": "",
+                    "name": "sac",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajsac0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.SAC"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajsic0": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "dbo_name": "RefTraj",
+                    "description": "ASTERIX System Identification Code",
+                    "dimension": "",
+                    "name": "sic",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajsic0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.SIC"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajspi0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "spi",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajspi0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.SPI"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtarget_addr0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "24 bit target address / aircraft address / Mode-S address",
+                    "dimension": "",
+                    "name": "target_addr",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtarget_addr0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TARGET_ADDR"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtimestamp0": {
+                "parameters": {
+                    "data_type_str": "LONGINT",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "timestamp",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtimestamp0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TIMESTAMP"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtod0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "Time of Message / Time of Day (= ms since last midnight)",
+                    "dimension": "",
+                    "name": "tod",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtod0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TOD"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtrack_created0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "track_created",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtrack_created0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TRACK_CREATED"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtrack_end0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = End of track, N = Track is still alive",
+                    "dimension": "",
+                    "name": "track_end",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtrack_end0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TRACK_END"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajtrack_num0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "RefTraj",
+                    "description": "Track number",
+                    "dimension": "",
+                    "name": "track_num",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajtrack_num0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TRACK_NUM"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajturnrate_degps0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "RefTraj",
+                    "description": "Turn rate in Deg/sec",
+                    "dimension": "",
+                    "name": "turnrate_degps",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajturnrate_degps0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.TURNRATE_DEGPS"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableRefTrajusable0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "RefTraj",
+                    "description": "Y = to be used for evaluation, N = not to be used",
+                    "dimension": "",
+                    "name": "usable",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionRefTrajusable0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_reftraj.USABLE"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

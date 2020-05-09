@@ -16,17 +16,6 @@
  */
 
 #include "jsonimporttask.h"
-
-#include <QApplication>
-#include <QCoreApplication>
-#include <QDateTime>
-#include <QMessageBox>
-#include <QThread>
-#include <algorithm>
-#include <fstream>
-#include <memory>
-#include <stdexcept>
-
 #include "atsdb.h"
 #include "buffer.h"
 #include "createartasassociationstask.h"
@@ -49,6 +38,16 @@
 #include "savedfile.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+
+#include <QApplication>
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QMessageBox>
+#include <QThread>
+#include <algorithm>
+#include <fstream>
+#include <memory>
+#include <stdexcept>
 
 using namespace Utils;
 using namespace nlohmann;
