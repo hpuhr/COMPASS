@@ -27,6 +27,11 @@
         },
         {
             "class_id": "DBObject",
+            "instance_id": "RefTraj",
+            "path": "db_object_reftraj.json"
+        },
+        {
+            "class_id": "DBObject",
             "instance_id": "Tracker",
             "path": "db_object_tracker.json"
         }
@@ -212,6 +217,12 @@
                                 "dbo_variable_name": "alt_baro_ft"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajalt_baro_ft0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "alt_baro_ft"
+                            }
+                        },
                         "DBOVariableDefinitionTrackeralt_baro_ft0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -278,6 +289,12 @@
                                 "dbo_variable_name": "alt_geo_ft"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajalt_geo_ft0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "alt_geo_ft"
+                            }
+                        },
                         "DBOVariableDefinitionTrackeralt_geo_ft0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -321,6 +338,28 @@
                     }
                 }
             },
+            "MetaDBOVariablecalc_vertical_rate_ftm0": {
+                "parameters": {
+                    "description": "",
+                    "name": "calc_vertical_rate_ftm"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajcalc_vertical_rate_ftm0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "calc_vertical_rate_ftm"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackercalc_vertical_rate_ftm0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "calc_vertical_rate_ftm"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaDBOVariablecallsign0": {
                 "parameters": {
                     "description": "",
@@ -343,6 +382,12 @@
                         "DBOVariableDefinitionRadarcallsign0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "callsign"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajcallsign0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "callsign"
                             }
                         },
@@ -399,6 +444,12 @@
                         "DBOVariableDefinitionRadarcivil_emergency0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "civil_emergency"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajcivil_emergency0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "civil_emergency"
                             }
                         },
@@ -526,6 +577,12 @@
                                 "dbo_variable_name": "ds_id"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajds_id0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "ds_id"
+                            }
+                        },
                         "DBOVariableDefinitionTrackerds_id0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -632,6 +689,12 @@
                                 "dbo_variable_name": "groundspeed_kt"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajgroundspeed_kt0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "groundspeed_kt"
+                            }
+                        },
                         "DBOVariableDefinitionTrackergroundspeed_kt0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -670,6 +733,28 @@
                             "parameters": {
                                 "dbo_name": "Tracker",
                                 "dbo_variable_name": "hash_code"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariableheading_deg0": {
+                "parameters": {
+                    "description": "",
+                    "name": "heading_deg"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajheading_deg0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "heading_deg"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackerheading_deg0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "heading_deg"
                             }
                         }
                     }
@@ -791,6 +876,12 @@
                         "DBOVariableDefinitionRadarmil_emergency0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "mil_emergency"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajmil_emergency0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "mil_emergency"
                             }
                         },
@@ -1004,6 +1095,12 @@
                                 "dbo_variable_name": "mode3a_code"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajmode3a_code0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "mode3a_code"
+                            }
+                        },
                         "DBOVariableDefinitionTrackermode3a_code0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1116,6 +1213,12 @@
                                 "dbo_variable_name": "modec_code_ft"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajmodec_code_ft0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "modec_code_ft"
+                            }
+                        },
                         "DBOVariableDefinitionTrackermodec_code_ft0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1197,6 +1300,72 @@
                     }
                 }
             },
+            "MetaDBOVariablemof_long0": {
+                "parameters": {
+                    "description": "",
+                    "name": "mof_long"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajmof_long0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "mof_long"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackermof_long0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "mof_long"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariablemof_trans0": {
+                "parameters": {
+                    "description": "",
+                    "name": "mof_trans"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajmof_trans0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "mof_trans"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackermof_trans0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "mof_trans"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariablemof_vert0": {
+                "parameters": {
+                    "description": "",
+                    "name": "mof_vert"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajmof_vert0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "mof_vert"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackermof_vert0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "mof_vert"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaDBOVariablemsg_fmt0": {
                 "parameters": {
                     "description": "",
@@ -1247,6 +1416,12 @@
                         "DBOVariableDefinitionRadarpos_lat_deg0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "pos_lat_deg"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajpos_lat_deg0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "pos_lat_deg"
                             }
                         },
@@ -1418,6 +1593,12 @@
                                 "dbo_variable_name": "pos_long_deg"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajpos_long_deg0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "pos_long_deg"
+                            }
+                        },
                         "DBOVariableDefinitionTrackerpos_long_deg0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1444,6 +1625,72 @@
                             "parameters": {
                                 "dbo_name": "Tracker",
                                 "dbo_variable_name": "pos_long_deg_calc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariablepos_std_dev_lat_deg0": {
+                "parameters": {
+                    "description": "",
+                    "name": "pos_std_dev_lat_deg"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionMLATpos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "dbo_name": "MLAT",
+                                "dbo_variable_name": "pos_std_dev_lat_deg"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajpos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "pos_std_dev_lat_deg"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariablepos_std_dev_latlong_corr_coeff0": {
+                "parameters": {
+                    "description": "",
+                    "name": "pos_std_dev_latlong_corr_coeff"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionMLATpos_std_dev_latlong_corr_coeff0": {
+                            "parameters": {
+                                "dbo_name": "MLAT",
+                                "dbo_variable_name": "pos_std_dev_latlong_corr_coeff"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajpos_std_dev_latlong_corr_coeff0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "pos_std_dev_latlong_corr_coeff"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaDBOVariablepos_std_dev_long_deg0": {
+                "parameters": {
+                    "description": "",
+                    "name": "pos_std_dev_long_deg"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionMLATpos_std_dev_long_deg0": {
+                            "parameters": {
+                                "dbo_name": "MLAT",
+                                "dbo_variable_name": "pos_std_dev_long_deg"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajpos_std_dev_long_deg0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "pos_std_dev_long_deg"
                             }
                         }
                     }
@@ -1598,6 +1845,12 @@
                                 "dbo_variable_name": "rec_num"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajrec_num0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "rec_num"
+                            }
+                        },
                         "DBOVariableDefinitionTrackerrec_num0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1682,6 +1935,18 @@
                 },
                 "sub_configs": {
                     "DBOVariableDefinition": {
+                        "DBOVariableDefinitionADSBreport_type0": {
+                            "parameters": {
+                                "dbo_name": "ADSB",
+                                "dbo_variable_name": "report_type"
+                            }
+                        },
+                        "DBOVariableDefinitionMLATreport_type0": {
+                            "parameters": {
+                                "dbo_name": "MLAT",
+                                "dbo_variable_name": "report_type"
+                            }
+                        },
                         "DBOVariableDefinitionRadarreport_type0": {
                             "parameters": {
                                 "dbo_name": "Radar",
@@ -1722,6 +1987,12 @@
                                 "dbo_variable_name": "sac"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajsac0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "sac"
+                            }
+                        },
                         "DBOVariableDefinitionTrackersac0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1753,6 +2024,12 @@
                         "DBOVariableDefinitionRadarsic0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "sic"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajsic0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "sic"
                             }
                         },
@@ -1824,6 +2101,12 @@
                                 "dbo_variable_name": "spi"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajspi0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "spi"
+                            }
+                        },
                         "DBOVariableDefinitionTrackerspi0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -1855,6 +2138,12 @@
                         "DBOVariableDefinitionRadartarget_addr0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "target_addr"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajtarget_addr0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "target_addr"
                             }
                         },
@@ -1917,6 +2206,12 @@
                         "DBOVariableDefinitionRadartod0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "tod"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajtod0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "tod"
                             }
                         },
@@ -2035,6 +2330,28 @@
                     }
                 }
             },
+            "MetaDBOVariabletrack_created0": {
+                "parameters": {
+                    "description": "",
+                    "name": "track_created"
+                },
+                "sub_configs": {
+                    "DBOVariableDefinition": {
+                        "DBOVariableDefinitionRefTrajtrack_created0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "track_created"
+                            }
+                        },
+                        "DBOVariableDefinitionTrackertrack_created0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "track_created"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaDBOVariabletrack_end0": {
                 "parameters": {
                     "description": "",
@@ -2051,6 +2368,12 @@
                         "DBOVariableDefinitionRadartrack_end0": {
                             "parameters": {
                                 "dbo_name": "Radar",
+                                "dbo_variable_name": "track_end"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajtrack_end0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "track_end"
                             }
                         },
@@ -2103,6 +2426,12 @@
                                 "dbo_name": "Radar",
                                 "dbo_variable_name": "track_manoeuvre_hori"
                             }
+                        },
+                        "DBOVariableDefinitionRefTrajmanoeuvre_hori0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "manoeuvre_hori"
+                            }
                         }
                     }
                 }
@@ -2126,6 +2455,12 @@
                                 "dbo_variable_name": "track_num"
                             }
                         },
+                        "DBOVariableDefinitionRefTrajtrack_num0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
+                                "dbo_variable_name": "track_num"
+                            }
+                        },
                         "DBOVariableDefinitionTrackertrack_num0": {
                             "parameters": {
                                 "dbo_name": "Tracker",
@@ -2145,6 +2480,12 @@
                         "DBOVariableDefinitionADSBturnrate_degps0": {
                             "parameters": {
                                 "dbo_name": "ADSB",
+                                "dbo_variable_name": "turnrate_degps"
+                            }
+                        },
+                        "DBOVariableDefinitionRefTrajturnrate_degps0": {
+                            "parameters": {
+                                "dbo_name": "RefTraj",
                                 "dbo_variable_name": "turnrate_degps"
                             }
                         },

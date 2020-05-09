@@ -5,6 +5,21 @@
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
+            "DBODataSourceDefinitionRadarSCDB Extended0": {
+                "parameters": {
+                    "altitude_column": "ds_radar.GROUND_ALTITUDE_AMSL_M",
+                    "foreign_key": "ds_radar.DS_ID",
+                    "latitude_column": "ds_radar.POS_LAT_DEG",
+                    "local_key": "ds_id",
+                    "longitude_column": "ds_radar.POS_LONG_DEG",
+                    "meta_table": "RadarDataSources",
+                    "name_column": "le_ds.DS_NAME",
+                    "sac_column": "le_ds.SAC",
+                    "schema": "SCDB Extended",
+                    "short_name_column": "le_ds.DS_SHORT_NAME",
+                    "sic_column": "le_ds.SIC"
+                }
+            },
             "DBODataSourceDefinitionRadarSCDB0": {
                 "parameters": {
                     "altitude_column": "ds_radar.GROUND_ALTITUDE_AMSL_M",
@@ -971,6 +986,12 @@
                 "parameters": {
                     "meta_table": "Radar",
                     "schema": "SCDB"
+                }
+            },
+            "DBOSchemaMetaTableDefinitionSCDB ExtendedRadar0": {
+                "parameters": {
+                    "meta_table": "Radar",
+                    "schema": "SCDB Extended"
                 }
             }
         },
