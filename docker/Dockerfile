@@ -109,6 +109,13 @@ RUN cd osgearth-osgearth-2.10.2/build && make install
 #RUN cd osgearth-osgearth-2.10.2/build && make -j 4
 #RUN cd osgearth-osgearth-2.10.2/build && make install
 
+RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+RUN unzip master.zip
+RUN mkdir NemaTode-master/build
+RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd NemaTode-master/build && make -j 4
+RUN cd NemaTode-master/build && make install
+
 #RUN apt-get install gdb -y
 
 RUN ldconfig -v /usr/lib64/ 

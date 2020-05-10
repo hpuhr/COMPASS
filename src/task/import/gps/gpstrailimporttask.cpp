@@ -7,10 +7,18 @@
 #include "taskmanager.h"
 #include "files.h"
 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <nmeaparse/nmea.h>
+
+#include <QApplication>
+
 const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
 
 using namespace Utils;
 using namespace std;
+using namespace nmea;
 
 GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                                        TaskManager& task_manager)
@@ -36,7 +44,7 @@ GPSTrailImportTask::~GPSTrailImportTask()
 }
 
 void GPSTrailImportTask::generateSubConfigurable(const std::string& class_id,
-                                             const std::string& instance_id)
+                                                 const std::string& instance_id)
 {
     if (class_id == "NMEAFile")
     {
@@ -83,11 +91,15 @@ void GPSTrailImportTask::addFile(const std::string& filename)
     generateSubConfigurable("NMEAFile", "NMEAFile" + instancename);
 
     current_filename_ = filename;  // set as current
+    parseCurrentFile();
 
     emit statusChangedSignal(name_);
 
     if (widget_)
+    {
         widget_->updateFileListSlot();
+        widget_->updateText();
+    }
 }
 
 void GPSTrailImportTask::removeCurrentFilename()
@@ -141,8 +153,13 @@ void GPSTrailImportTask::currentFilename(const std::string& filename)
 
     current_filename_ = filename;
 
+    parseCurrentFile();
+
     if (widget_)
+    {
         widget_->updateFileListSlot();
+        widget_->updateText();
+    }
 
     emit statusChangedSignal(name_);
 }
@@ -163,13 +180,23 @@ bool GPSTrailImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-//    if (ATSDB::instance().objectManager().hasData())
-//        return false;
+    //    if (ATSDB::instance().objectManager().hasData())
+    //        return false;
 
     return canImportFile();
 }
 
 bool GPSTrailImportTask::isRequired() { return false; }
+
+std::string GPSTrailImportTask::currentError() const
+{
+    return current_error_;
+}
+
+std::string GPSTrailImportTask::currentText() const
+{
+    return current_text_;
+}
 
 
 bool GPSTrailImportTask::canImportFile()
@@ -200,124 +227,183 @@ void GPSTrailImportTask::parseCurrentFile ()
     loginf << "GPSTrailImportTask: parseCurrentFile: file '" << current_filename_ << "'";
 
     current_error_ = "";
+    current_text_ = "";
 
-//    current_data_.clear();
+    fix_cnt_ = 0;
 
-//    if (!Files::fileExists(current_filename_))
-//    {
-//        current_error_ = "file '" + current_filename_ + "' does not exist";
-//        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
-//        return;
-//    }
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    std::ifstream ifs(current_filename_);
+    NMEAParser parser;
+    GPSService gps(parser);
+    parser.log = false;
 
-//    try
-//    {
-//        current_data_ = json::parse(ifs);
+    //cout << "Fix  Sats  Sig\t\tSpeed    Dir  Lat         , Lon           Accuracy" << endl;
+    // Handle any changes to the GPS Fix... This is called whenever it's updated.
+    gps.onUpdate += [&gps, this](){
+//        cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
+//        cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
+//        cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
+//        cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
+//        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+//        cout << endl;
 
-//        checkParsedData();
-//    }
-//    catch (exception& e)
-//    {
-//        current_error_ = "parsing file '" + current_filename_ + "' resulted in error '" + e.what() + "'";
-//        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
-//    }
+        ++fix_cnt_;
 
-//    if (widget_)
-//        widget_->updateContext();
+        if (gps.fix.locked() && !current_text_.size())
+            current_text_ = "First (locked) message:\n"+gps.fix.toString();
+    };
 
-//    loginf << "GPSTrailImportTask: parseCurrentFile: done";
+    // From a file
+    string line;
+    ifstream file(current_filename_);
+    unsigned int line_cnt = 0;
+
+    while (getline(file, line))
+    {
+        try
+        {
+            parser.readLine(line);
+        }
+        catch (NMEAParseError& e)
+        {
+            logerr << "GPSTrailImportTask: parseCurrentFile: line " << line_cnt << ": error '" << e.message << "'";
+            if (!current_error_.size())
+                current_error_ = "Line "+to_string(line_cnt)+": "+e.message;
+            else
+                current_error_ += "\nLine "+to_string(line_cnt)+": "+e.message;
+            // You can keep feeding data to the gps service...
+            // The previous data is ignored and the parser is reset.
+        }
+        ++line_cnt;
+    }
+
+    // Show the final fix information
+    //cout << gps.fix.toString() << endl;
+
+    current_text_ = "\nParsed "+to_string(fix_cnt_)+" fixes.\n\n"+current_text_
+            +"\n\nLast message:\n"+gps.fix.toString();
+
+    loginf << "GPSTrailImportTask: parseCurrentFile: parsed " << fix_cnt_ << " fixes";
+
+    QApplication::restoreOverrideCursor();
+
+    //    current_data_.clear();
+
+    //    if (!Files::fileExists(current_filename_))
+    //    {
+    //        current_error_ = "file '" + current_filename_ + "' does not exist";
+    //        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
+    //        return;
+    //    }
+
+    //    std::ifstream ifs(current_filename_);
+
+    //    try
+    //    {
+    //        current_data_ = json::parse(ifs);
+
+    //        checkParsedData();
+    //    }
+    //    catch (exception& e)
+    //    {
+    //        current_error_ = "parsing file '" + current_filename_ + "' resulted in error '" + e.what() + "'";
+    //        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
+    //    }
+
+    //    if (widget_)
+    //        widget_->updateContext();
+
+    //    loginf << "GPSTrailImportTask: parseCurrentFile: done";
 }
 
 void GPSTrailImportTask::checkParsedData ()
 {
     loginf << "GPSTrailImportTask: checkParsedData";
 
-//    if (!current_data_.is_object())
-//        throw std::runtime_error("current data is not an object");
+    //    if (!current_data_.is_object())
+    //        throw std::runtime_error("current data is not an object");
 
-//    if (!current_data_.contains("view_point_context"))
-//        throw std::runtime_error("current data has no context information");
+    //    if (!current_data_.contains("view_point_context"))
+    //        throw std::runtime_error("current data has no context information");
 
-//    json& context = current_data_.at("view_point_context");
+    //    json& context = current_data_.at("view_point_context");
 
-//    if (!context.contains("version"))
-//        throw std::runtime_error("current data context has no version");
+    //    if (!context.contains("version"))
+    //        throw std::runtime_error("current data context has no version");
 
-//    json& version = context.at("version");
+    //    json& version = context.at("version");
 
-//    if (!version.is_string())
-//        throw std::runtime_error("current data context version is not string");
+    //    if (!version.is_string())
+    //        throw std::runtime_error("current data context version is not string");
 
-//    string version_str = version;
+    //    string version_str = version;
 
-//    if (version_str != "0.1")
-//        throw std::runtime_error("current data context version '"+version_str+"' is not supported");
+    //    if (version_str != "0.1")
+    //        throw std::runtime_error("current data context version '"+version_str+"' is not supported");
 
-//    if (context.contains("datasets"))
-//    {
-//        if (!context.at("datasets").is_array())
-//            throw std::runtime_error("datasets is not an array");
+    //    if (context.contains("datasets"))
+    //    {
+    //        if (!context.at("datasets").is_array())
+    //            throw std::runtime_error("datasets is not an array");
 
-//        for (json& ds_it : context.at("datasets").get<json::array_t>())
-//        {
-//            if (!ds_it.contains("name") || !ds_it.at("name").is_string())
-//                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
+    //        for (json& ds_it : context.at("datasets").get<json::array_t>())
+    //        {
+    //            if (!ds_it.contains("name") || !ds_it.at("name").is_string())
+    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
 
-//            if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
-//                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
+    //            if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
+    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
 
-//            std::string filename = ds_it.at("filename");
+    //            std::string filename = ds_it.at("filename");
 
-//            bool found = true;
+    //            bool found = true;
 
-//            if (!Files::fileExists(filename))
-//            {
-//                found = false;
+    //            if (!Files::fileExists(filename))
+    //            {
+    //                found = false;
 
-//                std::string file = Files::getFilenameFromPath(filename);
-//                std::string dir = Files::getDirectoryFromPath(current_filename_);
+    //                std::string file = Files::getFilenameFromPath(filename);
+    //                std::string dir = Files::getDirectoryFromPath(current_filename_);
 
-//                loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
-//                       << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
+    //                loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
+    //                       << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
 
-//                filename = dir+"/"+file;
+    //                filename = dir+"/"+file;
 
-//                if (Files::fileExists(filename))
-//                {
-//                    found = true;
+    //                if (Files::fileExists(filename))
+    //                {
+    //                    found = true;
 
-//                    loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
-//                           << "' found at different path";
-//                }
-//            }
+    //                    loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
+    //                           << "' found at different path";
+    //                }
+    //            }
 
-//            if (!found)
-//                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
-//        }
-//    }
+    //            if (!found)
+    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
+    //        }
+    //    }
 
-//    if (!current_data_.contains("view_points"))
-//        throw std::runtime_error("current data does not contain view points");
+    //    if (!current_data_.contains("view_points"))
+    //        throw std::runtime_error("current data does not contain view points");
 
-//    json& view_points = current_data_.at("view_points");
+    //    json& view_points = current_data_.at("view_points");
 
-//    if (!view_points.is_array())
-//        throw std::runtime_error("view_points is not an array");
+    //    if (!view_points.is_array())
+    //        throw std::runtime_error("view_points is not an array");
 
-//    if (!view_points.size())
-//        throw std::runtime_error("view_points is an empty array");
+    //    if (!view_points.size())
+    //        throw std::runtime_error("view_points is an empty array");
 
-//    for (auto& vp_it : view_points.get<json::array_t>())
-//    {
-//        if (!vp_it.contains("id") || !vp_it.at("id").is_number())
-//            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
+    //    for (auto& vp_it : view_points.get<json::array_t>())
+    //    {
+    //        if (!vp_it.contains("id") || !vp_it.at("id").is_number())
+    //            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
 
-//        if (!vp_it.contains("type") || !vp_it.at("type").is_string())
-//            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
-//    }
+    //        if (!vp_it.contains("type") || !vp_it.at("type").is_string())
+    //            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
+    //    }
 
-//    loginf << "GPSTrailImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
-//           << " view points";
+    //    loginf << "GPSTrailImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
+    //           << " view points";
 }

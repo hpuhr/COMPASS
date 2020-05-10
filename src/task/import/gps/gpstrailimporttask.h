@@ -13,7 +13,7 @@ class SavedFile;
 
 class GPSTrailImportTask : public Task, public Configurable
 {
-        Q_OBJECT
+    Q_OBJECT
 public:
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                        TaskManager& task_manager);
@@ -24,8 +24,6 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
-
-    std::string currentError() const;
 
     bool canImportFile();
     virtual bool canRun();
@@ -43,18 +41,24 @@ public:
     virtual bool isRecommended();
     virtual bool isRequired();
 
+    std::string currentText() const;
+    std::string currentError() const;
+
 protected:
-  std::map<std::string, SavedFile*> file_list_;
-  std::string current_filename_;
+    std::map<std::string, SavedFile*> file_list_;
+    std::string current_filename_;
 
-  std::unique_ptr<GPSTrailImportTaskWidget> widget_;
+    unsigned int fix_cnt_ {0};
 
-  std::string current_error_;
+    std::unique_ptr<GPSTrailImportTaskWidget> widget_;
 
-  virtual void checkSubConfigurables() {}
+    std::string current_error_;
+    std::string current_text_;
 
-  void parseCurrentFile ();
-  void checkParsedData (); // throws exceptions for errors
+    virtual void checkSubConfigurables() {}
+
+    void parseCurrentFile ();
+    void checkParsedData (); // throws exceptions for errors
 };
 
 #endif // GPSTRAILIMPORTTASK_H

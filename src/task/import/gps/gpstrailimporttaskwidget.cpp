@@ -11,6 +11,10 @@
 #include <QListWidget>
 #include <QTextEdit>
 
+#include <iostream>
+
+using namespace std;
+
 GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget(parent, f), task_(task)
 {
@@ -58,6 +62,8 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
     text_edit_ = new QTextEdit ();
     text_edit_->setReadOnly(true);
     main_layout->addWidget(text_edit_);
+
+    updateText();
 
     setLayout(main_layout);
 }
@@ -148,7 +154,20 @@ void GPSTrailImportTaskWidget::updateText ()
     loginf << "ViewPointsImportTaskWidget: updateText";
 
     assert (text_edit_);
-    text_edit_->setText("");
+
+    stringstream ss;
+
+    if (task_.currentError().size())
+        ss << "Errors:\n" << task_.currentError();
+    else
+        ss << "Errors: None\n";
+
+    if (task_.currentText().size())
+        ss << "Info:\n" << task_.currentText();
+    else
+        ss << "Info: None\n";
+
+    text_edit_->setText(ss.str().c_str());
 
 //    if (task_.currentError().size())
 //    {
