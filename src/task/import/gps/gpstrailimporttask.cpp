@@ -6,6 +6,13 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "files.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
+#include "dbovariable.h"
+#include "buffer.h"
+#include "dbovariableset.h"
+#include "dbtablecolumn.h"
+#include "postprocesstask.h"
 
 #include <iostream>
 #include <fstream>
@@ -172,6 +179,12 @@ bool GPSTrailImportTask::checkPrerequisites()
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
+    if (!ATSDB::instance().objectManager().existsObject("RefTraj"))
+        return false;
+
+    if (!ATSDB::instance().objectManager().object("RefTraj").hasCurrentMetaTable())
+        return false;
+
     return true;
 }
 
@@ -211,15 +224,7 @@ bool GPSTrailImportTask::canImportFile()
         return false;
     }
 
-    return true;
-}
-
-bool GPSTrailImportTask::canRun() { return canImportFile(); }
-
-
-void GPSTrailImportTask::run()
-{
-    loginf << "GPSTrailImportTask: run: filename '" << current_filename_;
+    return gps_fixes_.size(); // only if fixes exist
 }
 
 void GPSTrailImportTask::parseCurrentFile ()
@@ -229,7 +234,7 @@ void GPSTrailImportTask::parseCurrentFile ()
     current_error_ = "";
     current_text_ = "";
 
-    fix_cnt_ = 0;
+    gps_fixes_.clear();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -247,7 +252,7 @@ void GPSTrailImportTask::parseCurrentFile ()
 //        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
 //        cout << endl;
 
-        ++fix_cnt_;
+        gps_fixes_.push_back(gps.fix);
 
         if (gps.fix.locked() && !current_text_.size())
             current_text_ = "First (locked) message:\n"+gps.fix.toString();
@@ -280,130 +285,138 @@ void GPSTrailImportTask::parseCurrentFile ()
     // Show the final fix information
     //cout << gps.fix.toString() << endl;
 
-    current_text_ = "\nParsed "+to_string(fix_cnt_)+" fixes.\n\n"+current_text_
+    current_text_ = "\nParsed "+to_string(gps_fixes_.size())+" fixes.\n\n"+current_text_
             +"\n\nLast message:\n"+gps.fix.toString();
 
-    loginf << "GPSTrailImportTask: parseCurrentFile: parsed " << fix_cnt_ << " fixes";
+    loginf << "GPSTrailImportTask: parseCurrentFile: parsed " << gps_fixes_.size() << " fixes in "
+           << line_cnt << " lines";
 
     QApplication::restoreOverrideCursor();
-
-    //    current_data_.clear();
-
-    //    if (!Files::fileExists(current_filename_))
-    //    {
-    //        current_error_ = "file '" + current_filename_ + "' does not exist";
-    //        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
-    //        return;
-    //    }
-
-    //    std::ifstream ifs(current_filename_);
-
-    //    try
-    //    {
-    //        current_data_ = json::parse(ifs);
-
-    //        checkParsedData();
-    //    }
-    //    catch (exception& e)
-    //    {
-    //        current_error_ = "parsing file '" + current_filename_ + "' resulted in error '" + e.what() + "'";
-    //        logerr << "GPSTrailImportTask: parseCurrentFile: " << current_error_;
-    //    }
-
-    //    if (widget_)
-    //        widget_->updateContext();
-
-    //    loginf << "GPSTrailImportTask: parseCurrentFile: done";
 }
 
-void GPSTrailImportTask::checkParsedData ()
+bool GPSTrailImportTask::canRun() { return canImportFile(); }
+
+void GPSTrailImportTask::run()
 {
-    loginf << "GPSTrailImportTask: checkParsedData";
+    loginf << "GPSTrailImportTask: run: filename '" << current_filename_ << " fixes " << gps_fixes_.size();
 
-    //    if (!current_data_.is_object())
-    //        throw std::runtime_error("current data is not an object");
+    assert (gps_fixes_.size());
 
-    //    if (!current_data_.contains("view_point_context"))
-    //        throw std::runtime_error("current data has no context information");
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
-    //    json& context = current_data_.at("view_point_context");
+    assert (obj_man.existsObject("RefTraj"));
 
-    //    if (!context.contains("version"))
-    //        throw std::runtime_error("current data context has no version");
+    DBObject& reftraj_obj = obj_man.object("RefTraj");
+    assert (reftraj_obj.hasCurrentMetaTable());
 
-    //    json& version = context.at("version");
+    assert (reftraj_obj.hasVariable("sac"));
+    assert (reftraj_obj.hasVariable("sic"));
+    assert (reftraj_obj.hasVariable("ds_id"));
+    assert (reftraj_obj.hasVariable("tod"));
+    assert (reftraj_obj.hasVariable("pos_lat_deg"));
+    assert (reftraj_obj.hasVariable("pos_long_deg"));
 
-    //    if (!version.is_string())
-    //        throw std::runtime_error("current data context version is not string");
+    loginf << "GPSTrailImportTask: run: getting variables";
 
-    //    string version_str = version;
+    DBOVariable& sac_var = reftraj_obj.variable("sac");
+    DBOVariable& sic_var = reftraj_obj.variable("sic");
+    DBOVariable& ds_id_var = reftraj_obj.variable("ds_id");
+    DBOVariable& tod_var = reftraj_obj.variable("tod");
+    DBOVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
+    DBOVariable& long_var = reftraj_obj.variable("pos_long_deg");
 
-    //    if (version_str != "0.1")
-    //        throw std::runtime_error("current data context version '"+version_str+"' is not supported");
+    DBOVariableSet var_set;
 
-    //    if (context.contains("datasets"))
-    //    {
-    //        if (!context.at("datasets").is_array())
-    //            throw std::runtime_error("datasets is not an array");
+    var_set.add(sac_var);
+    var_set.add(sic_var);
+    var_set.add(ds_id_var);
+    var_set.add(tod_var);
+    var_set.add(lat_var);
+    var_set.add(long_var);
 
-    //        for (json& ds_it : context.at("datasets").get<json::array_t>())
-    //        {
-    //            if (!ds_it.contains("name") || !ds_it.at("name").is_string())
-    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid name");
+    PropertyList properties;
+    properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
+    properties.addProperty(sic_var.name(), PropertyDataType::UCHAR);
+    properties.addProperty(ds_id_var.name(), PropertyDataType::INT);
+    properties.addProperty(tod_var.name(), PropertyDataType::FLOAT);
+    properties.addProperty(lat_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(long_var.name(), PropertyDataType::DOUBLE);
 
-    //            if (!ds_it.contains("filename") || !ds_it.at("filename").is_string())
-    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a valid filename");
+    loginf << "GPSTrailImportTask: run: creating buffer";
 
-    //            std::string filename = ds_it.at("filename");
+    shared_ptr<Buffer> buffer = make_shared<Buffer>(properties, "RefTraj");
 
-    //            bool found = true;
+    NullableVector<unsigned char> sac_vec = buffer->get<unsigned char>("sac");
+    NullableVector<unsigned char> sic_vec = buffer->get<unsigned char>("sic");
+    NullableVector<int> ds_id_vec = buffer->get<int>("ds_id");
+    NullableVector<float> tod_vec = buffer->get<float>("tod");
+    NullableVector<double> lat_vec = buffer->get<double>("pos_lat_deg");
+    NullableVector<double> long_vec = buffer->get<double>("pos_long_deg");
 
-    //            if (!Files::fileExists(filename))
-    //            {
-    //                found = false;
+    unsigned int cnt = 0;
+    int sac = 0;
+    int sic = 0;
+    int ds_id = sac*255+sic;
 
-    //                std::string file = Files::getFilenameFromPath(filename);
-    //                std::string dir = Files::getDirectoryFromPath(current_filename_);
+    bool has_ds = reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
 
-    //                loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
-    //                       << "' not found, checking for file '" << file << "' in dir '" << dir << "'";
+    float tod;
 
-    //                filename = dir+"/"+file;
+    loginf << "GPSTrailImportTask: run: filling buffer";
 
-    //                if (Files::fileExists(filename))
-    //                {
-    //                    found = true;
+    for (auto& fix_it : gps_fixes_)
+    {
+        tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0+fix_it.timestamp.sec;
 
-    //                    loginf << "GPSTrailImportTask: checkParsedData: filename '" << filename
-    //                           << "' found at different path";
-    //                }
-    //            }
+        sac_vec.set(cnt, sac);
+        sic_vec.set(cnt, sic);
+        ds_id_vec.set(cnt, ds_id);
 
-    //            if (!found)
-    //                throw std::runtime_error("dataset '"+ds_it.dump()+"' does not contain a usable filename");
-    //        }
-    //    }
+        tod_vec.set(cnt, tod);
+        lat_vec.set(cnt, fix_it.latitude);
+        long_vec.set(cnt, fix_it.longitude);
 
-    //    if (!current_data_.contains("view_points"))
-    //        throw std::runtime_error("current data does not contain view points");
+        ++cnt;
+    }
 
-    //    json& view_points = current_data_.at("view_points");
 
-    //    if (!view_points.is_array())
-    //        throw std::runtime_error("view_points is not an array");
+    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
 
-    //    if (!view_points.size())
-    //        throw std::runtime_error("view_points is an empty array");
+    if (!has_ds)
+    {
+        loginf << "GPSTrailImportTask: run: adding data source";
 
-    //    for (auto& vp_it : view_points.get<json::array_t>())
-    //    {
-    //        if (!vp_it.contains("id") || !vp_it.at("id").is_number())
-    //            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid id");
+        std::map<int, std::pair<int, int>> datasources_to_add;
 
-    //        if (!vp_it.contains("type") || !vp_it.at("type").is_string())
-    //            throw std::runtime_error("view point '"+vp_it.dump()+"' does not contain a valid type");
-    //    }
+        datasources_to_add[ds_id] = {sac,sic};
 
-    //    loginf << "GPSTrailImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
-    //           << " view points";
+        reftraj_obj.addDataSources(datasources_to_add);
+    }
+
+    loginf << "GPSTrailImportTask: run: inserting data";
+
+    reftraj_obj.insertData(var_set, buffer, false);
 }
+
+void GPSTrailImportTask::insertProgressSlot(float percent)
+{
+    loginf << "GPSTrailImportTask: insertProgressSlot: percent " << percent;
+}
+
+void GPSTrailImportTask::insertDoneSlot(DBObject& object)
+{
+    loginf << "GPSTrailImportTask: insertDoneSlot";
+
+    done_ = true;
+
+    ATSDB::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+
+    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+    emit doneSignal(name_);
+}
+
+//void GPSTrailImportTask::checkParsedData ()
+//{
+//    loginf << "GPSTrailImportTask: checkParsedData";
+//}

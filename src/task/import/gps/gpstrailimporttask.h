@@ -7,13 +7,21 @@
 #include <QObject>
 #include <memory>
 
+#include <nmeaparse/nmea.h>
+
 class TaskManager;
 class GPSTrailImportTaskWidget;
 class SavedFile;
+class DBObject;
 
 class GPSTrailImportTask : public Task, public Configurable
 {
     Q_OBJECT
+
+public slots:
+    void insertProgressSlot(float percent);
+    void insertDoneSlot(DBObject& object);
+
 public:
     GPSTrailImportTask(const std::string& class_id, const std::string& instance_id,
                        TaskManager& task_manager);
@@ -48,17 +56,18 @@ protected:
     std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
-    unsigned int fix_cnt_ {0};
-
     std::unique_ptr<GPSTrailImportTaskWidget> widget_;
 
     std::string current_error_;
     std::string current_text_;
 
+    std::vector<nmea::GPSFix> gps_fixes_;
+    //unsigned int gps_fixes_skipped_ {0};
+
     virtual void checkSubConfigurables() {}
 
     void parseCurrentFile ();
-    void checkParsedData (); // throws exceptions for errors
+    //void checkParsedData (); // throws exceptions for errors
 };
 
 #endif // GPSTRAILIMPORTTASK_H
