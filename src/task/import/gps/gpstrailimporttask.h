@@ -13,6 +13,7 @@ class TaskManager;
 class GPSTrailImportTaskWidget;
 class SavedFile;
 class DBObject;
+class Buffer;
 
 class GPSTrailImportTask : public Task, public Configurable
 {
@@ -63,6 +64,8 @@ protected:
 
     std::vector<nmea::GPSFix> gps_fixes_;
     //unsigned int gps_fixes_skipped_ {0};
+
+    std::shared_ptr<Buffer> buffer_;
 
     virtual void checkSubConfigurables() {}
 

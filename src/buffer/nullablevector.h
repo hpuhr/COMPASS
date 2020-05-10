@@ -128,7 +128,7 @@ NullableVector<T>::NullableVector(Property& property, Buffer& buffer)
 template <class T>
 void NullableVector<T>::clear()
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": clear";
+    logdbg << "NullableVector " << property_.name() << ": clear";
     std::fill(data_.begin(), data_.end(), T());
     std::fill(null_flags_.begin(), null_flags_.end(), true);
 }
@@ -136,7 +136,7 @@ void NullableVector<T>::clear()
 template <class T>
 const T NullableVector<T>::get(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": get: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
     {
         assert(data_.size() <= buffer_.data_size_);
@@ -149,12 +149,12 @@ const T NullableVector<T>::get(unsigned int index)
     {
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            logerr << "ArrayListTemplate " << property_.name() << ": get: index " << index
+            logerr << "NullableVector " << property_.name() << ": get: index " << index
                    << " is null";
             assert(false);
         }
 
-        throw std::runtime_error("ArrayListTemplate: get of Null value " + std::to_string(index));
+        throw std::runtime_error("NullableVector: get of Null value " + std::to_string(index));
     }
 
     return data_.at(index);
@@ -163,14 +163,14 @@ const T NullableVector<T>::get(unsigned int index)
 template <class T>
 const std::string NullableVector<T>::getAsString(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": getAsString";
+    logdbg << "NullableVector " << property_.name() << ": getAsString";
     return Utils::String::getValueString(get(index));
 }
 
 template <class T>
 void NullableVector<T>::set(unsigned int index, T value)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": set: index " << index << " value '"
+    logdbg << "NullableVector " << property_.name() << ": set: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -193,14 +193,14 @@ void NullableVector<T>::set(unsigned int index, T value)
     data_.at(index) = value;
     unsetNull(index);
 
-    // logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
+    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
 void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
                                       const std::string& value_str)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": setFromFormat";
+    logdbg << "NullableVector " << property_.name() << ": setFromFormat";
     T value;
 
     if (format == "octal")
@@ -239,7 +239,7 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
     }
     else
     {
-        logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 
@@ -249,7 +249,7 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
 template <class T>
 void NullableVector<T>::append(unsigned int index, T value)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
+    logdbg << "NullableVector " << property_.name() << ": append: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -272,14 +272,14 @@ void NullableVector<T>::append(unsigned int index, T value)
     data_.at(index) += value;
     unsetNull(index);
 
-    // logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
+    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
 void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& format,
                                          const std::string& value_str)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": appendFromFormat";
+    logdbg << "NullableVector " << property_.name() << ": appendFromFormat";
     T value;
 
     if (format == "octal")
@@ -304,7 +304,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
     }
     else
     {
-        logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 
@@ -314,7 +314,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
 template <class T>
 void NullableVector<T>::setNull(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": setNull: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": setNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -335,7 +335,7 @@ void NullableVector<T>::setNull(unsigned int index)
 template <class T>
 bool NullableVector<T>::isNull(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": isNull: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": isNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -359,7 +359,7 @@ bool NullableVector<T>::isNull(unsigned int index)
 template <class T>
 void NullableVector<T>::resizeDataTo(unsigned int size)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": resizeDataTo: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": resizeDataTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -376,7 +376,7 @@ void NullableVector<T>::resizeDataTo(unsigned int size)
 template <class T>
 void NullableVector<T>::resizeNullTo(unsigned int size)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": resizeNullTo: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": resizeNullTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
         assert(null_flags_.size() <= buffer_.data_size_);
@@ -397,7 +397,7 @@ void NullableVector<T>::resizeNullTo(unsigned int size)
 template <class T>
 void NullableVector<T>::addData(NullableVector<T>& other)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData";
+    logdbg << "NullableVector " << property_.name() << ": addData";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -408,62 +408,62 @@ void NullableVector<T>::addData(NullableVector<T>& other)
     if (!other.data_.size() &&
         other.null_flags_.size())  // if other has null flags set, need to fill my nulls
     {
-        logdbg << "ArrayListTemplate " << property_.name()
+        logdbg << "NullableVector " << property_.name()
                << ": addData: 1: other no data resizing null";
         resizeNullTo(buffer_.data_size_);
-        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: inserting null";
+        logdbg << "NullableVector " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
         goto DONE;
     }
 
     if (other.data_.size() && !other.null_flags_.size())  // if other has everything set
     {
-        logdbg << "ArrayListTemplate " << property_.name()
+        logdbg << "NullableVector " << property_.name()
                << ": addData: 2: other has everything set";
 
         if (data_.size() < buffer_.data_size_)  // need to size data up
         {
-            logdbg << "ArrayListTemplate " << property_.name()
+            logdbg << "NullableVector " << property_.name()
                    << ": addData: 2: data not full, setting null";
             resizeNullTo(buffer_.data_size_);
 
-            logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: resizing data";
+            logdbg << "NullableVector " << property_.name() << ": addData: 2: resizing data";
             resizeDataTo(buffer_.data_size_);
         }
 
-        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: inserting data";
+        logdbg << "NullableVector " << property_.name() << ": addData: 2: inserting data";
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         goto DONE;
     }
 
-    logdbg << "ArrayListTemplate " << property_.name()
+    logdbg << "NullableVector " << property_.name()
            << ": addData: 3: mixture, both have data & nulls";
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing null to "
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing null to "
            << buffer_.data_size_;
     resizeNullTo(buffer_.data_size_);
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting nulls";
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting nulls";
     null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
 
     if (data_.size() < buffer_.data_size_)  // need to size data up
     {
-        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing data";
+        logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing data";
         resizeDataTo(buffer_.data_size_);
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting data";
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
 
 DONE:
     // size is adjusted in Buffer::seizeBuffer
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: end";
+    logdbg << "NullableVector " << property_.name() << ": addData: end";
 }
 
 template <class T>
 void NullableVector<T>::copyData(NullableVector<T>& other)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": copyData";
+    logdbg << "NullableVector " << property_.name() << ": copyData";
 
     data_ = other.data_;
     null_flags_ = other.null_flags_;
@@ -476,13 +476,13 @@ void NullableVector<T>::copyData(NullableVector<T>& other)
     if (buffer_.data_size_ < null_flags_.size())
         buffer_.data_size_ = null_flags_.size();
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": copyData: end";
+    logdbg << "NullableVector " << property_.name() << ": copyData: end";
 }
 
 template <class T>
 NullableVector<T>& NullableVector<T>::operator*=(double factor)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": operator*=";
+    logdbg << "NullableVector " << property_.name() << ": operator*=";
 
     unsigned int data_size = data_.size();
 
@@ -502,7 +502,7 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
 template <class T>
 std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValues";
+    logdbg << "NullableVector " << property_.name() << ": distinctValues";
 
     std::set<T> values;
 
@@ -525,7 +525,7 @@ template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
     unsigned int from_index, unsigned int to_index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<T, std::vector<unsigned int>> values;
 
@@ -554,7 +554,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
         }
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
@@ -563,7 +563,7 @@ template <class T>
 std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
     const std::vector<unsigned int>& indexes)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<T, std::vector<unsigned int>> values;
 
@@ -584,7 +584,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
         }
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
@@ -593,7 +593,7 @@ template <class T>
 std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
                                                               unsigned int to_index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
     std::vector<unsigned int> indexes;
 
@@ -622,7 +622,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_
         }
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
            << indexes.size();
     return indexes;
 }
@@ -631,7 +631,7 @@ template <class T>
 std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
     const std::vector<unsigned int>& indexes)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
     std::vector<unsigned int> ret_indexes;
 
@@ -646,7 +646,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
         }
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
            << ret_indexes.size();
     return ret_indexes;
 }
@@ -654,7 +654,7 @@ std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
 template <class T>
 void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": convertToStandardFormat";
+    logdbg << "NullableVector " << property_.name() << ": convertToStandardFormat";
 
     static_assert(std::is_integral<T>::value, "only defined for integer types");
 
@@ -663,7 +663,7 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 
     if (from_format != "octal")
     {
-        logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format
+        logerr << "NullableVector: convertToStandardFormat: unknown format '" << from_format
                << "'";
         assert(false);
     }
@@ -691,7 +691,7 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
     //        }
     //        else
     //        {
-    //            logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" <<
+    //            logerr << "NullableVector: convertToStandardFormat: unknown format '" <<
     //            from_format << "'"; assert (false);
     //        }
     //    }
@@ -706,7 +706,7 @@ unsigned int NullableVector<T>::size()
 template <class T>
 void NullableVector<T>::cutToSize(unsigned int size)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": cutToSize: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": cutToSize: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -726,7 +726,7 @@ void NullableVector<T>::cutToSize(unsigned int size)
 template <class T>
 void NullableVector<T>::checkNotNull()
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": checkNotNull";
+    logdbg << "NullableVector " << property_.name() << ": checkNotNull";
 
     for (unsigned int cnt = 0; cnt < null_flags_.size(); cnt++)
     {
@@ -744,7 +744,7 @@ void NullableVector<T>::checkNotNull()
 template <class T>
 void NullableVector<T>::unsetNull(unsigned int index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": unsetNull";
+    logdbg << "NullableVector " << property_.name() << ": unsetNull";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {

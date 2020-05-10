@@ -577,6 +577,7 @@ void Buffer::transformVariables(DBOVariableSet& list, bool tc2dbovar)
 
 std::shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_properties)
 {
+    assert (size());
     std::shared_ptr<Buffer> tmp_buffer{new Buffer()};
 
     for (unsigned int cnt = 0; cnt < partial_properties.size(); ++cnt)
@@ -589,35 +590,55 @@ std::shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_prope
         switch (prop.dataType())
         {
             case PropertyDataType::BOOL:
+                logdbg << "Buffer: getPartialCopy: adding BOOL property " << prop.name()
+                       << " size " << get<bool>(prop.name()).size();
                 tmp_buffer->get<bool>(prop.name()).copyData(get<bool>(prop.name()));
                 break;
             case PropertyDataType::CHAR:
+                logdbg << "Buffer: getPartialCopy: adding CHAR property " << prop.name()
+                          << " size " << get<char>(prop.name()).size();
                 tmp_buffer->get<char>(prop.name()).copyData(get<char>(prop.name()));
                 break;
             case PropertyDataType::UCHAR:
+                logdbg << "Buffer: getPartialCopy: adding UCHAR property " << prop.name()
+                          << " size " << get<unsigned char>(prop.name()).size();
                 tmp_buffer->get<unsigned char>(prop.name())
                     .copyData(get<unsigned char>(prop.name()));
                 break;
             case PropertyDataType::INT:
+                logdbg << "Buffer: getPartialCopy: adding INT property " << prop.name()
+                          << " size " << get<int>(prop.name()).size();
                 tmp_buffer->get<int>(prop.name()).copyData(get<int>(prop.name()));
                 break;
             case PropertyDataType::UINT:
+                logdbg << "Buffer: getPartialCopy: adding UINT property " << prop.name()
+                          << " size " << get<unsigned int>(prop.name()).size();
                 tmp_buffer->get<unsigned int>(prop.name()).copyData(get<unsigned int>(prop.name()));
                 break;
             case PropertyDataType::LONGINT:
+                logdbg << "Buffer: getPartialCopy: adding LONGINT property " << prop.name()
+                          << " size " << get<long int>(prop.name()).size();
                 tmp_buffer->get<long int>(prop.name()).copyData(get<long int>(prop.name()));
                 break;
             case PropertyDataType::ULONGINT:
+                logdbg << "Buffer: getPartialCopy: adding ULONGINT property " << prop.name()
+                          << " size " << get<unsigned long int>(prop.name()).size();
                 tmp_buffer->get<unsigned long int>(prop.name())
                     .copyData(get<unsigned long int>(prop.name()));
                 break;
             case PropertyDataType::FLOAT:
+                logdbg << "Buffer: getPartialCopy: adding FLOAT property " << prop.name()
+                          << " size " << get<float>(prop.name()).size();
                 tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
                 break;
             case PropertyDataType::DOUBLE:
+                logdbg << "Buffer: getPartialCopy: adding bool property " << prop.name()
+                          << " size " << get<double>(prop.name()).size();
                 tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
                 break;
             case PropertyDataType::STRING:
+                logdbg << "Buffer: getPartialCopy: adding STRING property " << prop.name()
+                          << " size " << get<std::string>(prop.name()).size();
                 tmp_buffer->get<std::string>(prop.name()).copyData(get<std::string>(prop.name()));
                 break;
             default:
@@ -627,6 +648,8 @@ std::shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_prope
                                          Property::asString(prop.dataType()));
         }
     }
+
+    assert (tmp_buffer->size());
 
     return tmp_buffer;
 }

@@ -20,6 +20,7 @@
 #include <nmeaparse/nmea.h>
 
 #include <QApplication>
+#include <QMessageBox>
 
 const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
 
@@ -196,6 +197,9 @@ bool GPSTrailImportTask::isRecommended()
     //    if (ATSDB::instance().objectManager().hasData())
     //        return false;
 
+    if (done_)
+        return false;
+
     return canImportFile();
 }
 
@@ -252,9 +256,12 @@ void GPSTrailImportTask::parseCurrentFile ()
 //        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
 //        cout << endl;
 
+        if (!gps.fix.locked())
+            return; // TODO skip
+
         gps_fixes_.push_back(gps.fix);
 
-        if (gps.fix.locked() && !current_text_.size())
+        if (!current_text_.size())
             current_text_ = "First (locked) message:\n"+gps.fix.toString();
     };
 
@@ -300,7 +307,11 @@ void GPSTrailImportTask::run()
 {
     loginf << "GPSTrailImportTask: run: filename '" << current_filename_ << " fixes " << gps_fixes_.size();
 
+    task_manager_.appendInfo("GPSTrailImportTask: import of file '" + current_filename_ +
+                             "' started");
+
     assert (gps_fixes_.size());
+    assert (!buffer_);
 
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
@@ -344,14 +355,14 @@ void GPSTrailImportTask::run()
 
     loginf << "GPSTrailImportTask: run: creating buffer";
 
-    shared_ptr<Buffer> buffer = make_shared<Buffer>(properties, "RefTraj");
+    buffer_ = make_shared<Buffer>(properties, "RefTraj");
 
-    NullableVector<unsigned char> sac_vec = buffer->get<unsigned char>("sac");
-    NullableVector<unsigned char> sic_vec = buffer->get<unsigned char>("sic");
-    NullableVector<int> ds_id_vec = buffer->get<int>("ds_id");
-    NullableVector<float> tod_vec = buffer->get<float>("tod");
-    NullableVector<double> lat_vec = buffer->get<double>("pos_lat_deg");
-    NullableVector<double> long_vec = buffer->get<double>("pos_long_deg");
+    NullableVector<unsigned char>& sac_vec = buffer_->get<unsigned char>("sac");
+    NullableVector<unsigned char>& sic_vec = buffer_->get<unsigned char>("sic");
+    NullableVector<int>& ds_id_vec = buffer_->get<int>("ds_id");
+    NullableVector<float>& tod_vec = buffer_->get<float>("tod");
+    NullableVector<double>& lat_vec = buffer_->get<double>("pos_lat_deg");
+    NullableVector<double>& long_vec = buffer_->get<double>("pos_long_deg");
 
     unsigned int cnt = 0;
     int sac = 0;
@@ -366,6 +377,7 @@ void GPSTrailImportTask::run()
 
     for (auto& fix_it : gps_fixes_)
     {
+
         tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0+fix_it.timestamp.sec;
 
         sac_vec.set(cnt, sac);
@@ -379,9 +391,6 @@ void GPSTrailImportTask::run()
         ++cnt;
     }
 
-
-    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
-
     if (!has_ds)
     {
         loginf << "GPSTrailImportTask: run: adding data source";
@@ -393,9 +402,16 @@ void GPSTrailImportTask::run()
         reftraj_obj.addDataSources(datasources_to_add);
     }
 
+    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
+
     loginf << "GPSTrailImportTask: run: inserting data";
 
-    reftraj_obj.insertData(var_set, buffer, false);
+    connect(&reftraj_obj, &DBObject::insertDoneSignal, this, &GPSTrailImportTask::insertDoneSlot,
+            Qt::UniqueConnection);
+    connect(&reftraj_obj, &DBObject::insertProgressSignal, this,
+            &GPSTrailImportTask::insertProgressSlot, Qt::UniqueConnection);
+
+    reftraj_obj.insertData(var_set, buffer_, false);
 }
 
 void GPSTrailImportTask::insertProgressSlot(float percent)
@@ -407,11 +423,28 @@ void GPSTrailImportTask::insertDoneSlot(DBObject& object)
 {
     loginf << "GPSTrailImportTask: insertDoneSlot";
 
+    buffer_ = nullptr;
+
     done_ = true;
+
+    task_manager_.appendSuccess("GPSTrailImportTask: imported " + to_string(gps_fixes_.size())
+                                +" GPS fixes");
 
     ATSDB::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
     ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+    ATSDB::instance().interface().databaseContentChanged();
+    object.updateToDatabaseContent();
+
+    QMessageBox msg_box;
+
+    msg_box.setWindowTitle("Import GPS Trail");
+    msg_box.setText("Import of "+QString::number(gps_fixes_.size())+" GPS fixes done.");
+    msg_box.setStandardButtons(QMessageBox::Ok);
+
+    if (show_done_summary_)
+        msg_box.exec();
 
     emit doneSignal(name_);
 }

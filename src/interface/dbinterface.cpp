@@ -969,13 +969,17 @@ void DBInterface::insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> 
 {
     logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size "
            << buffer->size();
+    assert (buffer->size());
 
+    logdbg << "DBInterface: insertBuffer: main table " << meta_table.mainTable().name();
     std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert(partial_buffer->size());
     insertBuffer(meta_table.mainTable(), partial_buffer);
 
     for (auto& sub_it : meta_table.subTables())
     {
+        logdbg << "DBInterface: insertBuffer: sub table " << sub_it.second.name();
+
         partial_buffer = getPartialBuffer(sub_it.second, buffer);
         assert(partial_buffer->size());
         insertBuffer(sub_it.second, partial_buffer);
@@ -1086,6 +1090,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
 {
     logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
            << buffer->size();
+    assert (buffer->size());
 
     PropertyList org_properties = buffer->properties();
     PropertyList partial_properties;
@@ -1108,6 +1113,8 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
     std::shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
 
     logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
+    assert (tmp_buffer->size());
+
     return tmp_buffer;
 }
 
