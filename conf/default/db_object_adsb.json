@@ -23,7 +23,7 @@
             "DBODataSourceDefinitionADSBSCDB0": {
                 "parameters": {
                     "altitude_column": "",
-                    "foreign_key": "le_ds.DS_ID",
+                    "foreign_key": "ds_ads.DS_ID",
                     "latitude_column": "ds_ads.POS_LAT_DEG",
                     "local_key": "ds_id",
                     "longitude_column": "ds_ads.POS_LONG_DEG",

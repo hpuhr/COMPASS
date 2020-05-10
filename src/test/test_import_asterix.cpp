@@ -115,6 +115,7 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
         client.processEvents();
 
     // set data sources
+    task_manager_widget->setCurrentTask(manage_ds_task);
     REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
 
     std::string ds_filename = data_path + "ds.json";
@@ -131,6 +132,8 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
     // calculate radar plot positions
     RadarPlotPositionCalculatorTask& radar_plot_pos_calc =
         task_manager.radarPlotPositionCalculatorTask();
+
+    task_manager_widget->setCurrentTask(radar_plot_pos_calc);
     REQUIRE(task_manager_widget->getCurrentTaskName() == radar_plot_pos_calc.name());
     REQUIRE(radar_plot_pos_calc.isRecommended());
     radar_plot_pos_calc.showDoneSummary(false);
@@ -144,6 +147,8 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
 
     // post-process
     PostProcessTask& post_process_task = task_manager.postProcessTask();
+
+    task_manager_widget->setCurrentTask(post_process_task);
     REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
     REQUIRE(post_process_task.isRecommended());
     REQUIRE(post_process_task.isRequired());

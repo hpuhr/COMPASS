@@ -10,7 +10,7 @@
                     "altitude_column": "ds_tracker.WGS_ELEV_CARTESIAN_M",
                     "foreign_key": "le_ds.DS_ID",
                     "latitude_column": "ds_tracker.POS_LAT_DEG",
-                    "local_key": "",
+                    "local_key": "ds_id",
                     "longitude_column": "ds_tracker.POS_LONG_DEG",
                     "meta_table": "TrackerDataSources",
                     "name_column": "le_ds.DS_NAME",

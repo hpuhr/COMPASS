@@ -7,17 +7,17 @@
         "DBODataSourceDefinition": {
             "DBODataSourceDefinitionRefTrajSCDB Extended0": {
                 "parameters": {
-                    "altitude_column": "",
-                    "foreign_key": "",
-                    "latitude_column": "",
-                    "local_key": "",
-                    "longitude_column": "",
+                    "altitude_column": "ds_reftraj.WGS_ELEV_CARTESIAN_M",
+                    "foreign_key": "le_ds.DS_ID",
+                    "latitude_column": "ds_reftraj.POS_LAT_DEG",
+                    "local_key": "ds_id",
+                    "longitude_column": "ds_reftraj.POS_LONG_DEG",
                     "meta_table": "RefTrajDataSources",
-                    "name_column": "",
-                    "sac_column": "",
+                    "name_column": "le_ds.DS_NAME",
+                    "sac_column": "le_ds.SAC",
                     "schema": "SCDB Extended",
-                    "short_name_column": "",
-                    "sic_column": ""
+                    "short_name_column": "le_ds.DS_SHORT_NAME",
+                    "sic_column": "le_ds.SIC"
                 }
             }
         },
@@ -541,7 +541,7 @@
             },
             "DBOVariableRefTrajsac0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
+                    "data_type_str": "UCHAR",
                     "dbo_name": "RefTraj",
                     "description": "ASTERIX System Area Code",
                     "dimension": "",
@@ -562,7 +562,7 @@
             },
             "DBOVariableRefTrajsic0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
+                    "data_type_str": "UCHAR",
                     "dbo_name": "RefTraj",
                     "description": "ASTERIX System Identification Code",
                     "dimension": "",
