@@ -62,6 +62,27 @@ public:
     unsigned int dsSIC() const;
     void dsSIC(unsigned int sic);
 
+    float todOffset() const;
+    void todOffset(float value);
+
+    bool setMode3aCode() const;
+    void setMode3aCode(bool value);
+
+    unsigned int mode3aCode() const;
+    void mode3aCode(unsigned int value);
+
+    bool setTargetAddress() const;
+    void setTargetAddress(bool value);
+
+    unsigned int targetAddress() const;
+    void targetAddress(unsigned int value);
+
+    bool setCallsign() const;
+    void setCallsign(bool value);
+
+    std::string callsign() const;
+    void callsign(const std::string& callsign);
+
 protected:
     std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
@@ -70,13 +91,37 @@ protected:
     unsigned int ds_sac_ {0};
     unsigned int ds_sic_ {0};
 
+    float tod_offset_ {0};
+
+    bool set_mode_3a_code_;
+    unsigned int mode_3a_code_; // decimal
+    bool set_target_address_;
+    unsigned int target_address_; // decimal
+    bool set_callsign_;
+    std::string callsign_;
+
     std::unique_ptr<GPSTrailImportTaskWidget> widget_;
 
     std::string current_error_;
     std::string current_text_;
 
     std::vector<nmea::GPSFix> gps_fixes_;
-    //unsigned int gps_fixes_skipped_ {0};
+
+    std::map<unsigned int, unsigned int> quality_counts_;
+    unsigned int gps_fixes_cnt_ {0};
+    unsigned int gps_fixes_skipped_cnt_ {0};
+
+    const std::map<unsigned int, std::string> quality_labels {
+        {0, "Invalid"},
+        {1, "Standard"},
+        {2, "DGPS"},
+        {3, "PPS fix"},
+        {4, "Real Time Kinetic"},
+        {5, "Real Time Kinetic (float)"},
+        {6, "Estimate"},
+        {7, "Manual input"},
+        {8, "Simulation mode"}
+    };
 
     std::shared_ptr<Buffer> buffer_;
 

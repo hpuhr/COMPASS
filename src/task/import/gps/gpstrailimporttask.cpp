@@ -24,6 +24,7 @@
 #include <QMessageBox>
 
 const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
+const float tod_24h = 24 * 60 * 60;
 
 using namespace Utils;
 using namespace std;
@@ -41,6 +42,8 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
     registerParameter("ds_name", &ds_name_, "GPS Trail");
     registerParameter("ds_sac", &ds_sac_, 0);
     registerParameter("ds_sic", &ds_sic_, 0);
+
+    registerParameter("tod_offset", &tod_offset_, 0);
 
     createSubConfigurables();
 
@@ -168,11 +171,11 @@ void GPSTrailImportTask::currentFilename(const std::string& filename)
 
     parseCurrentFile();
 
-//    if (widget_)
-//    {
-//        widget_->updateFileListSlot();
-//        widget_->updateText();
-//    }
+    //    if (widget_)
+    //    {
+    //        widget_->updateFileListSlot();
+    //        widget_->updateText();
+    //    }
 
     emit statusChangedSignal(name_);
 }
@@ -222,6 +225,8 @@ std::string GPSTrailImportTask::dsName() const
 
 void GPSTrailImportTask::dsName(const std::string& ds_name)
 {
+    loginf << "GPSTrailImportTask: dsName: value '" << ds_name << "'";
+
     ds_name_ = ds_name;
 }
 
@@ -232,6 +237,8 @@ unsigned int GPSTrailImportTask::dsSAC() const
 
 void GPSTrailImportTask::dsSAC(unsigned int ds_sac)
 {
+    loginf << "GPSTrailImportTask: dsSAC: value " << ds_sac;
+
     ds_sac_ = ds_sac;
 }
 
@@ -242,7 +249,93 @@ unsigned int GPSTrailImportTask::dsSIC() const
 
 void GPSTrailImportTask::dsSIC(unsigned int ds_sic)
 {
+    loginf << "GPSTrailImportTask: dsSIC: value " << ds_sic;
+
     ds_sic_ = ds_sic;
+}
+
+float GPSTrailImportTask::todOffset() const
+{
+    return tod_offset_;
+}
+
+void GPSTrailImportTask::todOffset(float tod_offset)
+{
+    loginf << "GPSTrailImportTask: todOffset: value " << tod_offset;
+
+    tod_offset_ = tod_offset;
+}
+
+bool GPSTrailImportTask::setMode3aCode() const
+{
+    return set_mode_3a_code_;
+}
+
+void GPSTrailImportTask::setMode3aCode(bool value)
+{
+    loginf << "GPSTrailImportTask: setMode3aCode: value " << value;
+
+    set_mode_3a_code_ = value;
+}
+
+unsigned int GPSTrailImportTask::mode3aCode() const
+{
+    return mode_3a_code_;
+}
+
+void GPSTrailImportTask::mode3aCode(unsigned int value)
+{
+    loginf << "GPSTrailImportTask: mode3aCode: value " << value;
+
+    mode_3a_code_ = value;
+}
+
+bool GPSTrailImportTask::setTargetAddress() const
+{
+    return set_target_address_;
+}
+
+void GPSTrailImportTask::setTargetAddress(bool value)
+{
+    loginf << "GPSTrailImportTask: setTargetAddress: value " << value;
+
+    set_target_address_ = value;
+}
+
+unsigned int GPSTrailImportTask::targetAddress() const
+{
+    return target_address_;
+}
+
+void GPSTrailImportTask::targetAddress(unsigned int target_address)
+{
+    loginf << "GPSTrailImportTask: targetAddress: value " << target_address;
+
+    target_address_ = target_address;
+}
+
+bool GPSTrailImportTask::setCallsign() const
+{
+    return set_callsign_;
+}
+
+void GPSTrailImportTask::setCallsign(bool value)
+{
+    loginf << "GPSTrailImportTask: setCallsign: value " << value;
+
+    set_callsign_ = value;
+}
+
+std::string GPSTrailImportTask::callsign() const
+{
+    return callsign_;
+}
+
+void GPSTrailImportTask::callsign(const std::string& callsign)
+{
+    loginf << "GPSTrailImportTask: callsign: value '" << callsign << "'";
+
+    callsign_ = callsign;
 }
 
 std::string GPSTrailImportTask::currentText() const
@@ -274,6 +367,9 @@ void GPSTrailImportTask::parseCurrentFile ()
     current_text_ = "";
 
     gps_fixes_.clear();
+    quality_counts_.clear();
+    gps_fixes_cnt_ = 0;
+    gps_fixes_skipped_cnt_ = 0;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -281,23 +377,29 @@ void GPSTrailImportTask::parseCurrentFile ()
     GPSService gps(parser);
     parser.log = false;
 
+    bool dubious_line = false;
+
     //cout << "Fix  Sats  Sig\t\tSpeed    Dir  Lat         , Lon           Accuracy" << endl;
     // Handle any changes to the GPS Fix... This is called whenever it's updated.
-    gps.onUpdate += [&gps, this](){
-//        cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
-//        cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
-//        cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
-//        cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
-//        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
-//        cout << endl;
+    gps.onUpdate += [&gps, this, &dubious_line](){
+        //        cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
+        //        cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
+        //        cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
+        //        cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
+        //        cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+        //        cout << endl;
 
-        if (!gps.fix.locked())
-            return; // TODO skip
+        ++gps_fixes_cnt_;
+
+        quality_counts_[gps.fix.quality] += 1;
+
+        if (gps.fix.quality == 0)
+        {
+            ++gps_fixes_skipped_cnt_;
+            return;
+        }
 
         gps_fixes_.push_back(gps.fix);
-
-        if (!current_text_.size())
-            current_text_ = "First (locked) message:\n"+gps.fix.toString();
     };
 
     // From a file
@@ -309,7 +411,12 @@ void GPSTrailImportTask::parseCurrentFile ()
     {
         try
         {
+            dubious_line = false;
             parser.readLine(line);
+
+            if (dubious_line)
+                loginf << "UGA2 " << line;
+
         }
         catch (NMEAParseError& e)
         {
@@ -327,8 +434,36 @@ void GPSTrailImportTask::parseCurrentFile ()
     // Show the final fix information
     //cout << gps.fix.toString() << endl;
 
-    current_text_ = "\nParsed "+to_string(gps_fixes_.size())+" fixes.\n\n"+current_text_
-            +"\n\nLast message:\n"+gps.fix.toString();
+    stringstream ss;
+
+    ss << "Parsed " << line_cnt << " lines.\n";
+
+    if (gps_fixes_cnt_)
+    {
+        ss << "Found " << gps_fixes_cnt_ << " fixes, skipped " << gps_fixes_skipped_cnt_
+           << " (" << String::percentToString(100.0*gps_fixes_skipped_cnt_/gps_fixes_cnt_) << "%)"
+           << " got " << gps_fixes_.size()
+           << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%)\n";
+
+        if (quality_counts_.size())
+        {
+            ss << "\nQuality:\n";
+
+            for (auto& qual_it : quality_counts_)
+            {
+                if (quality_labels.count(qual_it.first))
+                    ss << quality_labels.at(qual_it.first) << ": " << qual_it.second
+                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_cnt_) << "%)\n";
+                else
+                    ss << "Unknown ("<< qual_it.first << "): " << qual_it.second
+                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_cnt_) << "%)\n";
+            }
+        }
+    }
+    else
+        ss << "Found 0 fixes.";
+
+    current_text_ = ss.str();
 
     loginf << "GPSTrailImportTask: parseCurrentFile: parsed " << gps_fixes_.size() << " fixes in "
            << line_cnt << " lines";
@@ -432,8 +567,18 @@ void GPSTrailImportTask::run()
 
     for (auto& fix_it : gps_fixes_)
     {
-
         tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0+fix_it.timestamp.sec;
+
+        tod += tod_offset_;
+
+        // check for out-of-bounds because of midnight-jump
+        while (tod < 0.0f)
+            tod += tod_24h;
+        while (tod > tod_24h)
+            tod -= tod_24h;
+
+        assert(tod >= 0.0f);
+        assert(tod <= tod_24h);
 
         sac_vec.set(cnt, ds_sac_);
         sic_vec.set(cnt, ds_sic_);

@@ -2,6 +2,10 @@
 #include "gpstrailimporttask.h"
 #include "logger.h"
 
+#include "textfielddoublevalidator.h"
+#include "textfieldhexvalidator.h"
+#include "textfieldoctvalidator.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
@@ -10,6 +14,8 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QTextEdit>
+#include <QLineEdit>
+#include <QCheckBox>
 
 #include <iostream>
 
@@ -18,16 +24,35 @@ using namespace std;
 GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget(parent, f), task_(task)
 {
-    QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout_ = new QHBoxLayout();
+
+    tab_widget_ = new QTabWidget();
+
+    main_layout_->addWidget(tab_widget_);
+
+    addMainTab();
+    addConfigTab();
+
+    updateText();
+    updateConfig();
+
+    setLayout(main_layout_);
+}
+
+void GPSTrailImportTaskWidget::addMainTab()
+{
+    assert(tab_widget_);
 
     QFont font_bold;
     font_bold.setBold(true);
+
+    QVBoxLayout* tab_layout = new QVBoxLayout();
 
     // file stuff
     {
         QLabel* files_label = new QLabel("File Selection");
         files_label->setFont(font_bold);
-        main_layout->addWidget(files_label);
+        tab_layout->addWidget(files_label);
 
         file_list_ = new QListWidget();
         file_list_->setWordWrap(true);
@@ -37,7 +62,7 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
         connect(file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
 
         updateFileListSlot();
-        main_layout->addWidget(file_list_);
+        tab_layout->addWidget(file_list_);
     }
 
     // file button stuff
@@ -56,16 +81,117 @@ GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWi
         connect(delete_all_files_button_, &QPushButton::clicked, this, &GPSTrailImportTaskWidget::deleteAllFilesSlot);
         button_layout->addWidget(delete_all_files_button_);
 
-        main_layout->addLayout(button_layout);
+        tab_layout->addLayout(button_layout);
     }
 
     text_edit_ = new QTextEdit ();
     text_edit_->setReadOnly(true);
-    main_layout->addWidget(text_edit_);
+    tab_layout->addWidget(text_edit_);
 
-    updateText();
+    QWidget* main_tab_widget = new QWidget();
+    main_tab_widget->setContentsMargins(0, 0, 0, 0);
+    main_tab_widget->setLayout(tab_layout);
+    tab_widget_->addTab(main_tab_widget, "Main");
+}
 
-    setLayout(main_layout);
+void GPSTrailImportTaskWidget::addConfigTab()
+{
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QVBoxLayout* tab_layout = new QVBoxLayout();
+
+    QGridLayout* grid = new QGridLayout();
+
+    unsigned int row = 0;
+
+    // sac
+    grid->addWidget(new QLabel("SAC"), row, 0);
+
+    sac_edit_ = new QLineEdit();
+    sac_edit_->setValidator(new TextFieldDoubleValidator(0, 255, 0));
+    connect(sac_edit_, &QLineEdit::textEdited, this, &GPSTrailImportTaskWidget::sacEditedSlot);
+    grid->addWidget(sac_edit_, row, 1);
+
+    // sic
+    ++row;
+
+    grid->addWidget(new QLabel("SIC"), row, 0);
+
+    sic_edit_ = new QLineEdit();
+    sic_edit_->setValidator(new TextFieldDoubleValidator(0, 255, 0));
+    connect(sic_edit_, &QLineEdit::textEdited, this, &GPSTrailImportTaskWidget::sicEditedSlot);
+    grid->addWidget(sic_edit_, row, 1);
+
+    // name
+
+    ++row;
+    grid->addWidget(new QLabel("Name"), row, 0);
+
+    name_edit_ = new QLineEdit();
+    connect(name_edit_, &QLineEdit::textEdited, this, &GPSTrailImportTaskWidget::nameEditedSlot);
+    grid->addWidget(name_edit_, row, 1);
+
+    // tod offset
+    ++row;
+    grid->addWidget(new QLabel("Time of Day Offset"), row, 0);
+
+    tod_offset_edit_ = new QLineEdit();
+    tod_offset_edit_->setValidator(new TextFieldDoubleValidator(-24 * 3600, 24 * 3600, 3));
+    connect(tod_offset_edit_, &QLineEdit::textEdited, this,
+            &GPSTrailImportTaskWidget::todOffsetEditedSlot);
+    grid->addWidget(tod_offset_edit_, row, 1);
+
+    // mode 3a
+
+    ++row;
+    set_mode_3a_code_check_ = new QCheckBox("Mode 3/A Code (octal)");
+    connect(set_mode_3a_code_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::mode3ACheckedSlot);
+    grid->addWidget(set_mode_3a_code_check_, row, 0);
+
+    mode_3a_code_edit_ = new QLineEdit();
+    mode_3a_code_edit_->setValidator(new TextFieldOctValidator(4));
+    connect(mode_3a_code_edit_, &QLineEdit::textEdited, this,
+            &GPSTrailImportTaskWidget::mode3AEditedSlot);
+    grid->addWidget(mode_3a_code_edit_, row, 1);
+
+    // target address
+
+    ++row;
+    set_target_address_check_ = new QCheckBox("Target Address (hexadecimal)");
+    connect(set_target_address_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::targetAddressCheckedSlot);
+    grid->addWidget(set_target_address_check_, row, 0);
+
+    target_address_edit_ = new QLineEdit();
+    target_address_edit_->setValidator(new TextFieldHexValidator(6));
+    connect(target_address_edit_, &QLineEdit::textEdited, this,
+            &GPSTrailImportTaskWidget::targetAddressEditedSlot);
+    grid->addWidget(target_address_edit_, row, 1);
+
+    // callsign
+
+    ++row;
+    set_callsign_check_ = new QCheckBox("Callsign");
+    connect(set_callsign_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::callsignCheckedSlot);
+    grid->addWidget(set_callsign_check_, row, 0);
+
+    callsign_edit_ = new QLineEdit();
+    callsign_edit_->setMaxLength(8);
+    connect(callsign_edit_, &QLineEdit::textEdited, this,
+            &GPSTrailImportTaskWidget::callsignEditedSlot);
+    grid->addWidget(callsign_edit_, row, 1);
+
+
+    // finish him
+    tab_layout->addLayout(grid);
+
+    tab_layout->addStretch();
+
+    QWidget* tab_widget = new QWidget();
+    tab_widget->setContentsMargins(0, 0, 0, 0);
+    tab_widget->setLayout(tab_layout);
+
+    tab_widget_->addTab(tab_widget, "Config");
 }
 
 GPSTrailImportTaskWidget::~GPSTrailImportTaskWidget() {}
@@ -152,6 +278,85 @@ void GPSTrailImportTaskWidget::updateFileListSlot()
     }
 }
 
+void GPSTrailImportTaskWidget::sacEditedSlot(const QString& value)
+{
+    assert (sac_edit_);
+
+    TextFieldDoubleValidator::displayValidityAsColor(sac_edit_);
+
+    if (sac_edit_->hasAcceptableInput())
+        task_.dsSAC(sac_edit_->text().toUInt());
+}
+
+void GPSTrailImportTaskWidget::sicEditedSlot(const QString& value)
+{
+    assert (sic_edit_);
+
+    TextFieldDoubleValidator::displayValidityAsColor(sic_edit_);
+
+    if (sic_edit_->hasAcceptableInput())
+        task_.dsSIC(sic_edit_->text().toUInt());
+}
+
+void GPSTrailImportTaskWidget::nameEditedSlot(const QString& value)
+{
+    assert (name_edit_);
+    task_.dsName(name_edit_->text().toStdString());
+}
+
+void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
+{
+    TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
+
+    if (tod_offset_edit_->hasAcceptableInput())
+        task_.todOffset(tod_offset_edit_->text().toFloat());
+}
+
+void GPSTrailImportTaskWidget::mode3ACheckedSlot()
+{
+    loginf << "GPSTrailImportTaskWidget: mode3ACheckedSlot";
+}
+
+void GPSTrailImportTaskWidget::mode3AEditedSlot(const QString& value)
+{
+    loginf << "GPSTrailImportTaskWidget: mode3AEditedSlot: value " << value.toStdString();
+}
+
+void GPSTrailImportTaskWidget::targetAddressCheckedSlot()
+{
+    loginf << "GPSTrailImportTaskWidget: targetAddressCheckedSlot";
+}
+
+void GPSTrailImportTaskWidget::targetAddressEditedSlot(const QString& value)
+{
+    loginf << "GPSTrailImportTaskWidget: targetAddressEditedSlot: value " << value.toStdString();
+}
+
+void GPSTrailImportTaskWidget::callsignCheckedSlot()
+{
+    loginf << "GPSTrailImportTaskWidget: callsignCheckedSlot";
+}
+
+void GPSTrailImportTaskWidget::callsignEditedSlot(const QString& value)
+{
+    loginf << "GPSTrailImportTaskWidget: callsignEditedSlot: value '" << value.toStdString() << "'";
+}
+
+void GPSTrailImportTaskWidget::updateConfig ()
+{
+    assert (sac_edit_);
+    sac_edit_->setText(QString::number(task_.dsSAC()));
+
+    assert (sic_edit_);
+    sic_edit_->setText(QString::number(task_.dsSIC()));
+
+    assert (name_edit_);
+    name_edit_->setText(task_.dsName().c_str());
+
+    assert (tod_offset_edit_);
+    tod_offset_edit_->setText(QString::number(task_.todOffset()));
+}
+
 void GPSTrailImportTaskWidget::expertModeChangedSlot() {}
 
 //void GPSTrailImportTaskWidget::runStarted()
@@ -177,30 +382,26 @@ void GPSTrailImportTaskWidget::updateText ()
     stringstream ss;
 
     if (task_.currentError().size())
-        ss << "Errors:\n" << task_.currentError();
-    else
-        ss << "Errors: None\n";
+        ss << "Errors:\n" << task_.currentError() << "\n";
 
     if (task_.currentText().size())
-        ss << "Info:\n" << task_.currentText();
-    else
-        ss << "Info: None\n";
+        ss << task_.currentText();
 
     text_edit_->setText(ss.str().c_str());
 
-//    if (task_.currentError().size())
-//    {
-//        context_edit_->setText(QString("Error: ")+task_.currentError().c_str());
-//        import_button_->setDisabled(true);
-//    }
-//    else
-//    {
-//        const nlohmann::json& data = task_.currentData();
+    //    if (task_.currentError().size())
+    //    {
+    //        context_edit_->setText(QString("Error: ")+task_.currentError().c_str());
+    //        import_button_->setDisabled(true);
+    //    }
+    //    else
+    //    {
+    //        const nlohmann::json& data = task_.currentData();
 
-//        assert (data.contains("view_point_context"));
+    //        assert (data.contains("view_point_context"));
 
-//        context_edit_->setText(data.at("view_point_context").dump(4).c_str());
+    //        context_edit_->setText(data.at("view_point_context").dump(4).c_str());
 
-//        import_button_->setDisabled(false);
-//    }
+    //        import_button_->setDisabled(false);
+    //    }
 }
