@@ -378,7 +378,8 @@ void GPSTrailImportTask::parseCurrentFile ()
     gps_fixes_.clear();
     quality_counts_.clear();
     gps_fixes_cnt_ = 0;
-    gps_fixes_skipped_cnt_ = 0;
+    gps_fixes_skipped_quality_cnt_ = 0;
+    gps_fixes_skipped_time_cnt_ = 0;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -386,11 +387,11 @@ void GPSTrailImportTask::parseCurrentFile ()
     GPSService gps(parser);
     parser.log = false;
 
-    bool dubious_line = false;
+    time_t last_tod;
 
     //cout << "Fix  Sats  Sig\t\tSpeed    Dir  Lat         , Lon           Accuracy" << endl;
     // Handle any changes to the GPS Fix... This is called whenever it's updated.
-    gps.onUpdate += [&gps, this, &dubious_line](){
+    gps.onUpdate += [&gps, this, &last_tod](){
         //        cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
         //        cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
         //        cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
@@ -400,15 +401,23 @@ void GPSTrailImportTask::parseCurrentFile ()
 
         ++gps_fixes_cnt_;
 
-        quality_counts_[gps.fix.quality] += 1;
-
         if (gps.fix.quality == 0)
         {
-            ++gps_fixes_skipped_cnt_;
+            ++gps_fixes_skipped_quality_cnt_;
             return;
         }
 
+        if (gps_fixes_.size() && last_tod == gps.fix.timestamp.getTime())
+        {
+            ++gps_fixes_skipped_time_cnt_;
+            return;
+        }
+
+        quality_counts_[gps.fix.quality] += 1;
+
         gps_fixes_.push_back(gps.fix);
+
+        last_tod = gps.fix.timestamp.getTime();
     };
 
     // From a file
@@ -420,12 +429,7 @@ void GPSTrailImportTask::parseCurrentFile ()
     {
         try
         {
-            dubious_line = false;
             parser.readLine(line);
-
-            if (dubious_line)
-                loginf << "UGA2 " << line;
-
         }
         catch (NMEAParseError& e)
         {
@@ -449,10 +453,15 @@ void GPSTrailImportTask::parseCurrentFile ()
 
     if (gps_fixes_cnt_)
     {
-        ss << "Found " << gps_fixes_cnt_ << " fixes, skipped " << gps_fixes_skipped_cnt_
-           << " (" << String::percentToString(100.0*gps_fixes_skipped_cnt_/gps_fixes_cnt_) << "%)"
-           << " got " << gps_fixes_.size()
-           << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%)\n";
+        ss << "Read " << gps_fixes_cnt_ << " fixes.\n";
+        ss << "Skipped " << gps_fixes_skipped_quality_cnt_
+           << " (" << String::percentToString(100.0*gps_fixes_skipped_quality_cnt_/gps_fixes_cnt_) << "%)"
+           << " because of quality.\n";
+        ss << "Skipped " << gps_fixes_skipped_time_cnt_
+           << " (" << String::percentToString(100.0*gps_fixes_skipped_time_cnt_/gps_fixes_cnt_) << "%)"
+           << " because of same time.\n";
+        ss << "Got " << gps_fixes_.size()
+           << " (" << String::percentToString(100.0*gps_fixes_.size()/gps_fixes_cnt_) << "%) fixes.\n";
 
         if (quality_counts_.size())
         {
@@ -462,10 +471,10 @@ void GPSTrailImportTask::parseCurrentFile ()
             {
                 if (quality_labels.count(qual_it.first))
                     ss << quality_labels.at(qual_it.first) << ": " << qual_it.second
-                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_cnt_) << "%)\n";
+                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_.size()) << "%)\n";
                 else
                     ss << "Unknown ("<< qual_it.first << "): " << qual_it.second
-                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_cnt_) << "%)\n";
+                       << " (" << String::percentToString(100.0*qual_it.second/gps_fixes_.size()) << "%)\n";
             }
         }
     }
@@ -505,6 +514,9 @@ void GPSTrailImportTask::run()
     assert (reftraj_obj.hasVariable("tod"));
     assert (reftraj_obj.hasVariable("pos_lat_deg"));
     assert (reftraj_obj.hasVariable("pos_long_deg"));
+    assert (reftraj_obj.hasVariable("mode3a_code"));
+    assert (reftraj_obj.hasVariable("target_addr"));
+    assert (reftraj_obj.hasVariable("callsign"));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
@@ -514,6 +526,9 @@ void GPSTrailImportTask::run()
     DBOVariable& tod_var = reftraj_obj.variable("tod");
     DBOVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
     DBOVariable& long_var = reftraj_obj.variable("pos_long_deg");
+    DBOVariable& m3a_var = reftraj_obj.variable("mode3a_code");
+    DBOVariable& ta_var = reftraj_obj.variable("target_addr");
+    DBOVariable& cs_var = reftraj_obj.variable("callsign");
 
     DBOVariableSet var_set;
 
@@ -524,6 +539,15 @@ void GPSTrailImportTask::run()
     var_set.add(lat_var);
     var_set.add(long_var);
 
+    if (set_mode_3a_code_)
+        var_set.add(m3a_var);
+
+    if (set_target_address_)
+        var_set.add(ta_var);
+
+    if (set_callsign_)
+        var_set.add(cs_var);
+
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
     properties.addProperty(sic_var.name(), PropertyDataType::UCHAR);
@@ -531,6 +555,15 @@ void GPSTrailImportTask::run()
     properties.addProperty(tod_var.name(), PropertyDataType::FLOAT);
     properties.addProperty(lat_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(long_var.name(), PropertyDataType::DOUBLE);
+
+    if (set_mode_3a_code_)
+        properties.addProperty(m3a_var.name(), PropertyDataType::INT);
+
+    if (set_target_address_)
+        properties.addProperty(ta_var.name(), PropertyDataType::INT);
+
+    if (set_callsign_)
+        properties.addProperty(cs_var.name(), PropertyDataType::STRING);
 
     loginf << "GPSTrailImportTask: run: creating buffer";
 
@@ -596,6 +629,15 @@ void GPSTrailImportTask::run()
         tod_vec.set(cnt, tod);
         lat_vec.set(cnt, fix_it.latitude);
         long_vec.set(cnt, fix_it.longitude);
+
+        if (set_mode_3a_code_)
+            buffer_->get<int>("mode3a_code").set(cnt, mode_3a_code_);
+
+        if (set_target_address_)
+            buffer_->get<int>("target_addr").set(cnt, target_address_);
+
+        if (set_callsign_)
+            buffer_->get<string>("callsign").set(cnt, callsign_);
 
         ++cnt;
     }

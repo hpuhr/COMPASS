@@ -109,7 +109,8 @@ protected:
 
     std::map<unsigned int, unsigned int> quality_counts_;
     unsigned int gps_fixes_cnt_ {0};
-    unsigned int gps_fixes_skipped_cnt_ {0};
+    unsigned int gps_fixes_skipped_quality_cnt_ {0};
+    unsigned int gps_fixes_skipped_time_cnt_ {0};
 
     const std::map<unsigned int, std::string> quality_labels {
         {0, "Invalid"},
