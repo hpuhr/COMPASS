@@ -52,7 +52,7 @@ void GPSTrailImportTaskWidget::addMainTab()
 
     // file stuff
     {
-        QLabel* files_label = new QLabel("File Selection");
+        QLabel* files_label = new QLabel("NMEA File Selection");
         files_label->setFont(font_bold);
         tab_layout->addWidget(files_label);
 

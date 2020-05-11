@@ -514,9 +514,13 @@ void GPSTrailImportTask::run()
     assert (reftraj_obj.hasVariable("tod"));
     assert (reftraj_obj.hasVariable("pos_lat_deg"));
     assert (reftraj_obj.hasVariable("pos_long_deg"));
+
     assert (reftraj_obj.hasVariable("mode3a_code"));
     assert (reftraj_obj.hasVariable("target_addr"));
     assert (reftraj_obj.hasVariable("callsign"));
+
+    assert (reftraj_obj.hasVariable("heading_deg"));
+    assert (reftraj_obj.hasVariable("groundspeed_kt"));
 
     loginf << "GPSTrailImportTask: run: getting variables";
 
@@ -526,9 +530,14 @@ void GPSTrailImportTask::run()
     DBOVariable& tod_var = reftraj_obj.variable("tod");
     DBOVariable& lat_var = reftraj_obj.variable("pos_lat_deg");
     DBOVariable& long_var = reftraj_obj.variable("pos_long_deg");
+
     DBOVariable& m3a_var = reftraj_obj.variable("mode3a_code");
     DBOVariable& ta_var = reftraj_obj.variable("target_addr");
     DBOVariable& cs_var = reftraj_obj.variable("callsign");
+
+    DBOVariable& head_var = reftraj_obj.variable("heading_deg");
+    DBOVariable& spd_var = reftraj_obj.variable("groundspeed_kt");
+
 
     DBOVariableSet var_set;
 
@@ -548,6 +557,9 @@ void GPSTrailImportTask::run()
     if (set_callsign_)
         var_set.add(cs_var);
 
+    var_set.add(head_var);
+    var_set.add(spd_var);
+
     PropertyList properties;
     properties.addProperty(sac_var.name(), PropertyDataType::UCHAR);
     properties.addProperty(sic_var.name(), PropertyDataType::UCHAR);
@@ -565,6 +577,9 @@ void GPSTrailImportTask::run()
     if (set_callsign_)
         properties.addProperty(cs_var.name(), PropertyDataType::STRING);
 
+    properties.addProperty(head_var.name(), PropertyDataType::DOUBLE);
+    properties.addProperty(spd_var.name(), PropertyDataType::DOUBLE);
+
     loginf << "GPSTrailImportTask: run: creating buffer";
 
     buffer_ = make_shared<Buffer>(properties, "RefTraj");
@@ -575,6 +590,9 @@ void GPSTrailImportTask::run()
     NullableVector<float>& tod_vec = buffer_->get<float>("tod");
     NullableVector<double>& lat_vec = buffer_->get<double>("pos_lat_deg");
     NullableVector<double>& long_vec = buffer_->get<double>("pos_long_deg");
+
+    NullableVector<double>& head_vec = buffer_->get<double>("heading_deg");
+    NullableVector<double>& spd_vec = buffer_->get<double>("groundspeed_kt");
 
     unsigned int cnt = 0;
     int ds_id = ds_sac_*255+ds_sic_;
@@ -638,6 +656,12 @@ void GPSTrailImportTask::run()
 
         if (set_callsign_)
             buffer_->get<string>("callsign").set(cnt, callsign_);
+
+        if (fix_it.travelAngle != 0.0)
+            head_vec.set(cnt, fix_it.travelAngle);
+
+        if (fix_it.speed != 0.0)
+            spd_vec.set(cnt, fix_it.speed*0.539957); // km/h to knots
 
         ++cnt;
     }
