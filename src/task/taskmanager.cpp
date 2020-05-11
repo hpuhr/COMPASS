@@ -492,6 +492,13 @@ void TaskManager::importASTERIXFile(const std::string& filename)
     asterix_import_filename_ = filename;
 }
 
+void TaskManager::importGPSTrailFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    gps_trail_import_file_ = true;
+    gps_trail_import_filename_ = filename;
+}
+
 void TaskManager::importViewPointsFile(const std::string& filename)
 {
     loginf << "TaskManager: importViewPointsFile: filename '" << filename << "'";
@@ -680,6 +687,48 @@ void TaskManager::performAutomaticTasks ()
         QThread::msleep(100);  // delay
     }
     #endif
+
+    if (gps_trail_import_file_)
+    {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
+               << gps_trail_import_filename_ << "'";
+
+        if (!Files::fileExists(gps_trail_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*gps_trail_import_task_);
+        if(widget_->getCurrentTaskName() != gps_trail_import_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        GPSTrailImportTaskWidget* gps_import_task_widget =
+            dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
+        assert(gps_import_task_widget);
+
+        gps_import_task_widget->addFile(gps_trail_import_filename_);
+        gps_import_task_widget->selectFile(gps_trail_import_filename_);
+
+        assert(gps_trail_import_task_->canRun());
+        gps_trail_import_task_->showDoneSummary(false);
+
+        //widget_->runCurrentTaskSlot();
+        widget_->runTask(*gps_trail_import_task_);
+
+        while (QCoreApplication::hasPendingEvents() || !gps_trail_import_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
+    }
 
     if (auto_process_)
     {

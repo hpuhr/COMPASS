@@ -76,6 +76,23 @@ void GPSTrailImportTaskWidget::addFile(const std::string& filename)
         task_.addFile(filename);
 }
 
+void GPSTrailImportTaskWidget::selectFile(const std::string& filename)
+{
+    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+    assert (items.size() > 0);
+
+    assert(task_.hasFile(filename));
+    task_.currentFilename(filename);
+
+    for (auto item_it : items)
+    {
+        assert (item_it);
+        file_list_->setCurrentItem(item_it);
+    }
+
+    updateText();
+}
+
 void GPSTrailImportTaskWidget::addFileSlot()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Add NMEA File"));
@@ -117,6 +134,8 @@ void GPSTrailImportTaskWidget::selectedFileSlot()
     assert(task_.hasFile(filename.toStdString()));
 
     task_.currentFilename(filename.toStdString());
+
+    updateText();
 }
 
 void GPSTrailImportTaskWidget::updateFileListSlot()

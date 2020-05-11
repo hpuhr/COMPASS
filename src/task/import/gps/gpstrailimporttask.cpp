@@ -163,11 +163,11 @@ void GPSTrailImportTask::currentFilename(const std::string& filename)
 
     parseCurrentFile();
 
-    if (widget_)
-    {
-        widget_->updateFileListSlot();
-        widget_->updateText();
-    }
+//    if (widget_)
+//    {
+//        widget_->updateFileListSlot();
+//        widget_->updateText();
+//    }
 
     emit statusChangedSignal(name_);
 }
