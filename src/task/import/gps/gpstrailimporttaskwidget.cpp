@@ -1,6 +1,7 @@
 #include "gpstrailimporttaskwidget.h"
 #include "gpstrailimporttask.h"
 #include "logger.h"
+#include "stringconv.h"
 
 #include "textfielddoublevalidator.h"
 #include "textfieldhexvalidator.h"
@@ -20,6 +21,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace Utils;
 
 GPSTrailImportTaskWidget::GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget(parent, f), task_(task)
@@ -306,40 +308,67 @@ void GPSTrailImportTaskWidget::nameEditedSlot(const QString& value)
 
 void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
 {
+    assert (tod_offset_edit_);
+
     TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
 
     if (tod_offset_edit_->hasAcceptableInput())
-        task_.todOffset(tod_offset_edit_->text().toFloat());
+        task_.todOffset(value.toFloat());
 }
 
 void GPSTrailImportTaskWidget::mode3ACheckedSlot()
 {
     loginf << "GPSTrailImportTaskWidget: mode3ACheckedSlot";
+
+    assert (set_mode_3a_code_check_);
+    task_.setMode3aCode(set_mode_3a_code_check_->checkState() == Qt::Checked);
 }
 
 void GPSTrailImportTaskWidget::mode3AEditedSlot(const QString& value)
 {
     loginf << "GPSTrailImportTaskWidget: mode3AEditedSlot: value " << value.toStdString();
+
+    assert (mode_3a_code_edit_);
+
+    if (mode_3a_code_edit_->hasAcceptableInput())
+        task_.mode3aCode(String::intFromOctalString(value.toStdString()));
 }
 
 void GPSTrailImportTaskWidget::targetAddressCheckedSlot()
 {
     loginf << "GPSTrailImportTaskWidget: targetAddressCheckedSlot";
+
+    assert (set_target_address_check_);
+    task_.setTargetAddress(set_target_address_check_->checkState() == Qt::Checked);
 }
 
 void GPSTrailImportTaskWidget::targetAddressEditedSlot(const QString& value)
 {
     loginf << "GPSTrailImportTaskWidget: targetAddressEditedSlot: value " << value.toStdString();
+
+    assert (target_address_edit_);
+
+    if (target_address_edit_->hasAcceptableInput())
+        task_.targetAddress(String::intFromHexString(value.toStdString()));
 }
 
 void GPSTrailImportTaskWidget::callsignCheckedSlot()
 {
     loginf << "GPSTrailImportTaskWidget: callsignCheckedSlot";
+
+    assert (set_callsign_check_);
+    task_.setCallsign(set_callsign_check_->checkState() == Qt::Checked);
 }
 
 void GPSTrailImportTaskWidget::callsignEditedSlot(const QString& value)
 {
     loginf << "GPSTrailImportTaskWidget: callsignEditedSlot: value '" << value.toStdString() << "'";
+
+    QString upper_value = value.toUpper();
+
+    callsign_edit_->setText(upper_value);
+
+    task_.callsign(upper_value.toStdString());
 }
 
 void GPSTrailImportTaskWidget::updateConfig ()
@@ -355,6 +384,22 @@ void GPSTrailImportTaskWidget::updateConfig ()
 
     assert (tod_offset_edit_);
     tod_offset_edit_->setText(QString::number(task_.todOffset()));
+
+    assert (set_mode_3a_code_check_);
+    set_mode_3a_code_check_->setChecked(task_.setMode3aCode());
+
+    assert (mode_3a_code_edit_);
+    mode_3a_code_edit_->setText(String::octStringFromInt(task_.mode3aCode()).c_str());
+
+    assert (set_target_address_check_);
+    set_target_address_check_->setChecked(task_.setTargetAddress());
+    assert (target_address_edit_);
+    target_address_edit_->setText(String::hexStringFromInt(task_.targetAddress()).c_str());
+
+    assert (set_callsign_check_);
+    set_callsign_check_->setChecked(task_.setCallsign());
+    assert (callsign_edit_);
+    callsign_edit_->setText(task_.callsign().c_str());
 }
 
 void GPSTrailImportTaskWidget::expertModeChangedSlot() {}

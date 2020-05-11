@@ -45,6 +45,15 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
 
     registerParameter("tod_offset", &tod_offset_, 0);
 
+    registerParameter("set_mode_3a_code", &set_mode_3a_code_, false);
+    registerParameter("mode_3a_code", &mode_3a_code_, 0);
+
+    registerParameter("set_target_address", &set_target_address_, false);
+    registerParameter("target_address", &target_address_, 0);
+
+    registerParameter("set_callsign", &set_callsign_, false);
+    registerParameter("callsign_", &callsign_, "");
+
     createSubConfigurables();
 
     if (current_filename_.size())
