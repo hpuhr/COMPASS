@@ -53,9 +53,22 @@ public:
     std::string currentText() const;
     std::string currentError() const;
 
+    std::string dsName() const;
+    void dsName(const std::string& ds_name);
+
+    unsigned int dsSAC() const;
+    void dsSAC(unsigned int sac);
+
+    unsigned int dsSIC() const;
+    void dsSIC(unsigned int sic);
+
 protected:
     std::map<std::string, SavedFile*> file_list_;
     std::string current_filename_;
+
+    std::string ds_name_;
+    unsigned int ds_sac_ {0};
+    unsigned int ds_sic_ {0};
 
     std::unique_ptr<GPSTrailImportTaskWidget> widget_;
 

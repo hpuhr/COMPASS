@@ -13,6 +13,7 @@
 #include "dbovariableset.h"
 #include "dbtablecolumn.h"
 #include "postprocesstask.h"
+#include "managedatasourcestask.h"
 
 #include <iostream>
 #include <fstream>
@@ -36,6 +37,10 @@ GPSTrailImportTask::GPSTrailImportTask(const std::string& class_id, const std::s
     tooltip_ = "Allows importing of GPS trails as NMEA into the opened database.";
 
     registerParameter("current_filename", &current_filename_, "");
+
+    registerParameter("ds_name", &ds_name_, "GPS Trail");
+    registerParameter("ds_sac", &ds_sac_, 0);
+    registerParameter("ds_sic", &ds_sic_, 0);
 
     createSubConfigurables();
 
@@ -210,6 +215,36 @@ std::string GPSTrailImportTask::currentError() const
     return current_error_;
 }
 
+std::string GPSTrailImportTask::dsName() const
+{
+    return ds_name_;
+}
+
+void GPSTrailImportTask::dsName(const std::string& ds_name)
+{
+    ds_name_ = ds_name;
+}
+
+unsigned int GPSTrailImportTask::dsSAC() const
+{
+    return ds_sac_;
+}
+
+void GPSTrailImportTask::dsSAC(unsigned int ds_sac)
+{
+    ds_sac_ = ds_sac;
+}
+
+unsigned int GPSTrailImportTask::dsSIC() const
+{
+    return ds_sic_;
+}
+
+void GPSTrailImportTask::dsSIC(unsigned int ds_sic)
+{
+    ds_sic_ = ds_sic;
+}
+
 std::string GPSTrailImportTask::currentText() const
 {
     return current_text_;
@@ -365,9 +400,29 @@ void GPSTrailImportTask::run()
     NullableVector<double>& long_vec = buffer_->get<double>("pos_long_deg");
 
     unsigned int cnt = 0;
-    int sac = 0;
-    int sic = 0;
-    int ds_id = sac*255+sic;
+    int ds_id = ds_sac_*255+ds_sic_;
+
+    // config data source
+    {
+        ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+
+        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
+        {
+            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
+                   << ds_sac_ << "/" << ds_sic_;
+            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
+            new_ds.name(ds_name_);
+            new_ds.sac(ds_sac_);
+            new_ds.sic(ds_sic_);
+        }
+        else // set name if existing
+        {
+            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
+                   << ds_sac_ << "/" << ds_sic_;
+            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
+            ds.name(ds_name_);
+        }
+    }
 
     bool has_ds = reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
 
@@ -380,8 +435,8 @@ void GPSTrailImportTask::run()
 
         tod = fix_it.timestamp.hour*3600.0 + fix_it.timestamp.min*60.0+fix_it.timestamp.sec;
 
-        sac_vec.set(cnt, sac);
-        sic_vec.set(cnt, sic);
+        sac_vec.set(cnt, ds_sac_);
+        sic_vec.set(cnt, ds_sic_);
         ds_id_vec.set(cnt, ds_id);
 
         tod_vec.set(cnt, tod);
@@ -397,7 +452,7 @@ void GPSTrailImportTask::run()
 
         std::map<int, std::pair<int, int>> datasources_to_add;
 
-        datasources_to_add[ds_id] = {sac,sic};
+        datasources_to_add[ds_id] = {ds_sac_, ds_sic_};
 
         reftraj_obj.addDataSources(datasources_to_add);
     }
