@@ -23,6 +23,7 @@
 
 #include <QComboBox>
 #include <memory>
+#include <string>
 
 #include "asteriximporttask.h"
 
@@ -47,7 +48,7 @@ class ASTERIXEditionComboBox : public QComboBox
                            QWidget* parent = nullptr)
         : QComboBox(parent), task_(task), category_(category)
     {
-        for (auto& ed_it : category_->editions())
+        for (const auto& ed_it : category_->editions())
         {
             addItem(ed_it.first.c_str());
         }
