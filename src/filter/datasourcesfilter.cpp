@@ -282,15 +282,15 @@ void DataSourcesFilter::saveViewPointConditions (nlohmann::json& filters)
     }
 }
 
-void DataSourcesFilter::loadViewPointConditions (nlohmann::json& filters)
+void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
     assert (conditions_.size() == 0);
 
     assert (filters.contains(name_));
-    json& filter = filters.at(name_);
+    const json& filter = filters.at(name_);
 
     assert (filter.contains("active_sources"));
-    json& active_sources = filter.at("active_sources");
+    const json& active_sources = filter.at("active_sources");
 
     assert (active_sources.is_array());
 

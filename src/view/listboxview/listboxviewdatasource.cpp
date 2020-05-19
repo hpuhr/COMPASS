@@ -148,7 +148,7 @@ void ListBoxViewDataSource::unshowViewPoint (ViewPoint* vp)
 void ListBoxViewDataSource::showViewPoint (ViewPoint* vp)
 {
     assert (vp);
-    json& data = vp->data();
+    const json& data = vp->data();
 
 //    "context_variables": {
 //        "Tracker": [
@@ -160,7 +160,7 @@ void ListBoxViewDataSource::showViewPoint (ViewPoint* vp)
 
     if (data.contains("context_variables"))
     {
-        json& context_variables = data.at("context_variables");
+        const json& context_variables = data.at("context_variables");
         assert (context_variables.is_object());
 
         for (auto& obj_it : context_variables.get<json::object_t>())

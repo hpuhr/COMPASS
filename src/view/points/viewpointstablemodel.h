@@ -4,6 +4,8 @@
 #include <QAbstractItemModel>
 #include <QIcon>
 
+#include "json.hpp"
+
 class ViewManager;
 class ViewPoint;
 
@@ -24,8 +26,8 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    unsigned int saveNewViewPoint(bool update=true);
-    ViewPoint& saveNewViewPoint(unsigned int id, bool update=true);
+    unsigned int saveNewViewPoint(const nlohmann::json& data, bool update=true);
+    ViewPoint& saveNewViewPoint(unsigned int id, const nlohmann::json& data, bool update=true);
     bool existsViewPoint(unsigned int id);
     ViewPoint& viewPoint(unsigned int id);
     //void removeViewPoint(unsigned int id);
@@ -33,7 +35,7 @@ public:
 
     std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
     void printViewPoints();
-    void saveViewPoints();
+    //void saveViewPoints();
 
     void importViewPoints (const std::string& filename);
     void exportViewPoints (const std::string& filename);

@@ -383,11 +383,11 @@ void DBFilter::saveViewPointConditions (nlohmann::json& filters)
     }
 }
 
-void DBFilter::loadViewPointConditions (nlohmann::json& filters)
+void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
     assert (filters.is_object());
     assert (filters.contains(name_));
-    nlohmann::json& filter = filters.at(name_);
+    const nlohmann::json& filter = filters.at(name_);
     assert (filter.is_object());
 
     // clear previous conditions

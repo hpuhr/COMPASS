@@ -2,14 +2,27 @@
 #include "viewmanager.h"
 #include "logger.h"
 #include "json.hpp"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 using namespace nlohmann;
 
-ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
+ViewPoint::ViewPoint(unsigned int id, const nlohmann::json& data, ViewManager& view_manager, bool needs_save)
     : id_(id), view_manager_(view_manager)
 {
-    data_["id"] = id_;
-    data_["status"] = "open";
+    data_ = data;
+
+    assert (data_.contains("id"));
+    assert (data_.at("id") == id_);
+
+    if (!data_.contains("status"))
+    {
+        data_["status"] = "open";
+        needs_save = true;
+    }
+
+    if (needs_save)
+        save();
 
 //    "id":0,
 //    "type":"any string",
@@ -61,37 +74,49 @@ ViewPoint::ViewPoint(unsigned int id, ViewManager& view_manager)
 
 }
 
-ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager)
+ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save)
     : id_(id), view_manager_(view_manager)
 {
     data_ = json::parse(json_str);
+
     assert (data_.contains("id"));
     assert (data_.at("id") == id_);
 
     if (!data_.contains("status"))
     {
         data_["status"] = "open";
-        dirty_ = true;
+        needs_save = true;
     }
+
+    if (needs_save)
+        save();
 }
 
 unsigned int ViewPoint::id() const { return id_; }
 
-nlohmann::json& ViewPoint::data() { return data_; }
-
 const nlohmann::json& ViewPoint::data() const { return data_; }
+
+void ViewPoint::setStatus (const std::string& status)
+{
+    data_["status"] = status;
+    save();
+}
+
+void ViewPoint::setComment (const std::string& comment)
+{
+    data_["comment"] = comment;
+    save();
+}
 
 void ViewPoint::print()
 {
-    loginf << "ViewPoint id " << id_ <<": print: dirty " << dirty_ << " json '" << data_.dump(4) << "'";
+    loginf << "ViewPoint id " << id_ <<": print: data '" << data_.dump(4) << "'";
 }
 
-bool ViewPoint::dirty() const
+void ViewPoint::save()
 {
-    return dirty_;
-}
+    loginf << "ViewPoint: save: id " << id_;
 
-void ViewPoint::dirty(bool value)
-{
-    dirty_ = value;
+    DBInterface& db_interface = ATSDB::instance().interface();
+    db_interface.setViewPoint(id_, data_.dump());
 }

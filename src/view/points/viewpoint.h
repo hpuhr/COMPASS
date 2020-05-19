@@ -8,25 +8,24 @@ class ViewManager;
 class ViewPoint
 {
   public:
-    ViewPoint(unsigned int id, ViewManager& view_manager);
-    ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager);
+    ViewPoint(unsigned int id, const nlohmann::json& data, ViewManager& view_manager, bool needs_save);
+    ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save);
 
     unsigned int id() const;
 
-    nlohmann::json& data();
     const nlohmann::json& data() const;
 
-    void print();
+    void setStatus (const std::string& status);
+    void setComment (const std::string& comment);
 
-    bool dirty() const;
-    void dirty(bool value);
+    void print();
 
 protected:
     unsigned int id_;
     nlohmann::json data_;
     ViewManager& view_manager_;
 
-    bool dirty_ {false};
+    void save();
 };
 
 #endif  // VIEWPOINT_H
