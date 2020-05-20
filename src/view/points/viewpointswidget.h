@@ -57,6 +57,16 @@ public:
 
     void updateFilteredTypes ();
 
+    QStringList columns() const;
+    QStringList filteredColumns() const;
+
+    void filterColumn (QString name);
+    void showOnlyMainColumns ();
+    void showAllColumns ();
+    void showNoColumns ();
+
+    void updateFilteredColumns ();
+
 private:
     ViewManager& view_manager_;
 
@@ -72,6 +82,9 @@ private:
 
     QStringList types_;
     QStringList filtered_types_;
+
+    QStringList columns_;
+    QStringList filtered_columns_;
 
     bool load_in_progress_ {false};
     bool restore_focus_ {false};

@@ -55,11 +55,15 @@ public:
     int typeColumn () { return table_columns_.indexOf("type"); }
     int statusColumn () { return table_columns_.indexOf("status"); }
     int commentColumn () { return table_columns_.indexOf("comment"); }
+    //int columnIndex (QString name);
 
     bool updateTableColumns(); // true if changed
     void updateTypes(); // emits signal if changed
 
     QStringList types() const;
+    QStringList tableColumns() const;
+
+    QStringList defaultTableColumns() const;
 
 private:
     ViewManager& view_manager_;

@@ -198,6 +198,12 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
     return false;
 }
 
+//int ViewPointsTableModel::columnIndex (QString name)
+//{
+//    assert (table_columns_.contains(name));
+//    return table_columns_.indexOf(name);
+//}
+
 bool ViewPointsTableModel::updateTableColumns()
 {
     loginf << "ViewPointsTableModel: updateTableColumns";
@@ -260,6 +266,16 @@ void ViewPointsTableModel::updateTypes()
 QStringList ViewPointsTableModel::types() const
 {
     return types_;
+}
+
+QStringList ViewPointsTableModel::tableColumns() const
+{
+    return table_columns_;
+}
+
+QStringList ViewPointsTableModel::defaultTableColumns() const
+{
+    return default_table_columns_;
 }
 
 unsigned int ViewPointsTableModel::saveNewViewPoint(const nlohmann::json& data, bool update)

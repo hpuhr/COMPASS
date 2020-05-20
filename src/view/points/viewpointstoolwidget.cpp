@@ -73,7 +73,7 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
     // filters
     {
         toolbar_->addAction("Filter Types");
-        //toolbar_->addAction("Filter Columns");
+        toolbar_->addAction("Filter Columns");
     }
 
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
@@ -118,6 +118,10 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
     {
         showTypesMenu();
     }
+    else if (text == "Filter Columns")
+    {
+        showColumnsMenu();
+    }
     else
         logwrn << "ViewPointsToolWidget: actionTriggeredSlot: unkown action '" << text << "'";
 }
@@ -151,13 +155,6 @@ void ViewPointsToolWidget::showTypesMenu ()
     menu.addAction(none_action);
 
     menu.exec(QCursor::pos());
-
-
-//    m_p_Act_Button1 = new QAction("Super Button 1", this);
-//       m_p_Act_Button1->setCheckable(true);
-//       m_p_Act_Button1->setChecked(true);
-//       connect(m_p_Act_Button1, SIGNAL(triggered()), this, SLOT(slot_SomethingChecked()));
-
 }
 
 void ViewPointsToolWidget::typeFilteredSlot ()
@@ -177,14 +174,56 @@ void ViewPointsToolWidget::typeFilteredSlot ()
         vp_widget_->filterType(type);
 }
 
-//void ViewPointsToolWidget::loadingStartedSlot()
-//{
-//    assert(toolbar_);
-//    toolbar_->setDisabled(true);
-//}
+void ViewPointsToolWidget::showColumnsMenu()
+{
 
-//void ViewPointsToolWidget::loadingDoneSlot()
-//{
-//    assert(toolbar_);
-//    toolbar_->setDisabled(false);
-//}
+    QMenu menu;
+
+    QStringList columns = vp_widget_->columns();
+    QStringList filtered_columns = vp_widget_->filteredColumns();
+
+    for (auto& col : columns)
+    {
+        QAction* action = new QAction(col, this);
+        action->setCheckable(true);
+        action->setChecked(!filtered_columns.contains(col));
+        connect (action, &QAction::triggered, this, &ViewPointsToolWidget::columnFilteredSlot);
+
+        menu.addAction(action);
+    }
+
+    menu.addSeparator();
+
+    QAction* main_action = new QAction("Show Only Main", this);
+    connect (main_action, &QAction::triggered, this, &ViewPointsToolWidget::columnFilteredSlot);
+    menu.addAction(main_action);
+
+    QAction* all_action = new QAction("Show All", this);
+    connect (all_action, &QAction::triggered, this, &ViewPointsToolWidget::columnFilteredSlot);
+    menu.addAction(all_action);
+
+    QAction* none_action = new QAction("Show None", this);
+    connect (none_action, &QAction::triggered, this, &ViewPointsToolWidget::columnFilteredSlot);
+    menu.addAction(none_action);
+
+    menu.exec(QCursor::pos());
+}
+
+void ViewPointsToolWidget::columnFilteredSlot ()
+{
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    loginf << "ViewPointsToolWidget: columnFilteredSlot: " << action->text().toStdString();
+
+    QString col = action->text();
+
+    if (col == "Show Only Main")
+        vp_widget_->showOnlyMainColumns();
+    else if (col == "Show All")
+        vp_widget_->showAllColumns();
+    else if (col == "Show None")
+        vp_widget_->showNoColumns();
+    else
+        vp_widget_->filterColumn(col);
+}

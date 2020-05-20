@@ -487,23 +487,70 @@ void ViewPointsWidget::updateFilteredTypes ()
     proxy_model_->setFilterKeyColumn(table_model_->typeColumn()); // type
 }
 
-//void ViewPointsWidget::onTableClickedSlot (const QModelIndex& current)
-//{
-//    if (!current.isValid())
-//    {
-//        loginf << "ViewPointsWidget: onTableClickedSlot: invalid index";
-//        return;
-//    }
+QStringList ViewPointsWidget::columns() const
+{
+    assert (table_model_);
 
-//    auto const source_index = proxy_model_->mapToSource(current);
-//    assert (source_index.isValid());
+    return table_model_->tableColumns();
+}
 
-//    unsigned int id = table_model_->getIdOf(source_index);
+QStringList ViewPointsWidget::filteredColumns() const
+{
+    return filtered_columns_;
+}
 
-//    loginf << "ViewPointsWidget: onTableClickedSlot: current id " << id;
-//    view_manager_.setCurrentViewPoint(id);
-//}
 
+void ViewPointsWidget::filterColumn(QString name)
+{
+    assert (columns().contains(name));
+
+    if (filtered_columns_.contains(name))
+        filtered_columns_.removeAll(name);
+    else
+        filtered_columns_.append(name);
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showOnlyMainColumns ()
+{
+    filtered_columns_.clear();
+
+    QStringList default_cols = table_model_->defaultTableColumns();
+
+    for (auto& col : columns())
+        if (!default_cols.contains(col))
+            filtered_columns_.append(col);
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showAllColumns()
+{
+    filtered_columns_.clear();
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showNoColumns()
+{
+    filtered_columns_ = columns();
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::updateFilteredColumns()
+{
+    assert (table_view_);
+
+    unsigned int cnt=0;
+
+    for (auto& col : columns())
+    {
+        table_view_->setColumnHidden(cnt, filtered_columns_.contains(col));
+        ++cnt;
+    }
+}
 
 
 
