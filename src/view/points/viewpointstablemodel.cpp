@@ -8,6 +8,7 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "filtermanager.h"
+#include "viewpointswidget.h"
 
 #include <fstream>
 
@@ -36,6 +37,7 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     }
 
     updateTableColumns();
+    updateTypes();
 
     open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
     closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
@@ -228,6 +230,38 @@ bool ViewPointsTableModel::updateTableColumns()
     return changed;
 }
 
+void ViewPointsTableModel::updateTypes()
+{
+    loginf << "ViewPointsTableModel: updateTypes";
+
+    QStringList old_types = types_;
+    types_.clear();
+
+    for (auto& vp_it : view_points_)
+    {
+        const nlohmann::json& data = vp_it.second.data();
+
+        assert (data.contains("type"));
+
+        const string& type = data.at("type");
+
+        if (!types_.contains(type.c_str()))
+            types_.append(type.c_str());
+    }
+
+    if (types_ != old_types)
+    {
+        loginf << "ViewPointsTableModel: updateTypes: changed";
+
+        emit typesChangedSignal(types_);
+    }
+}
+
+QStringList ViewPointsTableModel::types() const
+{
+    return types_;
+}
+
 unsigned int ViewPointsTableModel::saveNewViewPoint(const nlohmann::json& data, bool update)
 {
     unsigned int new_id {0};
@@ -265,7 +299,14 @@ ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const nlohman
     assert (existsViewPoint(id));
 
     if (update)
+    {
         emit endInsertRows();
+
+        if (updateTableColumns()) // true if changed
+            view_manager_.viewPointsWidget()->resizeColumnsToContents();
+
+        updateTypes();
+    }
 
     return view_points_.at(id);
 }
@@ -379,6 +420,7 @@ void ViewPointsTableModel::importViewPoints (const std::string& filename)
         endInsertRows();
 
         updateTableColumns();
+        updateTypes();
 
         //        if (view_points_widget_) // TODO
         //            view_points_widget_->update();

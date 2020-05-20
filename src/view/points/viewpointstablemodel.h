@@ -6,11 +6,18 @@
 
 #include "json.hpp"
 
+#include "viewpoint.h"
+
 class ViewManager;
-class ViewPoint;
+
 
 class ViewPointsTableModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
+signals:
+    void typesChangedSignal(QStringList types);
+
 public:
     ViewPointsTableModel(ViewManager& view_manager);
     //virtual ~ViewPointsTableModel();
@@ -45,16 +52,22 @@ public:
 
     void setStatus (const QModelIndex &row_index, const std::string& value);
 
-    int commentColumn () { return table_columns_.indexOf("comment"); }
+    int typeColumn () { return table_columns_.indexOf("type"); }
     int statusColumn () { return table_columns_.indexOf("status"); }
+    int commentColumn () { return table_columns_.indexOf("comment"); }
 
     bool updateTableColumns(); // true if changed
+    void updateTypes(); // emits signal if changed
+
+    QStringList types() const;
 
 private:
     ViewManager& view_manager_;
 
     QStringList default_table_columns_ {"id", "name", "type", "status", "comment"};
     QStringList table_columns_;
+
+    QStringList types_;
 
     QIcon open_icon_;
     QIcon closed_icon_;

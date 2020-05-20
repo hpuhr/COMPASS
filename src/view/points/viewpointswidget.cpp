@@ -26,9 +26,13 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     main_layout->addWidget(tool_widget_);
 
     table_model_ = new ViewPointsTableModel(view_manager_);
+    connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
+             this, &ViewPointsWidget::typesChangedSlot);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
+
+    typesChangedSlot(table_model_->types()); // needs first update
 
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
@@ -129,6 +133,42 @@ void ViewPointsWidget::resizeColumnsToContents()
 ViewPointsTableModel* ViewPointsWidget::tableModel() const
 {
     return table_model_;
+}
+
+QStringList ViewPointsWidget::types() const
+{
+    return types_;
+}
+
+QStringList ViewPointsWidget::filteredTypes() const
+{
+    return filtered_types_;
+}
+
+void ViewPointsWidget::filterType (QString type)
+{
+    assert (types_.contains(type));
+
+    if (filtered_types_.contains(type))
+        filtered_types_.removeAll(type);
+    else
+        filtered_types_.append(type);
+
+    updateFilteredTypes();
+}
+
+void ViewPointsWidget::showAllTypes ()
+{
+    filtered_types_.clear();
+
+    updateFilteredTypes();
+}
+
+void ViewPointsWidget::showNoTypes ()
+{
+    filtered_types_ = types_;
+
+    updateFilteredTypes();
 }
 
 void ViewPointsWidget::selectPreviousSlot()
@@ -421,6 +461,30 @@ void ViewPointsWidget::allLoadingDoneSlot()
         setFocus();
         restore_focus_ = false;
     }
+}
+
+void ViewPointsWidget::typesChangedSlot(QStringList types)
+{
+    loginf << "ViewPointsWidget: typesChangedSlot";
+
+    types_ = types;
+}
+
+void ViewPointsWidget::updateFilteredTypes ()
+{
+    QStringList regex_list;
+
+    for (auto& type : types_)
+        if (!filtered_types_.contains(type))
+            regex_list.append(type);
+
+    //"^(Correlation|banana)$"
+    QString regex = "^(" + regex_list.join("|") + ")$";
+    loginf << "ViewPointsWidget: updateFilteredTypes: '" << regex.toStdString() << "'";
+
+    assert (proxy_model_);
+    proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
+    proxy_model_->setFilterKeyColumn(table_model_->typeColumn()); // type
 }
 
 //void ViewPointsWidget::onTableClickedSlot (const QModelIndex& current)

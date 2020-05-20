@@ -34,6 +34,7 @@ signals:
 
 public slots:
     void actionTriggeredSlot(QAction* action);
+    void typeFilteredSlot ();
 
 public:
     ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget* parent = nullptr);
@@ -49,6 +50,8 @@ private:
     QToolButton* step_next_open_button_{nullptr};
     QToolButton* open_current_step_next_button_{nullptr};
     QToolButton* close_current_step_next_button_{nullptr};
+
+    void showTypesMenu ();
 };
 
 #endif // VIEWPOINTSTOOLWIDGET_H

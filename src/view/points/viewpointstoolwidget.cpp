@@ -66,6 +66,16 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
                              "Select Next [Down]");
      }
 
+    QWidget* empty = new QWidget();
+    empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolbar_->addWidget(empty);
+
+    // filters
+    {
+        toolbar_->addAction("Filter Types");
+        //toolbar_->addAction("Filter Columns");
+    }
+
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
 
      layout->addWidget(toolbar_);
@@ -104,6 +114,67 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
     {
         vp_widget_->selectNextSlot();
     }
+    else if (text == "Filter Types")
+    {
+        showTypesMenu();
+    }
+    else
+        logwrn << "ViewPointsToolWidget: actionTriggeredSlot: unkown action '" << text << "'";
+}
+
+void ViewPointsToolWidget::showTypesMenu ()
+{
+
+    QMenu menu;
+
+    QStringList types = vp_widget_->types();
+    QStringList filtered_types = vp_widget_->filteredTypes();
+
+    for (auto& type : types)
+    {
+        QAction* action = new QAction(type, this);
+        action->setCheckable(true);
+        action->setChecked(!filtered_types.contains(type));
+        connect (action, &QAction::triggered, this, &ViewPointsToolWidget::typeFilteredSlot);
+
+        menu.addAction(action);
+    }
+
+    menu.addSeparator();
+
+    QAction* all_action = new QAction("Show All", this);
+    connect (all_action, &QAction::triggered, this, &ViewPointsToolWidget::typeFilteredSlot);
+    menu.addAction(all_action);
+
+    QAction* none_action = new QAction("Show None", this);
+    connect (none_action, &QAction::triggered, this, &ViewPointsToolWidget::typeFilteredSlot);
+    menu.addAction(none_action);
+
+    menu.exec(QCursor::pos());
+
+
+//    m_p_Act_Button1 = new QAction("Super Button 1", this);
+//       m_p_Act_Button1->setCheckable(true);
+//       m_p_Act_Button1->setChecked(true);
+//       connect(m_p_Act_Button1, SIGNAL(triggered()), this, SLOT(slot_SomethingChecked()));
+
+}
+
+void ViewPointsToolWidget::typeFilteredSlot ()
+{
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    loginf << "ViewPointsToolWidget: typeFilteredSlot: " << action->text().toStdString();
+
+    QString type = action->text();
+
+    if (type == "Show All")
+        vp_widget_->showAllTypes();
+    else if (type == "Show None")
+        vp_widget_->showNoTypes();
+    else
+        vp_widget_->filterType(type);
 }
 
 //void ViewPointsToolWidget::loadingStartedSlot()
