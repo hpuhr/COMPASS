@@ -740,6 +740,7 @@ void TaskManager::performAutomaticTasks ()
         {
             loginf << "TaskManager: performAutomaticTasks: starting radar plot position calculation task";
 
+            widget_->setCurrentTask(*radar_plot_position_calculator_task_);
             if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
             {
                 logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
@@ -774,6 +775,7 @@ void TaskManager::performAutomaticTasks ()
         assert(post_process_task_->isRecommended());
         assert(post_process_task_->isRequired());
 
+        widget_->setCurrentTask(*post_process_task_);
         if(widget_->getCurrentTaskName() != post_process_task_->name())
             widget_->setCurrentTask(*post_process_task_);
 
@@ -795,6 +797,7 @@ void TaskManager::performAutomaticTasks ()
 
             loginf << "TaskManager: performAutomaticTasks: starting association task";
 
+            widget_->setCurrentTask(*create_artas_associations_task_);
             if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
             {
                 logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
