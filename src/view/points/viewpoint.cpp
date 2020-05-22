@@ -7,7 +7,7 @@
 
 using namespace nlohmann;
 
-ViewPoint::ViewPoint(unsigned int id, const nlohmann::json& data, ViewManager& view_manager, bool needs_save)
+ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, ViewManager& view_manager, bool needs_save)
     : id_(id), view_manager_(view_manager)
 {
     data_ = data;

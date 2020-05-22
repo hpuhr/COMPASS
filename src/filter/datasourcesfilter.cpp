@@ -177,7 +177,7 @@ void DataSourcesFilter::updateDataSources()
                 active_sources_[to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t &active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_.emplace(std::piecewise_construct,
                                   std::forward_as_tuple(ds_it->first),  // args for key

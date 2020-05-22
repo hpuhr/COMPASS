@@ -308,9 +308,12 @@ ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const nlohman
     nlohmann::json new_data = data;
     ATSDB::instance().filterManager().setConfigInViewPoint(new_data);
 
+    assert (new_data.is_object());
+    json::object_t& new_data_ref = new_data.get_ref<json::object_t&>();
+
     view_points_.emplace(std::piecewise_construct,
                          std::forward_as_tuple(id),   // args for key
-                         std::forward_as_tuple(id, new_data, view_manager_, true));  // args for mapped value
+                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
 
     assert (existsViewPoint(id));
 

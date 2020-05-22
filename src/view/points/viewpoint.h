@@ -8,7 +8,7 @@ class ViewManager;
 class ViewPoint
 {
   public:
-    ViewPoint(unsigned int id, const nlohmann::json& data, ViewManager& view_manager, bool needs_save);
+    ViewPoint(unsigned int id, const nlohmann::json::object_t& data, ViewManager& view_manager, bool needs_save);
     ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save);
 
     unsigned int id() const;
