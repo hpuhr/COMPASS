@@ -15,7 +15,7 @@ You must have the mapnik vector tiles driver built by including the protobuf lib
 
 	<cache_policy max_age="1209600"/>
         <cache type="filesystem">
-            <path>osgearth_cache/arcgis</path>
+            <path>osgearth_cache/arcgis_2d</path>
         </cache>
         
     </options>
