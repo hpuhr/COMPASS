@@ -5,6 +5,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - Support of multiple, configurable database schemas, e.g. SCDB
 - Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
 - Dynamic ASTERIX import using [jASTERIX](https://github.com/hpuhr/jASTERIX)
+- Import of DGPS trails from NMEA files
 - MySQL database import and management of SCDB databases
 - High performance processing, low memory footprint
 - Filtering for detailed analysis
@@ -15,6 +16,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - System Tracks and Reference Trajectories
   - MLAT & WAM target reports
   - ADS-B target reports
+  - Reference trajectory points
 - Textual data inspection using Listbox View
   - Display of data as text tables
   - Configurable data loading of data of interest
