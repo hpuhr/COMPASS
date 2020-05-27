@@ -35,7 +35,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::str
       data_widget_(nullptr),
       config_widget_(nullptr)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     QHBoxLayout* hlayout = new QHBoxLayout;
 
@@ -46,7 +46,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::str
 
     {  // data widget
         data_widget_ = new ListBoxViewDataWidget(getView(), view->getDataSource());
-        data_widget_->setAutoFillBackground(true);
+        //data_widget_->setAutoFillBackground(true);
         QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sp_left.setHorizontalStretch(3);
         data_widget_->setSizePolicy(sp_left);
@@ -56,7 +56,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::str
 
     {  // config widget
         config_widget_ = new ListBoxViewConfigWidget(getView());
-        config_widget_->setAutoFillBackground(true);
+        //config_widget_->setAutoFillBackground(true);
         QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sp_right.setHorizontalStretch(1);
         config_widget_->setSizePolicy(sp_right);

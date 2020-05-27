@@ -47,7 +47,7 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
     logdbg << "View: constructor";
 
     central_widget_ = new QWidget();
-    central_widget_->setAutoFillBackground(true);
+    //central_widget_->setAutoFillBackground(true);
 
     connect(this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
 

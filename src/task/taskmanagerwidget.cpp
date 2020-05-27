@@ -66,7 +66,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget* parent)
 
     QSettings settings("ATSDB", "TaskManagerWidget");
 
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     // top
     {

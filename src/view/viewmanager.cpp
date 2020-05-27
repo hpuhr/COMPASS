@@ -64,7 +64,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     main_tab_widget_ = tab_widget;
 
     view_points_widget_ = new ViewPointsWidget(*this);
-    view_points_widget_->setAutoFillBackground(true);
+    //view_points_widget_->setAutoFillBackground(true);
 
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
