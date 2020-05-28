@@ -15,7 +15,6 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - Radar plots
   - MLAT & WAM target reports
   - ADS-B target reports
-  - Reference trajectory points
   - System Track updates
   - Reference trajectory updates
 - Textual data inspection using Listbox View
