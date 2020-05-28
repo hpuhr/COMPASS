@@ -35,6 +35,7 @@ before_install:
  - unzip master.zip
  - mkdir NemaTode-master/build
  - cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. && make && sudo make install
+ - cd ../..
  
 script:
  #- export CC=gcc-9
