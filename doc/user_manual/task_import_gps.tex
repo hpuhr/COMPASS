@@ -9,7 +9,7 @@ This task allows importing of (D)GPS trails into the opened database, by parsing
   \caption{Task: Import GPS Trail}
 \end{figure}
 
-There exist 4 tabs:
+There exist 2 tabs:
 
 \begin{itemize}  
 \item Main: File list and information text
@@ -51,3 +51,9 @@ After selecting an NMEA file, using the 'Run Current Task' button the task can b
     \includegraphics[width=16cm,frame]{../screenshots/gps_import_ready.png}
   \caption{Task: Import GPS Trail Ready}
 \end{figure}
+
+Please note that, based on two conditions, reference trajectory updates are skipped if:
+\begin{itemize}  
+\item the time is the same as the previous update or
+\item the quality is set to 0 (invalid position).
+\end{itemize}

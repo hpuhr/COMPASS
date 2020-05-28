@@ -31,10 +31,7 @@ layout crop_features="true"
             <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
         </features>       
         
-        <layout tile_size="500000" crop_features="true" paged="true">
-            <level max_range="1e10"/>
-        </layout>
-        
+       
         <styles>
             <style type="text/css">
                 states {
