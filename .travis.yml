@@ -29,14 +29,17 @@ compiler:
  - gcc
 # - clang
 
-script:
- #- export CC=gcc-9
- #- export CXX=g++-9
+before_install:
  # NemaTode install
  - wget https://github.com/ckgt/NemaTode/archive/master.zip
  - unzip master.zip
  - mkdir NemaTode-master/build
- - cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. && make && make install
+ - cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. && make && sudo make install
+ 
+script:
+ #- export CC=gcc-9
+ #- export CXX=g++-9
+
  #build
  - mkdir build
  - cd build
