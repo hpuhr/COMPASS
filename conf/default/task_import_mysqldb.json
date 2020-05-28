@@ -1,14 +1,9 @@
 {
     "parameters": {
-        "current_filename": "/home/sk/data/skeyes/exported.sql.gz"
+        "current_filename": ""
     },
     "sub_configs": {
         "File": {
-            "Filehomeskdataskeyesexported.sql.gz": {
-                "parameters": {
-                    "name": "/home/sk/data/skeyes/exported.sql.gz"
-                }
-            }
         }
     }
 }

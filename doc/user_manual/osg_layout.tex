@@ -7,7 +7,7 @@
   \label{fig:osgview_overview}
 \end{figure}
 
-The map window will automatically traverse to the medium location of the data in the current database. \\
+The map window will automatically traverse to the medium location of the data in the current database and later pan/zoom to the loaded data (on the first load only). \\
 
 There exist 3 main components:
 \begin{itemize}
@@ -38,4 +38,15 @@ For each DBObject, a default display configuration is set:
  \item Radar: Green cross (default)
  \item MLAT: Red triangle (default)
  \item ADS-B: Blue square (default)
+ \item RefTraj: Orange plus-sign (default)
 \end{itemize}
+\ \\
+
+There exist two display modes, 2D(default) and 3D, which are set based on the used map:
+
+\begin{itemize}
+ \item 2D: Displays map in a 2D projection and (per default) disables usage of height in geometry data drawing
+ \item 3D: Displays map as a globe and (per default) enables usage of height in geometry data drawing
+\end{itemize}
+\ \\
+Please refer to \nameref{ref:osgview_map_ops} for details.

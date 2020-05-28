@@ -1,9 +1,5 @@
 {
     "parameters": {
-        "current_filename": "/home/sk/workspace/toe/run/view_points.json"
-    },
-    "sub_configs": {
-        "JSONFile": {
-        }
+        "current_filename": ""
     }
 }

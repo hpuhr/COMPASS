@@ -208,16 +208,18 @@ bool GPSTrailImportTask::checkPrerequisites()
 
 bool GPSTrailImportTask::isRecommended()
 {
-    if (!checkPrerequisites())
-        return false;
+    return false;
 
-    //    if (ATSDB::instance().objectManager().hasData())
-    //        return false;
+//    if (!checkPrerequisites())
+//        return false;
 
-    if (done_)
-        return false;
+//    //    if (ATSDB::instance().objectManager().hasData())
+//    //        return false;
 
-    return canImportFile();
+//    if (done_)
+//        return false;
+
+//    return canImportFile();
 }
 
 bool GPSTrailImportTask::isRequired() { return false; }
