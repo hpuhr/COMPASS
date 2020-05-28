@@ -4,11 +4,20 @@
 #include <QAbstractItemModel>
 #include <QIcon>
 
+#include "json.hpp"
+
+#include "viewpoint.h"
+
 class ViewManager;
-class ViewPoint;
+
 
 class ViewPointsTableModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
+signals:
+    void typesChangedSignal(QStringList types);
+
 public:
     ViewPointsTableModel(ViewManager& view_manager);
     //virtual ~ViewPointsTableModel();
@@ -24,8 +33,8 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
-    unsigned int saveNewViewPoint(bool update=true);
-    ViewPoint& saveNewViewPoint(unsigned int id, bool update=true);
+    unsigned int saveNewViewPoint(const nlohmann::json& data, bool update=true);
+    ViewPoint& saveNewViewPoint(unsigned int id, const nlohmann::json& data, bool update=true);
     bool existsViewPoint(unsigned int id);
     ViewPoint& viewPoint(unsigned int id);
     //void removeViewPoint(unsigned int id);
@@ -33,7 +42,7 @@ public:
 
     std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
     void printViewPoints();
-    void saveViewPoints();
+    //void saveViewPoints();
 
     void importViewPoints (const std::string& filename);
     void exportViewPoints (const std::string& filename);
@@ -43,16 +52,26 @@ public:
 
     void setStatus (const QModelIndex &row_index, const std::string& value);
 
-    int commentColumn () { return table_columns_.indexOf("comment"); }
+    int typeColumn () { return table_columns_.indexOf("type"); }
     int statusColumn () { return table_columns_.indexOf("status"); }
+    int commentColumn () { return table_columns_.indexOf("comment"); }
+    //int columnIndex (QString name);
 
     bool updateTableColumns(); // true if changed
+    void updateTypes(); // emits signal if changed
+
+    QStringList types() const;
+    QStringList tableColumns() const;
+
+    QStringList defaultTableColumns() const;
 
 private:
     ViewManager& view_manager_;
 
     QStringList default_table_columns_ {"id", "name", "type", "status", "comment"};
     QStringList table_columns_;
+
+    QStringList types_;
 
     QIcon open_icon_;
     QIcon closed_icon_;

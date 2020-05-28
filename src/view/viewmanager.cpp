@@ -64,7 +64,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     main_tab_widget_ = tab_widget;
 
     view_points_widget_ = new ViewPointsWidget(*this);
-    view_points_widget_->setAutoFillBackground(true);
+    //view_points_widget_->setAutoFillBackground(true);
 
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
@@ -103,7 +103,7 @@ void ViewManager::close()
 
     if (view_points_widget_)
     {
-        view_points_widget_->tableModel()->saveViewPoints();
+        //view_points_widget_->tableModel()->saveViewPoints();
         delete view_points_widget_;
         view_points_widget_ = nullptr;
     }
@@ -256,7 +256,7 @@ void ViewManager::doViewPointAfterLoad ()
     assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
     ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
-    json& data = vp.data();
+    const json& data = vp.data();
 
     bool contains_time = data.contains("time");
     float time;

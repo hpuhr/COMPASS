@@ -164,6 +164,7 @@ The following layer-based style presets exist:
  \item Layer Color per ds\_id: Style is defined by data source
  \item Layer Color per mode3a\_code: Style is defined by Mode 3/A code
  \item Layer Color per target\_addr: Style is defined by Mode S Target Address
+ \item Layer Color per track\_num: Style is defined by track number
 \end{itemize}
 \  \\
 
@@ -179,6 +180,7 @@ The following Target report based style presets exist:
  \item Color by Flight Level: Color is defined by the Mode C code/Flight level
  \item Color by Speed: Color is defined by groundspeed value
  \item Color by Track Angle: Color is defined by direction of movement value
+ \item Color by Tracker Detection Type: Color is defined by detection type (PSR, SSR, Combined, ...)
 \end{itemize}
 \  \\
 
@@ -202,6 +204,12 @@ To give a few examples, some interesting Layer modes and Style preset combinatio
     \hspace*{-2.5cm}
     \includegraphics[width=19cm,frame]{../screenshots/osgview_style_mode3a_code.png}
   \caption{OSG View Layer color per mode3a\_code}
+\end{figure}
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_num.png}
+  \caption{OSG View Layer color per track\_num}
 \end{figure}
 
 \begin{figure}[H]
@@ -239,6 +247,19 @@ To give a few examples, some interesting Layer modes and Style preset combinatio
     \includegraphics[width=19cm,frame]{../screenshots/osgview_style_track_angle.png}
   \caption{OSG View Color by track angle}
 \end{figure}
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm,frame]{../screenshots/osgview_style_tracker_detection_type.png}
+  \caption{OSG View Color by tracker detection type}
+\end{figure}
+
+Please note that:
+\begin{itemize}
+ \item The detection type here reflects the technology used to update the track. E.g. an MLAT SSR detection + a PSR detection can form detection type 3 (Combined).
+ \item The method used to determine the detection type is slightly different than in Verif
+ \item The method used to determine the detection type is currently being discussed/tested by users and will be documented after being accepted.
+\end{itemize}
 
 \subsubsection{Render Order}
 

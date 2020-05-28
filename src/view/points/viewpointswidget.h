@@ -34,6 +34,8 @@ class ViewPointsWidget : public QWidget
     void loadingStartedSlot();
     void allLoadingDoneSlot();
 
+    void typesChangedSlot(QStringList types);
+
 public:
     ViewPointsWidget(ViewManager& view_manager);
     virtual ~ViewPointsWidget();
@@ -45,6 +47,25 @@ public:
 //    void closeCurrentSelectNext();
 
     ViewPointsTableModel* tableModel() const;
+
+    QStringList types() const;
+    QStringList filteredTypes() const;
+
+    void filterType (QString type);
+    void showAllTypes ();
+    void showNoTypes ();
+
+    void updateFilteredTypes ();
+
+    QStringList columns() const;
+    QStringList filteredColumns() const;
+
+    void filterColumn (QString name);
+    void showOnlyMainColumns ();
+    void showAllColumns ();
+    void showNoColumns ();
+
+    void updateFilteredColumns ();
 
 private:
     ViewManager& view_manager_;
@@ -58,6 +79,12 @@ private:
     QPushButton* import_button_{nullptr};
     QPushButton* delete_all_button_{nullptr};
     QPushButton* export_button_{nullptr};
+
+    QStringList types_;
+    QStringList filtered_types_;
+
+    QStringList columns_;
+    QStringList filtered_columns_;
 
     bool load_in_progress_ {false};
     bool restore_focus_ {false};

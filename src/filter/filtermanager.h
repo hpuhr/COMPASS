@@ -78,7 +78,7 @@ class FilterManager : public QObject, public Configurable
 
     FilterManagerWidget* widget();
 
-    void setConfigInViewPoint (ViewPoint& vp);
+    void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
 
   protected:

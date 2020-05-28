@@ -33,7 +33,7 @@ using namespace Utils;
 ViewContainerConfigWidget::ViewContainerConfigWidget(ViewContainer* view_container, QWidget* parent)
     : QWidget(parent), view_container_(view_container)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     QFont font_bold;
     font_bold.setBold(true);

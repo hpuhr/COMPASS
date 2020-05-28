@@ -17,10 +17,6 @@
 
 #include "dbobject.h"
 
-#include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <memory>
-
 #include "atsdb.h"
 #include "buffer.h"
 #include "dbinterface.h"
@@ -46,6 +42,10 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "updatebufferdbjob.h"
+
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <memory>
 
 using namespace Utils;
 

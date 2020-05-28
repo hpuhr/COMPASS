@@ -5,6 +5,21 @@
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
+            "DBODataSourceDefinitionMLATSCDB Extended0": {
+                "parameters": {
+                    "altitude_column": "ds_mlat.WGS_ELEV_CARTESIAN_M",
+                    "foreign_key": "ds_mlat.DS_ID",
+                    "latitude_column": "ds_mlat.POS_LAT_DEG",
+                    "local_key": "ds_id",
+                    "longitude_column": "ds_mlat.POS_LONG_DEG",
+                    "meta_table": "MLATDataSources",
+                    "name_column": "le_ds.DS_NAME",
+                    "sac_column": "le_ds.SAC",
+                    "schema": "SCDB Extended",
+                    "short_name_column": "le_ds.DS_SHORT_NAME",
+                    "sic_column": "le_ds.SIC"
+                }
+            },
             "DBODataSourceDefinitionMLATSCDB0": {
                 "parameters": {
                     "altitude_column": "",
@@ -1468,6 +1483,12 @@
                     "meta_table": "MLAT",
                     "schema": "SCDB"
                 }
+            },
+            "DBOSchemaMetaTableDefinitionSCDB ExtendedMLAT0": {
+                "parameters": {
+                    "meta_table": "MLAT",
+                    "schema": "SCDB Extended"
+                }
             }
         },
         "DBOVariable": {
@@ -1487,6 +1508,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ACAS_AIRCRAFT_IDENTIFICATION"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_AIRCRAFT_IDENTIFICATION0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ACAS_AIRCRAFT_IDENTIFICATION"
                             }
                         }
@@ -1511,6 +1538,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ACAS_ALT_CAPABILITY_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_ALT_CAPABILITY_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ACAS_ALT_CAPABILITY_FT"
+                            }
                         }
                     }
                 }
@@ -1531,6 +1564,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ACAS_BDS_1_A"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_BDS_1_A0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ACAS_BDS_1_A"
                             }
                         }
@@ -1555,6 +1594,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ACAS_BDS_1_B"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_BDS_1_B0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ACAS_BDS_1_B"
+                            }
                         }
                     }
                 }
@@ -1575,6 +1620,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ACAS_COMM_CAPABILITY"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_COMM_CAPABILITY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ACAS_COMM_CAPABILITY"
                             }
                         }
@@ -1599,6 +1650,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ACAS_FLIGHT_STATUS"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_FLIGHT_STATUS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ACAS_FLIGHT_STATUS"
+                            }
                         }
                     }
                 }
@@ -1619,6 +1676,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ACAS_MODES_SERVICE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACAS_MODES_SERVICE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ACAS_MODES_SERVICE"
                             }
                         }
@@ -1643,6 +1706,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ACCEL_AX_MS2"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACCEL_AX_MS20": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ACCEL_AX_MS2"
+                            }
                         }
                     }
                 }
@@ -1663,6 +1732,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ACCEL_AY_MS2"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ACCEL_AY_MS20": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ACCEL_AY_MS2"
                             }
                         }
@@ -1686,6 +1761,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ALT_BARO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ALT_BARO_FT"
+                            }
                         }
                     }
                 }
@@ -1707,6 +1788,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ALT_BARO_G"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ALT_BARO_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ALT_BARO_G"
+                            }
                         }
                     }
                 }
@@ -1726,6 +1813,12 @@
                         "DBOSchemaVariableDefinitionMLATalt_baro_v0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.ALT_BARO_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ALT_BARO_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.ALT_BARO_V"
                             }
                         }
@@ -1750,6 +1843,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.ALT_GEO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.ALT_GEO_FT"
+                            }
                         }
                     }
                 }
@@ -1770,6 +1869,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.CALC_ALT_GEO_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.CALC_ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.CALC_ALT_GEO_FT"
                             }
                         }
@@ -1794,6 +1899,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.CALLSIGN"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.CALLSIGN0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.CALLSIGN"
+                            }
                         }
                     }
                 }
@@ -1814,6 +1925,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.CAT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.CAT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.CAT"
                             }
                         }
@@ -1838,6 +1955,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.DISPLAY_STATE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.DISPLAY_STATE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.DISPLAY_STATE"
+                            }
                         }
                     }
                 }
@@ -1858,6 +1981,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.DOM_POSIX"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.DOM_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.DOM_POSIX"
                             }
                         }
@@ -1882,6 +2011,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.DS_ID"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.DS_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.DS_ID"
+                            }
                         }
                     }
                 }
@@ -1902,6 +2037,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.FLIGHT_LEVEL_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.FLIGHT_LEVEL_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.FLIGHT_LEVEL_FT"
                             }
                         }
@@ -1926,6 +2067,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.FLIGHT_LEVEL_G"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.FLIGHT_LEVEL_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.FLIGHT_LEVEL_G"
+                            }
                         }
                     }
                 }
@@ -1946,6 +2093,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.FLIGHT_LEVEL_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.FLIGHT_LEVEL_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.FLIGHT_LEVEL_V"
                             }
                         }
@@ -1970,6 +2123,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.GEO_ALT_STD_DEV_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.GEO_ALT_STD_DEV_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.GEO_ALT_STD_DEV_FT"
+                            }
                         }
                     }
                 }
@@ -1990,6 +2149,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.GEO_ALT_STD_DEV_M"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.GEO_ALT_STD_DEV_M0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.GEO_ALT_STD_DEV_M"
                             }
                         }
@@ -2014,6 +2179,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.GEO_AREA_MASK"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.GEO_AREA_MASK0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.GEO_AREA_MASK"
+                            }
                         }
                     }
                 }
@@ -2034,6 +2205,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.GROUND_BIT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.GROUND_BIT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.GROUND_BIT"
                             }
                         }
@@ -2058,6 +2235,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.HASH_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.HASH_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.HASH_CODE"
+                            }
                         }
                     }
                 }
@@ -2078,6 +2261,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.HEIGHT_3D_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.HEIGHT_3D_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.HEIGHT_3D_FT"
                             }
                         }
@@ -2102,6 +2291,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.LINE_ID"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.LINE_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.LINE_ID"
+                            }
                         }
                     }
                 }
@@ -2122,6 +2317,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MAS_TRACK_NUM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MAS_TRACK_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MAS_TRACK_NUM"
                             }
                         }
@@ -2146,6 +2347,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE1_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE1_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE1_CODE"
+                            }
                         }
                     }
                 }
@@ -2166,6 +2373,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE1_G"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE1_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE1_G"
                             }
                         }
@@ -2190,6 +2403,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE1_SMO"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE1_SMO0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE1_SMO"
+                            }
                         }
                     }
                 }
@@ -2210,6 +2429,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE1_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE1_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE1_V"
                             }
                         }
@@ -2234,6 +2459,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE2_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE2_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE2_CODE"
+                            }
                         }
                     }
                 }
@@ -2254,6 +2485,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE2_G"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE2_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE2_G"
                             }
                         }
@@ -2278,6 +2515,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE2_SMO"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE2_SMO0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE2_SMO"
+                            }
                         }
                     }
                 }
@@ -2298,6 +2541,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE2_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE2_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE2_V"
                             }
                         }
@@ -2322,6 +2571,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE3A_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE3A_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE3A_CODE"
+                            }
                         }
                     }
                 }
@@ -2342,6 +2597,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE3A_G"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE3A_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE3A_G"
                             }
                         }
@@ -2366,6 +2627,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODE3A_SMO"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE3A_SMO0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODE3A_SMO"
+                            }
                         }
                     }
                 }
@@ -2386,6 +2653,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MODE3A_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODE3A_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MODE3A_V"
                             }
                         }
@@ -2410,6 +2683,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.MODES_MB_DATA"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MODES_MB_DATA0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.MODES_MB_DATA"
+                            }
                         }
                     }
                 }
@@ -2430,6 +2709,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.MSG_FMT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.MSG_FMT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.MSG_FMT"
                             }
                         }
@@ -2454,6 +2739,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_DOP_X"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_DOP_X0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_DOP_X"
+                            }
                         }
                     }
                 }
@@ -2474,6 +2765,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_DOP_XY"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_DOP_XY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_DOP_XY"
                             }
                         }
@@ -2498,6 +2795,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_DOP_XY_CORRELATION_COEFF"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_DOP_XY_CORRELATION_COEFF0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_DOP_XY_CORRELATION_COEFF"
+                            }
                         }
                     }
                 }
@@ -2518,6 +2821,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_DOP_Y"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_DOP_Y0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_DOP_Y"
                             }
                         }
@@ -2542,6 +2851,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_LAT_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LAT_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_LAT_DEG"
+                            }
                         }
                     }
                 }
@@ -2562,6 +2877,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_LAT_DEG_CALC"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LAT_DEG_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_LAT_DEG_CALC"
                             }
                         }
@@ -2586,6 +2907,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_LOCAL_X_NM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LOCAL_X_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_LOCAL_X_NM"
+                            }
                         }
                     }
                 }
@@ -2606,6 +2933,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_LOCAL_X_NM_CALC"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LOCAL_X_NM_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_LOCAL_X_NM_CALC"
                             }
                         }
@@ -2630,6 +2963,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_LOCAL_Y_NM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LOCAL_Y_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_LOCAL_Y_NM"
+                            }
                         }
                     }
                 }
@@ -2650,6 +2989,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_LOCAL_Y_NM_CALC"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LOCAL_Y_NM_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_LOCAL_Y_NM_CALC"
                             }
                         }
@@ -2674,6 +3019,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_LONG_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LONG_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_LONG_DEG"
+                            }
                         }
                     }
                 }
@@ -2694,6 +3045,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_LONG_DEG_CALC"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_LONG_DEG_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_LONG_DEG_CALC"
                             }
                         }
@@ -2718,6 +3075,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_SMOOTHED"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_SMOOTHED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_SMOOTHED"
+                            }
                         }
                     }
                 }
@@ -2738,6 +3101,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_CORRELATION_COEFF"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_DOP_XY_CORRELATION_COEFF0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_CORRELATION_COEFF"
                             }
                         }
@@ -2762,6 +3131,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LAT_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LAT_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LAT_DEG"
+                            }
                         }
                     }
                 }
@@ -2782,6 +3157,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LAT_M"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LAT_M0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LAT_M"
                             }
                         }
@@ -2806,6 +3187,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LATLONG_CORR_COEFF"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LATLONG_CORR_COEFF0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LATLONG_CORR_COEFF"
+                            }
                         }
                     }
                 }
@@ -2826,6 +3213,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LATLONG_DEG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LATLONG_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LATLONG_DEG"
                             }
                         }
@@ -2850,6 +3243,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LONG_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LONG_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LONG_DEG"
+                            }
                         }
                     }
                 }
@@ -2870,6 +3269,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_LONG_M"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_LONG_M0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_LONG_M"
                             }
                         }
@@ -2894,6 +3299,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_X_M"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_X_M0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_X_M"
+                            }
                         }
                     }
                 }
@@ -2914,6 +3325,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_STD_DEV_Y_M"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_STD_DEV_Y_M0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_STD_DEV_Y_M"
                             }
                         }
@@ -2938,6 +3355,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.POS_SYS_X_NM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_SYS_X_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.POS_SYS_X_NM"
+                            }
                         }
                     }
                 }
@@ -2958,6 +3381,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.POS_SYS_Y_NM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.POS_SYS_Y_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.POS_SYS_Y_NM"
                             }
                         }
@@ -2982,6 +3411,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.RAW_MSG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.RAW_MSG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.RAW_MSG"
+                            }
                         }
                     }
                 }
@@ -3002,6 +3437,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.RDP_CHAIN"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.RDP_CHAIN0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.RDP_CHAIN"
                             }
                         }
@@ -3026,6 +3467,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.REC_NUM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.REC_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.REC_NUM"
+                            }
                         }
                     }
                 }
@@ -3046,6 +3493,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.REC_TIME_MS"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.REC_TIME_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.REC_TIME_MS"
                             }
                         }
@@ -3070,6 +3523,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.REC_TIME_POSIX"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.REC_TIME_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.REC_TIME_POSIX"
+                            }
                         }
                     }
                 }
@@ -3090,6 +3549,12 @@
                             "parameters": {
                                 "meta_table": "MLAT",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_mlat.REPORT_TYPE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.REPORT_TYPE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_mlat.REPORT_TYPE"
                             }
                         }
@@ -3114,6 +3579,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_mlat.SAC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.SAC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.SAC"
+                            }
                         }
                     }
                 }
@@ -3130,6 +3601,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.SIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.SIC"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATsic0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3152,6 +3629,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.SIMULATED_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.SIMULATED_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATsimulated_target0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3174,6 +3657,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.SPI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.SPI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATspi0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3196,6 +3685,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TARGET_ADDR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TARGET_ADDR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtarget_addr0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3218,6 +3713,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TEST_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TEST_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtest_target0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3240,6 +3741,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TOD0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TOD"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtod0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3262,6 +3769,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TOD_CALCULATED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TOD_CALCULATED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtod_calculated0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3284,6 +3797,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_CLIMB_DESC_MODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_CLIMB_DESC_MODE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_climb_desc_mode0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3306,6 +3825,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_COASTED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_COASTED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_coasted0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3328,6 +3853,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_CONFIRMED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_CONFIRMED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_confirmed0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3350,6 +3881,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_END0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_END"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_end0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3372,6 +3909,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_GHOST_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_GHOST_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_ghost_target0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3394,6 +3937,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_MANOEUVRE_HORI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_MANOEUVRE_HORI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_manoeuvre_hori0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3416,6 +3965,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRACK_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRACK_NUM"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrack_num0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3438,6 +3993,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_DME0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_DME"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_dme0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3460,6 +4021,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_HF0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_HF"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_hf0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3482,6 +4049,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_MS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_ms0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3504,6 +4077,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_SSR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_SSR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_ssr0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3526,6 +4105,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_UAT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_UAT"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_uat0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3548,6 +4133,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.TRD_VDL40": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.TRD_VDL4"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATtrd_vdl40": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3570,6 +4161,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.VELOCITY_VX_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.VELOCITY_VX_MS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATvelocity_vx_ms0": {
                             "parameters": {
                                 "meta_table": "MLAT",
@@ -3592,6 +4189,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionMLATsd_mlat.VELOCITY_VY_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_mlat.VELOCITY_VY_MS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionMLATvelocity_vy_ms0": {
                             "parameters": {
                                 "meta_table": "MLAT",

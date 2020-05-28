@@ -42,10 +42,10 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     registerParameter("pos_x", &pos_x_, 0);
     registerParameter("pos_y", &pos_y_, 0);
-    registerParameter("width", &width_, 1000);
-    registerParameter("height", &height_, 700);
-    registerParameter("min_width", &min_width_, 1000);
-    registerParameter("min_height", &min_height_, 700);
+    registerParameter("width", &width_, 1200);
+    registerParameter("height", &height_, 900);
+    registerParameter("min_width", &min_width_, 1200);
+    registerParameter("min_height", &min_height_, 900);
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 

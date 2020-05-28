@@ -26,9 +26,13 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     main_layout->addWidget(tool_widget_);
 
     table_model_ = new ViewPointsTableModel(view_manager_);
+    connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
+             this, &ViewPointsWidget::typesChangedSlot);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
+
+    typesChangedSlot(table_model_->types()); // needs first update
 
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
@@ -129,6 +133,42 @@ void ViewPointsWidget::resizeColumnsToContents()
 ViewPointsTableModel* ViewPointsWidget::tableModel() const
 {
     return table_model_;
+}
+
+QStringList ViewPointsWidget::types() const
+{
+    return types_;
+}
+
+QStringList ViewPointsWidget::filteredTypes() const
+{
+    return filtered_types_;
+}
+
+void ViewPointsWidget::filterType (QString type)
+{
+    assert (types_.contains(type));
+
+    if (filtered_types_.contains(type))
+        filtered_types_.removeAll(type);
+    else
+        filtered_types_.append(type);
+
+    updateFilteredTypes();
+}
+
+void ViewPointsWidget::showAllTypes ()
+{
+    filtered_types_.clear();
+
+    updateFilteredTypes();
+}
+
+void ViewPointsWidget::showNoTypes ()
+{
+    filtered_types_ = types_;
+
+    updateFilteredTypes();
 }
 
 void ViewPointsWidget::selectPreviousSlot()
@@ -423,23 +463,94 @@ void ViewPointsWidget::allLoadingDoneSlot()
     }
 }
 
-//void ViewPointsWidget::onTableClickedSlot (const QModelIndex& current)
-//{
-//    if (!current.isValid())
-//    {
-//        loginf << "ViewPointsWidget: onTableClickedSlot: invalid index";
-//        return;
-//    }
+void ViewPointsWidget::typesChangedSlot(QStringList types)
+{
+    loginf << "ViewPointsWidget: typesChangedSlot";
 
-//    auto const source_index = proxy_model_->mapToSource(current);
-//    assert (source_index.isValid());
+    types_ = types;
+}
 
-//    unsigned int id = table_model_->getIdOf(source_index);
+void ViewPointsWidget::updateFilteredTypes ()
+{
+    QStringList regex_list;
 
-//    loginf << "ViewPointsWidget: onTableClickedSlot: current id " << id;
-//    view_manager_.setCurrentViewPoint(id);
-//}
+    for (auto& type : types_)
+        if (!filtered_types_.contains(type))
+            regex_list.append(type);
 
+    //"^(Correlation|banana)$"
+    QString regex = "^(" + regex_list.join("|") + ")$";
+    loginf << "ViewPointsWidget: updateFilteredTypes: '" << regex.toStdString() << "'";
+
+    assert (proxy_model_);
+    proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
+    proxy_model_->setFilterKeyColumn(table_model_->typeColumn()); // type
+}
+
+QStringList ViewPointsWidget::columns() const
+{
+    assert (table_model_);
+
+    return table_model_->tableColumns();
+}
+
+QStringList ViewPointsWidget::filteredColumns() const
+{
+    return filtered_columns_;
+}
+
+
+void ViewPointsWidget::filterColumn(QString name)
+{
+    assert (columns().contains(name));
+
+    if (filtered_columns_.contains(name))
+        filtered_columns_.removeAll(name);
+    else
+        filtered_columns_.append(name);
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showOnlyMainColumns ()
+{
+    filtered_columns_.clear();
+
+    QStringList default_cols = table_model_->defaultTableColumns();
+
+    for (auto& col : columns())
+        if (!default_cols.contains(col))
+            filtered_columns_.append(col);
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showAllColumns()
+{
+    filtered_columns_.clear();
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::showNoColumns()
+{
+    filtered_columns_ = columns();
+
+    updateFilteredColumns();
+}
+
+void ViewPointsWidget::updateFilteredColumns()
+{
+    assert (table_view_);
+
+    unsigned int cnt=0;
+
+    for (auto& col : columns())
+    {
+        table_view_->setColumnHidden(cnt, filtered_columns_.contains(col));
+        ++cnt;
+    }
+}
 
 
 

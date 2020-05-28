@@ -1,0 +1,29 @@
+<!--
+osgEarth Sample - Openstreetmap buildings.
+
+This shows how to use the TFS driver to connect to a worldwide openstreetmap building dataset.
+You must have the mapnik vector tiles driver built by including the protobuf libraries in cmake.
+-->
+<map name="TFS" type="projected" version="2">
+
+    <options>
+        <lighting>false</lighting>
+        <terrain>
+            <min_tile_range_factor>8</min_tile_range_factor>
+            <color>#000000FF</color>
+        </terrain>
+
+	<cache_policy max_age="1209600"/>
+        <cache type="filesystem">
+            <path>osgearth_cache/arcgis_2d</path>
+        </cache>
+        
+    </options>
+
+    <image name="arcgis-world-imagery" driver="arcgis">
+        <url>http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/</url>
+		<nodata_image>http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/100/0/0.jpeg</nodata_image>
+		<profile>spherical-mercator</profile>
+    </image>
+
+</map>

@@ -45,7 +45,7 @@ BufferTableWidget::BufferTableWidget(DBObject& object, ListBoxView& view,
                                      Qt::WindowFlags f)
     : QWidget(parent, f), object_(object), view_(view), data_source_(data_source)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     QVBoxLayout* layout = new QVBoxLayout();
 

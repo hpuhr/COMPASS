@@ -51,6 +51,10 @@ MainWindow::MainWindow()
     QLocale::setDefault(QLocale::c());
     setLocale(QLocale::c());
 
+    const char* appdir = getenv("APPDIR");
+    if (appdir)
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native since they cause crashes
+
     setMinimumSize(QSize(1200, 900));
 
     QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
@@ -71,7 +75,7 @@ MainWindow::MainWindow()
     QWidget::setWindowTitle(title.c_str());
 
     tab_widget_ = new QTabWidget();
-    tab_widget_->setAutoFillBackground(true);
+    //tab_widget_->setAutoFillBackground(true);
 
     TaskManager& task_man = ATSDB::instance().taskManager();
 
@@ -81,11 +85,11 @@ MainWindow::MainWindow()
     connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
     connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
 
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     // management widget
     management_widget_ = new ManagementWidget();
-    management_widget_->setAutoFillBackground(true);
+    //management_widget_->setAutoFillBackground(true);
 
     setCentralWidget(tab_widget_);
 

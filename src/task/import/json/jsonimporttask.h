@@ -18,15 +18,16 @@
 #ifndef JSONIMPORTERTASK_H
 #define JSONIMPORTERTASK_H
 
+#include "configurable.h"
+#include "json.hpp"
+#include "jsonparsingschema.h"
+#include "task.h"
+
 #include <QObject>
 #include <memory>
 #include <set>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "configurable.h"
-#include "json.hpp"
-#include "jsonparsingschema.h"
-#include "task.h"
 
 class TaskManager;
 class JSONImportTaskWidget;

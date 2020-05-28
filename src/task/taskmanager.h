@@ -32,6 +32,7 @@ class ManageDBObjectsTask;
 class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
 class JSONImportTask;
+class GPSTrailImportTask;
 class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
 class PostProcessTask;
@@ -94,6 +95,7 @@ class TaskManager : public QObject, public Configurable
     ViewPointsImportTask& viewPointsImportTask() const;
     JSONImportTask& jsonImporterTask() const;
     MySQLDBImportTask& mysqldbImportTask() const;
+    GPSTrailImportTask& gpsTrailImportTask() const;
     ManageDataSourcesTask& manageDatasourcesTask() const;
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
@@ -102,10 +104,13 @@ class TaskManager : public QObject, public Configurable
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
 
+    void importViewPointsFile(const std::string& filename);
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
 #endif
-    void importViewPointsFile(const std::string& filename);
+    void importGPSTrailFile(const std::string& filename);
+
+
     void autoProcess(bool value);
 
     void quitAfterAutoProcess(bool value);
@@ -124,13 +129,16 @@ protected:
     bool sqlite3_open_db_ {false};
     std::string sqlite3_open_db_filename_;
 
+    bool view_points_import_file_ {false};
+    std::string view_points_import_filename_;
+
 #if USE_JASTERIX
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
 #endif
 
-    bool view_points_import_file_ {false};
-    std::string view_points_import_filename_;
+    bool gps_trail_import_file_ {false};
+    std::string gps_trail_import_filename_;
 
     bool auto_process_ {false};
     bool quit_after_auto_process_ {false};
@@ -145,6 +153,7 @@ protected:
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
     std::unique_ptr<JSONImportTask> json_import_task_;
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
+    std::unique_ptr<GPSTrailImportTask> gps_trail_import_task_;
     std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;

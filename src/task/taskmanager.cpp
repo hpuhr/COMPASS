@@ -46,6 +46,8 @@
 #include "files.h"
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
+#include "gpstrailimporttask.h"
+#include "gpstrailimporttaskwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -73,7 +75,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask",
+    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "GPSTrailImportTask",
                                          "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
                                          "PostProcessTask", "CreateARTASAssociationsTask"});
 
@@ -136,6 +138,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         mysqldb_import_task_.reset(new MySQLDBImportTask(class_id, instance_id, *this));
         assert(mysqldb_import_task_);
         addTask(class_id, mysqldb_import_task_.get());
+    }
+    else if (class_id.compare("GPSTrailImportTask") == 0)
+    {
+        assert(!gps_trail_import_task_);
+        gps_trail_import_task_.reset(new GPSTrailImportTask(class_id, instance_id, *this));
+        assert(gps_trail_import_task_);
+        addTask(class_id, gps_trail_import_task_.get());
     }
     else if (class_id.compare("ManageDataSourcesTask") == 0)
     {
@@ -225,6 +234,12 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("MySQLDBImportTask", "MySQLDBImportTask0");
         assert(mysqldb_import_task_);
+    }
+
+    if (!gps_trail_import_task_)
+    {
+        generateSubConfigurable("GPSTrailImportTask", "GPSTrailImportTask0");
+        assert(gps_trail_import_task_);
     }
 
     if (!manage_datasources_task_)
@@ -331,6 +346,7 @@ void TaskManager::shutdown()
     view_points_import_task_ = nullptr;
     json_import_task_ = nullptr;
     mysqldb_import_task_ = nullptr;
+    gps_trail_import_task_ = nullptr;
     manage_datasources_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
@@ -424,6 +440,13 @@ MySQLDBImportTask& TaskManager::mysqldbImportTask() const
     return *mysqldb_import_task_;
 }
 
+GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
+{
+    assert(gps_trail_import_task_);
+    return *gps_trail_import_task_;
+
+}
+
 RadarPlotPositionCalculatorTask& TaskManager::radarPlotPositionCalculatorTask() const
 {
     assert(radar_plot_position_calculator_task_);
@@ -467,6 +490,13 @@ void TaskManager::importASTERIXFile(const std::string& filename)
     automatic_tasks_defined_ = true;
     asterix_import_file_ = true;
     asterix_import_filename_ = filename;
+}
+
+void TaskManager::importGPSTrailFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    gps_trail_import_file_ = true;
+    gps_trail_import_filename_ = filename;
 }
 
 void TaskManager::importViewPointsFile(const std::string& filename)
@@ -658,6 +688,48 @@ void TaskManager::performAutomaticTasks ()
     }
     #endif
 
+    if (gps_trail_import_file_)
+    {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
+               << gps_trail_import_filename_ << "'";
+
+        if (!Files::fileExists(gps_trail_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*gps_trail_import_task_);
+        if(widget_->getCurrentTaskName() != gps_trail_import_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        GPSTrailImportTaskWidget* gps_import_task_widget =
+            dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
+        assert(gps_import_task_widget);
+
+        gps_import_task_widget->addFile(gps_trail_import_filename_);
+        gps_import_task_widget->selectFile(gps_trail_import_filename_);
+
+        assert(gps_trail_import_task_->canRun());
+        gps_trail_import_task_->showDoneSummary(false);
+
+        //widget_->runCurrentTaskSlot();
+        widget_->runTask(*gps_trail_import_task_);
+
+        while (QCoreApplication::hasPendingEvents() || !gps_trail_import_task_->done())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        QThread::msleep(100);  // delay
+    }
+
     if (auto_process_)
     {
         while (QCoreApplication::hasPendingEvents())
@@ -668,6 +740,7 @@ void TaskManager::performAutomaticTasks ()
         {
             loginf << "TaskManager: performAutomaticTasks: starting radar plot position calculation task";
 
+            widget_->setCurrentTask(*radar_plot_position_calculator_task_);
             if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
             {
                 logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
@@ -702,6 +775,7 @@ void TaskManager::performAutomaticTasks ()
         assert(post_process_task_->isRecommended());
         assert(post_process_task_->isRequired());
 
+        widget_->setCurrentTask(*post_process_task_);
         if(widget_->getCurrentTaskName() != post_process_task_->name())
             widget_->setCurrentTask(*post_process_task_);
 
@@ -723,6 +797,7 @@ void TaskManager::performAutomaticTasks ()
 
             loginf << "TaskManager: performAutomaticTasks: starting association task";
 
+            widget_->setCurrentTask(*create_artas_associations_task_);
             if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
             {
                 logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()

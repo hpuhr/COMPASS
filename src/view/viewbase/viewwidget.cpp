@@ -35,7 +35,7 @@ ViewWidget::ViewWidget(const std::string& class_id, const std::string& instance_
       event_processor_(nullptr),
       view_(view)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
     setContentsMargins(0, 0, 0, 0);
 }
 

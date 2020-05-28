@@ -8,8 +8,8 @@ cp /usr/bin/atsdb_client appimage/appdir/bin/
 mkdir -p appimage/appdir/lib/
 cp /usr/lib/libatsdb.a appimage/appdir/lib/
 
-cp -r /usr/lib64/osgPlugins-3.4.1 appimage/appdir/lib/
-#cp -r /usr/lib/osgPlugins-3.6.4 appimage/appdir/lib/
+#cp -r /usr/lib64/osgPlugins-3.4.1 appimage/appdir/lib/
+cp -r /usr/lib/osgPlugins-3.6.4 appimage/appdir/lib/
 cp /usr/lib64/libosgEarth* appimage/appdir/lib/
 cp /usr/lib64/osgdb_* appimage/appdir/lib/
 

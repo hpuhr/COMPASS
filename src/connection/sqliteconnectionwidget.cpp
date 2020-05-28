@@ -90,7 +90,7 @@ SQLiteConnectionWidget::~SQLiteConnectionWidget()
 
 void SQLiteConnectionWidget::newFileSlot()
 {
-    QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"), "", tr(""));
+    QString filename = QFileDialog::getSaveFileName(this, "New SQLite3 File");
 
     if (filename.size() > 0)
     {
@@ -101,7 +101,7 @@ void SQLiteConnectionWidget::newFileSlot()
 
 void SQLiteConnectionWidget::addFileSlot()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Add SQLite3 File"));
+    QString filename = QFileDialog::getOpenFileName(this, "Add SQLite3 File");
 
     if (filename.size() > 0)
         addFile(filename.toStdString());

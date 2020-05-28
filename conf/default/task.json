@@ -19,6 +19,11 @@
             "path": "task_db_open.json"
         },
         {
+            "class_id": "GPSTrailImportTask",
+            "instance_id": "GPSTrailImportTask0",
+            "path": "task_import_gps.json"
+        },
+        {
             "class_id": "JSONImportTask",
             "instance_id": "JSONImportTask",
             "path": "task_import_json.json"
@@ -52,6 +57,11 @@
             "class_id": "RadarPlotPositionCalculatorTask",
             "instance_id": "RadarPlotPositionCalculatorTask0",
             "path": "task_calc_radar_pos.json"
+        },
+        {
+            "class_id": "ViewPointsImportTask",
+            "instance_id": "ViewPointsImportTask0",
+            "path": "task_import_view_points.json"
         }
     ]
 }

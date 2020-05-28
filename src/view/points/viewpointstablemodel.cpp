@@ -8,6 +8,7 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "filtermanager.h"
+#include "viewpointswidget.h"
 
 #include <fstream>
 
@@ -30,11 +31,13 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
             assert (!view_points_.count(vp_it.first));
             view_points_.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(vp_it.first),   // args for key
-                                 std::forward_as_tuple(vp_it.first, vp_it.second, view_manager_));  // args for mapped value
+                                 std::forward_as_tuple(vp_it.first, vp_it.second, view_manager_, false));
+            // args for mapped value
         }
     }
 
     updateTableColumns();
+    updateTypes();
 
     open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
     closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
@@ -184,11 +187,9 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
         assert (index.column() == statusColumn() || index.column() == commentColumn());
 
         if (index.column() == statusColumn())
-            view_points_.at(id).data()["status"] = value.toString().toStdString();
+            view_points_.at(id).setStatus(value.toString().toStdString());
         else
-            view_points_.at(id).data()["comment"] = value.toString().toStdString();
-
-        view_points_.at(id).dirty(true);
+            view_points_.at(id).setComment(value.toString().toStdString());
 
         emit dataChanged(index, index);
 
@@ -196,6 +197,12 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
     }
     return false;
 }
+
+//int ViewPointsTableModel::columnIndex (QString name)
+//{
+//    assert (table_columns_.contains(name));
+//    return table_columns_.indexOf(name);
+//}
 
 bool ViewPointsTableModel::updateTableColumns()
 {
@@ -205,7 +212,7 @@ bool ViewPointsTableModel::updateTableColumns()
 
     for (auto& vp_it : view_points_)
     {
-        nlohmann::json& data = vp_it.second.data();
+        const nlohmann::json& data = vp_it.second.data();
 
         assert (data.is_object());
         for (auto& j_it : data.get<json::object_t>())
@@ -229,7 +236,49 @@ bool ViewPointsTableModel::updateTableColumns()
     return changed;
 }
 
-unsigned int ViewPointsTableModel::saveNewViewPoint(bool update)
+void ViewPointsTableModel::updateTypes()
+{
+    loginf << "ViewPointsTableModel: updateTypes";
+
+    QStringList old_types = types_;
+    types_.clear();
+
+    for (auto& vp_it : view_points_)
+    {
+        const nlohmann::json& data = vp_it.second.data();
+
+        assert (data.contains("type"));
+
+        const string& type = data.at("type");
+
+        if (!types_.contains(type.c_str()))
+            types_.append(type.c_str());
+    }
+
+    if (types_ != old_types)
+    {
+        loginf << "ViewPointsTableModel: updateTypes: changed";
+
+        emit typesChangedSignal(types_);
+    }
+}
+
+QStringList ViewPointsTableModel::types() const
+{
+    return types_;
+}
+
+QStringList ViewPointsTableModel::tableColumns() const
+{
+    return table_columns_;
+}
+
+QStringList ViewPointsTableModel::defaultTableColumns() const
+{
+    return default_table_columns_;
+}
+
+unsigned int ViewPointsTableModel::saveNewViewPoint(const nlohmann::json& data, bool update)
 {
     unsigned int new_id {0};
 
@@ -238,12 +287,15 @@ unsigned int ViewPointsTableModel::saveNewViewPoint(bool update)
 
     assert (!existsViewPoint(new_id));
 
-    saveNewViewPoint(new_id, update);
+    nlohmann::json new_data = data;
+    new_data["id"] = new_id;
+
+    saveNewViewPoint(new_id, new_data, update);
 
     return new_id;
 }
 
-ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, bool update)
+ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const nlohmann::json& data, bool update)
 {
     if (view_points_.count(id))
         throw std::runtime_error ("ViewPointsTableModel: addNewViewPoint: id "+std::to_string(id)+" already exists");
@@ -253,22 +305,27 @@ ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, bool update)
     if (update)
         beginInsertRows(QModelIndex(), row, row);
 
+    nlohmann::json new_data = data;
+    ATSDB::instance().filterManager().setConfigInViewPoint(new_data);
+
+    assert (new_data.is_object());
+    json::object_t& new_data_ref = new_data.get_ref<json::object_t&>();
+
     view_points_.emplace(std::piecewise_construct,
                          std::forward_as_tuple(id),   // args for key
-                         std::forward_as_tuple(id, view_manager_));  // args for mapped value
+                         std::forward_as_tuple(id, new_data_ref, view_manager_, true));  // args for mapped value
 
     assert (existsViewPoint(id));
 
-    ATSDB::instance().filterManager().setConfigInViewPoint(view_points_.at(id));
-    view_points_.at(id).dirty(true);
-
-//    if (update)
-//    {
-//        emit dataChanged(); // TODO
-//    }
-
     if (update)
+    {
         emit endInsertRows();
+
+        if (updateTableColumns()) // true if changed
+            view_manager_.viewPointsWidget()->resizeColumnsToContents();
+
+        updateTypes();
+    }
 
     return view_points_.at(id);
 }
@@ -318,22 +375,6 @@ void ViewPointsTableModel::printViewPoints()
 {
     for (auto& vp_it : view_points_)
         vp_it.second.print();
-}
-
-void ViewPointsTableModel::saveViewPoints()
-{
-    loginf << "ViewPointsTableModel: saveViewPoints";
-
-    DBInterface& db_interface = ATSDB::instance().interface();
-
-    for (auto& vp_it : view_points_)
-    {
-        if (vp_it.second.dirty())
-        {
-            db_interface.setViewPoint(vp_it.first, vp_it.second.data().dump());
-            vp_it.second.dirty(false);
-        }
-    }
 }
 
 void ViewPointsTableModel::importViewPoints (const std::string& filename)
@@ -392,13 +433,13 @@ void ViewPointsTableModel::importViewPoints (const std::string& filename)
             if (!vp_it.contains("status"))
                 vp_it["status"] = "open";
 
-            ViewPoint& vp = saveNewViewPoint(id, false);
-            vp.data() = vp_it;
+            saveNewViewPoint(id, vp_it, false);
         }
 
         endInsertRows();
 
         updateTableColumns();
+        updateTypes();
 
         //        if (view_points_widget_) // TODO
         //            view_points_widget_->update();

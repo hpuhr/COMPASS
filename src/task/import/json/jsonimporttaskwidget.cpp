@@ -17,6 +17,18 @@
 
 #include "jsonimporttaskwidget.h"
 
+#include "atsdb.h"
+#include "dbobject.h"
+#include "dbobjectcombobox.h"
+#include "dbobjectmanager.h"
+#include "dbovariable.h"
+#include "dbovariableselectionwidget.h"
+#include "jsonimporttask.h"
+#include "jsonparsingschema.h"
+#include "logger.h"
+#include "selectdbobjectdialog.h"
+#include "stringconv.h"
+
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -29,18 +41,6 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QVBoxLayout>
-
-#include "atsdb.h"
-#include "dbobject.h"
-#include "dbobjectcombobox.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableselectionwidget.h"
-#include "jsonimporttask.h"
-#include "jsonparsingschema.h"
-#include "logger.h"
-#include "selectdbobjectdialog.h"
-#include "stringconv.h"
 
 using namespace Utils;
 
@@ -221,7 +221,7 @@ void JSONImportTaskWidget::addFileSlot()
 
 void JSONImportTaskWidget::deleteFileSlot()
 {
-    loginf << "JSONImporterTaskWidget: deleteFileSlot";
+    loginf << "JSONImportTaskWidget: deleteFileSlot";
 
     if (!file_list_->currentItem() || !task_.currentFilename().size())
     {
@@ -245,7 +245,7 @@ void JSONImportTaskWidget::deleteAllFilesSlot()
 
 void JSONImportTaskWidget::selectedFileSlot()
 {
-    logdbg << "JSONImporterTaskWidget: selectedFileSlot";
+    logdbg << "JSONImportTaskWidget: selectedFileSlot";
     assert(file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
@@ -270,7 +270,7 @@ void JSONImportTaskWidget::updateFileListSlot()
 
 void JSONImportTaskWidget::addSchemaSlot()
 {
-    loginf << "JSONImporterTaskWidget: addSchemaSlot";
+    loginf << "JSONImportTaskWidget: addSchemaSlot";
 
     bool ok;
     QString text =
@@ -280,7 +280,7 @@ void JSONImportTaskWidget::addSchemaSlot()
     if (ok)
     {
         std::string name = text.toStdString();
-        loginf << "JSONImporterTaskWidget: addSchemaSlot: name '" << name << "'";
+        loginf << "JSONImportTaskWidget: addSchemaSlot: name '" << name << "'";
 
         if (!name.size())
         {
@@ -312,7 +312,7 @@ void JSONImportTaskWidget::addSchemaSlot()
 
 void JSONImportTaskWidget::removeSchemaSlot()
 {
-    loginf << "JSONImporterTaskWidget: removeSchemaSlot";
+    loginf << "JSONImportTaskWidget: removeSchemaSlot";
 
     if (!task_.currentSchemaName().size())
     {
@@ -329,7 +329,7 @@ void JSONImportTaskWidget::removeSchemaSlot()
 
 void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
 {
-    loginf << "JSONImporterTaskWidget: selectedSchemaChangedSlot: text " << text.toStdString();
+    loginf << "JSONImportTaskWidget: selectedSchemaChangedSlot: text " << text.toStdString();
 
     assert(task_.hasSchema(text.toStdString()));
     task_.currentSchemaName(text.toStdString());
@@ -339,7 +339,7 @@ void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
 
 void JSONImportTaskWidget::updateSchemasBox()
 {
-    loginf << "JSONImporterTaskWidget: updateSchemasBox";
+    loginf << "JSONImportTaskWidget: updateSchemasBox";
 
     schema_box_->clear();
 
@@ -377,7 +377,7 @@ void JSONImportTaskWidget::addObjectParserSlot()
     {
         std::string name = dialog.name();
         std::string dbo_name = dialog.selectedObject();
-        loginf << "JSONImporterTaskWidget: addObjectParserSlot: name " << name << " obj "
+        loginf << "JSONImportTaskWidget: addObjectParserSlot: name " << name << " obj "
                << dbo_name;
 
         JSONParsingSchema& current = task_.currentSchema();
@@ -403,7 +403,7 @@ void JSONImportTaskWidget::addObjectParserSlot()
 }
 void JSONImportTaskWidget::removeObjectParserSlot()
 {
-    loginf << "JSONImporterTaskWidget: removeObjectParserSlot";
+    loginf << "JSONImportTaskWidget: removeObjectParserSlot";
 
     if (object_parser_box_->currentIndex() >= 0)
     {
@@ -421,7 +421,7 @@ void JSONImportTaskWidget::removeObjectParserSlot()
 
 void JSONImportTaskWidget::selectedObjectParserSlot(const QString& text)
 {
-    loginf << "JSONImporterTaskWidget: selectedObjectParserSlot: text " << text.toStdString();
+    loginf << "JSONImportTaskWidget: selectedObjectParserSlot: text " << text.toStdString();
 
     if (object_parser_widget_)
         while (object_parser_widget_->count() > 0)
@@ -448,7 +448,7 @@ void JSONImportTaskWidget::expertModeChangedSlot() {}
 
 void JSONImportTaskWidget::testImportSlot()
 {
-    loginf << "JSONImporterTaskWidget: testImportSlot";
+    loginf << "JSONImportTaskWidget: testImportSlot";
 
     if (!task_.canImportFile())
     {
@@ -464,21 +464,21 @@ void JSONImportTaskWidget::testImportSlot()
 
 void JSONImportTaskWidget::runStarted()
 {
-    loginf << "JSONImporterTaskWidget: runStarted";
+    loginf << "JSONImportTaskWidget: runStarted";
 
     test_button_->setDisabled(true);
 }
 
 void JSONImportTaskWidget::runDone()
 {
-    loginf << "JSONImporterTaskWidget: runDone";
+    loginf << "JSONImportTaskWidget: runDone";
 
     test_button_->setDisabled(false);
 }
 
 void JSONImportTaskWidget::updateParserBox()
 {
-    loginf << "JSONImporterTaskWidget: updateParserBox";
+    loginf << "JSONImportTaskWidget: updateParserBox";
 
     assert(object_parser_box_);
     object_parser_box_->clear();

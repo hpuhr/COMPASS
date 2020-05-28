@@ -44,9 +44,14 @@
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
 #include "savedfile.h"
+#include "global.h"
+
+#if USE_JASTERIX
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixoverridewidget.h"
+#endif
+
 #include "managedatasourcestask.h"
 
 #include <fstream>
@@ -573,6 +578,8 @@ void ViewPointsImportTask::import ()
                 loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' done";
 
                 QThread::msleep(100);  // delay
+#else
+                logerr<< "ViewPointsImportTask: import: importing of datasets not possible with missing jasterix";
 #endif
 
             }

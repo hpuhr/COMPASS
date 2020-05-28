@@ -177,7 +177,7 @@ void DataSourcesFilter::updateDataSources()
                 active_sources_[to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t &active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_.emplace(std::piecewise_construct,
                                   std::forward_as_tuple(ds_it->first),  // args for key
@@ -282,15 +282,15 @@ void DataSourcesFilter::saveViewPointConditions (nlohmann::json& filters)
     }
 }
 
-void DataSourcesFilter::loadViewPointConditions (nlohmann::json& filters)
+void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
     assert (conditions_.size() == 0);
 
     assert (filters.contains(name_));
-    json& filter = filters.at(name_);
+    const json& filter = filters.at(name_);
 
     assert (filter.contains("active_sources"));
-    json& active_sources = filter.at("active_sources");
+    const json& active_sources = filter.at("active_sources");
 
     assert (active_sources.is_array());
 

@@ -1,20 +1,10 @@
 {
     "parameters": {
-        "current_filename": "/home/sk/data/austria/json_10k.json",
+        "current_filename": "",
         "current_schema": "SDDL"
     },
     "sub_configs": {
         "JSONFile": {
-            "JSONFilehomeskdataaustriajson_10k.json": {
-                "parameters": {
-                    "name": "/home/sk/data/austria/json_10k.json"
-                }
-            },
-            "JSONFilehomeskdataaustriajson_10k.zip": {
-                "parameters": {
-                    "name": "/home/sk/data/austria/json_10k.zip"
-                }
-            }
         },
         "JSONParsingSchema": {
             "JSONParsingSchemaADSBExchange0": {

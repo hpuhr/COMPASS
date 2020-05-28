@@ -5,9 +5,24 @@
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
+            "DBODataSourceDefinitionTrackerSCDB Extended0": {
+                "parameters": {
+                    "altitude_column": "ds_tracker.WGS_ELEV_CARTESIAN_M",
+                    "foreign_key": "le_ds.DS_ID",
+                    "latitude_column": "ds_tracker.POS_LAT_DEG",
+                    "local_key": "ds_id",
+                    "longitude_column": "ds_tracker.POS_LONG_DEG",
+                    "meta_table": "TrackerDataSources",
+                    "name_column": "le_ds.DS_NAME",
+                    "sac_column": "le_ds.SAC",
+                    "schema": "SCDB Extended",
+                    "short_name_column": "le_ds.DS_SHORT_NAME",
+                    "sic_column": "le_ds.SIC"
+                }
+            },
             "DBODataSourceDefinitionTrackerSCDB0": {
                 "parameters": {
-                    "altitude_column": "",
+                    "altitude_column": "ds_tracker.WGS_ELEV_CARTESIAN_M",
                     "foreign_key": "le_ds.DS_ID",
                     "latitude_column": "ds_tracker.POS_LAT_DEG",
                     "local_key": "ds_id",
@@ -812,6 +827,12 @@
                     "meta_table": "Tracker",
                     "schema": "SCDB"
                 }
+            },
+            "DBOSchemaMetaTableDefinitionSCDB ExtendedTracker0": {
+                "parameters": {
+                    "meta_table": "Tracker",
+                    "schema": "SCDB Extended"
+                }
             }
         },
         "DBOVariable": {
@@ -831,6 +852,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.AIRCRAFT_DERIVED"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.AIRCRAFT_DERIVED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.AIRCRAFT_DERIVED"
                             }
                         }
@@ -855,6 +882,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.ALT_BARO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.ALT_BARO_FT"
+                            }
                         }
                     }
                 }
@@ -875,6 +908,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.ALT_BARO_MORE_RELIABLE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.ALT_BARO_MORE_RELIABLE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.ALT_BARO_MORE_RELIABLE"
                             }
                         }
@@ -899,6 +938,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.ALT_GEO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.ALT_GEO_FT"
+                            }
                         }
                     }
                 }
@@ -919,6 +964,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.CALC_ALT_GEO_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.CALC_ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.CALC_ALT_GEO_FT"
                             }
                         }
@@ -943,6 +994,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.CALC_VERTICAL_RATE_FTM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.CALC_VERTICAL_RATE_FTM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.CALC_VERTICAL_RATE_FTM"
+                            }
                         }
                     }
                 }
@@ -963,6 +1020,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.CALLSIGN"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.CALLSIGN0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.CALLSIGN"
                             }
                         }
@@ -987,6 +1050,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.CAT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.CAT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.CAT"
+                            }
                         }
                     }
                 }
@@ -1007,6 +1076,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.CIVIL_EMERGENCY"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.CIVIL_EMERGENCY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.CIVIL_EMERGENCY"
                             }
                         }
@@ -1031,6 +1106,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.DETECTION_TYPE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.DETECTION_TYPE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.DETECTION_TYPE"
+                            }
                         }
                     }
                 }
@@ -1051,6 +1132,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.DISPLAY_STATE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.DISPLAY_STATE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.DISPLAY_STATE"
                             }
                         }
@@ -1075,6 +1162,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.DOM_POSIX"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.DOM_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.DOM_POSIX"
+                            }
                         }
                     }
                 }
@@ -1095,6 +1188,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.DS_ID"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.DS_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.DS_ID"
                             }
                         }
@@ -1119,6 +1218,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.FORMATION_FLIGHT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.FORMATION_FLIGHT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.FORMATION_FLIGHT"
+                            }
                         }
                     }
                 }
@@ -1138,6 +1243,12 @@
                         "DBOSchemaVariableDefinitionTrackerfpl_callsign0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.FPL_CALLSIGN"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.FPL_CALLSIGN0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.FPL_CALLSIGN"
                             }
                         }
@@ -1162,6 +1273,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.GEO_AREA_MASK"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.GEO_AREA_MASK0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.GEO_AREA_MASK"
+                            }
                         }
                     }
                 }
@@ -1182,6 +1299,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.GROUNDSPEED_KT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.GROUNDSPEED_KT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.GROUNDSPEED_KT"
                             }
                         }
@@ -1206,6 +1329,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.HASH_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.HASH_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.HASH_CODE"
+                            }
                         }
                     }
                 }
@@ -1226,6 +1355,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.HEADING_DEG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.HEADING_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.HEADING_DEG"
                             }
                         }
@@ -1250,6 +1385,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.IC_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.IC_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.IC_CODE"
+                            }
                         }
                     }
                 }
@@ -1270,6 +1411,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.LINE_ID"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LINE_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.LINE_ID"
                             }
                         }
@@ -1293,6 +1440,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.LM_ALT_BARO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.LM_ALT_BARO_FT"
+                            }
                         }
                     }
                 }
@@ -1312,6 +1465,12 @@
                         "DBOSchemaVariableDefinitionTrackerlm_alt_baro_g0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.LM_ALT_BARO_G"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_ALT_BARO_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.LM_ALT_BARO_G"
                             }
                         }
@@ -1335,6 +1494,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.LM_ALT_BARO_V"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_ALT_BARO_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.LM_ALT_BARO_V"
+                            }
                         }
                     }
                 }
@@ -1354,6 +1519,12 @@
                         "DBOSchemaVariableDefinitionTrackerlm_alt_geo_ft0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.LM_ALT_GEO_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.LM_ALT_GEO_FT"
                             }
                         }
@@ -1377,6 +1548,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.LM_MODE3A_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_MODE3A_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.LM_MODE3A_CODE"
+                            }
                         }
                     }
                 }
@@ -1396,6 +1573,12 @@
                         "DBOSchemaVariableDefinitionTrackerlm_mode3a_g0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.LM_MODE3A_G"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_MODE3A_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.LM_MODE3A_G"
                             }
                         }
@@ -1419,6 +1602,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.LM_MODE3A_S"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_MODE3A_S0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.LM_MODE3A_S"
+                            }
                         }
                     }
                 }
@@ -1438,6 +1627,12 @@
                         "DBOSchemaVariableDefinitionTrackerlm_mode3a_v0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.LM_MODE3A_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.LM_MODE3A_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.LM_MODE3A_V"
                             }
                         }
@@ -1462,6 +1657,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MAS_TRACK_NUM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MAS_TRACK_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MAS_TRACK_NUM"
+                            }
                         }
                     }
                 }
@@ -1481,6 +1682,12 @@
                         "DBOSchemaVariableDefinitionTrackermeasured_alt_baro_age_s0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MEASURED_ALT_BARO_AGE_S"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MEASURED_ALT_BARO_AGE_S0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MEASURED_ALT_BARO_AGE_S"
                             }
                         }
@@ -1504,6 +1711,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MEASURED_ALT_BARO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MEASURED_ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MEASURED_ALT_BARO_FT"
+                            }
                         }
                     }
                 }
@@ -1523,6 +1736,12 @@
                         "DBOSchemaVariableDefinitionTrackermeasured_mode3a_age_s0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MEASURED_MODE3A_AGE_S"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MEASURED_MODE3A_AGE_S0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MEASURED_MODE3A_AGE_S"
                             }
                         }
@@ -1547,6 +1766,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MIL_EMERGENCY"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MIL_EMERGENCY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MIL_EMERGENCY"
+                            }
                         }
                     }
                 }
@@ -1567,6 +1792,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MODE3A_CODE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODE3A_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MODE3A_CODE"
                             }
                         }
@@ -1591,6 +1822,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MODE3A_G"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODE3A_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MODE3A_G"
+                            }
                         }
                     }
                 }
@@ -1611,6 +1848,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MODE3A_V"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODE3A_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MODE3A_V"
                             }
                         }
@@ -1635,6 +1878,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MODEC_AGE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODEC_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MODEC_AGE"
+                            }
                         }
                     }
                 }
@@ -1655,6 +1904,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MODEC_CODE_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODEC_CODE_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MODEC_CODE_FT"
                             }
                         }
@@ -1679,6 +1934,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MODEC_G"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODEC_G0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MODEC_G"
+                            }
                         }
                     }
                 }
@@ -1699,6 +1960,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MODEC_SOURCE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODEC_SOURCE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MODEC_SOURCE"
                             }
                         }
@@ -1723,6 +1990,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MODEC_V"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODEC_V0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MODEC_V"
+                            }
                         }
                     }
                 }
@@ -1743,6 +2016,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MODES_MB_DATA"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MODES_MB_DATA0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MODES_MB_DATA"
                             }
                         }
@@ -1767,6 +2046,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MOF_LONG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MOF_LONG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MOF_LONG"
+                            }
                         }
                     }
                 }
@@ -1787,6 +2072,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MOF_TRANS"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MOF_TRANS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MOF_TRANS"
                             }
                         }
@@ -1811,6 +2102,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MOF_VERT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MOF_VERT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MOF_VERT"
+                            }
                         }
                     }
                 }
@@ -1831,6 +2128,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.MSG_FMT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MSG_FMT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.MSG_FMT"
                             }
                         }
@@ -1855,6 +2158,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.MULTIPLE_SOURCES"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.MULTIPLE_SOURCES0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.MULTIPLE_SOURCES"
+                            }
                         }
                     }
                 }
@@ -1875,6 +2184,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.POS_LAT_DEG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LAT_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.POS_LAT_DEG"
                             }
                         }
@@ -1899,6 +2214,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.POS_LAT_DEG_CALC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LAT_DEG_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_LAT_DEG_CALC"
+                            }
                         }
                     }
                 }
@@ -1919,6 +2240,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.POS_LOCAL_X_NM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LOCAL_X_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.POS_LOCAL_X_NM"
                             }
                         }
@@ -1943,6 +2270,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.POS_LOCAL_X_NM_CALC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LOCAL_X_NM_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_LOCAL_X_NM_CALC"
+                            }
                         }
                     }
                 }
@@ -1963,6 +2296,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.POS_LOCAL_Y_NM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LOCAL_Y_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.POS_LOCAL_Y_NM"
                             }
                         }
@@ -1987,6 +2326,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.POS_LOCAL_Y_NM_CALC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LOCAL_Y_NM_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_LOCAL_Y_NM_CALC"
+                            }
                         }
                     }
                 }
@@ -2007,6 +2352,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.POS_LONG_DEG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LONG_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.POS_LONG_DEG"
                             }
                         }
@@ -2031,6 +2382,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.POS_LONG_DEG_CALC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_LONG_DEG_CALC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_LONG_DEG_CALC"
+                            }
                         }
                     }
                 }
@@ -2051,6 +2408,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.POS_SYS_X_NM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_SYS_X_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.POS_SYS_X_NM"
                             }
                         }
@@ -2075,6 +2438,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.POS_SYS_Y_NM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.POS_SYS_Y_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_SYS_Y_NM"
+                            }
                         }
                     }
                 }
@@ -2095,6 +2464,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.RAW_MSG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.RAW_MSG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.RAW_MSG"
                             }
                         }
@@ -2119,6 +2494,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.REC_NUM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.REC_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.REC_NUM"
+                            }
                         }
                     }
                 }
@@ -2139,6 +2520,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.REC_TIME_MS"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.REC_TIME_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.REC_TIME_MS"
                             }
                         }
@@ -2163,6 +2550,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.REC_TIME_POSIX"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.REC_TIME_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.REC_TIME_POSIX"
+                            }
                         }
                     }
                 }
@@ -2183,6 +2576,12 @@
                             "parameters": {
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_track.REPORT_TYPE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.REC_TIME_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.REPORT_TYPE"
                             }
                         }
@@ -2207,6 +2606,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.SAC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionTrackersd_track.SAC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SAC"
+                            }
                         }
                     }
                 }
@@ -2223,6 +2628,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.SELECTED_ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SELECTED_ALT_BARO_FT"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackerselected_alt_baro_ft0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -2244,6 +2655,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.SELECTED_ALT_BARO_SOURCE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SELECTED_ALT_BARO_SOURCE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackerselected_alt_baro_source0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -2265,6 +2682,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.SIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SIC"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackersic0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2287,6 +2710,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.SIMULATED_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SIMULATED_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackersimulated_target0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2309,6 +2738,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.SPI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.SPI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackerspi0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2331,6 +2766,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TARGET_ADDR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TARGET_ADDR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertarget_addr0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2353,6 +2794,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TOD0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TOD"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertod0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2375,6 +2822,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TOD_CALCULATED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TOD_CALCULATED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertod_calculated0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2397,6 +2850,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_AMALGAMATED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_AMALGAMATED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_amalgamated0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2419,6 +2878,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_COASTED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_COASTED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_coasted0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2441,6 +2906,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_CONFIRMED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_CONFIRMED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_confirmed0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2463,6 +2934,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_CREATED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_CREATED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_created0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2485,6 +2962,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_END0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_END"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_end0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2507,6 +2990,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_NUM"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_num0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2529,6 +3018,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_PSR_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_PSR_AGE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_psr_age0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2551,6 +3046,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_SLANT_CORR_TYPE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_SLANT_CORR_TYPE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertrack_slant_corr_type0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2573,6 +3074,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACKED_ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACKED_ALT_BARO_FT"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertracked_alt_baro_ft0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -2594,6 +3101,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACKED_ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACKED_ALT_GEO_FT"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertracked_alt_geo_ft0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -2615,6 +3128,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACKED_MODE3A_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACKED_MODE3A_CODE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertracked_mode3a_code0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -2636,6 +3155,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRANSPONDER_DELAY_CORR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRANSPONDER_DELAY_CORR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackertransponder_delay_corr0": {
                             "parameters": {
                                 "meta_table": "Tracker",
@@ -2658,6 +3183,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TURNRATE_DEGPS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TURNRATE_DEGPS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionTrackerturnrate_degps0": {
                             "parameters": {
                                 "meta_table": "Tracker",

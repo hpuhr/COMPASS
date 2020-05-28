@@ -18,12 +18,13 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
+#include "propertylist.h"
+#include "logger.h"
+
 #include <memory>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
-
-#include "propertylist.h"
 
 class DBOVariableSet;
 
@@ -160,6 +161,13 @@ inline bool Buffer::has(const std::string& id)
 template <typename T>
 NullableVector<T>& Buffer::get(const std::string& id)
 {
+    if (!(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+              ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
+        logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
+
+    assert ((std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
+             ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
+
     return *(std::get<Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
                             ArrayListMapTupel>::value>(array_list_tuple_))
                 .at(id);
