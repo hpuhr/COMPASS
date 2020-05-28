@@ -27,7 +27,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - High-speed time-filtered display
   - Numerous operations for analysis, e.g. data selection, labeling, distance measurement
   - Configurable data layering and styling for detailed analysis
-  - Relatively low memory footprint (e.g. 16 million target reports in ~6 GB RAM)
+  - Relatively low memory footprint (e.g. 16 million target reports in ~8 GB RAM)
 - Cross-view data selection and inspection
 - Command line options for automated processing
 - View points for efficient inspection
