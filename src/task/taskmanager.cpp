@@ -483,6 +483,7 @@ void TaskManager::openSqlite3DB(const std::string& filename)
     sqlite3_open_db_filename_ = filename;
 }
 
+#if USE_JASTERIX
 void TaskManager::importASTERIXFile(const std::string& filename)
 {
     loginf << "TaskManager: asterixImportFile: filename '" << filename << "'";
@@ -491,6 +492,7 @@ void TaskManager::importASTERIXFile(const std::string& filename)
     asterix_import_file_ = true;
     asterix_import_filename_ = filename;
 }
+#endif
 
 void TaskManager::importGPSTrailFile(const std::string& filename)
 {
