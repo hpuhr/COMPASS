@@ -38,7 +38,7 @@ before_install:
 
 install:
 #qt
- - sudo apt-get install qt58base-dev # qt58svg qt58charts-no-lgpl qt58xmlpatterns
+ - sudo apt-get install qt58base # qt58svg qt58charts-no-lgpl qt58xmlpatterns
  - source /opt/qt58/bin/qt58-env.sh
 # NemaTode install
  - wget https://github.com/ckgt/NemaTode/archive/master.zip
