@@ -27,25 +27,25 @@ class DBTable;
 /**
  * @brief Post-processing Job
  *
- * Updates meta-information about database content: A list of active data sources and minimum/maximum values of all
- * variables.
+ * Updates meta-information about database content: A list of active data sources and
+ * minimum/maximum values of all variables.
  *
  */
 class DBOMinMaxDBJob : public Job
 {
-public:
+  public:
     DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object);
     virtual ~DBOMinMaxDBJob();
 
-    virtual void run ();
+    virtual void run();
 
-protected:
+  protected:
     DBInterface& db_interface_;
     const DBObject& object_;
     /// @brief Creates minimum/maximum table and values
-    //void createMinMaxValuesSpecial ();
-    void createMinMaxValuesNormal ();
-    void processTable (const DBTable& table);
+    // void createMinMaxValuesSpecial ();
+    void createMinMaxValuesNormal();
+    void processTable(const DBTable& table);
 };
 
 #endif /* DBOMINMAXDBJOB_H_ */

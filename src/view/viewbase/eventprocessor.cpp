@@ -17,38 +17,35 @@
 
 #include "eventprocessor.h"
 
-
 /**
 @brief Constructor.
 */
 EventProcessor::EventProcessor()
-:   mouse_left_pressed_( false ), mouse_right_pressed_( false ), mouse_middle_pressed_( false )
+    : mouse_left_pressed_(false), mouse_right_pressed_(false), mouse_middle_pressed_(false)
 {
 }
 
 /**
 @brief Destructor.
 */
-EventProcessor::~EventProcessor()
-{
-}
+EventProcessor::~EventProcessor() {}
 
 /**
 @brief Handles specific mouse press events.
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::mousePressEvent(QMouseEvent *e)
+bool EventProcessor::mousePressEvent(QMouseEvent* e)
 {
     mouse_pos_ = e->pos();
-    if( e->button() == Qt::RightButton )
+    if (e->button() == Qt::RightButton)
         mouse_right_pressed_ = true;
-    if( e->button() == Qt::LeftButton )
+    if (e->button() == Qt::LeftButton)
         mouse_left_pressed_ = true;
-    if( e->button() == Qt::MidButton )
+    if (e->button() == Qt::MidButton)
         mouse_middle_pressed_ = true;
 
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -57,17 +54,17 @@ bool EventProcessor::mousePressEvent(QMouseEvent *e)
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::mouseReleaseEvent(QMouseEvent *e)
+bool EventProcessor::mouseReleaseEvent(QMouseEvent* e)
 {
     mouse_pos_ = e->pos();
-    if( e->button() == Qt::RightButton )
+    if (e->button() == Qt::RightButton)
         mouse_right_pressed_ = false;
-    if( e->button() == Qt::LeftButton )
+    if (e->button() == Qt::LeftButton)
         mouse_left_pressed_ = false;
-    if( e->button() == Qt::MidButton )
+    if (e->button() == Qt::MidButton)
         mouse_middle_pressed_ = false;
 
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -76,11 +73,11 @@ bool EventProcessor::mouseReleaseEvent(QMouseEvent *e)
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::mouseMoveEvent(QMouseEvent *e)
+bool EventProcessor::mouseMoveEvent(QMouseEvent* e)
 {
     mouse_pos_ = e->pos();
 
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -89,9 +86,9 @@ bool EventProcessor::mouseMoveEvent(QMouseEvent *e)
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::wheelEvent(QWheelEvent * e)
+bool EventProcessor::wheelEvent(QWheelEvent* e)
 {
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -100,9 +97,9 @@ bool EventProcessor::wheelEvent(QWheelEvent * e)
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::keyPressEvent(QKeyEvent *e)
+bool EventProcessor::keyPressEvent(QKeyEvent* e)
 {
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -111,9 +108,9 @@ bool EventProcessor::keyPressEvent(QKeyEvent *e)
 @param e The event.
 @return True if the event has been handled, false otherwise.
 */
-bool EventProcessor::keyReleaseEvent(QKeyEvent *e)
+bool EventProcessor::keyReleaseEvent(QKeyEvent* e)
 {
-    //not handled in base class
+    // not handled in base class
     return false;
 }
 
@@ -124,6 +121,6 @@ bool EventProcessor::keyReleaseEvent(QKeyEvent *e)
 */
 bool EventProcessor::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    //not handled in base class
+    // not handled in base class
     return false;
 }

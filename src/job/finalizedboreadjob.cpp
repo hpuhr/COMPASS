@@ -15,33 +15,31 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "finalizedboreadjob.h"
+
 #include <QThread>
 
-#include "finalizedboreadjob.h"
+#include "buffer.h"
 #include "dbobject.h"
 #include "dbovariableset.h"
-#include "buffer.h"
 
-FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject &dbobject, DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
-    : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_ (buffer)
+FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject& dbobject, DBOVariableSet& read_list,
+                                       std::shared_ptr<Buffer> buffer)
+    : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_(buffer)
 {
-    assert (buffer_);
+    assert(buffer_);
 }
 
-FinalizeDBOReadJob::~FinalizeDBOReadJob()
-{
+FinalizeDBOReadJob::~FinalizeDBOReadJob() {}
 
-}
-
-void FinalizeDBOReadJob::run ()
+void FinalizeDBOReadJob::run()
 {
     logdbg << "FinalizeDBOReadJob: run: read_list size " << read_list_.getSize();
     started_ = true;
 
     buffer_->transformVariables(read_list_, true);
-    buffer_->addProperty("selected", PropertyDataType::BOOL); // add boolean to indicate selection
+    buffer_->addProperty("selected", PropertyDataType::BOOL);  // add boolean to indicate selection
 
     logdbg << "FinalizeDBOReadJob: run: done";
-    done_=true;
+    done_ = true;
 }
-

@@ -18,10 +18,10 @@
 #ifndef STRUCTUREDESCRIPTIONMANAGER_H_
 #define STRUCTUREDESCRIPTIONMANAGER_H_
 
+#include "configuration.h"
+#include "global.h"
 #include "singleton.h"
 #include "structuredescription.h"
-#include "global.h"
-#include "configuration.h"
 
 /**
  * @brief Global StructureDescription manager
@@ -30,27 +30,30 @@
  */
 class StructureDescriptionManager : public Singleton
 {
-public:
-  /// @brief Destructor
-  virtual ~StructureDescriptionManager();
+  public:
+    /// @brief Destructor
+    virtual ~StructureDescriptionManager();
 
-  /// @brief Returns StructureDescription for a given DBO type
-  StructureDescription *getStructureDescription (const std::string &dbo_type);
-  /// @brief Returns container with all StructureDesciptions
-  std::map <std::string, StructureDescription *> &getStructureDescriptions () { return structure_descriptions_; }
+    /// @brief Returns StructureDescription for a given DBO type
+    StructureDescription* getStructureDescription(const std::string& dbo_type);
+    /// @brief Returns container with all StructureDesciptions
+    std::map<std::string, StructureDescription*>& getStructureDescriptions()
+    {
+        return structure_descriptions_;
+    }
 
-private:
-  /// @brief Constructor
-  StructureDescriptionManager();
-  /// @brief Container with all StructureDescriptions, DBO type -> StructureDescription
-  std::map <std::string, StructureDescription *> structure_descriptions_;
+  private:
+    /// @brief Constructor
+    StructureDescriptionManager();
+    /// @brief Container with all StructureDescriptions, DBO type -> StructureDescription
+    std::map<std::string, StructureDescription*> structure_descriptions_;
 
-public:
-  static StructureDescriptionManager& getInstance()
-  {
-    static StructureDescriptionManager instance;
-    return instance;
-  }
+  public:
+    static StructureDescriptionManager& getInstance()
+    {
+        static StructureDescriptionManager instance;
+        return instance;
+    }
 };
 
 #endif /* STRUCTUREDESCRIPTIONMANAGER_H_ */

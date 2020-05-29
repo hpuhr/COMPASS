@@ -16,29 +16,29 @@
  */
 
 #include "taskmanagerwidget.h"
-#include "taskmanager.h"
+
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QListWidget>
+#include <QPushButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QStackedWidget>
+#include <QVBoxLayout>
+
+#include "files.h"
 #include "global.h"
 #include "logger.h"
-#include "files.h"
-#include "taskwidget.h"
-
-#include <QListWidget>
-#include <QStackedWidget>
-#include <QFrame>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QFormLayout>
-#include <QLabel>
-#include <QSplitter>
-#include <QSettings>
-#include <QCheckBox>
-#include <QPushButton>
-
+#include "taskmanager.h"
 #include "taskmanagerlogwidget.h"
+#include "taskwidget.h"
 
 using namespace Utils;
 
-TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
+TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget* parent)
     : QWidget(parent), task_manager_(task_manager)
 {
     QFont font_bold;
@@ -49,24 +49,24 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Vertical);
-    //main_splitter_->setStyleSheet("QSplitter::handle {background: gray;} ");
-    //main_splitter_->setHandleWidth(7);
+    // main_splitter_->setStyleSheet("QSplitter::handle {background: gray;} ");
+    // main_splitter_->setHandleWidth(7);
 
-//    QSplitterHandle *handle = main_splitter_->handle(1);
-//    QVBoxLayout *layout = new QVBoxLayout(handle);
-//    layout->setSpacing(0);
-//    layout->setMargin(0);
+    //    QSplitterHandle *handle = main_splitter_->handle(1);
+    //    QVBoxLayout *layout = new QVBoxLayout(handle);
+    //    layout->setSpacing(0);
+    //    layout->setMargin(0);
 
-//    QFrame *line = new QFrame(handle);
-//    line->setFrameShape(QFrame::HLine);
-//    line->setFrameShadow(QFrame::Sunken);
-//    layout->addWidget(line);
+    //    QFrame *line = new QFrame(handle);
+    //    line->setFrameShape(QFrame::HLine);
+    //    line->setFrameShadow(QFrame::Sunken);
+    //    layout->addWidget(line);
 
-    QVBoxLayout* main_layout_ = new QVBoxLayout ();
+    QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    QSettings settings ("ATSDB", "TaskManagerWidget");
+    QSettings settings("ATSDB", "TaskManagerWidget");
 
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
     // top
     {
@@ -78,28 +78,30 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         QWidget* task_stuff_container = new QWidget;
         QVBoxLayout* task_stuff_container_layout = new QVBoxLayout;
 
-        task_list_ = new QListWidget ();
+        task_list_ = new QListWidget();
         task_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
         task_list_->setSelectionMode(QAbstractItemView::SingleSelection);
         updateTaskList();
         updateTaskStates();
-        connect (task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClickedSlot);
+        connect(task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClickedSlot);
 
         task_stuff_container_layout->addWidget(task_list_);
 
         expert_check_ = new QCheckBox("Expert Mode");
         expert_check_->setChecked(task_manager_.expertMode());
-        connect (expert_check_, &QCheckBox::clicked, this, &TaskManagerWidget::expertModeToggledSlot);
+        connect(expert_check_, &QCheckBox::clicked, this,
+                &TaskManagerWidget::expertModeToggledSlot);
         task_stuff_container_layout->addWidget(expert_check_);
 
-        //task_stuff_container_layout->addStretch();
+        // task_stuff_container_layout->addStretch();
 
-        run_current_task_button_ = new QPushButton ("Run Current Task");
+        run_current_task_button_ = new QPushButton("Run Current Task");
         run_current_task_button_->setDisabled(true);
-        QObject::connect(run_current_task_button_, &QPushButton::clicked, this, &TaskManagerWidget::runCurrentTaskSlot);
+        QObject::connect(run_current_task_button_, &QPushButton::clicked, this,
+                         &TaskManagerWidget::runCurrentTaskSlot);
         task_stuff_container_layout->addWidget(run_current_task_button_);
 
-        start_button_ = new QPushButton ("Start");
+        start_button_ = new QPushButton("Start");
         start_button_->setDisabled(true);
         QObject::connect(start_button_, &QPushButton::clicked, this, &TaskManagerWidget::startSlot);
         task_stuff_container_layout->addWidget(start_button_);
@@ -108,7 +110,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
         top_splitter_->addWidget(task_stuff_container);
 
-        tasks_widget_ = new QStackedWidget ();
+        tasks_widget_ = new QStackedWidget();
 
         selectNextTask();
         top_splitter_->addWidget(tasks_widget_);
@@ -120,55 +122,55 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         main_splitter_->addWidget(top_container);
     }
 
-    log_widget_ = new TaskManagerLogWidget ();
+    log_widget_ = new TaskManagerLogWidget();
 
     main_splitter_->addWidget(log_widget_);
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
 
     main_layout_->addWidget(main_splitter_);
 
-    setLayout (main_layout_);
-
+    setLayout(main_layout_);
 }
 
-TaskManagerWidget::~TaskManagerWidget ()
+TaskManagerWidget::~TaskManagerWidget()
 {
-    logdbg  << "TaskManagerWidget: destructor";
+    logdbg << "TaskManagerWidget: destructor";
 
-    QSettings settings ("ATSDB", "TaskManagerWidget");
+    QSettings settings("ATSDB", "TaskManagerWidget");
     settings.setValue("topSplitterSizes", top_splitter_->saveState());
     settings.setValue("mainSplitterSizes", main_splitter_->saveState());
 }
 
-void TaskManagerWidget::updateTaskList ()
+void TaskManagerWidget::updateTaskList()
 {
-    assert (task_list_);
+    assert(task_list_);
 
     task_list_->clear();
     item_task_mappings_.clear();
 
     std::vector<std::string> task_list = task_manager_.taskList();
-    std::map <std::string, Task*> tasks = task_manager_.tasks();
+    std::map<std::string, Task*> tasks = task_manager_.tasks();
 
     Task* current_task;
 
     for (auto& task_it : task_list)
     {
-        assert (tasks.count(task_it));
+        assert(tasks.count(task_it));
         current_task = tasks.at(task_it);
-        assert (current_task);
+        assert(current_task);
 
-        QListWidgetItem* item = new QListWidgetItem(current_task->guiName().c_str(), task_list_); // icon,
+        QListWidgetItem* item =
+            new QListWidgetItem(current_task->guiName().c_str(), task_list_);  // icon,
         if (current_task->tooltip().size())
             item->setToolTip(current_task->tooltip().c_str());
-        //item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        //item->setCheckState(Qt::Unchecked); // AND initialize check state
+        // item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+        // item->setCheckState(Qt::Unchecked); // AND initialize check state
 
         item_task_mappings_[item] = current_task;
     }
 }
 
-void TaskManagerWidget::updateTaskStates ()
+void TaskManagerWidget::updateTaskStates()
 {
     bool expert_mode = task_manager_.expertMode();
 
@@ -182,21 +184,23 @@ void TaskManagerWidget::updateTaskStates ()
         expert_mode_missing = !expert_mode && item_it.second->expertOnly();
         prerequisites_missing = !item_it.second->checkPrerequisites();
 
-        //item->setFlags(item->flags() & ~Qt::ItemIsSelectable); Qt::ItemIsEnabled
+        // item->setFlags(item->flags() & ~Qt::ItemIsSelectable); Qt::ItemIsEnabled
 
-        loginf << "TaskManagerWidget: updateTaskStates: item " << item_it.first->text().toStdString()
-               << " expert missing " << expert_mode_missing << " prereq. missing " << prerequisites_missing
-               << " recommended " << item_it.second->isRecommended()
-               << " required " << item_it.second->isRequired() << " done " << item_it.second->done();
+        loginf << "TaskManagerWidget: updateTaskStates: item "
+               << item_it.first->text().toStdString() << " expert missing " << expert_mode_missing
+               << " prereq. missing " << prerequisites_missing << " recommended "
+               << item_it.second->isRecommended() << " required " << item_it.second->isRequired()
+               << " done " << item_it.second->done();
 
-        if (!expert_mode_missing && !prerequisites_missing) // can be run
+        if (!expert_mode_missing && !prerequisites_missing)  // can be run
         {
             item_it.first->setFlags(item_it.first->flags() | Qt::ItemIsEnabled);
 
             if (item_it.second->done())
                 item_it.first->setIcon(QIcon(Files::getIconFilepath("done.png").c_str()));
             else if (!item_it.second->isRecommended())
-                item_it.first->setIcon(QIcon(Files::getIconFilepath("not_recommended.png").c_str()));
+                item_it.first->setIcon(
+                    QIcon(Files::getIconFilepath("not_recommended.png").c_str()));
             else
                 item_it.first->setIcon(QIcon(Files::getIconFilepath("todo.png").c_str()));
         }
@@ -236,14 +240,15 @@ void TaskManagerWidget::updateTaskStates ()
     }
 }
 
-void TaskManagerWidget::selectNextTask ()
+void TaskManagerWidget::selectNextTask()
 {
     QListWidgetItem* current_item = task_list_->currentItem();
 
-    if (current_item && (current_item->flags() & Qt::ItemIsEnabled)
-            && item_task_mappings_.at(current_item)->isRecommended()) // stay on current item uf still recommended
+    if (current_item && (current_item->flags() & Qt::ItemIsEnabled) &&
+        item_task_mappings_.at(current_item)
+            ->isRecommended())  // stay on current item uf still recommended
     {
-        taskClickedSlot (current_item);
+        taskClickedSlot(current_item);
         return;
     }
 
@@ -252,61 +257,61 @@ void TaskManagerWidget::selectNextTask ()
         if ((task_map_it.first->flags() & Qt::ItemIsEnabled) && task_map_it.second->isRecommended())
         {
             task_list_->setCurrentItem(task_map_it.first);
-            taskClickedSlot (task_map_it.first);
+            taskClickedSlot(task_map_it.first);
             return;
         }
     }
 
-    taskClickedSlot (task_list_->currentItem()); // update to change buttons
+    taskClickedSlot(task_list_->currentItem());  // update to change buttons
 }
 
-std::string TaskManagerWidget::getCurrentTaskName ()
+std::string TaskManagerWidget::getCurrentTaskName()
 {
     QListWidgetItem* current_item = task_list_->currentItem();
-    assert (current_item);
+    assert(current_item);
 
-    assert (item_task_mappings_.count(current_item));
+    assert(item_task_mappings_.count(current_item));
     return item_task_mappings_.at(current_item)->name();
 }
 
-bool TaskManagerWidget::isStartPossible ()
+bool TaskManagerWidget::isStartPossible()
 {
-    assert (start_button_);
+    assert(start_button_);
     return start_button_->isEnabled();
 }
 
 void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
 {
-    assert (item);
+    assert(item);
     loginf << "TaskManagerWidget: taskClickedSlot: item '" << item->text().toStdString() << "'";
 
-    if (!(item->flags() & Qt::ItemIsEnabled)) // do nothing if not enabled
+    if (!(item->flags() & Qt::ItemIsEnabled))  // do nothing if not enabled
         return;
 
-    assert (item_task_mappings_.count(item));
+    assert(item_task_mappings_.count(item));
     Task* current_task = item_task_mappings_.at(item);
-    assert (current_task);
+    assert(current_task);
 
     setCurrentTask(*current_task);
 }
 
-void TaskManagerWidget::setCurrentTask (Task& task)
+void TaskManagerWidget::setCurrentTask(Task& task)
 {
-    loginf << "TaskManagerWidget: setCurrentTask: task '" << task.name()
-           << "' can run " << task.canRun() << " done " << task.done()
-           << " is recommended " << task.isRecommended();
+    loginf << "TaskManagerWidget: setCurrentTask: task '" << task.name() << "' can run "
+           << task.canRun() << " done " << task.done() << " is recommended "
+           << task.isRecommended();
 
     // check if selected in list
-    assert (task_list_);
+    assert(task_list_);
 
     QList<QListWidgetItem*> items = task_list_->findItems(task.guiName().c_str(), Qt::MatchExactly);
-    assert (items.size() == 1);
+    assert(items.size() == 1);
     QListWidgetItem* task_item = items.at(0);
     if (task_list_->currentItem() != task_item)
         task_list_->setCurrentItem(task_item);
 
     // set widget
-    if (tasks_widget_->indexOf(task.widget()) == -1) // add of not added previously
+    if (tasks_widget_->indexOf(task.widget()) == -1)  // add of not added previously
         tasks_widget_->addWidget(task.widget());
 
     tasks_widget_->setCurrentWidget(task.widget());
@@ -331,22 +336,30 @@ void TaskManagerWidget::setCurrentTask (Task& task)
     }
 }
 
-void TaskManagerWidget::expertModeToggledSlot ()
+void TaskManagerWidget::expertModeToggledSlot()
 {
     loginf << "TaskManagerWidget: expertModeToggledSlot";
 
-    assert (expert_check_);
+    assert(expert_check_);
     task_manager_.expertMode(expert_check_->checkState() == Qt::Checked);
 }
 
 void TaskManagerWidget::runCurrentTaskSlot()
 {
-    loginf << "TaskManagerWidget: runCurrentTaskSlot";
+    loginf << "TaskManagerWidget: runCurrentTaskSlot: task " << getCurrentTaskName();
 
     task_manager_.runTask(getCurrentTaskName());
 }
 
-void TaskManagerWidget::startSlot ()
+void TaskManagerWidget::runTask(Task& task)
+{
+    loginf << "TaskManagerWidget: runTask: name '" << task.name() << "'";
+    setCurrentTask(task);
+    task_manager_.runTask(task.name());
+}
+
+
+void TaskManagerWidget::startSlot()
 {
     loginf << "TaskManagerWidget: startSlot";
 

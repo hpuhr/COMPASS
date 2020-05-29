@@ -18,11 +18,10 @@
 #ifndef BUFFERTABLEMODEL_H
 #define BUFFERTABLEMODEL_H
 
-#include "dbovariableset.h"
-
+#include <QAbstractTableModel>
 #include <memory>
 
-#include <QAbstractTableModel>
+#include "dbovariableset.h"
 
 class Buffer;
 class DBObject;
@@ -34,56 +33,57 @@ class BufferTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
-signals:
-    void exportDoneSignal (bool cancelled);
+  signals:
+    void exportDoneSignal(bool cancelled);
 
-public slots:
-    void setChangedSlot ();
-    void exportJobObsoleteSlot ();
+  public slots:
+    void setChangedSlot();
+    void exportJobObsoleteSlot();
     void exportJobDoneSlot();
 
-public:
-    BufferTableModel(BufferTableWidget* table_widget, DBObject& object, ListBoxViewDataSource& data_source);
+  public:
+    BufferTableModel(BufferTableWidget* table_widget, DBObject& object,
+                     ListBoxViewDataSource& data_source);
     virtual ~BufferTableModel();
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const ;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual QVariant headerData(int section, Qt::Orientation orientation,
+                                int role = Qt::DisplayRole) const;
 
+    void clearData();
+    void setData(std::shared_ptr<Buffer> buffer);
 
-    void clearData ();
-    void setData (std::shared_ptr <Buffer> buffer);
+    void saveAsCSV(const std::string& file_name, bool overwrite);
 
-    void saveAsCSV (const std::string& file_name, bool overwrite);
-
-    void usePresentation (bool use_presentation);
-    void showOnlySelected (bool value);
-    void showAssociations (bool value);
-    void reset ();
+    void usePresentation(bool use_presentation);
+    void showOnlySelected(bool value);
+    void showAssociations(bool value);
+    void reset();
 
     void updateToSelection();
 
-protected:
-    BufferTableWidget* table_widget_ {nullptr};
+  protected:
+    BufferTableWidget* table_widget_{nullptr};
     DBObject& object_;
     ListBoxViewDataSource& data_source_;
 
-    std::shared_ptr <Buffer> buffer_;
+    std::shared_ptr<Buffer> buffer_;
     DBOVariableSet read_set_;
 
-    std::shared_ptr <BufferCSVExportJob> export_job_;
+    std::shared_ptr<BufferCSVExportJob> export_job_;
 
-    unsigned int last_processed_index_ {0};
-    std::vector <unsigned int> row_indexes_;
+    unsigned int last_processed_index_{0};
+    std::vector<unsigned int> row_indexes_;
 
-    bool show_only_selected_ {true};
-    bool use_presentation_ {true};
-    bool show_associations_ {false};
+    bool show_only_selected_{true};
+    bool use_presentation_{true};
+    bool show_associations_{false};
 
-    void updateRows ();
+    void updateRows();
 };
 
-#endif // BUFFERTABLEMODEL_H
+#endif  // BUFFERTABLEMODEL_H

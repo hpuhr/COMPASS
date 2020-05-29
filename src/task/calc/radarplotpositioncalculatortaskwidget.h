@@ -32,7 +32,7 @@ class RadarPlotPositionCalculatorTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void dbObjectChangedSlot();
     void keyVarChangedSlot();
     void datasourceVarChangedSlot();
@@ -42,29 +42,29 @@ public slots:
     void latitudeVarChangedSlot();
     void longitudeVarChangedSlot();
 
-    void expertModeChangedSlot ();
+    void expertModeChangedSlot();
 
-public:
-    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget* parent=0,
-                                          Qt::WindowFlags f=0);
+  public:
+    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task,
+                                          QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~RadarPlotPositionCalculatorTaskWidget();
 
-    void update ();
+    void update();
 
-protected:
+  protected:
     RadarPlotPositionCalculatorTask& task_;
 
-    DBObjectComboBox* object_box_ {nullptr};
-    DBOVariableSelectionWidget* key_box_ {nullptr};
-    DBOVariableSelectionWidget* datasource_box_ {nullptr};
-    DBOVariableSelectionWidget* range_box_ {nullptr};
-    DBOVariableSelectionWidget* azimuth_box_ {nullptr};
-    DBOVariableSelectionWidget* altitude_box_ {nullptr};
+    DBObjectComboBox* object_box_{nullptr};
+    DBOVariableSelectionWidget* key_box_{nullptr};
+    DBOVariableSelectionWidget* datasource_box_{nullptr};
+    DBOVariableSelectionWidget* range_box_{nullptr};
+    DBOVariableSelectionWidget* azimuth_box_{nullptr};
+    DBOVariableSelectionWidget* altitude_box_{nullptr};
 
-    DBOVariableSelectionWidget* latitude_box_ {nullptr};
-    DBOVariableSelectionWidget* longitude_box_ {nullptr};
+    DBOVariableSelectionWidget* latitude_box_{nullptr};
+    DBOVariableSelectionWidget* longitude_box_{nullptr};
 
-    void setDBOBject (const std::string& object_name);
+    void setDBOBject(const std::string& object_name);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_ */

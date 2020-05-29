@@ -15,52 +15,52 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "viewmanagerwidget.h"
 
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QMenu>
 #include <QAction>
+#include <QLabel>
+#include <QMenu>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QVariant>
 
-#include "viewmanagerwidget.h"
-#include "viewmanager.h"
-#include "logger.h"
-#include "jobmanager.h"
-#include "viewcontainer.h"
-#include "viewcontainerwidget.h"
-#include "viewcontainerconfigwidget.h"
 #include "global.h"
+#include "jobmanager.h"
+#include "logger.h"
+#include "viewcontainer.h"
+#include "viewcontainerconfigwidget.h"
+#include "viewcontainerwidget.h"
+#include "viewmanager.h"
 
-ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
+ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)
 {
-    logdbg  << "ViewManagerWidget: constructor: start";
+    logdbg << "ViewManagerWidget: constructor: start";
 
     QFont font_bold;
     font_bold.setBold(true);
 
     layout_ = new QVBoxLayout();
 
-    QLabel *head = new QLabel (tr("Views"));
-    head->setFont (font_bold);
+    QLabel* head = new QLabel(tr("Views"));
+    head->setFont(font_bold);
     layout_->addWidget(head);
 
-    cont_layout_ = new QVBoxLayout ();
-    cont_layout_->setSpacing (0);
-    cont_layout_->setMargin (0);
-    layout_->addLayout (cont_layout_);
+    cont_layout_ = new QVBoxLayout();
+    cont_layout_->setSpacing(0);
+    cont_layout_->setMargin(0);
+    layout_->addLayout(cont_layout_);
 
-    layout_->addStretch ();
+    layout_->addStretch();
 
     add_button_ = new QPushButton(tr("Add View"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewMenuSlot() ));
+    connect(add_button_, SIGNAL(clicked()), this, SLOT(addViewMenuSlot()));
     layout_->addWidget(add_button_);
 
-    setLayout (layout_);
+    setLayout(layout_);
 
-    connect (&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
-    connect (&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
+    connect(&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
+    connect(&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
 
     view_class_list_.append("ListBoxView");
 
@@ -68,27 +68,24 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     view_class_list_.append("OSGView");
 #endif
 
-    update ();
+    update();
 
-    logdbg  << "ViewManagerWidget: constructor: end";
+    logdbg << "ViewManagerWidget: constructor: end";
 }
 
-ViewManagerWidget::~ViewManagerWidget()
-{
-}
+ViewManagerWidget::~ViewManagerWidget() {}
 
-void ViewManagerWidget::databaseBusy ()
+void ViewManagerWidget::databaseBusy()
 {
-    assert (add_button_);
+    assert(add_button_);
     add_button_->setDisabled(true);
 }
 
-void ViewManagerWidget::databaseIdle ()
+void ViewManagerWidget::databaseIdle()
 {
-    assert (add_button_);
+    assert(add_button_);
     add_button_->setDisabled(false);
 }
-
 
 void ViewManagerWidget::addViewMenuSlot()
 {
@@ -101,15 +98,16 @@ void ViewManagerWidget::addViewMenuSlot()
 
     for (QString view_class : view_class_list_)
     {
-        submenu = menu.addMenu (view_class);
+        submenu = menu.addMenu(view_class);
 
-        QAction *new_window_action = submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()) );
+        QAction* new_window_action =
+            submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()));
         new_window_action->setData(view_class);
 
-        for( i=0; i<n; ++i )
+        for (i = 0; i < n; ++i)
         {
-            name = cont_widgets_[ i ]->name();
-            QAction* action = submenu->addAction( name, this, SLOT(addViewSlot()) );
+            name = cont_widgets_[i]->name();
+            QAction* action = submenu->addAction(name, this, SLOT(addViewSlot()));
             QStringList list;
             list.append(view_class);
             list.append(QString::number(i));
@@ -117,7 +115,8 @@ void ViewManagerWidget::addViewMenuSlot()
         }
     }
 
-    //  std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
+    //  std::map<std::string, Configuration> &templates =
+    //  ViewManager::getInstance().getConfiguration()
     //          .getConfigurationTemplates ();
 
     //  if (templates.size() > 0)
@@ -129,8 +128,9 @@ void ViewManagerWidget::addViewMenuSlot()
     //      {
     //          submenu = templatesubmenu->addMenu( it->first.c_str());
 
-    //          QAction* newaction = submenu->addAction( "New Window", this, SLOT(addTemplateNewWindowSlot()) );
-    //          newaction->setData( QVariant( tr(it->first.c_str()) ) );
+    //          QAction* newaction = submenu->addAction( "New Window", this,
+    //          SLOT(addTemplateNewWindowSlot()) ); newaction->setData( QVariant(
+    //          tr(it->first.c_str()) ) );
 
     //          for( i=0; i<n; ++i )
     //          {
@@ -138,7 +138,8 @@ void ViewManagerWidget::addViewMenuSlot()
     //            QAction* action = submenu->addAction( name, this, SLOT(addTemplateSlot()) );
 
     //            assert (add_template_actions_.find (action) == add_template_actions_.end());
-    //            add_template_actions_ [action] = std::pair <std::string, int> (it->first.c_str(), i);
+    //            add_template_actions_ [action] = std::pair <std::string, int> (it->first.c_str(),
+    //            i);
     //          }
     //      }
     //  }
@@ -148,10 +149,10 @@ void ViewManagerWidget::addViewMenuSlot()
 
 void ViewManagerWidget::addViewNewWindowSlot()
 {
-    QAction *action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+    assert(action);
     QString class_name = action->data().toString();
-    ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
+    ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget();
     container_widget->viewContainer().addView(class_name.toStdString());
 
     update();
@@ -159,69 +160,69 @@ void ViewManagerWidget::addViewNewWindowSlot()
 
 void ViewManagerWidget::addViewSlot()
 {
-    QAction *action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+    assert(action);
     QStringList list = action->data().toStringList();
-    assert (list.size() == 2);
+    assert(list.size() == 2);
     QString class_name = list.at(0);
     QString number_str = list.at(1);
     bool ok;
     unsigned int containter_id = number_str.toUInt(&ok);
-    assert (ok);
+    assert(ok);
 
     loginf << "ViewManagerWidget: addViewSlot: class " << class_name.toStdString();
 
-    if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-        throw( std::runtime_error( "ViewManagerWidget: addViewSlot: container out of bounds" ) );
-    cont_widgets_[ containter_id ]->addView(class_name.toStdString());
+    if (containter_id < 0 || containter_id >= cont_widgets_.size())
+        throw(std::runtime_error("ViewManagerWidget: addViewSlot: container out of bounds"));
+    cont_widgets_[containter_id]->addView(class_name.toStdString());
 }
 
-void ViewManagerWidget::update ()
+void ViewManagerWidget::update()
 {
-    loginf  << "ViewManagerWidget: update";
+    loginf << "ViewManagerWidget: update";
 
     cont_widgets_.clear();
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = cont_layout_->takeAt(0)) != 0)
     {
         cont_layout_->removeItem(child);
     }
 
-    std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
+    std::map<std::string, ViewContainer*> containers = view_manager_.getContainers();
 
-    //loginf  << "ViewManagerWidget: update size containers " << containers.size();
+    // loginf  << "ViewManagerWidget: update size containers " << containers.size();
 
     std::map<std::string, ViewContainer*>::iterator it;
     for (it = containers.begin(); it != containers.end(); it++)
     {
-        cont_widgets_.push_back (it->second->configWidget());
-        cont_layout_->addWidget (it->second->configWidget());
+        cont_widgets_.push_back(it->second->configWidget());
+        cont_layout_->addWidget(it->second->configWidget());
     }
 }
 
-//void ViewManagerWidget::addTemplateSlot ()
+// void ViewManagerWidget::addTemplateSlot ()
 //{
 //    QAction *action = (QAction*) sender();
 
 //    assert (add_template_actions_.find (action) != add_template_actions_.end());
 //    std::pair <std::string, int> data = add_template_actions_ [action];
 
-//    loginf << "ViewManagerWidget: addTemplateSlot: " << data.first << " in window " << data.second;
-//    int containter_id = data.second;
+//    loginf << "ViewManagerWidget: addTemplateSlot: " << data.first << " in window " <<
+//    data.second; int containter_id = data.second;
 
 //    if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//      throw( std::runtime_error( "ViewManagerWidget: addTemplateSlot: container out of bounds" ) );
+//      throw( std::runtime_error( "ViewManagerWidget: addTemplateSlot: container out of bounds" )
+//      );
 
 //    cont_widgets_[ containter_id ]->addTemplateView (data.first);
 
 //}
 
-//void ViewManagerWidget::addTemplateNewWindowSlot ()
+// void ViewManagerWidget::addTemplateNewWindowSlot ()
 //{
 //    QAction *action = (QAction*) sender();
 //    QVariant variant = action->data();
 //    loginf << "ViewManagerWidget: addTemplateNewWindowSlot: " << variant.toString().toStdString();
 //    ViewManager::getInstance().addContainerWithTemplateView(variant.toString().toStdString());
 //}
-

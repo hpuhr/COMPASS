@@ -8,7 +8,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "5")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
+SET(CPACK_PACKAGE_VERSION_PATCH "3")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -42,6 +42,8 @@ message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${ATSDB_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};/usr/local/lib/cmake/;/usr/lib/x86_64-linux-gnu/)
+message("  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
 find_package (Eigen3 3.2 REQUIRED)
 
@@ -86,10 +88,7 @@ find_package ( OpenSSL REQUIRED )
 message("  OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
 message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
-#find_package ( JSONCPP REQUIRED )
-#message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
-#message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")
-
+find_package(NemaTode REQUIRED CONFIG)
 
 add_library(atsdb "")
 
@@ -168,6 +167,7 @@ target_link_libraries ( atsdb optimized
     ${JSONCPP_LIBRARY}
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
+    NemaTode::NemaTode
     )
 
 

@@ -64,34 +64,43 @@ ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
 ENV QTLIBDIR="${QTDIR}/gcc_64/"
 
 #osg
-RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.4.1.zip
-RUN unzip OpenSceneGraph-3.4.1.zip
-RUN mkdir OpenSceneGraph-OpenSceneGraph-3.4.1/build
-RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
-RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make -j 4
-RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make install
+#RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.4.1.zip
+#RUN unzip OpenSceneGraph-3.4.1.zip
+#RUN mkdir OpenSceneGraph-OpenSceneGraph-3.4.1/build
+#RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+#RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make -j 4
+#RUN cd OpenSceneGraph-OpenSceneGraph-3.4.1/build && make install
 
-#RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.4.zip
-#RUN unzip OpenSceneGraph-3.6.4.zip
-#RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.4/build
-#RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
-#RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make -j 4
-#RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make install
+RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.4.zip
+RUN unzip OpenSceneGraph-3.6.4.zip
+RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.4/build
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make -j 4
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make install
 
-#RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
-#RUN unzip Qt4.zip
-#RUN mkdir osgQt-Qt4/build
-#RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
-#RUN cd osgQt-Qt4/build && make -j 4
-#RUN cd osgQt-Qt4/build && make install
+RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
+RUN unzip Qt4.zip
+RUN mkdir osgQt-Qt4/build
+RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
+RUN cd osgQt-Qt4/build && make -j 4
+RUN cd osgQt-Qt4/build && make install
 
 # osgEarth
-RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.9.zip
-RUN unzip osgearth-2.9.zip
-RUN mkdir osgearth-osgearth-2.9/build
-RUN cd osgearth-osgearth-2.9/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
-RUN cd osgearth-osgearth-2.9/build && make -j 4
-RUN cd osgearth-osgearth-2.9/build && make install
+#RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.9.zip
+#RUN unzip osgearth-2.9.zip
+#RUN mkdir osgearth-osgearth-2.9/build
+#RUN cd osgearth-osgearth-2.9/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
+#RUN cd osgearth-osgearth-2.9/build && make -j 4
+#RUN cd osgearth-osgearth-2.9/build && make install
+
+RUN apt-get install libgeos++-dev -y
+
+RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
+RUN unzip osgearth-2.10.2.zip
+RUN mkdir osgearth-osgearth-2.10.2/build
+RUN cd osgearth-osgearth-2.10.2/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-2.10.2/build && make -j 4
+RUN cd osgearth-osgearth-2.10.2/build && make install
 
 #RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
 #RUN unzip osgearth-2.10.2.zip
@@ -100,7 +109,14 @@ RUN cd osgearth-osgearth-2.9/build && make install
 #RUN cd osgearth-osgearth-2.10.2/build && make -j 4
 #RUN cd osgearth-osgearth-2.10.2/build && make install
 
-RUN apt-get install gdb -y
+RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
+RUN unzip master.zip
+RUN mkdir NemaTode-master/build
+RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd NemaTode-master/build && make -j 4
+RUN cd NemaTode-master/build && make install
+
+#RUN apt-get install gdb -y
 
 RUN ldconfig -v /usr/lib64/ 
 RUN updatedb

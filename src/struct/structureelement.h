@@ -18,19 +18,32 @@
 #ifndef STRUCTUREELEMENT_H_
 #define STRUCTUREELEMENT_H_
 
-#include <string>
 #include <cassert>
 #include <map>
+#include <string>
+
 #include "global.h"
 #include "property.h"
 
 class StructureDescription;
 class StructureVariable;
 
-/// C struct data type, if any new data types are added also add them to the conversion mechanism in StructureConverter.cpp
-enum class StructureElementDataType {
-    BOOL, TINYINT, SMALLINT, INT, UTINYINT, USMALLINT, UINT, VARCHAR, VARCHAR_ARRAY, FLOAT, DOUBLE };
-
+/// C struct data type, if any new data types are added also add them to the conversion mechanism in
+/// StructureConverter.cpp
+enum class StructureElementDataType
+{
+    BOOL,
+    TINYINT,
+    SMALLINT,
+    INT,
+    UTINYINT,
+    USMALLINT,
+    UINT,
+    VARCHAR,
+    VARCHAR_ARRAY,
+    FLOAT,
+    DOUBLE
+};
 
 /**
  * @brief Interface for a StructureDescription or a StructureVariable
@@ -39,33 +52,46 @@ enum class StructureElementDataType {
  */
 class StructureElement
 {
-public:
+  public:
     StructureElement();
-    virtual ~StructureElement() {};
+    virtual ~StructureElement(){};
     /// @brief Prints element contents (for debugging)
-    virtual void print (std::string prefix)=0;
+    virtual void print(std::string prefix) = 0;
     /// @brief Adds element contents iteratively to the supplied (flat) StructureDescription
-    virtual void addToFlatStructureDescription (StructureDescription *flatdesc, std::string prefix)=0;
+    virtual void addToFlatStructureDescription(StructureDescription* flatdesc,
+                                               std::string prefix) = 0;
     /// @brief Returns if element is a StructureVariable
-    virtual bool isVariable()=0;
+    virtual bool isVariable() = 0;
     /// @brief Sets the present_variable_
-    virtual void addPresentStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset)=0;
+    virtual void addPresentStructureVariable(std::string id, StructureElementDataType type,
+                                             int number, std::string description,
+                                             size_t offset) = 0;
 
     /// @brief Returns if present_variable_ was set
-    bool hasPresentVariable () { return present_variable_ != 0;}
+    bool hasPresentVariable() { return present_variable_ != 0; }
     /// @brief Returns present_variable_
-    StructureVariable *getPresentVariable () { assert (present_variable_); return present_variable_; }
+    StructureVariable* getPresentVariable()
+    {
+        assert(present_variable_);
+        return present_variable_;
+    }
 
-    const std::string &stringFor (StructureElementDataType type) const { return data_type_strings_.at(type); }
-    size_t sizeFor (StructureElementDataType type) const { return data_type_sizes_.at(type); }
-    PropertyDataType propertyDataTypeFor (StructureElementDataType type) const { return data_type_conversion_table_.at(type); }
+    const std::string& stringFor(StructureElementDataType type) const
+    {
+        return data_type_strings_.at(type);
+    }
+    size_t sizeFor(StructureElementDataType type) const { return data_type_sizes_.at(type); }
+    PropertyDataType propertyDataTypeFor(StructureElementDataType type) const
+    {
+        return data_type_conversion_table_.at(type);
+    }
 
-protected:
+  protected:
     /// Present variable, which indicates if data in struct is valid
-    StructureVariable *present_variable_;
-    static std::map <StructureElementDataType, std::string> data_type_strings_;
-    static std::map <StructureElementDataType, size_t> data_type_sizes_;
-    static std::map <StructureElementDataType, PropertyDataType> data_type_conversion_table_;
+    StructureVariable* present_variable_;
+    static std::map<StructureElementDataType, std::string> data_type_strings_;
+    static std::map<StructureElementDataType, size_t> data_type_sizes_;
+    static std::map<StructureElementDataType, PropertyDataType> data_type_conversion_table_;
 };
 
 #endif /* STRUCTUREELEMENT_H_ */

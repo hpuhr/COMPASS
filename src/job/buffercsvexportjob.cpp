@@ -15,30 +15,35 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "buffercsvexportjob.h"
+
 #include <fstream>
 #include <sstream>
 
-#include "buffercsvexportjob.h"
-#include "dbovariable.h"
-#include "dbobjectmanager.h"
-#include "dbobject.h"
 #include "atsdb.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "dbovariable.h"
 
-BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
-                                       const std::string& file_name, bool overwrite, bool only_selected,
-                                       bool use_presentation, bool show_associations)
-    : Job("BufferCSVExportJob"), buffer_(buffer), read_set_(read_set), file_name_(file_name), overwrite_(overwrite),
-      only_selected_(only_selected), use_presentation_(use_presentation), show_associations_(show_associations)
+BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
+                                       const DBOVariableSet& read_set, const std::string& file_name,
+                                       bool overwrite, bool only_selected, bool use_presentation,
+                                       bool show_associations)
+    : Job("BufferCSVExportJob"),
+      buffer_(buffer),
+      read_set_(read_set),
+      file_name_(file_name),
+      overwrite_(overwrite),
+      only_selected_(only_selected),
+      use_presentation_(use_presentation),
+      show_associations_(show_associations)
 {
-    assert (file_name_.size());
+    assert(file_name_.size());
 }
 
-BufferCSVExportJob::~BufferCSVExportJob()
-{
+BufferCSVExportJob::~BufferCSVExportJob() {}
 
-}
-
-void BufferCSVExportJob::run ()
+void BufferCSVExportJob::run()
 {
     logdbg << "BufferCSVExportJob: execute: start";
     started_ = true;
@@ -54,35 +59,35 @@ void BufferCSVExportJob::run ()
 
     if (output_file)
     {
-        const PropertyList &properties = buffer_->properties();
+        const PropertyList& properties = buffer_->properties();
         size_t read_set_size = read_set_.getSize();
         size_t buffer_size = buffer_->size();
         std::stringstream ss;
         bool null;
         std::string value_str;
-        size_t row=0;
+        size_t row = 0;
 
         ss << "Selected";
 
         if (show_associations_)
             ss << ";UTN";
 
-        for (size_t col=0; col < read_set_size; col++)
+        for (size_t col = 0; col < read_set_size; col++)
         {
-            //if (col != 0)
+            // if (col != 0)
             ss << ";";
             ss << read_set_.getVariable(col).name();
         }
         output_file << ss.str() << "\n";
 
-        assert (buffer_->has<bool>("selected"));
+        assert(buffer_->has<bool>("selected"));
         NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
 
-        assert (buffer_->has<int>("rec_num"));
+        assert(buffer_->has<int>("rec_num"));
         NullableVector<int> rec_num_vec = buffer_->get<int>("rec_num");
 
         std::string dbo_name = buffer_->dboName();
-        assert (dbo_name.size());
+        assert(dbo_name.size());
 
         DBObjectManager& manager = ATSDB::instance().objectManager();
 
@@ -102,13 +107,13 @@ void BufferCSVExportJob::run ()
             {
                 ss << ";";
 
-                assert (!rec_num_vec.isNull(row));
+                assert(!rec_num_vec.isNull(row));
                 unsigned int rec_num = rec_num_vec.get(row);
 
                 ss << manager.object(dbo_name).associations().getUTNsStringFor(rec_num);
             }
 
-            for (size_t col=0; col < read_set_size; col++)
+            for (size_t col = 0; col < read_set_size; col++)
             {
                 value_str = "";
 
@@ -130,7 +135,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<bool>(property_name).getAsString(row));
+                                buffer_->get<bool>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<bool>(property_name).getAsString(row);
                     }
@@ -148,7 +153,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<char>(property_name).getAsString(row));
+                                buffer_->get<char>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<char>(property_name).getAsString(row);
                     }
@@ -166,7 +171,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<unsigned char>(property_name).getAsString(row));
+                                buffer_->get<unsigned char>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<unsigned char>(property_name).getAsString(row);
                     }
@@ -184,7 +189,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<int>(property_name).getAsString(row));
+                                buffer_->get<int>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<int>(property_name).getAsString(row);
                     }
@@ -202,7 +207,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<unsigned int>(property_name).getAsString(row));
+                                buffer_->get<unsigned int>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<unsigned int>(property_name).getAsString(row);
                     }
@@ -220,7 +225,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<long int>(property_name).getAsString(row));
+                                buffer_->get<long int>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<long int>(property_name).getAsString(row);
                     }
@@ -238,9 +243,10 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<unsigned long int>(property_name).getAsString(row));
+                                buffer_->get<unsigned long int>(property_name).getAsString(row));
                         else
-                            value_str = buffer_->get<unsigned long int>(property_name).getAsString(row);
+                            value_str =
+                                buffer_->get<unsigned long int>(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::FLOAT)
@@ -256,7 +262,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<float>(property_name).getAsString(row));
+                                buffer_->get<float>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<float>(property_name).getAsString(row);
                     }
@@ -274,7 +280,7 @@ void BufferCSVExportJob::run ()
                     {
                         if (use_presentation_)
                             value_str = variable.getRepresentationStringFromValue(
-                                        buffer_->get<double>(property_name).getAsString(row));
+                                buffer_->get<double>(property_name).getAsString(row));
                         else
                             value_str = buffer_->get<double>(property_name).getAsString(row);
                     }
@@ -294,7 +300,7 @@ void BufferCSVExportJob::run ()
                     }
                 }
                 else
-                    throw std::domain_error ("BufferCSVExportJob: run: unknown property data type");
+                    throw std::domain_error("BufferCSVExportJob: run: unknown property data type");
 
                 ss << ";";
                 ss << value_str;
@@ -307,14 +313,15 @@ void BufferCSVExportJob::run ()
         boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
         if (diff.total_seconds() > 0)
-            loginf  << "BufferCSVExportJob: run: done after " << diff << ", " << 1000.0*row/diff.total_milliseconds() << " el/s";
+            loginf << "BufferCSVExportJob: run: done after " << diff << ", "
+                   << 1000.0 * row / diff.total_milliseconds() << " el/s";
     }
     else
     {
         logerr << "BufferCSVExportJob: runFailure opening " << file_name_;
     }
 
-    done_=true;
+    done_ = true;
 
     logdbg << "BufferCSVExportJob: execute: done";
     return;

@@ -15,103 +15,104 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QLineEdit>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QLabel>
+#include "dbobjectmanagerwidget.h"
+
 #include <QComboBox>
+#include <QGridLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QInputDialog>
+#include <QVBoxLayout>
 
+#include "atsdb.h"
 #include "configuration.h"
 #include "configurationmanager.h"
-#include "dbovariable.h"
-#include "metadbovariable.h"
-#include "metadbovariablewidget.h"
 #include "dbobject.h"
-#include "dbobjectwidget.h"
-#include "dbobjectmanagerwidget.h"
 #include "dbobjectmanager.h"
+#include "dbobjectwidget.h"
+#include "dbovariable.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
+#include "files.h"
+#include "global.h"
+#include "metadbovariable.h"
+#include "metadbovariablewidget.h"
 #include "metadbtable.h"
 #include "stringconv.h"
-#include "atsdb.h"
-#include "global.h"
-#include "files.h"
 //#include "MetaDBObjectEditWidget.h"
 
 using namespace Utils;
 
-DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
+DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
 {
-    //unsigned int frame_width = FRAME_SIZE;
+    // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);
 
-//    setFrameStyle(QFrame::Panel | QFrame::Raised);
-//    setLineWidth(frame_width);
+    //    setFrameStyle(QFrame::Panel | QFrame::Raised);
+    //    setLineWidth(frame_width);
 
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QVBoxLayout* main_layout = new QVBoxLayout();
 
     // database objects
-    QLabel *main_label = new QLabel ("Database Objects");
-    main_label->setFont (font_bold);
-    main_layout->addWidget (main_label);
+    QLabel* main_label = new QLabel("Database Objects");
+    main_label->setFont(font_bold);
+    main_layout->addWidget(main_label);
 
-    QFrame *dob_frame = new QFrame ();
+    QFrame* dob_frame = new QFrame();
     dob_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     dob_frame->setLineWidth(FRAME_SIZE);
 
-    dbobjects_grid_ = new QGridLayout ();
-    updateDBOsSlot ();
+    dbobjects_grid_ = new QGridLayout();
+    updateDBOsSlot();
 
-    dob_frame->setLayout (dbobjects_grid_);
+    dob_frame->setLayout(dbobjects_grid_);
 
-    QScrollArea *dbo_scroll = new QScrollArea ();
-    dbo_scroll->setWidgetResizable (true);
+    QScrollArea* dbo_scroll = new QScrollArea();
+    dbo_scroll->setWidgetResizable(true);
     dbo_scroll->setWidget(dob_frame);
 
-    main_layout->addWidget (dbo_scroll);
+    main_layout->addWidget(dbo_scroll);
 
     // new dbobject
     add_dbo_button_ = new QPushButton("Add");
     connect(add_dbo_button_, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
-    main_layout->addWidget (add_dbo_button_);
+    main_layout->addWidget(add_dbo_button_);
 
     main_layout->addStretch();
 
     // meta objects
-    QLabel *metavars_label = new QLabel ("Meta Variables");
-    metavars_label->setFont (font_bold);
-    main_layout->addWidget (metavars_label);
+    QLabel* metavars_label = new QLabel("Meta Variables");
+    metavars_label->setFont(font_bold);
+    main_layout->addWidget(metavars_label);
 
-    QFrame *meta_frame = new QFrame ();
+    QFrame* meta_frame = new QFrame();
     meta_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     meta_frame->setLineWidth(FRAME_SIZE);
 
-    meta_variables_grid_ = new QGridLayout ();
+    meta_variables_grid_ = new QGridLayout();
     updateMetaVariablesSlot();
 
-    meta_frame->setLayout (meta_variables_grid_);
+    meta_frame->setLayout(meta_variables_grid_);
 
-    QScrollArea *meta_scroll = new QScrollArea ();
-    meta_scroll->setWidgetResizable (true);
+    QScrollArea* meta_scroll = new QScrollArea();
+    meta_scroll->setWidgetResizable(true);
     meta_scroll->setWidget(meta_frame);
 
-    main_layout->addWidget (meta_scroll);
+    main_layout->addWidget(meta_scroll);
 
     add_metavar_button_ = new QPushButton("Add");
     connect(add_metavar_button_, SIGNAL(clicked()), this, SLOT(addAllMetaVariablesSlot()));
-    main_layout->addWidget (add_metavar_button_);
+    main_layout->addWidget(add_metavar_button_);
 
-    setLayout (main_layout);
+    setLayout(main_layout);
 
-    //lock();
+    // lock();
 }
 
 DBObjectManagerWidget::~DBObjectManagerWidget()
@@ -121,7 +122,7 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
     edit_dbo_widgets_.clear();
 }
 
-//void DBObjectManagerWidget::lock ()
+// void DBObjectManagerWidget::lock ()
 //{
 ////    for (auto it : edit_dbo_buttons_)
 ////        it.first->setDisabled (true);
@@ -137,7 +138,7 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
 //    add_metavar_button_->setDisabled (true);
 //}
 
-//void DBObjectManagerWidget::unlock ()
+// void DBObjectManagerWidget::unlock ()
 //{
 ////    for (auto it : edit_dbo_buttons_)
 ////        it.first->setDisabled (!it.second->hasCurrentMetaTable());
@@ -153,12 +154,12 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
 //    add_metavar_button_->setDisabled (false);
 //}
 
-//void DBObjectManagerWidget::databaseOpenedSlot ()
+// void DBObjectManagerWidget::databaseOpenedSlot ()
 //{
 //    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
 //}
 
-void DBObjectManagerWidget::addDBOSlot ()
+void DBObjectManagerWidget::addDBOSlot()
 {
     if (!schema_manager_.hasCurrentSchema())
     {
@@ -167,9 +168,9 @@ void DBObjectManagerWidget::addDBOSlot ()
     }
 
     bool ok;
-    QString text = QInputDialog::getText(this, tr("Database Object Name"),
-                                         tr("Specify a (unique) DBObject name:"), QLineEdit::Normal,
-                                         "", &ok);
+    QString text =
+        QInputDialog::getText(this, tr("Database Object Name"),
+                              tr("Specify a (unique) DBObject name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
     {
         std::string name = text.toStdString();
@@ -180,7 +181,6 @@ void DBObjectManagerWidget::addDBOSlot ()
             return;
         }
 
-
         auto metas = schema_manager_.getCurrentSchema().metaTables();
         QStringList items;
 
@@ -190,20 +190,21 @@ void DBObjectManagerWidget::addDBOSlot ()
         }
 
         bool ok;
-        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0,
-                                             false, &ok);
+        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"),
+                                             tr("Select:"), items, 0, false, &ok);
         if (ok && !item.isEmpty())
         {
             std::string meta_table_name = item.toStdString();
 
-            std::string instance = "DBObject"+name+"0";
+            std::string instance = "DBObject" + name + "0";
 
-            Configuration &config = object_manager_.addNewSubConfiguration ("DBObject", instance);
-            config.addParameterString ("name", name);
-            //config.addParameterString ("meta_table", meta_table_name);
-            Configuration &metatable_config = config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
-            metatable_config.addParameterString ("schema", schema_manager_.getCurrentSchemaName());
-            metatable_config.addParameterString ("meta_table", meta_table_name);
+            Configuration& config = object_manager_.addNewSubConfiguration("DBObject", instance);
+            config.addParameterString("name", name);
+            // config.addParameterString ("meta_table", meta_table_name);
+            Configuration& metatable_config =
+                config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
+            metatable_config.addParameterString("schema", schema_manager_.getCurrentSchemaName());
+            metatable_config.addParameterString("meta_table", meta_table_name);
 
             object_manager_.generateSubConfigurable("DBObject", instance);
 
@@ -212,43 +213,39 @@ void DBObjectManagerWidget::addDBOSlot ()
     }
 }
 
-void DBObjectManagerWidget::changedDBOSlot ()
+void DBObjectManagerWidget::changedDBOSlot() { updateDBOsSlot(); }
+
+void DBObjectManagerWidget::editDBOSlot()
 {
-    updateDBOsSlot ();
-}
+    assert(edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
 
-void DBObjectManagerWidget::editDBOSlot ()
-{
-    assert (edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
+    DBObject* object = edit_dbo_buttons_[(QPushButton*)sender()];
 
-    DBObject *object = edit_dbo_buttons_ [(QPushButton*)sender()];
-
-    if (edit_dbo_widgets_.find (object) == edit_dbo_widgets_.end())
+    if (edit_dbo_widgets_.find(object) == edit_dbo_widgets_.end())
     {
-        DBObjectWidget *widget = object->widget();
-        connect(widget, SIGNAL (changedDBOSignal()), this, SLOT(changedDBOSlot()));
+        DBObjectWidget* widget = object->widget();
+        connect(widget, SIGNAL(changedDBOSignal()), this, SLOT(changedDBOSlot()));
         edit_dbo_widgets_[object] = widget;
     }
     else
         edit_dbo_widgets_[object]->show();
 }
 
-void DBObjectManagerWidget::deleteDBOSlot ()
+void DBObjectManagerWidget::deleteDBOSlot()
 {
-    assert (delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
+    assert(delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
 
-    DBObject *object = delete_dbo_buttons_ [(QPushButton*)sender()];
-    object_manager_.deleteObject (object->name());
+    DBObject* object = delete_dbo_buttons_[(QPushButton*)sender()];
+    object_manager_.deleteObject(object->name());
 
     updateDBOsSlot();
 }
 
-
-void DBObjectManagerWidget::updateDBOsSlot ()
+void DBObjectManagerWidget::updateDBOsSlot()
 {
-    assert (dbobjects_grid_);
+    assert(dbobjects_grid_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = dbobjects_grid_->takeAt(0)) != 0)
     {
         if (child->widget())
@@ -265,99 +262,95 @@ void DBObjectManagerWidget::updateDBOsSlot ()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QLabel *name_label = new QLabel ("Name");
-    name_label->setFont (font_bold);
-    dbobjects_grid_->addWidget (name_label, 0, 0);
+    QLabel* name_label = new QLabel("Name");
+    name_label->setFont(font_bold);
+    dbobjects_grid_->addWidget(name_label, 0, 0);
 
-    QLabel *numel_label = new QLabel ("# columns");
-    numel_label->setFont (font_bold);
-    dbobjects_grid_->addWidget (numel_label, 0, 1);
+    QLabel* numel_label = new QLabel("# columns");
+    numel_label->setFont(font_bold);
+    dbobjects_grid_->addWidget(numel_label, 0, 1);
 
-    QLabel *meta_label = new QLabel ("Meta Table");
-    meta_label->setFont (font_bold);
-    dbobjects_grid_->addWidget (meta_label, 0, 2);
+    QLabel* meta_label = new QLabel("Meta Table");
+    meta_label->setFont(font_bold);
+    dbobjects_grid_->addWidget(meta_label, 0, 2);
 
-    unsigned int row=1;
+    unsigned int row = 1;
 
     for (auto& obj_it : object_manager_)
     {
-        QLabel* name = new QLabel (obj_it.second->name().c_str());
-//        if (!obj_it.second->existsInDB())
-//        {
-//            QFont font = name->font();
-//            font.setStrikeOut(true);
-//            name->setFont(font);
-//        }
-        dbobjects_grid_->addWidget (name, row, 0);
+        QLabel* name = new QLabel(obj_it.second->name().c_str());
+        //        if (!obj_it.second->existsInDB())
+        //        {
+        //            QFont font = name->font();
+        //            font.setStrikeOut(true);
+        //            name->setFont(font);
+        //        }
+        dbobjects_grid_->addWidget(name, row, 0);
 
-        QLabel* numel = new QLabel ((std::to_string(obj_it.second->numVariables())).c_str());
-        dbobjects_grid_->addWidget (numel, row, 1);
+        QLabel* numel = new QLabel((std::to_string(obj_it.second->numVariables())).c_str());
+        dbobjects_grid_->addWidget(numel, row, 1);
 
         bool active = obj_it.second->hasCurrentMetaTable();
-        QLabel* meta = new QLabel ("None");
+        QLabel* meta = new QLabel("None");
         if (active)
             meta->setText(obj_it.second->currentMetaTable().name().c_str());
-        dbobjects_grid_->addWidget (meta, row, 2);
+        dbobjects_grid_->addWidget(meta, row, 2);
 
-        QPushButton* edit = new QPushButton ();
+        QPushButton* edit = new QPushButton();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
-        //edit->setDisabled(!active || locked_);
-        connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
-        dbobjects_grid_->addWidget (edit, row, 3);
+        // edit->setDisabled(!active || locked_);
+        connect(edit, SIGNAL(clicked()), this, SLOT(editDBOSlot()));
+        dbobjects_grid_->addWidget(edit, row, 3);
         edit_dbo_buttons_[edit] = obj_it.second;
 
-        QPushButton* del = new QPushButton ();
+        QPushButton* del = new QPushButton();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        //del->setDisabled(locked_);
-        connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
-        dbobjects_grid_->addWidget (del, row, 4);
+        // del->setDisabled(locked_);
+        connect(del, SIGNAL(clicked()), this, SLOT(deleteDBOSlot()));
+        dbobjects_grid_->addWidget(del, row, 4);
         delete_dbo_buttons_[del] = obj_it.second;
 
         row++;
     }
 }
 
-void DBObjectManagerWidget::addMetaVariableSlot ()
+void DBObjectManagerWidget::addMetaVariableSlot() {}
+
+void DBObjectManagerWidget::editMetaVariableSlot()
 {
+    assert(edit_meta_buttons_.find((QPushButton*)sender()) != edit_meta_buttons_.end());
 
-}
+    MetaDBOVariable* meta_var = edit_meta_buttons_[(QPushButton*)sender()];
 
-void DBObjectManagerWidget::editMetaVariableSlot ()
-{
-    assert (edit_meta_buttons_.find((QPushButton*)sender()) != edit_meta_buttons_.end());
-
-    MetaDBOVariable *meta_var = edit_meta_buttons_ [(QPushButton*)sender()];
-
-    if (edit_meta_widgets_.find (meta_var) == edit_meta_widgets_.end())
+    if (edit_meta_widgets_.find(meta_var) == edit_meta_widgets_.end())
     {
-        MetaDBOVariableWidget *widget = meta_var->widget();
-        connect(widget, SIGNAL( metaVariableChangedSignal()), this, SLOT( updateMetaVariablesSlot()));
+        MetaDBOVariableWidget* widget = meta_var->widget();
+        connect(widget, SIGNAL(metaVariableChangedSignal()), this, SLOT(updateMetaVariablesSlot()));
         edit_meta_widgets_[meta_var] = widget;
     }
     else
         edit_meta_widgets_[meta_var]->show();
 }
 
-void DBObjectManagerWidget::deleteMetaVariableSlot ()
+void DBObjectManagerWidget::deleteMetaVariableSlot()
 {
-    assert (delete_meta_buttons_.find((QPushButton*)sender()) != delete_meta_buttons_.end());
+    assert(delete_meta_buttons_.find((QPushButton*)sender()) != delete_meta_buttons_.end());
 
-    MetaDBOVariable *meta_var = delete_meta_buttons_ [(QPushButton*)sender()];
-    object_manager_.deleteMetaVariable (meta_var->name());
+    MetaDBOVariable* meta_var = delete_meta_buttons_[(QPushButton*)sender()];
+    object_manager_.deleteMetaVariable(meta_var->name());
 
     updateMetaVariablesSlot();
 }
 
-
-void DBObjectManagerWidget::addAllMetaVariablesSlot ()
+void DBObjectManagerWidget::addAllMetaVariablesSlot()
 {
-    std::vector <std::string> found_dbos;
+    std::vector<std::string> found_dbos;
 
     bool changed = false;
 
@@ -367,21 +360,21 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
         {
             if (object_manager_.usedInMetaVariable(var_it.second))
             {
-                loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable " << var_it.first
-                       << " since already used";
+                loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
+                       << var_it.first << " since already used";
                 continue;
             }
 
             found_dbos.clear();
-            found_dbos.push_back(obj_it.first); // original object
+            found_dbos.push_back(obj_it.first);  // original object
 
             for (auto& obj_it2 : object_manager_)
             {
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) && var_it.second.dataType()
-                        == obj_it2.second->variable(var_it.first).dataType())
+                if (obj_it2.second->hasVariable(var_it.first) &&
+                    var_it.second.dataType() == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -391,24 +384,28 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
             {
                 if (!object_manager_.existsMetaVariable(var_it.first))
                 {
-                    loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable " << var_it.first;
+                    loginf
+                        << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                        << var_it.first;
 
-                    std::string instance = "MetaDBOVariable"+var_it.first+"0";
+                    std::string instance = "MetaDBOVariable" + var_it.first + "0";
 
-                    Configuration &config = object_manager_.addNewSubConfiguration ("MetaDBOVariable", instance);
-                    config.addParameterString ("name", var_it.first);
+                    Configuration& config =
+                        object_manager_.addNewSubConfiguration("MetaDBOVariable", instance);
+                    config.addParameterString("name", var_it.first);
 
                     object_manager_.generateSubConfigurable("MetaDBOVariable", instance);
                 }
 
-                assert (object_manager_.existsMetaVariable(var_it.first));
-                MetaDBOVariable &meta_var = object_manager_.metaVariable(var_it.first);
+                assert(object_manager_.existsMetaVariable(var_it.first));
+                MetaDBOVariable& meta_var = object_manager_.metaVariable(var_it.first);
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta "
+                                  "variable "
                                << var_it.first << " dbo variable " << var_it.first;
                         meta_var.addVariable(*dbo_it2, var_it.first);
                     }
@@ -423,11 +420,11 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
         updateMetaVariablesSlot();
 }
 
-void DBObjectManagerWidget::updateMetaVariablesSlot ()
+void DBObjectManagerWidget::updateMetaVariablesSlot()
 {
-    assert (meta_variables_grid_);
+    assert(meta_variables_grid_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = meta_variables_grid_->takeAt(0)) != 0)
     {
         if (child->widget())
@@ -444,49 +441,48 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QLabel *name_label = new QLabel ("Name");
-    name_label->setFont (font_bold);
-    meta_variables_grid_->addWidget (name_label, 0, 0);
+    QLabel* name_label = new QLabel("Name");
+    name_label->setFont(font_bold);
+    meta_variables_grid_->addWidget(name_label, 0, 0);
 
-    QLabel *type_label = new QLabel ("Data type");
-    type_label->setFont (font_bold);
-    meta_variables_grid_->addWidget (type_label, 0, 1);
+    QLabel* type_label = new QLabel("Data type");
+    type_label->setFont(font_bold);
+    meta_variables_grid_->addWidget(type_label, 0, 1);
 
-    unsigned int row=1;
+    unsigned int row = 1;
 
     auto meta_variables = object_manager_.metaVariables();
 
     for (auto it = meta_variables.begin(); it != meta_variables.end(); it++)
     {
-        QLabel *name = new QLabel (it->second->name().c_str());
-        meta_variables_grid_->addWidget (name, row, 0);
+        QLabel* name = new QLabel(it->second->name().c_str());
+        meta_variables_grid_->addWidget(name, row, 0);
 
-        QLabel *datatype = new QLabel ();
+        QLabel* datatype = new QLabel();
         if (it->second->hasVariables())
             datatype->setText(it->second->dataTypeString().c_str());
-        meta_variables_grid_->addWidget (datatype, row, 1);
+        meta_variables_grid_->addWidget(datatype, row, 1);
 
-        QPushButton *edit = new QPushButton ();
+        QPushButton* edit = new QPushButton();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
-        //edit->setDisabled(!active || !unlocked_);
+        // edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL(clicked()), this, SLOT(editMetaVariableSlot()));
-        meta_variables_grid_->addWidget (edit, row, 2);
+        meta_variables_grid_->addWidget(edit, row, 2);
         edit_meta_buttons_[edit] = it->second;
 
-        QPushButton *del = new QPushButton ();
+        QPushButton* del = new QPushButton();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        //del->setDisabled(!unlocked_);
+        // del->setDisabled(!unlocked_);
         connect(del, SIGNAL(clicked()), this, SLOT(deleteMetaVariableSlot()));
-        meta_variables_grid_->addWidget (del, row, 3);
+        meta_variables_grid_->addWidget(del, row, 3);
         delete_meta_buttons_[del] = it->second;
 
         row++;
     }
-
 }

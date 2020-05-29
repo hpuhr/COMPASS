@@ -19,9 +19,10 @@
 #define DBTABLECOLUMN_H_
 
 #include <string>
+
 #include "configurable.h"
-#include "property.h"
 #include "format.h"
+#include "property.h"
 
 class DBInterface;
 class DBTable;
@@ -34,61 +35,61 @@ class UnitSelectionWidget;
  */
 class DBTableColumn : public Configurable
 {
-public:
+  public:
     /// @brief Constructor
-    DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table,
+    DBTableColumn(const std::string& class_id, const std::string& instance_id, DBTable* table,
                   DBInterface& db_interface);
     /// @brief Destructor
     virtual ~DBTableColumn();
 
     /// @brief Sets the column name
-    void name (const std::string &name);
+    void name(const std::string& name);
     /// @brief Returns the column name
-    const std::string &name() const { return name_; }
+    const std::string& name() const { return name_; }
 
-    const std::string &identifier () const { return identifier_; }
+    const std::string& identifier() const { return identifier_; }
 
-    bool operator ==(const DBTableColumn& b) const;
+    bool operator==(const DBTableColumn& b) const;
 
     /// @brief Sets the data type
-    void type (const std::string &type) { type_=type; }
+    void type(const std::string& type) { type_ = type; }
     /// @brief Returns the data type
-    const std::string &type() const { return type_; }
-    PropertyDataType propertyType () const;
+    const std::string& type() const { return type_; }
+    PropertyDataType propertyType() const;
 
     /// @brief Sets key flag
-    void isKey (bool is_key) { is_key_=is_key; }
+    void isKey(bool is_key) { is_key_ = is_key; }
     /// @brief Returns key flag
-    bool isKey () const { return is_key_; }
+    bool isKey() const { return is_key_; }
 
-    void comment (const std::string &comment) { comment_ = comment; }
-    const std::string &comment () const { return comment_; }
+    void comment(const std::string& comment) { comment_ = comment; }
+    const std::string& comment() const { return comment_; }
 
-    bool hasDimension () const { return dimension_.size() > 0; }
+    bool hasDimension() const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
-    const std::string &dimension () const { return dimension_; }
+    const std::string& dimension() const { return dimension_; }
     /// @brief Returns unit
-    const std::string &unit () const { return unit_; }
+    const std::string& unit() const { return unit_; }
 
     //  bool hasSpecialNull () const { return special_null_.size() > 0; }
     //  void specialNull (std::string special_null) { special_null_ = special_null; }
     //  const std::string &specialNull () const { return special_null_; }
 
-    DBTable &table() const { return table_; }
+    DBTable& table() const { return table_; }
 
-    UnitSelectionWidget *unitWidget ();
+    UnitSelectionWidget* unitWidget();
 
-    void createSubConfigurables () {}
+    void createSubConfigurables() {}
 
-    void updateOnDatabase(); // check what informations is present in the current db
-    bool existsInDB () const { return exists_in_db_; }
+    void updateOnDatabase();  // check what informations is present in the current db
+    bool existsInDB() const { return exists_in_db_; }
 
-    Format& dataFormat()  { return data_format_; }
+    Format& dataFormat() { return data_format_; }
     const Format& dataFormat() const { return data_format_; }
-    //void dataFormat(const std::string& data_format);
+    // void dataFormat(const std::string& data_format);
 
-protected:
-    DBTable &table_;
+  protected:
+    DBTable& table_;
     DBInterface& db_interface_;
 
     /// Name of the column
@@ -109,11 +110,11 @@ protected:
     /// Data format
     Format data_format_;
 
-    UnitSelectionWidget* widget_ {nullptr};
+    UnitSelectionWidget* widget_{nullptr};
 
     static std::map<std::string, PropertyDataType> db_types_2_data_types_;
 
-    bool exists_in_db_ {false};
+    bool exists_in_db_{false};
 };
 
 #endif /* DBTABLECOLUMN_H_ */

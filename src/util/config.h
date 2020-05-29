@@ -18,8 +18,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "json.hpp"
 
@@ -31,36 +31,36 @@
 
 class SimpleConfig
 {
-protected:
-    bool opened_ {false};
+  protected:
+    bool opened_{false};
     std::string config_filename_;
 
     /// Container with all defined identifier -> value pairings
-    //std::map<std::string,std::string> config_;
+    // std::map<std::string,std::string> config_;
     nlohmann::json config_;
 
     /// @brief Initialises the config class and reads file given by filename
-    void loadFile ();
+    void loadFile();
 
-public:
+  public:
     /// @brief Constructor
-    SimpleConfig (const std::string& config_filename);
+    SimpleConfig(const std::string& config_filename);
     /// @brief Destructor
     virtual ~SimpleConfig();
 
     /// @brief Returns if a given identifier exists
-    bool existsId (const std::string& id);
+    bool existsId(const std::string& id);
 
     /// @brief  Gets value from map by id string and converts it to bool
-    bool getBool (const std::string& id);
+    bool getBool(const std::string& id);
     /// @brief  Gets value from map by id string and converts it to int
-    int getInt (const std::string& id);
+    int getInt(const std::string& id);
     /// @brief  Gets value from map by id string and converts it to unsigned int
-    unsigned int getUnsignedInt (const std::string& id);
+    unsigned int getUnsignedInt(const std::string& id);
     /// @brief  Gets value from map by id string and converts it to double
-    double getDouble (const std::string& id);
+    double getDouble(const std::string& id);
     /// @brief  Gets value from map by id string and doesn't convert it
-    std::string getString (const std::string& id);
+    std::string getString(const std::string& id);
 };
 
 #endif

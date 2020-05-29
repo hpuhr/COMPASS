@@ -2,10 +2,10 @@
 #ifndef DBVIEWMODEL_H
 #define DBVIEWMODEL_H
 
-#include "ViewModel.h"
-#include "Global.h"
-
 #include <QObject>
+
+#include "Global.h"
+#include "ViewModel.h"
 
 class DBView;
 class Buffer;
@@ -13,7 +13,6 @@ class Workflow;
 class DOGenerator;
 class ComputationElement;
 class DisplayObjectManager;
-
 
 /**
 @brief ViewModel for database driven views.
@@ -39,67 +38,71 @@ Add a new generator:
 - Add a new string type at the beginning of .cpp
 - Add handling for the specific generator type in generateSubConfigurable()
 
-@todo Not consistent: Generators are not always database driven, but they are introduced in DBViewModel.
-Maybe it would be more consistent to introduce a GeneratorModel... and derive from this one for DBViewModel.
+@todo Not consistent: Generators are not always database driven, but they are introduced in
+DBViewModel. Maybe it would be more consistent to introduce a GeneratorModel... and derive from this
+one for DBViewModel.
   */
 class DBViewModel : public ViewModel
 {
     Q_OBJECT
-public:
+  public:
     /// ID's for generators, add new generator ID's here
-    enum GeneratorType { GENERATOR_POINTS_BUFFER=0,
-                         GENERATOR_POINTS_RAW,
-                         GENERATOR_POINTS_TILED,
-                         GENERATOR_LINES_BUFFER,
-                         GENERATOR_LINES_RAW,
-                         GENERATOR_BINS,
-                         GENERATOR_BINS2D,
-                         GENERATOR_SHAPE,
-                         GENERATOR_AERONAUTICAL };
+    enum GeneratorType
+    {
+        GENERATOR_POINTS_BUFFER = 0,
+        GENERATOR_POINTS_RAW,
+        GENERATOR_POINTS_TILED,
+        GENERATOR_LINES_BUFFER,
+        GENERATOR_LINES_RAW,
+        GENERATOR_BINS,
+        GENERATOR_BINS2D,
+        GENERATOR_SHAPE,
+        GENERATOR_AERONAUTICAL
+    };
 
-    typedef std::map<GeneratorType,std::string> GeneratorTypeStringMap;
+    typedef std::map<GeneratorType, std::string> GeneratorTypeStringMap;
     typedef std::vector<DOGenerator*> Generators;
 
-    DBViewModel( std::string class_id, std::string instance_id, DBView* view );
+    DBViewModel(std::string class_id, std::string instance_id, DBView* view);
     virtual ~DBViewModel();
 
     virtual void redrawData();
-    virtual void clear( bool update=true );
-    bool addData( Buffer* buffer );
+    virtual void clear(bool update = true);
+    bool addData(Buffer* buffer);
 
     /// @brief creates the workflow for the view, reimplement and construct your workflow here
     virtual void createWorkflow() {}
 
     DBView* getView() { return (DBView*)view_; }
 
-    virtual void completedMinMaxInfo ();
+    virtual void completedMinMaxInfo();
 
-    virtual void generateSubConfigurable( std::string class_id, std::string instance_id );
+    virtual void generateSubConfigurable(std::string class_id, std::string instance_id);
 
     /// @brief Checks if the model obtains a Workflow, reimplemented for convenience
     bool hasWorkflow() const { return true; }
     /// @brief Returns the models Workflow
     Workflow* getWorkflow() { return workflow_; }
 
-    DOGenerator* addDOGenerator( GeneratorType type, ComputationElement* elem=NULL );
+    DOGenerator* addDOGenerator(GeneratorType type, ComputationElement* elem = NULL);
     unsigned int numberOfGenerators() const;
-    DOGenerator* getGenerator( int idx );
-    void removeGenerator( DOGenerator* generator );
+    DOGenerator* getGenerator(int idx);
+    void removeGenerator(DOGenerator* generator);
 
     /// @brief Returns the generator ID's as strings
     static const GeneratorTypeStringMap& getPossibleGenerators() { return generator_type_strings_; }
 
-protected slots:
+  protected slots:
     virtual void bufferFinished();
     virtual void lastBufferFinished();
     virtual void loadingFinished();
-    virtual void enableSelection( bool enable );
+    virtual void enableSelection(bool enable);
 
-protected:
+  protected:
     virtual void checkSubConfigurables();
-    virtual bool processBuffer( Buffer* buffer );
+    virtual bool processBuffer(Buffer* buffer);
     void clearGenerators();
-    void updateSelectionGenerators( const std::set<DB_OBJECT_TYPE>& types, bool sel=true );
+    void updateSelectionGenerators(const std::set<DB_OBJECT_TYPE>& types, bool sel = true);
 
     /// The display object manager in use
     DisplayObjectManager* do_manager_;
@@ -112,4 +115,4 @@ protected:
     static GeneratorTypeStringMap generator_type_strings_;
 };
 
-#endif //DBVIEWMODEL_H
+#endif  // DBVIEWMODEL_H

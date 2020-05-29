@@ -4,26 +4,26 @@
 #include <QComboBox>
 
 #include "atsdb.h"
-#include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "dbobjectmanager.h"
 #include "dbodatasource.h"
 #include "global.h"
 
 /**
  *  @brief Property data type selection for a DBOVariable
  */
-class DBODataSourceSelectionComboBox: public QComboBox
+class DBODataSourceSelectionComboBox : public QComboBox
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted if changed
     void changedDataSourceSignal();
 
-public:
+  public:
     /// @brief Constructor
-    DBODataSourceSelectionComboBox(DBObject& object, QWidget* parent=0)
-    : QComboBox(parent), db_object_ (object)
+    DBODataSourceSelectionComboBox(DBObject& object, QWidget* parent = 0)
+        : QComboBox(parent), db_object_(object)
     {
         if (db_object_.hasDataSources())
         {
@@ -32,39 +32,36 @@ public:
             for (auto& ds_it : data_sources)
             {
                 if (ds_it.second.hasShortName())
-                    addItem (ds_it.second.shortName().c_str());
+                    addItem(ds_it.second.shortName().c_str());
                 else
-                    addItem (ds_it.second.name().c_str());
+                    addItem(ds_it.second.name().c_str());
             }
         }
-        connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedDataSourceSignal()));
+        connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedDataSourceSignal()));
     }
 
     /// @brief Destructor
     virtual ~DBODataSourceSelectionComboBox() {}
 
     /// @brief Returns the currently selected data type
-    std::string getDSName ()
-    {
-        return currentText().toStdString();
-    }
+    std::string getDSName() { return currentText().toStdString(); }
 
-    bool hasDataSource (const std::string &ds_name)
+    bool hasDataSource(const std::string& ds_name)
     {
         int index = findText(QString(ds_name.c_str()));
         return index >= 0;
     }
 
     /// @brief Sets the currently selected data type
-    void setDataSource (const std::string &ds_name)
+    void setDataSource(const std::string& ds_name)
     {
         int index = findText(QString(ds_name.c_str()));
-        assert (index >= 0);
-        setCurrentIndex (index);
+        assert(index >= 0);
+        setCurrentIndex(index);
     }
 
-protected:
+  protected:
     DBObject& db_object_;
 };
 
-#endif // DBODATASOURCESELECTIONCOMBOBOX_H
+#endif  // DBODATASOURCESELECTIONCOMBOBOX_H

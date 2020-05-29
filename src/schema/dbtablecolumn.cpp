@@ -15,51 +15,51 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbtable.h"
 #include "dbtablecolumn.h"
+
+#include "dbinterface.h"
+#include "dbtable.h"
+#include "dbtableinfo.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
-#include "dbinterface.h"
-#include "dbtableinfo.h"
 
 // TODO watch out for unsigned
-std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_ {
-        {"bool", PropertyDataType::BOOL},
-        {"tinyint", PropertyDataType::CHAR},
-        //{""UCHAR", PropertyDataType::UCHAR},
-        {"smallint", PropertyDataType::INT},
-        {"mediumint", PropertyDataType::INT},
-        {"int", PropertyDataType::INT},
-        //{""UINT", PropertyDataType::UCHAR},
-        {"bigint", PropertyDataType::LONGINT},
-        //{""ULONGINT", PropertyDataType::ULONGINT},
-        {"float", PropertyDataType::FLOAT},
-        {"double", PropertyDataType::DOUBLE},
-        {"enum", PropertyDataType::STRING},
-        {"tinyblob", PropertyDataType::STRING},
-        {"char", PropertyDataType::STRING},
-        {"blob", PropertyDataType::STRING},
-        {"mediumblob", PropertyDataType::STRING},
-        {"longblob", PropertyDataType::STRING},
-        {"varchar", PropertyDataType::STRING}
-};
+std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_{
+    {"bool", PropertyDataType::BOOL},
+    {"tinyint", PropertyDataType::CHAR},
+    //{""UCHAR", PropertyDataType::UCHAR},
+    {"smallint", PropertyDataType::INT},
+    {"mediumint", PropertyDataType::INT},
+    {"int", PropertyDataType::INT},
+    //{""UINT", PropertyDataType::UCHAR},
+    {"bigint", PropertyDataType::LONGINT},
+    //{""ULONGINT", PropertyDataType::ULONGINT},
+    {"float", PropertyDataType::FLOAT},
+    {"double", PropertyDataType::DOUBLE},
+    {"enum", PropertyDataType::STRING},
+    {"tinyblob", PropertyDataType::STRING},
+    {"char", PropertyDataType::STRING},
+    {"blob", PropertyDataType::STRING},
+    {"mediumblob", PropertyDataType::STRING},
+    {"longblob", PropertyDataType::STRING},
+    {"varchar", PropertyDataType::STRING}};
 
-DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table,
-                             DBInterface& db_interface)
- : Configurable (class_id, instance_id, table), table_(*table), db_interface_(db_interface)
+DBTableColumn::DBTableColumn(const std::string& class_id, const std::string& instance_id,
+                             DBTable* table, DBInterface& db_interface)
+    : Configurable(class_id, instance_id, table), table_(*table), db_interface_(db_interface)
 {
-  registerParameter ("name", &name_, "");
-  registerParameter ("type", &type_, "");
-  registerParameter ("is_key", &is_key_, false);
-  registerParameter ("comment", &comment_, "");
-  registerParameter ("dimension", &dimension_, "");
-  registerParameter ("unit", &unit_, "");
-  registerParameter ("data_format", &data_format_, "");
-  registerParameter ("special_null", &special_null_, "");
+    registerParameter("name", &name_, "");
+    registerParameter("type", &type_, "");
+    registerParameter("is_key", &is_key_, false);
+    registerParameter("comment", &comment_, "");
+    registerParameter("dimension", &dimension_, "");
+    registerParameter("unit", &unit_, "");
+    registerParameter("data_format", &data_format_, "");
+    registerParameter("special_null", &special_null_, "");
 
-  identifier_ = table_.name()+"."+name_;
+    identifier_ = table_.name() + "." + name_;
 
-  createSubConfigurables();
+    createSubConfigurables();
 }
 
 DBTableColumn::~DBTableColumn()
@@ -69,48 +69,40 @@ DBTableColumn::~DBTableColumn()
         delete widget_;
         widget_ = nullptr;
     }
-
 }
 
-void DBTableColumn::name (const std::string &name)
+void DBTableColumn::name(const std::string& name)
 {
-    name_=name;
-    table_.name()+"."+name_;
+    name_ = name;
+    table_.name() + "." + name_;
 }
 
-bool DBTableColumn::operator ==(const DBTableColumn& b) const
+bool DBTableColumn::operator==(const DBTableColumn& b) const
 {
-    if (table_.name() != b.table().name() ||
-            name_ != b.name_ ||
-            identifier_ != identifier_ ||
-            type_ != b.type_ ||
-            is_key_ != b.is_key_ ||
-            comment_ != b.comment_ ||
-            dimension_ != b.dimension_ ||
-            unit_ != b.unit_ ||
-            special_null_ != b.special_null_ ||
-            data_format_ != b.data_format_)
+    if (table_.name() != b.table().name() || name_ != b.name_ || identifier_ != identifier_ ||
+        type_ != b.type_ || is_key_ != b.is_key_ || comment_ != b.comment_ ||
+        dimension_ != b.dimension_ || unit_ != b.unit_ || special_null_ != b.special_null_ ||
+        data_format_ != b.data_format_)
         return false;
 
     return true;
 }
 
-PropertyDataType DBTableColumn::propertyType () const
+PropertyDataType DBTableColumn::propertyType() const
 {
-//        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING
+    //        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING
     if (db_types_2_data_types_.count(type_) == 0)
         return Property::asDataType(type_);
     else
         return db_types_2_data_types_.at(type_);
 }
 
-
-UnitSelectionWidget* DBTableColumn::unitWidget ()
+UnitSelectionWidget* DBTableColumn::unitWidget()
 {
     if (!widget_)
     {
-        widget_ = new UnitSelectionWidget (dimension_, unit_);
-        assert (widget_);
+        widget_ = new UnitSelectionWidget(dimension_, unit_);
+        assert(widget_);
     }
 
     return widget_;
@@ -120,7 +112,7 @@ void DBTableColumn::updateOnDatabase()
 {
     bool exists = false;
 
-    const std::map <std::string, DBTableInfo> &all_table_infos = db_interface_.tableInfo ();
+    const std::map<std::string, DBTableInfo>& all_table_infos = db_interface_.tableInfo();
 
     std::string table_name = table_.name();
 
@@ -134,11 +126,11 @@ void DBTableColumn::updateOnDatabase()
 
     exists_in_db_ = exists;
 
-    logdbg << "DBTableColumn: updateOnDatabase: table " <<  table_name << " column "
-           << name_ << " exists in db " << exists_in_db_;
+    logdbg << "DBTableColumn: updateOnDatabase: table " << table_name << " column " << name_
+           << " exists in db " << exists_in_db_;
 }
 
-//void DBTableColumn::dataFormat(const std::string& data_format)
+// void DBTableColumn::dataFormat(const std::string& data_format)
 //{
 //    loginf << "DBTableColumn " << identifier() << ": dataFormat: " << data_format_;
 //    data_format_ = data_format;

@@ -15,7 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef LISTBOXVIEW_H_
 #define LISTBOXVIEW_H_
 
@@ -39,41 +38,49 @@ class ListBoxViewDataSource;
 class ListBoxView : public View
 {
     Q_OBJECT
-public slots:
-//    /// @brief Is executed when selection is changed. Does nothing.
-//    void selectionChanged();
-//    /// @brief Is executed when selection is to be cleared. Does nothing.
-//    void selectionToBeCleared();
+  public slots:
+    //    /// @brief Is executed when selection is changed. Does nothing.
+    //    void selectionChanged();
+    //    /// @brief Is executed when selection is to be cleared. Does nothing.
+    //    void selectionToBeCleared();
+    virtual void unshowViewPointSlot (ViewPoint* vp) override;
+    virtual void showViewPointSlot (ViewPoint* vp) override;
+    void allLoadingDoneSlot();
 
-signals:
-//    /// @brief Is emitted when selection was changed locally
-//    void setSelection (const ViewSelectionEntries& entries);
-//    /// @brief Is emitted when somthing was added to the selection
-//    void addSelection (const ViewSelectionEntries& entries);
-//    /// @brief Is emitted when selection should be cleared
-//    void clearSelection();
+  signals:
+    //    /// @brief Is emitted when selection was changed locally
+    //    void setSelection (const ViewSelectionEntries& entries);
+    //    /// @brief Is emitted when somthing was added to the selection
+    //    void addSelection (const ViewSelectionEntries& entries);
+    //    /// @brief Is emitted when selection should be cleared
+    //    void clearSelection();
 
-    void showOnlySelectedSignal (bool value);
-    void usePresentationSignal (bool value);
-    void showAssociationsSignal (bool value);
+    void showOnlySelectedSignal(bool value);
+    void usePresentationSignal(bool value);
+    void showAssociationsSignal(bool value);
 
-public:
+  public:
     /// @brief Constructor
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     /// @brief Destructor
     virtual ~ListBoxView() override;
 
-    void update (bool atOnce=false) override;
+    void update(bool atOnce = false) override;
     void clearData() override;
     bool init() override;
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) override;
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
     /// @brief Returns the used data source
-    ListBoxViewDataSource *getDataSource () { assert (data_source_); return data_source_; }
+    ListBoxViewDataSource* getDataSource()
+    {
+        assert(data_source_);
+        return data_source_;
+    }
 
-    virtual DBOVariableSet getSet (const std::string& dbo_name) override;
+    virtual DBOVariableSet getSet(const std::string& dbo_name) override;
 
     bool usePresentation() const;
     void usePresentation(bool use_presentation);
@@ -88,22 +95,22 @@ public:
     bool showAssociations() const;
     void showAssociations(bool show_associations);
 
-protected:
+  protected:
     /// For data display
-    ListBoxViewWidget* widget_ {nullptr};
+    ListBoxViewWidget* widget_{nullptr};
     /// For data loading
-    ListBoxViewDataSource* data_source_ {nullptr};
+    ListBoxViewDataSource* data_source_{nullptr};
 
-    bool show_only_selected_ {true};
+    bool show_only_selected_{true};
     /// Use presentation
-    bool use_presentation_ {true};
+    bool use_presentation_{true};
     /// Overwrite during export, if not, it appends
-    bool overwrite_csv_ {false};
-    bool can_show_associations_ {false};
-    bool show_associations_ {false};
+    bool overwrite_csv_{false};
+    bool can_show_associations_{false};
+    bool show_associations_{false};
 
-    virtual void checkSubConfigurables () override;
-    virtual void updateSelection () override;
+    virtual void checkSubConfigurables() override;
+    virtual void updateSelection() override;
 };
 
 #endif /* LISTBOXVIEW_H_ */

@@ -18,10 +18,10 @@
 #ifndef ASTERIXDECODEJOB_H
 #define ASTERIXDECODEJOB_H
 
+#include <functional>
+
 #include "job.h"
 #include "json.hpp"
-
-#include <functional>
 
 class ASTERIXImportTask;
 class ASTERIXPostProcess;
@@ -29,15 +29,15 @@ class ASTERIXPostProcess;
 class ASTERIXDecodeJob : public Job
 {
     Q_OBJECT
-signals:
-    void decodedASTERIXSignal ();
+  signals:
+    void decodedASTERIXSignal();
 
-public:
-    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test,
-                     ASTERIXPostProcess& post_process);
+  public:
+    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename,
+                     const std::string& framing, bool test, ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
-    virtual void run ();
+    virtual void run();
 
     size_t numFrames() const;
     size_t numRecords() const;
@@ -51,16 +51,13 @@ public:
 
     std::map<unsigned int, size_t> categoryCounts() const;
 
-    std::unique_ptr<nlohmann::json> extractedData()
-    {
-        return std::move(extracted_data_);
-    }
+    std::unique_ptr<nlohmann::json> extractedData() { return std::move(extracted_data_); }
 
-private:
+  private:
     ASTERIXImportTask& task_;
     std::string filename_;
     std::string framing_;
-    bool test_ {false};
+    bool test_{false};
     ASTERIXPostProcess& post_process_;
 
     volatile bool pause_{false};
@@ -69,18 +66,18 @@ private:
     size_t num_records_{0};
     size_t num_errors_{0};
 
-    bool error_ {false};
+    bool error_{false};
     std::string error_message_;
 
     std::unique_ptr<nlohmann::json> extracted_data_;
 
     std::map<unsigned int, size_t> category_counts_;
 
-    void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
-                           size_t numErrors);
-    void countRecord (unsigned int category, nlohmann::json& record);
+    void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames,
+                           size_t num_records, size_t numErrors);
+    void countRecord(unsigned int category, nlohmann::json& record);
     // checks that SAC/SIC are set in all records in same data block
-    void checkCAT001SacSics (nlohmann::json& data_block);
+    void checkCAT001SacSics(nlohmann::json& data_block);
 };
 
-#endif // ASTERIXDECODEJOB_H
+#endif  // ASTERIXDECODEJOB_H

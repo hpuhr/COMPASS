@@ -39,38 +39,38 @@ class DBTableWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
 
-public slots:
-    void infoSlot (const QString& value);
-//    void setSpecialNull (const QString &text);
-    void updateSlot ();
+  public slots:
+    void infoSlot(const QString& value);
+    //    void setSpecialNull (const QString &text);
+    void updateSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBTableWidget(DBTable& table, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBTableWidget(DBTable& table, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBTableWidget();
 
-    void lock ();
+    void lock();
 
-protected:
+  protected:
     /// Represented table
     DBTable& table_;
 
     /// Table info edit field
-    QLineEdit* info_edit_ {nullptr};
+    QLineEdit* info_edit_{nullptr};
 
     /// Grid with all table columns
-    QGridLayout* column_grid_ {nullptr};
+    QGridLayout* column_grid_{nullptr};
 
     /// Container with all column special null edit fields
-    //std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
+    // std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
 
-    std::map <UnitSelectionWidget*, DBTableColumn*> column_unit_selection_widgets_;
+    std::map<UnitSelectionWidget*, DBTableColumn*> column_unit_selection_widgets_;
 
     /// @brief Updates the table columns grid
-    void updateColumnGrid ();
+    void updateColumnGrid();
 };
 
 #endif /* DBTABLEEDITWIDGET_H_ */

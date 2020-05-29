@@ -5,10 +5,25 @@
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
+            "DBODataSourceDefinitionADSBSCDB Extended0": {
+                "parameters": {
+                    "altitude_column": "",
+                    "foreign_key": "ds_ads.DS_ID",
+                    "latitude_column": "ds_ads.POS_LAT_DEG",
+                    "local_key": "ds_id",
+                    "longitude_column": "ds_ads.POS_LONG_DEG",
+                    "meta_table": "ADSBDataSources",
+                    "name_column": "le_ds.DS_NAME",
+                    "sac_column": "le_ds.SAC",
+                    "schema": "SCDB Extended",
+                    "short_name_column": "le_ds.DS_SHORT_NAME",
+                    "sic_column": "le_ds.SIC"
+                }
+            },
             "DBODataSourceDefinitionADSBSCDB0": {
                 "parameters": {
                     "altitude_column": "",
-                    "foreign_key": "le_ds.DS_ID",
+                    "foreign_key": "ds_ads.DS_ID",
                     "latitude_column": "ds_ads.POS_LAT_DEG",
                     "local_key": "ds_id",
                     "longitude_column": "ds_ads.POS_LONG_DEG",
@@ -84,8 +99,8 @@
                         },
                         "LabelEntryalt_baro_ft0": {
                             "parameters": {
-                                "prefix": "",
-                                "show": false,
+                                "prefix": "C ",
+                                "show": true,
                                 "suffix": "",
                                 "variable_name": "alt_baro_ft"
                             }
@@ -1012,8 +1027,8 @@
                         },
                         "LabelEntrysil0": {
                             "parameters": {
-                                "prefix": "",
-                                "show": false,
+                                "prefix": "SIL ",
+                                "show": true,
                                 "suffix": "",
                                 "variable_name": "sil"
                             }
@@ -1476,6 +1491,12 @@
                     "meta_table": "ADSB",
                     "schema": "SCDB"
                 }
+            },
+            "DBOSchemaMetaTableDefinitionSCDB ExtendedADSB0": {
+                "parameters": {
+                    "meta_table": "ADSB",
+                    "schema": "SCDB Extended"
+                }
             }
         },
         "DBOVariable": {
@@ -1494,6 +1515,12 @@
                         "DBOSchemaVariableDefinitionADSBaircraft_leng_width0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.AIRCRAFT_LENG_WIDTH"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.AIRCRAFT_LENG_WIDTH0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.AIRCRAFT_LENG_WIDTH"
                             }
                         }
@@ -1518,6 +1545,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.AIRSPEED_KT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.AIRSPEED_KT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.AIRSPEED_KT"
+                            }
                         }
                     }
                 }
@@ -1538,6 +1571,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.AIRSPEED_MACH"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.AIRSPEED_MACH0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.AIRSPEED_MACH"
                             }
                         }
@@ -1562,6 +1601,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.ALT_BARO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.ALT_BARO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.ALT_BARO_FT"
+                            }
                         }
                     }
                 }
@@ -1582,6 +1627,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.ALT_GEO_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.ALT_GEO_FT"
                             }
                         }
@@ -1606,6 +1657,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.ALT_REPORTING_CAPABILITY_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
+                            }
                         }
                     }
                 }
@@ -1628,6 +1685,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_FTM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.ALT_REPORTING_CAPABILITY_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_FTM"
+                            }
                         }
                     }
                 }
@@ -1647,6 +1710,12 @@
                         "DBOSchemaVariableDefinitionADSBbaro_vertical_rate_re0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_RE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.BARO_VERTICAL_RATE_RE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_RE"
                             }
                         }
@@ -1671,6 +1740,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.CALC_ALT_GEO_FT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.CALC_ALT_GEO_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.CALC_ALT_GEO_FT"
+                            }
                         }
                     }
                 }
@@ -1691,6 +1766,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.CALLSIGN"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.CALLSIGN0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.CALLSIGN"
                             }
                         }
@@ -1715,6 +1796,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.CAT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.CAT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.CAT"
+                            }
                         }
                     }
                 }
@@ -1735,6 +1822,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.DESCRIPTOR_ATP"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.DESCRIPTOR_ATP0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.DESCRIPTOR_ATP"
                             }
                         }
@@ -1759,6 +1852,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.DIFFERENTIAL_CORRECTION"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.DIFFERENTIAL_CORRECTION0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.DIFFERENTIAL_CORRECTION"
+                            }
                         }
                     }
                 }
@@ -1779,6 +1878,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.DISPLAY_STATE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.DISPLAY_STATE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.DISPLAY_STATE"
                             }
                         }
@@ -1803,6 +1908,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.DOM_POSIX"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.DOM_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.DOM_POSIX"
+                            }
                         }
                     }
                 }
@@ -1823,6 +1934,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.DS_ID"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.DS_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.DS_ID"
                             }
                         }
@@ -1847,6 +1964,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.EMITTER_CATEGORY"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.EMITTER_CATEGORY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.EMITTER_CATEGORY"
+                            }
                         }
                     }
                 }
@@ -1867,6 +1990,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.FIGURE_OF_MERIT_ACAS"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FIGURE_OF_MERIT_ACAS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.FIGURE_OF_MERIT_ACAS"
                             }
                         }
@@ -1891,6 +2020,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.FIGURE_OF_MERIT_DIFFERENTIAL"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FIGURE_OF_MERIT_DIFFERENTIAL0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.FIGURE_OF_MERIT_DIFFERENTIAL"
+                            }
                         }
                     }
                 }
@@ -1911,6 +2046,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.FIGURE_OF_MERIT_MULTIPLE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FIGURE_OF_MERIT_MULTIPLE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.FIGURE_OF_MERIT_MULTIPLE"
                             }
                         }
@@ -1935,6 +2076,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_APPROACH"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FINAL_SEL_ALTITUDE_APPROACH0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_APPROACH"
+                            }
                         }
                     }
                 }
@@ -1955,6 +2102,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FINAL_SEL_ALTITUDE_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_FT"
                             }
                         }
@@ -1979,6 +2132,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_HOLD"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FINAL_SEL_ALTITUDE_HOLD0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_HOLD"
+                            }
                         }
                     }
                 }
@@ -1999,6 +2158,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_VERTICAL"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FINAL_SEL_ALTITUDE_VERTICAL0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_VERTICAL"
                             }
                         }
@@ -2023,6 +2188,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.FROM_FFT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.FROM_FFT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.FROM_FFT"
+                            }
                         }
                     }
                 }
@@ -2045,6 +2216,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.GEO_AREA_MASK"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GEO_AREA_MASK0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.GEO_AREA_MASK"
+                            }
                         }
                     }
                 }
@@ -2064,6 +2241,12 @@
                         "DBOSchemaVariableDefinitionADSBgeo_height_accuracy0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.GEO_HEIGHT_ACCURACY"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GEO_HEIGHT_ACCURACY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.GEO_HEIGHT_ACCURACY"
                             }
                         }
@@ -2088,6 +2271,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_FTM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GEO_VERTICAL_RATE_FTM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_FTM"
+                            }
                         }
                     }
                 }
@@ -2107,6 +2296,12 @@
                         "DBOSchemaVariableDefinitionADSBgeo_vertical_rate_re0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_RE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GEO_VERTICAL_RATE_RE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_RE"
                             }
                         }
@@ -2131,6 +2326,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.GROUND_BIT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GROUND_BIT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.GROUND_BIT"
+                            }
                         }
                     }
                 }
@@ -2151,6 +2352,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.GROUNDSPEED_KT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.GROUNDSPEED_KT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.GROUNDSPEED_KT"
                             }
                         }
@@ -2175,6 +2382,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.HASH_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.HASH_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.HASH_CODE"
+                            }
                         }
                     }
                 }
@@ -2195,6 +2408,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_FT"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.INTER_SEL_ALTITUDE_FT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_FT"
                             }
                         }
@@ -2219,6 +2438,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_INFO"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.INTER_SEL_ALTITUDE_INFO0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_INFO"
+                            }
                         }
                     }
                 }
@@ -2239,6 +2464,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_SOURCE"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.INTER_SEL_ALTITUDE_SOURCE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_SOURCE"
                             }
                         }
@@ -2263,6 +2494,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.LINE_ID"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINE_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.LINE_ID"
+                            }
                         }
                     }
                 }
@@ -2283,6 +2520,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.LINK_TECHNOLOGY_CDTI"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINK_TECHNOLOGY_CDTI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.LINK_TECHNOLOGY_CDTI"
                             }
                         }
@@ -2307,6 +2550,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.LINK_TECHNOLOGY_MDS"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINK_TECHNOLOGY_MDS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.LINK_TECHNOLOGY_MDS"
+                            }
                         }
                     }
                 }
@@ -2327,6 +2576,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.LINK_TECHNOLOGY_OTHER"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINK_TECHNOLOGY_OTHER0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.LINK_TECHNOLOGY_OTHER"
                             }
                         }
@@ -2351,6 +2606,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.LINK_TECHNOLOGY_UAT"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINK_TECHNOLOGY_UAT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.LINK_TECHNOLOGY_UAT"
+                            }
                         }
                     }
                 }
@@ -2371,6 +2632,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.LINK_TECHNOLOGY_VDL"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.LINK_TECHNOLOGY_VDL0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.LINK_TECHNOLOGY_VDL"
                             }
                         }
@@ -2395,6 +2662,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.MAGNETIC_HEADING_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.MAGNETIC_HEADING_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.MAGNETIC_HEADING_DEG"
+                            }
                         }
                     }
                 }
@@ -2414,6 +2687,12 @@
                         "DBOSchemaVariableDefinitionADSBmilitary_emergency0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.MILITARY_EMERGENCY"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.MILITARY_EMERGENCY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.MILITARY_EMERGENCY"
                             }
                         }
@@ -2437,6 +2716,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.MODE3A_CODE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.MODE3A_CODE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.MODE3A_CODE"
+                            }
                         }
                     }
                 }
@@ -2456,6 +2741,12 @@
                         "DBOSchemaVariableDefinitionADSBmops_version0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.MOPS_VERSION"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.MOPS_VERSION0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.MOPS_VERSION"
                             }
                         }
@@ -2479,6 +2770,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.NAC_P"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.NAC_P0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.NAC_P"
+                            }
                         }
                     }
                 }
@@ -2498,6 +2795,12 @@
                         "DBOSchemaVariableDefinitionADSBnic_baro0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.NIC_BARO"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.NIC_BARO0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.NIC_BARO"
                             }
                         }
@@ -2521,6 +2824,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.NUCP_NIC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.NUCP_NIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.NUCP_NIC"
+                            }
                         }
                     }
                 }
@@ -2540,6 +2849,12 @@
                         "DBOSchemaVariableDefinitionADSBnucr_nacv0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.NUCR_NACV"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.NUCR_NACV0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.NUCR_NACV"
                             }
                         }
@@ -2563,6 +2878,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.OP_STATUS_RA"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.OP_STATUS_RA0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.OP_STATUS_RA"
+                            }
                         }
                     }
                 }
@@ -2582,6 +2903,12 @@
                         "DBOSchemaVariableDefinitionADSBop_status_sa0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.OP_STATUS_SA"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.OP_STATUS_SA0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.OP_STATUS_SA"
                             }
                         }
@@ -2605,6 +2932,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.OP_STATUS_TCAS"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.OP_STATUS_TCAS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.OP_STATUS_TCAS"
+                            }
                         }
                     }
                 }
@@ -2624,6 +2957,12 @@
                         "DBOSchemaVariableDefinitionADSBpic0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.PIC"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.PIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.PIC"
                             }
                         }
@@ -2648,6 +2987,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.POS_LAT_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POS_LAT_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.POS_LAT_DEG"
+                            }
                         }
                     }
                 }
@@ -2670,6 +3015,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.POS_LONG_DEG"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POS_LONG_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.POS_LONG_DEG"
+                            }
                         }
                     }
                 }
@@ -2689,6 +3040,12 @@
                         "DBOSchemaVariableDefinitionADSBpos_offset_applied0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.POS_OFFSET_APPLIED"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POS_OFFSET_APPLIED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.POS_OFFSET_APPLIED"
                             }
                         }
@@ -2713,6 +3070,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.POS_SYS_X_NM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POS_SYS_X_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.POS_SYS_X_NM"
+                            }
                         }
                     }
                 }
@@ -2733,6 +3096,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.POS_SYS_Y_NM"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POS_SYS_Y_NM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.POS_SYS_Y_NM"
                             }
                         }
@@ -2757,6 +3126,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.POSITION_ACCURACY"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.POSITION_ACCURACY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.POSITION_ACCURACY"
+                            }
                         }
                     }
                 }
@@ -2777,6 +3152,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.RAW_MSG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.RAW_MSG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.RAW_MSG"
                             }
                         }
@@ -2801,6 +3182,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.REC_NUM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.REC_NUM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.REC_NUM"
+                            }
                         }
                     }
                 }
@@ -2821,6 +3208,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.REC_TIME_MS"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.REC_TIME_MS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.REC_TIME_MS"
                             }
                         }
@@ -2845,6 +3238,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.REC_TIME_POSIX"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.REC_TIME_POSIX0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.REC_TIME_POSIX"
+                            }
                         }
                     }
                 }
@@ -2864,6 +3263,12 @@
                         "DBOSchemaVariableDefinitionADSBreceiver_id0": {
                             "parameters": {
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.RECEIVER_ID"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.RECEIVER_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.RECEIVER_ID"
                             }
                         }
@@ -2888,6 +3293,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.REPORT_TYPE"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.REPORT_TYPE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.REPORT_TYPE"
+                            }
                         }
                     }
                 }
@@ -2908,6 +3319,12 @@
                             "parameters": {
                                 "meta_table": "ADSB",
                                 "schema": "SCDB",
+                                "variable_identifier": "sd_ads.ROLL_ANGLE_DEG"
+                            }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.ROLL_ANGLE_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
                                 "variable_identifier": "sd_ads.ROLL_ANGLE_DEG"
                             }
                         }
@@ -2932,6 +3349,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.SAC"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SAC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SAC"
+                            }
                         }
                     }
                 }
@@ -2953,6 +3376,12 @@
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_ads.SAM"
                             }
+                        },
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SAM0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SAM"
+                            }
                         }
                     }
                 }
@@ -2969,6 +3398,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SELECTED_ALT_CAPABILITY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SELECTED_ALT_CAPABILITY"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBselected_alt_capability0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -2991,6 +3426,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SERVICE_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SERVICE_ID"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBservice_id0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3012,6 +3453,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SIC"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBsic0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3034,6 +3481,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SIL0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SIL"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBsil0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3055,6 +3508,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SILS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SILS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBsils0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3076,6 +3535,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SIMULATED_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SIMULATED_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBsimulated_target0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3098,6 +3563,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SPI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SPI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBspi0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3120,6 +3591,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.SURVEILLANCE_STATUS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.SURVEILLANCE_STATUS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBsurveillance_status0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3141,6 +3618,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TARGET_ADDR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TARGET_ADDR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtarget_addr0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3163,6 +3646,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TARGET_STATUS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TARGET_STATUS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtarget_status0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3185,6 +3674,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TEST_TARGET0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TEST_TARGET"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtest_target0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3207,6 +3702,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TOAP0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TOAP"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtoap0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3228,6 +3729,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TOAV0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TOAV"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtoav0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3249,6 +3756,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TOD0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TOD"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtod0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3271,6 +3784,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TOD_ACCURACY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TOD_ACCURACY"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtod_accuracy0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3293,6 +3812,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TOD_CALCULATED0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TOD_CALCULATED"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtod_calculated0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3315,6 +3840,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORP0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORP"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorp0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3336,6 +3867,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORP_FSI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORP_FSI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorp_fsi0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3357,6 +3894,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORP_PRECISE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORP_PRECISE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorp_precise0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3378,6 +3921,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORV0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORV"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorv0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3399,6 +3948,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORV_FSI0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORV_FSI"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorv_fsi0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3420,6 +3975,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TORV_PRECISE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TORV_PRECISE"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtorv_precise0": {
                             "parameters": {
                                 "schema": "SCDB",
@@ -3441,6 +4002,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TRACK_ANGLE_DEG0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TRACK_ANGLE_DEG"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtrack_angle_deg0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3463,6 +4030,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TRUE_AIRSPEED_KT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TRUE_AIRSPEED_KT"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBtrue_airspeed_kt0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3485,6 +4058,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TURNRATE_DEGPS0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TURNRATE_DEGPS"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBturnrate_degps0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3507,6 +4086,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.TURNRATE_INDICATOR0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.TURNRATE_INDICATOR"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBturnrate_indicator0": {
                             "parameters": {
                                 "meta_table": "ADSB",
@@ -3529,6 +4114,12 @@
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionADSBsd_ads.VELOCITY_ACCURACY0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_ads.VELOCITY_ACCURACY"
+                            }
+                        },
                         "DBOSchemaVariableDefinitionADSBvelocity_accuracy0": {
                             "parameters": {
                                 "meta_table": "ADSB",

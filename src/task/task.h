@@ -27,86 +27,62 @@ class Task : public QObject
 {
     Q_OBJECT
 
-signals:
-    void statusChangedSignal (std::string task_name); // emitted when settings where changes which influence the prerequisites
-    void doneSignal (std::string task_name); // emitted when task is done
+  signals:
+    void statusChangedSignal(std::string task_name);  // emitted when settings where changes which
+                                                      // influence the prerequisites
+    void doneSignal(std::string task_name);           // emitted when task is done
 
-public:
+  public:
     Task(const std::string& name, const std::string& gui_name, bool gui_only, bool expert_only,
          TaskManager& task_manager)
-        : name_(name), gui_name_(gui_name), gui_only_(gui_only), expert_only_(expert_only), task_manager_(task_manager)
+        : name_(name),
+          gui_name_(gui_name),
+          gui_only_(gui_only),
+          expert_only_(expert_only),
+          task_manager_(task_manager)
     {
-
     }
     virtual ~Task() {}
 
-    std::string name() const
-    {
-        return name_;
-    }
+    std::string name() const { return name_; }
 
-    virtual TaskWidget* widget ()=0;
-    virtual void deleteWidget ()=0;
+    virtual TaskWidget* widget() = 0;
+    virtual void deleteWidget() = 0;
 
-    bool guiOnly() const
-    {
-        return gui_only_;
-    }
+    bool guiOnly() const { return gui_only_; }
 
-    std::string guiName() const
-    {
-        return gui_name_;
-    }
+    std::string guiName() const { return gui_name_; }
 
-    virtual bool checkPrerequisites ()=0; // returns true can be shown, false if not yet
-    virtual bool canRun() { return !gui_only_; } // returns true if can be run, to be overriden
-    virtual bool isRecommended ()=0; // returns true if it is recommended to run this task
-    virtual bool isRequired ()=0; // returns true if it is required to run this task
+    virtual bool checkPrerequisites() = 0;        // returns true can be shown, false if not yet
+    virtual bool canRun() { return !gui_only_; }  // returns true if can be run, to be overriden
+    virtual bool isRecommended() = 0;  // returns true if it is recommended to run this task
+    virtual bool isRequired() = 0;     // returns true if it is required to run this task
 
-    bool expertOnly() const
-    {
-        return expert_only_;
-    }
+    bool expertOnly() const { return expert_only_; }
 
+    bool done() const { return done_; }
 
-    bool done() const
-    {
-        return done_;
-    }
+    virtual void run() { assert(!gui_only_); }  // to be overriden by tasks that can run
 
-    virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run
+    TaskManager& manager() const { return task_manager_; }
 
-    TaskManager& manager() const
-    {
-        return task_manager_;
-    }
+    std::string tooltip() const { return tooltip_; }
 
-    std::string tooltip() const
-    {
-        return tooltip_;
-    }
+    bool showDoneSummary() const { return show_done_summary_; }
 
-    bool showDoneSummary() const
-    {
-        return show_done_summary_;
-    }
+    void showDoneSummary(bool value) { show_done_summary_ = value; }
 
-    void showDoneSummary(bool value)
-    {
-        show_done_summary_ = value;
-    }
-
-protected:
+  protected:
     std::string name_;
     std::string gui_name_;
-    bool gui_only_ {false};
-    bool expert_only_ {false};
-    bool done_ {false};
-    bool show_done_summary_ {true};
+    bool gui_only_{false};
+    bool expert_only_{false};
+    bool done_{false};
+    bool show_done_summary_{true};
 
     std::string tooltip_;
 
     TaskManager& task_manager_;
 };
 
-#endif // TASK_H
+#endif  // TASK_H

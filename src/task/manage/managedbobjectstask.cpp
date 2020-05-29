@@ -16,49 +16,49 @@
  */
 
 #include "managedbobjectstask.h"
-#include "managedbobjectstaskwidget.h"
-#include "taskmanager.h"
+
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbschemamanager.h"
+#include "managedbobjectstaskwidget.h"
+#include "taskmanager.h"
 
-ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id, const std::string& instance_id,
-                                   TaskManager& task_manager)
+ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id,
+                                         const std::string& instance_id, TaskManager& task_manager)
     : Task("ManageDBObjectsTask", "Manage DBObjects", true, true, task_manager),
-      Configurable (class_id, instance_id, &task_manager, "task_manage_dbojects.json")
+      Configurable(class_id, instance_id, &task_manager, "task_manage_dbojects.json")
 {
-    tooltip_ ="Allows management of DBObjects and is reserved for expert users. This task can not be run,"
-              " but is performed using the GUI elements.";
+    tooltip_ =
+        "Allows management of DBObjects and is reserved for expert users. This task can not be run,"
+        " but is performed using the GUI elements.";
 }
 
-TaskWidget* ManageDBObjectsTask::widget ()
+TaskWidget* ManageDBObjectsTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new ManageDBObjectsTaskWidget(*this));
 
-        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
-                 widget_.get(), &ManageDBObjectsTaskWidget::expertModeChangedSlot);
+        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
+                &ManageDBObjectsTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();
 }
 
-void ManageDBObjectsTask::deleteWidget ()
+void ManageDBObjectsTask::deleteWidget() { widget_.reset(nullptr); }
+
+void ManageDBObjectsTask::generateSubConfigurable(const std::string& class_id,
+                                                  const std::string& instance_id)
 {
-    widget_.reset(nullptr);
+    throw std::runtime_error("ManageDBObjectsTask: generateSubConfigurable: unknown class_id " +
+                             class_id);
 }
 
-void ManageDBObjectsTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
-{
-    throw std::runtime_error ("ManageDBObjectsTask: generateSubConfigurable: unknown class_id "+class_id );
-}
-
-bool ManageDBObjectsTask::checkPrerequisites ()
+bool ManageDBObjectsTask::checkPrerequisites()
 {
     if (!ATSDB::instance().interface().ready())
         return false;
 
     return ATSDB::instance().schemaManager().isLocked();
 }
-

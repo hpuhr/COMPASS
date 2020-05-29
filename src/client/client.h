@@ -19,12 +19,11 @@
 #define CLIENT_H_
 
 #include <QApplication>
-
 #include <memory>
 
 class MainWindow;
 
-//namespace ATSDB
+// namespace ATSDB
 //{
 
 /**
@@ -33,40 +32,40 @@ class MainWindow;
  */
 class Client : public QApplication
 {
-public:
+  public:
     ///@brief Constructor.
-  Client(int& argc, char** argv);
-  ///@brief Destructor.
-  virtual ~Client();
+    Client(int& argc, char** argv);
+    ///@brief Destructor.
+    virtual ~Client();
 
-  ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
-  virtual bool notify(QObject* receiver, QEvent* event);
+    ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
+    virtual bool notify(QObject* receiver, QEvent* event);
 
-  bool quitRequested() const;
-  MainWindow& mainWindow ();
+    bool quitRequested() const;
+    MainWindow& mainWindow();
 
-private:
-  std::string system_install_path_;
-  bool quit_requested_ {false};
+  private:
+    std::string system_install_path_;
+    bool quit_requested_{false};
 
-  bool config_and_data_reset_wanted_ {false};
+    bool config_and_data_reset_wanted_{false};
 
-  bool config_and_data_exists_ {false};
-  bool config_and_data_copied_ {false};
+    bool config_and_data_exists_{false};
+    bool config_and_data_copied_{false};
 
-  bool upgrade_needed_ {false};
-  bool config_and_data_deletion_wanted_ {false};
+    bool upgrade_needed_{false};
+    bool config_and_data_deletion_wanted_{false};
 
-  void checkAndSetupConfig ();
+    void checkAndSetupConfig();
 
-  void checkNeededActions ();
-  void performNeededActions ();
+    void checkNeededActions();
+    void performNeededActions();
 
-  void deleteConfigurationAndData ();
-  void copyConfigurationAndData ();
-  void copyConfiguration ();
+    void deleteConfigurationAndData();
+    void copyConfigurationAndData();
+    void copyConfiguration();
 
-protected:
+  protected:
     std::unique_ptr<MainWindow> main_window_;
 };
 //}

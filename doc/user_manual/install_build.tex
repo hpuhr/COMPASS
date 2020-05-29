@@ -20,6 +20,7 @@ The following software has to be installed on the workstation:
     libarchive-dev & Archive libary & 3.2.2 \\ \hline
     libeigen3-dev & Linear algebra libary & 3.3.4 \\ \hline
     libtbb-dev & Intel Thread Building Blocks & 2019~U8-1 \\ \hline
+    NemaTode & Cross platform C++ 11 NMEA Parser \& GPS Framework & \\ \hline
     doxygen & Documentation generation & 1.8.13 \\ 
     \hline
   \end{tabular}
@@ -31,18 +32,18 @@ To build the source code with the ASTERIX decoder jASTERIX, follow the instructi
 To install the ATSDB source code, either download the latest released version from \\ \url{https://github.com/hpuhr/ATSDB/releases} \\
 or use the following command (git required) to clone the current repository:
 
-\begin{cverbatim}
+\begin{lstlisting}
 git clone https://github.com/hpuhr/ATSDB.git
-\end{cverbatim}
+\end{lstlisting}
 
 Enter the ATSDB source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
 
-\begin{cverbatim}
+\begin{lstlisting}
 cmake ..
-\end{cverbatim}
+\end{lstlisting}
 
 The output should look like this:
-\begin{cverbatim}
+\begin{lstlisting}
 sk@golem:~/test/ATSDB$ cmake .
   Path: /home/sk/test/ATSDB
 -- The C compiler identification is GNU 7.2.0
@@ -86,17 +87,17 @@ sk@golem:~/test/ATSDB$ cmake .
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/sk/test/ATSDB
-\end{cverbatim}
+\end{lstlisting}
 
 Then, compile the source by executing:
 
-\begin{cverbatim}
+\begin{lstlisting}
 make
-\end{cverbatim}
+\end{lstlisting}
 
 The output should look like this:
 
-\begin{cverbatim}
+\begin{lstlisting}
 Scanning dependencies of target atsdb_autogen
 [  1%] Automatic MOC for target atsdb
 Generating MOC predefs moc_predefs.h
@@ -123,17 +124,17 @@ Scanning dependencies of target atsdb_client
 ...
 [100%] Linking CXX executable atsdb_client
 [100%] Built target atsdb_client
-\end{cverbatim}
+\end{lstlisting}
 
 To install the ATSDB client, execute the following command in the build folder:
 
-\begin{cverbatim}
+\begin{lstlisting}
 sudo make install
-\end{cverbatim}
+\end{lstlisting}
 
 This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/atsdb/' (or similiar, depending on you Linux distribution.
 
 To start the ATSDB client run:
-\begin{cverbatim}
+\begin{lstlisting}
 atsdb_client
-\end{cverbatim}  
+\end{lstlisting}  

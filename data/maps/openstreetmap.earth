@@ -6,12 +6,6 @@ http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
 <map name="OpenStreetMap" type="geocentric" version="2">
 
-    <image name="osm_mapnik" driver="xyz">
-        <url>http://[abc].tile.openstreetmap.org/{z}/{x}/{y}.png</url>
-        <profile>spherical-mercator</profile>
-        <attribution>&#169;OpenStreetMap contributors</attribution>
-    </image>
-
     <options>
         <lighting>false</lighting>
         <terrain>
@@ -25,4 +19,10 @@ http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
         </cache>
     </options>
 
+    <image name="osm_mapnik" driver="xyz">
+        <url>http://[abc].tile.openstreetmap.org/{z}/{x}/{y}.png</url>
+        <profile>spherical-mercator</profile>
+        <attribution>&#169;OpenStreetMap contributors</attribution>
+    </image>    
+    
 </map>

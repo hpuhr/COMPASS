@@ -36,44 +36,49 @@ class TaskManagerWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
 
-public slots:
+  public slots:
     void taskClickedSlot(QListWidgetItem* item);
-    void expertModeToggledSlot ();
+    void expertModeToggledSlot();
     void runCurrentTaskSlot();
-    void startSlot ();
+    void startSlot();
 
-public:
-    explicit TaskManagerWidget(TaskManager& task_manager, QWidget* parent=nullptr);
-    ~TaskManagerWidget ();
+  public:
+    explicit TaskManagerWidget(TaskManager& task_manager, QWidget* parent = nullptr);
+    ~TaskManagerWidget();
 
-    void updateTaskList ();
-    void updateTaskStates ();
-    void selectNextTask ();
-    void setCurrentTask (Task& task);
+    void updateTaskList();
+    void updateTaskStates();
+    void selectNextTask();
+    void setCurrentTask(Task& task);
+    void runTask(Task& task); // set and run
 
-    std::string getCurrentTaskName ();
+    std::string getCurrentTaskName();
 
-    TaskManagerLogWidget* logWidget() { assert (log_widget_); return log_widget_; }
+    TaskManagerLogWidget* logWidget()
+    {
+        assert(log_widget_);
+        return log_widget_;
+    }
 
-    bool isStartPossible ();
+    bool isStartPossible();
 
-protected:
+  protected:
     TaskManager& task_manager_;
 
-    QListWidget* task_list_ {nullptr};
-    QCheckBox* expert_check_ {nullptr};
-    QPushButton* run_current_task_button_ {nullptr};
-    QPushButton* start_button_ {nullptr};
+    QListWidget* task_list_{nullptr};
+    QCheckBox* expert_check_{nullptr};
+    QPushButton* run_current_task_button_{nullptr};
+    QPushButton* start_button_{nullptr};
 
-    QStackedWidget* tasks_widget_ {nullptr};
-    TaskManagerLogWidget* log_widget_ {nullptr};
+    QStackedWidget* tasks_widget_{nullptr};
+    TaskManagerLogWidget* log_widget_{nullptr};
 
-    QSplitter* top_splitter_ {nullptr};
-    QSplitter* main_splitter_ {nullptr};
+    QSplitter* top_splitter_{nullptr};
+    QSplitter* main_splitter_{nullptr};
 
-    std::map <QListWidgetItem*, Task*> item_task_mappings_;
+    std::map<QListWidgetItem*, Task*> item_task_mappings_;
 };
 
-#endif // TASKMANAGERWIDGET_H
+#endif  // TASKMANAGERWIDGET_H

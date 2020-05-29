@@ -18,8 +18,8 @@
 #ifndef VIEWCONTAINER_H
 #define VIEWCONTAINER_H
 
-#include <QObject>
 #include <QMenu>
+#include <QObject>
 
 #include "configurable.h"
 
@@ -37,49 +37,50 @@ class ViewContainer : public QObject, public Configurable
 {
     Q_OBJECT
 
-public slots:
+  public slots:
 
-    void showMenuSlot ();
-    //void saveViewTemplate ();
-    void deleteView ();
+    void showMenuSlot();
+    // void saveViewTemplate ();
+    void deleteView();
 
-public:
+  public:
     ViewContainer(const std::string& class_id, const std::string& instance_id, Configurable* parent,
                   ViewManager* view_manager, QTabWidget* tab_widget, int window_cnt);
     virtual ~ViewContainer();
 
-    void addView (View *view);
-    void removeView (View *view);
+    void addView(View* view);
+    void removeView(View* view);
     const std::vector<View*>& getViews() const;
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    virtual std::string getWindowName ();
-    static unsigned int getViewCount () { return view_count_; }
+    virtual std::string getWindowName();
+    static unsigned int getViewCount() { return view_count_; }
 
     void addView(const std::string& class_name);
 
-    ViewContainerConfigWidget *configWidget ();
+    ViewContainerConfigWidget* configWidget();
 
-protected:
-    ViewManager &view_manager_;
+  protected:
+    ViewManager& view_manager_;
 
-    QTabWidget* tab_widget_ {nullptr};
+    QTabWidget* tab_widget_{nullptr};
 
-    int window_cnt_ {0};
+    int window_cnt_{0};
 
     std::vector<View*> views_;
 
     QMenu menu_;
-    QPushButton* last_active_manage_button_ {nullptr};
+    QPushButton* last_active_manage_button_{nullptr};
 
-    ViewContainerConfigWidget* config_widget_ {nullptr};
+    ViewContainerConfigWidget* config_widget_{nullptr};
 
-    std::map <QPushButton*, View*> view_manage_buttons_;
+    std::map<QPushButton*, View*> view_manage_buttons_;
 
     static unsigned int view_count_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
-#endif // VIEWCONTAINER_H
+#endif  // VIEWCONTAINER_H

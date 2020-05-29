@@ -16,35 +16,42 @@
  */
 
 #include "DBOInfoDBJob.h"
-#include "DBJob.h"
+
 #include "Buffer.h"
 #include "DBInterface.h"
+#include "DBJob.h"
 #include "JobOrderer.h"
 
-
-DBOInfoDBJob::DBOInfoDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-    boost::function<void (Job*)> obsolete_function, DBInterface *interface, DB_OBJECT_TYPE type,
-    std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
-    bool ascending, unsigned int limit_min, unsigned int limit_max, bool finalize)
- : DBJob (orderer, done_function, obsolete_function, interface), type_(type), ids_(ids), read_list_(read_list),
-   use_filters_(use_filters), order_by_variable_(order_by_variable), ascending_(ascending), limit_min_(limit_min),
-   limit_max_(limit_max), result_buffer_(0), finalize_(finalize)
+DBOInfoDBJob::DBOInfoDBJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                           boost::function<void(Job*)> obsolete_function, DBInterface* interface,
+                           DB_OBJECT_TYPE type, std::vector<unsigned int> ids,
+                           DBOVariableSet read_list, bool use_filters,
+                           std::string order_by_variable, bool ascending, unsigned int limit_min,
+                           unsigned int limit_max, bool finalize)
+    : DBJob(orderer, done_function, obsolete_function, interface),
+      type_(type),
+      ids_(ids),
+      read_list_(read_list),
+      use_filters_(use_filters),
+      order_by_variable_(order_by_variable),
+      ascending_(ascending),
+      limit_min_(limit_min),
+      limit_max_(limit_max),
+      result_buffer_(0),
+      finalize_(finalize)
 {
-
 }
 
-DBOInfoDBJob::~DBOInfoDBJob()
+DBOInfoDBJob::~DBOInfoDBJob() {}
+
+void DBOInfoDBJob::execute()
 {
+    assert(!result_buffer_);
 
-}
+    result_buffer_ =
+        db_interface_->getInfo(type_, ids_, read_list_, use_filters_, order_by_variable_,
+                               ascending_, limit_min_, limit_max_, finalize_);
 
-void DBOInfoDBJob::execute ()
-{
-  assert (!result_buffer_);
-
-  result_buffer_ = db_interface_->getInfo(type_, ids_, read_list_, use_filters_, order_by_variable_,
-      ascending_, limit_min_, limit_max_, finalize_);
-
-  assert (result_buffer_);
-  done_=true;
+    assert(result_buffer_);
+    done_ = true;
 }

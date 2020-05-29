@@ -18,8 +18,8 @@
 #ifndef DBINTERFACEWIDGET_H_
 #define DBINTERFACEWIDGET_H_
 
-#include <QWidget>
 #include <QComboBox>
+#include <QWidget>
 
 class DBInterface;
 class QStackedWidget;
@@ -31,25 +31,25 @@ class DBInterfaceWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
-    void databaseTypeSelectSlot ();
-    void databaseOpenedSlot ();
+  public slots:
+    void databaseTypeSelectSlot();
+    void databaseOpenedSlot();
 
-signals:
-    void databaseOpenedSignal ();
+  signals:
+    void databaseOpenedSignal();
 
-public:
+  public:
     /// @brief Constructor
-    explicit DBInterfaceWidget(DBInterface &interface, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit DBInterfaceWidget(DBInterface& interface, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBInterfaceWidget();
 
-protected:
-    DBInterface &interface_;
+  protected:
+    DBInterface& interface_;
 
-    QStackedWidget *connection_stack_;
+    QStackedWidget* connection_stack_;
 
-    void useConnection (std::string connection_type);
+    void useConnection(std::string connection_type);
 };
 
 #endif /* DBINTERFACEWIDGET_H_ */

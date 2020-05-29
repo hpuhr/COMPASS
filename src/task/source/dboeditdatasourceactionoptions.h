@@ -18,9 +18,9 @@
 #ifndef DBOEDITDATASOURCEACTIONOPTIONS_H
 #define DBOEDITDATASOURCEACTIONOPTIONS_H
 
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
 
 #include "dboeditdatasourceaction.h"
 
@@ -31,59 +31,62 @@ class DBOEditDataSourceActionOptionsWidget;
 
 class DBOEditDataSourceActionOptions
 {
-public:
-    DBOEditDataSourceActionOptions (DBObject& object, const std::string& sourceType, const std::string& sourceId);
+  public:
+    DBOEditDataSourceActionOptions(DBObject& object, const std::string& sourceType,
+                                   const std::string& sourceId);
     // none action is added by default with action_id 0
-    DBOEditDataSourceActionOptions () = default;
+    DBOEditDataSourceActionOptions() = default;
 
-    void addPossibleAction (const std::string& action, const std::string& target_type,
-                            const std::string& target_id);
+    void addPossibleAction(const std::string& action, const std::string& target_type,
+                           const std::string& target_id);
 
-    using PossibleActionIterator = typename std::map<unsigned int, DBOEditDataSourceAction>::iterator;
+    using PossibleActionIterator =
+        typename std::map<unsigned int, DBOEditDataSourceAction>::iterator;
     PossibleActionIterator begin() { return possible_actions_.begin(); }
     PossibleActionIterator end() { return possible_actions_.end(); }
-    size_t numOptions () { return possible_actions_.size(); }
+    size_t numOptions() { return possible_actions_.size(); }
 
     bool performFlag() const;
     void performFlag(bool perform_flag);
 
     std::string sourceType() const;
-    void sourceType(const std::string &source_type);
+    void sourceType(const std::string& source_type);
 
     std::string sourceId() const;
-    void sourceId(const std::string &source_id);
+    void sourceId(const std::string& source_id);
 
     unsigned int currentActionId() const;
     void currentActionId(unsigned int current_action_id);
 
     DBOEditDataSourceAction& currentAction();
 
-    DBOEditDataSourceActionOptionsWidget* widget ();
+    DBOEditDataSourceActionOptionsWidget* widget();
 
-    void perform ();
+    void perform();
 
-private:
-    DBObject* object_ {nullptr};
+  private:
+    DBObject* object_{nullptr};
 
-    bool perform_ {false};
+    bool perform_{false};
 
-    std::string source_type_; // "cfg", "db"
-    std::string source_id_; // id
+    std::string source_type_;  // "cfg", "db"
+    std::string source_id_;    // id
 
     unsigned int current_action_id_;
 
-    std::map<unsigned int, DBOEditDataSourceAction> possible_actions_; // action_id -> action
+    std::map<unsigned int, DBOEditDataSourceAction> possible_actions_;  // action_id -> action
 
     std::unique_ptr<DBOEditDataSourceActionOptionsWidget> widget_;
 };
 
-using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
+using DBOEditDataSourceActionOptionsCollection =
+    typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
 
 namespace DBOEditDataSourceActionOptionsCreator
 {
-    DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBODataSource& source);
-    DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, const StoredDBODataSource& source);
-}
+DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBODataSource& source);
+DBOEditDataSourceActionOptions getSyncOptionsFromCfg(DBObject& object,
+                                                     const StoredDBODataSource& source);
+}  // namespace DBOEditDataSourceActionOptionsCreator
 
-
-#endif // DBOEDITDATASOURCEACTIONOPTIONS_H
+#endif  // DBOEDITDATASOURCEACTIONOPTIONS_H

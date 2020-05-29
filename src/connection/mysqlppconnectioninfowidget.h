@@ -27,18 +27,18 @@ class MySQLppConnectionInfoWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
-    void updateSlot ();
+  public slots:
+    void updateSlot();
 
-public:
-    explicit MySQLppConnectionInfoWidget(MySQLppConnection &connection, QWidget *parent = 0);
+  public:
+    explicit MySQLppConnectionInfoWidget(MySQLppConnection& connection, QWidget* parent = 0);
 
-protected:
-    MySQLppConnection &connection_;
+  protected:
+    MySQLppConnection& connection_;
 
-    QLabel *server_;
-    QLabel *database_;
-    QLabel *status_;
+    QLabel* server_;
+    QLabel* database_;
+    QLabel* status_;
 };
 
-#endif // MYSQLPPCONNECTIONINFOWIDGET_H
+#endif  // MYSQLPPCONNECTIONINFOWIDGET_H

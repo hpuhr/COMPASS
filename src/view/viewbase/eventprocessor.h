@@ -18,11 +18,10 @@
 #ifndef EVENTPROCESSOR_H
 #define EVENTPROCESSOR_H
 
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QWheelEvent>
 #include <QWidget>
-
 
 /**
 @brief Base class for all event processors.
@@ -37,19 +36,19 @@ If not they may handle the event themselves and should return if they did so aft
 class EventProcessor : public QObject
 {
     Q_OBJECT
-public:
+  public:
     EventProcessor();
     virtual ~EventProcessor();
 
-    virtual bool mousePressEvent(QMouseEvent *e);
-    virtual bool mouseReleaseEvent(QMouseEvent *e);
-    virtual bool mouseMoveEvent(QMouseEvent *e);
-    virtual bool wheelEvent(QWheelEvent * e);
-    virtual bool keyPressEvent(QKeyEvent *e);
-    virtual bool keyReleaseEvent(QKeyEvent *e);
+    virtual bool mousePressEvent(QMouseEvent* e);
+    virtual bool mouseReleaseEvent(QMouseEvent* e);
+    virtual bool mouseMoveEvent(QMouseEvent* e);
+    virtual bool wheelEvent(QWheelEvent* e);
+    virtual bool keyPressEvent(QKeyEvent* e);
+    virtual bool keyReleaseEvent(QKeyEvent* e);
     virtual bool mouseDoubleClickEvent(QMouseEvent* e);
 
-protected:
+  protected:
     /// Stores the current mouse position
     QPoint mouse_pos_;
     /// Stores the left mouse buttons state
@@ -58,7 +57,6 @@ protected:
     bool mouse_right_pressed_;
     /// Stores the middle mouse buttons state
     bool mouse_middle_pressed_;
-
 };
 
-#endif //EVENTPROCESSOR_H
+#endif  // EVENTPROCESSOR_H

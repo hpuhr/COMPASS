@@ -26,15 +26,15 @@ class ManageSchemaTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void schemaLockedSlot ();
-    void expertModeChangedSlot ();
+  public slots:
+    void schemaLockedSlot();
+    void expertModeChangedSlot();
 
-public:
-    ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget *parent=nullptr);
+  public:
+    ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* parent = nullptr);
 
-protected:
+  protected:
     ManageSchemaTask& task_;
 };
 
-#endif // MANAGESCHEMATASKWIDGET_H
+#endif  // MANAGESCHEMATASKWIDGET_H

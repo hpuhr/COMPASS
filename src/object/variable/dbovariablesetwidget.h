@@ -20,10 +20,11 @@
 
 class QListWidget;
 
-#include <QWidget>
 #include <QMenu>
-#include "DBOVariableSet.h"
+#include <QWidget>
+
 #include "DBOVariableSelectionWidget.h"
+#include "DBOVariableSet.h"
 
 /**
  * @brief Widget representation of a DBOVariableSet
@@ -32,45 +33,44 @@ class DBOVariableSetWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     /// @brief Updates the variable list
-    void updateVariableList ();
+    void updateVariableList();
     /// @brief Removes the currently selected variable
-    void remove ();
+    void remove();
 
-protected slots:
+  protected slots:
     /// @brief Called when menu action is executed
-    void triggerSlot( QAction* action );
+    void triggerSlot(QAction* action);
     /// @brief Shows the context menu
     void showMenuSlot();
 
-signals:
+  signals:
     /// @brief Is emitted when the set is changed
     void setChanged();
 
-public:
+  public:
     /// @brief Constructor
-    DBOVariableSetWidget(DBOVariableSet &set, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBOVariableSetWidget(DBOVariableSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBOVariableSetWidget();
 
     /// @brief Return represented set
-    DBOVariableSet &getSet () { return set_; }
+    DBOVariableSet& getSet() { return set_; }
 
-protected:
+  protected:
     /// Represented set
     DBOVariableSet set_;
     /// Context menu for adding a variable
     QMenu menu_;
 
     /// List of variables
-    QListWidget *list_widget_;
+    QListWidget* list_widget_;
 
     /// @brief Creates GUI elements
-    void createElements ();
+    void createElements();
     /// @brief Updates the variables list
     void updateEntries();
-
 };
 
 #endif /* DBOVARIABLESetWIDGET_H_ */

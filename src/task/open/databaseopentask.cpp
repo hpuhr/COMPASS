@@ -16,23 +16,24 @@
  */
 
 #include "databaseopentask.h"
-#include "databaseopentaskwidget.h"
-#include "taskmanager.h"
+
 #include "atsdb.h"
-#include "dbinterface.h"
+#include "databaseopentaskwidget.h"
 #include "dbconnection.h"
+#include "dbinterface.h"
+#include "taskmanager.h"
 
 DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("DatabaseOpenTask", "Open a Database", true, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager, "task_db_open.json")
+      Configurable(class_id, instance_id, &task_manager, "task_db_open.json")
 {
-    tooltip_ = "Allows creating new databases, or managing and accessing existing ones. This task can not be run,"
-               " but is performed using the 'Open' button.";
+    tooltip_ =
+        "Allows creating new databases, or managing and accessing existing ones. This task can not "
+        "be run, but is performed using the 'Open' button.";
 }
 
-
-void DatabaseOpenTask::useConnection (const std::string& connection_type)
+void DatabaseOpenTask::useConnection(const std::string& connection_type)
 {
     ATSDB::instance().interface().useConnection(connection_type);
 
@@ -40,38 +41,36 @@ void DatabaseOpenTask::useConnection (const std::string& connection_type)
         widget_->updateUsedConnection();
 }
 
-TaskWidget* DatabaseOpenTask::widget ()
+TaskWidget* DatabaseOpenTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new DatabaseOpenTaskWidget(*this, ATSDB::instance().interface()));
 
-        connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal,
-                         this, &DatabaseOpenTask::databaseOpenedSlot);
-        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
-                 widget_.get(), &DatabaseOpenTaskWidget::expertModeChangedSlot);
+        connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal, this,
+                &DatabaseOpenTask::databaseOpenedSlot);
+        connect(&task_manager_, &TaskManager::expertModeChangedSignal, widget_.get(),
+                &DatabaseOpenTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();
 }
 
-void DatabaseOpenTask::deleteWidget ()
+void DatabaseOpenTask::deleteWidget() { widget_.reset(nullptr); }
+
+void DatabaseOpenTask::generateSubConfigurable(const std::string& class_id,
+                                               const std::string& instance_id)
 {
-    widget_.reset(nullptr);
+    throw std::runtime_error("DatabaseOpenTask: generateSubConfigurable: unknown class_id " +
+                             class_id);
 }
 
-
-void DatabaseOpenTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+bool DatabaseOpenTask::checkPrerequisites()
 {
-    throw std::runtime_error ("DatabaseOpenTask: generateSubConfigurable: unknown class_id "+class_id );
+    return !ATSDB::instance().interface().ready();  // only usable if not already connected
 }
 
-bool DatabaseOpenTask::checkPrerequisites ()
-{
-    return !ATSDB::instance().interface().ready(); // only usable if not already connected
-}
-
-bool DatabaseOpenTask::isRecommended ()
+bool DatabaseOpenTask::isRecommended()
 {
     if (!checkPrerequisites())
         return false;
@@ -79,7 +78,7 @@ bool DatabaseOpenTask::isRecommended ()
     return true;
 }
 
-bool DatabaseOpenTask::isRequired ()
+bool DatabaseOpenTask::isRequired()
 {
     if (!checkPrerequisites())
         return false;
@@ -92,8 +91,9 @@ void DatabaseOpenTask::databaseOpenedSlot()
     loginf << "DatabaseOpenTask: databaseOpenedSlot";
     done_ = true;
 
-    task_manager_.appendSuccess("DatabaseOpenTask: database '"+ATSDB::instance().interface().connection().type()+":"
-                                +ATSDB::instance().interface().connection().identifier()+"' opened");
+    task_manager_.appendSuccess(
+        "DatabaseOpenTask: database '" + ATSDB::instance().interface().connection().type() + ":" +
+        ATSDB::instance().interface().connection().identifier() + "' opened");
 
     emit doneSignal(name_);
 }

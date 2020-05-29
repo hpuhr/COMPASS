@@ -18,10 +18,10 @@
 #ifndef ASTERIXCONFIGWIDGET_H
 #define ASTERIXCONFIGWIDGET_H
 
+#include <jasterix/jasterix.h>
+
 #include <QWidget>
 #include <memory>
-
-#include <jasterix/jasterix.h>
 
 class ASTERIXImportTask;
 
@@ -35,19 +35,19 @@ class ASTERIXConfigWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
 
-public slots:
+  public slots:
     void framingChangedSlot();
     void framingEditSlot();
 
-    void categoryCheckedSlot ();
+    void categoryCheckedSlot();
     void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
     void refEditionChangedSlot(const std::string& cat_str, const std::string& ed_str);
     void spfEditionChangedSlot(const std::string& cat_str, const std::string& ed_str);
-    void categoryEditionEditSlot ();
-    void categoryREFEditionEditSlot ();
-    void categorySPFEditionEditSlot ();
+    void categoryEditionEditSlot();
+    void categoryREFEditionEditSlot();
+    void categorySPFEditionEditSlot();
 
     void editDataBlockSlot();
     void editCategoriesSlot();
@@ -55,24 +55,24 @@ public slots:
 
     void updateSlot();
 
-public:
-    ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* parent=nullptr);
+  public:
+    ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* parent = nullptr);
     virtual ~ASTERIXConfigWidget();
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
 
-    QVBoxLayout* main_layout_ {nullptr};
-    QGridLayout* categories_grid_ {nullptr};
+    QVBoxLayout* main_layout_{nullptr};
+    QGridLayout* categories_grid_{nullptr};
 
-    ASTERIXFramingComboBox* framing_combo_ {nullptr};
-    QPushButton* framing_edit_ {nullptr};
+    ASTERIXFramingComboBox* framing_combo_{nullptr};
+    QPushButton* framing_edit_{nullptr};
 
     std::map<unsigned int, QPushButton*> ref_edit_buttons_;
     std::map<unsigned int, QPushButton*> spf_edit_buttons_;
 
-    void updateFraming ();
-    void updateCategories ();
+    void updateFraming();
+    void updateCategories();
 };
 
-#endif // ASTERIXCONFIGWIDGET_H
+#endif  // ASTERIXCONFIGWIDGET_H

@@ -1,46 +1,47 @@
 #ifndef ASTERIXSPFEDITIONCOMBOBOX_H
 #define ASTERIXSPFEDITIONCOMBOBOX_H
 
-#include "asteriximporttask.h"
-
 #include <jasterix/jasterix.h>
 #include <jasterix/spfedition.h>
 
 #include <QComboBox>
-
 #include <memory>
 
-class ASTERIXSPFEditionComboBox: public QComboBox
+#include "asteriximporttask.h"
+
+class ASTERIXSPFEditionComboBox : public QComboBox
 {
     Q_OBJECT
 
-public slots:
-    void changedSPFEditionSlot(const QString &edition)
+  public slots:
+    void changedSPFEditionSlot(const QString& edition)
     {
         emit changedSPFSignal(category_->number(), edition.toStdString());
     }
 
-signals:
+  signals:
     /// @brief Emitted if REF was changed
     void changedSPFSignal(const std::string& cat_str, const std::string& ref_ed_str);
 
-public:
+  public:
     /// @brief Constructor
-    ASTERIXSPFEditionComboBox(ASTERIXImportTask& task, const std::shared_ptr<jASTERIX::Category> category,
-                           QWidget* parent = nullptr)
-    : QComboBox(parent), task_(task), category_(category)
+    ASTERIXSPFEditionComboBox(ASTERIXImportTask& task,
+                              const std::shared_ptr<jASTERIX::Category> category,
+                              QWidget* parent = nullptr)
+        : QComboBox(parent), task_(task), category_(category)
     {
-        addItem ("");
+        addItem("");
 
         if (category_->spfEditions().size())
         {
             for (auto& spf_it : category_->spfEditions())
             {
-                addItem (spf_it.first.c_str());
+                addItem(spf_it.first.c_str());
             }
 
-            setCurrentIndex (0);
-            connect(this, SIGNAL(activated(const QString &)), this, SLOT(changedSPFEditionSlot(const QString &)));
+            setCurrentIndex(0);
+            connect(this, SIGNAL(activated(const QString&)), this,
+                    SLOT(changedSPFEditionSlot(const QString&)));
         }
         else
             setDisabled(true);
@@ -49,23 +50,19 @@ public:
     virtual ~ASTERIXSPFEditionComboBox() {}
 
     /// @brief Returns the currently selected framing
-    std::string getSPFEdition ()
-    {
-        return currentText().toStdString();
-    }
+    std::string getSPFEdition() { return currentText().toStdString(); }
 
     /// @brief Sets the currently selected edition
-    void setSPFEdition (const std::string& spf_ed_str)
+    void setSPFEdition(const std::string& spf_ed_str)
     {
         int index = findText(QString(spf_ed_str.c_str()));
-        assert (index >= 0);
-        setCurrentIndex (index);
+        assert(index >= 0);
+        setCurrentIndex(index);
     }
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
     const std::shared_ptr<jASTERIX::Category> category_;
-
 };
 
-#endif // ASTERIXSPFEDITIONCOMBOBOX_H
+#endif  // ASTERIXSPFEDITIONCOMBOBOX_H

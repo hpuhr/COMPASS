@@ -18,15 +18,13 @@
 #ifndef RADARPLOTPOSITIONCALCULATOR_H_
 #define RADARPLOTPOSITIONCALCULATOR_H_
 
-#include "configurable.h"
-#include "dbodatasource.h"
-#include "task.h"
-
 #include <QObject>
-
 #include <memory>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include "configurable.h"
+#include "dbodatasource.h"
+#include "task.h"
 
 class Buffer;
 class DBObject;
@@ -41,23 +39,23 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
 {
     Q_OBJECT
 
-public slots:
-    void newDataSlot (DBObject& object);
-    void loadingDoneSlot (DBObject& object);
+  public slots:
+    void newDataSlot(DBObject& object);
+    void loadingDoneSlot(DBObject& object);
 
-    void updateProgressSlot (float percent);
-    void updateDoneSlot (DBObject& object);
+    void updateProgressSlot(float percent);
+    void updateDoneSlot(DBObject& object);
 
-public:
+  public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
                                     TaskManager& task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
-    bool isCalculating ();
-    unsigned int getNumLoaded () { return num_loaded_; }
+    bool isCalculating();
+    unsigned int getNumLoaded() { return num_loaded_; }
 
     TaskWidget* widget();
-    virtual void deleteWidget ();
+    virtual void deleteWidget();
 
     std::string dbObjectStr() const;
     void dbObjectStr(const std::string& db_object_str);
@@ -83,16 +81,16 @@ public:
     std::string longitudeVarStr() const;
     void longitudeVarStr(const std::string& longitude_var_str);
 
-    virtual bool checkPrerequisites ();
-    virtual bool isRecommended ();
-    virtual bool isRequired ();
+    virtual bool checkPrerequisites();
+    virtual bool isRecommended();
+    virtual bool isRequired();
 
     virtual bool canRun();
-    virtual void run ();
+    virtual void run();
 
     static const std::string DONE_PROPERTY_NAME;
 
-protected:
+  protected:
     std::string db_object_str_;
     DBObject* db_object_{nullptr};
 
@@ -122,16 +120,16 @@ protected:
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    bool calculating_ {false};
+    bool calculating_{false};
 
-    unsigned int num_loaded_ {0};
+    unsigned int num_loaded_{0};
 
     std::unique_ptr<RadarPlotPositionCalculatorTaskWidget> widget_;
 
-    QMessageBox* msg_box_ {nullptr};
+    QMessageBox* msg_box_{nullptr};
     size_t target_report_count_{0};
 
-    void checkAndSetVariable (std::string &name_str, DBOVariable** var);
+    void checkAndSetVariable(std::string& name_str, DBOVariable** var);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

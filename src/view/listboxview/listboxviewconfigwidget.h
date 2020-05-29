@@ -19,6 +19,7 @@
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
 #include <QWidget>
+
 #include "dbovariable.h"
 
 class DBOVariableOrderedSetWidget;
@@ -35,48 +36,48 @@ class ListBoxViewConfigWidget : public QWidget
 {
     Q_OBJECT
 
-public slots:
+  public slots:
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
     void toggleUseOverwrite();
     void showAssociationsSlot();
     /// @brief Called when database view checkbox is un/checked
-    //void toggleDatabaseView ();
+    // void toggleDatabaseView ();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
-    void reloadWantedSlot ();
-    void reloadRequestedSlot ();
-    void loadingStartedSlot ();
+    void reloadWantedSlot();
+    void reloadRequestedSlot();
+    void loadingStartedSlot();
 
-signals:
-     void exportSignal (bool overwrite);
-     void reloadRequestedSignal (); // reload from database
+  signals:
+    void exportSignal(bool overwrite);
+    void reloadRequestedSignal();  // reload from database
 
-public:
+  public:
     /// @brief Constructor
-    ListBoxViewConfigWidget (ListBoxView* view, QWidget* parent=nullptr);
+    ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent = nullptr);
     /// @brief Destructor
     virtual ~ListBoxViewConfigWidget();
 
-protected:
+  protected:
     /// Base view
     ListBoxView* view_;
     /// Variable read list widget
     DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
 
-    QCheckBox* only_selected_check_ {nullptr};
-    QCheckBox* presentation_check_ {nullptr};
-    QCheckBox* associations_check_ {nullptr};
+    QCheckBox* only_selected_check_{nullptr};
+    QCheckBox* presentation_check_{nullptr};
+    QCheckBox* associations_check_{nullptr};
 
-    QCheckBox* overwrite_check_ {nullptr};
+    QCheckBox* overwrite_check_{nullptr};
 
-    QPushButton* export_button_ {nullptr};
+    QPushButton* export_button_{nullptr};
 
-    QPushButton* update_button_ {nullptr};
-    bool reload_needed_ {false};
+    QPushButton* update_button_{nullptr};
+    bool reload_needed_{false};
 
-    void updateUpdateButton ();
+    void updateUpdateButton();
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

@@ -1,25 +1,23 @@
 #include "dboreadassociationsjob.h"
+
 #include "dbobject.h"
 
 DBOReadAssociationsJob::DBOReadAssociationsJob(DBObject& dbobject)
     : Job("DBOReadAssociationsJob"), dbobject_(dbobject)
 {
-    assert (dbobject_.existsInDB());
+    assert(dbobject_.existsInDB());
 }
 
-DBOReadAssociationsJob::~DBOReadAssociationsJob()
-{
+DBOReadAssociationsJob::~DBOReadAssociationsJob() {}
 
-}
-
-void DBOReadAssociationsJob::run ()
+void DBOReadAssociationsJob::run()
 {
     loginf << "DBOReadAssociationsJob: run: " << dbobject_.name() << ": start";
     started_ = true;
 
-    dbobject_.loadAssociations ();
+    dbobject_.loadAssociations();
 
-    done_=true;
+    done_ = true;
 
     return;
 }

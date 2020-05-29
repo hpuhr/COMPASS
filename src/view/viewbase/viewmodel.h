@@ -19,16 +19,14 @@
 #define VIEWMODEL_H
 
 #include <QObject>
-
 #include <map>
 
+#include "configurable.h"
 #include "global.h"
 #include "viewselection.h"
-#include "configurable.h"
 
 class View;
 class ViewWidget;
-
 
 /**
 @brief Manages a view's data and configures the view.
@@ -42,14 +40,14 @@ This base class just implements some basic selection handling.
 class ViewModel : public QObject, public Configurable
 {
     Q_OBJECT
-public:
-    ViewModel(const std::string &class_id, const std::string &instance_id, View* view );
+  public:
+    ViewModel(const std::string& class_id, const std::string& instance_id, View* view);
     virtual ~ViewModel();
 
     /// @brief Redraws the data
     virtual void redrawData() = 0;
     /// @brief Clears the data and updates the display if wished.
-    virtual void clear( bool update=true ) = 0;
+    virtual void clear(bool update = true) = 0;
 
     /// @brief Returns the view
     View* getView() { return view_; }
@@ -58,12 +56,12 @@ public:
     /// @brief Checks if the model obtains a Workflow, reimplement for convenience
     virtual bool hasWorkflow() const { return false; }
 
-protected slots:
-    void sendSelection( ViewSelectionEntries& entries );
-    virtual void enableSelection( bool enable );
+  protected slots:
+    void sendSelection(ViewSelectionEntries& entries);
+    virtual void enableSelection(bool enable);
 
-protected:
-    virtual bool confirmSelection( ViewSelectionEntries& entries );
+  protected:
+    virtual bool confirmSelection(ViewSelectionEntries& entries);
 
     /// The view the model is part of
     View* view_;
@@ -71,4 +69,4 @@ protected:
     ViewWidget* widget_;
 };
 
-#endif //VIEWMODEL_H
+#endif  // VIEWMODEL_H

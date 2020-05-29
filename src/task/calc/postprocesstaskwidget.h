@@ -26,14 +26,14 @@ class PostProcessTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void expertModeChangedSlot ();
+  public slots:
+    void expertModeChangedSlot();
 
-public:
-    PostProcessTaskWidget(PostProcessTask& task, QWidget *parent=nullptr);
+  public:
+    PostProcessTaskWidget(PostProcessTask& task, QWidget* parent = nullptr);
 
-protected:
+  protected:
     PostProcessTask& task_;
 };
 
-#endif // POSTPROCESSTASKWIDGET_H
+#endif  // POSTPROCESSTASKWIDGET_H

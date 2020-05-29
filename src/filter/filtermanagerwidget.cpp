@@ -15,31 +15,34 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dbschemamanager.h"
 #include "filtermanagerwidget.h"
-#include "filtergeneratorwidget.h"
 
-#include "dbtable.h"
-#include "metadbtable.h"
-#include "dbschema.h"
-#include "dbschemawidget.h"
-#include "dbschemamanager.h"
-#include "logger.h"
-#include "global.h"
-#include "filtermanager.h"
-#include "dbfilter.h"
-#include "dbfilterwidget.h"
-
-#include <QLabel>
-#include <QPushButton>
 #include <QComboBox>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
+#include <QLabel>
+#include <QPushButton>
 #include <QStackedWidget>
+#include <QVBoxLayout>
 
-FilterManagerWidget::FilterManagerWidget(FilterManager &filter_manager, QWidget* parent, Qt::WindowFlags f)
- : QFrame(parent), filter_manager_(filter_manager), filter_generator_widget_(nullptr), add_button_(nullptr)
+#include "dbfilter.h"
+#include "dbfilterwidget.h"
+#include "dbschema.h"
+#include "dbschemamanager.h"
+#include "dbschemawidget.h"
+#include "dbtable.h"
+#include "filtergeneratorwidget.h"
+#include "filtermanager.h"
+#include "global.h"
+#include "logger.h"
+#include "metadbtable.h"
+
+FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
+                                         Qt::WindowFlags f)
+    : QFrame(parent),
+      filter_manager_(filter_manager),
+      filter_generator_widget_(nullptr),
+      add_button_(nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
@@ -48,26 +51,26 @@ FilterManagerWidget::FilterManagerWidget(FilterManager &filter_manager, QWidget*
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(frame_width);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLabel *filter_label = new QLabel (tr("Filters"));
-    filter_label->setFont (font_bold);
-    layout->addWidget (filter_label);
+    QLabel* filter_label = new QLabel(tr("Filters"));
+    filter_label->setFont(font_bold);
+    layout->addWidget(filter_label);
 
-    filter_layout_ = new QVBoxLayout ();
-    layout->addLayout (filter_layout_);
+    filter_layout_ = new QVBoxLayout();
+    layout->addLayout(filter_layout_);
 
     layout->addStretch();
 
-    QHBoxLayout *button_layout = new QHBoxLayout ();
+    QHBoxLayout* button_layout = new QHBoxLayout();
 
     add_button_ = new QPushButton(tr("Add Filter"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addFilterSlot() ));
-    button_layout->addWidget (add_button_);
+    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
+    button_layout->addWidget(add_button_);
 
     layout->addLayout(button_layout);
 
-    setLayout (layout);
+    setLayout(layout);
 
     setDisabled(true);
 }
@@ -81,46 +84,43 @@ FilterManagerWidget::~FilterManagerWidget()
     }
 }
 
-void FilterManagerWidget::addFilterSlot ()
+void FilterManagerWidget::addFilterSlot()
 {
-    assert (!filter_generator_widget_);
+    assert(!filter_generator_widget_);
 
-    filter_generator_widget_ = new FilterGeneratorWidget ();
-    connect (filter_generator_widget_, SIGNAL(filterWidgetAction(bool)), this, SLOT(filterWidgetActionSlot(bool)));
+    filter_generator_widget_ = new FilterGeneratorWidget();
+    connect(filter_generator_widget_, SIGNAL(filterWidgetAction(bool)), this,
+            SLOT(filterWidgetActionSlot(bool)));
     filter_generator_widget_->show();
 }
 
 void FilterManagerWidget::updateFiltersSlot()
 {
-    assert (filter_layout_);
+    assert(filter_layout_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = filter_layout_->takeAt(0)) != 0)
     {
         filter_layout_->removeItem(child);
     }
 
-    std::vector <DBFilter*> &filters = filter_manager_.filters();
+    std::vector<DBFilter*>& filters = filter_manager_.filters();
     for (auto it : filters)
     {
+        loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
         filter_layout_->addWidget(it->widget());
     }
 }
 
-void FilterManagerWidget::filterWidgetActionSlot (bool result)
+void FilterManagerWidget::filterWidgetActionSlot(bool result)
 {
-    assert (filter_generator_widget_);
+    assert(filter_generator_widget_);
 
     if (result)
         updateFiltersSlot();
 
     delete filter_generator_widget_;
-    filter_generator_widget_=nullptr;
+    filter_generator_widget_ = nullptr;
 }
 
-void FilterManagerWidget::databaseOpenedSlot ()
-{
-    setDisabled(false);
-}
-
-
+void FilterManagerWidget::databaseOpenedSlot() { setDisabled(false); }

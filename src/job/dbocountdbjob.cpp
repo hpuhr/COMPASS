@@ -15,39 +15,40 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Buffer.h"
 #include "DBOCountDBJob.h"
+
+#include "Buffer.h"
 #include "DBInterface.h"
 #include "DBResult.h"
 #include "Logger.h"
 
-DBOCountDBJob::DBOCountDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-        boost::function<void (Job*)> obsolete_function, DBInterface *interface, DB_OBJECT_TYPE type,
-        unsigned int sensor_number)
-: DBJob (orderer, done_function, obsolete_function, interface), type_(type), sensor_number_(sensor_number), count_(0)
+DBOCountDBJob::DBOCountDBJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                             boost::function<void(Job*)> obsolete_function, DBInterface* interface,
+                             DB_OBJECT_TYPE type, unsigned int sensor_number)
+    : DBJob(orderer, done_function, obsolete_function, interface),
+      type_(type),
+      sensor_number_(sensor_number),
+      count_(0)
 {
-
 }
 
-DBOCountDBJob::~DBOCountDBJob()
-{
-
-}
+DBOCountDBJob::~DBOCountDBJob() {}
 
 void DBOCountDBJob::execute()
 {
-    DBResult *result = db_interface_->count(type_, sensor_number_);
-    Buffer *buffer = result->getBuffer();
+    DBResult* result = db_interface_->count(type_, sensor_number_);
+    Buffer* buffer = result->getBuffer();
 
-    assert (!buffer->getFirstWrite());
-    assert (buffer->getSize() == 1);
+    assert(!buffer->getFirstWrite());
+    assert(buffer->getSize() == 1);
 
-    count_ = *(unsigned int*) buffer->get(0,0);
+    count_ = *(unsigned int*)buffer->get(0, 0);
 
-    loginf << "DBOCountDBJob: execute: got count " << count_ << " for type " << type_ << " number " << sensor_number_;
+    loginf << "DBOCountDBJob: execute: got count " << count_ << " for type " << type_ << " number "
+           << sensor_number_;
 
     delete result;
     delete buffer;
 
-    done_=true;
+    done_ = true;
 }

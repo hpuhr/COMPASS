@@ -23,26 +23,25 @@
 
 class FilterConditionResetValueComboBox : public QComboBox
 {
-protected:
-  static QList<QString> stringsList_;
-public:
-  FilterConditionResetValueComboBox ()
-  {
-    if (stringsList_.size() == 0)
+  protected:
+    static QList<QString> stringsList_;
+
+  public:
+    FilterConditionResetValueComboBox()
     {
-      stringsList_.append("MIN");
-      stringsList_.append("MAX");
-      stringsList_.append("value");
+        if (stringsList_.size() == 0)
+        {
+            stringsList_.append("MIN");
+            stringsList_.append("MAX");
+            stringsList_.append("value");
+        }
+
+        /* Populate the comboBox */
+        addItems(stringsList_);
     }
-
-    /* Populate the comboBox */
-    addItems(stringsList_);
-  }
-  virtual ~FilterConditionResetValueComboBox () {}
-
+    virtual ~FilterConditionResetValueComboBox() {}
 };
 
 QList<QString> FilterConditionResetValueComboBox::stringsList_;
-
 
 #endif /* FILTERCONDITIONRESETVALUECOMBOBOX_H_ */

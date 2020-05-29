@@ -2,17 +2,17 @@
 
 #include <sstream>
 
-void DBOAssociationCollection::add (unsigned int rec_num, DBOAssociationEntry&& entry)
+void DBOAssociationCollection::add(unsigned int rec_num, DBOAssociationEntry&& entry)
 {
     entries_.emplace(rec_num, entry);
 }
 
-bool DBOAssociationCollection::contains (unsigned int rec_num) const
+bool DBOAssociationCollection::contains(unsigned int rec_num) const
 {
     return entries_.count(rec_num);
 }
 
-std::vector<unsigned int> DBOAssociationCollection::getUTNsFor (unsigned int rec_num) const
+std::vector<unsigned int> DBOAssociationCollection::getUTNsFor(unsigned int rec_num) const
 {
     std::vector<unsigned int> ret;
 
@@ -26,8 +26,7 @@ std::vector<unsigned int> DBOAssociationCollection::getUTNsFor (unsigned int rec
     return ret;
 }
 
-
-std::string DBOAssociationCollection::getUTNsStringFor (unsigned int rec_num) const
+std::string DBOAssociationCollection::getUTNsStringFor(unsigned int rec_num) const
 {
     std::stringstream ss;
 
@@ -42,7 +41,7 @@ std::string DBOAssociationCollection::getUTNsStringFor (unsigned int rec_num) co
         if (first)
             ss << std::to_string(it->second.utn_);
         else
-            ss << ","  << std::to_string(it->second.utn_);
+            ss << "," << std::to_string(it->second.utn_);
 
         first = false;
     }

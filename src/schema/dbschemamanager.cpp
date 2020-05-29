@@ -15,35 +15,37 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "atsdb.h"
-#include "configurationmanager.h"
-#include "dbtablecolumn.h"
-#include "dbtable.h"
-#include "metadbtable.h"
-#include "dbschema.h"
-#include "dbschemamanagerwidget.h"
 #include "dbschemamanager.h"
-#include "logger.h"
-#include "buffer.h"
-#include "dbinterface.h"
-#include "dbobjectmanager.h"
 
 #include <QApplication>
 
-/**
- * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
- */
-DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb,
-                                 DBInterface& db_interface)
-: Configurable (class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
-{
-    registerParameter ("current_schema", &current_schema_, (std::string)"");
+#include "atsdb.h"
+#include "buffer.h"
+#include "configurationmanager.h"
+#include "dbinterface.h"
+#include "dbobjectmanager.h"
+#include "dbschema.h"
+#include "dbschemamanagerwidget.h"
+#include "dbtable.h"
+#include "dbtablecolumn.h"
+#include "logger.h"
+#include "metadbtable.h"
 
-    createSubConfigurables ();
+/**
+ * Registers current_schema as parameter, creates sub-configurables (schemas), checks if
+ * current_schema exists (if defined).
+ */
+DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id,
+                                 ATSDB* atsdb, DBInterface& db_interface)
+    : Configurable(class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
+{
+    registerParameter("current_schema", &current_schema_, (std::string) "");
+
+    createSubConfigurables();
 
     if (current_schema_.size() != 0)
         if (schemas_.count(current_schema_) == 0)
-            current_schema_="";
+            current_schema_ = "";
 
     loginf << "DBSchemaManager: DBSchemaManager: current schema: '" << current_schema_ << "'";
 }
@@ -62,44 +64,43 @@ DBSchemaManager::~DBSchemaManager()
         delete widget_;
         widget_ = nullptr;
     }
-
 }
 
-void DBSchemaManager::renameCurrentSchema (const std::string& new_name)
+void DBSchemaManager::renameCurrentSchema(const std::string& new_name)
 {
-    assert (hasCurrentSchema());
+    assert(hasCurrentSchema());
 
-    auto it = schemas_.find (current_schema_);
-    assert (new_name.size() != 0);
-    assert (schemas_.find(new_name) == schemas_.end());
-    schemas_.insert (std::pair <std::string, DBSchema*> (new_name, it->second));
+    auto it = schemas_.find(current_schema_);
+    assert(new_name.size() != 0);
+    assert(schemas_.find(new_name) == schemas_.end());
+    schemas_.insert(std::pair<std::string, DBSchema*>(new_name, it->second));
     schemas_.erase(it);
-    current_schema_= new_name;
+    current_schema_ = new_name;
 
     emit schemaChangedSignal();
 }
 
-void DBSchemaManager::setCurrentSchema (const std::string& current_schema)
+void DBSchemaManager::setCurrentSchema(const std::string& current_schema)
 {
     loginf << "DBSchemaManager: setCurrentSchema: " << current_schema;
 
-    assert (!locked_);
-    assert (current_schema.size() != 0);
-    assert (schemas_.find(current_schema) != schemas_.end());
+    assert(!locked_);
+    assert(current_schema.size() != 0);
+    assert(schemas_.find(current_schema) != schemas_.end());
 
-    current_schema_=current_schema;
+    current_schema_ = current_schema;
 
     emit schemaChangedSignal();
 }
 
-bool DBSchemaManager::hasCurrentSchema ()
+bool DBSchemaManager::hasCurrentSchema()
 {
     if (current_schema_.size() != 0)
     {
         if (schemas_.find(current_schema_) == schemas_.end())
         {
-            logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in "
-                   << schemas_.size() << " schemas";
+            logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_
+                   << "' not found in " << schemas_.size() << " schemas";
             return false;
         }
         else
@@ -107,42 +108,42 @@ bool DBSchemaManager::hasCurrentSchema ()
     }
     else
     {
-        logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in "
-               << schemas_.size() << " schemas";
+        logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_
+               << "' not found in " << schemas_.size() << " schemas";
         return false;
     }
 }
-const std::string& DBSchemaManager::getCurrentSchemaName ()
+const std::string& DBSchemaManager::getCurrentSchemaName()
 {
-    assert (hasCurrentSchema());
+    assert(hasCurrentSchema());
     return current_schema_;
 }
-
 
 /**
  * Can create DBSchemas.
  *
  * \exception std::runtime_error if unknown class_id
  */
-void DBSchemaManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBSchemaManager::generateSubConfigurable(const std::string& class_id,
+                                              const std::string& instance_id)
 {
-    logdbg  << "DBSchemaManager: generateSubConfigurable: " << classId() << " instance " << instanceId();
+    logdbg << "DBSchemaManager: generateSubConfigurable: " << classId() << " instance "
+           << instanceId();
 
     if (class_id.compare("DBSchema") == 0)
     {
-        logdbg  << "DBSchema: generateSubConfigurable: generating DBTable";
-        DBSchema *schema = new DBSchema ("DBSchema", instance_id, this, db_interface_);
-        assert (schema->name().size() != 0);
-        assert (schemas_.find(schema->name()) == schemas_.end());
-        schemas_.insert (std::pair <std::string, DBSchema*> (schema->name(), schema));
-        //schemas_.at(schema->getName())=schema;
+        logdbg << "DBSchema: generateSubConfigurable: generating DBTable";
+        DBSchema* schema = new DBSchema("DBSchema", instance_id, this, db_interface_);
+        assert(schema->name().size() != 0);
+        assert(schemas_.find(schema->name()) == schemas_.end());
+        schemas_.insert(std::pair<std::string, DBSchema*>(schema->name(), schema));
+        // schemas_.at(schema->getName())=schema;
     }
     else
-        throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
+        throw std::runtime_error("DBSchema: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-
-void DBSchemaManager::checkSubConfigurables ()
+void DBSchemaManager::checkSubConfigurables()
 {
     //  if (schemas_.size() == 0)
     //  {
@@ -150,31 +151,31 @@ void DBSchemaManager::checkSubConfigurables ()
     //  }
 }
 
-DBSchema &DBSchemaManager::getCurrentSchema ()
+DBSchema& DBSchemaManager::getCurrentSchema()
 {
-    assert (hasCurrentSchema());
+    assert(hasCurrentSchema());
     return *schemas_.at(current_schema_);
 }
 
-DBSchema& DBSchemaManager::getSchema (const std::string& name)
+DBSchema& DBSchemaManager::getSchema(const std::string& name)
 {
-    assert (schemas_.find(name) != schemas_.end());
+    assert(schemas_.find(name) != schemas_.end());
     return *schemas_.at(name);
 }
 
-void DBSchemaManager::deleteCurrentSchema ()
+void DBSchemaManager::deleteCurrentSchema()
 {
     loginf << "DBSchemaManager: deleteCurrentSchema: " << current_schema_;
 
-    assert (current_schema_.size() != 0);
-    assert (hasCurrentSchema());
+    assert(current_schema_.size() != 0);
+    assert(hasCurrentSchema());
 
     ATSDB::instance().objectManager().removeDependenciesForSchema(current_schema_);
 
     delete schemas_.at(current_schema_);
     schemas_.erase(current_schema_);
 
-    current_schema_="";
+    current_schema_ = "";
 
     if (schemas_.size())
     {
@@ -187,17 +188,17 @@ void DBSchemaManager::deleteCurrentSchema ()
     emit schemaChangedSignal();
 }
 
-bool DBSchemaManager::hasSchema (const std::string& name)
+bool DBSchemaManager::hasSchema(const std::string& name)
 {
     return schemas_.find(name) != schemas_.end();
 }
 
-void DBSchemaManager::addEmptySchema (const std::string& name)
+void DBSchemaManager::addEmptySchema(const std::string& name)
 {
-    std::string schema_name="DBSchema"+name+"0";
-    Configuration &schema_configuration = addNewSubConfiguration ("DBSchema", schema_name);
-    schema_configuration.addParameterString ("name", name);
-    generateSubConfigurable ("DBSchema", schema_name);
+    std::string schema_name = "DBSchema" + name + "0";
+    Configuration& schema_configuration = addNewSubConfiguration("DBSchema", schema_name);
+    schema_configuration.addParameterString("name", name);
+    generateSubConfigurable("DBSchema", schema_name);
 
     if (!hasCurrentSchema())
         setCurrentSchema(name);
@@ -207,17 +208,17 @@ DBSchemaManagerWidget* DBSchemaManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new DBSchemaManagerWidget (*this);
+        widget_ = new DBSchemaManagerWidget(*this);
 
         if (locked_)
             widget_->lock();
     }
 
-    assert (widget_);
+    assert(widget_);
     return widget_;
 }
 
-void DBSchemaManager::lock ()
+void DBSchemaManager::lock()
 {
     if (locked_)
         return;
@@ -233,7 +234,7 @@ void DBSchemaManager::lock ()
     emit schemaLockedSignal();
 }
 
-void DBSchemaManager::databaseContentChangedSlot ()
+void DBSchemaManager::databaseContentChangedSlot()
 {
     loginf << "DBSchemaManager: databaseContentChangedSlot";
 

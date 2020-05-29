@@ -7,14 +7,14 @@ class DBObject;
 
 class DBOReadAssociationsJob : public Job
 {
-public:
+  public:
     DBOReadAssociationsJob(DBObject& dbobject);
     virtual ~DBOReadAssociationsJob();
 
-    virtual void run ();
+    virtual void run();
 
-protected:
+  protected:
     DBObject& dbobject_;
 };
 
-#endif // DBOREADASSOCIATIONSJOB_H
+#endif  // DBOREADASSOCIATIONSJOB_H

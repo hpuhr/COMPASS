@@ -18,8 +18,8 @@
 #ifndef MYSQLPPCONNECTIONWIDGET_H
 #define MYSQLPPCONNECTIONWIDGET_H
 
-#include <QWidget>
 #include <QMenu>
+#include <QWidget>
 
 class MySQLppConnection;
 class QComboBox;
@@ -31,37 +31,37 @@ class MySQLppConnectionWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
-    void databaseOpenedSignal ();
+  signals:
+    void databaseOpenedSignal();
 
-public slots:
-    void addServerSlot ();
-    void deleteServerSlot ();
-    void serverSelectedSlot (const QString &value);
-    void serverConnectedSlot ();
-    void databaseOpenedSlot ();
+  public slots:
+    void addServerSlot();
+    void deleteServerSlot();
+    void serverSelectedSlot(const QString& value);
+    void serverConnectedSlot();
+    void databaseOpenedSlot();
 
-//    void showImportMenuSlot ();
-//    void importSQLTextSlot();
-//    void importSQLTextFromArchiveSlot();
+    //    void showImportMenuSlot ();
+    //    void importSQLTextSlot();
+    //    void importSQLTextFromArchiveSlot();
 
-public:
+  public:
     explicit MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent = 0);
     virtual ~MySQLppConnectionWidget();
 
-protected:
+  protected:
     MySQLppConnection& connection_;
 
-    QComboBox* server_select_ {nullptr};
-    QPushButton* add_button_ {nullptr};
-    QPushButton* delete_button_ {nullptr};
+    QComboBox* server_select_{nullptr};
+    QPushButton* add_button_{nullptr};
+    QPushButton* delete_button_{nullptr};
 
-//    QPushButton* import_button_ {nullptr};
-//    QMenu import_menu_;
+    //    QPushButton* import_button_ {nullptr};
+    //    QMenu import_menu_;
 
-    QStackedWidget* server_widgets_ {nullptr};
+    QStackedWidget* server_widgets_{nullptr};
 
     void updateServers();
 };
 
-#endif // MYSQLPPCONNECTIONWIDGET_H
+#endif  // MYSQLPPCONNECTIONWIDGET_H

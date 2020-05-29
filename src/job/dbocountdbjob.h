@@ -25,23 +25,23 @@ class DBInterface;
 
 class DBOCountDBJob : public DBJob
 {
-public:
-    DBOCountDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DBInterface *interface, DB_OBJECT_TYPE type,
-            unsigned int sensor_number);
+  public:
+    DBOCountDBJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                  boost::function<void(Job*)> obsolete_function, DBInterface* interface,
+                  DB_OBJECT_TYPE type, unsigned int sensor_number);
     virtual ~DBOCountDBJob();
 
-    virtual void execute ();
+    virtual void execute();
 
-    DB_OBJECT_TYPE getType () { return type_; }
+    DB_OBJECT_TYPE getType() { return type_; }
     unsigned int getSensorNumber() { return sensor_number_; }
-    unsigned int getCount () { return count_; }
+    unsigned int getCount() { return count_; }
 
-protected:
-  /// DBO type
-  DB_OBJECT_TYPE type_;
-  unsigned int sensor_number_;
-  unsigned int count_;
+  protected:
+    /// DBO type
+    DB_OBJECT_TYPE type_;
+    unsigned int sensor_number_;
+    unsigned int count_;
 };
 
 #endif /* DBOCOUNTDBJOB_H_ */

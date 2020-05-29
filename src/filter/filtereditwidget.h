@@ -36,39 +36,39 @@ class DBFilter;
 
 class FilterEditWidget : public QWidget
 {
-  Q_OBJECT
-public slots:
-//  void loadMin ();
-//  void loadMax ();
-  void addCondition ();
-  void deleteCondition ();
-  void changedName ();
-  void changedConditionVariable();
-  void changedABS ();
-  void changedOperator ();
-  void changedResetValue ();
+    Q_OBJECT
+  public slots:
+    //  void loadMin ();
+    //  void loadMax ();
+    void addCondition();
+    void deleteCondition();
+    void changedName();
+    void changedConditionVariable();
+    void changedABS();
+    void changedOperator();
+    void changedResetValue();
 
-public:
-  FilterEditWidget(DBFilter *filter, QWidget *parent=nullptr);
-  virtual ~FilterEditWidget();
+  public:
+    FilterEditWidget(DBFilter* filter, QWidget* parent = nullptr);
+    virtual ~FilterEditWidget();
 
-protected:
-  DBFilter *filter_;
-  QLineEdit *filter_name_;
-  DBOVariableSelectionWidget *condition_variable_widget_;
-  QCheckBox *condition_absolute_;
-  FilterConditionOperatorComboBox *condition_combo_;
-  FilterConditionResetValueComboBox *condition_reset_combo_;
-  QLineEdit *condition_value_;
+  protected:
+    DBFilter* filter_;
+    QLineEdit* filter_name_;
+    DBOVariableSelectionWidget* condition_variable_widget_;
+    QCheckBox* condition_absolute_;
+    FilterConditionOperatorComboBox* condition_combo_;
+    FilterConditionResetValueComboBox* condition_reset_combo_;
+    QLineEdit* condition_value_;
 
-  QGridLayout *conditions_grid_;
-  std::map <QPushButton*, DBFilterCondition *> conditions_delete_buttons_;
-  std::map <DBOVariableSelectionWidget*, DBFilterCondition *> conditions_variable_selects_;
-  std::map <QCheckBox*, DBFilterCondition *> conditions_abs_checkboxes_;
-  std::map <FilterConditionOperatorComboBox*, DBFilterCondition *> conditions_operator_combos_;
-  std::map <FilterConditionResetValueComboBox*, DBFilterCondition *> conditions_reset_value_combos_;
+    QGridLayout* conditions_grid_;
+    std::map<QPushButton*, DBFilterCondition*> conditions_delete_buttons_;
+    std::map<DBOVariableSelectionWidget*, DBFilterCondition*> conditions_variable_selects_;
+    std::map<QCheckBox*, DBFilterCondition*> conditions_abs_checkboxes_;
+    std::map<FilterConditionOperatorComboBox*, DBFilterCondition*> conditions_operator_combos_;
+    std::map<FilterConditionResetValueComboBox*, DBFilterCondition*> conditions_reset_value_combos_;
 
-  void updateConditionsGrid();
+    void updateConditionsGrid();
 };
 
 #endif /* FilterEditWidget_H_ */

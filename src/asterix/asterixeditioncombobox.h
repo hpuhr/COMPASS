@@ -18,66 +18,62 @@
 #ifndef ASTERIXEDITIONCOMBOBOX_H
 #define ASTERIXEDITIONCOMBOBOX_H
 
-#include "asteriximporttask.h"
-
-#include <jasterix/jasterix.h>
 #include <jasterix/category.h>
+#include <jasterix/jasterix.h>
 
 #include <QComboBox>
-
 #include <memory>
+#include <string>
 
-class ASTERIXEditionComboBox: public QComboBox
+#include "asteriximporttask.h"
+
+class ASTERIXEditionComboBox : public QComboBox
 {
     Q_OBJECT
 
-public slots:
-    void changedEditionSlot(const QString &edition)
+  public slots:
+    void changedEditionSlot(const QString& edition)
     {
         emit changedEdition(category_->number(), edition.toStdString());
     }
 
-signals:
+  signals:
     /// @brief Emitted if edition was changed
     void changedEdition(const std::string& cat_str, const std::string& ed_str);
 
-public:
+  public:
     /// @brief Constructor
-    ASTERIXEditionComboBox(ASTERIXImportTask& task, const std::shared_ptr<jASTERIX::Category> category,
+    ASTERIXEditionComboBox(ASTERIXImportTask& task,
+                           const std::shared_ptr<jASTERIX::Category> category,
                            QWidget* parent = nullptr)
-    : QComboBox(parent), task_(task), category_(category)
+        : QComboBox(parent), task_(task), category_(category)
     {
-        for (auto& ed_it : category_->editions())
+        for (const auto& ed_it : category_->editions())
         {
-            addItem (ed_it.first.c_str());
+            addItem(ed_it.first.c_str());
         }
 
-        setCurrentIndex (0);
-        connect(this, SIGNAL(activated(const QString &)), this, SLOT(changedEditionSlot(const QString &)));
-
+        setCurrentIndex(0);
+        connect(this, SIGNAL(activated(const QString&)), this,
+                SLOT(changedEditionSlot(const QString&)));
     }
     /// @brief Destructor
     virtual ~ASTERIXEditionComboBox() {}
 
     /// @brief Returns the currently selected framing
-    std::string getEdition ()
-    {
-        return currentText().toStdString();
-    }
+    std::string getEdition() { return currentText().toStdString(); }
 
     /// @brief Sets the currently selected edition
-    void setEdition (const std::string& edition)
+    void setEdition(const std::string& edition)
     {
         int index = findText(QString(edition.c_str()));
-        assert (index >= 0);
-        setCurrentIndex (index);
+        assert(index >= 0);
+        setCurrentIndex(index);
     }
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
     const std::shared_ptr<jASTERIX::Category> category_;
-
 };
 
-
-#endif // ASTERIXEDITIONCOMBOBOX_H
+#endif  // ASTERIXEDITIONCOMBOBOX_H

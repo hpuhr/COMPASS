@@ -15,12 +15,11 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef DBSCHEMAWIDGET_H_
 #define DBSCHEMAWIDGET_H_
 
-#include <QWidget>
 #include <QDialog>
+#include <QWidget>
 #include <map>
 
 class QCheckBox;
@@ -40,11 +39,11 @@ class DBSchemaWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Is emitted when the schema was renamed
-    void renamed ();
+    void renamed();
 
-private slots:
+  private slots:
     /// @brief Adds a DBTable
     void addTableSlot();
     /// @brief Adds all possible DBTables
@@ -58,41 +57,41 @@ private slots:
     /// @brief Adds a MetaDBTable
     void addMetaTableSlot();
     /// @brief Edits a MetaDBTable
-    void editMetaTableSlot ();
+    void editMetaTableSlot();
     void deleteMetaTableSlot();
     /// @brief Called when a MetaDBTable was changed
-    void changedMetaTableSlot ();
+    void changedMetaTableSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBSchemaWidget(DBSchema &schema, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBSchemaWidget(DBSchema& schema, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBSchemaWidget();
 
-    void lock ();
+    void lock();
 
-protected:
+  protected:
     /// Schema to be edited
     DBSchema& schema_;
 
     /// Grid for all tables
-    QGridLayout* table_grid_ {nullptr};
+    QGridLayout* table_grid_{nullptr};
 
-    QPushButton* add_table_button_ {nullptr};
-    QPushButton* add_all_tables_button_ {nullptr};
-    QCheckBox* auto_populate_check_ {nullptr};
+    QPushButton* add_table_button_{nullptr};
+    QPushButton* add_all_tables_button_{nullptr};
+    QCheckBox* auto_populate_check_{nullptr};
 
     /// Grid for all meta tables
-    QGridLayout* meta_table_grid_ {nullptr};
-    QPushButton* add_ts_button_ {nullptr};
+    QGridLayout* meta_table_grid_{nullptr};
+    QPushButton* add_ts_button_{nullptr};
 
     /// Container for table edit buttons
-    std::map <QPushButton*, DBTable*> edit_table_buttons_;
-    std::map <QPushButton*, DBTable*> delete_table_buttons_;
+    std::map<QPushButton*, DBTable*> edit_table_buttons_;
+    std::map<QPushButton*, DBTable*> delete_table_buttons_;
 
     /// Container for meta table edit buttons
-    std::map <QPushButton*, MetaDBTable*> edit_meta_table_buttons_;
-    std::map <QPushButton*, MetaDBTable*> delete_meta_table_buttons_;
+    std::map<QPushButton*, MetaDBTable*> edit_meta_table_buttons_;
+    std::map<QPushButton*, MetaDBTable*> delete_meta_table_buttons_;
 
     /// Updates DBTable grid
     void updateTableGrid();

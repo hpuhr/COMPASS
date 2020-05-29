@@ -29,26 +29,28 @@ class Projection;
 /**
  * @brief Singleton for coordinate projection handling
  *
- * Currently handles projection from world coordinates to Cartesian coordinates using the WGS-84 method.
+ * Currently handles projection from world coordinates to Cartesian coordinates using the WGS-84
+ * method.
  */
 class ProjectionManager : public Singleton, public Configurable
 {
-protected:
+  protected:
     /// @brief Constructor
     ProjectionManager();
 
-public:
+  public:
     /// @brief Desctructor
     virtual ~ProjectionManager();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    //bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
+    // bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
-    ProjectionManagerWidget* widget ();
+    ProjectionManagerWidget* widget();
 
-    void shutdown ();
+    void shutdown();
 
     /// @brief Returns static instance
     static ProjectionManager& instance()
@@ -59,25 +61,24 @@ public:
     std::string currentProjectionName() const;
     void currentProjectionName(const std::string& name);
 
-    bool hasProjection (const std::string& name);
-    bool hasCurrentProjection ();
-    Projection& currentProjection ();
-
+    bool hasProjection(const std::string& name);
+    bool hasCurrentProjection();
+    Projection& currentProjection();
 
     std::map<std::string, std::unique_ptr<Projection>>& projections();
 
-protected:
+  protected:
     //    float sdl_system_latitude_;
     //    float sdl_system_longitude_;
-//    t_Mapping_Info sdl_mapping_info_;
+    //    t_Mapping_Info sdl_mapping_info_;
 
     std::string current_projection_name_;
 
-    ProjectionManagerWidget* widget_ {nullptr};
+    ProjectionManagerWidget* widget_{nullptr};
 
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

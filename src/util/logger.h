@@ -18,16 +18,17 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-#include "singleton.h"
-
 #include "log4cpp/Appender.hh"
 #include "log4cpp/Category.hh"
+#include "singleton.h"
 
 #define logerr log4cpp::Category::getRoot().errorStream()
 #define logwrn log4cpp::Category::getRoot().warnStream()
 #define loginf log4cpp::Category::getRoot().infoStream()
 //#define logdbg log4cpp::Category::getRoot().debugStream()
-#define logdbg if(false) log4cpp::Category::getRoot().debugStream() // for improved performance
+#define logdbg \
+    if (false) \
+    log4cpp::Category::getRoot().debugStream()  // for improved performance
 
 /**
  * @brief Thread-safe logger
@@ -36,23 +37,23 @@
  */
 class Logger : public Singleton
 {
-protected:
-  static Logger *log_instance_;
-  log4cpp::Appender *console_appender_;
-  log4cpp::Appender *file_appender_;
+  protected:
+    static Logger* log_instance_;
+    log4cpp::Appender* console_appender_;
+    log4cpp::Appender* file_appender_;
 
-  Logger();
+    Logger();
 
-public:
-  static Logger& getInstance()
-  {
-    static Logger instance;
-    return instance;
-  }
+  public:
+    static Logger& getInstance()
+    {
+        static Logger instance;
+        return instance;
+    }
 
-  void init (const std::string &log_config_filename);
+    void init(const std::string& log_config_filename);
 
-  virtual ~Logger();
+    virtual ~Logger();
 };
 
 #endif /* LOGGER_H_ */

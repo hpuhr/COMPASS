@@ -15,89 +15,84 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //#include <iostream>
 
+#include "buffertablewidget.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QClipboard>
-#include <QKeyEvent>
-#include <QApplication>
-#include <QFileDialog>
-#include <QClipboard>
-#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-
 #include "buffer.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
+#include "buffertablemodel.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "logger.h"
-#include "buffertablewidget.h"
-#include "buffertablemodel.h"
-#include "viewselection.h"
+#include "dbovariable.h"
+#include "dbovariableset.h"
 #include "listboxviewdatasource.h"
+#include "logger.h"
+#include "viewselection.h"
 
-//using namespace Utils;
+// using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source,
-                                     QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), view_(view), data_source_(data_source)
+BufferTableWidget::BufferTableWidget(DBObject& object, ListBoxView& view,
+                                     ListBoxViewDataSource& data_source, QWidget* parent,
+                                     Qt::WindowFlags f)
+    : QWidget(parent, f), object_(object), view_(view), data_source_(data_source)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    table_ = new QTableView (this);
+    table_ = new QTableView(this);
     table_->setSelectionBehavior(QAbstractItemView::SelectItems);
     table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    model_ = new BufferTableModel (this, object_, data_source_);
+    model_ = new BufferTableModel(this, object_, data_source_);
     table_->setModel(model_);
 
-    connect (model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+    connect(model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
 
-    layout->addWidget (table_);
+    layout->addWidget(table_);
     table_->show();
 
-    setLayout (layout);
-
+    setLayout(layout);
 }
 
-BufferTableWidget::~BufferTableWidget()
+BufferTableWidget::~BufferTableWidget() {}
+
+void BufferTableWidget::clear()
 {
-}
-
-
-
-void BufferTableWidget::clear ()
-{
-    assert (model_);
+    assert(model_);
 
     model_->clearData();
 }
 
-void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
+void BufferTableWidget::show(
+    std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
 {
-    assert (buffer);
+    assert(buffer);
 
-    logdbg  << "BufferTableWidget: show: object " << object_.name() << " buffer size " << buffer->size()
-            << " properties " << buffer->properties().size();
-    assert (table_);
-    assert (model_);
+    logdbg << "BufferTableWidget: show: object " << object_.name() << " buffer size "
+           << buffer->size() << " properties " << buffer->properties().size();
+    assert(table_);
+    assert(model_);
 
     model_->setData(buffer);
     table_->resizeColumnsToContents();
 
-    logdbg  << " BufferTableWidget: show: end";
+    logdbg << " BufferTableWidget: show: end";
 }
 
 void BufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "BufferTableWidget: exportSlot: object " << object_.name();
 
-    QFileDialog dialog (nullptr);
+    QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
@@ -117,87 +112,80 @@ void BufferTableWidget::exportSlot(bool overwrite)
 
     if (filename.size())
     {
-        if (!filename.endsWith(".csv")) // in case of qt bug
+        if (!filename.endsWith(".csv"))  // in case of qt bug
             filename += ".csv";
 
         loginf << "BufferTableWidget: exportSlot: export filename " << filename.toStdString();
-        assert (model_);
+        assert(model_);
         model_->saveAsCSV(filename.toStdString(), overwrite);
     }
     else
     {
-        emit exportDoneSignal (true);
+        emit exportDoneSignal(true);
     }
 }
 
-void BufferTableWidget::exportDoneSlot (bool cancelled)
-{
-    emit exportDoneSignal (cancelled);
-}
+void BufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
 
-void BufferTableWidget::showOnlySelectedSlot (bool value)
+void BufferTableWidget::showOnlySelectedSlot(bool value)
 {
     loginf << "BufferTableWidget: showOnlySelectedSlot: " << value;
 
-    assert (model_);
+    assert(model_);
     model_->showOnlySelected(value);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void BufferTableWidget::usePresentationSlot (bool use_presentation)
+void BufferTableWidget::usePresentationSlot(bool use_presentation)
 {
-    assert (model_);
+    assert(model_);
     model_->usePresentation(use_presentation);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void BufferTableWidget::showAssociationsSlot (bool value)
+void BufferTableWidget::showAssociationsSlot(bool value)
 {
-    assert (model_);
+    assert(model_);
     model_->showAssociations(value);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
-
 
 void BufferTableWidget::resetModel()
 {
-    assert (model_);
+    assert(model_);
     model_->reset();
 }
 
-void BufferTableWidget::updateToSelection ()
+void BufferTableWidget::updateToSelection()
 {
-    assert (model_);
+    assert(model_);
     model_->updateToSelection();
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-ListBoxView &BufferTableWidget::view() const
-{
-    return view_;
-}
+ListBoxView& BufferTableWidget::view() const { return view_; }
 
 void BufferTableWidget::resizeColumns()
 {
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void BufferTableWidget::keyPressEvent (QKeyEvent* event)
+void BufferTableWidget::keyPressEvent(QKeyEvent* event)
 {
-    loginf  << "BufferTableWidget: keyPressEvent: got keypressed";
+    loginf << "BufferTableWidget: keyPressEvent: got keypressed";
 
-    assert (table_);
+    assert(table_);
 
     if (event->modifiers() & Qt::ControlModifier)
     {
         if (event->key() == Qt::Key_C)
         {
-            loginf  << "BufferTableWidget: keyPressEvent: copying";
+            loginf << "BufferTableWidget: keyPressEvent: copying";
 
             QAbstractItemModel* model = table_->model();
             QItemSelectionModel* selection = table_->selectionModel();
@@ -213,7 +201,7 @@ void BufferTableWidget::keyPressEvent (QKeyEvent* event)
             selected_text = model->data(previous).toString();
             indexes.removeFirst();
 
-            foreach(const QModelIndex &current, indexes)
+            foreach (const QModelIndex& current, indexes)
             {
                 // If you are at the start of the row the row number of the previous index
                 // isn't the same.  Text is followed by a row separator, which is a newline.
@@ -221,16 +209,17 @@ void BufferTableWidget::keyPressEvent (QKeyEvent* event)
                 {
                     selected_text.append('\n');
 
-                    if (!row_count) // first row
+                    if (!row_count)  // first row
                         selected_headers.append('\n');
 
                     ++row_count;
 
                     if (row_count == 999)
                     {
-                        QMessageBox m_warning (QMessageBox::Warning, "Too Many Rows Selected",
-                                               "If more than 1000 lines are selected, only the first 1000 are copied.",
-                                               QMessageBox::Ok);
+                        QMessageBox m_warning(
+                            QMessageBox::Warning, "Too Many Rows Selected",
+                            "If more than 1000 lines are selected, only the first 1000 are copied.",
+                            QMessageBox::Ok);
                         m_warning.exec();
                         break;
                     }
@@ -238,7 +227,7 @@ void BufferTableWidget::keyPressEvent (QKeyEvent* event)
                 // Otherwise it's the same row, so append a column separator, which is a tab.
                 else
                 {
-                    if (!row_count) // first row
+                    if (!row_count)  // first row
                         selected_headers.append(';');
 
                     selected_text.append(';');
@@ -249,16 +238,18 @@ void BufferTableWidget::keyPressEvent (QKeyEvent* event)
                 // At this point `text` contains the text in one cell
                 selected_text.append(text);
 
-//                loginf << "UGA row " << current.row() << " col " << current.column() << " text '"
-//                       << text.toStdString() << "'";
+                //                loginf << "UGA row " << current.row() << " col " <<
+                //                current.column() << " text '"
+                //                       << text.toStdString() << "'";
 
-                if (!row_count) // first row
-                    selected_headers.append(model->headerData(current.column(), Qt::Horizontal).toString());
+                if (!row_count)  // first row
+                    selected_headers.append(
+                        model->headerData(current.column(), Qt::Horizontal).toString());
 
                 previous = current;
             }
 
-            QApplication::clipboard()->setText(selected_headers+selected_text);
+            QApplication::clipboard()->setText(selected_headers + selected_text);
         }
     }
 }

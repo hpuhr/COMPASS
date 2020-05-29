@@ -28,64 +28,66 @@ class DBInterface;
 /**
  * @brief Database table definition
  *
- * Has some parameters (name, name in database, key column name, description) and a collection of DBTableColumn
- *  instances.
+ * Has some parameters (name, name in database, key column name, description) and a collection of
+ * DBTableColumn instances.
  */
 class DBTable : public Configurable
 {
-public:
+  public:
     /// @brief Constructor
-    DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema, DBInterface& db_interface);
+    DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema,
+            DBInterface& db_interface);
     /// @brief Destructor
     virtual ~DBTable();
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
     /// @brief Returns the identifier name
-    const std::string& name () const { return name_; }
+    const std::string& name() const { return name_; }
 
     /// @brief Sets the description
-    void info (const std::string& info) { info_=info; }
+    void info(const std::string& info) { info_ = info; }
     /// @brief Returns the description
-    const std::string& info () const { return info_; }
+    const std::string& info() const { return info_; }
 
-    bool hasColumn (const std::string& name) const;
+    bool hasColumn(const std::string& name) const;
     /// @brief Returns the DBTableColumn identified by the given name
-    const DBTableColumn& column (const std::string& name) const;
+    const DBTableColumn& column(const std::string& name) const;
     /// @brief Returns number of defined database columns
-    unsigned int numColumns () const { return columns_.size(); }
+    unsigned int numColumns() const { return columns_.size(); }
     /// @brief Deletes a given column
-    void deleteColumn (const std::string &name);
+    void deleteColumn(const std::string& name);
 
     /// @brief Returns container with all table columns
-    const std::map <std::string, DBTableColumn*>& columns () const { return columns_; }
+    const std::map<std::string, DBTableColumn*>& columns() const { return columns_; }
 
     /// @brief Returns if the name of the key column is defined
     bool hasKey() const { return key_name_.size() > 0; }
     /// @brief Sets the name of the key column
-    void key (const std::string& key) { key_name_ = key; }
+    void key(const std::string& key) { key_name_ = key; }
     /// @brief Returns name of the key column
-    const std::string& key () const { return key_name_; }
+    const std::string& key() const { return key_name_; }
 
-    void populate ();
-    void update ();
+    void populate();
+    void update();
 
-    void lock ();
-    bool isLocked () { return locked_; }
+    void lock();
+    bool isLocked() { return locked_; }
 
-    DBTableWidget* widget ();
+    DBTableWidget* widget();
 
-    void updateOnDatabase(); // check what informations is present in the current db
+    void updateOnDatabase();  // check what informations is present in the current db
 
-    bool existsInDB () const { return exists_in_db_; }
+    bool existsInDB() const { return exists_in_db_; }
 
-private:
-    DBSchema &schema_;
+  private:
+    DBSchema& schema_;
     DBInterface& db_interface_;
 
-    bool locked_ {false};
+    bool locked_{false};
 
-    DBTableWidget* widget_ {nullptr};
+    DBTableWidget* widget_{nullptr};
 
     /// Table name identifier
     std::string name_;
@@ -94,12 +96,12 @@ private:
     /// Name of the key column
     std::string key_name_;
     /// Container with all table columns (column name -> DBTableColumn)
-    std::map <std::string, DBTableColumn*> columns_;
+    std::map<std::string, DBTableColumn*> columns_;
 
-    bool exists_in_db_ {false};
+    bool exists_in_db_{false};
 
-protected:
-    virtual void checkSubConfigurables ();
+  protected:
+    virtual void checkSubConfigurables();
 };
 
 #endif /* DBTABLE_H_ */

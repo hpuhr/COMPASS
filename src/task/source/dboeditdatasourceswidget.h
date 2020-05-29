@@ -19,6 +19,7 @@
 #define DBOEDITDATASOURCESWIDGET_H
 
 #include <QWidget>
+
 #include "dbobject.h"
 #include "dboeditdatasourceactionoptions.h"
 
@@ -34,12 +35,12 @@ class QGridLayout;
 class DBOEditDataSourcesWidget : public QWidget
 {
     Q_OBJECT
-signals:
-    void dbItemChangedSignal ();
+  signals:
+    void dbItemChangedSignal();
 
-public slots:
+  public slots:
     void syncOptionsFromDBSlot();
-    void addStoredDSSlot ();
+    void addStoredDSSlot();
 
     void syncOptionsFromCfgSlot();
 
@@ -47,45 +48,47 @@ public slots:
     void deselectAllActionsSlot();
     void performActionsSlot();
 
-    void configItemChangedSlot(QTableWidgetItem *item);
-    void dbItemChangedSlot(QTableWidgetItem *item);
+    void configItemChangedSlot(QTableWidgetItem* item);
+    void dbItemChangedSlot(QTableWidgetItem* item);
 
-public:
-    DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object, QWidget* parent=0, Qt::WindowFlags f=0);
+  public:
+    DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object, QWidget* parent = 0,
+                             Qt::WindowFlags f = 0);
     virtual ~DBOEditDataSourcesWidget();
 
-    void update ();
+    void update();
 
-private:
+  private:
     ManageDataSourcesTask& task_;
     DBObject& object_;
 
-    const QStringList table_columns_ {"ID", "Name", "Short Name", "SAC", "SIC", "Latitude", "Longitude", "Altitude"};
+    const QStringList table_columns_{"ID",  "Name",     "Short Name", "SAC",
+                                     "SIC", "Latitude", "Longitude",  "Altitude"};
 
-    QTableWidget* config_ds_table_ {nullptr};
-    QPushButton* sync_from_cfg_button_ {nullptr};
+    QTableWidget* config_ds_table_{nullptr};
+    QPushButton* sync_from_cfg_button_{nullptr};
 
-    QLabel* action_heading_label_ {nullptr};
+    QLabel* action_heading_label_{nullptr};
     std::string action_heading_;
-    QGridLayout* action_layout_ {nullptr};
+    QGridLayout* action_layout_{nullptr};
     DBOEditDataSourceActionOptionsCollection action_collection_;
 
-    QPushButton* select_all_actions_ {nullptr};
-    QPushButton* deselect_all_actions_ {nullptr};
-    QPushButton* perform_actions_button_ {nullptr};
+    QPushButton* select_all_actions_{nullptr};
+    QPushButton* deselect_all_actions_{nullptr};
+    QPushButton* perform_actions_button_{nullptr};
 
-    QTableWidget* db_ds_table_ {nullptr};
-    QPushButton* sync_from_db_button_ {nullptr};
+    QTableWidget* db_ds_table_{nullptr};
+    QPushButton* sync_from_db_button_{nullptr};
 
-    void updateConfigDSTable ();
-    void updateDBDSTable ();
-    void updateColumnSizes ();
+    void updateConfigDSTable();
+    void updateDBDSTable();
+    void updateColumnSizes();
 
     void clearSyncOptions();
-    void displaySyncOptions ();
+    void displaySyncOptions();
 
     void updateActionButtons();
-    bool haveActionsToPerform ();
+    bool haveActionsToPerform();
 };
 
-#endif // DBOEDITDATASOURCESWIDGET_H
+#endif  // DBOEDITDATASOURCESWIDGET_H

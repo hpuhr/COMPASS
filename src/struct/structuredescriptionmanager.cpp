@@ -27,45 +27,48 @@
 
 StructureDescriptionManager::StructureDescriptionManager()
 {
-  logdbg  << "StructureDescriptionManager: constructor";
+    logdbg << "StructureDescriptionManager: constructor";
 
-//  structure_descriptions_[DBO_PLOTS] = new StructureDescriptionPlot ();
-//  structure_descriptions_[DBO_SYSTEM_TRACKS] = new StructureDescriptionSystemTrack ();
-//  structure_descriptions_[DBO_REFERENCE_TRAJECTORIES] = new StructureDescriptionReferenceTrajectory ();
-//  structure_descriptions_[DBO_ADS_B] = new StructureDescriptionADSB();
-//  structure_descriptions_[DBO_MLAT] = new StructureDescriptionMLAT ();
-  //structure_descriptions_[DBO_SENSOR_INFORMATION] = new StructureDescriptionSensor ();
+    //  structure_descriptions_[DBO_PLOTS] = new StructureDescriptionPlot ();
+    //  structure_descriptions_[DBO_SYSTEM_TRACKS] = new StructureDescriptionSystemTrack ();
+    //  structure_descriptions_[DBO_REFERENCE_TRAJECTORIES] = new
+    //  StructureDescriptionReferenceTrajectory (); structure_descriptions_[DBO_ADS_B] = new
+    //  StructureDescriptionADSB(); structure_descriptions_[DBO_MLAT] = new StructureDescriptionMLAT
+    //  ();
+    // structure_descriptions_[DBO_SENSOR_INFORMATION] = new StructureDescriptionSensor ();
 
-  logdbg  << "StructureDescriptionManager: constructor done";
+    logdbg << "StructureDescriptionManager: constructor done";
 }
 
 StructureDescriptionManager::~StructureDescriptionManager()
 {
-  //TODO cleanup causes segmentation
-  /*
-  for (unsigned int cnt=0; cnt < structure_descriptions_.size(); cnt++)
-  {
-    if (structure_descriptions_.at(cnt) != 0)
+    // TODO cleanup causes segmentation
+    /*
+    for (unsigned int cnt=0; cnt < structure_descriptions_.size(); cnt++)
     {
-      loginf  << "uga at " << cnt << " ptr " << (unsigned long) structure_descriptions_.at(cnt);
-      delete structure_descriptions_.at(cnt);
-      structure_descriptions_.at(cnt)=0;
+      if (structure_descriptions_.at(cnt) != 0)
+      {
+        loginf  << "uga at " << cnt << " ptr " << (unsigned long) structure_descriptions_.at(cnt);
+        delete structure_descriptions_.at(cnt);
+        structure_descriptions_.at(cnt)=0;
+      }
     }
-  }
-  structure_descriptions_.clear();
-   */
+    structure_descriptions_.clear();
+     */
 }
 
-StructureDescription *StructureDescriptionManager::getStructureDescription (const std::string &dbo_type)
+StructureDescription* StructureDescriptionManager::getStructureDescription(
+    const std::string& dbo_type)
 {
-  assert (structure_descriptions_.find(dbo_type) != structure_descriptions_.end());
+    assert(structure_descriptions_.find(dbo_type) != structure_descriptions_.end());
 
-  logdbg  << "StructureDescriptionManager: getStructureDescription: type " << dbo_type;
+    logdbg << "StructureDescriptionManager: getStructureDescription: type " << dbo_type;
 
-  return structure_descriptions_.at(dbo_type);
+    return structure_descriptions_.at(dbo_type);
 }
 
-//std::map <DB_OBJECT_TYPE, ConfigurableDefinition> StructureDescriptionManager::createAllDBObjects ()
+// std::map <DB_OBJECT_TYPE, ConfigurableDefinition> StructureDescriptionManager::createAllDBObjects
+// ()
 //{
 //  std::map <DB_OBJECT_TYPE, ConfigurableDefinition> definitions;
 //
@@ -78,4 +81,3 @@ StructureDescription *StructureDescriptionManager::getStructureDescription (cons
 //
 //  return definitions;
 //}
-

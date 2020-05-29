@@ -18,20 +18,22 @@
 #ifndef DBINTERFACE_H_
 #define DBINTERFACE_H_
 
-#include <QMutex>
-#include <set>
-#include <memory>
 #include <qobject.h>
 
-#include "configurable.h"
-#include "propertylist.h"
-#include "dbovariableset.h"
-#include "sqlgenerator.h"
-#include "dboassociationcollection.h"
+#include <QMutex>
+#include <memory>
+#include <set>
 
-static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
+#include "configurable.h"
+#include "dboassociationcollection.h"
+#include "dbovariableset.h"
+#include "propertylist.h"
+#include "sqlgenerator.h"
+
+static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
 static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
+static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 
 class ATSDB;
 class Buffer;
@@ -55,126 +57,139 @@ class QWidget;
 /**
  * @brief Encapsulates all dedicated database functionality
  *
- * After instantiation, initConnection has to be called to create a database connection. After this step, a number of functions
- * provide read/write/other methods. Simply delete to close database connection.
+ * After instantiation, initConnection has to be called to create a database connection. After this
+ * step, a number of functions provide read/write/other methods. Simply delete to close database
+ * connection.
  *
  * \todo Context reference point gets lost
  */
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
-signals:
-    void databaseContentChangedSignal ();
+  signals:
+    void databaseContentChangedSignal();
 
-public:
+  public:
     /// @brief Constructor
-    DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb);
+    DBInterface(std::string class_id, std::string instance_id, ATSDB* atsdb);
     /// @brief Destructor
     virtual ~DBInterface();
 
-    const std::map<std::string, DBConnection*> &connections () { return connections_; }
+    const std::map<std::string, DBConnection*>& connections() { return connections_; }
 
-    const std::string &usedConnection () { return used_connection_; }
+    const std::string& usedConnection() { return used_connection_; }
     /// @brief Initializes a database connection based on the supplied type
-    void useConnection (const std::string &connection_type);
-    void databaseContentChanged ();
-    void closeConnection ();
+    void useConnection(const std::string& connection_type);
+    void databaseContentChanged();
+    void closeConnection();
 
-    void updateTableInfo ();
+    void updateTableInfo();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    std::vector <std::string> getDatabases ();
+    std::vector<std::string> getDatabases();
 
     DBInterfaceInfoWidget* infoWidget();
 
-    QWidget* connectionWidget ();
+    QWidget* connectionWidget();
 
-    const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
+    const std::map<std::string, DBTableInfo>& tableInfo() { return table_info_; }
 
-    bool ready ();
+    bool ready();
 
-    DBConnection &connection ();
+    DBConnection& connection();
 
-    bool hasDataSourceTables (DBObject& object);
+    bool hasDataSourceTables(DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
-    std::map <int, DBODataSource> getDataSources (DBObject &object);
-    void updateDataSource (DBODataSource& data_source);
-    bool hasActiveDataSources (DBObject &object);
+    std::map<int, DBODataSource> getDataSources(DBObject& object);
+    void updateDataSource(DBODataSource& data_source);
+    bool hasActiveDataSources(DBObject& object);
     /// @brief Returns a set with all active data source ids for a DBO type
-    std::set<int> getActiveDataSources (DBObject &object);
+    std::set<int> getActiveDataSources(DBObject& object);
 
-    void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
-    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
-    void insertBuffer (const std::string& table_name, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
+    void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
-    bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
-                            std::shared_ptr<Buffer> buffer);
-    void updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
-                       int from_index=-1, int to_index=-1); // no indexes means full buffer
-    void updateBuffer (DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
-                       int from_index=-1, int to_index=-1); // no indexes means full buffer
+    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
+                           std::shared_ptr<Buffer> buffer);
+    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
+                      std::shared_ptr<Buffer> buffer, int from_index = -1,
+                      int to_index = -1);  // no indexes means full buffer
+    void updateBuffer(DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                      int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
-    std::shared_ptr<Buffer> getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
+    std::shared_ptr<Buffer> getPartialBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
 
     //    /// @brief Prepares incremental read of DBO type
-    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-                      std::vector <DBOVariable *> filtered_variables, bool use_order=false,
-                      DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
+    void prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
+                     std::string custom_filter_clause, std::vector<DBOVariable*> filtered_variables,
+                     bool use_order = false, DBOVariable* order_variable = nullptr,
+                     bool use_order_ascending = false, const std::string& limit = "");
 
     /// @brief Returns data chunk of DBO type
-    std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject);
+    std::shared_ptr<Buffer> readDataChunk(const DBObject& dbobject);
     /// @brief Cleans up incremental read of DBO type
-    void finalizeReadStatement (const DBObject &dbobject);
+    void finalizeReadStatement(const DBObject& dbobject);
 
     /// @brief Returns number of rows for a database table
-    size_t count (const std::string &table);
+    size_t count(const std::string& table);
 
     /// @brief Returns if properties table exists
-    bool existsPropertiesTable ();
+    bool existsPropertiesTable();
     /// @brief Creates the properties table
-    void createPropertiesTable ();
+    void createPropertiesTable();
     /// @brief Inserts a property
-    void setProperty (const std::string& id, const std::string& value);
+    void setProperty(const std::string& id, const std::string& value);
     /// @brief Returns a property
-    std::string getProperty (const std::string& id);
-    bool hasProperty (const std::string& id);
+    std::string getProperty(const std::string& id);
+    bool hasProperty(const std::string& id);
 
-    bool existsTable (const std::string& table_name);
-    void createTable (DBTable& table);
+    bool existsTable(const std::string& table_name);
+    void createTable(DBTable& table);
     /// @brief Returns if minimum/maximum table exists
-    bool existsMinMaxTable ();
+    bool existsMinMaxTable();
     /// @brief Returns the minimum/maximum table
-    void createMinMaxTable ();
+    void createMinMaxTable();
     /// @brief Returns buffer with the minimum/maximum of a DBO variable
-    std::pair<std::string, std::string> getMinMaxString (const DBOVariable& var);
+    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
     /// (dbo type, id) -> (min, max)
-    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
+    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string> >
+    getMinMaxInfo();
     /// @brief Inserts a minimum/maximum value pair
-    void insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,
-                       const std::string& max);
+    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
+                      const std::string& max);
+
+    bool existsViewPointsTable();
+    void createViewPointsTable();
+    void setViewPoint(const unsigned int id, const std::string& value);
+    std::map<unsigned int, std::string> viewPoints();
+    void deleteViewPoint(const unsigned int id);
+    void deleteAllViewPoints();
 
     /// @brief Deletes table content for given table name
-    void clearTableContent (const std::string& table_name);
+    void clearTableContent(const std::string& table_name);
 
     /// @brief Returns minimum/maximum information for all columns in a table
-    std::shared_ptr<DBResult> queryMinMaxNormalForTable (const DBTable& table);
+    std::shared_ptr<DBResult> queryMinMaxNormalForTable(const DBTable& table);
 
     /// @brief Executes query and returns numbers for all active sensors
-    std::set<int> queryActiveSensorNumbers (DBObject& object);
+    std::set<int> queryActiveSensorNumbers(DBObject& object);
 
-    //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
-    //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
+    //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string
+    //    filter); void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value,
+    //    std::string new_value, std::string filter);
 
-    void createAssociationsTable (const std::string& table_name);
-    DBOAssociationCollection getAssociations (const std::string& table_name);
+    void createAssociationsTable(const std::string& table_name);
+    DBOAssociationCollection getAssociations(const std::string& table_name);
 
-protected:
-    std::map <std::string, DBConnection*> connections_;
+  protected:
+    std::map<std::string, DBConnection*> connections_;
 
     std::string used_connection_;
     /// Connection to database, created based on DBConnectionInfo
-    DBConnection* current_connection_ {nullptr};
+    DBConnection* current_connection_{nullptr};
 
     /// Interface initialized (after opening database)
     bool initialized_;
@@ -188,21 +203,22 @@ protected:
     /// Generates SQL statements
     SQLGenerator sql_generator_;
 
-    DBInterfaceInfoWidget* info_widget_ {nullptr};
+    DBInterfaceInfoWidget* info_widget_{nullptr};
 
-    std::map <std::string, DBTableInfo> table_info_;
+    std::map<std::string, DBTableInfo> table_info_;
 
-    std::map <std::string, std::string> properties_;
+    std::map<std::string, std::string> properties_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 
-    void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
+    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
 
-    //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
-    //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
+    //    /// @brief Returns buffer with min/max data from another Buffer with the string contents.
+    //    Delete returned buffer yourself. Buffer *createFromMinMaxStringBuffer (Buffer
+    //    *string_buffer, PropertyDataType data_type);
 
-    void loadProperties ();
-    void saveProperties ();
+    void loadProperties();
+    void saveProperties();
 };
 
 #endif /* DBINTERFACE_H_ */

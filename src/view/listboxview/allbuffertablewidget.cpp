@@ -15,88 +15,84 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 //#include <iostream>
 
+#include "allbuffertablewidget.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QFileDialog>
+#include <QKeyEvent>
+#include <QMessageBox>
 #include <QTableView>
 #include <QVBoxLayout>
-#include <QClipboard>
-#include <QKeyEvent>
-#include <QApplication>
-#include <QFileDialog>
-#include <QClipboard>
-#include <QMessageBox>
+#include <QTimer>
 
+#include "allbuffertablemodel.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
-
 #include "buffer.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "logger.h"
-#include "allbuffertablewidget.h"
-#include "allbuffertablemodel.h"
-#include "viewselection.h"
+#include "dbovariable.h"
+#include "dbovariableset.h"
 #include "listboxviewdatasource.h"
+#include "logger.h"
+#include "viewselection.h"
 
-//using namespace Utils;
+// using namespace Utils;
 
 AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSource& data_source,
-                                     QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), view_(view), data_source_(data_source)
+                                           QWidget* parent, Qt::WindowFlags f)
+    : QWidget(parent, f), view_(view), data_source_(data_source)
 {
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
 
-    QVBoxLayout *layout = new QVBoxLayout ();
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    table_ = new QTableView (this);
+    table_ = new QTableView(this);
     table_->setSelectionBehavior(QAbstractItemView::SelectItems);
     table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    model_ = new AllBufferTableModel (this, data_source_);
+    model_ = new AllBufferTableModel(this, data_source_);
     table_->setModel(model_);
 
-    connect (model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+    connect(model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
 
-    layout->addWidget (table_);
+    layout->addWidget(table_);
     table_->show();
 
-    setLayout (layout);
+    setLayout(layout);
 }
 
-AllBufferTableWidget::~AllBufferTableWidget()
+AllBufferTableWidget::~AllBufferTableWidget() {}
+
+void AllBufferTableWidget::clear()
 {
-}
-
-
-
-void AllBufferTableWidget::clear ()
-{
-    assert (model_);
+    assert(model_);
 
     model_->clearData();
 }
 
-void AllBufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
+void AllBufferTableWidget::show(
+    std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
 {
-    assert (buffer);
+    assert(buffer);
 
-    logdbg  << "AllBufferTableWidget: show: buffer size " << buffer->size() << " properties "
-            << buffer->properties().size();
-    assert (table_);
-    assert (model_);
+    logdbg << "AllBufferTableWidget: show: buffer size " << buffer->size() << " properties "
+           << buffer->properties().size();
+    assert(table_);
+    assert(model_);
 
     model_->setData(buffer);
     table_->resizeColumnsToContents();
 
-    logdbg  << " AllBufferTableWidget: show: end";
+    logdbg << " AllBufferTableWidget: show: end";
 }
 
 void AllBufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "AllBufferTableWidget: exportSlot";
 
-    QFileDialog dialog (nullptr);
+    QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setNameFilter("CSV Files (*.csv)");
     dialog.setDefaultSuffix("csv");
@@ -116,87 +112,111 @@ void AllBufferTableWidget::exportSlot(bool overwrite)
 
     if (filename.size())
     {
-        if (!filename.endsWith(".csv")) // in case of qt bug
+        if (!filename.endsWith(".csv"))  // in case of qt bug
             filename += ".csv";
 
         loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
-        assert (model_);
+        assert(model_);
         model_->saveAsCSV(filename.toStdString(), overwrite);
     }
     else
     {
-        emit exportDoneSignal (true);
+        emit exportDoneSignal(true);
     }
 }
 
-void AllBufferTableWidget::exportDoneSlot (bool cancelled)
-{
-    emit exportDoneSignal (cancelled);
-}
+void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
 
-void AllBufferTableWidget::showOnlySelectedSlot (bool value)
+void AllBufferTableWidget::showOnlySelectedSlot(bool value)
 {
     loginf << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
 
-    assert (model_);
+    assert(model_);
     model_->showOnlySelected(value);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::usePresentationSlot (bool use_presentation)
+void AllBufferTableWidget::usePresentationSlot(bool use_presentation)
 {
-    assert (model_);
+    assert(model_);
     model_->usePresentation(use_presentation);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void AllBufferTableWidget::showAssociationsSlot (bool value)
+void AllBufferTableWidget::showAssociationsSlot(bool value)
 {
-    assert (model_);
+    assert(model_);
     model_->showAssociations(value);
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
-
 
 void AllBufferTableWidget::resetModel()
 {
-    assert (model_);
+    assert(model_);
     model_->reset();
 }
 
-void AllBufferTableWidget::updateToSelection ()
+void AllBufferTableWidget::updateToSelection()
 {
-    assert (model_);
+    assert(model_);
     model_->updateToSelection();
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
 void AllBufferTableWidget::resizeColumns()
 {
-    assert (table_);
+    assert(table_);
     table_->resizeColumnsToContents();
 }
 
-ListBoxView &AllBufferTableWidget::view() const
+void AllBufferTableWidget::selectSelectedRows()
 {
-    return view_;
+    loginf << "AllBufferTableWidget: selectSelectedRows";
+
+    assert(table_);
+    assert(model_);
+    std::pair<int,int> rows = model_->getSelectedRows();
+
+    if (rows.first >= 0 && rows.second >= 0)
+    {
+        loginf << "AllBufferTableWidget: selectSelectedRows: rows " << rows.first << " to " << rows.second;
+
+        assert (rows.first <= rows.second);
+
+        QModelIndex first = model_->index(rows.first, 0, QModelIndex());
+        assert (first.isValid());
+
+        QModelIndex last = model_->index(rows.second, 0, QModelIndex());
+        assert (last.isValid());
+
+        table_->selectionModel()->select(QItemSelection(first, last),
+                                         QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+        //table_->scrollTo(first, QAbstractItemView::PositionAtCenter);
+        // needed, maybe because model is reset
+        QTimer::singleShot(10, [this,first]{table_->scrollTo(first, QAbstractItemView::PositionAtCenter);});
+    }
+    else
+        loginf << "AllBufferTableWidget: selectSelectedRows: nothing selected";
 }
 
-void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
-{
-    loginf  << "AllBufferTableWidget: keyPressEvent: got keypressed";
+ListBoxView& AllBufferTableWidget::view() const { return view_; }
 
-    assert (table_);
+void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
+{
+    loginf << "AllBufferTableWidget: keyPressEvent: got keypressed";
+
+    assert(table_);
 
     if (event->modifiers() & Qt::ControlModifier)
     {
         if (event->key() == Qt::Key_C)
         {
-            loginf  << "AllBufferTableWidget: keyPressEvent: copying";
+            loginf << "AllBufferTableWidget: keyPressEvent: copying";
 
             QAbstractItemModel* model = table_->model();
             QItemSelectionModel* selection = table_->selectionModel();
@@ -212,7 +232,7 @@ void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
             selected_text = model->data(previous).toString();
             indexes.removeFirst();
 
-            foreach(const QModelIndex &current, indexes)
+            foreach (const QModelIndex& current, indexes)
             {
                 // If you are at the start of the row the row number of the previous index
                 // isn't the same.  Text is followed by a row separator, which is a newline.
@@ -220,16 +240,17 @@ void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
                 {
                     selected_text.append('\n');
 
-                    if (!row_count) // first row
+                    if (!row_count)  // first row
                         selected_headers.append('\n');
 
                     ++row_count;
 
                     if (row_count == 999)
                     {
-                        QMessageBox m_warning (QMessageBox::Warning, "Too Many Rows Selected",
-                                               "If more than 1000 lines are selected, only the first 1000 are copied.",
-                                               QMessageBox::Ok);
+                        QMessageBox m_warning(
+                            QMessageBox::Warning, "Too Many Rows Selected",
+                            "If more than 1000 lines are selected, only the first 1000 are copied.",
+                            QMessageBox::Ok);
                         m_warning.exec();
                         break;
                     }
@@ -237,7 +258,7 @@ void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
                 // Otherwise it's the same row, so append a column separator, which is a tab.
                 else
                 {
-                    if (!row_count) // first row
+                    if (!row_count)  // first row
                         selected_headers.append(';');
 
                     selected_text.append(';');
@@ -248,16 +269,18 @@ void AllBufferTableWidget::keyPressEvent (QKeyEvent* event)
                 // At this point `text` contains the text in one cell
                 selected_text.append(text);
 
-//                loginf << "UGA row " << current.row() << " col " << current.column() << " text '"
-//                       << text.toStdString() << "'";
+                //                loginf << "UGA row " << current.row() << " col " <<
+                //                current.column() << " text '"
+                //                       << text.toStdString() << "'";
 
-                if (!row_count) // first row
-                    selected_headers.append(model->headerData(current.column(), Qt::Horizontal).toString());
+                if (!row_count)  // first row
+                    selected_headers.append(
+                        model->headerData(current.column(), Qt::Horizontal).toString());
 
                 previous = current;
             }
 
-            QApplication::clipboard()->setText(selected_headers+selected_text);
+            QApplication::clipboard()->setText(selected_headers + selected_text);
         }
     }
 }

@@ -31,9 +31,9 @@ class QAction;
 class ViewManagerWidget : public QFrame
 {
     Q_OBJECT
-private slots:
-    void databaseBusy ();
-    void databaseIdle ();
+  private slots:
+    void databaseBusy();
+    void databaseIdle();
 
     void addViewMenuSlot();
     void addViewSlot();
@@ -41,22 +41,22 @@ private slots:
     //  void addTemplateSlot ();
     //  void addTemplateNewWindowSlot ();
 
-public:
-    ViewManagerWidget(ViewManager &view_manager);
+  public:
+    ViewManagerWidget(ViewManager& view_manager);
     virtual ~ViewManagerWidget();
 
-    void update ();
+    void update();
 
-private:
-    ViewManager &view_manager_;
-    QVBoxLayout *layout_;
-    QVBoxLayout *cont_layout_;
+  private:
+    ViewManager& view_manager_;
+    QVBoxLayout* layout_;
+    QVBoxLayout* cont_layout_;
 
-    QPushButton *add_button_;
+    QPushButton* add_button_;
 
     QStringList view_class_list_;
     std::vector<ViewContainerConfigWidget*> cont_widgets_;
-    std::map <QAction*, std::pair<std::string, int> > add_template_actions_;
+    std::map<QAction*, std::pair<std::string, int> > add_template_actions_;
 };
 
 #endif /* VIEWSWIDGET_H_ */

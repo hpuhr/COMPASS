@@ -15,85 +15,96 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QAction>
-#include <QWidget>
-#include <QCheckBox>
-#include <QVBoxLayout>
-#include <QPushButton>
-
 #include "dbfilterwidget.h"
-#include "dbfilter.h"
-#include "logger.h"
-#include "dbfiltercondition.h"
-#include "global.h"
+
+#include <QAction>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QWidget>
+
 #include "atsdb.h"
-#include "filtermanager.h"
+#include "dbfilter.h"
+#include "dbfiltercondition.h"
 #include "files.h"
+#include "filtermanager.h"
+#include "global.h"
+#include "logger.h"
 
 using namespace Utils;
 
 /**
  * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
  */
-DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &instance_id, DBFilter &filter)
-    : QFrame (), Configurable (class_id, instance_id, &filter),filter_(filter), visible_checkbox_(0),
-      active_checkbox_(0), manage_button_ (0), child_layout_ (0)
+DBFilterWidget::DBFilterWidget(const std::string& class_id, const std::string& instance_id,
+                               DBFilter& filter)
+    : QFrame(),
+      Configurable(class_id, instance_id, &filter),
+      filter_(filter),
+      visible_checkbox_(0),
+      active_checkbox_(0),
+      manage_button_(0),
+      child_layout_(0)
 {
-    logdbg  << "DBFilterWidget: constructor";
+    logdbg << "DBFilterWidget: constructor";
 
-    registerParameter ("visible", &visible_, false);
+    registerParameter("visible", &visible_, false);
 
-
-    QVBoxLayout *main_layout = new QVBoxLayout ();
-    main_layout->setContentsMargins (1, 1, 1, 1);
-    main_layout->setSpacing (1);
+    QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout->setContentsMargins(1, 1, 1, 1);
+    main_layout->setSpacing(1);
 
     setFrameStyle(QFrame::Panel | QFrame::Raised);
 
-    QHBoxLayout *config_layout = new QHBoxLayout ();
-    config_layout->setContentsMargins (1, 1, 1, 1);
-    config_layout->setSpacing (1);
+    QHBoxLayout* config_layout = new QHBoxLayout();
+    config_layout->setContentsMargins(1, 1, 1, 1);
+    config_layout->setSpacing(1);
 
     active_checkbox_ = new QCheckBox();
-    connect( active_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleActive() ) );
-    config_layout->addWidget (active_checkbox_);
+    connect(active_checkbox_, SIGNAL(clicked()), this, SLOT(toggleActive()));
+    config_layout->addWidget(active_checkbox_);
 
     visible_checkbox_ = new QCheckBox(tr(filter_.getName().c_str()));
-    connect( visible_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleVisible() ) );
+    connect(visible_checkbox_, SIGNAL(clicked()), this, SLOT(toggleVisible()));
 
-    std::string style_str = " QCheckBox::indicator {  width: 12px; height: 12px; }  "
-                            "QCheckBox::indicator:checked   {     image: url("+Files::getIconFilepath("collapse.png")+");   }"
-                            "QCheckBox::indicator:unchecked   {     image: url("+Files::getIconFilepath("expand.png")+"); }";
-    visible_checkbox_->setStyleSheet (style_str.c_str());
+    std::string style_str =
+        " QCheckBox::indicator {  width: 12px; height: 12px; }  "
+        "QCheckBox::indicator:checked   {     image: url(" +
+        Files::getIconFilepath("collapse.png") +
+        ");   }"
+        "QCheckBox::indicator:unchecked   {     image: url(" +
+        Files::getIconFilepath("expand.png") + "); }";
+    visible_checkbox_->setStyleSheet(style_str.c_str());
 
-    config_layout->addWidget (visible_checkbox_);
+    config_layout->addWidget(visible_checkbox_);
     config_layout->addStretch();
 
-    manage_button_ = new QPushButton ();
+    manage_button_ = new QPushButton();
     manage_button_->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
-    manage_button_->setFixedSize (UI_ICON_SIZE);
+    manage_button_->setFixedSize(UI_ICON_SIZE);
     manage_button_->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button_->setToolTip(tr("Manage filter"));
-    connect(manage_button_, SIGNAL( clicked() ), this, SLOT( showMenuSlot() ));
-    config_layout->addWidget (manage_button_);
-    main_layout->addLayout (config_layout);
+    connect(manage_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    config_layout->addWidget(manage_button_);
+    main_layout->addLayout(config_layout);
 
-    child_ = new QWidget ();
-    child_->setVisible (visible_);
+    child_ = new QWidget();
+    child_->setVisible(visible_);
 
-    child_layout_ = new QVBoxLayout ();
-    child_layout_->setContentsMargins (5, 1, 1, 1);
-    child_layout_->setSpacing (1);
+    child_layout_ = new QVBoxLayout();
+    child_layout_->setContentsMargins(5, 1, 1, 1);
+    child_layout_->setSpacing(1);
 
     updateChildWidget();
 
-    child_->setLayout (child_layout_);
+    child_->setLayout(child_layout_);
 
-    main_layout->addWidget (child_);
-    setLayout (main_layout);
+    main_layout->addWidget(child_);
+    setLayout(main_layout);
 
-    connect (this, SIGNAL(deleteFilterSignal(DBFilter*)), &ATSDB::instance().filterManager(), SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
-    createMenu ();
+    connect(this, SIGNAL(deleteFilterSignal(DBFilter*)), &ATSDB::instance().filterManager(),
+            SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
+    createMenu();
 
     update();
 }
@@ -101,66 +112,64 @@ DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &i
 /**
  * Tells the DBFilter that the widget has already been deleted.
  */
-DBFilterWidget::~DBFilterWidget()
-{
-
-}
+DBFilterWidget::~DBFilterWidget() {}
 
 /**
  * Adds possible actions for a generic filter
  */
-void DBFilterWidget::createMenu ()
+void DBFilterWidget::createMenu()
 {
     if (!filter_.isGeneric())
         return;
 
-    QAction *reset_action = menu_.addAction(tr("Reset"));
+    QAction* reset_action = menu_.addAction(tr("Reset"));
     connect(reset_action, SIGNAL(triggered()), this, SLOT(reset()));
 
-    QAction *edit_action = menu_.addAction(tr("Edit"));
+    QAction* edit_action = menu_.addAction(tr("Edit"));
     connect(edit_action, SIGNAL(triggered()), this, SLOT(filterEditSlot()));
 
-    QAction *delete_action = menu_.addAction(tr("Delete"));
+    QAction* delete_action = menu_.addAction(tr("Delete"));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteFilter()));
 }
 
 /**
  * Adds a widget to the child layout
  */
-void DBFilterWidget::addChildWidget (QWidget *widget)
+void DBFilterWidget::addChildWidget(QWidget* widget)
 {
-    assert (widget);
-    child_layout_->addWidget (widget);
+    assert(widget);
+    child_layout_->addWidget(widget);
 }
 
 /**
  * Removes all contents of the child layout, and adds all condition widgets of the filter
  */
-void DBFilterWidget::updateChildWidget ()
+void DBFilterWidget::updateChildWidget()
 {
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = child_layout_->takeAt(0)) != 0)
     {
         if (child->widget())
-            child_layout_->removeWidget(child->widget());;
+            child_layout_->removeWidget(child->widget());
+        ;
         child_layout_->removeItem(child);
         delete child;
     }
 
-    std::vector <DBFilterCondition *> &conditions = filter_.getConditions();
-    for (unsigned int cnt=0; cnt < conditions.size(); cnt++)
+    std::vector<DBFilterCondition*>& conditions = filter_.getConditions();
+    for (unsigned int cnt = 0; cnt < conditions.size(); cnt++)
     {
-        QWidget *child_widget = conditions.at(cnt)->getWidget();
-        assert (child_widget);
+        QWidget* child_widget = conditions.at(cnt)->getWidget();
+        assert(child_widget);
         child_layout_->addWidget(child_widget);
-        connect(conditions.at(cnt), SIGNAL( possibleFilterChange() ), this, SLOT( possibleSubFilterChange() ), Qt::UniqueConnection);
+        connect(conditions.at(cnt), SIGNAL(possibleFilterChange()), this,
+                SLOT(possibleSubFilterChange()), Qt::UniqueConnection);
     }
 }
 
-
 void DBFilterWidget::toggleVisible()
 {
-    logdbg  << "DBFilterWidget: toggleVisible";
+    logdbg << "DBFilterWidget: toggleVisible";
     visible_ = !visible_;
     child_->setVisible(visible_);
 }
@@ -169,8 +178,8 @@ void DBFilterWidget::toggleAnd()
 {
     logdbg << "DBFilterWidget: toggleAnd";
 
-    //checked is or is false
-    //unchecked is and is true
+    // checked is or is false
+    // unchecked is and is true
     /*
   filter_.setAnd(and_checkbox_->checkState() == Qt::Unchecked);
      */
@@ -193,11 +202,11 @@ void DBFilterWidget::invert()
     emit possibleFilterChange();
 }
 
-void DBFilterWidget::update (void)
+void DBFilterWidget::update(void)
 {
     logdbg << "DBFilterWidget: update";
 
-    visible_checkbox_->setText (filter_.getName().c_str());
+    visible_checkbox_->setText(filter_.getName().c_str());
 
     if (filter_.getActive())
         active_checkbox_->setChecked(true);
@@ -219,34 +228,27 @@ void DBFilterWidget::update (void)
     //  {
     //    conditions.at(cnt)->update();
     //  }
-
 }
 
-void DBFilterWidget::possibleSubFilterChange ()
+void DBFilterWidget::possibleSubFilterChange()
 {
-    logdbg  << "DBFilterWidget: possibleSubFilterChange";
+    logdbg << "DBFilterWidget: possibleSubFilterChange";
     emit possibleFilterChange();
 }
 
-void DBFilterWidget::reset ()
+void DBFilterWidget::reset()
 {
     filter_.reset();
-    updateChildWidget ();
+    updateChildWidget();
     emit possibleFilterChange();
 }
 
-void DBFilterWidget::showMenuSlot()
-{
-    menu_.exec( QCursor::pos() );
-}
+void DBFilterWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
 
-void DBFilterWidget::deleteFilter()
-{
-    emit deleteFilterSignal (&filter_);
-}
+void DBFilterWidget::deleteFilter() { emit deleteFilterSignal(&filter_); }
 
-void DBFilterWidget::filterEditSlot ()
+void DBFilterWidget::filterEditSlot()
 {
-    logdbg  << "DBFilterWidget: filterEditSlot";
+    logdbg << "DBFilterWidget: filterEditSlot";
     emit filterEdit(&filter_);
 }

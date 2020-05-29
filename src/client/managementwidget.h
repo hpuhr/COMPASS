@@ -20,30 +20,30 @@
 
 #include <QWidget>
 
-//class FilterConfigWidget;
-//class DBInfoWidget;
-//class ResultSetWidget;
-//class WorkerThreadWidget;
-//class ViewsWidget;
+// class FilterConfigWidget;
+// class DBInfoWidget;
+// class ResultSetWidget;
+// class WorkerThreadWidget;
+// class ViewsWidget;
 
 class ManagementWidget : public QWidget
 {
-  Q_OBJECT
+    Q_OBJECT
 
-public slots:
+  public slots:
 
-public:
-  ManagementWidget();
-  virtual ~ManagementWidget();
+  public:
+    ManagementWidget();
+    virtual ~ManagementWidget();
 
-protected:
-//  DBInfoWidget *db_info_;
-//  ResultSetWidget *result_;
-//  FilterConfigWidget *filter_config_gui_;
-//  WorkerThreadWidget *worker_widget_;
-//  ViewsWidget *views_;
+  protected:
+    //  DBInfoWidget *db_info_;
+    //  ResultSetWidget *result_;
+    //  FilterConfigWidget *filter_config_gui_;
+    //  WorkerThreadWidget *worker_widget_;
+    //  ViewsWidget *views_;
 
-  virtual void resizeEvent (QResizeEvent *event);
+    virtual void resizeEvent(QResizeEvent* event);
 };
 
 #endif /* MANAGMENTWIDGET_H_ */

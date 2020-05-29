@@ -18,50 +18,55 @@
 #ifndef UNIT_H_
 #define UNIT_H_
 
+#include <cmath>
+#include <map>
+#include <string>
+
 #include "configurable.h"
 #include "dimension.h"
 #include "logger.h"
 
-#include <string>
-#include <map>
-#include <cmath>
-
 /**
  * @brief Definition of a base unit
  *
- * Automatically registers to UnitManager, has a name (length, time), allows registering sub units with scaling factors.
+ * Automatically registers to UnitManager, has a name (length, time), allows registering sub units
+ * with scaling factors.
  */
 class Unit : public Configurable
 {
-public:
-  /// @brief Constructor with a name
-  Unit(const std::string &class_id, const std::string &instance_id, Dimension &parent)
-      : Configurable (class_id, instance_id, &parent)
-  {
-      registerParameter("definition", &definition_, "");
-      registerParameter("factor", &factor_, 1.0);
+  public:
+    /// @brief Constructor with a name
+    Unit(const std::string& class_id, const std::string& instance_id, Dimension& parent)
+        : Configurable(class_id, instance_id, &parent)
+    {
+        registerParameter("definition", &definition_, "");
+        registerParameter("factor", &factor_, 1.0);
 
-      loginf << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id
-             << " factor " << factor_;
+        loginf << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id
+               << " factor " << factor_;
 
-      assert (factor_ != 0);
-      assert (!std::isinf(factor_));
-  }
-  /// @brief Destructor
-  virtual ~Unit() {}
+        assert(factor_ != 0);
+        assert(!std::isinf(factor_));
+    }
+    /// @brief Destructor
+    virtual ~Unit() {}
 
-  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id) { assert (false); }
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id)
+    {
+        assert(false);
+    }
 
-  double factor () const { return factor_; }
+    double factor() const { return factor_; }
 
-private:
-  /// Comment definition
-  std::string definition_;
-  /// Scaling factor
-  double factor_;
+  private:
+    /// Comment definition
+    std::string definition_;
+    /// Scaling factor
+    double factor_;
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 };
 
 #endif /* UNIT_H_ */

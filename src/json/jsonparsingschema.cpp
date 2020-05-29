@@ -16,6 +16,7 @@
  */
 
 #include "jsonparsingschema.h"
+
 #include "jsonimporttask.h"
 
 JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
@@ -24,7 +25,7 @@ JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::str
 {
     registerParameter("name", &name_, "");
 
-    assert (name_.size());
+    assert(name_.size());
 
     createSubConfigurables();
 }
@@ -35,17 +36,18 @@ JSONParsingSchema& JSONParsingSchema::operator=(JSONParsingSchema&& other)
 
     parsers_ = std::move(other.parsers_);
 
-    other.configuration().updateParameterPointer ("name", &name_);
+    other.configuration().updateParameterPointer("name", &name_);
 
-//    widget_ = std::move(other.widget_);
-//    if (widget_)
-//        widget_->setParser(*this);
-//    other.widget_ = nullptr;
+    //    widget_ = std::move(other.widget_);
+    //    if (widget_)
+    //        widget_->setParser(*this);
+    //    other.widget_ = nullptr;
 
     return static_cast<JSONParsingSchema&>(Configurable::operator=(std::move(other)));
 }
 
-void JSONParsingSchema::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
+                                                const std::string& instance_id)
 {
     if (class_id == "JSONObjectParser")
     {
@@ -56,46 +58,43 @@ void JSONParsingSchema::generateSubConfigurable (const std::string &class_id, co
         if (sub_config.hasParameterConfigValueString("name"))
             name = sub_config.getParameterConfigValueString("name");
 
-        if (!name.size() && sub_config.hasParameterConfigValueString("db_object_name")) // name not set hack
+        if (!name.size() &&
+            sub_config.hasParameterConfigValueString("db_object_name"))  // name not set hack
             name = sub_config.getParameterConfigValueString("db_object_name");
 
-        assert (name.size());
-        assert (parsers_.find (name) == parsers_.end());
+        assert(name.size());
+        assert(parsers_.find(name) == parsers_.end());
 
         logdbg << "JSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
                << " with name " << name;
 
-        parsers_.emplace(std::piecewise_construct,
-                     std::forward_as_tuple(name),  // args for key
-                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+        parsers_.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(name),                          // args for key
+            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
-        throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error("JSONImporterTask: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
-std::string JSONParsingSchema::name() const
-{
-    return name_;
-}
+std::string JSONParsingSchema::name() const { return name_; }
 
-void JSONParsingSchema::name(const std::string &name)
-{
-    name_ = name;
-}
+void JSONParsingSchema::name(const std::string& name) { name_ = name; }
 
-JSONObjectParser& JSONParsingSchema::parser (const std::string& name)
+JSONObjectParser& JSONParsingSchema::parser(const std::string& name)
 {
-    assert (hasObjectParser(name));
+    assert(hasObjectParser(name));
     return parsers_.at(name);
 }
 
-void JSONParsingSchema::removeParser (const std::string& name)
+void JSONParsingSchema::removeParser(const std::string& name)
 {
-    assert (hasObjectParser(name));
+    assert(hasObjectParser(name));
     parsers_.erase(name);
 }
 
-void JSONParsingSchema::updateMappings ()
+void JSONParsingSchema::updateMappings()
 {
     for (auto& p_it : parsers_)
         p_it.second.updateMappings();

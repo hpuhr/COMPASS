@@ -12,25 +12,25 @@ class ManageDataSourcesTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
-public slots:
-    void expertModeChangedSlot ();
+  public slots:
+    void expertModeChangedSlot();
 
-    void exportConfigDataSourcesSlot ();
-    void clearConfigDataSourcesSlot ();
-    void importConfigDataSourcesSlot ();
-    void autoSyncAllConfigDataSourcesToDB ();
+    void exportConfigDataSourcesSlot();
+    void clearConfigDataSourcesSlot();
+    void importConfigDataSourcesSlot();
+    void autoSyncAllConfigDataSourcesToDB();
 
-    void dbItemChangedSlot ();
+    void dbItemChangedSlot();
 
-public:
-    ManageDataSourcesTaskWidget(ManageDataSourcesTask& task, QWidget *parent=nullptr);
+  public:
+    ManageDataSourcesTaskWidget(ManageDataSourcesTask& task, QWidget* parent = nullptr);
 
-    void setCurrentWidget (DBOEditDataSourcesWidget* widget);
+    void setCurrentWidget(DBOEditDataSourcesWidget* widget);
 
-protected:
+  protected:
     ManageDataSourcesTask& task_;
 
-    QTabWidget* tab_widget_ {nullptr};
+    QTabWidget* tab_widget_{nullptr};
 };
 
-#endif // MANAGEDATASOURCESTASKWIDGET_H
+#endif  // MANAGEDATASOURCESTASKWIDGET_H

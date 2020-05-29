@@ -15,35 +15,35 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
-#include "buffer.h"
 #include "updatebufferdbjob.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "buffer.h"
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbovariable.h"
-
 #include "stringconv.h"
 
 using namespace Utils::String;
 
-UpdateBufferDBJob::UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var,
-                                     std::shared_ptr<Buffer> buffer)
-: Job("UpdateBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), key_var_(key_var), buffer_(buffer)
+UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBObject& dbobject,
+                                     DBOVariable& key_var, std::shared_ptr<Buffer> buffer)
+    : Job("UpdateBufferDBJob"),
+      db_interface_(db_interface),
+      dbobject_(dbobject),
+      key_var_(key_var),
+      buffer_(buffer)
 {
-    assert (buffer_);
-    assert (dbobject_.existsInDB());
-    assert (key_var_.existsInDB());
+    assert(buffer_);
+    assert(dbobject_.existsInDB());
+    assert(key_var_.existsInDB());
 }
 
-UpdateBufferDBJob::~UpdateBufferDBJob()
-{
+UpdateBufferDBJob::~UpdateBufferDBJob() {}
 
-}
-
-void UpdateBufferDBJob::run ()
+void UpdateBufferDBJob::run()
 {
-    loginf  << "UpdateBufferDBJob: run: start";
+    loginf << "UpdateBufferDBJob: run: start";
 
     started_ = true;
 
@@ -54,8 +54,8 @@ void UpdateBufferDBJob::run ()
 
     unsigned int steps = buffer_->size() / 10000;
 
-    loginf  << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key " << key_var_.name()
-            << " size " << buffer_->size();
+    loginf << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key "
+           << key_var_.name() << " size " << buffer_->size();
 
     unsigned int index_from = 0;
     unsigned int index_to = 0;
@@ -65,24 +65,25 @@ void UpdateBufferDBJob::run ()
         index_from = cnt * 10000;
         index_to = index_from + 10000;
 
-        if (index_to > buffer_->size()-1)
-            index_to = buffer_->size()-1;
+        if (index_to > buffer_->size() - 1)
+            index_to = buffer_->size() - 1;
 
-        logdbg << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
-               << " to " << index_to;
+        logdbg << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from "
+               << index_from << " to " << index_to;
 
-        db_interface_.updateBuffer (dbobject_.currentMetaTable(), key_var_.currentDBColumn(), buffer_,
-                                    index_from, index_to);
+        db_interface_.updateBuffer(dbobject_.currentMetaTable(), key_var_.currentDBColumn(),
+                                   buffer_, index_from, index_to);
 
-        emit updateProgressSignal(100.0*index_to/buffer_->size());
+        emit updateProgressSignal(100.0 * index_to / buffer_->size());
     }
 
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
     boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
-    load_time= diff.total_milliseconds()/1000.0;
+    load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf  << "UpdateBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
-    done_=true;
+    loginf << "UpdateBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2)
+           << " s).";
+    done_ = true;
 }

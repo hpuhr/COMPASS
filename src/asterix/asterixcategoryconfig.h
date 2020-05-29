@@ -24,10 +24,10 @@
 
 class ASTERIXCategoryConfig : public Configurable
 {
-public:
-    ASTERIXCategoryConfig (unsigned int category, const std::string& class_id, const std::string& instance_id,
-                           Configurable* parent)
-        : Configurable (class_id, instance_id,parent), category_(category)
+  public:
+    ASTERIXCategoryConfig(unsigned int category, const std::string& class_id,
+                          const std::string& instance_id, Configurable* parent)
+        : Configurable(class_id, instance_id, parent), category_(category)
     {
         registerParameter("category", &category_, 0);
         registerParameter("decode", &decode_, false);
@@ -36,63 +36,37 @@ public:
         registerParameter("spf", &spf_, "");
     }
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
-
-    unsigned int category() const
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id)
     {
-        return category_;
     }
 
-    bool decode() const
-    {
-        return decode_;
-    }
-    void decode(bool decode)
-    {
-        decode_ = decode;
-    }
+    unsigned int category() const { return category_; }
 
-    std::string edition() const
-    {
-        return edition_;
-    }
+    bool decode() const { return decode_; }
+    void decode(bool decode) { decode_ = decode; }
 
-    void edition(const std::string& edition)
-    {
-        edition_ = edition;
-    }
+    std::string edition() const { return edition_; }
 
-    std::string ref() const
-    {
-        return ref_;
-    }
+    void edition(const std::string& edition) { edition_ = edition; }
 
-    void ref(const std::string& ref)
-    {
-        ref_ = ref;
-    }
+    std::string ref() const { return ref_; }
 
-    std::string spf() const
-    {
-        return spf_;
-    }
+    void ref(const std::string& ref) { ref_ = ref; }
 
-    void spf(const std::string& spf)
-    {
-        spf_ = spf;
-    }
+    std::string spf() const { return spf_; }
 
-private:
+    void spf(const std::string& spf) { spf_ = spf; }
+
+  private:
     unsigned int category_;
-    bool decode_ {false};
+    bool decode_{false};
     std::string edition_;
     std::string ref_;
     std::string spf_;
 
-protected:
-    virtual void checkSubConfigurables () {}
+  protected:
+    virtual void checkSubConfigurables() {}
 };
 
-#endif // ASTERIXCATEGORYCONFIG_H
-
-
+#endif  // ASTERIXCATEGORYCONFIG_H

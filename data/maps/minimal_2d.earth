@@ -1,0 +1,38 @@
+<!--
+osgEarth Sample
+
+layout crop_features="true"
+-->
+
+<map name="Wordwide Line Vectors" type="projected">
+  
+    <options>
+        <profile>spherical-mercator</profile>
+        <lighting>false</lighting>
+        <terrain>
+            <driver>rex</driver>
+            <tile_size>2</tile_size>
+            <color>#000000FF</color>
+        </terrain>
+    </options>
+
+    <feature_model name="world boundaries">
+        <features name="world boundaries" driver="ogr">
+            <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
+        </features>       
+        
+        <styles>
+            <style type="text/css">
+                states {
+                   stroke:                   #ffff00;
+                   stroke-width:             2px;
+                   render-lighting:          false;
+                   stroke-tessellation-size: 1km;
+                   altitude-clamping:   terrain-gpu;
+                   render-depth-offset:      true;     
+                }                    
+            </style>
+        </styles>        
+    </feature_model>
+    
+</map>

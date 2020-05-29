@@ -18,9 +18,11 @@
 #ifndef STRUCTUREVARIABLE_H_
 #define STRUCTUREVARIABLE_H_
 
-#include <string>
 #include <stdio.h>
+
 #include <iostream>
+#include <string>
+
 #include "structureelement.h"
 
 class StructureDescription;
@@ -30,61 +32,48 @@ class StructureDescription;
  */
 class StructureVariable : public StructureElement
 {
-public:
-  /// @brief Constructor
-  StructureVariable(std::string id, StructureElementDataType type, unsigned int number, std::string description, size_t offset);
+  public:
+    /// @brief Constructor
+    StructureVariable(std::string id, StructureElementDataType type, unsigned int number,
+                      std::string description, size_t offset);
 
-  void addPresentStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset);
+    void addPresentStructureVariable(std::string id, StructureElementDataType type, int number,
+                                     std::string description, size_t offset);
 
-public:
-  void print (std::string prefix);
+  public:
+    void print(std::string prefix);
 
-  void addToFlatStructureDescription (StructureDescription *flatdesc, std::string prefix);
+    void addToFlatStructureDescription(StructureDescription* flatdesc, std::string prefix);
 
-  /// @brief Destructor
-  virtual ~StructureVariable() {};
-  /// @brief Returns description
-  std::string getDescription() const
-  {
-    return description_;
-  }
-  /// @brief Returns identifier
-  std::string getId() const
-  {
-    return id_;
-  }
-  /// @brief Returns length in bytes
-  int getNumber ()
-  {
-    return number_;
-  }
+    /// @brief Destructor
+    virtual ~StructureVariable(){};
+    /// @brief Returns description
+    std::string getDescription() const { return description_; }
+    /// @brief Returns identifier
+    std::string getId() const { return id_; }
+    /// @brief Returns length in bytes
+    int getNumber() { return number_; }
 
-  unsigned int getSize() const;
+    unsigned int getSize() const;
 
-  /// @brief Returns data type
-  StructureElementDataType getType() const
-  {
-      return type_;
-  }
-  /// @brief Returns offset from base pointer
-  off_t getOffset() const
-  {
-      return offset_;
-  }
+    /// @brief Returns data type
+    StructureElementDataType getType() const { return type_; }
+    /// @brief Returns offset from base pointer
+    off_t getOffset() const { return offset_; }
 
-  virtual bool isVariable() { return true;}
+    virtual bool isVariable() { return true; }
 
-protected:
-  /// Identifier
-  std::string id_;
-  /// Length in bytes
-  unsigned int number_;
-  /// Data type
-  StructureElementDataType type_;
-  /// Description
-  std::string description_;
-  /// Offset from base pointer
-  size_t offset_;
+  protected:
+    /// Identifier
+    std::string id_;
+    /// Length in bytes
+    unsigned int number_;
+    /// Data type
+    StructureElementDataType type_;
+    /// Description
+    std::string description_;
+    /// Offset from base pointer
+    size_t offset_;
 };
 
 #endif /* STRUCTUREVARIABLE_H_ */

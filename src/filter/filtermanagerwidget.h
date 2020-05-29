@@ -30,26 +30,28 @@ class FilterManagerWidget : public QFrame
 {
     Q_OBJECT
 
-signals:
+  signals:
 
-public slots:
-    void addFilterSlot ();
+  public slots:
+    void addFilterSlot();
     void updateFiltersSlot();
-    void filterWidgetActionSlot (bool result);
+    void filterWidgetActionSlot(bool result);
 
-    void databaseOpenedSlot ();
-public:
-    explicit FilterManagerWidget(FilterManager &manager, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    void databaseOpenedSlot();
+
+  public:
+    explicit FilterManagerWidget(FilterManager& manager, QWidget* parent = 0,
+                                 Qt::WindowFlags f = 0);
     virtual ~FilterManagerWidget();
 
-protected:
-    FilterManager &filter_manager_;
+  protected:
+    FilterManager& filter_manager_;
 
-    FilterGeneratorWidget *filter_generator_widget_;
+    FilterGeneratorWidget* filter_generator_widget_;
 
-    QVBoxLayout *filter_layout_;
+    QVBoxLayout* filter_layout_;
 
-    QPushButton *add_button_;
+    QPushButton* add_button_;
 };
 
-#endif // FILTERMANAGERWIDGET_H
+#endif  // FILTERMANAGERWIDGET_H

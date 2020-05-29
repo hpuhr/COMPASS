@@ -1,0 +1,15 @@
+{
+    "parameters": {
+        "callsign_": "ENTRPRSE",
+        "current_filename": "",
+        "ds_name": "GPS Trail",
+        "ds_sac": 0,
+        "ds_sic": 0,
+        "mode_3a_code": 961,
+        "set_callsign": true,
+        "set_mode_3a_code": true,
+        "set_target_address": true,
+        "target_address": 16702992,
+        "tod_offset": -43200.0
+    }
+}

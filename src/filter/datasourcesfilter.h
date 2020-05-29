@@ -25,32 +25,30 @@
  */
 class DataSourcesFilterDataSource
 {
-public:
+  public:
     /// @brief Constructor
-    DataSourcesFilterDataSource () {}
+    DataSourcesFilterDataSource(unsigned int number, const std::string& name,
+                                nlohmann::json::boolean_t& active_in_filter)
+        : number_(number), name_(name), active_in_filter_(active_in_filter)
+    {
+    }
     /// @brief Destructor
-    virtual ~DataSourcesFilterDataSource () {}
+    virtual ~DataSourcesFilterDataSource() {}
 
-protected:
+  protected:
     /// Number id
-    unsigned int number_;
+    unsigned int number_ {0};
     /// Name id
     std::string name_;
     /// Flag indicating if active in data
-    bool active_in_data_;
+    bool active_in_data_ {false};
     /// Flag indicating if active in filter
-    bool active_in_filter_;
+    nlohmann::json::boolean_t& active_in_filter_;
 
-public:
-    bool isActiveInData() const
-    {
-        return active_in_data_;
-    }
+  public:
+    bool isActiveInData() const { return active_in_data_; }
 
-    void setActiveInData(bool active_in_data)
-    {
-        active_in_data_ = active_in_data;
-    }
+    void setActiveInData(bool active_in_data) { active_in_data_ = active_in_data; }
 
     bool isActiveInFilter() const
     {
@@ -62,28 +60,9 @@ public:
         active_in_filter_ = active_in_filter;
     }
 
-    bool &getActiveInFilterReference () { return active_in_filter_; }
+    std::string getName() const { return name_; }
 
-    std::string getName() const
-    {
-        return name_;
-    }
-
-    void setName(std::string name)
-    {
-        name_ = name;
-    }
-
-    unsigned int getNumber() const
-    {
-        return number_;
-    }
-
-    void setNumber(unsigned int number)
-    {
-        number_ = number;
-    }
-
+    unsigned int getNumber() const { return number_; }
 };
 
 class DBObject;
@@ -91,46 +70,52 @@ class DBObject;
 /**
  * @brief DBFilter specialization for non-generic sensor filters
  *
- * Each DBObject can have data sources, and if such data is contained in the database, a filter for the seperate
- * data sources should always exist. Should not have sub-filters or conditions.
+ * Each DBObject can have data sources, and if such data is contained in the database, a filter for
+ * the seperate data sources should always exist. Should not have sub-filters or conditions.
  *
  */
 class DataSourcesFilter : public DBFilter
 {
-public:
-  /// @brief Constructor
-  DataSourcesFilter(const std::string& class_id, const std::string& instance_id, Configurable* parent);
-  /// @brief Desctructor
-  virtual ~DataSourcesFilter();
+  public:
+    /// @brief Constructor
+    DataSourcesFilter(const std::string& class_id, const std::string& instance_id,
+                      Configurable* parent);
+    /// @brief Desctructor
+    virtual ~DataSourcesFilter();
 
-  virtual std::string getConditionString (const std::string& dbo_name, bool& first,
-                                          std::vector <DBOVariable*>& filtered_variables);
+    virtual std::string getConditionString(const std::string& dbo_name, bool& first,
+                                           std::vector<DBOVariable*>& filtered_variables);
 
-  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-  virtual bool filters (const std::string& dbo_name);
-  virtual void reset ();
+    virtual bool filters(const std::string& dbo_name);
+    virtual void reset();
 
-  const std::string& dbObjectName () { return dbo_name_; }
+    const std::string& dbObjectName() { return dbo_name_; }
 
-  std::map<int, DataSourcesFilterDataSource> &dataSources () { return data_sources_; }
+    std::map<int, DataSourcesFilterDataSource>& dataSources() { return data_sources_; }
 
-protected:
-  /// DBO type
-  std::string dbo_name_;
-  DBObject* object_ {nullptr};
-  /// Sensor id column name in database table
-  std::string ds_column_name_;
-  /// Container with all possible data sources and active flag pointers
-  std::map<int, DataSourcesFilterDataSource> data_sources_;
+    virtual void saveViewPointConditions (nlohmann::json& filters);
+    virtual void loadViewPointConditions (const nlohmann::json& filters);
 
-  /// @brief Load data sources and updates data_sources_ container
-  void updateDataSources ();
-  /// @brief Updates the data sources active in data information
-  void updateDataSourcesActive ();
+  protected:
+    /// DBO type
+    std::string dbo_name_;
+    DBObject* object_{nullptr};
+    /// Sensor id column name in database table
+    std::string ds_column_name_;
+    /// Container with all possible data sources and active flag pointers
+    std::map<int, DataSourcesFilterDataSource> data_sources_;
+    nlohmann::json active_sources_;
 
-  /// @brief Does nothing.
-  virtual void checkSubConfigurables ();
+    /// @brief Load data sources and updates data_sources_ container
+    void updateDataSources();
+    /// @brief Updates the data sources active in data information
+    void updateDataSourcesActive();
+
+    /// @brief Does nothing.
+    virtual void checkSubConfigurables();
 };
 
 #endif /* DATASOURCESFILTER_H_ */

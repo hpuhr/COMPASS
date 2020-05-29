@@ -25,21 +25,23 @@
  */
 class Singleton
 {
-public:
-  /// @brief Returns static instance
-  static Singleton& getInstance()
-  {
-    static Singleton instance;
-    return instance;
-  }
-protected:
-  /// @brief Constructor
-  Singleton() {};
-private:
-  /// @brief Don't implement
-  Singleton(Singleton const&);
-  /// @brief Don't implement
-  void operator=(Singleton const&);
+  public:
+    /// @brief Returns static instance
+    static Singleton& getInstance()
+    {
+        static Singleton instance;
+        return instance;
+    }
+
+  protected:
+    /// @brief Constructor
+    Singleton(){};
+
+  private:
+    /// @brief Don't implement
+    Singleton(Singleton const&);
+    /// @brief Don't implement
+    void operator=(Singleton const&);
 };
 
 #endif

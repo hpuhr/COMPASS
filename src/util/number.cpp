@@ -16,35 +16,29 @@
  */
 
 #include "number.h"
-#include "logger.h"
 
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
+
+#include "logger.h"
 
 namespace Utils
 {
 namespace Number
 {
-
-float randomNumber (float min, float max)
+float randomNumber(float min, float max)
 {
-    return (float) min + rand() / ( RAND_MAX / ( max - min ) + 1 );
+    return (float)min + rand() / (RAND_MAX / (max - min) + 1);
 }
 
-float roundToNearest(float num)
-{
-    return (num > 0.0) ? floor(num + 0.5) : ceil(num - 0.5);
-}
+float roundToNearest(float num) { return (num > 0.0) ? floor(num + 0.5) : ceil(num - 0.5); }
 
-double calculateAngle( double degrees, double minutes, double seconds )
+double calculateAngle(double degrees, double minutes, double seconds)
 {
     return degrees + minutes / 60.0 + seconds / 3600.0;
 }
 
-}
+}  // namespace Number
 
-void convert (const std::string& conversion_type, NullableVector<unsigned int> &array_list)
-{
-
-}
-}
+void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}
+}  // namespace Utils

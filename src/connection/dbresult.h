@@ -25,31 +25,36 @@ class Buffer;
 /**
  * @brief Generalized result of database query
  *
- * Simple encapsulation of a buffer (result data from query) and a flag indicating if a buffer was set.
+ * Simple encapsulation of a buffer (result data from query) and a flag indicating if a buffer was
+ * set.
  */
 class DBResult
 {
-public:
-  /// @brief Constructor with parameters
-    DBResult(std::shared_ptr <Buffer> buffer):contains_data_(true), buffer_(buffer) {}
-	/// @brief Default constructor
-    DBResult():contains_data_(false) {}
-	/// @brief Destructor
+  public:
+    /// @brief Constructor with parameters
+    DBResult(std::shared_ptr<Buffer> buffer) : contains_data_(true), buffer_(buffer) {}
+    /// @brief Default constructor
+    DBResult() : contains_data_(false) {}
+    /// @brief Destructor
     virtual ~DBResult() {}
 
-	/// @brief Sets the result buffer
-    void buffer (std::shared_ptr <Buffer> buffer) { buffer_=buffer; contains_data_=true; }
-	/// @brief Returns the result buffer
-    std::shared_ptr <Buffer> buffer () const { return buffer_;}
+    /// @brief Sets the result buffer
+    void buffer(std::shared_ptr<Buffer> buffer)
+    {
+        buffer_ = buffer;
+        contains_data_ = true;
+    }
+    /// @brief Returns the result buffer
+    std::shared_ptr<Buffer> buffer() const { return buffer_; }
 
-	/// @brief Returns if contains data flag was set
-    bool containsData () { return contains_data_; }
+    /// @brief Returns if contains data flag was set
+    bool containsData() { return contains_data_; }
 
-private:
-	/// @brief Contains result data flag
-	bool contains_data_;
-	/// @brief Result data buffer
-    std::shared_ptr <Buffer> buffer_;
+  private:
+    /// @brief Contains result data flag
+    bool contains_data_;
+    /// @brief Result data buffer
+    std::shared_ptr<Buffer> buffer_;
 };
 
 #endif /* DBRESULT_H_ */

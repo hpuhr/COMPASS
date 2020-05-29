@@ -16,35 +16,34 @@
  */
 
 #include "DBOVariableDistinctStatisticsDBJob.h"
-#include "DBInterface.h"
+
 #include "Buffer.h"
+#include "DBInterface.h"
 #include "DBResult.h"
 
-DBOVariableDistinctStatisticsDBJob::DBOVariableDistinctStatisticsDBJob(JobOrderer *orderer,
-        boost::function<void (Job*)> done_function,
-        boost::function<void (Job*)> obsolete_function, DBInterface *db_interface, DB_OBJECT_TYPE type,
-        DBOVariable *variable, unsigned int sensor_number)
- : DBJob (orderer, done_function, obsolete_function, db_interface),type_ (type), variable_(variable),
-   sensor_number_ (sensor_number), result_buffer_ (0)
+DBOVariableDistinctStatisticsDBJob::DBOVariableDistinctStatisticsDBJob(
+    JobOrderer* orderer, boost::function<void(Job*)> done_function,
+    boost::function<void(Job*)> obsolete_function, DBInterface* db_interface, DB_OBJECT_TYPE type,
+    DBOVariable* variable, unsigned int sensor_number)
+    : DBJob(orderer, done_function, obsolete_function, db_interface),
+      type_(type),
+      variable_(variable),
+      sensor_number_(sensor_number),
+      result_buffer_(0)
 {
-
-
 }
 
-DBOVariableDistinctStatisticsDBJob::~DBOVariableDistinctStatisticsDBJob()
-{
+DBOVariableDistinctStatisticsDBJob::~DBOVariableDistinctStatisticsDBJob() {}
 
-}
-
-void DBOVariableDistinctStatisticsDBJob::execute ()
+void DBOVariableDistinctStatisticsDBJob::execute()
 {
-    DBResult *result = db_interface_->getDistinctStatistics (type_, variable_, sensor_number_);
+    DBResult* result = db_interface_->getDistinctStatistics(type_, variable_, sensor_number_);
 
     result_buffer_ = result->getBuffer();
 
-    assert (!result_buffer_->getFirstWrite());
+    assert(!result_buffer_->getFirstWrite());
 
     delete result;
 
-    done_=true;
+    done_ = true;
 }

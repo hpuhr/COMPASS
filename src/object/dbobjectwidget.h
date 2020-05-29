@@ -28,7 +28,6 @@ class QGridLayout;
 class QPushButton;
 class QTextEdit;
 
-
 class DBObject;
 class DBODataSourceDefinition;
 class DBOVariable;
@@ -37,7 +36,6 @@ class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class DBSchemaManager;
 
-
 /**
  * @brief Edit widget for a DBObject
  */
@@ -45,80 +43,80 @@ class DBObjectWidget : public QWidget
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted if DBObject was changed
     void changedDBOSignal();
 
-public slots:
+  public slots:
     /// @brief Adds all new DBOVariables
-    void updateVariablesSlot ();
+    void updateVariablesSlot();
     /// @brief Adds a MetaDBTable
     void addMetaTableSlot();
 
     /// @brief Updates data sources grid
-    void updateDataSourcesGridSlot ();
+    void updateDataSourcesGridSlot();
     /// @brief Adds a data source
-    void addDataSourceSlot ();
+    void addDataSourceSlot();
     /// @brief Edits a data source
     void editDataSourceSlot();
     /// @brief Deletes a data source
     void deleteDataSourceSlot();
 
     /// @brief Changes DBO name
-    void editNameSlot ();
+    void editNameSlot();
     /// @brief Changes DBO info
-    void editInfoSlot ();
+    void editInfoSlot();
 
     /// @brief Edits a DBOVariable
-    //void editDBOVarSlot();
-    void editDBOVariableNameSlot ();
-    void editDBOVariableDescriptionSlot ();
-    void editDBOVariableDBColumnSlot (const QString& text);
+    // void editDBOVarSlot();
+    void editDBOVariableNameSlot();
+    void editDBOVariableDescriptionSlot();
+    void editDBOVariableDBColumnSlot(const QString& text);
     /// @brief Deletes a DBOVariable
     void deleteDBOVarSlot();
 
     /// @brief Updates the DBOVariables grid
-    void updateDBOVarsGridSlot ();
+    void updateDBOVarsGridSlot();
     void deleteMetaTableSlot();
     /// @brief Updates meta tables grid
     void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
-    void printSlot ();
+    void printSlot();
 
-public:
+  public:
     /// @brief Constructor
-    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent = 0,
+                   Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBObjectWidget();
 
-private:
+  private:
     /// @brief DBObject to be managed
-    DBObject* object_ {nullptr};
+    DBObject* object_{nullptr};
     DBSchemaManager& schema_manager_;
 
     /// @brief DBO name
-    QLineEdit* name_edit_ {nullptr};
+    QLineEdit* name_edit_{nullptr};
     /// @brief DBO info
-    QLineEdit* info_edit_ {nullptr};
+    QLineEdit* info_edit_{nullptr};
 
-    QPushButton* edit_label_button_ {nullptr};
+    QPushButton* edit_label_button_{nullptr};
 
     /// @brief Grid with all data sources
-    QGridLayout* ds_grid_ {nullptr};
+    QGridLayout* ds_grid_{nullptr};
 
-    QPushButton* new_ds_button_ {nullptr};
+    QPushButton* new_ds_button_{nullptr};
 
     /// @brief grid with all meta tables per schema
-    QGridLayout* meta_table_grid_ {nullptr};
+    QGridLayout* meta_table_grid_{nullptr};
 
-    QPushButton* new_meta_button_ {nullptr};
+    QPushButton* new_meta_button_{nullptr};
 
     /// @brief Grid with all DBOVariables
-    QGridLayout* dbovars_grid_ {nullptr};
+    QGridLayout* dbovars_grid_{nullptr};
 
-    QPushButton* update_variables_button_ {nullptr};
-
+    QPushButton* update_variables_button_{nullptr};
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

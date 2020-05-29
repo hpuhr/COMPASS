@@ -1,0 +1,215 @@
+\section{Appendix: Licensing}
+\label{sec:appendix_licensing}
+
+The ATSDB source code (database backend \& GUI) is released under GNU GPLv3: \\
+\url{https://www.gnu.org/licenses/gpl-3.0.en.html} \\\\
+
+The AppImage binary is released under Creative Commons Attribution 4.0 International (CC BY 4.0) \\
+Human readable: \url{https://creativecommons.org/licenses/by/4.0/} \\
+Legal: \url{https://creativecommons.org/licenses/by/4.0/legalcode} \\\\
+
+The OSGView is not released as open-source and can only be used in the AppImage binary.
+
+\section{Appendix: Disclaimer}
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+\section{Appendix: Used Libaries}
+
+While it is permitted to use the AppImage for commercial purposes, \textbf{the used open-source libraries might still prohibit this without further permission}. It is the responsibility of the user to see to that the license information here is correct and that their use cases are permitted under the referenced licenses.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Package} & \textbf{License} & \textbf{Link} \\ \hline
+    Qt5 & GNU LGPL v3 &\href{https://doc.qt.io/qt-5.10/licensing.html}{Link} \\ \hline
+    Boost & Boost license  & \href{https://www.boost.org/users/license.html}{Link} \\ \hline
+    OpenSceneGraph & GNU LGPL v3 &\href{http://www.openscenegraph.org/index.php/about/licensing}{Link} \\ \hline
+    osgEarth & GNU LGPL v3 &\href{hhttps://github.com/gwaldron/osgearth/blob/master/LICENSE.txt}{Link} \\ \hline    
+    MySQL++ & GNU LGPL & \href{https://tangentsoft.com/mysqlpp/wiki?name=FAQ}{Link} \\ \hline
+    MySQL Connector/C++ & GNU GPL v2 or later & \href{https://downloads.mysql.com/docs/licenses/connector-cpp-gpl-en.pdf}{Link} \\ \hline
+    SQLite3 & Public domain & \href{https://www.sqlite.org/copyright.html}{Link} \\ \hline
+    GDAL & X11/MIT & \href{https://trac.osgeo.org/gdal/wiki/FAQGeneral#WhatlicensedoesGDALOGRuse}{Link} \\ \hline
+    Log4cpp & LGPL & \href{http://log4cpp.sourceforge.net/#license}{Link} \\ \hline
+    LibArchive & New BSD & \href{https://raw.githubusercontent.com/libarchive/libarchive/master/COPYING}{Link} \\ \hline
+    Eigen3 & MPL2 & \href{http://eigen.tuxfamily.org/index.php?title=Main_Page}{Link} \\ \hline
+    JSON for Modern C++ & MIT & \href{https://github.com/nlohmann/json}{Link} \\ \hline
+    Intel TBB & Apache 2.0 & \href{https://www.threadingbuildingblocks.org/}{Link} \\ \hline
+    Catch2 & BSL-1.0 & \href{https://github.com/catchorg/Catch2}{Link} \\ \hline
+    NemaTode & Zlib & \href{https://github.com/ckgt/NemaTode}{Link} \\ \hline
+  \end{tabular}
+  \caption{Library licenses}
+\end{table}
+
+Please note that this list is not exhaustive, and that a large number of other, smaller libraries is used in the background, for which the licenses were not checked. Please use the 'ldd' tool to get details, in the authors system the following libaries were used:
+
+\begin{multicols}{2}
+linux-vdso.so.1 \\ \\
+libosgDB.so.131 \\ \\
+libosgGA.so.131 \\ \\
+libosgQt.so.131 \\ \\
+libosgUtil.so.131 \\ \\
+libosgViewer.so.131 \\
+libosgText.so.131 \\
+libosg.so.131 \\
+libosgEarth.so.5 \\
+libosgEarthUtil.so.5 \\
+libQt5OpenGL.so.5 \\
+libQt5Widgets.so.5 \\
+libQt5Gui.so.5 \\
+libQt5Core.so.5 \\
+libtinyxml2.so.6 \\
+libboost\_regex.so.1.65.1 \\
+libboost\_system.so.1.65.1 \\
+libboost\_program\_options.so.1.65.1 \\
+liblog4cpp.so.5 \\
+libmysqlpp.so.3 \\
+libmysqlclient.so.20 \\
+libgdal.so.20 \\
+libsqlite3.so.0 \\
+libarchive.so.13 \\
+libstdc++.so.6 \\
+libm.so.6 \\
+libgcc\_s.so.1 \\
+libc.so.6 \\
+libdl.so.2 \\
+libz.so.1 \\
+libOpenThreads.so.20 \\
+libpthread.so.0 \\
+libGL.so.1 \\
+libX11.so.6 \\
+librt.so.1 \\
+libosgSim.so.131 \\
+libosgTerrain.so.131 \\
+libosgShadow.so.131 \\
+libcurl-gnutls.so.4 \\
+libosgEarthAnnotation.so.5 \\
+libosgEarthFeatures.so.5 \\
+libosgEarthSymbology.so.5 \\
+libpng16.so.16 \\
+libharfbuzz.so.0 \\
+libicui18n.so.60 \\
+libicuuc.so.60 \\
+libdouble-conversion.so.1 \\
+libglib-2.0.so.0 \\
+ld-linux-x86-64.so.2 \\
+libarmadillo.so.8 \\
+libproj.so.12 \\
+libpoppler.so.73 \\
+libjson-c.so.3 \\
+libfreexl.so.1 \\
+libqhull.so.7 \\
+libgeos\_c.so.1 \\
+libwebp.so.6 \\
+libepsilon.so.1 \\
+libodbc.so.2 \\
+libodbcinst.so.2 \\
+libkmlbase.so.1 \\
+libkmldom.so.1 \\
+libkmlengine.so.1 \\
+libexpat.so.1 \\
+libxerces-c-3.2.so \\
+libopenjp2.so.7 \\
+libnetcdf.so.13 \\
+libhdf5\_serial.so.100 \\
+libmfhdfalt.so.0 \\
+libdfalt.so.0 \\
+libogdi.so.3.2 \\
+libgif.so.7 \\
+libjpeg.so.8 \\
+libgeotiff.so.2 \\
+libtiff.so.5 \\
+libpq.so.5 \\
+libdapclient.so.6 \\
+libdap.so.25 \\
+libspatialite.so.7 \\
+libpcre.so.3 \\
+libfyba.so.0 \\
+libxml2.so.2 \\
+libnettle.so.6 \\
+libacl.so.1 \\
+liblzo2.so.2 \\
+liblzma.so.5 \\
+liblz4.so.1 \\
+libbz2.so.1.0 \\
+libGLX.so.0 \\
+libGLdispatch.so.0 \\
+libxcb.so.1 \\
+libnghttp2.so.14 \\
+libidn2.so.0 \\
+librtmp.so.1 \\
+libpsl.so.5 \\
+libgnutls.so.30 \\
+libgssapi\_krb5.so.2 \\
+libldap\_r-2.4.so.2 \\
+liblber-2.4.so.2 \\
+libosgManipulator.so.131 \\
+libfreetype.so.6 \\
+libgraphite2.so.3 \\
+libicudata.so.60 \\
+libblas.so.3 \\
+liblapack.so.3 \\
+libarpack.so.2 \\
+libsuperlu.so.5 \\
+libfontconfig.so.1 \\
+libnss3.so \\
+libsmime3.so \\
+libnspr4.so \\
+liblcms2.so.2 \\
+libgeos-3.6.2.so \\
+libltdl.so.7 \\
+libminizip.so.1 \\
+liburiparser.so.1 \\
+libhdf5\_serial\_hl.so.100 \\
+libsz.so.2 \\
+libjbig.so.0 \\
+libssl.so.1.1 \\
+libcrypto.so.1.1 \\
+libfyut.so.0 \\
+libfygm.so.0 \\
+libattr.so.1 \\
+libXau.so.6 \\
+libXdmcp.so.6 \\
+libunistring.so.2 \\
+libhogweed.so.4 \\
+libgmp.so.10 \\
+libp11-kit.so.0 \\
+libtasn1.so.6 \\
+libkrb5.so.3 \\
+libk5crypto.so.3 \\
+libcom\_err.so.2 \\
+libkrb5support.so.0 \\
+libresolv.so.2 \\
+libsasl2.so.2 \\
+libgssapi.so.3 \\
+libgfortran.so.4 \\
+libnssutil3.so \\
+libplc4.so \\
+libplds4.so \\
+libaec.so.0 \\
+libbsd.so.0 \\
+libffi.so.6 \\
+libkeyutils.so.1 \\
+libheimntlm.so.0 \\
+libkrb5.so.26 \\
+libasn1.so.8 \\
+libhcrypto.so.4 \\
+libroken.so.18 \\
+libquadmath.so.0 \\
+libwind.so.0 \\
+libheimbase.so.1 \\
+libhx509.so.5 \\
+libcrypt.so.1
+\end{multicols}
+
+\section{Appendix: ADS-B exchange}
+\label{sec:adsbex}
+
+ADS-B exchange is a project hosted at \url{https://www.adsbexchange.com/}. \\
+
+From the preamble of the home page one can read: \\\\
+\textit{Welcome to ADSBexchange.com, a co-op of ADS-B/Mode S/MLAT feeders from around the world, and the world's largest source of unfiltered flight data.  Thanks to our worldwide community of participants, if the data is broadcast over the air, you can find it here.  This opens up a whole new world of interesting traffic for hobbyists, \textbf{without materially affecting security for anyone}. \\}
+
+Please be aware that using the produced data for commercial purposes (without a specific agreement) would violate the ADSB exchange terms \& conditions. Please refer to \url{https://www.adsbexchange.com/legal-and-privacy/} for additional information.\\
+

@@ -30,30 +30,34 @@ class Dimension;
  */
 class UnitManager : public Configurable, public Singleton
 {
-public:
+  public:
     /// @brief Destructor
     virtual ~UnitManager();
 
-    bool hasDimension (const std::string &name) { return dimensions_.count(name) > 0; }
+    bool hasDimension(const std::string& name) { return dimensions_.count(name) > 0; }
 
     /// @brief Returns unit with a given name
-    const Dimension &dimension (const std::string &name) { assert (hasDimension(name));
-                                                           return *dimensions_.at(name); }
+    const Dimension& dimension(const std::string& name)
+    {
+        assert(hasDimension(name));
+        return *dimensions_.at(name);
+    }
     /// @brief Return container with all units
-    const std::map <std::string, Dimension*> &dimensions () { return dimensions_; }
+    const std::map<std::string, Dimension*>& dimensions() { return dimensions_; }
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-protected:
+  protected:
     /// Container with all units (unit name (length, time) -> unit)
-    std::map <std::string, Dimension*> dimensions_;
+    std::map<std::string, Dimension*> dimensions_;
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables();
 
     /// @brief Constructor
     UnitManager();
 
-public:
+  public:
     static UnitManager& instance()
     {
         static UnitManager instance;

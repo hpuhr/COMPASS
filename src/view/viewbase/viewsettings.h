@@ -20,7 +20,6 @@
 
 #include "singleton.h"
 
-
 /**
 @brief Base class for common settings of a view category.
 
@@ -31,7 +30,7 @@ There is not much to it at the moment.
   */
 class ViewSettings : public Singleton
 {
-public:
+  public:
     ViewSettings();
     virtual ~ViewSettings();
 
@@ -46,4 +45,4 @@ public:
     }
 };
 
-#endif //VIEWSETTINGS_H
+#endif  // VIEWSETTINGS_H

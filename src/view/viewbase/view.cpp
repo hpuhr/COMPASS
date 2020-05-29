@@ -15,21 +15,20 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QWidget>
-#include <QVBoxLayout>
+#include "view.h"
 
+#include <QVBoxLayout>
+#include <QWidget>
 #include <cassert>
 
-
-#include "view.h"
 #include "logger.h"
+#include "viewcontainer.h"
+#include "viewmanager.h"
 #include "viewmodel.h"
 #include "viewwidget.h"
-#include "viewmanager.h"
-#include "viewcontainer.h"
+#include "viewpoint.h"
 
-unsigned int View::cnt_=0;
-
+unsigned int View::cnt_ = 0;
 
 /**
 @brief Constructor.
@@ -37,18 +36,24 @@ unsigned int View::cnt_=0;
 @param instance_id Configurable instance id.
 @param w ViewContainerWidget the view is embedded in, configurable parent.
  */
-View::View (const std::string& class_id, const std::string& instance_id, ViewContainer *container,
-            ViewManager &view_manager)
-: Configurable( class_id, instance_id, container), view_manager_(view_manager), model_(nullptr), widget_(nullptr),
-  container_(container)
+View::View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
+           ViewManager& view_manager)
+    : Configurable(class_id, instance_id, container),
+      view_manager_(view_manager),
+      model_(nullptr),
+      widget_(nullptr),
+      container_(container)
 {
-    logdbg  << "View: constructor";
+    logdbg << "View: constructor";
 
     central_widget_ = new QWidget();
-    central_widget_->setAutoFillBackground(true);
+    //central_widget_->setAutoFillBackground(true);
 
-    connect (this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
-    connect (&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
+    connect(this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
+
+    connect(&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
+    connect(&view_manager_, &ViewManager::unshowViewPointSignal, this, &View::unshowViewPointSlot);
+    connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
 }
 
 /**
@@ -58,16 +63,16 @@ Just deleting a view is totally feasible and will remove the view from its ViewC
  */
 View::~View()
 {
-    //delete model
-    if( model_ )
+    // delete model
+    if (model_)
         delete model_;
 
-    //unregister from manager
-    if( view_manager_.isRegistered( this ) )
-        view_manager_.unregisterView( this );
+    // unregister from manager
+    if (view_manager_.isRegistered(this))
+        view_manager_.unregisterView(this);
 
-    //remove view from container widget first, then delete it
-    container_->removeView( this );
+    // remove view from container widget first, then delete it
+    container_->removeView(this);
     delete central_widget_;
 }
 
@@ -79,13 +84,13 @@ then the model, which will need the widget in it's constructor.
  */
 bool View::init()
 {
-    logdbg  << "View: init";
+    logdbg << "View: init";
 
-    //register in manager
-    view_manager_.registerView( this );
+    // register in manager
+    view_manager_.registerView(this);
 
-    //add view to container widget
-    container_->addView( this );
+    // add view to container widget
+    container_->addView(this);
     return true;
 }
 
@@ -93,16 +98,13 @@ bool View::init()
 @brief Returns the views name.
 @return The views name.
  */
-const std::string& View::getName() const
-{
-  return instanceId();
-}
+const std::string& View::getName() const { return instanceId(); }
 
 /**
 @brief Returns a unique instance key.
 @return Unique instance key.
  */
-unsigned int View::getInstanceKey ()
+unsigned int View::getInstanceKey()
 {
     ++cnt_;
     return cnt_;
@@ -114,10 +116,10 @@ unsigned int View::getInstanceKey ()
 Should only be called once to set the model.
 @param model The view's model.
  */
-void View::setModel( ViewModel* model )
+void View::setModel(ViewModel* model)
 {
-    if( model_ )
-        throw std::runtime_error( "View: setModel: Model already set." );
+    if (model_)
+        throw std::runtime_error("View: setModel: Model already set.");
     model_ = model;
 }
 
@@ -127,13 +129,13 @@ void View::setModel( ViewModel* model )
 Should only be called once to set the widget.
 @param model The view's widget.
  */
-void View::setWidget( ViewWidget* widget )
+void View::setWidget(ViewWidget* widget)
 {
-    if( model_ )
-        throw std::runtime_error( "View: setWidget: Widget already set." );
+    if (model_)
+        throw std::runtime_error("View: setWidget: Widget already set.");
 
     widget_ = widget;
-    if( widget_ )
+    if (widget_)
         constructWidget();
 }
 
@@ -142,38 +144,35 @@ void View::setWidget( ViewWidget* widget )
  */
 void View::constructWidget()
 {
-    assert( widget_ );
-    assert( central_widget_ );
+    assert(widget_);
+    assert(central_widget_);
 
     QVBoxLayout* central_vlayout = new QVBoxLayout();
     QHBoxLayout* central_hlayout = new QHBoxLayout();
-    central_widget_->setLayout( central_vlayout );
-    widget_->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
-    central_hlayout->addWidget( widget_ );
-    central_vlayout->addLayout( central_hlayout );
+    central_widget_->setLayout(central_vlayout);
+    widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    central_hlayout->addWidget(widget_);
+    central_vlayout->addLayout(central_hlayout);
 }
 
 /**
 @brief Will delete the view and show the given error message.
 @param err An error message.
  */
-void View::viewShutdown( const std::string& err )
-{
-    view_manager_.viewShutdown( this, err );
-}
+void View::viewShutdown(const std::string& err) { view_manager_.viewShutdown(this, err); }
 
-void View::emitSelectionChange ()
+void View::emitSelectionChange()
 {
-//    assert (!selection_change_emitted_);
-//    selection_change_emitted_ = true;
+    //    assert (!selection_change_emitted_);
+    //    selection_change_emitted_ = true;
 
     emit selectionChangedSignal();
 }
 
 void View::selectionChangedSlot()
 {
-//    if (selection_change_emitted_)
-//        selection_change_emitted_ = false;
-//    else // only update if not self-emitted
-        updateSelection();
+    //    if (selection_change_emitted_)
+    //        selection_change_emitted_ = false;
+    //    else // only update if not self-emitted
+    updateSelection();
 }

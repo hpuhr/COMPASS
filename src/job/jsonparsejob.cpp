@@ -1,25 +1,22 @@
 #include "jsonparsejob.h"
+
 #include "logger.h"
 
 using namespace nlohmann;
 
 JSONParseJob::JSONParseJob(std::vector<std::string> objects)
-    : Job ("JSONParseJob"), objects_(std::move(objects))
+    : Job("JSONParseJob"), objects_(std::move(objects))
 {
-
 }
 
-JSONParseJob::~JSONParseJob()
-{
+JSONParseJob::~JSONParseJob() {}
 
-}
-
-void JSONParseJob::run ()
+void JSONParseJob::run()
 {
     loginf << "JSONParseJob: run: start with " << objects_.size() << " objects";
 
     started_ = true;
-    assert (!json_objects_);
+    assert(!json_objects_);
     json_objects_.reset(new json());
     (*json_objects_)["records"] = json::array();
 
@@ -40,23 +37,13 @@ void JSONParseJob::run ()
         ++objects_parsed_;
     }
 
-    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects, errors " << parse_errors_;
+    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects, errors "
+           << parse_errors_;
     done_ = true;
 }
 
-size_t JSONParseJob::objectsParsed() const
-{
-    return objects_parsed_;
-}
+size_t JSONParseJob::objectsParsed() const { return objects_parsed_; }
 
-size_t JSONParseJob::parseErrors() const
-{
-    return parse_errors_;
-}
+size_t JSONParseJob::parseErrors() const { return parse_errors_; }
 
-std::unique_ptr<nlohmann::json> JSONParseJob::jsonObjects()
-{
-    return std::move(json_objects_);
-}
-
-
+std::unique_ptr<nlohmann::json> JSONParseJob::jsonObjects() { return std::move(json_objects_); }

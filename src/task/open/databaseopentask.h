@@ -22,7 +22,6 @@
 #include "task.h"
 
 #include <QObject>
-
 #include <memory>
 
 class DatabaseOpenTaskWidget;
@@ -35,25 +34,26 @@ class DatabaseOpenTask : public Task, public Configurable
 public slots:
     void databaseOpenedSlot();
 
-public:
+  public:
     DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
                      TaskManager& task_manager);
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-    virtual TaskWidget* widget ();
-    virtual void deleteWidget ();
+    virtual TaskWidget* widget();
+    virtual void deleteWidget();
 
-    virtual bool checkPrerequisites ();
-    virtual bool isRecommended ();
-    virtual bool isRequired ();
+    virtual bool checkPrerequisites();
+    virtual bool isRecommended();
+    virtual bool isRequired();
 
-    void useConnection (const std::string& connection_type);
+    void useConnection(const std::string& connection_type);
 
-protected:
+  protected:
     std::unique_ptr<DatabaseOpenTaskWidget> widget_;
 
-    virtual void checkSubConfigurables () {}
+    virtual void checkSubConfigurables() {}
 };
 
-#endif // DATABASEOPENTASK_H
+#endif  // DATABASEOPENTASK_H

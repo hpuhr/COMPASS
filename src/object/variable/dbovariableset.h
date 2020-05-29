@@ -32,55 +32,55 @@ class DBOVariable;
  */
 class DBOVariableSet
 {
-public:
-  /// @brief Constructor
-  DBOVariableSet();
-  /// @brief Destructor
-  virtual ~DBOVariableSet();
+  public:
+    /// @brief Constructor
+    DBOVariableSet();
+    /// @brief Destructor
+    virtual ~DBOVariableSet();
 
-  /// @brief Returns flag indicating if a change occurred
-  bool getChanged () { return changed_; }
-  /// @brief Sets the change occurred flag
-  void setChanged (bool changed) { changed_=changed; }
+    /// @brief Returns flag indicating if a change occurred
+    bool getChanged() { return changed_; }
+    /// @brief Sets the change occurred flag
+    void setChanged(bool changed) { changed_ = changed; }
 
-  /// @brief Adds a DBOVariable
-  bool add (DBOVariable &var);
-  bool add (const DBOVariable &var);
-  /// @brief Adds another set of variables
-  bool add (DBOVariableSet &set);
-  /// @brief Adds variables for a given type from a given set of variables
-  //bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
-  /// @brief Removes variable at a given index
-  void removeVariableAt (unsigned int index);
-  void removeVariable (const DBOVariable &var);
-  /// @brief Intersects with another set of variables
-  bool intersect (DBOVariableSet &set);
-  /// @brief Removes all variables
-  void clear ();
-  /// @brief Returns if given variable is in the set
-  bool hasVariable (const DBOVariable& variable);
+    /// @brief Adds a DBOVariable
+    bool add(DBOVariable& var);
+    bool add(const DBOVariable& var);
+    /// @brief Adds another set of variables
+    bool add(DBOVariableSet& set);
+    /// @brief Adds variables for a given type from a given set of variables
+    // bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
+    /// @brief Removes variable at a given index
+    void removeVariableAt(unsigned int index);
+    void removeVariable(const DBOVariable& var);
+    /// @brief Intersects with another set of variables
+    bool intersect(DBOVariableSet& set);
+    /// @brief Removes all variables
+    void clear();
+    /// @brief Returns if given variable is in the set
+    bool hasVariable(const DBOVariable& variable);
 
-  DBOVariableSet& operator= (const DBOVariableSet &source);
-  //DBOVariableSet *clone ();
+    DBOVariableSet& operator=(const DBOVariableSet& source);
+    // DBOVariableSet *clone ();
 
-  /// @brief Returns container with all variables
-  std::vector <DBOVariable*>& getSet () { return set_; }
-  std::vector <DBOVariable*> getExistsInDBSet ();
-  /// @brief Returns variable at a given index
-  DBOVariable &getVariable (unsigned int index) const;
+    /// @brief Returns container with all variables
+    std::vector<DBOVariable*>& getSet() { return set_; }
+    std::vector<DBOVariable*> getExistsInDBSet();
+    /// @brief Returns variable at a given index
+    DBOVariable& getVariable(unsigned int index) const;
 
-  /// @brief Prints contents, for debugging purposes
-  void print ();
+    /// @brief Prints contents, for debugging purposes
+    void print();
 
-  /// @brief Returns number of variables in the set
-  unsigned int getSize () const { return set_.size(); }
+    /// @brief Returns number of variables in the set
+    unsigned int getSize() const { return set_.size(); }
 
-protected:
-  /// Container with all variables in the set
-  std::vector <DBOVariable*> set_;
+  protected:
+    /// Container with all variables in the set
+    std::vector<DBOVariable*> set_;
 
-  /// Change occurred flag
-  bool changed_;
+    /// Change occurred flag
+    bool changed_;
 };
 
 #endif /* DBOVARIABLESET_H_ */

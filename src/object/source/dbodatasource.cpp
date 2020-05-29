@@ -17,12 +17,12 @@
 
 #include "dbodatasource.h"
 //#include "dbodatasourcewidget.h"
-#include "dbobject.h"
-#include "projectionmanager.h"
-#include "dboeditdatasourceaction.h"
-#include "storeddbodatasource.h"
-
 #include <cmath>
+
+#include "dbobject.h"
+#include "dboeditdatasourceaction.h"
+#include "projectionmanager.h"
+#include "storeddbodatasource.h"
 
 DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::string& name)
     : object_(&object), id_(id), name_(name)
@@ -31,7 +31,7 @@ DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::strin
 
 DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
 {
-    //id_ = other.id(); not copied, keep own
+    // id_ = other.id(); not copied, keep own
     name_ = other.name();
     has_short_name_ = other.hasShortName();
     if (has_short_name_)
@@ -52,18 +52,18 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_altitude_)
         altitude_ = other.altitude();
 
-    loginf << "DBODataSource: operator=: name " << name_
-           << " short name " << (has_short_name_ ? short_name_ : "false")
-           << " sac " << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false")
-           << " sic " << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false")
-           << " lat " << (has_latitude_ ? std::to_string(latitude_) : "false")
-           << " lon " << (has_longitude_ ? std::to_string(longitude_) : "false")
-           << " alt " << (has_altitude_ ? std::to_string(altitude_) : "false");
+    loginf << "DBODataSource: operator=: name " << name_ << " short name "
+           << (has_short_name_ ? short_name_ : "false") << " sac "
+           << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false") << " sic "
+           << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false") << " lat "
+           << (has_latitude_ ? std::to_string(latitude_) : "false") << " lon "
+           << (has_longitude_ ? std::to_string(longitude_) : "false") << " alt "
+           << (has_altitude_ ? std::to_string(altitude_) : "false");
 
     return *this;
 }
 
-//DBODataSource& DBODataSource::operator=(DBODataSource&& other)
+// DBODataSource& DBODataSource::operator=(DBODataSource&& other)
 //{
 //    loginf << "DBODataSource: move operator: moving";
 
@@ -89,40 +89,35 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
 
 bool DBODataSource::operator==(const StoredDBODataSource& other) const
 {
-    logdbg << "DBODataSource: operator==: name " << (name_ == other.name())
-           << " short " << (short_name_ == other.shortName())
-           << " sac " << (sac_ == other.sac())
-           << " sic " << (sic_ == other.sic())
-           << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
-           << " long " << (fabs(longitude_ - other.longitude()) < 1e-10)
-           << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
+    logdbg << "DBODataSource: operator==: name " << (name_ == other.name()) << " short "
+           << (short_name_ == other.shortName()) << " sac " << (sac_ == other.sac()) << " sic "
+           << (sic_ == other.sic()) << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
+           << " long " << (fabs(longitude_ - other.longitude()) < 1e-10) << " alt "
+           << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-    return (name_ == other.name()) &&
-            (has_short_name_ == other.hasShortName()) &&
-            (has_short_name_ ? short_name_ == other.shortName() : true) &&
-            (has_sac_ == other.hasSac()) &&
-            (has_sac_ ? sac_ == other.sac() : true) &&
-            (has_sic_ == other.hasSic()) &&
-            (has_sic_ ? sic_ == other.sic() : true) &&
-            (has_latitude_ == other.hasLatitude()) &&
-            (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true) &&
-            (has_longitude_ == other.hasLongitude()) &&
-            (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true) &&
-            (has_altitude_ == other.hasAltitude()) &&
-            (has_altitude_? fabs(altitude_ - other.altitude()) < 1e-10 : true);
+    return (name_ == other.name()) && (has_short_name_ == other.hasShortName()) &&
+           (has_short_name_ ? short_name_ == other.shortName() : true) &&
+           (has_sac_ == other.hasSac()) && (has_sac_ ? sac_ == other.sac() : true) &&
+           (has_sic_ == other.hasSic()) && (has_sic_ ? sic_ == other.sic() : true) &&
+           (has_latitude_ == other.hasLatitude()) &&
+           (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true) &&
+           (has_longitude_ == other.hasLongitude()) &&
+           (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true) &&
+           (has_altitude_ == other.hasAltitude()) &&
+           (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true);
 }
 
-DBODataSource::~DBODataSource()
-{
-    logdbg << "DBODataSource: dtor: id " << std::to_string(id_);
-}
+DBODataSource::~DBODataSource() { logdbg << "DBODataSource: dtor: id " << std::to_string(id_); }
 
 // azimuth degrees, range nautical miles, altitude in meters
-//bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
-//                                                   double baro_altitude_ft, double &sys_x, double &sys_y)
+// bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool
+// has_baro_altitude,
+//                                                   double baro_altitude_ft, double &sys_x, double
+//                                                   &sys_y)
 //{
 //    if (!finalized_)
-//        logerr << "DBODataSource: calculateOGRSystemCoordinates: " << short_name_ << " not finalized";
+//        logerr << "DBODataSource: calculateOGRSystemCoordinates: " << short_name_ << " not
+//        finalized";
 
 //    assert (finalized_);
 
@@ -135,7 +130,8 @@ DBODataSource::~DBODataSource()
 
 //    //    if (slant_range <= altitude)
 //    //    {
-//    //        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+//    //        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " <<
+//    slant_range << " alt " << altitude
 //    //                << ", assuming range = slant range";
 //    //        range = slant_range; // TODO pure act of desperation
 //    //    }
@@ -163,8 +159,10 @@ DBODataSource::~DBODataSource()
 
 //    if (sys_x != sys_x || sys_y != sys_y)
 //    {
-//        loginf << "DBODataSource: calculateOGRSystemCoordinates: error calculatign a " << azimuth_rad << " sr "
-//               << slant_range_m << " alt " << baro_altitude_ft << " hor.range " << horizontal_range
+//        loginf << "DBODataSource: calculateOGRSystemCoordinates: error calculatign a " <<
+//        azimuth_rad << " sr "
+//               << slant_range_m << " alt " << baro_altitude_ft << " hor.range " <<
+//               horizontal_range
 //               << " sys_x " << sys_x << " sys_y " << sys_y;
 //        return false;
 //    }
@@ -173,11 +171,13 @@ DBODataSource::~DBODataSource()
 //}
 
 // azimuth degrees, range nautical miles, altitude in meters
-//bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+// bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool
+// has_baro_altitude,
 //                                                double baro_altitude_ft, t_CPos& grs_pos)
 //{
 //    if (!finalized_)
-//        logerr << "DBODataSource: calculateSDLSystemCoordinates: " << short_name_ << " not finalized";
+//        logerr << "DBODataSource: calculateSDLSystemCoordinates: " << short_name_ << " not
+//        finalized";
 
 //    assert (finalized_);
 
@@ -289,7 +289,8 @@ DBODataSource::~DBODataSource()
 
 //    if (!elevation_present)
 //    {
-//        loginf << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
+//        loginf << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " <<
+//        slant_range_m
 //               << " alt " << baro_altitude_ft << " elevation not present";
 //        return false;
 //    }
@@ -345,92 +346,63 @@ DBODataSource::~DBODataSource()
 //    return true;
 //}
 
-
-
-bool DBODataSource::hasLatitude() const
-{
-    return has_latitude_;
-}
+bool DBODataSource::hasLatitude() const { return has_latitude_; }
 
 double DBODataSource::altitude() const
 {
-    assert (has_altitude_);
+    assert(has_altitude_);
     return altitude_;
 }
 
-const std::string DBODataSource::dboName () const
+const std::string DBODataSource::dboName() const
 {
-    assert (object_);
+    assert(object_);
     return object_->name();
 }
 
-unsigned int DBODataSource::id() const
-{
-    return id_;
-}
+unsigned int DBODataSource::id() const { return id_; }
 
 double DBODataSource::latitude() const
 {
-    assert (has_latitude_);
+    assert(has_latitude_);
     return latitude_;
 }
 
 double DBODataSource::longitude() const
 {
-    assert (has_longitude_);
+    assert(has_longitude_);
     return longitude_;
 }
 
-bool DBODataSource::hasShortName() const
-{
-    return has_short_name_;
-}
+bool DBODataSource::hasShortName() const { return has_short_name_; }
 
-bool DBODataSource::hasSac() const
-{
-    return has_sac_;
-}
+bool DBODataSource::hasSac() const { return has_sac_; }
 
-bool DBODataSource::hasSic() const
-{
-    return has_sic_;
-}
+bool DBODataSource::hasSic() const { return has_sic_; }
 
-bool DBODataSource::hasLongitude() const
-{
-    return has_longitude_;
-}
+bool DBODataSource::hasLongitude() const { return has_longitude_; }
 
-bool DBODataSource::hasAltitude() const
-{
-    return has_altitude_;
-}
+bool DBODataSource::hasAltitude() const { return has_altitude_; }
 
-const std::string &DBODataSource::name() const
-{
-    return name_;
-}
+const std::string& DBODataSource::name() const { return name_; }
 
-void DBODataSource::name(const std::string &name)
-{
-    this->name_ = name;
-}
+void DBODataSource::name(const std::string& name) { this->name_ = name; }
 
 unsigned char DBODataSource::sac() const
 {
-    assert (has_sac_);
+    assert(has_sac_);
     return sac_;
 }
 
-const std::string &DBODataSource::shortName() const
+const std::string& DBODataSource::shortName() const
 {
-    assert (has_short_name_);
+    assert(has_short_name_);
     return short_name_;
 }
 
 unsigned char DBODataSource::sic() const
 {
-    assert (has_sic_);
+    assert(has_sic_);
     return sic_;
 }
 
@@ -442,7 +414,7 @@ void DBODataSource::altitude(double altitude)
 
 void DBODataSource::latitude(double latitiude)
 {
-    has_latitude_= true;
+    has_latitude_ = true;
     this->latitude_ = latitiude;
 }
 
@@ -458,7 +430,7 @@ void DBODataSource::sac(unsigned char sac)
     this->sac_ = sac;
 }
 
-void DBODataSource::shortName(const std::string &short_name)
+void DBODataSource::shortName(const std::string& short_name)
 {
     has_short_name_ = true;
     this->short_name_ = short_name;
@@ -508,12 +480,12 @@ void DBODataSource::removeAltitude()
 
 DBObject& DBODataSource::object()
 {
-    assert (object_);
+    assert(object_);
     return *object_;
 }
 
-void DBODataSource::updateInDatabase ()
+void DBODataSource::updateInDatabase()
 {
-    assert (object_);
+    assert(object_);
     object_->updateDataSource(id_);
 }

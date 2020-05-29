@@ -18,59 +18,56 @@
 #ifndef ASTERIXFRAMINGCOMBOBOX_H
 #define ASTERIXFRAMINGCOMBOBOX_H
 
-#include "asteriximporttask.h"
-
 #include <jasterix/jasterix.h>
 
 #include <QComboBox>
 
-class ASTERIXFramingComboBox: public QComboBox
+#include "asteriximporttask.h"
+
+class ASTERIXFramingComboBox : public QComboBox
 {
     Q_OBJECT
 
-signals:
+  signals:
     /// @brief Emitted if type was changed
     void changedFraming();
 
-public:
+  public:
     /// @brief Constructor
-    ASTERIXFramingComboBox(ASTERIXImportTask& task, QWidget * parent = 0)
-    : QComboBox(parent), task_(task)
+    ASTERIXFramingComboBox(ASTERIXImportTask& task, QWidget* parent = 0)
+        : QComboBox(parent), task_(task)
     {
         loadFramings();
-        connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedFraming()));
+        connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedFraming()));
     }
     /// @brief Destructor
     virtual ~ASTERIXFramingComboBox() {}
 
-    void loadFramings ()
+    void loadFramings()
     {
         clear();
 
         for (std::string frame_it : task_.jASTERIX()->framings())
         {
-            addItem (frame_it.c_str());
+            addItem(frame_it.c_str());
         }
 
-        setCurrentIndex (0);
+        setCurrentIndex(0);
     }
 
     /// @brief Returns the currently selected framing
-    std::string getFraming ()
-    {
-        return currentText().toStdString();
-    }
+    std::string getFraming() { return currentText().toStdString(); }
 
     /// @brief Sets the currently selected data type
-    void setFraming (const std::string &framing)
+    void setFraming(const std::string& framing)
     {
         int index = findText(QString(framing.c_str()));
-        assert (index >= 0);
-        setCurrentIndex (index);
+        assert(index >= 0);
+        setCurrentIndex(index);
     }
 
-protected:
+  protected:
     ASTERIXImportTask& task_;
 };
 
-#endif // ASTERIXFRAMINGCOMBOBOX_H
+#endif  // ASTERIXFRAMINGCOMBOBOX_H

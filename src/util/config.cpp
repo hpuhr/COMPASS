@@ -15,26 +15,27 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <limits>
-#include <fstream>
-
-#include "logger.h"
 #include "config.h"
-#include "stringconv.h"
+
+#include <stdlib.h>
+
+#include <fstream>
+#include <limits>
+
 #include "files.h"
+#include "logger.h"
+#include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
 
-SimpleConfig::SimpleConfig (const std::string& config_filename)
-    : config_filename_ (config_filename)
+SimpleConfig::SimpleConfig(const std::string& config_filename) : config_filename_(config_filename)
 {
     try
     {
-        loadFile ();
-        assert (opened_);
+        loadFile();
+        assert(opened_);
     }
     catch (exception& e)
     {
@@ -43,20 +44,17 @@ SimpleConfig::SimpleConfig (const std::string& config_filename)
     }
 }
 
-SimpleConfig::~SimpleConfig()
-{
-    opened_ = false;
-}
+SimpleConfig::~SimpleConfig() { opened_ = false; }
 
 void SimpleConfig::loadFile()
 {
-    assert (!opened_);
+    assert(!opened_);
 
-    std::string config_path = HOME_CONF_DIRECTORY+config_filename_;
+    std::string config_path = HOME_CONF_DIRECTORY + config_filename_;
 
-    Files::verifyFileExists (config_path);
+    Files::verifyFileExists(config_path);
 
-    std::ifstream config_file (config_path, std::ifstream::in);
+    std::ifstream config_file(config_path, std::ifstream::in);
 
     try
     {
@@ -71,79 +69,84 @@ void SimpleConfig::loadFile()
     opened_ = true;
 }
 
-bool SimpleConfig::getBool (const std::string &id)
+bool SimpleConfig::getBool(const std::string& id)
 {
     if (!opened_)
-        throw std::runtime_error ("SimpleConfig: getBool: config file was not opened");
+        throw std::runtime_error("SimpleConfig: getBool: config file was not opened");
 
     if (!existsId(id))
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' not present in configuration");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id +
+                                 "' not present in configuration");
 
     if (!config_.at(id).is_boolean())
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' is not boolean");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id + "' is not boolean");
 
     return config_.at(id);
 }
 
-int SimpleConfig::getInt (const std::string &id)
+int SimpleConfig::getInt(const std::string& id)
 {
     if (!opened_)
-        throw std::runtime_error ("SimpleConfig: getInt: config file was not opened");
+        throw std::runtime_error("SimpleConfig: getInt: config file was not opened");
 
     if (!existsId(id))
-        throw std::runtime_error ("SimpleConfig: getInt: config id '"+id+"' not present in configuration");
+        throw std::runtime_error("SimpleConfig: getInt: config id '" + id +
+                                 "' not present in configuration");
 
     if (!config_.at(id).is_number_integer())
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' is not integer");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id + "' is not integer");
 
     return config_.at(id);
 }
 
-unsigned int SimpleConfig::getUnsignedInt (const std::string &id)
+unsigned int SimpleConfig::getUnsignedInt(const std::string& id)
 {
     if (!opened_)
-        throw std::runtime_error ("SimpleConfig: getUnsignedInt: config file was not opened");
+        throw std::runtime_error("SimpleConfig: getUnsignedInt: config file was not opened");
 
     if (!existsId(id))
-        throw std::runtime_error ("SimpleConfig: getUnsignedInt: config id '"+id+"' not present in configuration");
+        throw std::runtime_error("SimpleConfig: getUnsignedInt: config id '" + id +
+                                 "' not present in configuration");
 
     if (!config_.at(id).is_number_unsigned())
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' is not unsigned integer");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id +
+                                 "' is not unsigned integer");
 
     return config_.at(id);
 }
 
-double SimpleConfig::getDouble (const std::string &id)
+double SimpleConfig::getDouble(const std::string& id)
 {
     if (!opened_)
-        throw std::runtime_error ("SimpleConfig: getDouble: config file was not opened");
+        throw std::runtime_error("SimpleConfig: getDouble: config file was not opened");
 
     if (!existsId(id))
-        throw std::runtime_error ("SimpleConfig: getDouble: config id '"+id+"' not present in configuration");
+        throw std::runtime_error("SimpleConfig: getDouble: config id '" + id +
+                                 "' not present in configuration");
 
     if (!config_.at(id).is_number_float())
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' is not float");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id + "' is not float");
 
     return config_.at(id);
 }
 
-std::string SimpleConfig::getString (const std::string &id)
+std::string SimpleConfig::getString(const std::string& id)
 {
     if (!opened_)
-        throw std::runtime_error ("SimpleConfig: getValue: config file was not opened");
+        throw std::runtime_error("SimpleConfig: getValue: config file was not opened");
 
     if (!existsId(id))
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' not present in configuration");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id +
+                                 "' not present in configuration");
 
     if (!config_.at(id).is_string())
-        throw std::runtime_error ("SimpleConfig: getBool: config id '"+id+"' is not string");
+        throw std::runtime_error("SimpleConfig: getBool: config id '" + id + "' is not string");
 
     return config_.at(id);
 }
 
 bool SimpleConfig::existsId(const std::string& id)
 {
-    assert (id.size() > 0);
+    assert(id.size() > 0);
     return config_.contains(id);
 }
-

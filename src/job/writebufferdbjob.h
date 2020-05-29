@@ -19,6 +19,7 @@
 #define WRITEBUFFERDBJOB_H_
 
 #include <list>
+
 #include "DBJob.h"
 
 class Buffer;
@@ -30,18 +31,19 @@ class Buffer;
  */
 class WriteBufferDBJob : public DBJob
 {
-public:
-  WriteBufferDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-      boost::function<void (Job*)> obsolete_function, DBInterface *db_interface, Buffer *buffer);
+  public:
+    WriteBufferDBJob(JobOrderer* orderer, boost::function<void(Job*)> done_function,
+                     boost::function<void(Job*)> obsolete_function, DBInterface* db_interface,
+                     Buffer* buffer);
 
-  virtual ~WriteBufferDBJob();
+    virtual ~WriteBufferDBJob();
 
-  virtual void execute ();
+    virtual void execute();
 
-  Buffer *getBuffer () { return buffer_; }
+    Buffer* getBuffer() { return buffer_; }
 
-protected:
-  Buffer *buffer_;
+  protected:
+    Buffer* buffer_;
 };
 
 #endif /* WRITEBUFFERDBJOB_H_ */

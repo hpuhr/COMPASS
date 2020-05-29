@@ -16,23 +16,31 @@
  */
 
 #include "dboreaddbjob.h"
+
+#include "buffer.h"
+#include "dbinterface.h"
 #include "dbobject.h"
 #include "dbovariable.h"
-#include "propertylist.h"
-#include "dbinterface.h"
-#include "buffer.h"
 #include "logger.h"
+#include "propertylist.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list,
-                           std::string custom_filter_clause, std::vector <DBOVariable*> filtered_variables,
-                           bool use_order, DBOVariable *order_variable, bool use_order_ascending,
-                           const std::string &limit_str)
-: Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list),
-  custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
-  use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending),
-  limit_str_(limit_str)
+DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVariableSet read_list,
+                           std::string custom_filter_clause,
+                           std::vector<DBOVariable*> filtered_variables, bool use_order,
+                           DBOVariable* order_variable, bool use_order_ascending,
+                           const std::string& limit_str)
+    : Job("DBOReadDBJob"),
+      db_interface_(db_interface),
+      dbobject_(dbobject),
+      read_list_(read_list),
+      custom_filter_clause_(custom_filter_clause),
+      filtered_variables_(filtered_variables),
+      use_order_(use_order),
+      order_variable_(order_variable),
+      use_order_ascending_(use_order_ascending),
+      limit_str_(limit_str)
 {
-    assert (dbobject_.existsInDB());
+    assert(dbobject_.existsInDB());
 
     for (auto& var_it : read_list_.getSet())
         assert(var_it->existsInDB());
@@ -41,15 +49,12 @@ DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVar
         assert(var_it->existsInDB());
 
     if (order_variable_)
-        assert (order_variable_->existsInDB());
+        assert(order_variable_->existsInDB());
 }
 
-DBOReadDBJob::~DBOReadDBJob()
-{
+DBOReadDBJob::~DBOReadDBJob() {}
 
-}
-
-void DBOReadDBJob::run ()
+void DBOReadDBJob::run()
 {
     loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": start";
     started_ = true;
@@ -57,22 +62,21 @@ void DBOReadDBJob::run ()
     if (obsolete_)
     {
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete before prepared";
-        done_=true;
+        done_ = true;
         return;
     }
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    db_interface_.prepareRead(dbobject_, read_list_, custom_filter_clause_, filtered_variables_,
+                              use_order_, order_variable_, use_order_ascending_, limit_str_);
 
-    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_,
-                               order_variable_, use_order_ascending_, limit_str_);
-
-    unsigned int cnt=0;
+    unsigned int cnt = 0;
 
     while (!done_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
-        assert (buffer);
+        assert(buffer);
 
         cnt++;
 
@@ -82,7 +86,7 @@ void DBOReadDBJob::run ()
             break;
         }
 
-        assert (buffer->dboName() == dbobject_.name());
+        assert(buffer->dboName() == dbobject_.name());
 
         logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                << cnt << " last one " << buffer->lastOne();
@@ -101,16 +105,13 @@ void DBOReadDBJob::run ()
 
     if (diff.total_seconds() > 0)
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
-               << 1000.0*row_count_/diff.total_milliseconds() << " el/s";
+               << 1000.0 * row_count_ / diff.total_milliseconds() << " el/s";
     else
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
 
-    done_=true;
+    done_ = true;
 
     return;
 }
 
-unsigned int DBOReadDBJob::rowCount() const
-{
-    return row_count_;
-}
+unsigned int DBOReadDBJob::rowCount() const { return row_count_; }

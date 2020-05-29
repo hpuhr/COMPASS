@@ -16,55 +16,55 @@
  */
 
 #include "asterixconfigwidget.h"
-#include "asteriximporttask.h"
-#include "asterixframingcombobox.h"
-#include "asterixeditioncombobox.h"
-#include "asterixrefeditioncombobox.h"
-#include "asterixspfeditioncombobox.h"
-#include "logger.h"
-#include "files.h"
-#include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
 #include <jasterix/refedition.h>
 
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QListWidget>
-#include <QDesktopServices>
-#include <QGridLayout>
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QFormLayout>
+#include <QGridLayout>
+#include <QLabel>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
 
+#include "asterixeditioncombobox.h"
+#include "asterixframingcombobox.h"
+#include "asteriximporttask.h"
+#include "asterixrefeditioncombobox.h"
+#include "asterixspfeditioncombobox.h"
+#include "files.h"
+#include "logger.h"
+#include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
 using namespace jASTERIX;
 
 ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* parent)
-     : QWidget(parent), task_(task)
+    : QWidget(parent), task_(task)
 {
-    main_layout_ = new QVBoxLayout ();
+    main_layout_ = new QVBoxLayout();
 
     // framing stuff
     {
-        QGridLayout* framing_grid = new QGridLayout ();
+        QGridLayout* framing_grid = new QGridLayout();
 
-        QLabel* framing_label = new QLabel ("Framing");
-        framing_grid->addWidget (framing_label, 0, 0);
+        QLabel* framing_label = new QLabel("Framing");
+        framing_grid->addWidget(framing_label, 0, 0);
 
         framing_combo_ = new ASTERIXFramingComboBox(task_);
         connect(framing_combo_, SIGNAL(changedFraming()), this, SLOT(framingChangedSlot()));
-        framing_grid->addWidget (framing_combo_, 0, 1);
+        framing_grid->addWidget(framing_combo_, 0, 1);
 
         framing_edit_ = new QPushButton("Edit");
         connect(framing_edit_, SIGNAL(clicked()), this, SLOT(framingEditSlot()));
-        framing_grid->addWidget (framing_edit_, 0, 2);
+        framing_grid->addWidget(framing_edit_, 0, 2);
 
         updateFraming();
 
@@ -73,7 +73,7 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* paren
 
     // categories stuff
     {
-        categories_grid_ = new QGridLayout ();
+        categories_grid_ = new QGridLayout();
         updateCategories();
 
         main_layout_->addLayout(categories_grid_);
@@ -83,38 +83,38 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* paren
 
     // button stuff
     {
-        QGridLayout* button_grid = new QGridLayout ();
+        QGridLayout* button_grid = new QGridLayout();
 
-        QPushButton* edit_db_button = new QPushButton ("Edit Data Block");
-        connect(edit_db_button, SIGNAL( clicked() ), this, SLOT(editDataBlockSlot()));
-        button_grid->addWidget (edit_db_button, 0, 0);
+        QPushButton* edit_db_button = new QPushButton("Edit Data Block");
+        connect(edit_db_button, SIGNAL(clicked()), this, SLOT(editDataBlockSlot()));
+        button_grid->addWidget(edit_db_button, 0, 0);
 
-        QPushButton* edit_cat_button = new QPushButton ("Edit Categories");
-        connect(edit_cat_button, SIGNAL( clicked() ), this, SLOT(editCategoriesSlot()));
-        button_grid->addWidget (edit_cat_button, 0, 1);
+        QPushButton* edit_cat_button = new QPushButton("Edit Categories");
+        connect(edit_cat_button, SIGNAL(clicked()), this, SLOT(editCategoriesSlot()));
+        button_grid->addWidget(edit_cat_button, 0, 1);
 
-        QPushButton* refresh_button = new QPushButton ("Refresh");
-        connect(refresh_button, SIGNAL( clicked() ), this, SLOT(refreshjASTERIXSlot()));
-        button_grid->addWidget (refresh_button, 0, 2);
+        QPushButton* refresh_button = new QPushButton("Refresh");
+        connect(refresh_button, SIGNAL(clicked()), this, SLOT(refreshjASTERIXSlot()));
+        button_grid->addWidget(refresh_button, 0, 2);
 
         main_layout_->addLayout(button_grid);
     }
 
-    setLayout (main_layout_);
+    setLayout(main_layout_);
 }
 
-ASTERIXConfigWidget::~ASTERIXConfigWidget()
-{
-}
+ASTERIXConfigWidget::~ASTERIXConfigWidget() {}
 
 void ASTERIXConfigWidget::editDataBlockSlot()
 {
-    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '" << task_.jASTERIX()->dataBlockDefinitionPath() << "'";
+    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '"
+           << task_.jASTERIX()->dataBlockDefinitionPath() << "'";
     QDesktopServices::openUrl(QUrl(task_.jASTERIX()->dataBlockDefinitionPath().c_str()));
 }
 void ASTERIXConfigWidget::editCategoriesSlot()
 {
-    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '" << task_.jASTERIX()->categoriesDefinitionPath() << "'";
+    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '"
+           << task_.jASTERIX()->categoriesDefinitionPath() << "'";
     QDesktopServices::openUrl(QUrl(task_.jASTERIX()->categoriesDefinitionPath().c_str()));
 }
 
@@ -135,7 +135,7 @@ void ASTERIXConfigWidget::updateSlot()
 
 void ASTERIXConfigWidget::framingChangedSlot()
 {
-    assert (framing_combo_);
+    assert(framing_combo_);
     loginf << "ASTERIXConfigWidget: framingChangedSlot: " << framing_combo_->getFraming();
 
     task_.currentFraming(framing_combo_->getFraming());
@@ -148,15 +148,16 @@ void ASTERIXConfigWidget::framingChangedSlot()
 
 void ASTERIXConfigWidget::framingEditSlot()
 {
-    std::string framing_path = "file:///"+task_.jASTERIX()->framingsFolderPath()+"/"+task_.currentFraming()+".json";
+    std::string framing_path = "file:///" + task_.jASTERIX()->framingsFolderPath() + "/" +
+                               task_.currentFraming() + ".json";
     loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
 
-void ASTERIXConfigWidget::updateFraming ()
+void ASTERIXConfigWidget::updateFraming()
 {
-    assert (framing_combo_);
-    assert (framing_edit_);
+    assert(framing_combo_);
+    assert(framing_edit_);
 
     framing_combo_->loadFramings();
     framing_combo_->setFraming(task_.currentFraming());
@@ -165,14 +166,13 @@ void ASTERIXConfigWidget::updateFraming ()
         framing_edit_->setDisabled(true);
     else
         framing_edit_->setDisabled(false);
-
 }
 
 void ASTERIXConfigWidget::updateCategories()
 {
-    assert (categories_grid_);
+    assert(categories_grid_);
 
-    QLayoutItem *child;
+    QLayoutItem* child;
     while ((child = categories_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
@@ -183,37 +183,37 @@ void ASTERIXConfigWidget::updateCategories()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QLabel *cat_label = new QLabel ("Category");
-    cat_label->setFont (font_bold);
-    categories_grid_->addWidget (cat_label, 0, 0);
+    QLabel* cat_label = new QLabel("Category");
+    cat_label->setFont(font_bold);
+    categories_grid_->addWidget(cat_label, 0, 0);
 
-    QLabel *edition_label = new QLabel ("Edition");
-    edition_label->setFont (font_bold);
-    categories_grid_->addWidget (edition_label, 0, 1);
+    QLabel* edition_label = new QLabel("Edition");
+    edition_label->setFont(font_bold);
+    categories_grid_->addWidget(edition_label, 0, 1);
 
-    QLabel *edition_edit_label = new QLabel ("Edit");
-    edition_edit_label->setFont (font_bold);
-    categories_grid_->addWidget (edition_edit_label, 0, 2);
+    QLabel* edition_edit_label = new QLabel("Edit");
+    edition_edit_label->setFont(font_bold);
+    categories_grid_->addWidget(edition_edit_label, 0, 2);
 
-    QLabel *ref_label = new QLabel ("REF");
-    ref_label->setFont (font_bold);
-    categories_grid_->addWidget (ref_label, 0, 3);
+    QLabel* ref_label = new QLabel("REF");
+    ref_label->setFont(font_bold);
+    categories_grid_->addWidget(ref_label, 0, 3);
 
-    QLabel *ref_edit_label = new QLabel ("Edit");
-    ref_edit_label->setFont (font_bold);
-    categories_grid_->addWidget (ref_edit_label, 0, 4);
+    QLabel* ref_edit_label = new QLabel("Edit");
+    ref_edit_label->setFont(font_bold);
+    categories_grid_->addWidget(ref_edit_label, 0, 4);
 
-    QLabel *spf_label = new QLabel ("SPF");
-    spf_label->setFont (font_bold);
-    categories_grid_->addWidget (spf_label, 0, 5);
+    QLabel* spf_label = new QLabel("SPF");
+    spf_label->setFont(font_bold);
+    categories_grid_->addWidget(spf_label, 0, 5);
 
-    QLabel *spf_edit_label = new QLabel ("Edit");
-    spf_edit_label->setFont (font_bold);
-    categories_grid_->addWidget (spf_edit_label, 0, 6);
+    QLabel* spf_edit_label = new QLabel("Edit");
+    spf_edit_label->setFont(font_bold);
+    categories_grid_->addWidget(spf_edit_label, 0, 6);
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
 
-    int row=1;
+    int row = 1;
 
     ref_edit_buttons_.clear();
     spf_edit_buttons_.clear();
@@ -222,81 +222,85 @@ void ASTERIXConfigWidget::updateCategories()
     {
         unsigned int category = cat_it.first;
 
-        QCheckBox* cat_check = new QCheckBox (String::categoryString(category).c_str());
+        QCheckBox* cat_check = new QCheckBox(String::categoryString(category).c_str());
         connect(cat_check, &QCheckBox::clicked, this, &ASTERIXConfigWidget::categoryCheckedSlot);
         cat_check->setProperty("category", category);
         if (task_.hasConfiguratonFor(category))
             cat_check->setChecked(task_.decodeCategory(category));
-        categories_grid_->addWidget (cat_check, row, 0);
+        categories_grid_->addWidget(cat_check, row, 0);
 
         const std::shared_ptr<Category> cat = cat_it.second;
 
         ASTERIXEditionComboBox* ed_combo = new ASTERIXEditionComboBox(task_, cat);
         if (task_.hasConfiguratonFor(category))
             ed_combo->setEdition(task_.editionForCategory(category));
-        connect(ed_combo, &ASTERIXEditionComboBox::changedEdition, this, &ASTERIXConfigWidget::editionChangedSlot);
-        categories_grid_->addWidget (ed_combo, row, 1);
+        connect(ed_combo, &ASTERIXEditionComboBox::changedEdition, this,
+                &ASTERIXConfigWidget::editionChangedSlot);
+        categories_grid_->addWidget(ed_combo, row, 1);
 
-        QPushButton *ed_edit = new QPushButton ();
+        QPushButton* ed_edit = new QPushButton();
         ed_edit->setIcon(edit_icon);
         ed_edit->setFixedSize(UI_ICON_SIZE);
         ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(ed_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryEditionEditSlot);
+        connect(ed_edit, &QPushButton::clicked, this,
+                &ASTERIXConfigWidget::categoryEditionEditSlot);
         ed_edit->setProperty("category", category);
-        categories_grid_->addWidget (ed_edit, row, 2);
+        categories_grid_->addWidget(ed_edit, row, 2);
 
         // ref
         ASTERIXREFEditionComboBox* ref_combo = new ASTERIXREFEditionComboBox(task_, cat);
         if (task_.hasConfiguratonFor(category))
             ref_combo->setREFEdition(task_.refEditionForCategory(category));
-        connect(ref_combo, &ASTERIXREFEditionComboBox::changedREFSignal,
-                this, &ASTERIXConfigWidget::refEditionChangedSlot);
-        categories_grid_->addWidget (ref_combo, row, 3);
+        connect(ref_combo, &ASTERIXREFEditionComboBox::changedREFSignal, this,
+                &ASTERIXConfigWidget::refEditionChangedSlot);
+        categories_grid_->addWidget(ref_combo, row, 3);
 
-        QPushButton *ref_edit = new QPushButton ();
+        QPushButton* ref_edit = new QPushButton();
         ref_edit->setIcon(edit_icon);
         ref_edit->setFixedSize(UI_ICON_SIZE);
         ref_edit->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(ref_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryREFEditionEditSlot);
+        connect(ref_edit, &QPushButton::clicked, this,
+                &ASTERIXConfigWidget::categoryREFEditionEditSlot);
         ref_edit->setProperty("category", category);
 
-        if (!ref_combo->isEnabled()) // is disabled when no refs exist
+        if (!ref_combo->isEnabled())  // is disabled when no refs exist
             ref_edit->setDisabled(true);
 
-        categories_grid_->addWidget (ref_edit, row, 4);
-        assert (!ref_edit_buttons_.count(category));
+        categories_grid_->addWidget(ref_edit, row, 4);
+        assert(!ref_edit_buttons_.count(category));
         ref_edit_buttons_[category] = ref_edit;
 
         // spf
         ASTERIXSPFEditionComboBox* spf_combo = new ASTERIXSPFEditionComboBox(task_, cat);
         if (task_.hasConfiguratonFor(category))
             spf_combo->setSPFEdition(task_.spfEditionForCategory(category));
-        connect(spf_combo, &ASTERIXSPFEditionComboBox::changedSPFSignal,
-                this, &ASTERIXConfigWidget::spfEditionChangedSlot);
-        categories_grid_->addWidget (spf_combo, row, 5);
+        connect(spf_combo, &ASTERIXSPFEditionComboBox::changedSPFSignal, this,
+                &ASTERIXConfigWidget::spfEditionChangedSlot);
+        categories_grid_->addWidget(spf_combo, row, 5);
 
-        QPushButton *spf_edit = new QPushButton ();
+        QPushButton* spf_edit = new QPushButton();
         spf_edit->setIcon(edit_icon);
         spf_edit->setFixedSize(UI_ICON_SIZE);
         spf_edit->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(spf_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categorySPFEditionEditSlot);
+        connect(spf_edit, &QPushButton::clicked, this,
+                &ASTERIXConfigWidget::categorySPFEditionEditSlot);
         spf_edit->setProperty("category", category);
 
-        if (!spf_combo->isEnabled()) // is disabled when no spf exist
+        if (!spf_combo->isEnabled())  // is disabled when no spf exist
             spf_edit->setDisabled(true);
 
-        categories_grid_->addWidget (spf_edit, row, 6);
-        assert (!spf_edit_buttons_.count(category));
+        categories_grid_->addWidget(spf_edit, row, 6);
+        assert(!spf_edit_buttons_.count(category));
         spf_edit_buttons_[category] = spf_edit;
 
         row++;
     }
 }
 
-void ASTERIXConfigWidget::categoryCheckedSlot ()
+void ASTERIXConfigWidget::categoryCheckedSlot()
 {
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
-    assert (widget);
+    assert(widget);
 
     QVariant cat_var = widget->property("category");
     bool decode = widget->checkState() == Qt::Checked;
@@ -315,40 +319,44 @@ void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const s
     task_.editionForCategory(cat, ed_str);
 }
 
-void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str, const std::string& ed_str)
+void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str,
+                                                const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: refEditionChangedSlot: cat " << cat_str << " ref '" << ed_str << "'";
+    loginf << "ASTERIXConfigWidget: refEditionChangedSlot: cat " << cat_str << " ref '" << ed_str
+           << "'";
 
     unsigned int cat = std::stoul(cat_str);
     task_.refEditionForCategory(cat, ed_str);
 
-    assert (ref_edit_buttons_.count(cat));
-    if (ed_str.size()) // enable or disable button if edition is empty
+    assert(ref_edit_buttons_.count(cat));
+    if (ed_str.size())  // enable or disable button if edition is empty
         ref_edit_buttons_.at(cat)->setDisabled(false);
     else
         ref_edit_buttons_.at(cat)->setDisabled(true);
 }
 
-void ASTERIXConfigWidget::spfEditionChangedSlot(const std::string& cat_str, const std::string& ed_str)
+void ASTERIXConfigWidget::spfEditionChangedSlot(const std::string& cat_str,
+                                                const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: spfEditionChangedSlot: cat " << cat_str << " ref '" << ed_str << "'";
+    loginf << "ASTERIXConfigWidget: spfEditionChangedSlot: cat " << cat_str << " ref '" << ed_str
+           << "'";
 
     unsigned int cat = std::stoul(cat_str);
     task_.spfEditionForCategory(cat, ed_str);
 
-    assert (spf_edit_buttons_.count(cat));
-    if (ed_str.size()) // enable or disable button if edition is empty
+    assert(spf_edit_buttons_.count(cat));
+    if (ed_str.size())  // enable or disable button if edition is empty
         spf_edit_buttons_.at(cat)->setDisabled(false);
     else
         spf_edit_buttons_.at(cat)->setDisabled(true);
 }
 
-void ASTERIXConfigWidget::categoryEditionEditSlot ()
+void ASTERIXConfigWidget::categoryEditionEditSlot()
 {
     loginf << "ASTERIXConfigWidget: categoryEditionEditSlot";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert (widget);
+    assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -358,8 +366,8 @@ void ASTERIXConfigWidget::categoryEditionEditSlot ()
     else
         edition_str = task_.jASTERIX()->category(cat)->defaultEdition();
 
-    assert (task_.jASTERIX()->hasCategory(cat));
-    assert (task_.jASTERIX()->category(cat)->hasEdition(edition_str));
+    assert(task_.jASTERIX()->hasCategory(cat));
+    assert(task_.jASTERIX()->category(cat)->hasEdition(edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->editionPath(edition_str);
 
     loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat << " path '" << def_path << "'";
@@ -367,12 +375,12 @@ void ASTERIXConfigWidget::categoryEditionEditSlot ()
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
 
-void ASTERIXConfigWidget::categoryREFEditionEditSlot ()
+void ASTERIXConfigWidget::categoryREFEditionEditSlot()
 {
     loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert (widget);
+    assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -384,21 +392,22 @@ void ASTERIXConfigWidget::categoryREFEditionEditSlot ()
 
     loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: ref '" << ref_edition_str << "'";
 
-    assert (task_.jASTERIX()->hasCategory(cat));
-    assert (task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
+    assert(task_.jASTERIX()->hasCategory(cat));
+    assert(task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->refEditionPath(ref_edition_str);
 
-    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: cat " << cat << " ref path '" << def_path << "'";
+    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: cat " << cat << " ref path '"
+           << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
 
-void ASTERIXConfigWidget::categorySPFEditionEditSlot ()
+void ASTERIXConfigWidget::categorySPFEditionEditSlot()
 {
     loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert (widget);
+    assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -410,11 +419,12 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot ()
 
     loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot: spf '" << spf_edition_str << "'";
 
-    assert (task_.jASTERIX()->hasCategory(cat));
-    assert (task_.jASTERIX()->category(cat)->hasSPFEdition(spf_edition_str));
+    assert(task_.jASTERIX()->hasCategory(cat));
+    assert(task_.jASTERIX()->category(cat)->hasSPFEdition(spf_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->spfEditionPath(spf_edition_str);
 
-    loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot: cat " << cat << " ref path '" << def_path << "'";
+    loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot: cat " << cat << " ref path '"
+           << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }

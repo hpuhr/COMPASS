@@ -306,13 +306,17 @@ Once activated using the symbol \includegraphics[width=0.5cm,frame]{../../data/i
   \caption{OSG View depth check}
 \end{figure}
 
-Please note that if the display check is activated for geometry without height display, bad rendering can occur. For this reason, this mode is only recommended for geometry display with height.
+Please note that if the display check is activated for geometry without height display, bad rendering can occur. For this reason, this mode is only recommended for geometry display with height and is disabled in 2D display mode.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm,frame]{../screenshots/osgview_depth_check_bad.png}
   \caption{OSG View depth check bad rendering}
 \end{figure}
+
+\subsubsection{Save View Point}
+
+The current filter configuration and viewed position can be saved as a new view point using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/vp_save.png} in the toolbar. When clicked, a name of the view point has to be entered by the user. 
 
 \subsubsection{Data Label Background Color}
 
@@ -371,3 +375,16 @@ The selection can be erased using the symbol \includegraphics[width=0.5cm,frame]
 \subsubsection{Overlay Text Color Invert}
 
 The overlay text color can be toggled between black on white or white on black using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/text_invert.png} in the toolbar. Depending on the map background one or the other is more suitable.
+
+\subsubsection{Switch Map Dimensions}
+
+The display modes can be switched using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/3d.png} or \includegraphics[width=0.5cm,frame]{../../data/icons/2d.png} in the toolbar, or by pressing the D-key. 
+
+\subsubsection{Zoom to Home}
+
+The currently viewed area can be set to encompass all data in the database using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_home.png} in the toolbar.
+
+\subsubsection{Zoom to Loaded Data}
+
+The currently viewed area can be set to encompass all currently loaded data using the symbol \includegraphics[width=0.5cm,frame]{../../data/icons/zoom_geometry.png} in the toolbar.
+
