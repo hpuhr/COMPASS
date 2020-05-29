@@ -374,6 +374,8 @@ void ViewPointsImportTask::import ()
 
     assert (canImport());
 
+    finished_ = false;
+
     // view points
 
     assert (current_data_.contains("view_points"));
@@ -401,6 +403,7 @@ void ViewPointsImportTask::import ()
         {
             loginf << "ViewPointsImportTask: import: aborted";
             task_manager_.appendInfo("ViewPointsImportTask: import aborted by user");
+            finished_ = true;
             return;
         }
     }
@@ -461,6 +464,7 @@ void ViewPointsImportTask::import ()
                 {
                     logerr << "ViewPointsImportTask: import: wrong task '" << widget->getCurrentTaskName()
                            << "' selected, aborting";
+                    finished_ = true;
                     return;
                 }
 
@@ -592,10 +596,17 @@ void ViewPointsImportTask::import ()
         }
     }
 
+    finished_ = true;
+
     loginf << "ViewPointsImportTask: done";
 }
 
 const nlohmann::json& ViewPointsImportTask::currentData() const
 {
     return current_data_;
+}
+
+bool ViewPointsImportTask::finished() const
+{
+    return finished_;
 }

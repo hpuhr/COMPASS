@@ -82,6 +82,8 @@ public:
 
     const nlohmann::json& currentData() const;
 
+    bool finished() const;
+
 protected:
     std::string current_filename_;
     nlohmann::json current_data_;
@@ -89,6 +91,7 @@ protected:
     std::map<std::string, SavedFile*> file_list_;
 
     std::string current_error_;
+    bool finished_ {false};
 
     std::unique_ptr<ViewPointsImportTaskWidget> widget_;
 
