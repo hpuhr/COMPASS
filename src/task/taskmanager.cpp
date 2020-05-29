@@ -638,7 +638,7 @@ void TaskManager::performAutomaticTasks ()
 
         view_points_import_task_widget->importSlot();
 
-        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
+        while (QCoreApplication::hasPendingEvents() || !view_points_import_task_->finished())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         QThread::msleep(100);  // delay
