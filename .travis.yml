@@ -30,6 +30,13 @@ compiler:
 # - clang
 
 before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt58-trusty -y
+  - sudo apt-get update
+
+install:
+#qt
+  - sudo apt-get install qt58base # qt58svg qt58charts-no-lgpl qt58xmlpatterns
+  - source /opt/qt58/bin/qt58-env.sh
  # NemaTode install
  - wget https://github.com/ckgt/NemaTode/archive/master.zip
  - unzip master.zip
