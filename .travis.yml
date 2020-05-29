@@ -1,4 +1,7 @@
 language: c++
+dist: trusty
+compiler: g++
+sudo: required
 
 addons:
   apt:
