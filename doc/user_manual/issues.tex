@@ -43,6 +43,41 @@ Unfortunately this means that for e.g. CentOS 6.* (or older) an AppImage produce
 If this is the case for you please comment on \url{https://github.com/hpuhr/ATSDB/issues/35}.
 
 
+\subsection{White OSGView \& Shader Errors in Console Log}
+\label{ref:issue_shaders}
+
+When the OSGView is started on older, unsupported Intel graphics cards the OSGView only show a white window and the following error messages are logged in the console:
+
+\begin{lstlisting}
+...
+glLinkProgram 0x1af6a320"" FAILED
+
+VERTEX glCompileShader "main(vertex)" FAILED
+VERTEX Shader "main(vertex)" infolog:
+0:1(10): error: GLSL 3.30 is not supported. Supported versions are: 1.10, 1.20, 1.30, 1.00 ES, 3.00 ES, and 3.10 ES
+
+FRAGMENT glCompileShader "main(fragment)" FAILED
+FRAGMENT Shader "main(fragment)" infolog:
+0:1(10): error: GLSL 3.30 is not supported. Supported versions are: 1.10, 1.20, 1.30, 1.00 ES, 3.00 ES, and 3.10 ES
+
+Program "" infolog:
+error: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shadererror: linking with uncompiled/unspecialized shader
+glLinkProgram 0x82eefa0"" FAILED
+\end{lstlisting}
+\ \\
+
+This is due to the the used graphics libraries OpenSceneGraph and osgEarth depending on shaders defined in GLSL 3.30 (shading language version) and the used graphics card driver not supporting this version of shaders. \\
+
+There exists a workaround which might work for you: There exists the issue that in some cases the shaders are supported in the used Mesa graphics driver, but are not detected correctly. One can override the reported OpenGL version for one application using a system variable and start the app in that mode using:
+
+\begin{lstlisting}
+MESA_GL_VERSION_OVERRIDE=3.3 ./ATSDB-release.AppImage
+\end{lstlisting}
+
+At least on the authors workstation with an Intel graphics card and for some other users this resolved the issue. \\
+
+If this is not the case for you please comment on \url{https://github.com/hpuhr/ATSDB/issues/151}
+
 \subsection{Graphical Issues}
 
 For issues of the following nature:
