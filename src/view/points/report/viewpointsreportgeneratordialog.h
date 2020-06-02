@@ -5,9 +5,14 @@
 
 class ViewPointsReportGenerator;
 
+class QPushButton;
+
 class ViewPointsReportGeneratorDialog : public QDialog
 {
     Q_OBJECT
+
+public slots:
+  void runSlot();
 
 public:
     ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
@@ -15,6 +20,8 @@ public:
 
 protected:
     ViewPointsReportGenerator& generator_;
+
+    QPushButton* run_button_{nullptr};
 };
 
 #endif // VIEWPOINTSREPORTGENERATORDIALOG_H

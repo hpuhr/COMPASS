@@ -278,6 +278,11 @@ QStringList ViewPointsTableModel::defaultTableColumns() const
     return default_table_columns_;
 }
 
+std::map<unsigned int, ViewPoint> ViewPointsTableModel::viewPoints() const
+{
+    return view_points_;
+}
+
 unsigned int ViewPointsTableModel::saveNewViewPoint(const nlohmann::json& data, bool update)
 {
     unsigned int new_id {0};

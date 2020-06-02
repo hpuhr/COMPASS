@@ -65,6 +65,8 @@ public:
 
     QStringList defaultTableColumns() const;
 
+    std::map<unsigned int, ViewPoint> viewPoints() const;
+
 private:
     ViewManager& view_manager_;
 

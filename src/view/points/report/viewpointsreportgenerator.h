@@ -17,6 +17,8 @@ public:
 
     ViewPointsReportGeneratorDialog& dialog();
 
+    void run ();
+
 protected:
     ViewManager& view_manager_;
 
