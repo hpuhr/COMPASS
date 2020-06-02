@@ -17,6 +17,7 @@ class ViewPointsWidget : public QWidget
 
   public slots:
     void exportSlot();
+    void exportPDFSlot();
     void deleteAllSlot();
     void importSlot();
 
@@ -79,6 +80,7 @@ private:
     QPushButton* import_button_{nullptr};
     QPushButton* delete_all_button_{nullptr};
     QPushButton* export_button_{nullptr};
+    QPushButton* export_pdf_button_{nullptr};
 
     QStringList types_;
     QStringList filtered_types_;

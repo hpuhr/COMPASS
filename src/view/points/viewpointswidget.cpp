@@ -6,6 +6,8 @@
 #include "atsdb.h"
 #include "dbobjectmanager.h"
 #include "viewpointstoolwidget.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -85,6 +87,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         connect (export_button_, &QPushButton::clicked, this, &ViewPointsWidget::exportSlot);
         button_layout->addWidget(export_button_);
 
+        export_pdf_button_ = new QPushButton("Export PDF");
+        connect (export_pdf_button_, &QPushButton::clicked, this, &ViewPointsWidget::exportPDFSlot);
+        button_layout->addWidget(export_pdf_button_);
 
         main_layout->addLayout(button_layout);
     }
@@ -378,6 +383,14 @@ void ViewPointsWidget::exportSlot()
         assert (table_model_);
         table_model_->exportViewPoints(filename);
     }
+}
+
+void ViewPointsWidget::exportPDFSlot()
+{
+    loginf << "ViewPointsWidget: exportPDFSlot";
+
+    ViewPointsReportGeneratorDialog& dialog = view_manager_.viewPointsGenerator().dialog();
+    dialog.exec();
 }
 
 void ViewPointsWidget::deleteAllSlot()

@@ -31,6 +31,7 @@ class ViewManagerWidget;
 class View;
 class ViewPoint;
 class ViewPointsWidget;
+class ViewPointsReportGenerator;
 
 class QWidget;
 class QTabWidget;
@@ -78,6 +79,8 @@ class ViewManager : public QObject, public Configurable
 
     ViewPointsWidget* viewPointsWidget() const;
 
+    ViewPointsReportGenerator& viewPointsGenerator();
+
     void setCurrentViewPoint (unsigned int id);
     void unsetCurrentViewPoint ();
 
@@ -96,6 +99,8 @@ protected:
     std::map<std::string, ViewContainer*> containers_;
     std::map<std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
+
+    std::unique_ptr<ViewPointsReportGenerator> view_points_report_gen_;
 
     bool current_view_point_set_ {false};
     unsigned int current_view_point_ {0};

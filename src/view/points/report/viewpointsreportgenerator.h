@@ -4,6 +4,7 @@
 #include "configurable.h"
 
 class ViewManager;
+class ViewPointsReportGeneratorDialog;
 
 class ViewPointsReportGenerator : public Configurable
 {
@@ -14,8 +15,12 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    ViewPointsReportGeneratorDialog& dialog();
+
 protected:
     ViewManager& view_manager_;
+
+    std::unique_ptr<ViewPointsReportGeneratorDialog> dialog_;
 
     virtual void checkSubConfigurables();
 };
