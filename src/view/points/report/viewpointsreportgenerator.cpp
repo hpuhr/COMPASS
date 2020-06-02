@@ -8,6 +8,11 @@
 #include "stringconv.h"
 #include "dbobjectmanager.h"
 #include "atsdb.h"
+#include "global.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "osgview.h"
+#endif
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -61,13 +66,17 @@ void ViewPointsReportGenerator::run ()
     assert (table_model);
     std::map<unsigned int, ViewPoint> view_points = table_model->viewPoints();
 
-    string elapsed_time_str, remaining_time_str;
+    string status_str, elapsed_time_str, remaining_time_str;
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     unsigned int vp_cnt = 0;
     unsigned int vp_size = view_points.size();
-    float ms;
-    float ms_per_vp;
+    double ms;
+    double ms_per_vp;
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    OSGView::instant_display_ = true;
+#endif
 
     for (auto& vp_it : view_points)
     {
@@ -84,19 +93,39 @@ void ViewPointsReportGenerator::run ()
         elapsed_time_str =
             String::timeStringFromDouble(ms / 1000.0, false);
 
+        status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(vp_size);
+
         if (vp_cnt && ms > 0)
         {
-            ms_per_vp = ms/(float)vp_cnt;
-            remaining_time_str = String::timeStringFromDouble((vp_size-vp_cnt) * ms_per_vp, false);
+            ms_per_vp = ms/(double)vp_cnt;
 
-            loginf << "ViewPointsReportGenerator: run: setting done after " << elapsed_time_str
-                   << " remaining " << remaining_time_str;
+            remaining_time_str = String::timeStringFromDouble((vp_size-vp_cnt) * ms_per_vp / 1000.0, false);
+
+            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first
+                   << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
         }
         else
-            loginf << "ViewPointsReportGenerator: run: setting done after " << elapsed_time_str;
+        {
+            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first
+                   << " done after " << elapsed_time_str;
 
+        }
 
+        dialog_->setElapsedTime(elapsed_time_str);
+        dialog_->setProgress(0, vp_size, vp_cnt);
+        dialog_->setStatus(status_str);
+        dialog_->setRemainingTime(remaining_time_str);
 
         ++vp_cnt;
     }
+
+    dialog_->setProgress(0, vp_size, vp_size);
+    dialog_->setStatus("Writing view points done");
+    dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    OSGView::instant_display_ = false;
+#endif
+
 }
