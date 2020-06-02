@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/report/CMakeLists.txt")
+
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
