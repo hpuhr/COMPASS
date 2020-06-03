@@ -9,6 +9,10 @@
 #include "dbobjectmanager.h"
 #include "atsdb.h"
 #include "global.h"
+#include "dbinterface.h"
+#include "sqliteconnection.h"
+#include "mysqlppconnection.h"
+#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -17,6 +21,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <QCoreApplication>
+#include <QMessageBox>
 
 using namespace std;
 using namespace Utils;
@@ -26,6 +31,25 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     : Configurable(class_id, instance_id, &view_manager), view_manager_(view_manager)
 {
 
+    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+
+    if (sql_con)
+    {
+        report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/report_"
+                + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
+    }
+    else
+    {
+        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+        assert (mysql_con);
+        report_path_ = HOME_PATH+"/report_"+mysql_con->usedDatabase() + "/";
+    }
+
+    report_filename_ = "report.tex";
+
+
+    loginf << "ViewPointsReportGenerator: constructor: report path '" << report_path_ << "'"
+           << " filename '"  << report_filename_ << "'";
 }
 
 
@@ -54,6 +78,9 @@ void ViewPointsReportGenerator::run ()
 {
     loginf << "ViewPointsReportGenerator: run";
 
+    cancel_ = false;
+    running_ = true;
+
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime stop_time;
     boost::posix_time::time_duration time_diff;
@@ -80,11 +107,17 @@ void ViewPointsReportGenerator::run ()
 
     for (auto& vp_it : view_points)
     {
+        if (cancel_)
+        {
+            loginf << "ViewPointsReportGenerator: run: cancel";
+            break;
+        }
+
         loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first;
         view_manager_.setCurrentViewPoint(vp_it.first);
 
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents();
 
         stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -119,13 +152,64 @@ void ViewPointsReportGenerator::run ()
         ++vp_cnt;
     }
 
-    dialog_->setProgress(0, vp_size, vp_size);
-    dialog_->setStatus("Writing view points done");
-    dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+    if (cancel_)
+    {
+        dialog_->setProgress(0, vp_size, 0);
+        dialog_->setStatus("Writing view points cancelled");
+        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+    }
+    else
+    {
+        dialog_->setProgress(0, vp_size, vp_size);
+        dialog_->setStatus("Writing view points done");
+        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+    }
 
+    dialog_->close();
 
 #if USE_EXPERIMENTAL_SOURCE == true
     OSGView::instant_display_ = false;
 #endif
 
+    QMessageBox msgBox;
+    if (cancel_)
+        msgBox.setText("Export View Points as PDF Cancelled");
+    else
+        msgBox.setText("Export View Points as PDF Done");
+
+    msgBox.exec();
+
+    running_ = false;
+}
+
+void ViewPointsReportGenerator::cancel ()
+{
+    loginf << "ViewPointsReportGenerator: cancel";
+
+    cancel_ = true;
+
+    if (!running_)
+        dialog_->close();
+}
+
+std::string ViewPointsReportGenerator::reportPath() const
+{
+    return report_path_;
+}
+
+void ViewPointsReportGenerator::reportPath(const std::string& path)
+{
+    loginf << "ViewPointsReportGenerator: reportPath: '" << path << "'";
+    report_path_ = path;
+}
+
+std::string ViewPointsReportGenerator::reportFilename() const
+{
+    return report_filename_;
+}
+
+void ViewPointsReportGenerator::reportFilename(const std::string& filename)
+{
+    loginf << "ViewPointsReportGenerator: reportFilename: '" << filename << "'";
+    report_filename_ = filename;
 }

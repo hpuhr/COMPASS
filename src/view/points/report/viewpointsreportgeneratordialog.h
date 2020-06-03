@@ -8,13 +8,18 @@ class ViewPointsReportGenerator;
 class QPushButton;
 class QLabel;
 class QProgressBar;
+class QLineEdit;
 
 class ViewPointsReportGeneratorDialog : public QDialog
 {
     Q_OBJECT
 
 public slots:
-  void runSlot();
+    void pathEditedSlot (const QString& text);
+    void filenameEditedSlot(const QString& text);
+
+    void runSlot();
+    void cancelSlot();
 
 public:
     ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
@@ -28,12 +33,17 @@ public:
 protected:
     ViewPointsReportGenerator& generator_;
 
+    QLineEdit* directory_edit_ {nullptr};
+    QLineEdit* filename_edit_ {nullptr};
+
     QPushButton* run_button_{nullptr};
 
     QLabel* elapsed_time_label_{nullptr};
     QProgressBar* progress_bar_{nullptr};
     QLabel* status_label_{nullptr};
     QLabel* remaining_time_label_{nullptr};
+
+    QPushButton* quit_button_{nullptr};
 };
 
 #endif // VIEWPOINTSREPORTGENERATORDIALOG_H
