@@ -134,5 +134,12 @@ std::string getFilenameFromPath (const std::string& path)
     return file.string();
 }
 
+void createMissingDirectories(const std::string& path)
+{
+    QDir dir = QDir::root();
+    bool ret = dir.mkpath(path.c_str());
+    assert (ret);
+}
+
 }  // namespace Files
 }  // namespace Utils

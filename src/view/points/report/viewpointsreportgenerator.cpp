@@ -13,6 +13,7 @@
 #include "sqliteconnection.h"
 #include "mysqlppconnection.h"
 #include "files.h"
+#include "latexdocument.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -77,6 +78,9 @@ ViewPointsReportGeneratorDialog& ViewPointsReportGenerator::dialog()
 void ViewPointsReportGenerator::run ()
 {
     loginf << "ViewPointsReportGenerator: run";
+
+    LatexDocument doc (report_path_, report_filename_);
+    doc.title("ATSDB View Points Report");
 
     cancel_ = false;
     running_ = true;
@@ -158,11 +162,13 @@ void ViewPointsReportGenerator::run ()
         dialog_->setStatus("Writing view points cancelled");
         dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
     }
-    else
+    else // proceed
     {
         dialog_->setProgress(0, vp_size, vp_size);
         dialog_->setStatus("Writing view points done");
         dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+        doc.write();
     }
 
     dialog_->close();
