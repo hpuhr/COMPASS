@@ -59,6 +59,8 @@
 #include <QCoreApplication>
 #include <QThread>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 using namespace Utils;
 
 TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
@@ -518,20 +520,20 @@ void TaskManager::autoProcess(bool value)
     auto_process_ = value;
 }
 
-void TaskManager::quitAfterAutoProcess(bool value)
+void TaskManager::quit(bool value)
 {
     loginf << "TaskManager: autoQuitAfterProcess: value " << value;
 
     automatic_tasks_defined_ = true;
-    quit_after_auto_process_ = value;
+    quit_ = value;
 }
 
-void TaskManager::startAfterAutoProcess(bool value)
+void TaskManager::start(bool value)
 {
-    loginf << "TaskManager: startAfterAutoProcess: value " << value;
+    loginf << "TaskManager: start: value " << value;
 
     automatic_tasks_defined_ = true;
-    start_after_auto_process_ = value;
+    start_ = value;
 }
 
 bool TaskManager::automaticTasksDefined() const
@@ -821,13 +823,7 @@ void TaskManager::performAutomaticTasks ()
 
     loginf << "TaskManager: performAutomaticTasks: done";
 
-    if (quit_after_auto_process_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: quit requested";
-        emit quitRequestedSignal();
-    }
-
-    if (start_after_auto_process_)
+    if (start_)
     {
         loginf << "TaskManager: performAutomaticTasks: starting";
 
@@ -839,4 +835,41 @@ void TaskManager::performAutomaticTasks ()
         else
             loginf << "TaskManager: performAutomaticTasks: start not possible";
     }
+
+    if (load_data_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: loading data";
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents();
+
+        DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+        obj_man.loadSlot();
+
+        while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents();
+    }
+
+    if (quit_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: quit requested";
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+
+        while ((stop_time-start_time).total_milliseconds() < 1000
+               || QCoreApplication::hasPendingEvents())
+        {
+            QCoreApplication::processEvents();
+            stop_time = boost::posix_time::microsec_clock::local_time();
+        }
+
+        emit quitRequestedSignal();
+    }
+}
+
+void TaskManager::loadData(bool value)
+{
+    load_data_ = value;
 }
