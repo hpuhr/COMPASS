@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+class LatexSection;
+
 class LatexContent
 {
 public:
@@ -13,7 +15,11 @@ public:
     virtual std::string toString();
 
 protected:
-    std::vector<std::unique_ptr<LatexContent>> content_;
+    std::vector<std::string> content_; // main content as latex strings
+
+    std::vector<std::unique_ptr<LatexContent>> sub_content_;
+
+    LatexSection* findSubSection (const std::string& heading); // bla, nullptr if not found
 };
 
 #endif // LATEXCONTENT_H

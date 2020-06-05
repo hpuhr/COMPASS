@@ -3,6 +3,8 @@
 
 #include "latexcontent.h"
 
+class LatexSection;
+
 class LatexDocument : public LatexContent
 {
 public:
@@ -20,6 +22,12 @@ public:
     void abstract(const std::string& abstract);
 
     virtual std::string toString() override;
+
+    LatexSection& getSection (const std::string& id); // bla:bla2
+
+    bool hasSubSection (const std::string& heading);
+    LatexSection& getSubSection (const std::string& heading);
+    void addSubSection (const std::string& heading);
 
 protected:
     std::string path_;

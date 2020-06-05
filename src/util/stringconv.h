@@ -19,6 +19,8 @@
 #define STRINGMANIPULATION_H_
 
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/replace.hpp>
+
 #include <iomanip>
 #include <map>
 #include <vector>
@@ -311,6 +313,28 @@ inline int compareVersions(const std::string& v1_str, const std::string& v2_str)
     }
 
     return 0;  // same
+}
+
+inline std::string latexString(std::string str)
+{
+//    \textbackslash 	n/a
+    boost::replace_all(str, R"(\)", R"(\textbackslash)");
+//    \% 	%
+    boost::replace_all(str, "%", R"(\%)");
+//    \$ 	$
+    boost::replace_all(str, "$", R"(\$)");
+//    \{ 	{
+    boost::replace_all(str, "{", R"(\{)");
+//    \_ 	_
+    boost::replace_all(str, "_", R"(\_)");
+//    \# 	#
+    boost::replace_all(str, "#", R"(\#)");
+//    \& 	&
+    boost::replace_all(str, "&", R"(\&)");
+//    \} 	}
+    boost::replace_all(str, "}", R"(\})");
+
+    return str;
 }
 
 }  // namespace String

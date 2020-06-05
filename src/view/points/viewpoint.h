@@ -4,6 +4,7 @@
 #include "json.hpp"
 
 class ViewManager;
+class LatexVisitor;
 
 class ViewPoint
 {
@@ -19,6 +20,8 @@ class ViewPoint
     void setComment (const std::string& comment);
 
     void print();
+
+    virtual void accept(LatexVisitor& v);
 
 protected:
     unsigned int id_;

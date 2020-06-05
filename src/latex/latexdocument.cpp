@@ -1,6 +1,10 @@
 #include "latexdocument.h"
 #include "logger.h"
 #include "files.h"
+#include "stringconv.h"
+#include "latexsection.h"
+
+#include <memory>
 
 #include <fstream>
 #include <sstream>
@@ -98,6 +102,61 @@ std::string LatexDocument::toString()
     \end{document})" << "\n";
 
     return ss.str();
+}
+
+LatexSection& LatexDocument::getSection (const std::string& id)
+{
+    assert (id.size());
+    std::vector<std::string> parts = String::split(id, ':');
+    assert (parts.size());
+
+    //std::string& top = parts.at(0);
+
+    LatexSection* tmp;
+
+    for (unsigned int cnt=0; cnt < parts.size(); ++cnt)
+    {
+        std::string& heading = parts.at(cnt);
+
+        if (cnt == 0) // first
+        {
+            if (!hasSubSection(heading))
+                addSubSection(heading);
+
+            tmp = &getSubSection(heading);
+        }
+        else // previous section
+        {
+            assert (tmp);
+
+            if (!tmp->hasSubSection(heading))
+                tmp->addSubSection(heading);
+
+            tmp = &tmp->getSubSection(heading);
+        }
+    }
+
+    assert (tmp);
+    return *tmp;
+}
+
+bool LatexDocument::hasSubSection (const std::string& heading)
+{
+    return findSubSection(heading) != nullptr;
+}
+
+LatexSection& LatexDocument::getSubSection (const std::string& heading)
+{
+    LatexSection* tmp = findSubSection (heading);
+    assert (tmp);
+    return *tmp;
+}
+
+void LatexDocument::addSubSection (const std::string& heading)
+{
+    assert (!hasSubSection(heading));
+    sub_content_.push_back(unique_ptr<LatexSection>(new LatexSection(LatexSectionLevel::SECTION, heading)));
+    assert (hasSubSection(heading));
 }
 
 std::string LatexDocument::title() const

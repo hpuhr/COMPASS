@@ -14,6 +14,7 @@
 #include "mysqlppconnection.h"
 #include "files.h"
 #include "latexdocument.h"
+#include "latexvisitor.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -82,6 +83,8 @@ void ViewPointsReportGenerator::run ()
     LatexDocument doc (report_path_, report_filename_);
     doc.title("ATSDB View Points Report");
 
+    LatexVisitor visitor (doc);
+
     cancel_ = false;
     running_ = true;
 
@@ -123,6 +126,11 @@ void ViewPointsReportGenerator::run ()
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
 
+        // do stuff
+        vp_it.second.accept(visitor);
+
+
+        // update status
         stop_time = boost::posix_time::microsec_clock::local_time();
 
         time_diff = stop_time - start_time;
