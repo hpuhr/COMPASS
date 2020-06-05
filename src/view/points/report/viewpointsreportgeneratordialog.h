@@ -18,6 +18,9 @@ public slots:
     void pathEditedSlot (const QString& text);
     void filenameEditedSlot(const QString& text);
 
+    void authorEditedSlot (const QString& text);
+    void abstractEditedSlot(const QString& text);
+
     void runSlot();
     void cancelSlot();
 
@@ -37,6 +40,9 @@ protected:
 
     QLineEdit* directory_edit_ {nullptr};
     QLineEdit* filename_edit_ {nullptr};
+
+    QLineEdit* author_edit_ {nullptr};
+    QLineEdit* abstract_edit_ {nullptr};
 
     QPushButton* run_button_{nullptr};
 

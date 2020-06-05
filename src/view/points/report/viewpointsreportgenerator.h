@@ -32,6 +32,12 @@ public:
 
     void showDone(bool show_done);
 
+    std::string author() const;
+    void author(const std::string& author);
+
+    std::string abstract() const;
+    void abstract(const std::string& abstract);
+
 protected:
     ViewManager& view_manager_;
 
@@ -39,6 +45,9 @@ protected:
 
     std::string report_path_;
     std::string report_filename_; // without path
+
+    std::string author_;
+    std::string abstract_;
 
     bool running_ {false};
     bool cancel_ {false};

@@ -32,6 +32,8 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
                                                      ViewManager& view_manager)
     : Configurable(class_id, instance_id, &view_manager), view_manager_(view_manager)
 {
+    registerParameter("author", &author_, "");
+    registerParameter("abstract", &abstract_, "");
 
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
 
@@ -84,6 +86,12 @@ void ViewPointsReportGenerator::run ()
 
     LatexDocument doc (report_path_, report_filename_);
     doc.title("ATSDB View Points Report");
+
+    if (author_.size())
+        doc.author(author_);
+
+    if (abstract_.size())
+        doc.abstract(abstract_);
 
     LatexVisitor visitor (doc);
 
@@ -259,4 +267,24 @@ bool ViewPointsReportGenerator::isRunning() const
 void ViewPointsReportGenerator::showDone(bool show_done)
 {
     show_done_ = show_done;
+}
+
+std::string ViewPointsReportGenerator::author() const
+{
+    return author_;
+}
+
+void ViewPointsReportGenerator::author(const std::string& author)
+{
+    author_ = author;
+}
+
+std::string ViewPointsReportGenerator::abstract() const
+{
+    return abstract_;
+}
+
+void ViewPointsReportGenerator::abstract(const std::string& abstract)
+{
+    abstract_ = abstract;
 }

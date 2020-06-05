@@ -9,6 +9,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <QDateTime>
+
 using namespace std;
 using namespace Utils;
 
@@ -73,8 +75,9 @@ std::string LatexDocument::toString()
     if (author_.size())
         ss << R"(\author{)" << author_ << "}"  << "\n";
 
-    ss << R"(\date{}
-          \emergencystretch1em  %
+    ss << R"(\date{)" << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss").toStdString() << "}\n";
+
+    ss << R"(\emergencystretch1em  %
 
           \makeindex
 

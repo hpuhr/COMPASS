@@ -51,6 +51,22 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         connect(filename_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::filenameEditedSlot);
         config_grid->addWidget(filename_edit_, row, 1);
 
+        ++row;
+        config_grid->addWidget(new QLabel("Author"), row, 0);
+
+        author_edit_ = new QLineEdit();
+        author_edit_->setText(generator_.author().c_str());
+        connect(author_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::authorEditedSlot);
+        config_grid->addWidget(author_edit_, row, 1);
+
+        ++row;
+        config_grid->addWidget(new QLabel("Abstract"), row, 0);
+
+        abstract_edit_ = new QLineEdit();
+        abstract_edit_->setText(generator_.abstract().c_str());
+        connect(abstract_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::abstractEditedSlot);
+        config_grid->addWidget(abstract_edit_, row, 1);
+
         main_layout->addLayout(config_grid);
     }
 
@@ -114,6 +130,16 @@ void ViewPointsReportGeneratorDialog::pathEditedSlot (const QString& text)
 void ViewPointsReportGeneratorDialog::filenameEditedSlot(const QString& text)
 {
     generator_.reportFilename(text.toStdString());
+}
+
+void ViewPointsReportGeneratorDialog::authorEditedSlot (const QString& text)
+{
+    generator_.author(text.toStdString());
+}
+
+void ViewPointsReportGeneratorDialog::abstractEditedSlot(const QString& text)
+{
+    generator_.abstract(text.toStdString());
 }
 
 
