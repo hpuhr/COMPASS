@@ -80,6 +80,8 @@ void ViewPointsReportGenerator::run ()
 {
     loginf << "ViewPointsReportGenerator: run";
 
+    assert (dialog_);
+
     LatexDocument doc (report_path_, report_filename_);
     doc.title("ATSDB View Points Report");
 
@@ -136,7 +138,7 @@ void ViewPointsReportGenerator::run ()
         time_diff = stop_time - start_time;
         ms = time_diff.total_milliseconds();
         elapsed_time_str =
-            String::timeStringFromDouble(ms / 1000.0, false);
+                String::timeStringFromDouble(ms / 1000.0, false);
 
         status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(vp_size);
 
@@ -185,13 +187,16 @@ void ViewPointsReportGenerator::run ()
     OSGView::instant_display_ = false;
 #endif
 
-    QMessageBox msgBox;
-    if (cancel_)
-        msgBox.setText("Export View Points as PDF Cancelled");
-    else
-        msgBox.setText("Export View Points as PDF Done");
+    if (show_done_)
+    {
+        QMessageBox msgBox;
+        if (cancel_)
+            msgBox.setText("Export View Points as PDF Cancelled");
+        else
+            msgBox.setText("Export View Points as PDF Done");
 
-    msgBox.exec();
+        msgBox.exec();
+    }
 
     running_ = false;
 }
@@ -215,6 +220,9 @@ void ViewPointsReportGenerator::reportPath(const std::string& path)
 {
     loginf << "ViewPointsReportGenerator: reportPath: '" << path << "'";
     report_path_ = path;
+
+    if (dialog_)
+        dialog_->updateFileInfo();
 }
 
 std::string ViewPointsReportGenerator::reportFilename() const
@@ -226,4 +234,29 @@ void ViewPointsReportGenerator::reportFilename(const std::string& filename)
 {
     loginf << "ViewPointsReportGenerator: reportFilename: '" << filename << "'";
     report_filename_ = filename;
+
+    if (dialog_)
+        dialog_->updateFileInfo();
+}
+
+void ViewPointsReportGenerator::reportPathAndFilename(const std::string& str)
+{
+    report_path_ = Files::getDirectoryFromPath(str) + "/";
+    report_filename_ = Files::getFilenameFromPath(str);
+
+    loginf << "ViewPointsReportGenerator: reportPathAndFilename: path '" << report_path_
+           << "' filename '" << report_filename_ << "'";
+
+    if (dialog_)
+        dialog_->updateFileInfo();
+}
+
+bool ViewPointsReportGenerator::isRunning() const
+{
+    return running_;
+}
+
+void ViewPointsReportGenerator::showDone(bool show_done)
+{
+    show_done_ = show_done;
 }

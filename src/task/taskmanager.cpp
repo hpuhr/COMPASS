@@ -48,6 +48,9 @@
 #include "viewpointsimporttaskwidget.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskwidget.h"
+#include "viewmanager.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -536,6 +539,25 @@ void TaskManager::start(bool value)
     start_ = value;
 }
 
+
+void TaskManager::loadData(bool value)
+{
+    loginf << "TaskManager: loadData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    load_data_ = value;
+}
+
+void TaskManager::exportViewPointsReportFile(const std::string& filename)
+{
+    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    export_view_points_report_ = true;
+    export_view_points_report_filename_ = filename;
+}
+
+
 bool TaskManager::automaticTasksDefined() const
 {
     return automatic_tasks_defined_;
@@ -851,6 +873,29 @@ void TaskManager::performAutomaticTasks ()
             QCoreApplication::processEvents();
     }
 
+    if (export_view_points_report_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: exporting view points report";
+
+        ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
+
+        ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+        dialog.show();
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents();
+
+        gen.reportPathAndFilename(export_view_points_report_filename_);
+        gen.showDone(false);
+
+        gen.run();
+
+        while (gen.isRunning() || QCoreApplication::hasPendingEvents()) // not sure if needed here but what the hell
+            QCoreApplication::processEvents();
+
+        gen.showDone(true);
+    }
+
     if (quit_)
     {
         loginf << "TaskManager: performAutomaticTasks: quit requested";
@@ -858,7 +903,7 @@ void TaskManager::performAutomaticTasks ()
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
 
-        while ((stop_time-start_time).total_milliseconds() < 1000
+        while ((stop_time-start_time).total_milliseconds() < 500
                || QCoreApplication::hasPendingEvents())
         {
             QCoreApplication::processEvents();
@@ -869,7 +914,4 @@ void TaskManager::performAutomaticTasks ()
     }
 }
 
-void TaskManager::loadData(bool value)
-{
-    load_data_ = value;
-}
+

@@ -25,6 +25,8 @@ public:
     ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
                                     QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
+    void updateFileInfo ();
+
     void setElapsedTime (const std::string& time_str);
     void setProgress (unsigned int min, unsigned int max, unsigned int value);
     void setStatus (const std::string& status);

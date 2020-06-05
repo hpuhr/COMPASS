@@ -98,6 +98,14 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
     setLayout(main_layout);
 }
 
+void ViewPointsReportGeneratorDialog::updateFileInfo ()
+{
+    assert (directory_edit_);
+    directory_edit_->setText(generator_.reportPath().c_str());
+    assert (filename_edit_);
+    filename_edit_->setText(generator_.reportFilename().c_str());
+}
+
 void ViewPointsReportGeneratorDialog::pathEditedSlot (const QString& text)
 {
     generator_.reportPath(text.toStdString());

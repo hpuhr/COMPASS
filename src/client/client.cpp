@@ -64,7 +64,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     bool auto_process {false};
     bool start {false};
     bool load_data {false};
-    //std::string export_view_points_pdf_filename;
+    std::string export_view_points_report_filename;
     bool quit {false};
 
     po::options_description desc("Allowed options");
@@ -85,8 +85,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
-//            ("export_view_points_pdf", po::value<std::string>(&export_view_points_pdf_filename),
-//                "export view points as pdf after start with given filename, e.g. '/data/db2/report.tex")
+            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
+                "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -140,6 +140,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (load_data)
         task_man.loadData(load_data);
+
+    if (export_view_points_report_filename.size())
+            task_man.exportViewPointsReportFile(export_view_points_report_filename);
 
     if (quit)
         task_man.quit(quit);

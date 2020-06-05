@@ -26,6 +26,12 @@ public:
     std::string reportFilename() const;
     void reportFilename(const std::string& filename);
 
+    void reportPathAndFilename(const std::string& str);
+
+    bool isRunning() const;
+
+    void showDone(bool show_done);
+
 protected:
     ViewManager& view_manager_;
 
@@ -36,6 +42,7 @@ protected:
 
     bool running_ {false};
     bool cancel_ {false};
+    bool show_done_ {true};
 
     virtual void checkSubConfigurables();
 };
