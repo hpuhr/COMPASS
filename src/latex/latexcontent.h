@@ -6,6 +6,7 @@
 #include <vector>
 
 class LatexSection;
+class LatexTable;
 
 class LatexContent
 {
@@ -20,6 +21,7 @@ protected:
     std::vector<std::unique_ptr<LatexContent>> sub_content_;
 
     LatexSection* findSubSection (const std::string& heading); // bla, nullptr if not found
+    LatexTable* findTable (const std::string& name); // bla, nullptr if not found
 };
 
 #endif // LATEXCONTENT_H

@@ -1,5 +1,6 @@
 #include "latexcontent.h"
 #include "latexsection.h"
+#include "latextable.h"
 
 #include <sstream>
 #include <cassert>
@@ -37,4 +38,18 @@ LatexSection* LatexContent::findSubSection (const std::string& heading)
     return nullptr;
 }
 
+LatexTable* LatexContent::findTable (const std::string& name)
+{
+    LatexTable* tmp;
+
+    for (auto& cont_it : sub_content_)
+    {
+        tmp = dynamic_cast<LatexTable*>(cont_it.get());
+
+        if (tmp && tmp->name() == name)
+            return tmp;
+    }
+
+    return nullptr;
+}
 

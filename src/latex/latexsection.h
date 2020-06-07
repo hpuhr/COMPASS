@@ -12,6 +12,8 @@ enum class LatexSectionLevel
     SUBPARAGRAPH,
 };
 
+class LatexTable;
+
 class LatexSection : public LatexContent
 {
 public:
@@ -26,6 +28,12 @@ public:
     void addSubSection (const std::string& heading);
 
     void addText (const std::string& latex_str);
+
+    bool hasTable (const std::string& name);
+    LatexTable& getTable (const std::string& name);
+    void addTable (const std::string& name, unsigned int num_columns,
+                          std::vector<std::string> headings, std::string heading_alignment="");
+
 
     virtual std::string toString() override;
 

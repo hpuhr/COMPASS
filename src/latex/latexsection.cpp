@@ -1,4 +1,5 @@
 #include "latexsection.h"
+#include "latextable.h"
 
 #include <cassert>
 #include <sstream>
@@ -45,6 +46,27 @@ void LatexSection::addSubSection (const std::string& heading)
 void LatexSection::addText (const std::string& latex_str)
 {
     content_.push_back(latex_str);
+}
+
+bool LatexSection::hasTable (const std::string& name)
+{
+    return findTable(name) != nullptr;
+}
+
+LatexTable& LatexSection::getTable (const std::string& name)
+{
+    LatexTable* tmp = findTable (name);
+    assert (tmp);
+    return *tmp;
+}
+
+void LatexSection::addTable (const std::string& name, unsigned int num_columns,
+                                    std::vector<std::string> headings, std::string heading_alignment)
+{
+    assert (!hasTable(name));
+    sub_content_.push_back(unique_ptr<LatexTable>(
+                           new LatexTable(name, num_columns, headings, heading_alignment)));
+    assert (hasTable(name));
 }
 
 std::string LatexSection::toString()

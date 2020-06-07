@@ -9,10 +9,12 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/latexcontent.h"
         "${CMAKE_CURRENT_LIST_DIR}/latexdocument.h"
         "${CMAKE_CURRENT_LIST_DIR}/latexsection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latextable.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/latexcontent.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/latexdocument.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/latexsection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/latextable.cpp"
 )
 
 

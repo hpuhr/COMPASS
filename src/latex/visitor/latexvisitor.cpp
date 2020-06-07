@@ -1,6 +1,7 @@
 #include "latexvisitor.h"
 #include "latexdocument.h"
 #include "latexsection.h"
+#include "latextable.h"
 #include "viewpoint.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -39,14 +40,38 @@ void LatexVisitor::visit(ViewPoint* e)
 
     LatexSection& sec = report_.getSection(section_name);
 
-    stringstream ss;
+//    stringstream ss;
 
-    ss << "Information:\n";
-    ss << R"(\begin{itemize})" << "\n";
-    ss << R"( \item id: )" << e->id() << "\n";
-    ss << R"( \item name: )" << name << "\n";
-    ss << R"( \item type: )" << type << "\n";
-    ss << R"( \item status: )" << status << "\n";
+//    ss << "Information:\n";
+//    ss << R"(\begin{itemize})" << "\n";
+//    ss << R"( \item \textbf{id}: )" << e->id() << "\n";
+//    ss << R"( \item \textbf{name}: )" << name << "\n";
+//    ss << R"( \item \textbf{type}: )" << type << "\n";
+//    ss << R"( \item \textbf{status}: )" << status << "\n";
+
+//    for (auto& j_it : j_data.items())
+//    {
+//        if (!j_it.value().is_primitive())
+//            continue;
+
+//        if (j_it.key() == "id" || j_it.key() == "name" || j_it.key() == "type" || j_it.key() == "status")
+//            continue;
+
+//        ss << R"( \item \textbf{)" << String::latexString(j_it.key())
+//           << "}: " << String::latexString(JSON::toString(j_it.value())) << "\n";
+//    }
+
+//    ss << R"(\end{itemize})" << "\n";
+
+//    sec.addText(ss.str());
+
+    sec.addTable("Info", 2, {"Key","Value"}, "| l | X |");
+    LatexTable& info_table = sec.getTable("Info");
+
+    info_table.addRow({"id", to_string(e->id())});
+    info_table.addRow({"name", j_data.at("name")});
+    info_table.addRow({"type", j_data.at("type")});
+    info_table.addRow({"status", status});
 
     for (auto& j_it : j_data.items())
     {
@@ -56,11 +81,6 @@ void LatexVisitor::visit(ViewPoint* e)
         if (j_it.key() == "id" || j_it.key() == "name" || j_it.key() == "type" || j_it.key() == "status")
             continue;
 
-        ss << R"( \item )" << String::latexString(j_it.key())
-           << ": " << String::latexString(JSON::toString(j_it.value())) << "\n";
+        info_table.addRow({j_it.key(), JSON::toString(j_it.value())});
     }
-
-    ss << R"(\end{itemize})" << "\n";
-
-    sec.addText(ss.str());
 }
