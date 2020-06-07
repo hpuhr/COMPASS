@@ -95,6 +95,8 @@ class ListBoxView : public View
     bool showAssociations() const;
     void showAssociations(bool show_associations);
 
+    virtual void accept(LatexVisitor& v) override;
+
   protected:
     /// For data display
     ListBoxViewWidget* widget_{nullptr};

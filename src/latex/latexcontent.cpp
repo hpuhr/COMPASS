@@ -1,6 +1,7 @@
 #include "latexcontent.h"
 #include "latexsection.h"
 #include "latextable.h"
+#include "lateximage.h"
 
 #include <sstream>
 #include <cassert>
@@ -53,3 +54,17 @@ LatexTable* LatexContent::findTable (const std::string& name)
     return nullptr;
 }
 
+LatexImage* LatexContent::findImage (const std::string& filename)
+{
+    LatexImage* tmp;
+
+    for (auto& cont_it : sub_content_)
+    {
+        tmp = dynamic_cast<LatexImage*>(cont_it.get());
+
+        if (tmp && tmp->filename() == filename)
+            return tmp;
+    }
+
+    return nullptr;
+}

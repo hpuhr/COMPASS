@@ -7,6 +7,7 @@
 
 class LatexSection;
 class LatexTable;
+class LatexImage;
 
 class LatexContent
 {
@@ -20,8 +21,9 @@ protected:
 
     std::vector<std::unique_ptr<LatexContent>> sub_content_;
 
-    LatexSection* findSubSection (const std::string& heading); // bla, nullptr if not found
-    LatexTable* findTable (const std::string& name); // bla, nullptr if not found
+    LatexSection* findSubSection (const std::string& heading); // nullptr if not found
+    LatexTable* findTable (const std::string& name); // nullptr if not found
+    LatexImage* findImage (const std::string& filename); // nullptr if not found
 };
 
 #endif // LATEXCONTENT_H

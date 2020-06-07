@@ -138,7 +138,10 @@ void ViewPointsReportGenerator::run ()
 
         // do stuff
         vp_it.second.accept(visitor);
+        visitor.imagePrefix("vp_"+to_string(vp_it.first));
 
+        for (auto& view_it : view_manager_.getViews())
+            view_it.second->accept(visitor);
 
         // update status
         stop_time = boost::posix_time::microsec_clock::local_time();

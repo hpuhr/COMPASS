@@ -162,6 +162,16 @@ void LatexDocument::addSubSection (const std::string& heading)
     assert (hasSubSection(heading));
 }
 
+std::string LatexDocument::path() const
+{
+    return path_;
+}
+
+std::string LatexDocument::filename() const
+{
+    return filename_;
+}
+
 std::string LatexDocument::title() const
 {
     return title_;

@@ -31,6 +31,7 @@ class QQWidget;
 class Workflow;
 
 class ViewPoint;
+class LatexVisitor;
 
 /**
 @brief Serves as base class for all views. Subclasses can be embedded in a ViewContainerWidget.
@@ -92,6 +93,8 @@ class View : public QObject, public Configurable
 
     void viewShutdown(const std::string& err);
     void emitSelectionChange();
+
+    virtual void accept(LatexVisitor& v) = 0;
 
   protected:
     ViewManager& view_manager_;

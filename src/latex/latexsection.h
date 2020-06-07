@@ -13,6 +13,7 @@ enum class LatexSectionLevel
 };
 
 class LatexTable;
+class LatexImage;
 
 class LatexSection : public LatexContent
 {
@@ -34,6 +35,9 @@ public:
     void addTable (const std::string& name, unsigned int num_columns,
                           std::vector<std::string> headings, std::string heading_alignment="");
 
+    bool hasImage (const std::string& filename);
+    LatexImage& getImage (const std::string& filename);
+    void addImage (const std::string& filename, const std::string& caption);
 
     virtual std::string toString() override;
 

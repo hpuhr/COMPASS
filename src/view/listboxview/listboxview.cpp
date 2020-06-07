@@ -27,6 +27,7 @@
 #include "listboxviewwidget.h"
 #include "logger.h"
 #include "viewselection.h"
+#include "latexvisitor.h"
 
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
                          ViewContainer* w, ViewManager& view_manager)
@@ -188,6 +189,11 @@ void ListBoxView::showAssociations(bool show_associations)
     show_associations_ = show_associations;
 
     emit showAssociationsSignal(show_associations_);
+}
+
+void ListBoxView::accept(LatexVisitor& v)
+{
+    v.visit(this);
 }
 
 bool ListBoxView::canShowAssociations() const { return can_show_associations_; }

@@ -29,6 +29,9 @@ public:
     LatexSection& getSubSection (const std::string& heading);
     void addSubSection (const std::string& heading);
 
+    std::string path() const;
+    std::string filename() const;
+
 protected:
     std::string path_;
     std::string filename_;

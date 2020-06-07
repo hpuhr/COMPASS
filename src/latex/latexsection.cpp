@@ -1,5 +1,6 @@
 #include "latexsection.h"
 #include "latextable.h"
+#include "lateximage.h"
 
 #include <cassert>
 #include <sstream>
@@ -67,6 +68,26 @@ void LatexSection::addTable (const std::string& name, unsigned int num_columns,
     sub_content_.push_back(unique_ptr<LatexTable>(
                            new LatexTable(name, num_columns, headings, heading_alignment)));
     assert (hasTable(name));
+}
+
+bool LatexSection::hasImage (const std::string& filename)
+{
+    return findImage(filename) != nullptr;
+}
+
+LatexImage& LatexSection::getImage (const std::string& filename)
+{
+    LatexImage* tmp = findImage (filename);
+    assert (tmp);
+    return *tmp;
+}
+
+void LatexSection::addImage (const std::string& filename, const std::string& caption)
+{
+    assert (!hasImage(filename));
+    sub_content_.push_back(unique_ptr<LatexImage>(
+                           new LatexImage(filename, caption)));
+    assert (hasImage(filename));
 }
 
 std::string LatexSection::toString()
