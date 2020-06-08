@@ -5,6 +5,8 @@
 #include "lateximage.h"
 #include "viewpoint.h"
 #include "listboxview.h"
+#include "listboxviewdatawidget.h"
+#include "allbuffertablewidget.h"
 #include "osgview.h"
 #include "osgviewdatawidget.h"
 #include "logger.h"
@@ -97,6 +99,25 @@ void LatexVisitor::visit(ListBoxView* e)
     assert (e);
 
     loginf << "LatexVisitor: visit: listboxview " << e->instanceId();
+
+    AllBufferTableWidget* allbuf = e->getDataWidget()->getAllBufferTableWidget();
+    assert (allbuf);
+
+    std::vector<std::vector<std::string>> data = allbuf->getSelectedText();
+
+    if (data.size())
+    {
+        LatexSection& sec = report_.getSection(current_section_name_);
+
+        sec.addTable(e->instanceId(), data.at(0).size(), data.at(0));
+        LatexTable& table = sec.getTable(e->instanceId());
+        table.setWideTable(true);
+
+        data.erase(data.begin()); // remove first header row#
+
+        for (auto& row_it : data)
+            table.addRow(row_it);
+    }
 }
 
 void LatexVisitor::visit(OSGView* e)

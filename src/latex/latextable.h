@@ -18,11 +18,14 @@ public:
 
     std::string name() const;
 
+    void setWideTable(bool wide_table);
+
 protected:
     std::string name_;
     unsigned int num_columns_;
     std::vector<std::string> headings_;
     std::string heading_alignment_;
+    bool wide_table_ {false};
 
     std::vector<std::vector<std::string>> rows_;
 

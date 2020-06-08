@@ -136,6 +136,12 @@ void ListBoxView::checkSubConfigurables()
     }
 }
 
+ListBoxViewDataWidget* ListBoxView::getDataWidget()
+{
+    assert (widget_);
+    return widget_->getDataWidget();
+}
+
 DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);

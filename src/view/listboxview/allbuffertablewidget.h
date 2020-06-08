@@ -79,6 +79,8 @@ class AllBufferTableWidget : public QWidget
 
     void selectSelectedRows();
 
+    std::vector<std::vector<std::string>> getSelectedText (); // first is header
+
   protected:
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;

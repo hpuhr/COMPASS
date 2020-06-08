@@ -17,12 +17,15 @@ LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
     {
         stringstream ss;
 
-        ss << " | ";
+        ss << "|";
         for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
-            ss << "l | ";
+            ss << " X |";
 
         heading_alignment_ = ss.str();
     }
+
+    loginf << "LatexTable: constructor: name " << name << " num cols " << num_columns_
+           << " heading alignment '" << heading_alignment_ << "'";
 
     assert (String::split(heading_alignment_, '|').size() == num_columns_+1);
 }
@@ -41,7 +44,17 @@ std::string LatexTable::toString()
 
     ss << R"(\begin{center})" << "\n";
     ss << R"(\begin{table}[H])" << "\n";
-    ss << R"(\begin{tabularx}{\textwidth}{)" << heading_alignment_ << " }\n";
+
+    if (wide_table_)
+    {
+        ss << R"(\hspace*{-1.5cm})" << "\n";
+        ss << R"(\setlength{\tabcolsep}{3pt})" << "\n";
+        ss << R"({\small)" << "\n";
+        ss << R"(\begin{tabularx}{1.15\textwidth}{)" << heading_alignment_ << " }\n";
+    }
+    else
+        ss << R"(\begin{tabularx}{\textwidth}{)" << heading_alignment_ << " }\n";
+
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);
 
@@ -49,6 +62,10 @@ std::string LatexTable::toString()
         ss << getLine(row);
 
     ss << R"(\end{tabularx})" << "\n";
+
+    if (wide_table_)
+        ss << R"(})" << "\n";
+
     ss << R"(\end{table})" << "\n";
     ss << R"(\end{center})" << "\n";
     ss << R"(\ \\)" << "\n";
@@ -59,6 +76,11 @@ std::string LatexTable::toString()
 std::string LatexTable::name() const
 {
     return name_;
+}
+
+void LatexTable::setWideTable(bool wide_table)
+{
+    wide_table_ = wide_table;
 }
 
 std::string LatexTable::getLine (const std::vector<std::string>& row, bool bold)

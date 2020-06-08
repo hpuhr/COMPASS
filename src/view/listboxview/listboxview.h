@@ -23,6 +23,7 @@
 
 class ListBoxViewWidget;
 class ListBoxViewDataSource;
+class ListBoxViewDataWidget;
 
 /**
  * @brief View for textual inspection of database contents
@@ -79,6 +80,8 @@ class ListBoxView : public View
         assert(data_source_);
         return data_source_;
     }
+
+    ListBoxViewDataWidget* getDataWidget();
 
     virtual DBOVariableSet getSet(const std::string& dbo_name) override;
 
