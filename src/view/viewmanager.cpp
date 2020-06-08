@@ -243,6 +243,9 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
 
     view_point_data_selected_ = false;
 
+    loginf << "ViewManager: setCurrentViewPoint: setting id " << id << " data: '"
+           << view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
+
     emit showViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
     ATSDB::instance().objectManager().loadSlot();

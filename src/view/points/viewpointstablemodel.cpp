@@ -7,7 +7,6 @@
 #include "files.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-#include "filtermanager.h"
 #include "viewpointswidget.h"
 
 #include <fstream>
@@ -311,7 +310,6 @@ ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const nlohman
         beginInsertRows(QModelIndex(), row, row);
 
     nlohmann::json new_data = data;
-    ATSDB::instance().filterManager().setConfigInViewPoint(new_data);
 
     assert (new_data.is_object());
     json::object_t& new_data_ref = new_data.get_ref<json::object_t&>();
