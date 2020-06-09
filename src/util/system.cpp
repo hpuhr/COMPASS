@@ -1,0 +1,87 @@
+/*
+ * This file is part of ATSDB.
+ *
+ * ATSDB is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ATSDB is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "system.h"
+
+#include <fstream>
+#include <limits>
+#include <string>
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <array>
+
+#include "logger.h"
+
+const double megabyte = 1024 * 1024;
+const double gigabyte = 1024 * 1024 * 1024;
+
+namespace Utils
+{
+    namespace System
+    {
+        float getFreeRAMinGB()
+        {
+            //    struct sysinfo info;
+            //    sysinfo (&info);
+
+            //    return ((uint64_t) (info.freeram + info.bufferram) * info.mem_unit)/gigabyte;
+
+            std::string token;
+            std::ifstream file("/proc/meminfo");
+            while (file >> token)
+            {
+                if (token == "MemAvailable:")
+                {
+                    unsigned long mem;
+
+                    if (file >> mem)  // returns in kB
+                    {
+                        return mem / megabyte;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                // ignore rest of the line
+                file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+            return 0;  // nothing found
+        }
+
+        std::string exec(const std::string& cmd)
+        {
+            std::array<char, 128> buffer;
+            std::string result;
+            std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+
+            if (!pipe)
+            {
+                logerr  << "Utils: exec: command '" << cmd << "' popen failed";
+                throw std::runtime_error("Utils: exec: popen failed");
+            }
+            while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+            {
+                result += buffer.data();
+            }
+            return result;
+        }
+
+    }
+}

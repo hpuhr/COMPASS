@@ -15,6 +15,7 @@
 #include "files.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
+#include "system.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -23,7 +24,10 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <QCoreApplication>
+#include <QApplication>
 #include <QMessageBox>
+#include <QUrl>
+#include <QDesktopServices>
 
 using namespace std;
 using namespace Utils;
@@ -56,6 +60,16 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
            << " filename '"  << report_filename_ << "'";
 
     registerParameter("export_all_unsorted", &export_all_unsorted_, false);
+    registerParameter("run_pdflatex", &run_pdflatex_, true);
+    registerParameter("open_created_pdf", &open_created_pdf_, false);
+
+    pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
+
+    if (!pdflatex_found_)
+    {
+        run_pdflatex_ = false;
+        open_created_pdf_ = false;
+    }
 }
 
 
@@ -99,6 +113,9 @@ void ViewPointsReportGenerator::run ()
 
     cancel_ = false;
     running_ = true;
+    pdf_created_ = false;
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime stop_time;
@@ -201,9 +218,63 @@ void ViewPointsReportGenerator::run ()
         dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
         doc.write();
+
+        if (run_pdflatex_)
+        {
+            std::string command_out;
+            std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
+                    +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
+
+            loginf << "ViewPointsReportGenerator: run: running pdflatex";
+            dialog_->setStatus("Running pdflatex");
+
+            logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
+
+            command_out = System::exec(command);
+
+            while (command_out.find("Rerun to get outlines right") != std::string::npos)
+            {
+                loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
+                dialog_->setStatus("Re-running pdflatex");
+                command_out = System::exec(command);
+            }
+
+            loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
+
+            if (!command_out.size()) // no warnings
+            {
+                pdf_created_ = true;
+
+                dialog_->setStatus("Running pdflatex done");
+
+                if (open_created_pdf_)
+                {
+                    std::string fullpath = report_path_+report_filename_;
+
+                    if (String::hasEnding(fullpath, ".tex"))
+                    {
+                        String::replace(fullpath, ".tex", ".pdf");
+
+                        loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+
+                        QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                    }
+                    else
+                        logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
+                }
+            }
+            else // show warnings
+            {
+                QMessageBox msgBox;
+                msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
+                msgBox.exec();
+            }
+        }
     }
 
     dialog_->close();
+
+    QApplication::restoreOverrideCursor();
 
 #if USE_EXPERIMENTAL_SOURCE == true
     OSGView::instant_display_ = false;
@@ -312,3 +383,29 @@ void ViewPointsReportGenerator::exportAllUnsorted(bool value)
 {
     export_all_unsorted_ = value;
 }
+
+bool ViewPointsReportGenerator::runPDFLatex() const
+{
+    return run_pdflatex_;
+}
+
+void ViewPointsReportGenerator::runPDFLatex(bool value)
+{
+    run_pdflatex_ = value;
+}
+
+bool ViewPointsReportGenerator::pdfLatexFound() const
+{
+    return pdflatex_found_;
+}
+
+bool ViewPointsReportGenerator::openCreatedPDF() const
+{
+    return open_created_pdf_;
+}
+
+void ViewPointsReportGenerator::openCreatedPDF(bool value)
+{
+    open_created_pdf_ = value;
+}
+

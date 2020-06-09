@@ -71,11 +71,41 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         ++row;
         config_grid->addWidget(new QLabel("Export All (Unsorted)"), row, 0);
 
+
         all_unsorted_check_ = new QCheckBox();
         all_unsorted_check_->setChecked(generator_.exportAllUnsorted());
         connect(all_unsorted_check_, &QCheckBox::clicked, this,
                 &ViewPointsReportGeneratorDialog::allUnsortedChangedSlot);
         config_grid->addWidget(all_unsorted_check_, row, 1);
+
+        // run pdflatex
+        ++row;
+        config_grid->addWidget(new QLabel("Run PDFLatex"), row, 0);
+
+        pdflatex_check_ = new QCheckBox();
+        pdflatex_check_->setChecked(generator_.runPDFLatex());
+
+        if (!generator_.pdfLatexFound())
+            pdflatex_check_->setDisabled(true);
+
+        connect(pdflatex_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::runPDFLatexChangedSlot);
+        config_grid->addWidget(pdflatex_check_, row, 1);
+
+        // open
+        ++row;
+        config_grid->addWidget(new QLabel("Open Created PDF"), row, 0);
+
+        open_pdf_check_ = new QCheckBox();
+        open_pdf_check_->setChecked(generator_.openCreatedPDF());
+
+        if (!generator_.pdfLatexFound())
+            open_pdf_check_->setDisabled(true);
+
+        connect(open_pdf_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::openPDFChangedSlot);
+        config_grid->addWidget(open_pdf_check_, row, 1);
+
 
         main_layout->addLayout(config_grid);
     }
@@ -155,6 +185,16 @@ void ViewPointsReportGeneratorDialog::abstractEditedSlot(const QString& text)
 void ViewPointsReportGeneratorDialog::allUnsortedChangedSlot (bool checked)
 {
     generator_.exportAllUnsorted(checked);
+}
+
+void ViewPointsReportGeneratorDialog::runPDFLatexChangedSlot (bool checked)
+{
+    generator_.runPDFLatex(checked);
+}
+
+void ViewPointsReportGeneratorDialog::openPDFChangedSlot (bool checked)
+{
+    generator_.openCreatedPDF(checked);
 }
 
 void ViewPointsReportGeneratorDialog::runSlot()

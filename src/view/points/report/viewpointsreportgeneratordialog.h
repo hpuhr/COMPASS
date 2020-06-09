@@ -23,6 +23,8 @@ public slots:
     void abstractEditedSlot(const QString& text);
 
     void allUnsortedChangedSlot (bool checked);
+    void runPDFLatexChangedSlot (bool checked);
+    void openPDFChangedSlot (bool checked);
 
     void runSlot();
     void cancelSlot();
@@ -48,6 +50,8 @@ protected:
     QLineEdit* abstract_edit_ {nullptr};
 
     QCheckBox* all_unsorted_check_ {nullptr};
+    QCheckBox* pdflatex_check_ {nullptr};
+    QCheckBox* open_pdf_check_ {nullptr};
 
     QPushButton* run_button_{nullptr};
 

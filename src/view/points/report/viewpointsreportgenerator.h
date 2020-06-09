@@ -41,6 +41,14 @@ public:
     bool exportAllUnsorted() const;
     void exportAllUnsorted(bool value);
 
+    bool runPDFLatex() const;
+    void runPDFLatex(bool value);
+
+    bool pdfLatexFound() const;
+
+    bool openCreatedPDF() const;
+    void openCreatedPDF(bool value);
+
 protected:
     ViewManager& view_manager_;
 
@@ -53,10 +61,16 @@ protected:
     std::string abstract_;
 
     bool export_all_unsorted_ {false};
+    bool run_pdflatex_ {true};
+    bool pdflatex_found_ {false};
+
+    bool open_created_pdf_ {false};
 
     bool running_ {false};
     bool cancel_ {false};
     bool show_done_ {true};
+
+    bool pdf_created_ {false};
 
     virtual void checkSubConfigurables();
 };
