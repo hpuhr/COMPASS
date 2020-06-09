@@ -38,6 +38,9 @@ public:
     std::string abstract() const;
     void abstract(const std::string& abstract);
 
+    bool exportAllUnsorted() const;
+    void exportAllUnsorted(bool value);
+
 protected:
     ViewManager& view_manager_;
 
@@ -48,6 +51,8 @@ protected:
 
     std::string author_;
     std::string abstract_;
+
+    bool export_all_unsorted_ {false};
 
     bool running_ {false};
     bool cancel_ {false};

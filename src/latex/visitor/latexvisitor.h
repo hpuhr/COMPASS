@@ -1,6 +1,8 @@
 #ifndef LATEXVISITOR_H
 #define LATEXVISITOR_H
 
+#include "global.h"
+
 #include <string>
 
 class ViewPoint;
@@ -15,7 +17,9 @@ public:
 
     virtual void visit(ViewPoint* e);
     virtual void visit(ListBoxView* e);
+#if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
+#endif
 
     void imagePrefix(const std::string& image_prefix);
 

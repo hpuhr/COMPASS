@@ -120,6 +120,7 @@ void LatexVisitor::visit(ListBoxView* e)
     }
 }
 
+#if USE_EXPERIMENTAL_SOURCE == true
 void LatexVisitor::visit(OSGView* e)
 {
     assert (e);
@@ -158,9 +159,10 @@ void LatexVisitor::visit(OSGView* e)
         LatexSection& sec = report_.getSection(current_section_name_);
 
         sec.addImage(image_path, e->instanceId());
-        LatexImage& image = sec.getImage(image_path);
+        //LatexImage& image = sec.getImage(image_path);
     }
 }
+#endif
 
 void LatexVisitor::imagePrefix(const std::string& image_prefix)
 {

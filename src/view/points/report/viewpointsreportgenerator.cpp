@@ -54,6 +54,8 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
 
     loginf << "ViewPointsReportGenerator: constructor: report path '" << report_path_ << "'"
            << " filename '"  << report_filename_ << "'";
+
+    registerParameter("export_all_unsorted", &export_all_unsorted_, false);
 }
 
 
@@ -108,13 +110,19 @@ void ViewPointsReportGenerator::run ()
     assert (vp_widget);
     ViewPointsTableModel* table_model = vp_widget->tableModel();
     assert (table_model);
-    std::map<unsigned int, ViewPoint> view_points = table_model->viewPoints();
+
+    std::vector<unsigned int> vp_ids;
+
+    if (export_all_unsorted_)
+        vp_ids = vp_widget->viewPoints();
+    else
+        vp_ids = vp_widget->viewedViewPoints();
 
     string status_str, elapsed_time_str, remaining_time_str;
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     unsigned int vp_cnt = 0;
-    unsigned int vp_size = view_points.size();
+    unsigned int vp_size = vp_ids.size();
     double ms;
     double ms_per_vp;
 
@@ -122,7 +130,7 @@ void ViewPointsReportGenerator::run ()
     OSGView::instant_display_ = true;
 #endif
 
-    for (auto& vp_it : view_points)
+    for (auto vp_id : vp_ids)
     {
         if (cancel_)
         {
@@ -130,15 +138,18 @@ void ViewPointsReportGenerator::run ()
             break;
         }
 
-        loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first;
-        view_manager_.setCurrentViewPoint(vp_it.first);
+        loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
+        view_manager_.setCurrentViewPoint(vp_id);
 
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
 
         // do stuff
-        vp_it.second.accept(visitor);
-        visitor.imagePrefix("vp_"+to_string(vp_it.first));
+        assert (table_model->existsViewPoint(vp_id));
+        ViewPoint& view_point = table_model->viewPoint(vp_id);
+
+        view_point.accept(visitor);
+        visitor.imagePrefix("vp_"+to_string(vp_id));
 
         for (auto& view_it : view_manager_.getViews())
             view_it.second->accept(visitor);
@@ -159,12 +170,12 @@ void ViewPointsReportGenerator::run ()
 
             remaining_time_str = String::timeStringFromDouble((vp_size-vp_cnt) * ms_per_vp / 1000.0, false);
 
-            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first
+            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
                    << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
         }
         else
         {
-            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_it.first
+            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
                    << " done after " << elapsed_time_str;
 
         }
@@ -290,4 +301,14 @@ std::string ViewPointsReportGenerator::abstract() const
 void ViewPointsReportGenerator::abstract(const std::string& abstract)
 {
     abstract_ = abstract;
+}
+
+bool ViewPointsReportGenerator::exportAllUnsorted() const
+{
+    return export_all_unsorted_;
+}
+
+void ViewPointsReportGenerator::exportAllUnsorted(bool value)
+{
+    export_all_unsorted_ = value;
 }

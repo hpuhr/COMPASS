@@ -10,6 +10,7 @@
 #include <QProgressBar>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QCheckBox>
 
 
 ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
@@ -66,6 +67,15 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         abstract_edit_->setText(generator_.abstract().c_str());
         connect(abstract_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
+
+        ++row;
+        config_grid->addWidget(new QLabel("Export All (Unsorted)"), row, 0);
+
+        all_unsorted_check_ = new QCheckBox();
+        all_unsorted_check_->setChecked(generator_.exportAllUnsorted());
+        connect(all_unsorted_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::allUnsortedChangedSlot);
+        config_grid->addWidget(all_unsorted_check_, row, 1);
 
         main_layout->addLayout(config_grid);
     }
@@ -142,6 +152,10 @@ void ViewPointsReportGeneratorDialog::abstractEditedSlot(const QString& text)
     generator_.abstract(text.toStdString());
 }
 
+void ViewPointsReportGeneratorDialog::allUnsortedChangedSlot (bool checked)
+{
+    generator_.exportAllUnsorted(checked);
+}
 
 void ViewPointsReportGeneratorDialog::runSlot()
 {

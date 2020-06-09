@@ -9,6 +9,7 @@ class QPushButton;
 class QLabel;
 class QProgressBar;
 class QLineEdit;
+class QCheckBox;
 
 class ViewPointsReportGeneratorDialog : public QDialog
 {
@@ -20,6 +21,8 @@ public slots:
 
     void authorEditedSlot (const QString& text);
     void abstractEditedSlot(const QString& text);
+
+    void allUnsortedChangedSlot (bool checked);
 
     void runSlot();
     void cancelSlot();
@@ -43,6 +46,8 @@ protected:
 
     QLineEdit* author_edit_ {nullptr};
     QLineEdit* abstract_edit_ {nullptr};
+
+    QCheckBox* all_unsorted_check_ {nullptr};
 
     QPushButton* run_button_{nullptr};
 

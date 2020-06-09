@@ -6,6 +6,7 @@
 class ViewManager;
 class ViewPointsToolWidget;
 class ViewPointsTableModel;
+class ViewPoint;
 
 class QTableView;
 class QPushButton;
@@ -67,6 +68,9 @@ public:
     void showNoColumns ();
 
     void updateFilteredColumns ();
+
+    std::vector<unsigned int> viewPoints(); // all
+    std::vector<unsigned int> viewedViewPoints(); // only viewed
 
 private:
     ViewManager& view_manager_;

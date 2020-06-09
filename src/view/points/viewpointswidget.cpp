@@ -565,5 +565,38 @@ void ViewPointsWidget::updateFilteredColumns()
     }
 }
 
+std::vector<unsigned int> ViewPointsWidget::viewPoints()
+{
+    std::vector<unsigned int> data;
 
+    for (auto& vp_it : table_model_->viewPoints())
+        data.push_back(vp_it.first);
+
+    return data;
+}
+
+std::vector<unsigned int> ViewPointsWidget::viewedViewPoints()
+{
+    std::vector<unsigned int> data;
+
+    QModelIndex index = table_view_->model()->index(0, 0);
+
+    while (index.isValid())
+    {
+        loginf << "ViewPointsWidget: viewedViewPoints: row " << index.row();
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        unsigned int id = table_model_->getIdOf(source_index);
+
+        loginf << "ViewPointsWidget: viewedViewPoints: id " << id;
+
+        data.push_back(id);
+
+        index = table_view_->model()->index(index.row()+1, 0);
+    }
+
+    return data;
+}
 
