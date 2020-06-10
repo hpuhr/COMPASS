@@ -39,7 +39,7 @@ std::string LatexDocument::toString()
 
     ss << R"(\documentclass[twoside,a4paper]{article}
           \usepackage{geometry}
-          \geometry{legalpaper, margin=2cm}
+          \geometry{legalpaper, margin=1.5cm}
 
           \usepackage{graphicx}
           \usepackage{float}
@@ -50,6 +50,7 @@ std::string LatexDocument::toString()
           \usepackage{listings}
           \usepackage{hyperref}
           \usepackage{tabularx}
+          \usepackage{pdflscape}
 
           \usepackage{color}
           \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}

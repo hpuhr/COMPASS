@@ -19,7 +19,10 @@ LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
 
         ss << "|";
         for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
-            ss << " X |";
+            if (cnt < 3)
+                ss << " l |";
+            else
+                ss << " X |";
 
         heading_alignment_ = ss.str();
     }
@@ -42,16 +45,25 @@ std::string LatexTable::toString()
 
     stringstream ss;
 
+    if (wide_table_)
+    {
+        ss << R"(\newgeometry{margin=1cm})" << "\n";
+        ss << R"(\begin{landscape})" << "\n";
+        ss << R"(\thispagestyle{empty})" << "\n";
+    }
+
     ss << R"(\begin{center})" << "\n";
     ss << R"(\begin{table}[H])" << "\n";
 
+//    if (wide_table_)
+//    {
+//        ss << R"(\hspace*{-1.5cm})" << "\n";
+//        ss << R"(\setlength{\tabcolsep}{3pt})" << "\n";
+//        ss << R"({\small)" << "\n";
+//        ss << R"(\begin{tabularx}{1.15\textwidth}{)" << heading_alignment_ << " }\n";
+//    }
     if (wide_table_)
-    {
-        ss << R"(\hspace*{-1.5cm})" << "\n";
-        ss << R"(\setlength{\tabcolsep}{3pt})" << "\n";
-        ss << R"({\small)" << "\n";
-        ss << R"(\begin{tabularx}{1.15\textwidth}{)" << heading_alignment_ << " }\n";
-    }
+        ss << R"(\begin{tabularx}{\linewidth}{)" << heading_alignment_ << " }\n";
     else
         ss << R"(\begin{tabularx}{\textwidth}{)" << heading_alignment_ << " }\n";
 
@@ -63,12 +75,18 @@ std::string LatexTable::toString()
 
     ss << R"(\end{tabularx})" << "\n";
 
-    if (wide_table_)
-        ss << R"(})" << "\n";
+//    if (wide_table_)
+//        ss << R"(})" << "\n";
 
     ss << R"(\end{table})" << "\n";
     ss << R"(\end{center})" << "\n";
     ss << R"(\ \\)" << "\n";
+
+    if (wide_table_)
+    {
+        ss << R"(\end{landscape})" << "\n";
+        ss << R"(\restoregeometry)" << "\n";
+    }
 
     return ss.str();
 }
