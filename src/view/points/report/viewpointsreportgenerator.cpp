@@ -59,6 +59,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     loginf << "ViewPointsReportGenerator: constructor: report path '" << report_path_ << "'"
            << " filename '"  << report_filename_ << "'";
 
+    registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
     registerParameter("export_all_unsorted", &export_all_unsorted_, false);
     registerParameter("run_pdflatex", &run_pdflatex_, true);
     registerParameter("open_created_pdf", &open_created_pdf_, false);
@@ -121,6 +122,8 @@ void ViewPointsReportGenerator::run ()
     boost::posix_time::ptime stop_time;
     boost::posix_time::time_duration time_diff;
 
+    boost::posix_time::ptime vp_start_time;
+
     start_time = boost::posix_time::microsec_clock::local_time();
 
     ViewPointsWidget* vp_widget = view_manager_.viewPointsWidget();
@@ -160,6 +163,18 @@ void ViewPointsReportGenerator::run ()
 
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
+
+        // wait maybe
+        if (time_before_screenshot_ms_)
+        {
+            vp_start_time = boost::posix_time::microsec_clock::local_time();
+
+            while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
+                   < time_before_screenshot_ms_)
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+        }
 
         // do stuff
         assert (table_model->existsViewPoint(vp_id));
@@ -407,5 +422,15 @@ bool ViewPointsReportGenerator::openCreatedPDF() const
 void ViewPointsReportGenerator::openCreatedPDF(bool value)
 {
     open_created_pdf_ = value;
+}
+
+unsigned int ViewPointsReportGenerator::timeBeforeScreenshot() const
+{
+    return time_before_screenshot_ms_;
+}
+
+void ViewPointsReportGenerator::timeBeforeScreenshot(unsigned int value_ms)
+{
+    time_before_screenshot_ms_ = value_ms;
 }
 

@@ -22,6 +22,8 @@ public slots:
     void authorEditedSlot (const QString& text);
     void abstractEditedSlot(const QString& text);
 
+    void waitTimeEditedSlot(const QString& text);
+
     void allUnsortedChangedSlot (bool checked);
     void runPDFLatexChangedSlot (bool checked);
     void openPDFChangedSlot (bool checked);
@@ -48,6 +50,8 @@ protected:
 
     QLineEdit* author_edit_ {nullptr};
     QLineEdit* abstract_edit_ {nullptr};
+
+    QLineEdit* wait_time_edit_ {nullptr};
 
     QCheckBox* all_unsorted_check_ {nullptr};
     QCheckBox* pdflatex_check_ {nullptr};

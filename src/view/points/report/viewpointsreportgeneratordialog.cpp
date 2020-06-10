@@ -1,5 +1,6 @@
 #include "viewpointsreportgeneratordialog.h"
 #include "viewpointsreportgenerator.h"
+#include "textfielddoublevalidator.h"
 #include "logger.h"
 
 #include <QGridLayout>
@@ -23,7 +24,7 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
 
     setModal(true);
 
-    setMinimumSize(QSize(600, 800));
+    setMinimumSize(QSize(600, 600));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -68,8 +69,19 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         connect(abstract_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
 
+        // wait
         ++row;
-        config_grid->addWidget(new QLabel("Export All (Unsorted)"), row, 0);
+        config_grid->addWidget(new QLabel("Wait Time Before Screenshot [ms]"), row, 0);
+
+        wait_time_edit_ = new QLineEdit();
+        wait_time_edit_->setText(QString::number(generator_.timeBeforeScreenshot()));
+        wait_time_edit_->setValidator(new TextFieldDoubleValidator(0, 5000, 0));
+        connect(wait_time_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::waitTimeEditedSlot);
+        config_grid->addWidget(wait_time_edit_, row, 1);
+
+        // export all
+        ++row;
+        config_grid->addWidget(new QLabel("Export All (Sorted by id)"), row, 0);
 
 
         all_unsorted_check_ = new QCheckBox();
@@ -145,7 +157,7 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         main_layout->addLayout(status_grid);
     }
 
-    main_layout->addStretch();
+    //main_layout->addStretch();
 
     quit_button_ = new QPushButton("Cancel");
     connect(quit_button_, &QPushButton::clicked, this, &ViewPointsReportGeneratorDialog::cancelSlot);
@@ -180,6 +192,14 @@ void ViewPointsReportGeneratorDialog::authorEditedSlot (const QString& text)
 void ViewPointsReportGeneratorDialog::abstractEditedSlot(const QString& text)
 {
     generator_.abstract(text.toStdString());
+}
+
+void ViewPointsReportGeneratorDialog::waitTimeEditedSlot(const QString& text)
+{
+    bool ok;
+    unsigned int tmp = text.toUInt(&ok);
+    assert (ok);
+    generator_.timeBeforeScreenshot(tmp);
 }
 
 void ViewPointsReportGeneratorDialog::allUnsortedChangedSlot (bool checked)
