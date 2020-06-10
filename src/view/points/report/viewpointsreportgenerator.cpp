@@ -100,6 +100,7 @@ void ViewPointsReportGenerator::run ()
     loginf << "ViewPointsReportGenerator: run";
 
     assert (dialog_);
+    dialog_->setRunning(true);
 
     LatexDocument doc (report_path_, report_filename_);
     doc.title("ATSDB View Points Report");
@@ -164,18 +165,6 @@ void ViewPointsReportGenerator::run ()
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
 
-        // wait maybe
-        if (time_before_screenshot_ms_)
-        {
-            vp_start_time = boost::posix_time::microsec_clock::local_time();
-
-            while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
-                   < time_before_screenshot_ms_)
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            }
-        }
-
         // do stuff
         assert (table_model->existsViewPoint(vp_id));
         ViewPoint& view_point = table_model->viewPoint(vp_id);
@@ -184,7 +173,23 @@ void ViewPointsReportGenerator::run ()
         visitor.imagePrefix("vp_"+to_string(vp_id));
 
         for (auto& view_it : view_manager_.getViews())
+        {
+            view_it.second->showInTabWidget();
+
+            // wait maybe
+            if (time_before_screenshot_ms_)
+            {
+                vp_start_time = boost::posix_time::microsec_clock::local_time();
+
+                while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
+                       < time_before_screenshot_ms_)
+                {
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                }
+            }
+
             view_it.second->accept(visitor);
+        }
 
         // update status
         stop_time = boost::posix_time::microsec_clock::local_time();
@@ -286,7 +291,7 @@ void ViewPointsReportGenerator::run ()
             }
         }
     }
-
+    dialog_->setRunning(false);
     dialog_->close();
 
     QApplication::restoreOverrideCursor();

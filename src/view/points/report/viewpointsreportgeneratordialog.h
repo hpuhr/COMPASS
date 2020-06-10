@@ -37,6 +37,8 @@ public:
 
     void updateFileInfo ();
 
+    void setRunning (bool value);
+
     void setElapsedTime (const std::string& time_str);
     void setProgress (unsigned int min, unsigned int max, unsigned int value);
     void setStatus (const std::string& status);

@@ -24,7 +24,7 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
 
     setModal(true);
 
-    setMinimumSize(QSize(600, 600));
+    setMinimumSize(QSize(800, 600));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -172,6 +172,14 @@ void ViewPointsReportGeneratorDialog::updateFileInfo ()
     directory_edit_->setText(generator_.reportPath().c_str());
     assert (filename_edit_);
     filename_edit_->setText(generator_.reportFilename().c_str());
+}
+
+void ViewPointsReportGeneratorDialog::setRunning (bool value)
+{
+    assert (run_button_);
+    run_button_->setDisabled(value);
+    assert (quit_button_);
+    quit_button_->setDisabled(!value);
 }
 
 void ViewPointsReportGeneratorDialog::pathEditedSlot (const QString& text)

@@ -89,6 +89,8 @@ class View : public QObject, public Configurable
     /// @brief Returns the view's model, override this method in derived classes.
     ViewModel* getModel() { return model_; }
 
+    void showInTabWidget();
+
     virtual DBOVariableSet getSet(const std::string& dbo_name) = 0;
 
     void viewShutdown(const std::string& err);

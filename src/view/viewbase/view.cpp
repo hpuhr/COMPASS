@@ -91,6 +91,7 @@ bool View::init()
 
     // add view to container widget
     container_->addView(this);
+
     return true;
 }
 
@@ -99,6 +100,12 @@ bool View::init()
 @return The views name.
  */
 const std::string& View::getName() const { return instanceId(); }
+
+void View::showInTabWidget()
+{
+    assert (container_);
+    container_->showView(getCentralWidget());
+}
 
 /**
 @brief Returns a unique instance key.
