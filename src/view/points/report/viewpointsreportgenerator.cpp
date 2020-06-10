@@ -153,6 +153,9 @@ void ViewPointsReportGenerator::run ()
 
     for (auto vp_id : vp_ids)
     {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents();
+
         if (cancel_)
         {
             loginf << "ViewPointsReportGenerator: run: cancel";
@@ -174,19 +177,24 @@ void ViewPointsReportGenerator::run ()
 
         for (auto& view_it : view_manager_.getViews())
         {
-            view_it.second->showInTabWidget();
-
-            // wait maybe
-            if (time_before_screenshot_ms_)
+#if USE_EXPERIMENTAL_SOURCE == true
+            if (dynamic_cast<OSGView*>(view_it.second))
             {
-                vp_start_time = boost::posix_time::microsec_clock::local_time();
+                view_it.second->showInTabWidget();
 
-                while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
-                       < time_before_screenshot_ms_)
+                // wait maybe
+                if (time_before_screenshot_ms_)
                 {
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    vp_start_time = boost::posix_time::microsec_clock::local_time();
+
+                    while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
+                           < time_before_screenshot_ms_)
+                    {
+                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    }
                 }
             }
+#endif
 
             view_it.second->accept(visitor);
         }
