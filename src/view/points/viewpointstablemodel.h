@@ -17,6 +17,7 @@ class ViewPointsTableModel : public QAbstractItemModel
 
 signals:
     void typesChangedSignal(QStringList types);
+    void statusesChangedSignal(QStringList types);
 
 public:
     ViewPointsTableModel(ViewManager& view_manager);
@@ -59,8 +60,10 @@ public:
 
     bool updateTableColumns(); // true if changed
     void updateTypes(); // emits signal if changed
+    void updateStatuses(); // emits signal if changed
 
     QStringList types() const;
+    QStringList statuses() const;
     QStringList tableColumns() const;
 
     QStringList defaultTableColumns() const;
@@ -74,6 +77,7 @@ private:
     QStringList table_columns_;
 
     QStringList types_;
+    QStringList statuses_;
 
     QIcon open_icon_;
     QIcon closed_icon_;

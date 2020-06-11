@@ -37,6 +37,7 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 
     updateTableColumns();
     updateTypes();
+    updateStatuses();
 
     open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
     closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
@@ -262,9 +263,41 @@ void ViewPointsTableModel::updateTypes()
     }
 }
 
+
+void ViewPointsTableModel::updateStatuses()
+{
+    loginf << "ViewPointsTableModel: updateStatuses";
+
+    QStringList old_statuses = statuses_;
+    statuses_.clear();
+
+    for (auto& vp_it : view_points_)
+    {
+        const nlohmann::json& data = vp_it.second.data();
+
+        assert (data.contains("status"));
+
+        const string& status = data.at("status");
+
+        if (!statuses_.contains(status.c_str()))
+            statuses_.append(status.c_str());
+    }
+
+    if (statuses_ != old_statuses)
+    {
+        loginf << "ViewPointsTableModel: updateStatuses: changed";
+
+        emit statusesChangedSignal(statuses_);
+    }
+}
 QStringList ViewPointsTableModel::types() const
 {
     return types_;
+}
+
+QStringList ViewPointsTableModel::statuses() const
+{
+    return statuses_;
 }
 
 QStringList ViewPointsTableModel::tableColumns() const
@@ -328,6 +361,7 @@ ViewPoint& ViewPointsTableModel::saveNewViewPoint(unsigned int id, const nlohman
             view_manager_.viewPointsWidget()->resizeColumnsToContents();
 
         updateTypes();
+        updateStatuses();
     }
 
     return view_points_.at(id);
@@ -443,6 +477,7 @@ void ViewPointsTableModel::importViewPoints (const std::string& filename)
 
         updateTableColumns();
         updateTypes();
+        updateStatuses();
 
         //        if (view_points_widget_) // TODO
         //            view_points_widget_->update();

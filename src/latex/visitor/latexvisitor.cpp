@@ -21,10 +21,9 @@
 using namespace std;
 using namespace Utils;
 
-LatexVisitor::LatexVisitor(LatexDocument& report)
-    : report_(report)
+LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type)
+    : report_(report), group_by_type_(group_by_type)
 {
-
 }
 
 
@@ -45,7 +44,10 @@ void LatexVisitor::visit(ViewPoint* e)
     assert (j_data.contains("status"));
     string status = j_data.at("status");
 
-    current_section_name_ = "View Points:ID "+to_string(e->id())+" "+name;
+    if (group_by_type_)
+        current_section_name_ = "View Points:"+type+":ID "+to_string(e->id())+" "+name;
+    else
+        current_section_name_ = "View Points:ID "+to_string(e->id())+" "+name;
 
     LatexSection& sec = report_.getSection(current_section_name_);
 

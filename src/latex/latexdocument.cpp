@@ -82,7 +82,7 @@ std::string LatexDocument::toString()
 
           \makeindex
 
-          \setcounter{tocdepth}{2}
+          \setcounter{tocdepth}{3}
 
           \begin{document})" << "\n";
 

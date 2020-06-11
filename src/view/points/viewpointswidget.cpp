@@ -30,11 +30,14 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_model_ = new ViewPointsTableModel(view_manager_);
     connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
              this, &ViewPointsWidget::typesChangedSlot);
+    connect (table_model_, &ViewPointsTableModel::statusesChangedSignal,
+             this, &ViewPointsWidget::typesChangedSlot);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
 
     typesChangedSlot(table_model_->types()); // needs first update
+    statusesChangedSlot(table_model_->statuses()); // needs first update
 
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
@@ -483,6 +486,13 @@ void ViewPointsWidget::typesChangedSlot(QStringList types)
     types_ = types;
 }
 
+void ViewPointsWidget::statusesChangedSlot(QStringList statuses)
+{
+    loginf << "ViewPointsWidget: statusesChangedSlot";
+
+    statuses_ = statuses;
+}
+
 void ViewPointsWidget::updateFilteredTypes ()
 {
     QStringList regex_list;
@@ -498,6 +508,23 @@ void ViewPointsWidget::updateFilteredTypes ()
     assert (proxy_model_);
     proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
     proxy_model_->setFilterKeyColumn(table_model_->typeColumn()); // type
+}
+
+void ViewPointsWidget::updateFilteredStatuses ()
+{
+    QStringList regex_list;
+
+    for (auto& status : statuses_)
+        if (!filtered_statuses_.contains(status))
+            regex_list.append(status);
+
+    //"^(Correlation|banana)$"
+    QString regex = "^(" + regex_list.join("|") + ")$";
+    loginf << "ViewPointsWidget: updateFilteredStatuses: '" << regex.toStdString() << "'";
+
+    assert (proxy_model_);
+    proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
+    proxy_model_->setFilterKeyColumn(table_model_->statusColumn()); // status
 }
 
 QStringList ViewPointsWidget::columns() const
@@ -563,6 +590,42 @@ void ViewPointsWidget::updateFilteredColumns()
         table_view_->setColumnHidden(cnt, filtered_columns_.contains(col));
         ++cnt;
     }
+}
+
+QStringList ViewPointsWidget::statuses() const
+{
+    return statuses_;
+}
+
+QStringList ViewPointsWidget::filteredStatuses() const
+{
+    return filtered_statuses_;
+}
+
+void ViewPointsWidget::filterStatus (QString status)
+{
+    assert (statuses_.contains(status));
+
+    if (filtered_statuses_.contains(status))
+        filtered_statuses_.removeAll(status);
+    else
+        filtered_statuses_.append(status);
+
+    updateFilteredStatuses();
+}
+
+void ViewPointsWidget::showAllStatuses ()
+{
+    filtered_statuses_.clear();
+
+    updateFilteredStatuses();
+}
+
+void ViewPointsWidget::showNoStatuses ()
+{
+    filtered_statuses_ = statuses_;
+
+    updateFilteredStatuses();
 }
 
 std::vector<unsigned int> ViewPointsWidget::viewPoints()

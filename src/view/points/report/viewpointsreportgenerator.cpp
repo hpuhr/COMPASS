@@ -60,6 +60,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
            << " filename '"  << report_filename_ << "'";
 
     registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
+    registerParameter("group_by_type", &group_by_type_, true);
     registerParameter("export_all_unsorted", &export_all_unsorted_, false);
     registerParameter("run_pdflatex", &run_pdflatex_, true);
     registerParameter("open_created_pdf", &open_created_pdf_, false);
@@ -111,7 +112,7 @@ void ViewPointsReportGenerator::run ()
     if (abstract_.size())
         doc.abstract(abstract_);
 
-    LatexVisitor visitor (doc);
+    LatexVisitor visitor (doc, group_by_type_);
 
     cancel_ = false;
     running_ = true;
@@ -458,5 +459,15 @@ unsigned int ViewPointsReportGenerator::timeBeforeScreenshot() const
 void ViewPointsReportGenerator::timeBeforeScreenshot(unsigned int value_ms)
 {
     time_before_screenshot_ms_ = value_ms;
+}
+
+bool ViewPointsReportGenerator::groupByType() const
+{
+    return group_by_type_;
+}
+
+void ViewPointsReportGenerator::groupByType(bool value)
+{
+    group_by_type_ = value;
 }
 

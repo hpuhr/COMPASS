@@ -70,10 +70,19 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
     empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolbar_->addWidget(empty);
 
+    // columns
+    {
+        toolbar_->addAction("Edit Columns");
+    }
+
+    QWidget* empty2 = new QWidget();
+    empty2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolbar_->addWidget(empty2);
+
     // filters
     {
-        toolbar_->addAction("Filter Types");
-        toolbar_->addAction("Filter Columns");
+        toolbar_->addAction("Filter By Type");
+        toolbar_->addAction("Filter By Status");
     }
 
      connect(toolbar_, &QToolBar::actionTriggered, this, &ViewPointsToolWidget::actionTriggeredSlot);
@@ -114,13 +123,17 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
     {
         vp_widget_->selectNextSlot();
     }
-    else if (text == "Filter Types")
+    else if (text == "Edit Columns")
+    {
+        showColumnsMenu();
+    }
+    else if (text == "Filter By Type")
     {
         showTypesMenu();
     }
-    else if (text == "Filter Columns")
+    else if (text == "Filter By Status")
     {
-        showColumnsMenu();
+        showStatusesMenu();
     }
     else
         logwrn << "ViewPointsToolWidget: actionTriggeredSlot: unkown action '" << text << "'";
@@ -128,7 +141,6 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
 
 void ViewPointsToolWidget::showTypesMenu ()
 {
-
     QMenu menu;
 
     QStringList types = vp_widget_->types();
@@ -157,6 +169,36 @@ void ViewPointsToolWidget::showTypesMenu ()
     menu.exec(QCursor::pos());
 }
 
+void ViewPointsToolWidget::showStatusesMenu ()
+{
+    QMenu menu;
+
+    QStringList statuses = vp_widget_->statuses();
+    QStringList filtered_statuses = vp_widget_->filteredStatuses();
+
+    for (auto& status : statuses)
+    {
+        QAction* action = new QAction(status, this);
+        action->setCheckable(true);
+        action->setChecked(!filtered_statuses.contains(status));
+        connect (action, &QAction::triggered, this, &ViewPointsToolWidget::statusFilteredSlot);
+
+        menu.addAction(action);
+    }
+
+    menu.addSeparator();
+
+    QAction* all_action = new QAction("Show All", this);
+    connect (all_action, &QAction::triggered, this, &ViewPointsToolWidget::statusFilteredSlot);
+    menu.addAction(all_action);
+
+    QAction* none_action = new QAction("Show None", this);
+    connect (none_action, &QAction::triggered, this, &ViewPointsToolWidget::statusFilteredSlot);
+    menu.addAction(none_action);
+
+    menu.exec(QCursor::pos());
+}
+
 void ViewPointsToolWidget::typeFilteredSlot ()
 {
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
@@ -172,6 +214,23 @@ void ViewPointsToolWidget::typeFilteredSlot ()
         vp_widget_->showNoTypes();
     else
         vp_widget_->filterType(type);
+}
+
+void ViewPointsToolWidget::statusFilteredSlot ()
+{
+    QAction* action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+
+    loginf << "ViewPointsToolWidget: statusFilteredSlot: " << action->text().toStdString();
+
+    QString status = action->text();
+
+    if (status == "Show All")
+        vp_widget_->showAllStatuses();
+    else if (status == "Show None")
+        vp_widget_->showNoStatuses();
+    else
+        vp_widget_->filterStatus(status);
 }
 
 void ViewPointsToolWidget::showColumnsMenu()

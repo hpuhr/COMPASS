@@ -13,7 +13,7 @@ class LatexDocument;
 class LatexVisitor
 {
 public:
-    LatexVisitor(LatexDocument& report);
+    LatexVisitor(LatexDocument& report, bool group_by_type);
 
     virtual void visit(ViewPoint* e);
     virtual void visit(ListBoxView* e);
@@ -25,6 +25,8 @@ public:
 
 protected:
     LatexDocument& report_;
+    bool group_by_type_;
+
     bool screenshot_folder_created_ {false};
 
     std::string current_section_name_;

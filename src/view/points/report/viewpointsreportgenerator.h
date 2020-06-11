@@ -52,6 +52,9 @@ public:
     unsigned int timeBeforeScreenshot() const;
     void timeBeforeScreenshot(unsigned int value_ms);
 
+    bool groupByType() const;
+    void groupByType(bool value);
+
 protected:
     ViewManager& view_manager_;
 
@@ -65,6 +68,7 @@ protected:
 
     unsigned int time_before_screenshot_ms_;
 
+    bool group_by_type_ {true};
     bool export_all_unsorted_ {false};
     bool run_pdflatex_ {true};
     bool pdflatex_found_ {false};

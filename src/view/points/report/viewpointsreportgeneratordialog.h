@@ -16,6 +16,7 @@ class ViewPointsReportGeneratorDialog : public QDialog
     Q_OBJECT
 
 public slots:
+    void setPathSlot ();
     void pathEditedSlot (const QString& text);
     void filenameEditedSlot(const QString& text);
 
@@ -24,6 +25,7 @@ public slots:
 
     void waitTimeEditedSlot(const QString& text);
 
+    void groupByTypeChangedSlot (bool checked);
     void allUnsortedChangedSlot (bool checked);
     void runPDFLatexChangedSlot (bool checked);
     void openPDFChangedSlot (bool checked);
@@ -47,6 +49,8 @@ public:
 protected:
     ViewPointsReportGenerator& generator_;
 
+    QWidget* config_container_ {nullptr};
+
     QLineEdit* directory_edit_ {nullptr};
     QLineEdit* filename_edit_ {nullptr};
 
@@ -55,6 +59,7 @@ protected:
 
     QLineEdit* wait_time_edit_ {nullptr};
 
+    QCheckBox* group_types_check_ {nullptr};
     QCheckBox* all_unsorted_check_ {nullptr};
     QCheckBox* pdflatex_check_ {nullptr};
     QCheckBox* open_pdf_check_ {nullptr};
