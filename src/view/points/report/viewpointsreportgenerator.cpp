@@ -238,12 +238,18 @@ void ViewPointsReportGenerator::run ()
         dialog_->setProgress(0, vp_size, 0);
         dialog_->setStatus("Writing view points cancelled");
         dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     }
     else // proceed
     {
         dialog_->setProgress(0, vp_size, vp_size);
         dialog_->setStatus("Writing view points done");
         dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         doc.write();
 
@@ -256,6 +262,9 @@ void ViewPointsReportGenerator::run ()
             loginf << "ViewPointsReportGenerator: run: running pdflatex";
             dialog_->setStatus("Running pdflatex");
 
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
             logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
 
             command_out = System::exec(command);
@@ -264,6 +273,10 @@ void ViewPointsReportGenerator::run ()
             {
                 loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
                 dialog_->setStatus("Re-running pdflatex");
+
+                while (QCoreApplication::hasPendingEvents())
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
                 command_out = System::exec(command);
             }
 
