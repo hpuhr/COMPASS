@@ -21,8 +21,10 @@
 using namespace std;
 using namespace Utils;
 
-LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type)
-    : report_(report), group_by_type_(group_by_type)
+LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
+                           bool add_overview_screenshot)
+    : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
+      add_overview_screenshot_(add_overview_screenshot)
 {
 }
 
@@ -50,7 +52,8 @@ void LatexVisitor::visit(ViewPoint* e)
         comment = String::latexString(j_data.at("comment"));
 
     // overview table
-    LatexSection& overview_sec = report_.getSection("Overview");
+    if (add_overview_table_)
+        report_.getSection("Overview"); // add before other section
 
     if (group_by_type_)
         current_section_name_ = "View Points:"+type+":ID "+to_string(e->id())+" "+name;
@@ -87,20 +90,25 @@ void LatexVisitor::visit(ViewPoint* e)
 
     // write overview table entry
 
-    if (!overview_sec.hasTable("ViewPoints Overview"))
-        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
-                     "| l | l | l | l | X | l |", false);
+    if (add_overview_table_)
+    {
+        LatexSection& overview_sec = report_.getSection("Overview");
 
-    LatexTable& overview_table = overview_sec.getTable("ViewPoints Overview");
+        if (!overview_sec.hasTable("ViewPoints Overview"))
+            overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+                                  "| l | l | l | l | X | l |", false);
 
-    overview_table.addRow({
-                              to_string(e->id()),
-                              name,
-                              type,
-                              status,
-                              comment,
-                              R"(\hyperref[)"+current_section_label+"]{Link}"
-                          });
+        LatexTable& overview_table = overview_sec.getTable("ViewPoints Overview");
+
+        overview_table.addRow({
+                                  to_string(e->id()),
+                                  name,
+                                  type,
+                                  status,
+                                  comment,
+                                  R"(\hyperref[)"+current_section_label+"]{Link}"
+                              });
+    }
 }
 
 void LatexVisitor::visit(ListBoxView* e)
@@ -148,28 +156,41 @@ void LatexVisitor::visit(OSGView* e)
     OSGViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    //QPixmap screenshot = QPixmap::grabWidget(data_widget, data_widget->rect());
-
-//    QPixmap screenshot(data_widget->size());
-//    data_widget->render(&screenshot); // , QPoint(), QRegion(data_widget->size())
+    // normal screenshot
 
     QImage screenshot = data_widget->grabFrameBuffer();
 
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
 
-    if(screenshot.isNull())
-        logerr << "LatexVisitor: visit: unable to create screenshot";
-    else
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    if (add_overview_screenshot_) // overview screenshot
     {
-        loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
-        bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+        data_widget->zoomHomeSlot();
+        data_widget->addDataMarker();
+
+        QImage overview_screenshot = data_widget->grabFrameBuffer();
+
+        data_widget->removeDataMarker();
+
+        std::string overview_image_path = screenshot_path+"/"+image_prefix_+"_overview_"+e->instanceId()+".jpg";
+        assert (!overview_screenshot.isNull());
+
+        loginf << "LatexVisitor: visit: saving overview screenshot as '" << overview_image_path << "'";
+        ret = overview_screenshot.save(overview_image_path.c_str(), "JPG"); // , 50
         assert (ret);
 
-        LatexSection& sec = report_.getSection(current_section_name_);
-
-        sec.addImage(image_path, e->instanceId());
-        //LatexImage& image = sec.getImage(image_path);
+        sec.addImage(overview_image_path, e->instanceId()+" Overview");
     }
+
+    // add normal screenshot after overview
+
+    sec.addImage(image_path, e->instanceId());
 }
 #endif
 

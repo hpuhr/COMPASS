@@ -62,7 +62,9 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     registerParameter("export_all_unsorted", &export_all_unsorted_, false);
     registerParameter("group_by_type", &group_by_type_, true);
     registerParameter("add_overview_table", &add_overview_table_, true);
+
     registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
+    registerParameter("add_overview_screenshot", &add_overview_screenshot_, true);
 
     registerParameter("run_pdflatex", &run_pdflatex_, true);
     registerParameter("open_created_pdf", &open_created_pdf_, false);
@@ -114,7 +116,7 @@ void ViewPointsReportGenerator::run ()
     if (abstract_.size())
         doc.abstract(abstract_);
 
-    LatexVisitor visitor (doc, group_by_type_);
+    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_);
 
     cancel_ = false;
     running_ = true;
@@ -482,5 +484,15 @@ bool ViewPointsReportGenerator::addOverviewTable() const
 void ViewPointsReportGenerator::addOverviewTable(bool value)
 {
     add_overview_table_ = value;
+}
+
+bool ViewPointsReportGenerator::addOverviewScreenshot() const
+{
+    return add_overview_screenshot_;
+}
+
+void ViewPointsReportGenerator::addOverviewScreenshot(bool value)
+{
+    add_overview_screenshot_ = value;
 }
 

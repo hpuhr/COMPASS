@@ -58,6 +58,9 @@ public:
     bool addOverviewTable() const;
     void addOverviewTable(bool value);
 
+    bool addOverviewScreenshot() const;
+    void addOverviewScreenshot(bool value);
+
 protected:
     ViewManager& view_manager_;
 
@@ -74,6 +77,7 @@ protected:
     bool add_overview_table_ {true};
 
     unsigned int time_before_screenshot_ms_ {0};
+    bool add_overview_screenshot_ {true};
 
     bool run_pdflatex_ {true};
     bool pdflatex_found_ {false};

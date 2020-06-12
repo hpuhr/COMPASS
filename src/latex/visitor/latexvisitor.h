@@ -13,7 +13,7 @@ class LatexDocument;
 class LatexVisitor
 {
 public:
-    LatexVisitor(LatexDocument& report, bool group_by_type);
+    LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot);
 
     virtual void visit(ViewPoint* e);
     virtual void visit(ListBoxView* e);
@@ -25,7 +25,10 @@ public:
 
 protected:
     LatexDocument& report_;
-    bool group_by_type_;
+
+    bool group_by_type_ {true};
+    bool add_overview_table_ {true};
+    bool add_overview_screenshot_ {true};
 
     bool screenshot_folder_created_ {false};
 

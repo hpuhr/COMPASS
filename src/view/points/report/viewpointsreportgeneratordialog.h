@@ -28,6 +28,7 @@ public slots:
     void addOverviewTableChangedSlot (bool checked);
 
     void waitTimeEditedSlot(const QString& text);
+    void addOverviewScreenshotChangedSlot (bool checked);
 
     void runPDFLatexChangedSlot (bool checked);
     void openPDFChangedSlot (bool checked);
@@ -64,6 +65,7 @@ protected:
     QCheckBox* add_overview_table_check_ {nullptr};
 
     QLineEdit* wait_time_edit_ {nullptr};
+    QCheckBox* add_overview_screenshot_check_ {nullptr};
 
     QCheckBox* pdflatex_check_ {nullptr};
     QCheckBox* open_pdf_check_ {nullptr};

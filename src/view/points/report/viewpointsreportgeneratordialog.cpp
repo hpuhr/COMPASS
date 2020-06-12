@@ -104,7 +104,6 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         config_grid->addWidget(group_types_check_, row, 1);
 
         // add overview table
-
         ++row;
         config_grid->addWidget(new QLabel("Add Overview Table"), row, 0);
 
@@ -124,6 +123,15 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         connect(wait_time_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::waitTimeEditedSlot);
         config_grid->addWidget(wait_time_edit_, row, 1);
 
+        // add overview screenshot
+        ++row;
+        config_grid->addWidget(new QLabel("Add Overview Screenshot"), row, 0);
+
+        add_overview_screenshot_check_ = new QCheckBox();
+        add_overview_screenshot_check_->setChecked(generator_.addOverviewScreenshot());
+        connect(add_overview_screenshot_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::addOverviewScreenshotChangedSlot);
+        config_grid->addWidget(add_overview_screenshot_check_, row, 1);
 
         // run pdflatex
         ++row;
@@ -264,6 +272,11 @@ void ViewPointsReportGeneratorDialog::waitTimeEditedSlot(const QString& text)
     unsigned int tmp = text.toUInt(&ok);
     assert (ok);
     generator_.timeBeforeScreenshot(tmp);
+}
+
+void ViewPointsReportGeneratorDialog::addOverviewScreenshotChangedSlot (bool checked)
+{
+    generator_.addOverviewScreenshot(checked);
 }
 
 void ViewPointsReportGeneratorDialog::groupByTypeChangedSlot (bool checked)
