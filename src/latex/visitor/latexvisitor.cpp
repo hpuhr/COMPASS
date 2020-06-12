@@ -44,6 +44,14 @@ void LatexVisitor::visit(ViewPoint* e)
     assert (j_data.contains("status"));
     string status = j_data.at("status");
 
+    string comment;
+
+    if (j_data.contains("comment"))
+        comment = String::latexString(j_data.at("comment"));
+
+    // overview table
+    LatexSection& overview_sec = report_.getSection("Overview");
+
     if (group_by_type_)
         current_section_name_ = "View Points:"+type+":ID "+to_string(e->id())+" "+name;
     else
@@ -51,30 +59,12 @@ void LatexVisitor::visit(ViewPoint* e)
 
     LatexSection& sec = report_.getSection(current_section_name_);
 
-    //    stringstream ss;
+    // set label
+    std::string current_section_label = "sec:view-point-"+to_string(e->id());
+    //boost::replace_all(current_section_label, " ", "-");
+    sec.label(current_section_label);
 
-    //    ss << "Information:\n";
-    //    ss << R"(\begin{itemize})" << "\n";
-    //    ss << R"( \item \textbf{id}: )" << e->id() << "\n";
-    //    ss << R"( \item \textbf{name}: )" << name << "\n";
-    //    ss << R"( \item \textbf{type}: )" << type << "\n";
-    //    ss << R"( \item \textbf{status}: )" << status << "\n";
-
-    //    for (auto& j_it : j_data.items())
-    //    {
-    //        if (!j_it.value().is_primitive())
-    //            continue;
-
-    //        if (j_it.key() == "id" || j_it.key() == "name" || j_it.key() == "type" || j_it.key() == "status")
-    //            continue;
-
-    //        ss << R"( \item \textbf{)" << String::latexString(j_it.key())
-    //           << "}: " << String::latexString(JSON::toString(j_it.value())) << "\n";
-    //    }
-
-    //    ss << R"(\end{itemize})" << "\n";
-
-    //    sec.addText(ss.str());
+    // details table
 
     sec.addTable("Info", 2, {"Key","Value"}, "| l | X |");
     LatexTable& info_table = sec.getTable("Info");
@@ -94,6 +84,23 @@ void LatexVisitor::visit(ViewPoint* e)
 
         info_table.addRow({j_it.key(), JSON::toString(j_it.value())});
     }
+
+    // write overview table entry
+
+    if (!overview_sec.hasTable("ViewPoints Overview"))
+        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+                     "| l | l | l | l | X | l |", false);
+
+    LatexTable& overview_table = overview_sec.getTable("ViewPoints Overview");
+
+    overview_table.addRow({
+                              to_string(e->id()),
+                              name,
+                              type,
+                              status,
+                              comment,
+                              R"(\hyperref[)"+current_section_label+"]{Link}"
+                          });
 }
 
 void LatexVisitor::visit(ListBoxView* e)

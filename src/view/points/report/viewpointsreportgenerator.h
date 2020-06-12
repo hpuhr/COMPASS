@@ -55,6 +55,9 @@ public:
     bool groupByType() const;
     void groupByType(bool value);
 
+    bool addOverviewTable() const;
+    void addOverviewTable(bool value);
+
 protected:
     ViewManager& view_manager_;
 
@@ -66,10 +69,12 @@ protected:
     std::string author_;
     std::string abstract_;
 
-    unsigned int time_before_screenshot_ms_;
-
-    bool group_by_type_ {true};
     bool export_all_unsorted_ {false};
+    bool group_by_type_ {true};
+    bool add_overview_table_ {true};
+
+    unsigned int time_before_screenshot_ms_ {0};
+
     bool run_pdflatex_ {true};
     bool pdflatex_found_ {false};
 

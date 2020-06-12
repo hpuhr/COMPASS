@@ -50,6 +50,7 @@ std::string LatexDocument::toString()
           \usepackage{listings}
           \usepackage{hyperref}
           \usepackage{tabularx}
+          \usepackage{ltablex}
           \usepackage{pdflscape}
 
           \usepackage{color}

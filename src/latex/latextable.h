@@ -10,7 +10,7 @@ class LatexTable : public LatexContent
 {
 public:
     LatexTable(const std::string& name, unsigned int num_columns,
-               std::vector<std::string> headings, std::string heading_alignment="");
+               std::vector<std::string> headings, std::string heading_alignment="", bool convert_to_latex=true);
 
     void addRow (std::vector<std::string> row); // not latefied yet
 
@@ -25,6 +25,7 @@ protected:
     unsigned int num_columns_;
     std::vector<std::string> headings_;
     std::string heading_alignment_;
+    bool convert_to_latex_ {true};
     bool wide_table_ {false};
 
     std::vector<std::vector<std::string>> rows_;

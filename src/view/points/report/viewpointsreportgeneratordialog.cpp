@@ -81,15 +81,16 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
         connect(abstract_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
 
-        // wait
+        // export all
         ++row;
-        config_grid->addWidget(new QLabel("Wait Time Before Screenshot [ms]"), row, 0);
+        config_grid->addWidget(new QLabel("Export All (Sorted by id)"), row, 0);
 
-        wait_time_edit_ = new QLineEdit();
-        wait_time_edit_->setText(QString::number(generator_.timeBeforeScreenshot()));
-        wait_time_edit_->setValidator(new TextFieldDoubleValidator(0, 5000, 0));
-        connect(wait_time_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::waitTimeEditedSlot);
-        config_grid->addWidget(wait_time_edit_, row, 1);
+
+        all_unsorted_check_ = new QCheckBox();
+        all_unsorted_check_->setChecked(generator_.exportAllUnsorted());
+        connect(all_unsorted_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::allUnsortedChangedSlot);
+        config_grid->addWidget(all_unsorted_check_, row, 1);
 
         // group by type
         ++row;
@@ -102,16 +103,27 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
                 &ViewPointsReportGeneratorDialog::groupByTypeChangedSlot);
         config_grid->addWidget(group_types_check_, row, 1);
 
-        // export all
+        // add overview table
+
         ++row;
-        config_grid->addWidget(new QLabel("Export All (Sorted by id)"), row, 0);
+        config_grid->addWidget(new QLabel("Add Overview Table"), row, 0);
 
+        add_overview_table_check_ = new QCheckBox();
+        add_overview_table_check_->setChecked(generator_.addOverviewTable());
+        connect(add_overview_table_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::addOverviewTableChangedSlot);
+        config_grid->addWidget(add_overview_table_check_, row, 1);
 
-        all_unsorted_check_ = new QCheckBox();
-        all_unsorted_check_->setChecked(generator_.exportAllUnsorted());
-        connect(all_unsorted_check_, &QCheckBox::clicked, this,
-                &ViewPointsReportGeneratorDialog::allUnsortedChangedSlot);
-        config_grid->addWidget(all_unsorted_check_, row, 1);
+        // wait
+        ++row;
+        config_grid->addWidget(new QLabel("Wait Time Before Screenshot [ms]"), row, 0);
+
+        wait_time_edit_ = new QLineEdit();
+        wait_time_edit_->setText(QString::number(generator_.timeBeforeScreenshot()));
+        wait_time_edit_->setValidator(new TextFieldDoubleValidator(0, 5000, 0));
+        connect(wait_time_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::waitTimeEditedSlot);
+        config_grid->addWidget(wait_time_edit_, row, 1);
+
 
         // run pdflatex
         ++row;
@@ -257,6 +269,11 @@ void ViewPointsReportGeneratorDialog::waitTimeEditedSlot(const QString& text)
 void ViewPointsReportGeneratorDialog::groupByTypeChangedSlot (bool checked)
 {
     generator_.groupByType(checked);
+}
+
+void ViewPointsReportGeneratorDialog::addOverviewTableChangedSlot (bool checked)
+{
+    generator_.addOverviewTable(checked);
 }
 
 void ViewPointsReportGeneratorDialog::allUnsortedChangedSlot (bool checked)

@@ -59,9 +59,11 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     loginf << "ViewPointsReportGenerator: constructor: report path '" << report_path_ << "'"
            << " filename '"  << report_filename_ << "'";
 
-    registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
-    registerParameter("group_by_type", &group_by_type_, true);
     registerParameter("export_all_unsorted", &export_all_unsorted_, false);
+    registerParameter("group_by_type", &group_by_type_, true);
+    registerParameter("add_overview_table", &add_overview_table_, true);
+    registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
+
     registerParameter("run_pdflatex", &run_pdflatex_, true);
     registerParameter("open_created_pdf", &open_created_pdf_, false);
 
@@ -270,7 +272,8 @@ void ViewPointsReportGenerator::run ()
 
             command_out = System::exec(command);
 
-            while (command_out.find("Rerun to get outlines right") != std::string::npos)
+            while (command_out.find("Rerun to get outlines right") != std::string::npos
+                   || command_out.find("Rerun to get cross-references right") != std::string::npos)
             {
                 loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
                 dialog_->setStatus("Re-running pdflatex");
@@ -469,5 +472,15 @@ bool ViewPointsReportGenerator::groupByType() const
 void ViewPointsReportGenerator::groupByType(bool value)
 {
     group_by_type_ = value;
+}
+
+bool ViewPointsReportGenerator::addOverviewTable() const
+{
+    return add_overview_table_;
+}
+
+void ViewPointsReportGenerator::addOverviewTable(bool value)
+{
+    add_overview_table_ = value;
 }
 

@@ -8,8 +8,10 @@ using namespace std;
 using namespace Utils;
 
 LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
-                       std::vector<std::string> headings, std::string heading_alignment)
- : name_(name), num_columns_(num_columns), headings_(headings), heading_alignment_(heading_alignment)
+                       std::vector<std::string> headings, std::string heading_alignment,
+                       bool convert_to_latex)
+ : name_(name), num_columns_(num_columns), headings_(headings), heading_alignment_(heading_alignment),
+   convert_to_latex_(convert_to_latex)
 {
     assert (headings_.size() == num_columns_);
 
@@ -19,10 +21,7 @@ LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
 
         ss << "|";
         for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
-            if (cnt < 3)
                 ss << " l |";
-            else
-                ss << " X |";
 
         heading_alignment_ = ss.str();
     }
@@ -52,16 +51,6 @@ std::string LatexTable::toString()
         ss << R"(\thispagestyle{empty})" << "\n";
     }
 
-    ss << R"(\begin{center})" << "\n";
-    ss << R"(\begin{table}[H])" << "\n";
-
-//    if (wide_table_)
-//    {
-//        ss << R"(\hspace*{-1.5cm})" << "\n";
-//        ss << R"(\setlength{\tabcolsep}{3pt})" << "\n";
-//        ss << R"({\small)" << "\n";
-//        ss << R"(\begin{tabularx}{1.15\textwidth}{)" << heading_alignment_ << " }\n";
-//    }
     if (wide_table_)
         ss << R"(\begin{tabularx}{\linewidth}{)" << heading_alignment_ << " }\n";
     else
@@ -75,11 +64,6 @@ std::string LatexTable::toString()
 
     ss << R"(\end{tabularx})" << "\n";
 
-//    if (wide_table_)
-//        ss << R"(})" << "\n";
-
-    ss << R"(\end{table})" << "\n";
-    ss << R"(\end{center})" << "\n";
     ss << R"(\ \\)" << "\n";
 
     if (wide_table_)
@@ -113,7 +97,10 @@ std::string LatexTable::getLine (const std::vector<std::string>& row, bool bold)
         if (bold)
             ss << R"(\textbf{)";
 
-        ss << String::latexString(row.at(cnt));
+        if (convert_to_latex_)
+            ss << String::latexString(row.at(cnt));
+        else
+            ss << row.at(cnt);
 
         if (bold)
             ss << "}";

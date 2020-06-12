@@ -62,11 +62,12 @@ LatexTable& LatexSection::getTable (const std::string& name)
 }
 
 void LatexSection::addTable (const std::string& name, unsigned int num_columns,
-                                    std::vector<std::string> headings, std::string heading_alignment)
+                             std::vector<std::string> headings, std::string heading_alignment,
+                             bool convert_to_latex)
 {
     assert (!hasTable(name));
     sub_content_.push_back(unique_ptr<LatexTable>(
-                           new LatexTable(name, num_columns, headings, heading_alignment)));
+                           new LatexTable(name, num_columns, headings, heading_alignment, convert_to_latex)));
     assert (hasTable(name));
 }
 
@@ -95,19 +96,34 @@ std::string LatexSection::toString()
     stringstream ss;
 
     if (level_ == LatexSectionLevel::SECTION)
-        ss << R"(\section{)" << heading_ << "}\n\n";
+        ss << R"(\section{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::SUBSECTION)
-        ss << R"(\subsection{)" << heading_ << "}\n\n";
+        ss << R"(\subsection{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::SUBSUBSECTION)
-        ss << R"(\subsubsection{)" << heading_ << "}\n\n";
+        ss << R"(\subsubsection{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::PARAGRAPH)
-        ss << R"(\parapgraph{)" << heading_ << "}\n\n";
+        ss << R"(\parapgraph{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::SUBPARAGRAPH)
-        ss << R"(\subparapgraph{)" << heading_ << "}\n\n";
+        ss << R"(\subparapgraph{)" << heading_ << "}\n";
     else
         throw std::runtime_error ("LatexSection: toString: unkown section level");
+
+    if (label_.size())
+        ss << R"(\label{)" << label_ << "}\n";
+
+    ss << "\n";
 
     ss << LatexContent::toString();
 
     return ss.str();
+}
+
+std::string LatexSection::label() const
+{
+    return label_;
+}
+
+void LatexSection::label(const std::string& label)
+{
+    label_ = label;
 }
