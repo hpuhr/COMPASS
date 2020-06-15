@@ -8,8 +8,26 @@
 
 #include "viewpoint.h"
 
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index/random_access_index.hpp>
+#include <boost/multi_index_container.hpp>
+
 class ViewManager;
 
+struct vp_tag
+{
+};
+
+typedef boost::multi_index_container<
+    ViewPoint,
+    boost::multi_index::indexed_by<
+        boost::multi_index::random_access<>,  // this index represents insertion order
+        boost::multi_index::hashed_unique<boost::multi_index::tag<vp_tag>,
+            boost::multi_index::member<
+        ViewPoint, const unsigned int, &ViewPoint::id_> >
+        > >
+    ViewPointCache;
 
 class ViewPointsTableModel : public QAbstractItemModel
 {
@@ -34,14 +52,16 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
+
+    bool hasViewPoint (unsigned int id);
     unsigned int saveNewViewPoint(const nlohmann::json& data, bool update=true);
-    ViewPoint& saveNewViewPoint(unsigned int id, const nlohmann::json& data, bool update=true);
-    bool existsViewPoint(unsigned int id);
-    ViewPoint& viewPoint(unsigned int id);
+    const ViewPoint& saveNewViewPoint(unsigned int id, const nlohmann::json& data, bool update=true);
+    //bool existsViewPoint(unsigned int id);
+    const ViewPoint& viewPoint(unsigned int id);
     //void removeViewPoint(unsigned int id);
     void deleteAllViewPoints ();
 
-    std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
+    //std::map<unsigned int, ViewPoint>& viewPoints() { return view_points_; }
     void printViewPoints();
     //void saveViewPoints();
 
@@ -68,7 +88,7 @@ public:
 
     QStringList defaultTableColumns() const;
 
-    std::map<unsigned int, ViewPoint> viewPoints() const;
+    const ViewPointCache& viewPoints() const;
 
 private:
     ViewManager& view_manager_;
@@ -84,7 +104,9 @@ private:
     QIcon todo_icon_;
     QIcon unknown_icon_;
 
-    std::map<unsigned int, ViewPoint> view_points_;
+    //std::map<unsigned int, ViewPoint> view_points_;
+    ViewPointCache view_points_;
+    unsigned int max_id_ {0};
 };
 
 #endif // VIEWPOINTSTABLEMODEL_H

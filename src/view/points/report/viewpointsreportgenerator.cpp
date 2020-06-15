@@ -174,8 +174,8 @@ void ViewPointsReportGenerator::run ()
             QCoreApplication::processEvents();
 
         // do stuff
-        assert (table_model->existsViewPoint(vp_id));
-        ViewPoint& view_point = table_model->viewPoint(vp_id);
+        assert (table_model->hasViewPoint(vp_id));
+        const ViewPoint& view_point = table_model->viewPoint(vp_id);
 
         view_point.accept(visitor);
         visitor.imagePrefix("vp_"+to_string(vp_id));

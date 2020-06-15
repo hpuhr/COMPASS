@@ -42,8 +42,8 @@ class ViewManager : public QObject, public Configurable
 
   signals:
     void selectionChangedSignal();
-    void unshowViewPointSignal (ViewPoint* vp);
-    void showViewPointSignal (ViewPoint* vp);
+    void unshowViewPointSignal (const ViewPoint* vp);
+    void showViewPointSignal (const ViewPoint* vp);
 
   public slots:
     void selectionChangedSlot();

@@ -73,8 +73,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
     /// @brief Returns use selection flag
     // bool getUseSelection () { return use_selection_; }
 
-    void unshowViewPoint (ViewPoint* vp); // vp can be nullptr
-    void showViewPoint (ViewPoint* vp);
+    void unshowViewPoint (const ViewPoint* vp); // vp can be nullptr
+    void showViewPoint (const ViewPoint* vp);
 
   protected:
     /// Variable read list

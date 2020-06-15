@@ -15,7 +15,7 @@ class LatexVisitor
 public:
     LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot);
 
-    virtual void visit(ViewPoint* e);
+    virtual void visit(const ViewPoint* e);
     virtual void visit(ListBoxView* e);
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);

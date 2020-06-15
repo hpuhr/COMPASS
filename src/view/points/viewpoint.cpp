@@ -109,12 +109,12 @@ void ViewPoint::setComment (const std::string& comment)
     save();
 }
 
-void ViewPoint::print()
+void ViewPoint::print() const
 {
     loginf << "ViewPoint id " << id_ <<": print: data '" << data_.dump(4) << "'";
 }
 
-void ViewPoint::accept(LatexVisitor& v)
+void ViewPoint::accept(LatexVisitor& v) const
 {
     loginf << "ViewPoint: accept";
     v.visit(this);

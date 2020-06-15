@@ -633,7 +633,7 @@ std::vector<unsigned int> ViewPointsWidget::viewPoints()
     std::vector<unsigned int> data;
 
     for (auto& vp_it : table_model_->viewPoints())
-        data.push_back(vp_it.first);
+        data.push_back(vp_it.id());
 
     return data;
 }

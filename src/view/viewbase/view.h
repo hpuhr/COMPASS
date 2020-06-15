@@ -62,8 +62,8 @@ class View : public QObject, public Configurable
 
   public slots:
     void selectionChangedSlot();
-    virtual void unshowViewPointSlot (ViewPoint* vp)=0;
-    virtual void showViewPointSlot (ViewPoint* vp)=0;
+    virtual void unshowViewPointSlot (const ViewPoint* vp)=0;
+    virtual void showViewPointSlot (const ViewPoint* vp)=0;
 
   public:
     View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,

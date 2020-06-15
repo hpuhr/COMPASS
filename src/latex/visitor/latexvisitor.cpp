@@ -29,7 +29,7 @@ LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_o
 }
 
 
-void LatexVisitor::visit(ViewPoint* e)
+void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
 

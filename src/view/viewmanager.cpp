@@ -236,7 +236,7 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
         unsetCurrentViewPoint();
 
     assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->existsViewPoint(id));
+    assert (view_points_widget_->tableModel()->hasViewPoint(id));
 
     current_view_point_set_ = true;
     current_view_point_ = id;
@@ -257,7 +257,7 @@ void ViewManager::unsetCurrentViewPoint ()
     if (current_view_point_set_)
     {
         assert (view_points_widget_);
-        assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
+        assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
 
         emit unshowViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
@@ -279,8 +279,8 @@ void ViewManager::doViewPointAfterLoad ()
         return; // already done, this is a re-load
 
     assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
-    ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
+    assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
+    const ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
     const json& data = vp.data();
 
