@@ -73,7 +73,7 @@ void AllBufferTableWidget::clear()
 }
 
 void AllBufferTableWidget::show(
-    std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
+        std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
 {
     assert(buffer);
 
@@ -248,9 +248,9 @@ void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
                     if (row_count == 999)
                     {
                         QMessageBox m_warning(
-                            QMessageBox::Warning, "Too Many Rows Selected",
-                            "If more than 1000 lines are selected, only the first 1000 are copied.",
-                            QMessageBox::Ok);
+                                    QMessageBox::Warning, "Too Many Rows Selected",
+                                    "If more than 1000 lines are selected, only the first 1000 are copied.",
+                                    QMessageBox::Ok);
                         m_warning.exec();
                         break;
                     }
@@ -275,7 +275,7 @@ void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
 
                 if (!row_count)  // first row
                     selected_headers.append(
-                        model->headerData(current.column(), Qt::Horizontal).toString());
+                                model->headerData(current.column(), Qt::Horizontal).toString());
 
                 previous = current;
             }
@@ -296,9 +296,6 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()
     if (!indexes.size())
         return data;
 
-    //QString selected_text;
-    //QString selected_headers;
-    // You need a pair of indexes to find the row changes
     QModelIndex previous = indexes.first();
 
     if (!previous.isValid()) // empty
@@ -309,9 +306,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()
     std::vector<std::string> header_data;
     std::vector<std::string> current_row_data;
 
-//    selected_headers = model->headerData(previous.column(), Qt::Horizontal).toString();
     header_data.push_back(model->headerData(previous.column(), Qt::Horizontal).toString().toStdString());
-//    selected_text = model->data(previous).toString();
     current_row_data.push_back(model->data(previous).toString().toStdString());
     indexes.removeFirst();
 
@@ -323,9 +318,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()
         {
             if (!row_count)  // first row
                 data.push_back(header_data);
-                //selected_headers.append('\n');
 
-            //selected_text.append('\n');
             data.push_back(current_row_data);
             current_row_data.clear();
 
@@ -334,38 +327,102 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()
             if (row_count == 999)
             {
                 QMessageBox m_warning(
-                    QMessageBox::Warning, "Too Many Rows Selected",
-                    "If more than 1000 lines are selected, only the first 1000 are copied.",
-                    QMessageBox::Ok);
+                            QMessageBox::Warning, "Too Many Rows Selected",
+                            "If more than 1000 lines are selected, only the first 1000 are copied.",
+                            QMessageBox::Ok);
                 m_warning.exec();
                 break;
             }
         }
+
         // Otherwise it's the same row, so append a column separator, which is a tab.
-//        else
-//        {
-//            if (!row_count)  // first row
-//                selected_headers.append(';');
-
-//            selected_text.append(';');
-//        }
-
-//        QVariant data = model->data(current);
-//        QString text = data.toString();
-        // At this point `text` contains the text in one cell
-        //selected_text.append(text);
         current_row_data.push_back(model->data(current).toString().toStdString());
-
-        //                loginf << "UGA row " << current.row() << " col " <<
-        //                current.column() << " text '"
-        //                       << text.toStdString() << "'";
 
         if (!row_count)  // first row
             header_data.push_back(model->headerData(current.column(), Qt::Horizontal).toString().toStdString());
-//            selected_headers.append(
-//                model->headerData(current.column(), Qt::Horizontal).toString());
 
         previous = current;
+    }
+
+    return data;
+}
+
+std::vector<std::vector<std::string>> AllBufferTableWidget::getText (unsigned int max_rows)
+{
+    std::vector<std::vector<std::string>> data;
+
+    QAbstractItemModel* model = table_->model();
+
+    QModelIndex previous_index = model->index(0, 0);
+
+    if (!previous_index.isValid()) // empty
+        return data;
+
+    unsigned int row_count = 0;
+
+    std::vector<std::string> header_data;
+    std::vector<std::string> current_row_data;
+
+    header_data.push_back(model->headerData(previous_index.column(), Qt::Horizontal).toString().toStdString());
+    current_row_data.push_back(model->data(previous_index).toString().toStdString());
+
+    QModelIndex current_index;
+
+    auto rows = model->rowCount();
+    auto cols = model->columnCount();
+
+    bool max_rows_hit = false;
+
+    for (int row_cnt = 0; row_cnt < rows; ++row_cnt)
+    {
+        for (int col_cnt = 0; col_cnt < cols; ++col_cnt)
+        {
+            if (row_cnt == 0 && col_cnt == 0) // first, skip for previous
+                continue;
+
+            if (row_cnt >= max_rows)
+            {
+                max_rows_hit = true;
+                break;
+            }
+
+            current_index = model->index(row_cnt, col_cnt);
+
+            if (!current_index.isValid())
+                break;
+
+            // If you are at the start of the row the row number of the previous index
+            // isn't the same.  Text is followed by a row separator, which is a newline.
+            if (current_index.row() != previous_index.row())
+            {
+                if (!row_count)  // first row
+                    data.push_back(header_data);
+
+                data.push_back(current_row_data);
+                current_row_data.clear();
+
+                ++row_count;
+            }
+
+            // Otherwise it's the same row, so append a column separator, which is a tab.
+            current_row_data.push_back(model->data(current_index).toString().toStdString());
+
+            if (!row_count)  // first row
+                header_data.push_back(model->headerData(current_index.column(), Qt::Horizontal).toString().toStdString());
+
+            previous_index = current_index;
+        }
+    }
+
+    if (max_rows_hit)
+    {
+        current_row_data.clear();
+
+        for (int col_cnt = 0; col_cnt < cols; ++col_cnt)
+            current_row_data.push_back("...");
+
+        data.push_back(current_row_data);
+        current_row_data.clear();
     }
 
     return data;

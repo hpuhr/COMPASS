@@ -135,6 +135,24 @@ void LatexVisitor::visit(ListBoxView* e)
         for (auto& row_it : data)
             table.addRow(row_it);
     }
+    else
+    {
+        data = allbuf->getText();
+
+        if (data.size())
+        {
+            LatexSection& sec = report_.getSection(current_section_name_);
+
+            sec.addTable(e->instanceId(), data.at(0).size(), data.at(0));
+            LatexTable& table = sec.getTable(e->instanceId());
+            table.setWideTable(true);
+
+            data.erase(data.begin()); // remove first header row#
+
+            for (auto& row_it : data)
+                table.addRow(row_it);
+        }
+    }
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -196,7 +214,6 @@ void LatexVisitor::visit(OSGView* e)
     }
 
     // add normal screenshot after overview
-
     sec.addImage(image_path, e->instanceId());
 }
 #endif

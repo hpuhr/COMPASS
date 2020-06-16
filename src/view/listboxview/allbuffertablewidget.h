@@ -80,6 +80,7 @@ class AllBufferTableWidget : public QWidget
     void selectSelectedRows();
 
     std::vector<std::vector<std::string>> getSelectedText (); // first is header
+    std::vector<std::vector<std::string>> getText (unsigned int max_rows=30); // first is header
 
   protected:
     ListBoxView& view_;
