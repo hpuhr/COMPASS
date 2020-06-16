@@ -13,7 +13,8 @@ class LatexDocument;
 class LatexVisitor
 {
 public:
-    LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot);
+    LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot,
+                 bool wait_on_map_loading);
 
     virtual void visit(const ViewPoint* e);
     virtual void visit(ListBoxView* e);
@@ -29,6 +30,7 @@ protected:
     bool group_by_type_ {true};
     bool add_overview_table_ {true};
     bool add_overview_screenshot_ {true};
+    bool wait_on_map_loading_ {true};
 
     bool screenshot_folder_created_ {false};
 

@@ -49,9 +49,6 @@ public:
     bool openCreatedPDF() const;
     void openCreatedPDF(bool value);
 
-    unsigned int timeBeforeScreenshot() const;
-    void timeBeforeScreenshot(unsigned int value_ms);
-
     bool groupByType() const;
     void groupByType(bool value);
 
@@ -60,6 +57,9 @@ public:
 
     bool addOverviewScreenshot() const;
     void addOverviewScreenshot(bool value);
+
+    bool waitOnMapLoading() const;
+    void waitOnMapLoading(bool value);
 
 protected:
     ViewManager& view_manager_;
@@ -76,8 +76,8 @@ protected:
     bool group_by_type_ {true};
     bool add_overview_table_ {true};
 
-    unsigned int time_before_screenshot_ms_ {0};
     bool add_overview_screenshot_ {true};
+    bool wait_on_map_loading_ {true};
 
     bool run_pdflatex_ {true};
     bool pdflatex_found_ {false};

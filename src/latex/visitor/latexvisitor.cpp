@@ -22,9 +22,9 @@ using namespace std;
 using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot)
+                           bool add_overview_screenshot, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
-      add_overview_screenshot_(add_overview_screenshot)
+      add_overview_screenshot_(add_overview_screenshot), wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -153,8 +153,15 @@ void LatexVisitor::visit(OSGView* e)
         screenshot_folder_created_ = true;
     }
 
+    e->showInTabWidget();
+
     OSGViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
+
+    if (wait_on_map_loading_)
+        data_widget->waitUntilMapLoaded();
+
+    data_widget->clearMouseCoordinates();
 
     // normal screenshot
 

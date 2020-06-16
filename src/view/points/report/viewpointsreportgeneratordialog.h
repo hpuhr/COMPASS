@@ -27,7 +27,7 @@ public slots:
     void groupByTypeChangedSlot (bool checked);
     void addOverviewTableChangedSlot (bool checked);
 
-    void waitTimeEditedSlot(const QString& text);
+    void waitOnMapLoadingEditedSlot(bool checked);
     void addOverviewScreenshotChangedSlot (bool checked);
 
     void runPDFLatexChangedSlot (bool checked);
@@ -64,7 +64,7 @@ protected:
     QCheckBox* group_types_check_ {nullptr};
     QCheckBox* add_overview_table_check_ {nullptr};
 
-    QLineEdit* wait_time_edit_ {nullptr};
+    QCheckBox* wait_on_map_loading_check_ {nullptr};
     QCheckBox* add_overview_screenshot_check_ {nullptr};
 
     QCheckBox* pdflatex_check_ {nullptr};

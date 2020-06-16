@@ -115,13 +115,13 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
 
         // wait
         ++row;
-        config_grid->addWidget(new QLabel("Wait Time Before Screenshot [ms]"), row, 0);
+        config_grid->addWidget(new QLabel("Wait On Map Loading"), row, 0);
 
-        wait_time_edit_ = new QLineEdit();
-        wait_time_edit_->setText(QString::number(generator_.timeBeforeScreenshot()));
-        wait_time_edit_->setValidator(new TextFieldDoubleValidator(0, 5000, 0));
-        connect(wait_time_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::waitTimeEditedSlot);
-        config_grid->addWidget(wait_time_edit_, row, 1);
+        wait_on_map_loading_check_ = new QCheckBox();
+        wait_on_map_loading_check_->setChecked(generator_.waitOnMapLoading());
+        connect(wait_on_map_loading_check_, &QCheckBox::clicked, this,
+                &ViewPointsReportGeneratorDialog::waitOnMapLoadingEditedSlot);
+        config_grid->addWidget(wait_on_map_loading_check_, row, 1);
 
         // add overview screenshot
         ++row;
@@ -266,12 +266,9 @@ void ViewPointsReportGeneratorDialog::abstractEditedSlot(const QString& text)
     generator_.abstract(text.toStdString());
 }
 
-void ViewPointsReportGeneratorDialog::waitTimeEditedSlot(const QString& text)
+void ViewPointsReportGeneratorDialog::waitOnMapLoadingEditedSlot(bool checked)
 {
-    bool ok;
-    unsigned int tmp = text.toUInt(&ok);
-    assert (ok);
-    generator_.timeBeforeScreenshot(tmp);
+    generator_.waitOnMapLoading(checked);
 }
 
 void ViewPointsReportGeneratorDialog::addOverviewScreenshotChangedSlot (bool checked)

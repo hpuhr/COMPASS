@@ -63,7 +63,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     registerParameter("group_by_type", &group_by_type_, true);
     registerParameter("add_overview_table", &add_overview_table_, true);
 
-    registerParameter("time_before_screenshot_ms", &time_before_screenshot_ms_, 0);
+    registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
     registerParameter("add_overview_screenshot", &add_overview_screenshot_, true);
 
     registerParameter("run_pdflatex", &run_pdflatex_, true);
@@ -116,7 +116,7 @@ void ViewPointsReportGenerator::run ()
     if (abstract_.size())
         doc.abstract(abstract_);
 
-    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_);
+    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, wait_on_map_loading_);
 
     cancel_ = false;
     running_ = true;
@@ -180,29 +180,9 @@ void ViewPointsReportGenerator::run ()
         view_point.accept(visitor);
         visitor.imagePrefix("vp_"+to_string(vp_id));
 
+        // visit se views
         for (auto& view_it : view_manager_.getViews())
-        {
-#if USE_EXPERIMENTAL_SOURCE == true
-            if (dynamic_cast<OSGView*>(view_it.second))
-            {
-                view_it.second->showInTabWidget();
-
-                // wait maybe
-                if (time_before_screenshot_ms_)
-                {
-                    vp_start_time = boost::posix_time::microsec_clock::local_time();
-
-                    while ((boost::posix_time::microsec_clock::local_time()-vp_start_time).total_milliseconds()
-                           < time_before_screenshot_ms_)
-                    {
-                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                    }
-                }
-            }
-#endif
-
             view_it.second->accept(visitor);
-        }
 
         // update status
         stop_time = boost::posix_time::microsec_clock::local_time();
@@ -456,16 +436,6 @@ void ViewPointsReportGenerator::openCreatedPDF(bool value)
     open_created_pdf_ = value;
 }
 
-unsigned int ViewPointsReportGenerator::timeBeforeScreenshot() const
-{
-    return time_before_screenshot_ms_;
-}
-
-void ViewPointsReportGenerator::timeBeforeScreenshot(unsigned int value_ms)
-{
-    time_before_screenshot_ms_ = value_ms;
-}
-
 bool ViewPointsReportGenerator::groupByType() const
 {
     return group_by_type_;
@@ -494,5 +464,15 @@ bool ViewPointsReportGenerator::addOverviewScreenshot() const
 void ViewPointsReportGenerator::addOverviewScreenshot(bool value)
 {
     add_overview_screenshot_ = value;
+}
+
+bool ViewPointsReportGenerator::waitOnMapLoading() const
+{
+    return wait_on_map_loading_;
+}
+
+void ViewPointsReportGenerator::waitOnMapLoading(bool value)
+{
+    wait_on_map_loading_ = value;
 }
 
