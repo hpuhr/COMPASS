@@ -57,6 +57,7 @@
 #include <fstream>
 
 #include <QCoreApplication>
+#include <QApplication>
 #include <QThread>
 #include <QMessageBox>
 
@@ -376,6 +377,8 @@ void ViewPointsImportTask::import ()
 
     assert (canImport());
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     finished_ = false;
 
     // view points
@@ -425,6 +428,8 @@ void ViewPointsImportTask::import ()
 
     loginf << "ViewPointsImportTask: import: imported " << to_string(view_points.size()) << " view points";
     task_manager_.appendSuccess("ViewPointsImportTask: imported "+to_string(view_points.size())+" view points");
+
+    QApplication::restoreOverrideCursor();
 
     // datasets
     if (current_data_.contains("view_point_context"))
