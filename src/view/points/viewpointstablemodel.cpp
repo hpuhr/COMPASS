@@ -209,7 +209,10 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
 //            view_points_.at(id).setComment(value.toString().toStdString());
 
         if (index.column() == statusColumn())
+        {
             view_points_.modify(it, [value](ViewPoint& p) { p.setStatus(value.toString().toStdString()); });
+            updateStatuses();
+        }
         else
             view_points_.modify(it, [value](ViewPoint& p) { p.setComment(value.toString().toStdString()); });
 

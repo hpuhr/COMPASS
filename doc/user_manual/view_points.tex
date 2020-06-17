@@ -45,7 +45,7 @@ Also, additional attributes can be shown. If other additional attributes exist i
 
 When a view point is selected, the dataset defined by the view point is loaded automatically and the active Views show the relevant data. Using the elements described in the following sections a user can quickly step through view points, assess the information shown and change status and comment information. \\
 
-Please \textbf{note} that changes to view points are only saved to the database on correct application shutdown.
+Please \textbf{note} that changes to view points are saved immediately to the database and no undo function exists.
 
 \section{Toolbar}
 
@@ -60,8 +60,9 @@ Please \textbf{note} that changes to view points are only saved to the database 
     \includegraphics[width=0.5cm,frame]{../../data/icons/todo.png} & Set Selected Status ToDo [T] & Sets the current view point to status 'todo' \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/comment.png} & Edit Comment [E] & Edits the current view points status \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/down.png} & Select Next [Down] & Steps to the next view point \\ \hline
-    & Filter Types & Opens menu for filtering based on type \\ \hline
-    & Filter Columns & Open menu for hiding/showing columns \\ \hline    
+    & Edit Columns & Open menu for hiding/showing columns \\ \hline
+    & Filter By Type & Opens menu for filtering based on type \\ \hline
+    & Filter By Status & Opens menu for filtering based on status \\ \hline
   \end{tabular}
   \caption{Toolbar Actions}
 \end{table}
@@ -91,6 +92,70 @@ This automatically triggers loading of the data and display in the existing View
 
 The status can only be set using the toolbar buttons or keyboard shortcuts, while editing the comment can also be triggered by a double-click on the respective cell.
 
+\section{Re-Sorting Using Columns}
+
+By clicking on a column, the View Points Table is sorted on the information in the column. Ascending/descending can be changed by clicking again on a column already used for sorting. \\
+
+Per default, the table is sorted by the 'id' column.
+
+\section{Showing/Hiding Columns}
+
+Using the 'Edit Columns' button in the toolbar, unwanted columns can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=5cm,frame]{../screenshots/view_points_edit_columns.png}
+  \caption{View Points: Edit Columns Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All Column names: With a checkbox to select/deselect which columns should be shown
+\item Show Only Main: Only the first 4 columns are shown
+\item Show All: All columns are shown
+\item Show None: No columns are shown
+\end{itemize}
+\ \\
+
+\section{Filtering Based on Type}
+
+Using the 'Filter By Type' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=5cm,frame]{../screenshots/view_points_filter_type.png}
+  \caption{View Points: Filter By Type Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All existing types: With a checkbox to select/deselect which should be shown
+\item Show All: All types are shown
+\item Show None: No types are shown
+\end{itemize}
+\ \\
+
+\section{Filtering Based on Status}
+
+Using the 'Filter By Status' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=4cm,frame]{../screenshots/view_points_filter_status.png}
+  \caption{View Points: Filter By Status Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All existing statuses: With a checkbox to select/deselect which should be shown
+\item Show All: All types are shown
+\item Show None: No types are shown
+\end{itemize}
+\ \\
+
 \section{Function Buttons}
 
 There exist 3 buttons for general functions:
@@ -99,6 +164,7 @@ There exist 3 buttons for general functions:
 \item Import: Imports a view point file selected by the user (only recommended if no view points are already defined)
 \item Delete All: Deletes all existing view points
 \item Export: Exports all existing view points as a view point file
+\item Export PDF: Exports view points as a PDF file
 \end{itemize}
 \ \\
 
@@ -141,3 +207,5 @@ After data loading, the application can be used as in any other situation, there
 In the 'View Points' tab, after assessing the view point, a user can add a comment and change the status to annotate the view point with additional information. \\
 
 After this e.g. the next view point can be selected.
+
+\section{Exporting View Points to PDF}

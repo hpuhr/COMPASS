@@ -60,6 +60,8 @@
 #include <QThread>
 #include <QMessageBox>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
@@ -421,7 +423,7 @@ void ViewPointsImportTask::import ()
         db_interface.setViewPoint(id, vp_it.dump());
     }
 
-    loginf << "ViewPointsImportTask: imported " << to_string(view_points.size()) << " view points";
+    loginf << "ViewPointsImportTask: import: imported " << to_string(view_points.size()) << " view points";
     task_manager_.appendSuccess("ViewPointsImportTask: imported "+to_string(view_points.size())+" view points");
 
     // datasets
@@ -431,7 +433,7 @@ void ViewPointsImportTask::import ()
 
         if (context.contains("datasets"))
         {
-            task_manager_.appendInfo("ViewPointsImportTask: starting import of ASTERIX files");
+            task_manager_.appendInfo("ViewPointsImportTask: import: starting import of ASTERIX files");
 
             for (auto& ds_it : context.at("datasets").get<json::array_t>())
             {
@@ -451,8 +453,9 @@ void ViewPointsImportTask::import ()
                     assert (Files::fileExists(filename));
                 }
 
-                while (QCoreApplication::hasPendingEvents())
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QCoreApplication::processEvents();
+
+                loginf << "ViewPointsImportTask: import: wait done";
 
                 TaskManagerWidget* widget = task_manager_.widget();
                 assert (widget);
@@ -574,14 +577,16 @@ void ViewPointsImportTask::import ()
                 asterix_importer_task.showDoneSummary(false);
 
                 //widget->runCurrentTaskSlot();
+                loginf << "ViewPointsImportTask: import: running task";
                 widget->runTask(asterix_importer_task);
 
-                while (QCoreApplication::hasPendingEvents() || !asterix_importer_task.done())
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                while (!asterix_importer_task.done())
+                {
+                    QCoreApplication::processEvents();
+                    QThread::msleep(1);
+                }
 
                 loginf << "ViewPointsImportTask: import: importing dataset '" << name << "' done";
-
-                QThread::msleep(100);  // delay
 #else
                 logerr<< "ViewPointsImportTask: import: importing of datasets not possible with missing jasterix";
 #endif

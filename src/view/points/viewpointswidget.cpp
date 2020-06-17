@@ -31,7 +31,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
              this, &ViewPointsWidget::typesChangedSlot);
     connect (table_model_, &ViewPointsTableModel::statusesChangedSignal,
-             this, &ViewPointsWidget::typesChangedSlot);
+             this, &ViewPointsWidget::statusesChangedSlot);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
@@ -52,7 +52,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
-    table_view_->show();
+    //table_view_->show();
 //    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
 //    table_->setColumnCount(table_columns_.size());
 //    table_->setHorizontalHeaderLabels(table_columns_);

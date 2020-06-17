@@ -43,6 +43,7 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QMetaType>
+#include <QApplication>
 
 #include <cassert>
 
@@ -65,8 +66,12 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(!initialized_);
     main_tab_widget_ = tab_widget;
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     view_points_widget_ = new ViewPointsWidget(*this);
     //view_points_widget_->setAutoFillBackground(true);
+
+    QApplication::restoreOverrideCursor();
 
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
