@@ -246,13 +246,24 @@ void ViewPointsReportGenerator::run ()
 
             loginf << "ViewPointsReportGenerator: run: running pdflatex";
             dialog_->setStatus("Running pdflatex");
+            dialog_->setRemainingTime("");
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            //while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
             logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
 
             command_out = System::exec(command);
+
+            logdbg << "ViewPointsReportGenerator: run: cmd done";
+
+            // update status
+            stop_time = boost::posix_time::microsec_clock::local_time();
+
+            time_diff = stop_time - start_time;
+            ms = time_diff.total_milliseconds();
+            elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+            dialog_->setElapsedTime(elapsed_time_str);
 
             while (command_out.find("Rerun to get outlines right") != std::string::npos
                    || command_out.find("Rerun to get cross-references right") != std::string::npos)
@@ -260,10 +271,17 @@ void ViewPointsReportGenerator::run ()
                 loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
                 dialog_->setStatus("Re-running pdflatex");
 
-                while (QCoreApplication::hasPendingEvents())
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                 command_out = System::exec(command);
+
+                time_diff = stop_time - start_time;
+                ms = time_diff.total_milliseconds();
+                elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+                dialog_->setElapsedTime(elapsed_time_str);
+
+                logdbg << "ViewPointsReportGenerator: run: re-run done";
             }
 
             loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
