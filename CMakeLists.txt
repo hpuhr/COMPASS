@@ -86,8 +86,6 @@ message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(NemaTode REQUIRED CONFIG)
 
-#find_package (Eigen3 3.3 REQUIRED NO_MODULE)
-
 add_library(atsdb "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -129,7 +127,7 @@ include_directories (
     ${GDAL_INCLUDE_DIRS}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${LibArchive_INCLUDE_DIRS}
-#    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIR}
     )
 
@@ -165,7 +163,7 @@ target_link_libraries ( atsdb optimized
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
-#    Eigen3::Eigen
+    Eigen3::Eigen
     )
 
 
