@@ -67,10 +67,6 @@ find_package ( GDAL REQUIRED )
 message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
 message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 
-#find_package ( TinyXML2 REQUIRED )
-#message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
-#message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}")
-
 find_package ( LibArchive REQUIRED )
 message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
@@ -89,6 +85,8 @@ message("  OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
 message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(NemaTode REQUIRED CONFIG)
+
+#find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 add_library(atsdb "")
 
@@ -129,10 +127,9 @@ include_directories (
     ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
     ${GDAL_INCLUDE_DIRS}
-#    ${TINYXML2_INCLUDE_DIR}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${LibArchive_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
+#    ${EIGEN3_INCLUDE_DIR}
     ${JSONCPP_INCLUDE_DIR}
     )
 
@@ -168,6 +165,7 @@ target_link_libraries ( atsdb optimized
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
+#    Eigen3::Eigen
     )
 
 
