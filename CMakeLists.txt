@@ -163,7 +163,7 @@ target_link_libraries ( atsdb optimized
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
-    Eigen3::Eigen
+    #Eigen3::Eigen
     )
 
 
