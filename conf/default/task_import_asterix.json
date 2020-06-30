@@ -8,7 +8,7 @@
         "override_sac_org": 50,
         "override_sic_new": 241,
         "override_sic_org": 240,
-        "override_tod_offset": 0.0
+        "override_tod_offset": -19501.8515625
     },
     "sub_configs": {
         "ASTERIXCategoryConfig": {
@@ -111,6 +111,8 @@
                     "spf": ""
                 }
             }
+        },
+        "ASTERIXFile": {
         },
         "JSONParsingSchema": {
             "JSONParsingSchemajASTERIX0": {
@@ -7551,6 +7553,22 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping192": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "pos_std_dev_xy_corr_coeff",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "500.COV.COV (XY Covariance Component)",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping2": {
                                         "parameters": {
                                             "active": true,
@@ -8865,11 +8883,11 @@
                                     },
                                     "JSONDataMapping94": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 118.5, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_x_m",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -8881,11 +8899,11 @@
                                     },
                                     "JSONDataMapping95": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 98.5, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_y_m",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -8897,11 +8915,11 @@
                                     },
                                     "JSONDataMapping96": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0.00088512765, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_lat_deg",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -8913,11 +8931,11 @@
                                     },
                                     "JSONDataMapping97": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0.0014966703899999998, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_long_deg",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
