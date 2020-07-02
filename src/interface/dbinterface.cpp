@@ -542,6 +542,60 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
                buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
     }
 
+    // psr
+    bool has_primary_azimuth_stddev = ds.hasPrimaryAzimuthStdDevColumn();
+    std::string primary_azimuth_stddev_col_name;
+    if (has_primary_azimuth_stddev)
+    {
+        primary_azimuth_stddev_col_name = meta.column(ds.primaryAzimuthStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(primary_azimuth_stddev_col_name) &&
+               buffer->properties().get(primary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
+    bool has_primary_range_stddev = ds.hasPrimaryRangeStdDevColumn();
+    std::string primary_range_stddev_col_name;
+    if (has_primary_range_stddev)
+    {
+        primary_range_stddev_col_name = meta.column(ds.primaryRangeStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(primary_range_stddev_col_name) &&
+               buffer->properties().get(primary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+    // ssr
+    bool has_secondary_azimuth_stddev = ds.hasSecondaryAzimuthStdDevColumn();
+    std::string secondary_azimuth_stddev_col_name;
+    if (has_secondary_azimuth_stddev)
+    {
+        secondary_azimuth_stddev_col_name = meta.column(ds.secondaryAzimuthStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(secondary_azimuth_stddev_col_name) &&
+               buffer->properties().get(secondary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
+    bool has_secondary_range_stddev = ds.hasSecondaryRangeStdDevColumn();
+    std::string secondary_range_stddev_col_name;
+    if (has_secondary_range_stddev)
+    {
+        secondary_range_stddev_col_name = meta.column(ds.secondaryRangeStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(secondary_range_stddev_col_name) &&
+               buffer->properties().get(secondary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+    // mode s
+    bool has_mode_s_azimuth_stddev = ds.hasModeSAzimuthStdDevColumn();
+    std::string mode_s_azimuth_stddev_col_name;
+    if (has_mode_s_azimuth_stddev)
+    {
+        mode_s_azimuth_stddev_col_name = meta.column(ds.modeSAzimuthStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(mode_s_azimuth_stddev_col_name) &&
+               buffer->properties().get(mode_s_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
+    bool has_mode_s_range_stddev = ds.hasModeSRangeStdDevColumn();
+    std::string mode_s_range_stddev_col_name;
+    if (has_mode_s_range_stddev)
+    {
+        mode_s_range_stddev_col_name = meta.column(ds.modeSRangeStdDevColumn()).name();
+        assert(buffer->properties().hasProperty(mode_s_range_stddev_col_name) &&
+               buffer->properties().get(mode_s_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
     std::map<int, DBODataSource> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
@@ -612,7 +666,30 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         if (has_altitude && !buffer->get<double>(altitude_col_name).isNull(cnt))
             sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
 
-        sources.at(key).dbContent(buffer->asJSON());
+        // psr
+        if (has_primary_azimuth_stddev && !buffer->get<double>(primary_azimuth_stddev_col_name).isNull(cnt))
+            sources.at(key).primaryAzimuthStdDev(buffer->get<double>(primary_azimuth_stddev_col_name).get(cnt));
+
+        if (has_primary_range_stddev && !buffer->get<double>(primary_range_stddev_col_name).isNull(cnt))
+            sources.at(key).primaryRangeStdDev(buffer->get<double>(primary_range_stddev_col_name).get(cnt));
+
+        // ssr
+        if (has_secondary_azimuth_stddev && !buffer->get<double>(secondary_azimuth_stddev_col_name).isNull(cnt))
+            sources.at(key).secondaryAzimuthStdDev(buffer->get<double>(secondary_azimuth_stddev_col_name).get(cnt));
+
+        if (has_secondary_range_stddev && !buffer->get<double>(secondary_range_stddev_col_name).isNull(cnt))
+            sources.at(key).secondaryRangeStdDev(buffer->get<double>(secondary_range_stddev_col_name).get(cnt));
+
+        // mode s
+        if (has_mode_s_azimuth_stddev && !buffer->get<double>(mode_s_azimuth_stddev_col_name).isNull(cnt))
+            sources.at(key).modeSAzimuthStdDev(buffer->get<double>(mode_s_azimuth_stddev_col_name).get(cnt));
+
+        if (has_mode_s_range_stddev && !buffer->get<double>(mode_s_range_stddev_col_name).isNull(cnt))
+            sources.at(key).modeSRangeStdDev(buffer->get<double>(mode_s_range_stddev_col_name).get(cnt));
+
+        // removed json content
+
+        //sources.at(key).dbContent(buffer->asJSON());
 
         //sources.at(key).print();
     }

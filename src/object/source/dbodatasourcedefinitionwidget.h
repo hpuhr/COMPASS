@@ -37,9 +37,18 @@ class DBODataSourceDefinitionWidget : public QWidget
     void changedNameColumnSlot();
     void changedSacColumnSlot();
     void changedSicColumnSlot();
+
     void changedLatitudeColumnSlot();
     void changedLongitudeColumnSlot();
     void changedAltitudeColumnSlot();
+
+    void changedPrimaryAzimuthStdDevColumnSlot();
+    void changedPrimaryRangeStdDevColumnSlot();
+    void changedSecondaryAzimuthStdDevColumnSlot();
+    void changedSecondaryRangeStdDevColumnSlot();
+    void changedModeSAzimuthStdDevColumnSlot();
+    void changedModeSRangeStdDevColumnSlot();
+
 
     /// @brief Updates data source local key selection
     void updateLocalKeySlot();
@@ -55,6 +64,13 @@ class DBODataSourceDefinitionWidget : public QWidget
     void updateLatitudeColumnSlot();
     void updateLongitudeColumnSlot();
     void updateAltitudeColumnSlot();
+
+    void updatePrimaryAzimuthStdDevColumnSlot();
+    void updatePrimaryRangeStdDevColumnSlot();
+    void updateSecondaryAzimuthStdDevColumnSlot();
+    void updateSecondaryRangeStdDevColumnSlot();
+    void updateModeSAzimuthStdDevColumnSlot();
+    void updateModeSRangeStdDevColumnSlot();
 
     // signals:
     //    void definitionChangedSignal();
@@ -82,6 +98,13 @@ class DBODataSourceDefinitionWidget : public QWidget
     QComboBox* latitude_box_{nullptr};
     QComboBox* longitude_box_{nullptr};
     QComboBox* altitude_box_{nullptr};
+    /// radar noise
+    QComboBox* primary_azimuth_stddev_box_{nullptr};
+    QComboBox* primary_range_stddev_box_{nullptr};
+    QComboBox* secondary_azimuth_stddev_box_{nullptr};
+    QComboBox* secondary_range_stddev_box_{nullptr};
+    QComboBox* mode_s_azimuth_stddev_box_{nullptr};
+    QComboBox* mode_s_range_stddev_box_{nullptr};
 
     /// @brief Updates a variable selection box
     void updateVariableSelectionBox(QComboBox* box, const std::string& schema_name,

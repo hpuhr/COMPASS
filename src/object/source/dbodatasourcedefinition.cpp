@@ -32,9 +32,19 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string& class_id,
     registerParameter("name_column", &name_column_, "");
     registerParameter("sac_column", &sac_column_, "");
     registerParameter("sic_column", &sic_column_, "");
+
     registerParameter("latitude_column", &latitude_column_, "");
     registerParameter("longitude_column", &longitude_column_, "");
     registerParameter("altitude_column", &altitude_column_, "");
+
+    registerParameter("primary_azimuth_stddev_column", &primary_azimuth_stddev_column_, "");
+    registerParameter("primary_range_stddev_column", &primary_range_stddev_column_, "");
+
+    registerParameter("secondary_azimuth_stddev_column", &secondary_azimuth_stddev_column_, "");
+    registerParameter("secondary_range_stddev_column", &secondary_range_stddev_column_, "");
+
+    registerParameter("mode_s_azimuth_stddev_column", &mode_s_azimuth_stddev_column_, "");
+    registerParameter("mode_s_range_stddev_column", &mode_s_range_stddev_column_, "");
 }
 
 DBODataSourceDefinition::~DBODataSourceDefinition()
@@ -101,6 +111,78 @@ void DBODataSourceDefinition::altitudeColumn(const std::string& altitude_column)
 {
     loginf << "DBODataSourceDefinition: altitudeColumn: value " << altitude_column;
     altitude_column_ = altitude_column;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::primaryAzimuthStdDevColumn() const
+{
+    return primary_azimuth_stddev_column_;
+}
+
+void DBODataSourceDefinition::primaryAzimuthStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: primaryAzimuthStdDevColumn: value " << value;
+    primary_azimuth_stddev_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::primaryRangeStdDevColumn() const
+{
+    return primary_range_stddev_column_;
+}
+
+void DBODataSourceDefinition::primaryRangeStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: primaryRangeStdDevColumn: value " << value;
+    primary_range_stddev_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::secondaryAzimuthStdDevColumn() const
+{
+    return secondary_azimuth_stddev_column_;
+}
+
+void DBODataSourceDefinition::secondaryAzimuthStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: secondaryAzimuthStdDevColumn: value " << value;
+    secondary_azimuth_stddev_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::secondaryRangeStdDevColumn() const
+{
+    return secondary_range_stddev_column_;
+}
+
+void DBODataSourceDefinition::secondaryRangeStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: secondaryRangeStdDevColumn: value " << value;
+    secondary_range_stddev_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::modeSAzimuthStdDevColumn() const
+{
+    return mode_s_azimuth_stddev_column_;
+}
+
+void DBODataSourceDefinition::modeSAzimuthStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: modeSAzimuthStdDevColumn: value " << value;
+    mode_s_azimuth_stddev_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::modeSRangeStdDevColumn() const
+{
+    return mode_s_range_stddev_column_;
+}
+
+void DBODataSourceDefinition::modeSRangeStdDevColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: modeSRangeStdDevColumn: value " << value;
+    mode_s_range_stddev_column_ = value;
     emit definitionChangedSignal();
 }
 

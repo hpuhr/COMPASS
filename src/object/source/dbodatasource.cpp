@@ -358,6 +358,145 @@ double DBODataSource::altitude() const
     return altitude_;
 }
 
+// psr azm
+bool DBODataSource::hasPrimaryAzimuthStdDev() const
+{
+    return has_primary_azimuth_stddev_;
+}
+
+void DBODataSource::removePrimaryAzimuthStdDev()
+{
+    has_primary_azimuth_stddev_ = false;
+    primary_azimuth_stddev_ = 0;
+}
+
+void DBODataSource::primaryAzimuthStdDev(double value)
+{
+    has_primary_azimuth_stddev_ = true;
+    primary_azimuth_stddev_ = value;
+}
+
+double DBODataSource::primaryAzimuthStdDev() const
+{
+    return primary_azimuth_stddev_;
+}
+
+// psr range
+bool DBODataSource::hasPrimaryRangeStdDev() const
+{
+    return has_primary_range_stddev_;
+}
+
+void DBODataSource::removePrimaryRangeStdDev()
+{
+    has_primary_range_stddev_ = false;
+    primary_range_stddev_ = 0;
+}
+
+void DBODataSource::primaryRangeStdDev(double value)
+{
+    has_primary_range_stddev_ = true;
+    primary_range_stddev_ = value;
+}
+
+double DBODataSource::primaryRangeStdDev() const
+{
+    return primary_range_stddev_;
+}
+
+// ssr azm
+bool DBODataSource::hasSecondaryAzimuthStdDev() const
+{
+    return has_secondary_azimuth_stddev_;
+}
+
+void DBODataSource::removeSecondaryAzimuthStdDev()
+{
+    has_secondary_azimuth_stddev_ = false;
+    secondary_azimuth_stddev_ = 0;
+}
+
+void DBODataSource::secondaryAzimuthStdDev(double value)
+{
+    has_secondary_azimuth_stddev_ = true;
+    secondary_azimuth_stddev_ = value;
+}
+
+double DBODataSource::secondaryAzimuthStdDev() const
+{
+    return secondary_azimuth_stddev_;
+}
+
+// ssr range
+bool DBODataSource::hasSecondaryRangeStdDev() const
+{
+    return has_secondary_range_stddev_;
+}
+
+void DBODataSource::removeSecondaryRangeStdDev()
+{
+    has_secondary_range_stddev_ = false;
+    secondary_range_stddev_ = 0;
+}
+
+void DBODataSource::secondaryRangeStdDev(double value)
+{
+    has_secondary_range_stddev_ = true;
+    secondary_range_stddev_ = value;
+}
+
+double DBODataSource::secondaryRangeStdDev() const
+{
+    return secondary_range_stddev_;
+}
+
+// mode s azm
+bool DBODataSource::hasModeSAzimuthStdDev() const
+{
+    return has_mode_s_azimuth_stddev_;
+}
+
+void DBODataSource::removeModeSAzimuthStdDev()
+{
+    has_mode_s_azimuth_stddev_ = false;
+    mode_s_azimuth_stddev_ = 0;
+}
+
+void DBODataSource::modeSAzimuthStdDev(double value)
+{
+    has_mode_s_azimuth_stddev_ = true;
+    mode_s_azimuth_stddev_ = value;
+}
+
+double DBODataSource::modeSAzimuthStdDev() const
+{
+    return mode_s_azimuth_stddev_;
+}
+
+// mode s range
+bool DBODataSource::hasModeSRangeStdDev() const
+{
+    return has_mode_s_range_stddev_;
+}
+
+void DBODataSource::removeModeSRangeStdDev()
+{
+    has_mode_s_range_stddev_ = false;
+    mode_s_range_stddev_ = 0;
+}
+
+void DBODataSource::modeSRangeStdDev(double value)
+{
+    has_mode_s_range_stddev_ = true;
+    mode_s_range_stddev_ = value;
+}
+
+double DBODataSource::modeSRangeStdDev() const
+{
+    return mode_s_range_stddev_;
+}
+
+
 const std::string DBODataSource::dboName() const
 {
     assert(object_);
@@ -532,17 +671,17 @@ void DBODataSource::print() const
     else
         ss << " no altitude";
 
-    ss << " json '" << db_content_.dump() << "'";
+    //ss << " json '" << db_content_.dump() << "'";
 
     loginf << "DBODataSource: print: "  << ss.str();
 }
 
-nlohmann::json DBODataSource::dbContent() const
-{
-    return db_content_;
-}
+//nlohmann::json DBODataSource::dbContent() const
+//{
+//    return db_content_;
+//}
 
-void DBODataSource::dbContent(const nlohmann::json& db_content)
-{
-    db_content_ = db_content;
-}
+//void DBODataSource::dbContent(const nlohmann::json& db_content)
+//{
+//    db_content_ = db_content;
+//}
