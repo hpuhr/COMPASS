@@ -462,6 +462,8 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     assert(result->containsData());
     std::shared_ptr<Buffer> buffer = result->buffer();
 
+    logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
+
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
     const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds.metaTableName()));
@@ -609,6 +611,10 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 
         if (has_altitude && !buffer->get<double>(altitude_col_name).isNull(cnt))
             sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
+
+        sources.at(key).dbContent(buffer->asJSON());
+
+        //sources.at(key).print();
     }
 
     return sources;

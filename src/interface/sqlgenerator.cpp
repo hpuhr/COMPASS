@@ -196,98 +196,105 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
     logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name()
            << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col "
            << ds.nameColumn();
-    if (!meta.hasColumn(ds.foreignKey()))
-        throw std::runtime_error(
-            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-            ds.foreignKey());
-
-    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
-
-    if (!meta.hasColumn(ds.nameColumn()))
-        throw std::runtime_error(
-            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-            ds.foreignKey());
-
-    const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
     std::vector<const DBTableColumn*> columns;
-    columns.push_back(&foreign_key_col);
-    columns.push_back(&name_col);
 
-    if (ds.hasShortNameColumn())
+    const std::map<std::string, const DBTableColumn&>& meta_columns = meta.columns();
+
+    logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name();
+    for (const auto& col_it : meta_columns)
     {
-        if (!meta.hasColumn(ds.shortNameColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column " +
-                ds.shortNameColumn());
+        if (col_it.second.hasKnownPropertyType()) // slightly hacky, skip those with unknown type
+        {
+            logdbg << "SQLGenerator: getDataSourcesSelectCommand: adding column '" << col_it.second.name()
+                   << "' type '" << col_it.second.type() << "'";
+
+            columns.push_back(&col_it.second);
+        }
         else
-            columns.push_back(&meta.column(ds.shortNameColumn()));
+            logdbg << "SQLGenerator: getDataSourcesSelectCommand: skipping column '" << col_it.second.name()
+                   << "' type '" << col_it.second.type() << "'";
+
     }
 
-    if (ds.hasSacColumn())
-    {
-        if (!meta.hasColumn(ds.sacColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column " +
-                ds.sacColumn());
-        else
-            columns.push_back(&meta.column(ds.sacColumn()));
-    }
 
-    if (ds.hasSicColumn())
-    {
-        if (!meta.hasColumn(ds.sicColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column " +
-                ds.sicColumn());
-        else
-            columns.push_back(&meta.column(ds.sicColumn()));
-    }
+//    if (!meta.hasColumn(ds.foreignKey()))
+//        throw std::runtime_error(
+//            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
+//            ds.foreignKey());
 
-    if (ds.hasLatitudeColumn())
-    {
-        if (!meta.hasColumn(ds.latitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column " +
-                ds.latitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.latitudeColumn()));
-    }
+//    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
 
-    if (ds.hasLongitudeColumn())
-    {
-        if (!meta.hasColumn(ds.longitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column " +
-                ds.longitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.longitudeColumn()));
-    }
+//    if (!meta.hasColumn(ds.nameColumn()))
+//        throw std::runtime_error(
+//            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
+//            ds.foreignKey());
 
-    if (ds.hasAltitudeColumn())
-    {
-        if (!meta.hasColumn(ds.altitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column " +
-                ds.altitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.altitudeColumn()));
-    }
+//    const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
-    // PropertyList list;
-    // list.addProperty (ds.foreignKey(), PropertyDataType::INT);
-    // list.addProperty (ds.nameColumn(), PropertyDataType::STRING); //DS_NAME SAC SIC
-    // list.addProperty ("DS_NAME", PropertyDataType::STRING);
-    // list.addProperty ("SAC", PropertyDataType::UCHAR);
-    // list.addProperty ("SIC", PropertyDataType::UCHAR);
-    // list.addProperty ("POS_LAT_DEG", PropertyDataType::DOUBLE);
-    // list.addProperty ("POS_LONG_DEG", PropertyDataType::DOUBLE);
+//    std::vector<const DBTableColumn*> columns;
+//    columns.push_back(&foreign_key_col);
+//    columns.push_back(&name_col);
 
-    // TODO height hack to be resolved
-    //    if (type == DBO_PLOTS)
-    //        list.addProperty ("GROUND_ALTITUDE_AMSL_M", PropertyDataType::DOUBLE);
-    //    else if (type == DBO_SYSTEM_TRACKS || type == DBO_MLAT)
-    //        list.addProperty ("WGS_ELEV_CARTESIAN_M", PropertyDataType::DOUBLE);
+//    if (ds.hasShortNameColumn())
+//    {
+//        if (!meta.hasColumn(ds.shortNameColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column " +
+//                ds.shortNameColumn());
+//        else
+//            columns.push_back(&meta.column(ds.shortNameColumn()));
+//    }
+
+//    if (ds.hasSacColumn())
+//    {
+//        if (!meta.hasColumn(ds.sacColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column " +
+//                ds.sacColumn());
+//        else
+//            columns.push_back(&meta.column(ds.sacColumn()));
+//    }
+
+//    if (ds.hasSicColumn())
+//    {
+//        if (!meta.hasColumn(ds.sicColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column " +
+//                ds.sicColumn());
+//        else
+//            columns.push_back(&meta.column(ds.sicColumn()));
+//    }
+
+//    if (ds.hasLatitudeColumn())
+//    {
+//        if (!meta.hasColumn(ds.latitudeColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column " +
+//                ds.latitudeColumn());
+//        else
+//            columns.push_back(&meta.column(ds.latitudeColumn()));
+//    }
+
+//    if (ds.hasLongitudeColumn())
+//    {
+//        if (!meta.hasColumn(ds.longitudeColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column " +
+//                ds.longitudeColumn());
+//        else
+//            columns.push_back(&meta.column(ds.longitudeColumn()));
+//    }
+
+//    if (ds.hasAltitudeColumn())
+//    {
+//        if (!meta.hasColumn(ds.altitudeColumn()))
+//            throw std::runtime_error(
+//                "SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column " +
+//                ds.altitudeColumn());
+//        else
+//            columns.push_back(&meta.column(ds.altitudeColumn()));
+//    }
 
     return getSelectCommand(meta, columns);
 }
@@ -1208,6 +1215,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const MetaDBTable& met
     for (auto col_it : columns)
     // look what tables are needed for loaded variables and add variables to sql query
     {
+        if (property_list.hasProperty(col_it->name())) // for already added ones
+            continue;
+
         if (!first)
             ss << ", ";
 

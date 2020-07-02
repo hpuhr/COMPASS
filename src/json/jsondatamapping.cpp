@@ -325,7 +325,7 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
             {
                 logerr << "JSONDataMapping: findAndSetValue: key " << json_key_
                        << " json exception " << e.what() << " property "
-                       << array_list.propertyName();
+                       << array_list.propertyID();
                 array_list.setNull(row_cnt);
                 return true;  // last entry might be wrong
             }
@@ -357,7 +357,7 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
             {
                 logerr << "JSONDataMapping: findAndSetValue: key " << json_key_
                        << " json exception " << e.what() << " property "
-                       << array_list.propertyName();
+                       << array_list.propertyID();
                 array_list.setNull(row_cnt);
                 return true;  // last entry might be wrong
             }

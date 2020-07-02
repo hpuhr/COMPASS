@@ -18,15 +18,13 @@
 #ifndef DBODATASOURCE_H
 #define DBODATASOURCE_H
 
-#include <memory>
-//#include <QWidget>
-
-//#include "geomap.h"
 #include "dboeditdatasourceactionoptions.h"
 
+#include "json.hpp"
+
+#include <memory>
+
 class DBObject;
-// class DBODataSourceWidget;
-// class QGridLayout;
 
 class DBODataSource
 {
@@ -85,7 +83,12 @@ class DBODataSource
     DBObject& object();
     void updateInDatabase();  // not called automatically in setters
 
-  protected:
+    void print() const;
+
+    nlohmann::json dbContent() const;
+    void dbContent(const nlohmann::json& dbContent);
+
+protected:
     DBObject* object_;
     unsigned int id_{0};
 
@@ -109,9 +112,7 @@ class DBODataSource
     bool has_altitude_{false};
     double altitude_{0};  // meter above msl
 
-    //    t_CPos grs_pos_;
-    //    t_GPos geo_pos_;
-    //    t_Mapping_Info mapping_info_;
+    nlohmann::json db_content_;
 };
 
 #endif  // DBODATASOURCE_H

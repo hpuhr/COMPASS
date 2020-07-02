@@ -88,6 +88,11 @@ bool DBTableColumn::operator==(const DBTableColumn& b) const
     return true;
 }
 
+bool DBTableColumn::hasKnownPropertyType () const
+{
+    return db_types_2_data_types_.count(type_);
+}
+
 PropertyDataType DBTableColumn::propertyType() const
 {
     //        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING

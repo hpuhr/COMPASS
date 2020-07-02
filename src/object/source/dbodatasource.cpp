@@ -17,12 +17,16 @@
 
 #include "dbodatasource.h"
 //#include "dbodatasourcewidget.h"
-#include <cmath>
 
 #include "dbobject.h"
 #include "dboeditdatasourceaction.h"
 #include "projectionmanager.h"
 #include "storeddbodatasource.h"
+
+#include <cmath>
+#include <sstream>
+
+using namespace std;
 
 DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::string& name)
     : object_(&object), id_(id), name_(name)
@@ -488,4 +492,57 @@ void DBODataSource::updateInDatabase()
 {
     assert(object_);
     object_->updateDataSource(id_);
+}
+
+void DBODataSource::print() const
+{
+    assert(object_);
+
+    stringstream ss;
+
+    ss << "dbo " << object_->name() << " id " << id_ << " name " << name_;
+
+    if (has_short_name_)
+        ss << " short name " << short_name_;
+    else
+        ss << " no short name";
+
+    if (has_sac_)
+        ss << " sac " << (int) sac_;
+    else
+        ss << " no sac";
+
+    if (has_sic_)
+        ss << " sic " << (int) sic_;
+    else
+        ss << " no sic";
+
+    if (has_latitude_)
+        ss << " latitude " << latitude_;
+    else
+        ss << " no latitude";
+
+    if (has_longitude_)
+        ss << " longitude " << longitude_;
+    else
+        ss << " no longitude";
+
+    if (has_altitude_)
+        ss << " altitude " << altitude_;
+    else
+        ss << " no altitude";
+
+    ss << " json '" << db_content_.dump() << "'";
+
+    loginf << "DBODataSource: print: "  << ss.str();
+}
+
+nlohmann::json DBODataSource::dbContent() const
+{
+    return db_content_;
+}
+
+void DBODataSource::dbContent(const nlohmann::json& db_content)
+{
+    db_content_ = db_content;
 }
