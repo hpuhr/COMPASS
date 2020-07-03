@@ -370,68 +370,137 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
 
     if (ds_def.hasShortNameColumn())
     {
-        const DBTableColumn& short_name_col = meta.column(ds_def.shortNameColumn());
-        assert(short_name_col.propertyType() == PropertyDataType::STRING);
-        buffer->addProperty(short_name_col.name(), short_name_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.shortNameColumn());
+        assert(col.propertyType() == PropertyDataType::STRING);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasShortName())
-            buffer->get<std::string>(short_name_col.name()).set(0, data_source.shortName());
+            buffer->get<std::string>(col.name()).set(0, data_source.shortName());
         else
-            buffer->get<std::string>(short_name_col.name()).setNull(0);
+            buffer->get<std::string>(col.name()).setNull(0);
     }
 
     if (ds_def.hasSacColumn())
     {
-        const DBTableColumn& sac_col = meta.column(ds_def.sacColumn());
-        assert(sac_col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(sac_col.name(), sac_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.sacColumn());
+        assert(col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasSac())
-            buffer->get<char>(sac_col.name()).set(0, data_source.sac());
+            buffer->get<char>(col.name()).set(0, data_source.sac());
         else
-            buffer->get<char>(sac_col.name()).setNull(0);
+            buffer->get<char>(col.name()).setNull(0);
     }
 
     if (ds_def.hasSicColumn())
     {
-        const DBTableColumn& sic_col = meta.column(ds_def.sicColumn());
-        assert(sic_col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(sic_col.name(), sic_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.sicColumn());
+        assert(col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasSic())
-            buffer->get<char>(sic_col.name()).set(0, data_source.sic());
+            buffer->get<char>(col.name()).set(0, data_source.sic());
         else
-            buffer->get<char>(sic_col.name()).setNull(0);
+            buffer->get<char>(col.name()).setNull(0);
     }
 
     if (ds_def.hasLatitudeColumn())
     {
-        const DBTableColumn& lat_col = meta.column(ds_def.latitudeColumn());
-        assert(lat_col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(lat_col.name(), lat_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.latitudeColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasLatitude())
-            buffer->get<double>(lat_col.name()).set(0, data_source.latitude());
+            buffer->get<double>(col.name()).set(0, data_source.latitude());
         else
-            buffer->get<double>(lat_col.name()).setNull(0);
+            buffer->get<double>(col.name()).setNull(0);
     }
 
     if (ds_def.hasLongitudeColumn())
     {
-        const DBTableColumn& lon_col = meta.column(ds_def.longitudeColumn());
-        assert(lon_col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(lon_col.name(), lon_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.longitudeColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasLongitude())
-            buffer->get<double>(lon_col.name()).set(0, data_source.longitude());
+            buffer->get<double>(col.name()).set(0, data_source.longitude());
         else
-            buffer->get<double>(lon_col.name()).setNull(0);
+            buffer->get<double>(col.name()).setNull(0);
     }
 
     if (ds_def.hasAltitudeColumn())
     {
-        const DBTableColumn& alt_col = meta.column(ds_def.altitudeColumn());
-        assert(alt_col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(alt_col.name(), alt_col.propertyType());
+        const DBTableColumn& col = meta.column(ds_def.altitudeColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasAltitude())
-            buffer->get<double>(alt_col.name()).set(0, data_source.altitude());
+            buffer->get<double>(col.name()).set(0, data_source.altitude());
         else
-            buffer->get<double>(alt_col.name()).setNull(0);
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    // psr
+    if (ds_def.hasPrimaryAzimuthStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.primaryAzimuthStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasPrimaryAzimuthStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.primaryAzimuthStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasPrimaryRangeStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.primaryRangeStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasPrimaryRangeStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.primaryRangeStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    // ssr
+    if (ds_def.hasSecondaryAzimuthStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.secondaryAzimuthStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasSecondaryAzimuthStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.secondaryAzimuthStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasSecondaryRangeStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.secondaryRangeStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasSecondaryRangeStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.secondaryRangeStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    // mode s
+    if (ds_def.hasModeSAzimuthStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.modeSAzimuthStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasModeSAzimuthStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.modeSAzimuthStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasModeSRangeStdDevColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.modeSRangeStdDevColumn());
+        assert(col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasModeSRangeStdDev())
+            buffer->get<double>(col.name()).set(0, data_source.modeSRangeStdDev());
+        else
+            buffer->get<double>(col.name()).setNull(0);
     }
 
     assert(foreign_key_col.propertyType() == PropertyDataType::INT);

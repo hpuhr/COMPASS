@@ -99,6 +99,37 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
     // db stuff
     {
+        // check if additional columns are required
+
+        if (object_.hasCurrentDataSourceDefinition())
+        {
+            const DBODataSourceDefinition& ds_def = object_.currentDataSourceDefinition();
+
+            has_primary_azimuth_stddev_ = ds_def.hasPrimaryAzimuthStdDevColumn();
+            if (has_primary_azimuth_stddev_)
+                table_columns_.push_back("Primary Azimuth StdDev");
+
+            has_primary_range_stddev_ = ds_def.hasPrimaryRangeStdDevColumn();
+            if (has_primary_range_stddev_)
+                table_columns_.push_back("Primary Range StdDev");
+
+            has_secondary_azimuth_stddev_ = ds_def.hasSecondaryAzimuthStdDevColumn();
+            if (has_secondary_azimuth_stddev_)
+                table_columns_.push_back("Secondary Azimuth StdDev");
+
+            has_secondary_range_stddev_ = ds_def.hasSecondaryRangeStdDevColumn();
+            if (has_secondary_range_stddev_)
+                table_columns_.push_back("Secondary Range StdDev");
+
+            has_mode_s_azimuth_stddev_ = ds_def.hasModeSAzimuthStdDevColumn();
+            if (has_mode_s_azimuth_stddev_)
+                table_columns_.push_back("Mode S Azimuth StdDev");
+
+            has_mode_s_range_stddev_ = ds_def.hasModeSRangeStdDevColumn();
+            if (has_mode_s_range_stddev_)
+                table_columns_.push_back("Mode S Range StdDev");
+        }
+
         QVBoxLayout* db_layout = new QVBoxLayout();
 
         QFrame* db_frame = new QFrame();
@@ -583,6 +614,121 @@ void DBOEditDataSourcesWidget::updateDBDSTable()
                 db_ds_table_->setItem(row, col, item);
             }
         }
+
+        if (has_primary_azimuth_stddev_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasPrimaryAzimuthStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.primaryAzimuthStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_primary_range_stddev_)   // psr range
+        {
+            ++col;
+            if (ds_it.second.hasPrimaryRangeStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_secondary_azimuth_stddev_)   // ssr azm
+        {
+            ++col;
+            if (ds_it.second.hasSecondaryAzimuthStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.secondaryAzimuthStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_secondary_range_stddev_)   // ssr range
+        {
+            ++col;
+            if (ds_it.second.hasSecondaryRangeStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_mode_s_azimuth_stddev_)   // mode s azm
+        {
+            ++col;
+            if (ds_it.second.hasModeSAzimuthStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.modeSAzimuthStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_mode_s_range_stddev_)   // mode s range
+        {
+            ++col;
+            if (ds_it.second.hasModeSRangeStdDev())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeStdDev()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
         ++row;
     }
 }
@@ -618,6 +764,9 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
     assert(ok);
     int col = config_ds_table_->currentColumn();
 
+    assert (col < table_columns_.size());
+    std::string col_name = table_columns_.at(col).toStdString();
+
     std::string text = item->text().toStdString();
 
     loginf << "DBOEditDataSourcesWidget: configItemChanged: id " << id << " col " << col
@@ -627,19 +776,19 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
 
     StoredDBODataSource& ds = task_.storedDataSource(object_.name(), id);
 
-    if (col == 1)
+    if (col_name == "Name")
     {
         if (text.size())
             ds.name(text);
     }
-    else if (col == 2)
+    else if (col_name == "Short Name")
     {
         if (!text.size())
             ds.removeShortName();
         else
             ds.shortName(text);
     }
-    else if (col == 3)
+    else if (col_name == "SAC")
     {
         if (!text.size())
             ds.removeSac();
@@ -651,7 +800,7 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
                 ds.sac(sac);
         }
     }
-    else if (col == 4)
+    else if (col_name == "SIC")
     {
         if (!text.size())
             ds.removeSic();
@@ -663,7 +812,7 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
                 ds.sic(sic);
         }
     }
-    else if (col == 5)
+    else if (col_name == "Latitude")
     {
         if (!text.size())
             ds.removeLatitude();
@@ -675,7 +824,7 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
                 ds.latitude(latitude);
         }
     }
-    else if (col == 6)
+    else if (col_name == "Longitude")
     {
         if (!text.size())
             ds.removeLongitude();
@@ -687,7 +836,7 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
                 ds.longitude(longitude);
         }
     }
-    else if (col == 7)
+    else if (col_name == "Altitude")
     {
         if (!text.size())
             ds.removeAltitude();
@@ -714,6 +863,8 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
     unsigned int id = item->data(Qt::UserRole).toUInt(&ok);
     assert(ok);
     int col = db_ds_table_->currentColumn();
+    assert (col < table_columns_.size());
+    std::string col_name = table_columns_.at(col).toStdString();
 
     std::string text = item->text().toStdString();
 
@@ -724,7 +875,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
 
     DBODataSource& ds = object_.getDataSource(id);
 
-    if (col == 1)
+    if (col_name == "Name")
     {
         if (text.size())
         {
@@ -732,7 +883,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             ds.updateInDatabase();
         }
     }
-    else if (col == 2)
+    else if (col_name == "Short Name")
     {
         if (!text.size())
             ds.removeShortName();
@@ -741,7 +892,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
 
         ds.updateInDatabase();
     }
-    else if (col == 3)
+    else if (col_name == "SAC")
     {
         if (!text.size())
         {
@@ -759,7 +910,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             }
         }
     }
-    else if (col == 4)
+    else if (col_name == "SIC")
     {
         if (!text.size())
         {
@@ -777,7 +928,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             }
         }
     }
-    else if (col == 5)
+    else if (col_name == "Latitude")
     {
         if (!text.size())
         {
@@ -795,7 +946,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             }
         }
     }
-    else if (col == 6)
+    else if (col_name == "Longitude")
     {
         if (!text.size())
         {
@@ -813,7 +964,7 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             }
         }
     }
-    else if (col == 7)
+    else if (col_name == "Altitude")
     {
         if (!text.size())
         {
@@ -827,6 +978,114 @@ void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
             if (ok)
             {
                 ds.altitude(altitude);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Primary Azimuth StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removePrimaryAzimuthStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.primaryAzimuthStdDev(value);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Primary Range StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removePrimaryRangeStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.primaryRangeStdDev(value);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Secondary Azimuth StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removeSecondaryAzimuthStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.secondaryAzimuthStdDev(value);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Secondary Range StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removeSecondaryRangeStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.secondaryRangeStdDev(value);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Mode S Azimuth StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removeModeSAzimuthStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.modeSAzimuthStdDev(value);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col_name == "Mode S Range StdDev")
+    {
+        if (!text.size())
+        {
+            ds.removeModeSRangeStdDev();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.modeSRangeStdDev(value);
                 ds.updateInDatabase();
             }
         }
