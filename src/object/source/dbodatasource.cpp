@@ -56,42 +56,43 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_altitude_)
         altitude_ = other.altitude();
 
-    // TODO radar stuff
+    // psr
+    has_primary_azimuth_stddev_ = other.hasPrimaryAzimuthStdDev();
+    if (has_primary_azimuth_stddev_)
+        primary_azimuth_stddev_ = other.primaryAzimuthStdDev();
 
-    loginf << "DBODataSource: operator=: name " << name_ << " short name "
-           << (has_short_name_ ? short_name_ : "false") << " sac "
-           << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false") << " sic "
-           << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false") << " lat "
-           << (has_latitude_ ? std::to_string(latitude_) : "false") << " lon "
-           << (has_longitude_ ? std::to_string(longitude_) : "false") << " alt "
-           << (has_altitude_ ? std::to_string(altitude_) : "false");
+    has_primary_range_stddev_ = other.hasPrimaryRangeStdDev();
+    if (has_primary_range_stddev_)
+        primary_range_stddev_ = other.primaryRangeStdDev();
+
+    // ssr
+    has_secondary_azimuth_stddev_ = other.hasSecondaryAzimuthStdDev();
+    if (has_secondary_azimuth_stddev_)
+        secondary_azimuth_stddev_ = other.secondaryAzimuthStdDev();
+
+    has_secondary_range_stddev_ = other.hasSecondaryRangeStdDev();
+    if (has_secondary_range_stddev_)
+        secondary_range_stddev_ = other.secondaryRangeStdDev();
+
+    // mode s
+    has_mode_s_azimuth_stddev_ = other.hasModeSAzimuthStdDev();
+    if (has_mode_s_azimuth_stddev_)
+        mode_s_azimuth_stddev_ = other.modeSAzimuthStdDev();
+
+    has_mode_s_range_stddev_ = other.hasModeSRangeStdDev();
+    if (has_mode_s_range_stddev_)
+        mode_s_range_stddev_ = other.modeSRangeStdDev();
+
+//    loginf << "DBODataSource: operator=: name " << name_ << " short name "
+//           << (has_short_name_ ? short_name_ : "false") << " sac "
+//           << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false") << " sic "
+//           << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false") << " lat "
+//           << (has_latitude_ ? std::to_string(latitude_) : "false") << " lon "
+//           << (has_longitude_ ? std::to_string(longitude_) : "false") << " alt "
+//           << (has_altitude_ ? std::to_string(altitude_) : "false");
 
     return *this;
 }
-
-// DBODataSource& DBODataSource::operator=(DBODataSource&& other)
-//{
-//    loginf << "DBODataSource: move operator: moving";
-
-//    object_ = other.object_;
-//    id_ = other.id_;
-
-//    name_ = other.name_;
-//    has_short_name_ = other.has_short_name_;
-//    short_name_ = other.short_name_;
-//    has_sac_ = other.has_sac_;
-//    sac_ = other.sac_;
-//    has_sic_ = other.has_sic_;
-//    sic_ = other.sic_;
-//    has_latitude_ = other.has_latitude_;
-//    latitude_ = other.latitude_;
-//    has_longitude_ = other.has_longitude_;
-//    longitude_ = other.longitude_;
-//    has_altitude_ = other.has_altitude_;
-//    altitude_ = other.altitude_;
-
-//    return *this;
-//}
 
 bool DBODataSource::operator==(const StoredDBODataSource& other) const
 {
@@ -100,8 +101,6 @@ bool DBODataSource::operator==(const StoredDBODataSource& other) const
            << (sic_ == other.sic()) << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
            << " long " << (fabs(longitude_ - other.longitude()) < 1e-10) << " alt "
            << (fabs(altitude_ - other.altitude()) < 1e-10);
-
-    // TODO radar stuff
 
     return (name_ == other.name()) && (has_short_name_ == other.hasShortName())
             && (has_short_name_ ? short_name_ == other.shortName() : true)
@@ -112,7 +111,25 @@ bool DBODataSource::operator==(const StoredDBODataSource& other) const
             && (has_longitude_ == other.hasLongitude())
             && (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true)
             && (has_altitude_ == other.hasAltitude())
-            && (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true);
+            && (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true)
+
+            && (has_primary_azimuth_stddev_ == other.hasPrimaryAzimuthStdDev())
+            && (has_primary_azimuth_stddev_ ? fabs(primary_azimuth_stddev_ - other.primaryAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_primary_range_stddev_ == other.hasPrimaryRangeStdDev())
+            && (has_primary_range_stddev_ ? fabs(primary_range_stddev_ - other.primaryRangeStdDev()) < 1e-10 : true)
+
+            && (has_secondary_azimuth_stddev_ == other.hasSecondaryAzimuthStdDev())
+            && (has_secondary_azimuth_stddev_ ? fabs(secondary_azimuth_stddev_ - other.secondaryAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_secondary_range_stddev_ == other.hasSecondaryRangeStdDev())
+            && (has_secondary_range_stddev_ ? fabs(secondary_range_stddev_ - other.secondaryRangeStdDev()) < 1e-10 : true)
+
+            && (has_mode_s_azimuth_stddev_ == other.hasModeSAzimuthStdDev())
+            && (has_mode_s_azimuth_stddev_ ? fabs(mode_s_azimuth_stddev_ - other.modeSAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_mode_s_range_stddev_ == other.hasModeSRangeStdDev())
+            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true);
 }
 
 DBODataSource::~DBODataSource() { logdbg << "DBODataSource: dtor: id " << std::to_string(id_); }

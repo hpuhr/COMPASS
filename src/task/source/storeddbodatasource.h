@@ -80,6 +80,39 @@ class StoredDBODataSource : public Configurable
     void altitude(double altitude);
     double altitude() const;
 
+    // psr
+    bool hasPrimaryAzimuthStdDev() const;
+    void removePrimaryAzimuthStdDev();
+    void primaryAzimuthStdDev(double value);
+    double primaryAzimuthStdDev() const;
+
+    bool hasPrimaryRangeStdDev() const;
+    void removePrimaryRangeStdDev();
+    void primaryRangeStdDev(double value);
+    double primaryRangeStdDev() const;
+
+    //ssr
+    bool hasSecondaryAzimuthStdDev() const;
+    void removeSecondaryAzimuthStdDev();
+    void secondaryAzimuthStdDev(double value);
+    double secondaryAzimuthStdDev() const;
+
+    bool hasSecondaryRangeStdDev() const;
+    void removeSecondaryRangeStdDev();
+    void secondaryRangeStdDev(double value);
+    double secondaryRangeStdDev() const;
+
+    // mode s
+    bool hasModeSAzimuthStdDev() const;
+    void removeModeSAzimuthStdDev();
+    void modeSAzimuthStdDev(double value);
+    double modeSAzimuthStdDev() const;
+
+    bool hasModeSRangeStdDev() const;
+    void removeModeSRangeStdDev();
+    void modeSRangeStdDev(double value);
+    double modeSRangeStdDev() const;
+
     std::string dboName() const;
 
     nlohmann::json getAsJSON();
@@ -101,6 +134,41 @@ class StoredDBODataSource : public Configurable
     double longitude_{0};  // degrees
     bool has_altitude_{false};
     double altitude_{0};  // meter above msl
+
+    // radar specific stuff
+
+    // pri azm bias
+    // pri range bias
+    // pri range gain
+
+    // pri azm standard dev
+    bool has_primary_azimuth_stddev_{false};
+    double primary_azimuth_stddev_ {0};  // degrees
+    // pri range standard dev
+    bool has_primary_range_stddev_{false};
+    double primary_range_stddev_ {0};  // meters
+
+    // ssr azm bias
+    // ssr range bias
+    // ssr range gain
+
+    // ssr azm standard dev
+    bool has_secondary_azimuth_stddev_{false};
+    double secondary_azimuth_stddev_ {0};  // degrees
+    // ssr range standard dev
+    bool has_secondary_range_stddev_{false};
+    double secondary_range_stddev_ {0};  // meters
+
+    // mode s azm bias
+    // mode s range bias
+    // mode s range gain
+
+    // mode s azm standard dev
+    bool has_mode_s_azimuth_stddev_{false};
+    double mode_s_azimuth_stddev_ {0};  // degrees
+    // mode s range standard dev
+    bool has_mode_s_range_stddev_{false};
+    double mode_s_range_stddev_ {0};  // meters
 
   protected:
     virtual void checkSubConfigurables() {}

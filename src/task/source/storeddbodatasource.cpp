@@ -38,12 +38,26 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id,
     registerParameter("sac", &sac_, 0);
     registerParameter("has_sic", &has_sic_, false);
     registerParameter("sic", &sic_, 0);
+
     registerParameter("has_latitude", &has_latitude_, false);
     registerParameter("latitude", &latitude_, 0);
     registerParameter("has_longitude", &has_longitude_, false);
     registerParameter("longitude", &longitude_, 0);
     registerParameter("has_altitude", &has_altitude_, false);
     registerParameter("altitude", &altitude_, 0);
+
+    registerParameter("has_primary_azimuth_stddev", &has_primary_azimuth_stddev_, false);
+    registerParameter("primary_azimuth_stddev", &primary_azimuth_stddev_, 0);
+    registerParameter("has_primary_range_stddev", &has_primary_range_stddev_, false);
+    registerParameter("primary_range_stddev", &primary_range_stddev_, 0);
+    registerParameter("has_secondary_azimuth_stddev", &has_secondary_azimuth_stddev_, false);
+    registerParameter("secondary_azimuth_stddev", &secondary_azimuth_stddev_, 0);
+    registerParameter("has_secondary_range_stddev", &has_secondary_range_stddev_, false);
+    registerParameter("secondary_range_stddev", &secondary_range_stddev_, 0);
+    registerParameter("has_mode_s_azimuth_stddev", &has_mode_s_azimuth_stddev_, false);
+    registerParameter("mode_s_azimuth_stddev", &mode_s_azimuth_stddev_, 0);
+    registerParameter("has_mode_s_range_stddev", &has_mode_s_range_stddev_, false);
+    registerParameter("mode_s_range_stddev", &mode_s_range_stddev_, 0);
 }
 
 StoredDBODataSource::~StoredDBODataSource() {}
@@ -72,6 +86,33 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
     has_altitude_ = other.hasAltitude();
     if (has_altitude_)
         altitude_ = other.altitude();
+
+    // psr
+    has_primary_azimuth_stddev_ = other.hasPrimaryAzimuthStdDev();
+    if (has_primary_azimuth_stddev_)
+        primary_azimuth_stddev_ = other.primaryAzimuthStdDev();
+
+    has_primary_range_stddev_ = other.hasPrimaryRangeStdDev();
+    if (has_primary_range_stddev_)
+        primary_range_stddev_ = other.primaryRangeStdDev();
+
+    // ssr
+    has_secondary_azimuth_stddev_ = other.hasSecondaryAzimuthStdDev();
+    if (has_secondary_azimuth_stddev_)
+        secondary_azimuth_stddev_ = other.secondaryAzimuthStdDev();
+
+    has_secondary_range_stddev_ = other.hasSecondaryRangeStdDev();
+    if (has_secondary_range_stddev_)
+        secondary_range_stddev_ = other.secondaryRangeStdDev();
+
+    // mode s
+    has_mode_s_azimuth_stddev_ = other.hasModeSAzimuthStdDev();
+    if (has_mode_s_azimuth_stddev_)
+        mode_s_azimuth_stddev_ = other.modeSAzimuthStdDev();
+
+    has_mode_s_range_stddev_ = other.hasModeSRangeStdDev();
+    if (has_mode_s_range_stddev_)
+        mode_s_range_stddev_ = other.modeSRangeStdDev();
 
     return *this;
 }
@@ -107,6 +148,24 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
 
+    // psr
+    has_primary_azimuth_stddev_ = other.has_primary_azimuth_stddev_;
+    primary_azimuth_stddev_ = other.primary_azimuth_stddev_;
+    has_primary_range_stddev_ = other.has_primary_range_stddev_;
+    primary_range_stddev_ = other.primary_range_stddev_;
+
+    // ssr
+    has_secondary_azimuth_stddev_ = other.has_secondary_azimuth_stddev_;
+    secondary_azimuth_stddev_ = other.secondary_azimuth_stddev_;
+    has_secondary_range_stddev_ = other.has_secondary_range_stddev_;
+    secondary_range_stddev_ = other.secondary_range_stddev_;
+
+    // mode s
+    has_mode_s_azimuth_stddev_ = other.has_mode_s_azimuth_stddev_;
+    mode_s_azimuth_stddev_ = other.mode_s_azimuth_stddev_;
+    has_mode_s_range_stddev_ = other.has_mode_s_range_stddev_;
+    mode_s_range_stddev_ = other.mode_s_range_stddev_;
+
     other.configuration().updateParameterPointer("dbo_name", &dbo_name_);
     other.configuration().updateParameterPointer("id", &id_);
     other.configuration().updateParameterPointer("name", &name_);
@@ -123,6 +182,19 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     other.configuration().updateParameterPointer("has_altitude", &has_altitude_);
     other.configuration().updateParameterPointer("altitude", &altitude_);
 
+    other.configuration().updateParameterPointer("has_primary_azimuth_stddev", &has_primary_azimuth_stddev_);
+    other.configuration().updateParameterPointer("primary_azimuth_stddev", &primary_azimuth_stddev_);
+    other.configuration().updateParameterPointer("has_primary_range_stddev", &has_primary_range_stddev_);
+    other.configuration().updateParameterPointer("primary_range_stddev", &primary_range_stddev_);
+    other.configuration().updateParameterPointer("has_secondary_azimuth_stddev", &has_secondary_azimuth_stddev_);
+    other.configuration().updateParameterPointer("secondary_azimuth_stddev", &secondary_azimuth_stddev_);
+    other.configuration().updateParameterPointer("has_secondary_range_stddev", &has_secondary_range_stddev_);
+    other.configuration().updateParameterPointer("secondary_range_stddev", &secondary_range_stddev_);
+    other.configuration().updateParameterPointer("has_mode_s_azimuth_stddev", &has_mode_s_azimuth_stddev_);
+    other.configuration().updateParameterPointer("mode_s_azimuth_stddev", &mode_s_azimuth_stddev_);
+    other.configuration().updateParameterPointer("has_mode_s_range_stddev", &has_mode_s_range_stddev_);
+    other.configuration().updateParameterPointer("mode_s_range_stddev", &mode_s_range_stddev_);
+
     return static_cast<StoredDBODataSource&>(Configurable::operator=(std::move(other)));
 }
 
@@ -134,23 +206,179 @@ bool StoredDBODataSource::operator==(const DBODataSource& other) const
            << " long " << (fabs(longitude_ - other.longitude()) < 1e-10) << " alt "
            << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-    return (dbo_name_ == other.dboName()) && (name_ == other.name()) &&
-           (has_short_name_ == other.hasShortName()) &&
-           (has_short_name_ ? short_name_ == other.shortName() : true) &&
-           (has_sac_ == other.hasSac()) && (has_sac_ ? sac_ == other.sac() : true) &&
-           (has_sic_ == other.hasSic()) && (has_sic_ ? sic_ == other.sic() : true) &&
-           (has_latitude_ == other.hasLatitude()) &&
-           (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true) &&
-           (has_longitude_ == other.hasLongitude()) &&
-           (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true) &&
-           (has_altitude_ == other.hasAltitude()) &&
-           (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true);
+    return (dbo_name_ == other.dboName()) && (name_ == other.name())
+            &&(has_short_name_ == other.hasShortName())
+            && (has_short_name_ ? short_name_ == other.shortName() : true)
+            && (has_sac_ == other.hasSac()) && (has_sac_ ? sac_ == other.sac() : true)
+            && (has_sic_ == other.hasSic()) && (has_sic_ ? sic_ == other.sic() : true)
+            && (has_latitude_ == other.hasLatitude())
+            && (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true)
+            && (has_longitude_ == other.hasLongitude())
+            && (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true)
+            && (has_altitude_ == other.hasAltitude())
+            && (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true)
+
+            && (has_primary_azimuth_stddev_ == other.hasPrimaryAzimuthStdDev())
+            && (has_primary_azimuth_stddev_ ? fabs(primary_azimuth_stddev_ - other.primaryAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_primary_range_stddev_ == other.hasPrimaryRangeStdDev())
+            && (has_primary_range_stddev_ ? fabs(primary_range_stddev_ - other.primaryRangeStdDev()) < 1e-10 : true)
+
+            && (has_secondary_azimuth_stddev_ == other.hasSecondaryAzimuthStdDev())
+            && (has_secondary_azimuth_stddev_ ? fabs(secondary_azimuth_stddev_ - other.secondaryAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_secondary_range_stddev_ == other.hasSecondaryRangeStdDev())
+            && (has_secondary_range_stddev_ ? fabs(secondary_range_stddev_ - other.secondaryRangeStdDev()) < 1e-10 : true)
+
+            && (has_mode_s_azimuth_stddev_ == other.hasModeSAzimuthStdDev())
+            && (has_mode_s_azimuth_stddev_ ? fabs(mode_s_azimuth_stddev_ - other.modeSAzimuthStdDev()) < 1e-10 : true)
+
+            && (has_mode_s_range_stddev_ == other.hasModeSRangeStdDev())
+            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true);
 }
 
 double StoredDBODataSource::altitude() const
 {
     assert(has_altitude_);
     return altitude_;
+}
+
+// psr azm
+bool StoredDBODataSource::hasPrimaryAzimuthStdDev() const
+{
+    return has_primary_azimuth_stddev_;
+}
+
+void StoredDBODataSource::removePrimaryAzimuthStdDev()
+{
+    has_primary_azimuth_stddev_ = false;
+    primary_azimuth_stddev_ = 0;
+}
+
+void StoredDBODataSource::primaryAzimuthStdDev(double value)
+{
+    has_primary_azimuth_stddev_ = true;
+    primary_azimuth_stddev_ = value;
+}
+
+double StoredDBODataSource::primaryAzimuthStdDev() const
+{
+    return primary_azimuth_stddev_;
+}
+
+// psr range
+bool StoredDBODataSource::hasPrimaryRangeStdDev() const
+{
+    return has_primary_range_stddev_;
+}
+
+void StoredDBODataSource::removePrimaryRangeStdDev()
+{
+    has_primary_range_stddev_ = false;
+    primary_range_stddev_ = 0;
+}
+
+void StoredDBODataSource::primaryRangeStdDev(double value)
+{
+    has_primary_range_stddev_ = true;
+    primary_range_stddev_ = value;
+}
+
+double StoredDBODataSource::primaryRangeStdDev() const
+{
+    return primary_range_stddev_;
+}
+
+// ssr azm
+bool StoredDBODataSource::hasSecondaryAzimuthStdDev() const
+{
+    return has_secondary_azimuth_stddev_;
+}
+
+void StoredDBODataSource::removeSecondaryAzimuthStdDev()
+{
+    has_secondary_azimuth_stddev_ = false;
+    secondary_azimuth_stddev_ = 0;
+}
+
+void StoredDBODataSource::secondaryAzimuthStdDev(double value)
+{
+    has_secondary_azimuth_stddev_ = true;
+    secondary_azimuth_stddev_ = value;
+}
+
+double StoredDBODataSource::secondaryAzimuthStdDev() const
+{
+    return secondary_azimuth_stddev_;
+}
+
+// ssr range
+bool StoredDBODataSource::hasSecondaryRangeStdDev() const
+{
+    return has_secondary_range_stddev_;
+}
+
+void StoredDBODataSource::removeSecondaryRangeStdDev()
+{
+    has_secondary_range_stddev_ = false;
+    secondary_range_stddev_ = 0;
+}
+
+void StoredDBODataSource::secondaryRangeStdDev(double value)
+{
+    has_secondary_range_stddev_ = true;
+    secondary_range_stddev_ = value;
+}
+
+double StoredDBODataSource::secondaryRangeStdDev() const
+{
+    return secondary_range_stddev_;
+}
+
+// mode s azm
+bool StoredDBODataSource::hasModeSAzimuthStdDev() const
+{
+    return has_mode_s_azimuth_stddev_;
+}
+
+void StoredDBODataSource::removeModeSAzimuthStdDev()
+{
+    has_mode_s_azimuth_stddev_ = false;
+    mode_s_azimuth_stddev_ = 0;
+}
+
+void StoredDBODataSource::modeSAzimuthStdDev(double value)
+{
+    has_mode_s_azimuth_stddev_ = true;
+    mode_s_azimuth_stddev_ = value;
+}
+
+double StoredDBODataSource::modeSAzimuthStdDev() const
+{
+    return mode_s_azimuth_stddev_;
+}
+
+// mode s range
+bool StoredDBODataSource::hasModeSRangeStdDev() const
+{
+    return has_mode_s_range_stddev_;
+}
+
+void StoredDBODataSource::removeModeSRangeStdDev()
+{
+    has_mode_s_range_stddev_ = false;
+    mode_s_range_stddev_ = 0;
+}
+
+void StoredDBODataSource::modeSRangeStdDev(double value)
+{
+    has_mode_s_range_stddev_ = true;
+    mode_s_range_stddev_ = value;
+}
+
+double StoredDBODataSource::modeSRangeStdDev() const
+{
+    return mode_s_range_stddev_;
 }
 
 std::string StoredDBODataSource::dboName() const { return dbo_name_; }
@@ -305,6 +533,19 @@ json StoredDBODataSource::getAsJSON()
     if (has_altitude_)
         j["altitude"] = altitude_;
 
+    if (has_primary_azimuth_stddev_)
+        j["primary_azimuth_stddev"] = primary_azimuth_stddev_;
+    if (has_primary_range_stddev_)
+        j["primary_range_stddev"] = primary_range_stddev_;
+    if (has_secondary_azimuth_stddev_)
+        j["secondary_azimuth_stddev"] = secondary_azimuth_stddev_;
+    if (has_secondary_range_stddev_)
+        j["secondary_range_stddev"] = secondary_range_stddev_;
+    if (has_mode_s_azimuth_stddev_)
+        j["mode_s_azimuth_stddev"] = mode_s_azimuth_stddev_;
+    if (has_mode_s_range_stddev_)
+        j["mode_s_range_stddev"] = mode_s_range_stddev_;
+
     return j;
 }
 
@@ -336,4 +577,31 @@ void StoredDBODataSource::setFromJSON(json& j)
     has_altitude_ = j.contains("altitude");
     if (has_altitude_)
         altitude_ = j.at("altitude");
+
+    // psr
+    has_primary_azimuth_stddev_ = j.contains("primary_azimuth_stddev");
+    if (has_primary_azimuth_stddev_)
+        primary_azimuth_stddev_ = j.at("primary_azimuth_stddev");
+
+    has_primary_range_stddev_ = j.contains("primary_range_stddev");
+    if (has_primary_range_stddev_)
+        primary_range_stddev_ = j.at("primary_range_stddev");
+
+    // ssr
+    has_secondary_azimuth_stddev_ = j.contains("secondary_azimuth_stddev");
+    if (has_secondary_azimuth_stddev_)
+        secondary_azimuth_stddev_ = j.at("secondary_azimuth_stddev");
+
+    has_secondary_range_stddev_ = j.contains("secondary_range_stddev");
+    if (has_secondary_range_stddev_)
+        secondary_range_stddev_ = j.at("secondary_range_stddev");
+
+    // mode s
+    has_mode_s_azimuth_stddev_ = j.contains("mode_s_azimuth_stddev");
+    if (has_mode_s_azimuth_stddev_)
+        mode_s_azimuth_stddev_ = j.at("mode_s_azimuth_stddev");
+
+    has_mode_s_range_stddev_ = j.contains("mode_s_range_stddev");
+    if (has_mode_s_range_stddev_)
+        mode_s_range_stddev_ = j.at("mode_s_range_stddev");
 }
