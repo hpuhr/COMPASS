@@ -1,6 +1,7 @@
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "viewmanager.h"
+#include "view.h"
 #include "viewpointswidget.h"
 #include "viewpointstablemodel.h"
 #include "viewpoint.h"
