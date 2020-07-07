@@ -6,6 +6,7 @@
 class ViewManager;
 class ViewPointsToolWidget;
 class ViewPointsTableModel;
+class ViewPoint;
 
 class QTableView;
 class QPushButton;
@@ -17,6 +18,7 @@ class ViewPointsWidget : public QWidget
 
   public slots:
     void exportSlot();
+    void exportPDFSlot();
     void deleteAllSlot();
     void importSlot();
 
@@ -35,6 +37,7 @@ class ViewPointsWidget : public QWidget
     void allLoadingDoneSlot();
 
     void typesChangedSlot(QStringList types);
+    void statusesChangedSlot(QStringList statuses);
 
 public:
     ViewPointsWidget(ViewManager& view_manager);
@@ -48,15 +51,7 @@ public:
 
     ViewPointsTableModel* tableModel() const;
 
-    QStringList types() const;
-    QStringList filteredTypes() const;
-
-    void filterType (QString type);
-    void showAllTypes ();
-    void showNoTypes ();
-
-    void updateFilteredTypes ();
-
+    // filter columns
     QStringList columns() const;
     QStringList filteredColumns() const;
 
@@ -66,6 +61,29 @@ public:
     void showNoColumns ();
 
     void updateFilteredColumns ();
+
+    // filter type
+    QStringList types() const;
+    QStringList filteredTypes() const;
+
+    void filterType (QString type);
+    void showAllTypes ();
+    void showNoTypes ();
+
+    void updateFilteredTypes ();
+
+    // filter statuses
+    QStringList statuses() const;
+    QStringList filteredStatuses() const;
+
+    void filterStatus (QString status);
+    void showAllStatuses ();
+    void showNoStatuses ();
+
+    void updateFilteredStatuses ();
+
+    std::vector<unsigned int> viewPoints(); // all
+    std::vector<unsigned int> viewedViewPoints(); // only viewed
 
 private:
     ViewManager& view_manager_;
@@ -79,9 +97,13 @@ private:
     QPushButton* import_button_{nullptr};
     QPushButton* delete_all_button_{nullptr};
     QPushButton* export_button_{nullptr};
+    QPushButton* export_pdf_button_{nullptr};
 
     QStringList types_;
     QStringList filtered_types_;
+
+    QStringList statuses_;
+    QStringList filtered_statuses_;
 
     QStringList columns_;
     QStringList filtered_columns_;

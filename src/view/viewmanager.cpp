@@ -34,6 +34,8 @@
 #include "metadbovariable.h"
 #include "dbovariable.h"
 #include "viewpointstablemodel.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 
 #include "json.hpp"
 
@@ -41,6 +43,7 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QMetaType>
+#include <QApplication>
 
 #include <cassert>
 
@@ -63,8 +66,12 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(!initialized_);
     main_tab_widget_ = tab_widget;
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     view_points_widget_ = new ViewPointsWidget(*this);
     //view_points_widget_->setAutoFillBackground(true);
+
+    QApplication::restoreOverrideCursor();
 
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
@@ -108,6 +115,8 @@ void ViewManager::close()
         view_points_widget_ = nullptr;
     }
 
+    view_points_report_gen_ = nullptr;
+
     if (widget_)
     {
         delete widget_;
@@ -133,7 +142,7 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
 
     assert(initialized_);
 
-    if (class_id.compare("ViewContainer") == 0)
+    if (class_id == "ViewContainer")
     {
         ViewContainer* container =
                 new ViewContainer(class_id, instance_id, this, this, main_tab_widget_, 0);
@@ -144,7 +153,7 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
         if (number >= container_count_)
             container_count_ = number;
     }
-    else if (class_id.compare("ViewContainerWidget") == 0)
+    else if (class_id == "ViewContainerWidget")
     {
         ViewContainerWidget* container_widget =
                 new ViewContainerWidget(class_id, instance_id, this);
@@ -158,6 +167,13 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
         unsigned int number = String::getAppendedInt(instance_id);
         if (number >= container_count_)
             container_count_ = number;
+    }
+    else if (class_id == "ViewPointsReportGenerator")
+    {
+        assert (!view_points_report_gen_);
+
+        view_points_report_gen_.reset(new ViewPointsReportGenerator(class_id, instance_id, *this));
+        assert (view_points_report_gen_);
     }
     else
         throw std::runtime_error("ViewManager: generateSubConfigurable: unknown class_id " +
@@ -173,6 +189,12 @@ void ViewManager::checkSubConfigurables()
     {
         addNewSubConfiguration("ViewContainer", "ViewContainer0");
         generateSubConfigurable("ViewContainer", "ViewContainer0");
+    }
+
+    if (!view_points_report_gen_)
+    {
+        addNewSubConfiguration("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
+        generateSubConfigurable("ViewPointsReportGenerator", "ViewPointsReportGenerator0");
     }
 }
 
@@ -207,18 +229,27 @@ ViewPointsWidget* ViewManager::viewPointsWidget() const
     return view_points_widget_;
 }
 
+ViewPointsReportGenerator& ViewManager::viewPointsGenerator()
+{
+    assert (view_points_report_gen_);
+    return *view_points_report_gen_;
+}
+
 void ViewManager::setCurrentViewPoint (unsigned int id)
 {
     if (current_view_point_set_)
         unsetCurrentViewPoint();
 
     assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->existsViewPoint(id));
+    assert (view_points_widget_->tableModel()->hasViewPoint(id));
 
     current_view_point_set_ = true;
     current_view_point_ = id;
 
     view_point_data_selected_ = false;
+
+    loginf << "ViewManager: setCurrentViewPoint: setting id " << id; // << " data: '"
+           //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
 
     emit showViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
@@ -231,7 +262,7 @@ void ViewManager::unsetCurrentViewPoint ()
     if (current_view_point_set_)
     {
         assert (view_points_widget_);
-        assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
+        assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
 
         emit unshowViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
 
@@ -253,8 +284,8 @@ void ViewManager::doViewPointAfterLoad ()
         return; // already done, this is a re-load
 
     assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->existsViewPoint(current_view_point_));
-    ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
+    assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
+    const ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
     const json& data = vp.data();
 

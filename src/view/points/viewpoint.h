@@ -4,6 +4,7 @@
 #include "json.hpp"
 
 class ViewManager;
+class LatexVisitor;
 
 class ViewPoint
 {
@@ -18,10 +19,13 @@ class ViewPoint
     void setStatus (const std::string& status);
     void setComment (const std::string& comment);
 
-    void print();
+    void print() const;
+
+    virtual void accept(LatexVisitor& v) const;
+
+    const unsigned int id_;
 
 protected:
-    unsigned int id_;
     nlohmann::json data_;
     ViewManager& view_manager_;
 

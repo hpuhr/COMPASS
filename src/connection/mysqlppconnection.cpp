@@ -814,10 +814,20 @@ std::string MySQLppConnection::identifier() const
     return used_server_ + ": " + used_database_;
 }
 
+std::string MySQLppConnection::usedDatabase() const
+{
+    return used_database_;
+}
+
+void MySQLppConnection::usedDatabase(const std::string& used_database)
+{
+    used_database_ = used_database;
+}
+
 void MySQLppConnection::addServer(const std::string& name)
 {
     logdbg << "MySQLppConnection: addServer: name '" << name << "'";
-
+    
     if (servers_.count(name) != 0)
         throw std::invalid_argument("MySQLppConnection: addServer: name '" + name +
                                     "' already in use");

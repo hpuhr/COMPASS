@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 
         if (ATSDB::instance().taskManager().automaticTasksDefined())
         {
-            QThread::msleep(100);
+            QThread::msleep(10);
 
             while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents();

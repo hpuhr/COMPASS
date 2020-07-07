@@ -1,0 +1,167 @@
+\section{Appendix: Algorithms}
+\label{sec:appendix_algorithms}  
+
+\subsection{Positions Accuracy Ellipses}
+\label{sec:algo_position_accuracy_ellipses} 
+
+According to the \href{https://en.wikipedia.org/wiki/68%E2%80%9395%E2%80%9399.7_rule}{68–95–99.7} rule, 68.27\%, 95.45\% and 99.73\% of the values lie within one, two and three standard deviations of the mean, respectively. \\
+
+Therefore, 95\% is equivalent to two standard deviations ($\sigma$). \\
+
+Please note that currently only the Cartesian variables are used, and are assumed to be valid for the target reports position (and north direction), not for a system center. \\
+
+The usage WGS-84 variables will be added in one of the next releases.
+
+\subsection{ADS-B}
+
+The accuracy values where taken from \href{https://mode-s.org/decode/adsb/uncertainty.html}{The 1090MHz Riddle} online book.
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | X | l | l | }
+    \hline
+    \textbf{ASTERIX Data Item} & \textbf{Variable} & \textbf{Comment} \\ \hline
+    210.VN & mops\_version & Used to distinguish between DO-260 versions \\ \hline
+    090.NACp & nac\_p  & Used for V1 \& V2 transponders \\ \hline
+    090.NUCp or NIC & nucp\_nic  & Used for V0 transponders \\ \hline
+  \end{tabularx}
+  \caption{ADS-B Position Accuracy Variables}
+\end{table}
+\end{center}
+
+\subsubsection{V0 Transponders}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l | l |}
+    \hline
+    \textbf{NUCp} & \textbf{HPL} & \textbf{RCu} & \textbf{$\sigma$} \\ \hline
+    9   & < 7.5 m            & < 3 m             & 1.5  \\ \hline
+    8   & < 25 m             & < 10 m            & 5  \\ \hline
+    7   & < 0.1 NM (185 m)   & < 0.05 NM (93 m)  & 46.5  \\ \hline
+    6   & < 0.2 NM (370 m)   & < 0.1 NM (185 m)  & 92.5  \\ \hline
+    5   & < 0.5 NM (926 m)   & < 0.25 NM (463 m) & 231.5  \\ \hline
+    4   & < 1 NM (1852 m)    & < 0.5 NM (926 m)  & 463  \\ \hline
+    3   & < 2 NM (3704 m)    & < 1 NM (1852 m)   & 926  \\ \hline
+    2   & < 10 NM (18520 m)  & < 5 NM (9260 m)   & 4630  \\ \hline
+    1   & < 20 NM (37040 m)  & < 10 NM (18520 m) & 9260  \\ \hline
+    0   & > 20 NM (37040 m)  & > 10 NM (18520 m) & -  \\ \hline
+  \end{tabular}
+  \caption{NUCp Values}
+\end{table}
+
+\begin{itemize}
+\item NUCp: Navigation Uncertainty Category - Position
+\item HPL: Horizontal Protection Limit
+\item RCu: 95\% Containment Radius - Horizontal
+\item $\sigma$: Standard deviation in meters, from RCu/2
+\end{itemize}
+\ \\
+
+For the NUCp values, the taken for display are listed in the $\sigma$ column, resulting in error circles (same value for both coordinates). Please note that for the NUCp value 0, no error ellipse is displayed, since the accuracy value is unkown.
+
+\subsubsection{V1 \& V2 Transponders}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l | l |}
+    \hline
+    \textbf{NACp} & \textbf{EPU (HFOM)} & \textbf{VEPU (VFOM)} & \textbf{$\sigma$} \\ \hline
+    11  & < 3 m              & < 4 m  & 1.5 \\ \hline
+    10  & < 10 m             & < 15 m & 5 \\ \hline
+    9   & < 30 m             & < 45 m & 15 \\ \hline
+    8   & < 0.05 NM (93 m)   & & 46.5 \\ \hline
+    7   & < 0.1 NM (185 m)   & & 92.5 \\ \hline
+    6   & < 0.3 NM (556 m)   & & 278 \\ \hline
+    5   & < 0.5 NM (926 m)   & & 463 \\ \hline
+    4   & < 1.0 NM (1852 m)  & & 926 \\ \hline
+    3   & < 2 NM (3704 m)    & & 1852 \\ \hline
+    2   & < 4 NM (7408 m)    & & 3704 \\ \hline
+    1   & < 10 NM (18520 km) & & 9260 \\ \hline
+    0   & > 10 NM or Unknown & & - \\ \hline
+  \end{tabular}
+  \caption{NACp Values}
+\end{table}
+
+\begin{itemize}
+\item NACp: Navigation Accuracy Category - Position
+\item EPU (HFOM): 95\% horizontal accuracy bounds, Estimated Position Uncertainty (EPU) a.k.a. Horizontal Figure of Merit (HFOM)
+\item VEPU (VFOM): 95\% vertical accuracy bounds, Vertical Estimated Position Uncertainty (VEPU) a.k.a. Vertical Figure of Merit (VFOM)
+\item $\sigma$: Standard deviation in meters, from EPU/2
+\end{itemize}
+\ \\
+
+For the NACp values, the taken for display are listed in the $\sigma$ column, resulting in error circles (same value for both coordinates). Please note that for the NACp value 0, no error ellipse is displayed, since the accuracy value is unkown.
+
+\subsection{MLAT}
+
+The description of the accuracy values where taken from \textit{EUROCONTROL Specification for Surveillance Data Exchange ASTERIX Part 14 Category 020 Multilateration Target Reports Appendix A: Reserved Expansion Field} (EUROCONTROL-SPEC-0149-14A) document.
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | X | l | l | }
+    \hline
+    \textbf{ASTERIX Data Item} & \textbf{Variable} & \textbf{Comment} \\ \hline
+     REF.PA.SDW.SDW (Latitude Component) & pos\_std\_dev\_lat\_deg &  \\ \hline
+     REF.PA.SDW.SDW (Longitude Component) & pos\_std\_dev\_long\_deg  &  \\ \hline
+     REF.PA.SDW.COV-WGS (Lat/Long Covariance Component) & pos\_std\_dev\_latlong\_corr\_coeff  &  \\ \hline
+     REF.PA.SDC.SDC (X-Component) & pos\_std\_dev\_x\_m &  \\ \hline
+     REF.PA.SDC.SDC (Y-Component) & pos\_std\_dev\_y\_m  &  \\ \hline
+     REF.PA.SDC.COV-XY (Covariance Component) & pos\_std\_dev\_correlation\_coeff  &  \\ \hline
+\end{tabularx}
+  \caption{MLAT Position Accuracy Variables}
+\end{table}
+\end{center}
+
+\begin{itemize}
+\item SDC.SDC values: Standard Deviation of Position of the target expressed in Cartesian coordinates, in meters
+\item SDC.COV-XY: XY Covariance Component, the unit is listed as in meters, but should be in $m^2$ and is asssumed as such
+\item SDW.SDW values: Standard Deviation of Position of the target expressed in WGS-84, in degrees
+\item SDW.COV-WGS: Lat/Long Covariance Component, the unit is listed as in degrees, but should be in $deg^2$ and is asssumed as such
+\end{itemize}
+\ \\
+
+Notes:
+\begin{itemize}
+\item XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}
+\item WGS-84 covariance component = sign {Cov(Lat,Long)} * sqrt {abs [Cov (Lat,Long)]}
+\end{itemize}
+
+\subsection{Radar}
+
+TODO
+
+\subsection{RefTraj}
+
+The usage WGS-84 variables will be added in one of the next releases.
+
+\subsection{Tracker}
+
+The description of the accuracy values where taken from \textit{EUROCONTROL Specification for Surveillance Data Exchange ASTERIX Part 9 Category 062 SDPS Track Messages} (EUROCONTROL-SPEC-0149-9) document.
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | X | l | l | }
+    \hline
+    \textbf{ASTERIX Data Item} & \textbf{Variable} & \textbf{Comment} \\ \hline
+     500.APW.APW (Latitude Component) & pos\_std\_dev\_lat\_deg &  \\ \hline
+     500.APW.APW (Longitude Component) & pos\_std\_dev\_long\_deg  &  \\ \hline
+     500.APC.APC (X-Component) & pos\_std\_dev\_x\_m &  \\ \hline
+     500.APC.APC (Y-Component) & pos\_std\_dev\_y\_m  &  \\ \hline
+     500.COV.COV (XY Covariance Component) & pos\_std\_dev\_xy\_corr\_coeff  &  \\ \hline
+\end{tabularx}
+  \caption{Tracker Position Accuracy Variables}
+\end{table}
+\end{center}
+
+\begin{itemize}
+\item APC.APC values: Estimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in Cartesian co-ordinates, in meters
+\item COV.COV: XY Covariance Component, the unit is listed as in meters, but should be in $m^2$ and is asssumed as such
+\item APW.APW values: Standard Deviation of Position of the target expressed in WGS-84, in degrees
+\end{itemize}
+\ \\
+
+Notes:
+\begin{itemize}
+\item XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}
+\end{itemize}

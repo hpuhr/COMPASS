@@ -44,6 +44,9 @@ Property::Property(std::string id, PropertyDataType type) : data_type_(type), na
 
 const std::string& Property::asString(PropertyDataType type)
 {
+    if (!data_types_2_strings_.count(type))
+        logerr << "Property: asString: unkown type " << (unsigned int) type;
+
     assert(data_types_2_strings_.count(type) > 0);
     return data_types_2_strings_.at(type);
 }
@@ -51,6 +54,10 @@ const std::string& Property::asString(PropertyDataType type)
 PropertyDataType& Property::asDataType(const std::string& type)
 {
     logdbg << "Property: asDataType: " << type;
+
+    if (!strings_2_data_types_.count(type))
+        logerr << "Property: asDataType: unkown type " << type;
+
     assert(strings_2_data_types_.count(type) > 0);
     return strings_2_data_types_.at(type);
 }

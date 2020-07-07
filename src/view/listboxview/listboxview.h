@@ -23,6 +23,7 @@
 
 class ListBoxViewWidget;
 class ListBoxViewDataSource;
+class ListBoxViewDataWidget;
 
 /**
  * @brief View for textual inspection of database contents
@@ -43,8 +44,8 @@ class ListBoxView : public View
     //    void selectionChanged();
     //    /// @brief Is executed when selection is to be cleared. Does nothing.
     //    void selectionToBeCleared();
-    virtual void unshowViewPointSlot (ViewPoint* vp) override;
-    virtual void showViewPointSlot (ViewPoint* vp) override;
+    virtual void unshowViewPointSlot (const ViewPoint* vp) override;
+    virtual void showViewPointSlot (const ViewPoint* vp) override;
     void allLoadingDoneSlot();
 
   signals:
@@ -80,6 +81,8 @@ class ListBoxView : public View
         return data_source_;
     }
 
+    ListBoxViewDataWidget* getDataWidget();
+
     virtual DBOVariableSet getSet(const std::string& dbo_name) override;
 
     bool usePresentation() const;
@@ -94,6 +97,8 @@ class ListBoxView : public View
     bool canShowAssociations() const;
     bool showAssociations() const;
     void showAssociations(bool show_associations);
+
+    virtual void accept(LatexVisitor& v) override;
 
   protected:
     /// For data display

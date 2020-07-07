@@ -62,8 +62,15 @@ class DBOEditDataSourcesWidget : public QWidget
     ManageDataSourcesTask& task_;
     DBObject& object_;
 
-    const QStringList table_columns_{"ID",  "Name",     "Short Name", "SAC",
-                                     "SIC", "Latitude", "Longitude",  "Altitude"};
+    QStringList table_columns_{"ID",  "Name", "Short Name", "SAC",
+                               "SIC", "Latitude", "Longitude",  "Altitude"};
+
+    bool has_primary_azimuth_stddev_{false};
+    bool has_primary_range_stddev_{false};
+    bool has_secondary_azimuth_stddev_{false};
+    bool has_secondary_range_stddev_{false};
+    bool has_mode_s_azimuth_stddev_{false};
+    bool has_mode_s_range_stddev_{false};
 
     QTableWidget* config_ds_table_{nullptr};
     QPushButton* sync_from_cfg_button_{nullptr};

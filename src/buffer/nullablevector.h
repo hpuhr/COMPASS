@@ -95,6 +95,11 @@ class NullableVector
 
     std::string propertyName() const
     {
+        return property_.name();
+    }
+
+    std::string propertyID() const
+    {
         return property_.name() + "(" + property_.dataTypeString() + ")";
     }
 

@@ -59,6 +59,7 @@ class ViewContainer : public QObject, public Configurable
     static unsigned int getViewCount() { return view_count_; }
 
     void addView(const std::string& class_name);
+    void showView(QWidget* widget);
 
     ViewContainerConfigWidget* configWidget();
 

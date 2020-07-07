@@ -62,8 +62,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     std::string import_gps_trail_filename;
 
     bool auto_process {false};
-    bool quit_after_auto_process {false};
-    bool start_after_auto_process {false};
+    bool start {false};
+    bool load_data {false};
+    std::string export_view_points_report_filename;
+    bool quit {false};
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
@@ -81,8 +83,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
                 "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
-            ("auto_quit", po::bool_switch(&quit_after_auto_process), "quit after automatic processing")
-            ("auto_start", po::bool_switch(&start_after_auto_process), "start after automatic processing");
+            ("start", po::bool_switch(&start), "start after finishing previous steps")
+            ("load_data", po::bool_switch(&load_data), "load data after start")
+            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
+                "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
     {
@@ -130,14 +135,18 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (auto_process)
         task_man.autoProcess(auto_process);
 
-    if (quit_after_auto_process)
-        task_man.quitAfterAutoProcess(quit_after_auto_process);
+    if (start)
+        task_man.start(start);
 
-    if (quit_after_auto_process)
-        task_man.quitAfterAutoProcess(quit_after_auto_process);
+    if (load_data)
+        task_man.loadData(load_data);
 
-    if (start_after_auto_process)
-        task_man.startAfterAutoProcess(start_after_auto_process);
+    if (export_view_points_report_filename.size())
+            task_man.exportViewPointsReportFile(export_view_points_report_filename);
+
+    if (quit)
+        task_man.quit(quit);
+
 }
 
 Client::~Client()

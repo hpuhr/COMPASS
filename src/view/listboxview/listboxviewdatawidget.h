@@ -71,6 +71,8 @@ class ListBoxViewDataWidget : public QWidget
 
     void selectFirstSelectedRow();
 
+    AllBufferTableWidget* getAllBufferTableWidget ();
+
   protected:
     ListBoxView* view_{nullptr};
     /// Data source

@@ -7742,6 +7742,71 @@
                                 "unit": ""
                             }
                         },
+                        "POS_STD_DEV_LAT_DEG": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_LAT_DEG",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_LONG_DEG": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_LONG_DEG",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_XY_CORR_COEFF": {
+                            "parameters": {
+                                "comment": "Correlation coefficient of xy in meters",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_XY_CORR_COEFF",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_X_M": {
+                            "parameters": {
+                                "comment": "Standard deviation of x component in meters",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_X_M",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
+                        "POS_STD_DEV_Y_M": {
+                            "parameters": {
+                                "comment": "Standard deviation of y component in meters",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "POS_STD_DEV_Y_M",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": ""
+                            }
+                        },
                         "POS_SYS_X_NM": {
                             "parameters": {
                                 "comment": "System coordinate x",

@@ -15,16 +15,19 @@ To get a list of available command line options use e.g.:
 
 \begin{lstlisting}
 Allowed options:
-  --help                      produce help message
-  -r [ --reset ]              reset user configuration and data
-  --create_new_sqlite3_db arg creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'
-  --open_sqlite3_db arg       opens existing SQLite3 database with given filename, e.g. '/data/file1.db'
-  --import_view_points arg    imports view points JSON file with given filename, e.g. '/data/file1.json'
-  --import_asterix arg        imports ASTERIX file with given filename, e.g. '/data/file1.ff'
-  --import_gps_trail arg      imports gps trail NMEA with given filename, e.g. '/data/file2.txt'
-  --auto_process              start automatic processing of imported data
-  --auto_quit                 quit after automatic processing
-  --auto_start                start after automatic processing
+  --help                          produce help message
+  -r [ --reset ]                  reset user configuration and data
+  --create_new_sqlite3_db arg     creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'
+  --open_sqlite3_db arg           opens existing SQLite3 database with given filename, e.g. '/data/file1.db'
+  --import_view_points arg        imports view points JSON file with given filename, e.g. '/data/file1.json'
+  --import_asterix arg            imports ASTERIX file with given filename, e.g. '/data/file1.ff'
+  --import_gps_trail arg          imports gps trail NMEA with given filename, e.g. '/data/file2.txt'
+  --auto_process                  start automatic processing of imported data
+  --start                         start after finishing previous steps
+  --load_data                     load data after start
+  --export_view_points_report arg export view points report after start with given filename, e.g. '/data/db2/report.tex
+  --quit                          quit after finishing all previous steps
+
 \end{lstlisting}
 \ \\
 
@@ -89,14 +92,30 @@ After a data was imported, automatically starts the following tasks:
  \item \nameref{sec:task_associate_artas_tris}* (If ARTAS data with TRIs was imported)
 \end{itemize}
 
-\subsection{--auto\_quit}
-
-After the other tasks were run, automatically quits the application.
-
-\subsection{--auto\_quit}
+\subsection{--start}
 
 After the other tasks were run, automatically starts the application into the management window.
 
+\subsection{--load\_data}
+
+After starting the application into the management window, a load process is triggered.
+
+
+\subsection{--export\_view\_points\_report}
+
+After starting the application into the management window, a export View Points as PDF process is triggered:
+
+\begin{itemize}
+ \item \nameref{sec:view_points_export_pdf}
+\end{itemize}
+\ \\
+
+The given argument filename definesd the report filename, with the report directory as the parent directory of the given filename.
+
+
+\subsection{--quit}
+
+After the other tasks were run, automatically quits the application.
 
 \section{Examples}
 
@@ -107,7 +126,7 @@ In this section, a few possible use cases are given.
 This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --auto_start
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -116,7 +135,7 @@ This command creates a new database, imports ASTERIX data, processess the data a
 This command opens an existing database and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --auto_start
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -125,8 +144,8 @@ This command opens an existing database and starts the management window.
 This commands create a new database, imports multiple ASTERIX data files, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_quit
-./ATSDB-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --auto_start
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --quit
+./ATSDB-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -135,6 +154,15 @@ This commands create a new database, imports multiple ASTERIX data files, proces
 This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --auto_start
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start
+\end{lstlisting}
+\ \\
+
+\subsection{Create, Import View Points \& Start \& Export as PDF \& Quit}
+
+This command creates a new database, imports ASTERIX data, processess the data, starts the management window and exports the View Points as PDF, and then quits.
+
+\begin{lstlisting}
+./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start --export_view_points_report /data/test.db/report.tex --quit
 \end{lstlisting}
 \ \\

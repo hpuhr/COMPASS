@@ -4,6 +4,7 @@
 #include "json.hpp"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "latexvisitor.h"
 
 using namespace nlohmann;
 
@@ -108,9 +109,15 @@ void ViewPoint::setComment (const std::string& comment)
     save();
 }
 
-void ViewPoint::print()
+void ViewPoint::print() const
 {
     loginf << "ViewPoint id " << id_ <<": print: data '" << data_.dump(4) << "'";
+}
+
+void ViewPoint::accept(LatexVisitor& v) const
+{
+    loginf << "ViewPoint: accept";
+    v.visit(this);
 }
 
 void ViewPoint::save()

@@ -113,15 +113,22 @@ class TaskManager : public QObject, public Configurable
 
     void autoProcess(bool value);
 
-    void quitAfterAutoProcess(bool value);
-    void startAfterAutoProcess(bool value);
+    void quit(bool value);
+    void start(bool value);
+
+    void loadData(bool value);
+    void exportViewPointsReportFile(const std::string& filename);
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
 
+
+
+
 protected:
     bool expert_mode_{false};
 
+    // command line defined tasks
     bool automatic_tasks_defined_ {false};
     bool sqlite3_create_new_db_ {false};
     std::string sqlite3_create_new_db_filename_;
@@ -141,9 +148,13 @@ protected:
     std::string gps_trail_import_filename_;
 
     bool auto_process_ {false};
-    bool quit_after_auto_process_ {false};
-    bool start_after_auto_process_ {false};
+    bool start_ {false};
+    bool load_data_ {false};
+    bool export_view_points_report_ {false};
+    std::string export_view_points_report_filename_;
+    bool quit_ {false};
 
+    // tasks
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;

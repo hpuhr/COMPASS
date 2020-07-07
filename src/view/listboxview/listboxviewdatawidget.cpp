@@ -194,3 +194,9 @@ void ListBoxViewDataWidget::selectFirstSelectedRow()
     if (all_buffer_table_widget_)
         all_buffer_table_widget_->selectSelectedRows();
 }
+
+AllBufferTableWidget* ListBoxViewDataWidget::getAllBufferTableWidget ()
+{
+    assert (all_buffer_table_widget_);
+    return all_buffer_table_widget_;
+}

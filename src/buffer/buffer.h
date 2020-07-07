@@ -58,6 +58,8 @@ struct Index<T, std::tuple<U, Types...>>
     static const std::size_t value = 1 + Index<T, std::tuple<Types...>>::value;
 };
 
+#include "json.hpp"
+
 /**
  * @brief Fast, dynamic data container
  *
@@ -124,6 +126,8 @@ class Buffer
                             bool tc2dbovar);  // tc2dbovar true for db->dbo, false dbo->db
 
     std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);
+
+    nlohmann::json asJSON();
 
   protected:
     /// Unique buffer id, copied when getting shallow copies
