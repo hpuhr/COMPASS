@@ -118,18 +118,18 @@ void MainWindow::startSlot()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    QMessageBox* msg_box = new QMessageBox(this);
-    msg_box->setWindowTitle("Starting");
-    msg_box->setText("Please wait...");
-    msg_box->setStandardButtons(0);
-    msg_box->show();
+//    QMessageBox* msg_box = new QMessageBox(this);
+//    msg_box->setWindowTitle("Starting");
+//    msg_box->setText("Please wait...");
+//    msg_box->setStandardButtons(0);
+//    msg_box->show();
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-    {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
 
     emit startedSignal();
 
@@ -143,14 +143,21 @@ void MainWindow::startSlot()
     assert(management_widget_);
     tab_widget_->addTab(management_widget_, "Management");
 
+//    start_time = boost::posix_time::microsec_clock::local_time();
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
+
     ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
 
     emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
 
-    msg_box->close();
-    delete msg_box;
+//    msg_box->close();
+//    delete msg_box;
 
     QApplication::restoreOverrideCursor();
 }
