@@ -7,12 +7,15 @@
 #include "listboxview.h"
 #include "listboxviewdatawidget.h"
 #include "allbuffertablewidget.h"
-#include "osgview.h"
-#include "osgviewdatawidget.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "osgview.h"
+#include "osgviewdatawidget.h"
+#endif
 
 #include <sstream>
 
