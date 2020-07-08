@@ -28,6 +28,8 @@
 #include "unit.h"
 #include "unitmanager.h"
 
+using namespace nlohmann;
+
 unsigned int Buffer::ids_ = 0;
 
 /**
@@ -652,4 +654,47 @@ std::shared_ptr<Buffer> Buffer::getPartialCopy(const PropertyList& partial_prope
     assert (tmp_buffer->size());
 
     return tmp_buffer;
+}
+
+nlohmann::json Buffer::asJSON()
+{
+    json j;
+
+    for (unsigned int cnt=0; cnt < data_size_; ++cnt)
+    {
+        j[cnt] = json::object();
+
+        for (auto& it : getArrayListMap<bool>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<char>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<unsigned char>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<int>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<unsigned int>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<long int>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<unsigned long int>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<float>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<double>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+        for (auto& it : getArrayListMap<std::string>())
+            if (!it.second->isNull(cnt))
+                j[cnt][it.second->propertyName()] = it.second->get(cnt);
+    }
+
+    return j;
 }

@@ -114,7 +114,10 @@ class MySQLppConnection : public DBConnection
     //    void importSQLFile (const std::string& filename);
     //    void importSQLArchiveFile (const std::string& filename);
 
-  protected:
+    std::string usedDatabase() const;
+    void usedDatabase(const std::string& used_database);
+
+protected:
     DBInterface& interface_;
     std::string used_server_;
     std::string used_database_;

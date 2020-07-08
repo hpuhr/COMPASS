@@ -146,6 +146,63 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
     connect(altitude_box_, SIGNAL(activated(int)), this, SLOT(changedAltitudeColumnSlot()));
     grid->addWidget(altitude_box_, row, 1);
 
+    // psr
+    row++;
+    grid->addWidget(new QLabel("Primary Azimuth Standard Deviation column"), row, 0);
+
+    primary_azimuth_stddev_box_ = new QComboBox();
+    updatePrimaryAzimuthStdDevColumnSlot();
+    connect(primary_azimuth_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedPrimaryAzimuthStdDevColumnSlot()));
+    grid->addWidget(primary_azimuth_stddev_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Primary Range Standard Deviation column"), row, 0);
+
+    primary_range_stddev_box_ = new QComboBox();
+    updatePrimaryRangeStdDevColumnSlot();
+    connect(primary_range_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedPrimaryRangeStdDevColumnSlot()));
+    grid->addWidget(primary_range_stddev_box_, row, 1);
+
+    // ssr
+    row++;
+    grid->addWidget(new QLabel("Secondary Azimuth Standard Deviation column"), row, 0);
+
+    secondary_azimuth_stddev_box_ = new QComboBox();
+    updateSecondaryAzimuthStdDevColumnSlot();
+    connect(secondary_azimuth_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedSecondaryAzimuthStdDevColumnSlot()));
+    grid->addWidget(secondary_azimuth_stddev_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Secondary Range Standard Deviation column"), row, 0);
+
+    secondary_range_stddev_box_ = new QComboBox();
+    updateSecondaryRangeStdDevColumnSlot();
+    connect(secondary_range_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedSecondaryRangeStdDevColumnSlot()));
+    grid->addWidget(secondary_range_stddev_box_, row, 1);
+
+    // mode s
+    row++;
+    grid->addWidget(new QLabel("Mode S Azimuth Standard Deviation column"), row, 0);
+
+    mode_s_azimuth_stddev_box_ = new QComboBox();
+    updateModeSAzimuthStdDevColumnSlot();
+    connect(mode_s_azimuth_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedModeSAzimuthStdDevColumnSlot()));
+    grid->addWidget(mode_s_azimuth_stddev_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Mode S Range Standard Deviation column"), row, 0);
+
+    mode_s_range_stddev_box_ = new QComboBox();
+    updateModeSRangeStdDevColumnSlot();
+    connect(mode_s_range_stddev_box_, SIGNAL(activated(int)),
+            this, SLOT(changedModeSRangeStdDevColumnSlot()));
+    grid->addWidget(mode_s_range_stddev_box_, row, 1);
+
     main_layout->addLayout(grid);
 
     setLayout(main_layout);
@@ -173,9 +230,17 @@ void DBODataSourceDefinitionWidget::changedMetaTableSlot()
     updateNameColumnSlot();
     updateSacColumnSlot();
     updateSicColumnSlot();
+
     updateLatitudeColumnSlot();
     updateLongitudeColumnSlot();
     updateAltitudeColumnSlot();
+
+    updatePrimaryAzimuthStdDevColumnSlot();
+    updatePrimaryRangeStdDevColumnSlot();
+    updateSecondaryAzimuthStdDevColumnSlot();
+    updateSecondaryRangeStdDevColumnSlot();
+    updateModeSAzimuthStdDevColumnSlot();
+    updateModeSRangeStdDevColumnSlot();
 }
 
 void DBODataSourceDefinitionWidget::changedForeignKeySlot()
@@ -240,6 +305,49 @@ void DBODataSourceDefinitionWidget::changedAltitudeColumnSlot()
     assert(altitude_box_);
     std::string value = altitude_box_->currentText().toStdString();
     definition_.altitudeColumn(value);
+}
+
+void DBODataSourceDefinitionWidget::changedPrimaryAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedPrimaryAzimuthStdDevColumnSlot";
+    assert(primary_azimuth_stddev_box_);
+    std::string value = primary_azimuth_stddev_box_->currentText().toStdString();
+    definition_.primaryAzimuthStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedPrimaryRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedPrimaryRangeStdDevColumnSlot";
+    assert(primary_range_stddev_box_);
+    std::string value = primary_range_stddev_box_->currentText().toStdString();
+    definition_.primaryRangeStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedSecondaryAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedSecondaryAzimuthStdDevColumnSlot";
+    assert(secondary_azimuth_stddev_box_);
+    std::string value = secondary_azimuth_stddev_box_->currentText().toStdString();
+    definition_.secondaryAzimuthStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedSecondaryRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedSecondaryRangeStdDevColumnSlot";
+    assert(secondary_range_stddev_box_);
+    std::string value = secondary_range_stddev_box_->currentText().toStdString();
+    definition_.secondaryRangeStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedModeSAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedModeSAzimuthStdDevColumnSlot";
+    assert(mode_s_azimuth_stddev_box_);
+    std::string value = mode_s_azimuth_stddev_box_->currentText().toStdString();
+    definition_.modeSAzimuthStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedModeSRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedModeSRangeStdDevColumnSlot";
+    assert(mode_s_range_stddev_box_);
+    std::string value = mode_s_range_stddev_box_->currentText().toStdString();
+    definition_.modeSRangeStdDevColumn(value);
 }
 
 void DBODataSourceDefinitionWidget::updateLocalKeySlot()
@@ -413,6 +521,79 @@ void DBODataSourceDefinitionWidget::updateAltitudeColumnSlot()
 
     updateVariableSelectionBox(altitude_box_, schema_name, meta_table_name,
                                definition_.altitudeColumn(), true);
+}
+
+void DBODataSourceDefinitionWidget::updatePrimaryAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updatePrimaryAzimuthStdDevColumnSlot";
+    assert(primary_azimuth_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(primary_azimuth_stddev_box_, schema_name, meta_table_name,
+                               definition_.primaryAzimuthStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updatePrimaryRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updatePrimaryRangeStdDevColumnSlot";
+    assert(primary_range_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(primary_range_stddev_box_, schema_name, meta_table_name,
+                               definition_.primaryRangeStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateSecondaryAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateSecondaryAzimuthStdDevColumnSlot";
+    assert(secondary_azimuth_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(secondary_azimuth_stddev_box_, schema_name, meta_table_name,
+                               definition_.secondaryAzimuthStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateSecondaryRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateSecondaryRangeStdDevColumnSlot";
+    assert(secondary_range_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(secondary_range_stddev_box_, schema_name, meta_table_name,
+                               definition_.secondaryRangeStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateModeSAzimuthStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateModeSAzimuthStdDevColumnSlot";
+    assert(mode_s_azimuth_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(mode_s_azimuth_stddev_box_, schema_name, meta_table_name,
+                               definition_.modeSAzimuthStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateModeSRangeStdDevColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateModeSRangeStdDevColumnSlot";
+    assert(mode_s_range_stddev_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(mode_s_range_stddev_box_, schema_name, meta_table_name,
+                               definition_.modeSRangeStdDevColumn(), true);
 }
 
 void DBODataSourceDefinitionWidget::updateVariableSelectionBox(QComboBox* box,

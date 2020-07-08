@@ -2392,6 +2392,111 @@
                     }
                 }
             },
+            "DBOVariableTrackerpos_std_dev_lat_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "pos_std_dev_lat_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackerpos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_STD_DEV_LAT_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackerpos_std_dev_long_deg0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "pos_std_dev_long_deg",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackerpos_std_dev_long_deg0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_STD_DEV_LONG_DEG"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackerpos_std_dev_x_m0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Standard deviation of x component in meters",
+                    "dimension": "",
+                    "name": "pos_std_dev_x_m",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackerpos_std_dev_x_m0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_STD_DEV_X_M"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackerpos_std_dev_xy_corr_coeff0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Correlation coefficient of xy in meters",
+                    "dimension": "",
+                    "name": "pos_std_dev_xy_corr_coeff",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackerpos_std_dev_xy_corr_coeff0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_STD_DEV_XY_CORR_COEFF"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackerpos_std_dev_y_m0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Standard deviation of y component in meters",
+                    "dimension": "",
+                    "name": "pos_std_dev_y_m",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackerpos_std_dev_y_m0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.POS_STD_DEV_Y_M"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackerpos_sys_x_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",

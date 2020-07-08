@@ -55,6 +55,7 @@ class DBTableColumn : public Configurable
     void type(const std::string& type) { type_ = type; }
     /// @brief Returns the data type
     const std::string& type() const { return type_; }
+    bool hasKnownPropertyType () const;
     PropertyDataType propertyType() const;
 
     /// @brief Sets key flag

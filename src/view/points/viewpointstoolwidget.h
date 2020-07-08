@@ -35,6 +35,7 @@ signals:
 public slots:
     void actionTriggeredSlot(QAction* action);
     void typeFilteredSlot ();
+    void statusFilteredSlot ();
 
     void columnFilteredSlot ();
 
@@ -53,8 +54,9 @@ private:
     QToolButton* open_current_step_next_button_{nullptr};
     QToolButton* close_current_step_next_button_{nullptr};
 
-    void showTypesMenu ();
     void showColumnsMenu ();
+    void showTypesMenu ();
+    void showStatusesMenu ();
 };
 
 #endif // VIEWPOINTSTOOLWIDGET_H

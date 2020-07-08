@@ -48,6 +48,9 @@
 #include "viewpointsimporttaskwidget.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskwidget.h"
+#include "viewmanager.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -58,6 +61,8 @@
 
 #include <QCoreApplication>
 #include <QThread>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace Utils;
 
@@ -518,21 +523,40 @@ void TaskManager::autoProcess(bool value)
     auto_process_ = value;
 }
 
-void TaskManager::quitAfterAutoProcess(bool value)
+void TaskManager::quit(bool value)
 {
     loginf << "TaskManager: autoQuitAfterProcess: value " << value;
 
     automatic_tasks_defined_ = true;
-    quit_after_auto_process_ = value;
+    quit_ = value;
 }
 
-void TaskManager::startAfterAutoProcess(bool value)
+void TaskManager::start(bool value)
 {
-    loginf << "TaskManager: startAfterAutoProcess: value " << value;
+    loginf << "TaskManager: start: value " << value;
 
     automatic_tasks_defined_ = true;
-    start_after_auto_process_ = value;
+    start_ = value;
 }
+
+
+void TaskManager::loadData(bool value)
+{
+    loginf << "TaskManager: loadData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    load_data_ = value;
+}
+
+void TaskManager::exportViewPointsReportFile(const std::string& filename)
+{
+    loginf << "TaskManager: exportViewPointsReport: file '" << filename << "'";
+
+    automatic_tasks_defined_ = true;
+    export_view_points_report_ = true;
+    export_view_points_report_filename_ = filename;
+}
+
 
 bool TaskManager::automaticTasksDefined() const
 {
@@ -560,11 +584,11 @@ void TaskManager::performAutomaticTasks ()
     SQLiteConnectionWidget* connection_widget =
         dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
 
+    while (QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
     if (sqlite3_create_new_db_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: creating and opening new sqlite3 database '"
                << sqlite3_create_new_db_filename_ << "'";
 
@@ -574,17 +598,9 @@ void TaskManager::performAutomaticTasks ()
         connection_widget->addFile(sqlite3_create_new_db_filename_);
         connection_widget->selectFile(sqlite3_create_new_db_filename_);
         connection_widget->openFileSlot();
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
     }
     else if (sqlite3_open_db_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: opening existing sqlite3 database '"
                << sqlite3_open_db_filename_ << "'";
 
@@ -598,18 +614,29 @@ void TaskManager::performAutomaticTasks ()
         connection_widget->addFile(sqlite3_open_db_filename_);
         connection_widget->selectFile(sqlite3_open_db_filename_);
         connection_widget->openFileSlot();
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
     }
+
+    loginf << "TaskManager: performAutomaticTasks: database opened";
+
+    // do longer wait on startup for things to settle
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+    // does not show widget
+    //QCoreApplication::processEvents();
+
+    // does cause application halt
+    //    while (QCoreApplication::hasPendingEvents())
+    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    loginf << "TaskManager: performAutomaticTasks: waiting done";
 
     if (view_points_import_file_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: importing view points file '"
                << view_points_import_filename_ << "'";
 
@@ -640,18 +667,16 @@ void TaskManager::performAutomaticTasks ()
 
         view_points_import_task_widget->importSlot();
 
-        while (QCoreApplication::hasPendingEvents() || !view_points_import_task_->finished())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
+        while (!view_points_import_task_->finished())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
     }
 
     #if USE_JASTERIX
     if (asterix_import_file_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
                << asterix_import_filename_ << "'";
 
@@ -680,21 +705,18 @@ void TaskManager::performAutomaticTasks ()
         assert(asterix_importer_task_->canRun());
         asterix_importer_task_->showDoneSummary(false);
 
-        //widget_->runCurrentTaskSlot();
         widget_->runTask(*asterix_importer_task_);
 
-        while (QCoreApplication::hasPendingEvents() || !asterix_importer_task_->done())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
+        while (!asterix_importer_task_->done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
     }
     #endif
 
     if (gps_trail_import_file_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
                << gps_trail_import_filename_ << "'";
 
@@ -723,20 +745,17 @@ void TaskManager::performAutomaticTasks ()
         assert(gps_trail_import_task_->canRun());
         gps_trail_import_task_->showDoneSummary(false);
 
-        //widget_->runCurrentTaskSlot();
         widget_->runTask(*gps_trail_import_task_);
 
-        while (QCoreApplication::hasPendingEvents() || !gps_trail_import_task_->done())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
+        while (!gps_trail_import_task_->done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
     }
 
     if (auto_process_)
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         // calculate radar plot positions
         if (radar_plot_position_calculator_task_->isRecommended())
         {
@@ -751,19 +770,16 @@ void TaskManager::performAutomaticTasks ()
             }
             radar_plot_position_calculator_task_->showDoneSummary(false);
 
-            //widget_->runCurrentTaskSlot();
             widget_->runTask(*radar_plot_position_calculator_task_);
 
-            while (QCoreApplication::hasPendingEvents() || !radar_plot_position_calculator_task_->done())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-            QThread::msleep(100);  // delay
+            while (!radar_plot_position_calculator_task_->done())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
         }
 
         // post-process
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
         loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
 
         if (!post_process_task_->isRecommended())
@@ -781,22 +797,19 @@ void TaskManager::performAutomaticTasks ()
         if(widget_->getCurrentTaskName() != post_process_task_->name())
             widget_->setCurrentTask(*post_process_task_);
 
-        //widget_->runCurrentTaskSlot();
         widget_->runTask(*post_process_task_);
 
-        while (QCoreApplication::hasPendingEvents() || !post_process_task_->done())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        QThread::msleep(100);  // delay
+        while (!post_process_task_->done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
 
         loginf << "TaskManager: performAutomaticTasks: post-processing task done";
 
         // assocs
         if (create_artas_associations_task_->isRecommended())
         {
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
             loginf << "TaskManager: performAutomaticTasks: starting association task";
 
             widget_->setCurrentTask(*create_artas_associations_task_);
@@ -809,34 +822,81 @@ void TaskManager::performAutomaticTasks ()
 
             create_artas_associations_task_->showDoneSummary(false);
 
-            //widget_->runCurrentTaskSlot();
             widget_->runTask(*create_artas_associations_task_);
 
-            while (QCoreApplication::hasPendingEvents() || !create_artas_associations_task_->done())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-            QThread::msleep(100);  // delay
+            while (!create_artas_associations_task_->done())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
         }
     }
 
     loginf << "TaskManager: performAutomaticTasks: done";
 
-    if (quit_after_auto_process_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: quit requested";
-        emit quitRequestedSignal();
-    }
-
-    if (start_after_auto_process_)
+    if (start_)
     {
         loginf << "TaskManager: performAutomaticTasks: starting";
 
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents();
-
         if(widget_->isStartPossible())
+        {
             widget_->startSlot();
+            QCoreApplication::processEvents();
+        }
         else
             loginf << "TaskManager: performAutomaticTasks: start not possible";
     }
+
+    if (load_data_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: loading data";
+
+        DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+        obj_man.loadSlot();
+
+        while (obj_man.loadInProgress())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
+    else
+        loginf << "TaskManager: performAutomaticTasks: not loading data";
+
+    if (export_view_points_report_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: exporting view points report";
+
+        ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
+
+        ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+        dialog.show();
+
+        QCoreApplication::processEvents();
+
+        gen.reportPathAndFilename(export_view_points_report_filename_);
+        gen.showDone(false);
+
+        gen.run();
+
+        while (gen.isRunning()) // not sure if needed here but what the hell
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+
+        gen.showDone(true);
+    }
+
+    if (quit_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: quit requested";
+
+        emit quitRequestedSignal();
+    }
+    else
+        loginf << "TaskManager: performAutomaticTasks: not quitting";
 }
+
+

@@ -8,7 +8,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "5")
-SET(CPACK_PACKAGE_VERSION_PATCH "3")
+SET(CPACK_PACKAGE_VERSION_PATCH "4")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -66,10 +66,6 @@ message("  LOG4CPP_LIBRARY: ${LOG4CPP_LIBRARIES}")
 find_package ( GDAL REQUIRED )
 message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
 message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
-
-#find_package ( TinyXML2 REQUIRED )
-#message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
-#message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}")
 
 find_package ( LibArchive REQUIRED )
 message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
@@ -129,7 +125,6 @@ include_directories (
     ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
     ${GDAL_INCLUDE_DIRS}
-#    ${TINYXML2_INCLUDE_DIR}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${LibArchive_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
@@ -168,6 +163,7 @@ target_link_libraries ( atsdb optimized
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
+    #Eigen3::Eigen
     )
 
 

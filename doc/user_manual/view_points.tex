@@ -45,7 +45,7 @@ Also, additional attributes can be shown. If other additional attributes exist i
 
 When a view point is selected, the dataset defined by the view point is loaded automatically and the active Views show the relevant data. Using the elements described in the following sections a user can quickly step through view points, assess the information shown and change status and comment information. \\
 
-Please \textbf{note} that changes to view points are only saved to the database on correct application shutdown.
+Please \textbf{note} that changes to view points are saved immediately to the database and no undo function exists.
 
 \section{Toolbar}
 
@@ -60,8 +60,9 @@ Please \textbf{note} that changes to view points are only saved to the database 
     \includegraphics[width=0.5cm,frame]{../../data/icons/todo.png} & Set Selected Status ToDo [T] & Sets the current view point to status 'todo' \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/comment.png} & Edit Comment [E] & Edits the current view points status \\ \hline
     \includegraphics[width=0.5cm,frame]{../../data/icons/down.png} & Select Next [Down] & Steps to the next view point \\ \hline
-    & Filter Types & Opens menu for filtering based on type \\ \hline
-    & Filter Columns & Open menu for hiding/showing columns \\ \hline    
+    & Edit Columns & Open menu for hiding/showing columns \\ \hline
+    & Filter By Type & Opens menu for filtering based on type \\ \hline
+    & Filter By Status & Opens menu for filtering based on status \\ \hline
   \end{tabular}
   \caption{Toolbar Actions}
 \end{table}
@@ -91,6 +92,70 @@ This automatically triggers loading of the data and display in the existing View
 
 The status can only be set using the toolbar buttons or keyboard shortcuts, while editing the comment can also be triggered by a double-click on the respective cell.
 
+\section{Re-Sorting Using Columns}
+
+By clicking on a column, the View Points Table is sorted on the information in the column. Ascending/descending can be changed by clicking again on a column already used for sorting. \\
+
+Per default, the table is sorted by the 'id' column.
+
+\section{Showing/Hiding Columns}
+
+Using the 'Edit Columns' button in the toolbar, unwanted columns can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=5cm,frame]{../screenshots/view_points_edit_columns.png}
+  \caption{View Points: Edit Columns Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All Column names: With a checkbox to select/deselect which columns should be shown
+\item Show Only Main: Only the first 4 columns are shown
+\item Show All: All columns are shown
+\item Show None: No columns are shown
+\end{itemize}
+\ \\
+
+\section{Filtering Based on Type}
+
+Using the 'Filter By Type' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=5cm,frame]{../screenshots/view_points_filter_type.png}
+  \caption{View Points: Filter By Type Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All existing types: With a checkbox to select/deselect which should be shown
+\item Show All: All types are shown
+\item Show None: No types are shown
+\end{itemize}
+\ \\
+
+\section{Filtering Based on Status}
+
+Using the 'Filter By Status' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=4cm,frame]{../screenshots/view_points_filter_status.png}
+  \caption{View Points: Filter By Status Menu}
+\end{figure}
+
+The following entries exist:
+
+\begin{itemize}  
+\item All existing statuses: With a checkbox to select/deselect which should be shown
+\item Show All: All types are shown
+\item Show None: No types are shown
+\end{itemize}
+\ \\
+
 \section{Function Buttons}
 
 There exist 3 buttons for general functions:
@@ -99,6 +164,7 @@ There exist 3 buttons for general functions:
 \item Import: Imports a view point file selected by the user (only recommended if no view points are already defined)
 \item Delete All: Deletes all existing view points
 \item Export: Exports all existing view points as a view point file
+\item Export PDF: Exports view points as a PDF file
 \end{itemize}
 \ \\
 
@@ -141,3 +207,72 @@ After data loading, the application can be used as in any other situation, there
 In the 'View Points' tab, after assessing the view point, a user can add a comment and change the status to annotate the view point with additional information. \\
 
 After this e.g. the next view point can be selected.
+
+\section{Exporting View Points to PDF}
+\label{sec:view_points_export_pdf} 
+
+Using the "Export PDF" button, a PDF can be generated. Please note that:
+
+\begin{itemize}  
+\item Commonly the shown (filtered) View Points are exported, in the configured order
+\item A Latex report file is generated, as well as View screenshots
+\item To compile the Latex report into PDF a Latex environment (including the pdflatex application) must be installed, e.g. TeX Live (used by the author) and MikTeX (see \href{https://en.wikipedia.org/wiki/LaTeX}{Link})
+\item All active views are included, so they should be configured in a suitable manner
+\begin{itemize}  
+\item A ListBoxView is reported as the selected data, or the first 30 rows (if no data is selected), in a table.
+\item An OSGView is reported as a screenshot figure.
+\end{itemize}
+\end{itemize}
+\ \\
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=14cm]{../screenshots/view_points_export_pdf.png}
+  \caption{View Points: Export PDF Dialog}
+\end{figure}
+
+At the top, the following configuration options exist:
+
+\begin{itemize}  
+\item Report Path: Directory to which the report will be written.
+\item Report Filename: Filename of the report, to be created in the report path. File extension must be '.tex'.
+\item Change Location: Button to set the report path and filename.
+\item Author: Author string, is added to the first page of the report.
+\item Abstract: Abstract string, is added to the first page of the report.
+\item Export All (Sorted by id): Export all view points, sorted by id, ignoring the filtering and ordering in the View Point tab.
+\item Group by Type: Creates sub-section for each type of View Point.
+\item Add Overview Table: Creates table with an overview of all View Points in the beginning of the document. 
+\item Wait on Map Loading: When OSGView screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
+\item Add Overview Screenshot: Adds a preceding screenshot per OSGView with an larger map overview and a data marker.
+\item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
+\item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
+\end{itemize}
+\ \\
+
+The 'Run' button startes the export process. At the bottom, status information and a cancel button exists. \\
+
+To run the export process, click the 'Run' button.
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=14cm]{../screenshots/view_points_export_pdf_status.png}
+  \caption{View Points: Export PDF Dialog Status}
+\end{figure}
+
+If pdflatex is to be run, this is indicated in the 'Status' text, which might have to be run several times. For large documents this might take several minutes, this time not being included in the 'Remaining Time' estimate.
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=14cm]{../screenshots/view_points_export_pdf_status2.png}
+  \caption{View Points: Export PDF Dialog Status: pdflatex}
+\end{figure}
+
+
+The export speed of course depends on the View Points, the number of Views, hardware etc. However, even exporting (somewhat unreasonable) 1500 View Points takes about only 15 minutes on the authors hardware, so it should be adequate for any reasonable use case. \\
+
+If the export process was sucessful, a message is shown and the dialog is closed automatically. The report Latex file was written into the report directory, with screenshots in the 'screenshots' subfolder. If the respective options were set, a PDF was automatically generated and is opened using the default PDF application. \\
+
+If a Latex error ocurred, a message box with the error message is shown. \\
+
+Please note that the generated report can of course be edited by the user and re-generated using pdflatex, which allows for better customization options (adding e.g. details, corporate identity etc.).
+

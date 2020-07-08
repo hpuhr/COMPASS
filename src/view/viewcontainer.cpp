@@ -90,6 +90,13 @@ void ViewContainer::addView(const std::string& class_name)
         config_widget_->updateSlot();
 }
 
+void ViewContainer::showView(QWidget* widget)
+{
+    assert (widget);
+    assert (tab_widget_->indexOf(widget) >= 0); // check if has widget
+    tab_widget_->setCurrentWidget(widget);
+}
+
 // void ViewContainer::addTemplateView (std::string template_name)
 //{
 //    std::string view_name = template_name+intToString(ViewContainerWidget::getViewCount());

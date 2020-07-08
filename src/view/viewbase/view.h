@@ -31,6 +31,7 @@ class QQWidget;
 class Workflow;
 
 class ViewPoint;
+class LatexVisitor;
 
 /**
 @brief Serves as base class for all views. Subclasses can be embedded in a ViewContainerWidget.
@@ -61,8 +62,8 @@ class View : public QObject, public Configurable
 
   public slots:
     void selectionChangedSlot();
-    virtual void unshowViewPointSlot (ViewPoint* vp)=0;
-    virtual void showViewPointSlot (ViewPoint* vp)=0;
+    virtual void unshowViewPointSlot (const ViewPoint* vp)=0;
+    virtual void showViewPointSlot (const ViewPoint* vp)=0;
 
   public:
     View(const std::string& class_id, const std::string& instance_id, ViewContainer* container,
@@ -88,10 +89,14 @@ class View : public QObject, public Configurable
     /// @brief Returns the view's model, override this method in derived classes.
     ViewModel* getModel() { return model_; }
 
+    void showInTabWidget();
+
     virtual DBOVariableSet getSet(const std::string& dbo_name) = 0;
 
     void viewShutdown(const std::string& err);
     void emitSelectionChange();
+
+    virtual void accept(LatexVisitor& v) = 0;
 
   protected:
     ViewManager& view_manager_;

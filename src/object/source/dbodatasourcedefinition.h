@@ -78,7 +78,31 @@ class DBODataSourceDefinition : public QObject, public Configurable
     std::string altitudeColumn() const;
     void altitudeColumn(const std::string& altitude_column);
 
-  protected:
+    bool hasPrimaryAzimuthStdDevColumn() const { return primary_azimuth_stddev_column_.size() > 0; }
+    std::string primaryAzimuthStdDevColumn() const;
+    void primaryAzimuthStdDevColumn(const std::string& value);
+
+    bool hasPrimaryRangeStdDevColumn() const { return primary_range_stddev_column_.size() > 0; }
+    std::string primaryRangeStdDevColumn() const;
+    void primaryRangeStdDevColumn(const std::string& value);
+
+    bool hasSecondaryAzimuthStdDevColumn() const { return secondary_azimuth_stddev_column_.size() > 0; }
+    std::string secondaryAzimuthStdDevColumn() const;
+    void secondaryAzimuthStdDevColumn(const std::string& value);
+
+    bool hasSecondaryRangeStdDevColumn() const { return secondary_range_stddev_column_.size() > 0; }
+    std::string secondaryRangeStdDevColumn() const;
+    void secondaryRangeStdDevColumn(const std::string& value);
+
+    bool hasModeSAzimuthStdDevColumn() const { return mode_s_azimuth_stddev_column_.size() > 0; }
+    std::string modeSAzimuthStdDevColumn() const;
+    void modeSAzimuthStdDevColumn(const std::string& value);
+
+    bool hasModeSRangeStdDevColumn() const { return mode_s_range_stddev_column_.size() > 0; }
+    std::string modeSRangeStdDevColumn() const;
+    void modeSRangeStdDevColumn(const std::string& value);
+
+protected:
     DBObject* object_{nullptr};
 
     /// DBSchema identifier
@@ -97,6 +121,13 @@ class DBODataSourceDefinition : public QObject, public Configurable
     std::string latitude_column_;
     std::string longitude_column_;
     std::string altitude_column_;
+    /// radar noise columns
+    std::string primary_azimuth_stddev_column_;
+    std::string primary_range_stddev_column_;
+    std::string secondary_azimuth_stddev_column_;
+    std::string secondary_range_stddev_column_;
+    std::string mode_s_azimuth_stddev_column_;
+    std::string mode_s_range_stddev_column_;
 
     DBODataSourceDefinitionWidget* widget_{nullptr};
 };

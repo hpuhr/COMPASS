@@ -189,24 +189,48 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         throw std::invalid_argument(
-            "SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table " +
-            ds.metaTableName());
+                "SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table " +
+                ds.metaTableName());
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
     logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name()
            << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col "
            << ds.nameColumn();
+
+    // select all part
+
+    //    std::vector<const DBTableColumn*> columns;
+
+    //    const std::map<std::string, const DBTableColumn&>& meta_columns = meta.columns();
+
+    //    logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name();
+    //    for (const auto& col_it : meta_columns)
+    //    {
+    //        if (col_it.second.hasKnownPropertyType()) // slightly hacky, skip those with unknown type
+    //        {
+    //            logdbg << "SQLGenerator: getDataSourcesSelectCommand: adding column '" << col_it.second.name()
+    //                   << "' type '" << col_it.second.type() << "'";
+
+    //            columns.push_back(&col_it.second);
+    //        }
+    //        else
+    //            logdbg << "SQLGenerator: getDataSourcesSelectCommand: skipping column '" << col_it.second.name()
+    //                   << "' type '" << col_it.second.type() << "'";
+
+    //    }
+
+
     if (!meta.hasColumn(ds.foreignKey()))
         throw std::runtime_error(
-            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-            ds.foreignKey());
+                "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
+                ds.foreignKey());
 
     const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
 
     if (!meta.hasColumn(ds.nameColumn()))
         throw std::runtime_error(
-            "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-            ds.foreignKey());
+                "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
+                ds.foreignKey());
 
     const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
@@ -216,78 +240,78 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
 
     if (ds.hasShortNameColumn())
     {
-        if (!meta.hasColumn(ds.shortNameColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column " +
-                ds.shortNameColumn());
-        else
-            columns.push_back(&meta.column(ds.shortNameColumn()));
+        assert (meta.hasColumn(ds.shortNameColumn()));
+        columns.push_back(&meta.column(ds.shortNameColumn()));
     }
 
     if (ds.hasSacColumn())
     {
-        if (!meta.hasColumn(ds.sacColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column " +
-                ds.sacColumn());
-        else
-            columns.push_back(&meta.column(ds.sacColumn()));
+        assert (meta.hasColumn(ds.sacColumn()));
+        columns.push_back(&meta.column(ds.sacColumn()));
     }
 
     if (ds.hasSicColumn())
     {
-        if (!meta.hasColumn(ds.sicColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column " +
-                ds.sicColumn());
-        else
-            columns.push_back(&meta.column(ds.sicColumn()));
+        assert (meta.hasColumn(ds.sicColumn()));
+        columns.push_back(&meta.column(ds.sicColumn()));
     }
 
     if (ds.hasLatitudeColumn())
     {
-        if (!meta.hasColumn(ds.latitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column " +
-                ds.latitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.latitudeColumn()));
+        assert (meta.hasColumn(ds.latitudeColumn()));
+        columns.push_back(&meta.column(ds.latitudeColumn()));
     }
 
     if (ds.hasLongitudeColumn())
     {
-        if (!meta.hasColumn(ds.longitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column " +
-                ds.longitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.longitudeColumn()));
+        assert (meta.hasColumn(ds.longitudeColumn()));
+        columns.push_back(&meta.column(ds.longitudeColumn()));
     }
 
     if (ds.hasAltitudeColumn())
     {
-        if (!meta.hasColumn(ds.altitudeColumn()))
-            throw std::runtime_error(
-                "SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column " +
-                ds.altitudeColumn());
-        else
-            columns.push_back(&meta.column(ds.altitudeColumn()));
+        assert (meta.hasColumn(ds.altitudeColumn()));
+        columns.push_back(&meta.column(ds.altitudeColumn()));
     }
 
-    // PropertyList list;
-    // list.addProperty (ds.foreignKey(), PropertyDataType::INT);
-    // list.addProperty (ds.nameColumn(), PropertyDataType::STRING); //DS_NAME SAC SIC
-    // list.addProperty ("DS_NAME", PropertyDataType::STRING);
-    // list.addProperty ("SAC", PropertyDataType::UCHAR);
-    // list.addProperty ("SIC", PropertyDataType::UCHAR);
-    // list.addProperty ("POS_LAT_DEG", PropertyDataType::DOUBLE);
-    // list.addProperty ("POS_LONG_DEG", PropertyDataType::DOUBLE);
+    // psr
+    if (ds.hasPrimaryAzimuthStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.primaryAzimuthStdDevColumn()));
+        columns.push_back(&meta.column(ds.primaryAzimuthStdDevColumn()));
+    }
 
-    // TODO height hack to be resolved
-    //    if (type == DBO_PLOTS)
-    //        list.addProperty ("GROUND_ALTITUDE_AMSL_M", PropertyDataType::DOUBLE);
-    //    else if (type == DBO_SYSTEM_TRACKS || type == DBO_MLAT)
-    //        list.addProperty ("WGS_ELEV_CARTESIAN_M", PropertyDataType::DOUBLE);
+    if (ds.hasPrimaryRangeStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.primaryRangeStdDevColumn()));
+        columns.push_back(&meta.column(ds.primaryRangeStdDevColumn()));
+    }
+
+    // ssr
+    if (ds.hasSecondaryAzimuthStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryAzimuthStdDevColumn()));
+        columns.push_back(&meta.column(ds.secondaryAzimuthStdDevColumn()));
+    }
+
+    if (ds.hasSecondaryRangeStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryRangeStdDevColumn()));
+        columns.push_back(&meta.column(ds.secondaryRangeStdDevColumn()));
+    }
+
+    // mode s
+    if (ds.hasModeSAzimuthStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.modeSAzimuthStdDevColumn()));
+        columns.push_back(&meta.column(ds.modeSAzimuthStdDevColumn()));
+    }
+
+    if (ds.hasModeSRangeStdDevColumn())
+    {
+        assert (meta.hasColumn(ds.modeSRangeStdDevColumn()));
+        columns.push_back(&meta.column(ds.modeSRangeStdDevColumn()));
+    }
 
     return getSelectCommand(meta, columns);
 }
@@ -764,8 +788,8 @@ std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
         throw std::runtime_error(
-            "SQLGenerator: insertDBUpdateStringBind: not yet implemented db type " +
-            connection_type);
+                "SQLGenerator: insertDBUpdateStringBind: not yet implemented db type " +
+                connection_type);
 
     std::stringstream values_ss;
     values_ss << "VALUES (";
@@ -823,14 +847,14 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     if (key_col_name != properties.at(size - 1).name())
         throw std::runtime_error(
-            "SQLGenerator: createDBUpdateStringBind: id var not at last position");
+                "SQLGenerator: createDBUpdateStringBind: id var not at last position");
 
     std::string connection_type = db_interface_.connection().type();
 
     if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
         throw std::runtime_error(
-            "SQLGenerator: createDBUpdateStringBind: not yet implemented db type " +
-            connection_type);
+                "SQLGenerator: createDBUpdateStringBind: not yet implemented db type " +
+                connection_type);
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
     {
@@ -840,8 +864,8 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
                 continue;
             else
                 throw std::runtime_error(
-                    "SQLGenerator: createDBUpdateStringBind: id var at other than last position " +
-                    std::to_string(cnt));
+                        "SQLGenerator: createDBUpdateStringBind: id var at other than last position " +
+                        std::to_string(cnt));
         }
         ss << properties.at(cnt).name() << "=";
 
@@ -993,9 +1017,9 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 //}
 
 std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-    const MetaDBTable& meta_table, DBOVariableSet read_list, const std::string& filter,
-    std::vector<DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
-    bool use_order_ascending, const std::string& limit, bool left_join)
+        const MetaDBTable& meta_table, DBOVariableSet read_list, const std::string& filter,
+        std::vector<DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
+        bool use_order_ascending, const std::string& limit, bool left_join)
 {
     logdbg << "SQLGenerator: getSelectCommand: meta table " << meta_table.name()
            << " read list size " << read_list.getSize();
@@ -1018,7 +1042,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 
     bool first = true;
     for (auto var_it : read_list.getSet())
-    // look what tables are needed for loaded variables and add variables to sql query
+        // look what tables are needed for loaded variables and add variables to sql query
     {
         DBOVariable* variable = var_it;
 
@@ -1044,7 +1068,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
         assert(order_variable);
         assert(meta_table.hasColumn(order_variable->currentDBColumn().identifier()));
         std::string table_db_name =
-            meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
+                meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
         if (find(used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
             used_tables.push_back(table_db_name);
     }
@@ -1057,12 +1081,12 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
     logdbg << "SQLGenerator: getSelectCommand: collecting sub table clauses";
     // find all tables needed for variables to be filtered on
     for (auto var_it : filtered_variables)
-    // look what tables are needed for filtered variables
+        // look what tables are needed for filtered variables
     {
         if (meta_table.hasColumn(var_it->currentDBColumn().identifier()))
         {
             std::string table_db_name =
-                meta_table.tableFor(var_it->currentDBColumn().identifier()).name();
+                    meta_table.tableFor(var_it->currentDBColumn().identifier()).name();
 
             if (find(used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
                 used_tables.push_back(table_db_name);
@@ -1155,7 +1179,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
         assert(order_variable);
         assert(meta_table.hasColumn(order_variable->currentDBColumn().identifier()));
         std::string table_db_name =
-            meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
+                meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
 
         ss << " ORDER BY " << table_db_name << "." << order_variable->currentDBColumn().name();
 
@@ -1206,8 +1230,11 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const MetaDBTable& met
 
     bool first = true;
     for (auto col_it : columns)
-    // look what tables are needed for loaded variables and add variables to sql query
+        // look what tables are needed for loaded variables and add variables to sql query
     {
+        if (property_list.hasProperty(col_it->name())) // for already added ones
+            continue;
+
         if (!first)
             ss << ", ";
 
@@ -1268,7 +1295,7 @@ std::string SQLGenerator::subTablesWhereClause(const MetaDBTable& meta_table,
     for (auto it : meta_table.subTableDefinitions())
     {
         if (find(used_tables.begin(), used_tables.end(), it.second->subTableName()) ==
-            used_tables.end())
+                used_tables.end())
             continue;
 
         if (!first)

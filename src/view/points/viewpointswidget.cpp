@@ -6,6 +6,8 @@
 #include "atsdb.h"
 #include "dbobjectmanager.h"
 #include "viewpointstoolwidget.h"
+#include "viewpointsreportgenerator.h"
+#include "viewpointsreportgeneratordialog.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -28,11 +30,14 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_model_ = new ViewPointsTableModel(view_manager_);
     connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
              this, &ViewPointsWidget::typesChangedSlot);
+    connect (table_model_, &ViewPointsTableModel::statusesChangedSignal,
+             this, &ViewPointsWidget::statusesChangedSlot);
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(table_model_);
 
     typesChangedSlot(table_model_->types()); // needs first update
+    statusesChangedSlot(table_model_->statuses()); // needs first update
 
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
@@ -47,7 +52,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
-    table_view_->show();
+    //table_view_->show();
 //    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
 //    table_->setColumnCount(table_columns_.size());
 //    table_->setHorizontalHeaderLabels(table_columns_);
@@ -85,6 +90,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         connect (export_button_, &QPushButton::clicked, this, &ViewPointsWidget::exportSlot);
         button_layout->addWidget(export_button_);
 
+        export_pdf_button_ = new QPushButton("Export PDF");
+        connect (export_pdf_button_, &QPushButton::clicked, this, &ViewPointsWidget::exportPDFSlot);
+        button_layout->addWidget(export_pdf_button_);
 
         main_layout->addLayout(button_layout);
     }
@@ -380,6 +388,14 @@ void ViewPointsWidget::exportSlot()
     }
 }
 
+void ViewPointsWidget::exportPDFSlot()
+{
+    loginf << "ViewPointsWidget: exportPDFSlot";
+
+    ViewPointsReportGeneratorDialog& dialog = view_manager_.viewPointsGenerator().dialog();
+    dialog.exec();
+}
+
 void ViewPointsWidget::deleteAllSlot()
 {
     loginf << "ViewPointsWidget: deleteAllSlot";
@@ -470,6 +486,13 @@ void ViewPointsWidget::typesChangedSlot(QStringList types)
     types_ = types;
 }
 
+void ViewPointsWidget::statusesChangedSlot(QStringList statuses)
+{
+    loginf << "ViewPointsWidget: statusesChangedSlot";
+
+    statuses_ = statuses;
+}
+
 void ViewPointsWidget::updateFilteredTypes ()
 {
     QStringList regex_list;
@@ -485,6 +508,23 @@ void ViewPointsWidget::updateFilteredTypes ()
     assert (proxy_model_);
     proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
     proxy_model_->setFilterKeyColumn(table_model_->typeColumn()); // type
+}
+
+void ViewPointsWidget::updateFilteredStatuses ()
+{
+    QStringList regex_list;
+
+    for (auto& status : statuses_)
+        if (!filtered_statuses_.contains(status))
+            regex_list.append(status);
+
+    //"^(Correlation|banana)$"
+    QString regex = "^(" + regex_list.join("|") + ")$";
+    loginf << "ViewPointsWidget: updateFilteredStatuses: '" << regex.toStdString() << "'";
+
+    assert (proxy_model_);
+    proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
+    proxy_model_->setFilterKeyColumn(table_model_->statusColumn()); // status
 }
 
 QStringList ViewPointsWidget::columns() const
@@ -552,5 +592,74 @@ void ViewPointsWidget::updateFilteredColumns()
     }
 }
 
+QStringList ViewPointsWidget::statuses() const
+{
+    return statuses_;
+}
 
+QStringList ViewPointsWidget::filteredStatuses() const
+{
+    return filtered_statuses_;
+}
+
+void ViewPointsWidget::filterStatus (QString status)
+{
+    assert (statuses_.contains(status));
+
+    if (filtered_statuses_.contains(status))
+        filtered_statuses_.removeAll(status);
+    else
+        filtered_statuses_.append(status);
+
+    updateFilteredStatuses();
+}
+
+void ViewPointsWidget::showAllStatuses ()
+{
+    filtered_statuses_.clear();
+
+    updateFilteredStatuses();
+}
+
+void ViewPointsWidget::showNoStatuses ()
+{
+    filtered_statuses_ = statuses_;
+
+    updateFilteredStatuses();
+}
+
+std::vector<unsigned int> ViewPointsWidget::viewPoints()
+{
+    std::vector<unsigned int> data;
+
+    for (auto& vp_it : table_model_->viewPoints())
+        data.push_back(vp_it.id());
+
+    return data;
+}
+
+std::vector<unsigned int> ViewPointsWidget::viewedViewPoints()
+{
+    std::vector<unsigned int> data;
+
+    QModelIndex index = table_view_->model()->index(0, 0);
+
+    while (index.isValid())
+    {
+        loginf << "ViewPointsWidget: viewedViewPoints: row " << index.row();
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        unsigned int id = table_model_->getIdOf(source_index);
+
+        loginf << "ViewPointsWidget: viewedViewPoints: id " << id;
+
+        data.push_back(id);
+
+        index = table_view_->model()->index(index.row()+1, 0);
+    }
+
+    return data;
+}
 

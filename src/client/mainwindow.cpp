@@ -40,6 +40,7 @@
 #include <QStackedWidget>
 #include <QTabWidget>
 #include <QLocale>
+#include <QMessageBox>
 
 using namespace Utils;
 using namespace std;
@@ -75,7 +76,6 @@ MainWindow::MainWindow()
     QWidget::setWindowTitle(title.c_str());
 
     tab_widget_ = new QTabWidget();
-    //tab_widget_->setAutoFillBackground(true);
 
     TaskManager& task_man = ATSDB::instance().taskManager();
 
@@ -85,11 +85,8 @@ MainWindow::MainWindow()
     connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
     connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
 
-    //setAutoFillBackground(true);
-
     // management widget
     management_widget_ = new ManagementWidget();
-    //management_widget_->setAutoFillBackground(true);
 
     setCentralWidget(tab_widget_);
 
@@ -121,6 +118,19 @@ void MainWindow::startSlot()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+//    QMessageBox* msg_box = new QMessageBox(this);
+//    msg_box->setWindowTitle("Starting");
+//    msg_box->setText("Please wait...");
+//    msg_box->setStandardButtons(0);
+//    msg_box->show();
+
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
+
     emit startedSignal();
 
     assert(task_manager_widget_);
@@ -133,11 +143,21 @@ void MainWindow::startSlot()
     assert(management_widget_);
     tab_widget_->addTab(management_widget_, "Management");
 
+//    start_time = boost::posix_time::microsec_clock::local_time();
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
+
     ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
 
     emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
+
+//    msg_box->close();
+//    delete msg_box;
 
     QApplication::restoreOverrideCursor();
 }

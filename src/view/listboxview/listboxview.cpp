@@ -27,6 +27,7 @@
 #include "listboxviewwidget.h"
 #include "logger.h"
 #include "viewselection.h"
+#include "latexvisitor.h"
 
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id,
                          ViewContainer* w, ViewManager& view_manager)
@@ -135,6 +136,12 @@ void ListBoxView::checkSubConfigurables()
     }
 }
 
+ListBoxViewDataWidget* ListBoxView::getDataWidget()
+{
+    assert (widget_);
+    return widget_->getDataWidget();
+}
+
 DBOVariableSet ListBoxView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
@@ -190,6 +197,11 @@ void ListBoxView::showAssociations(bool show_associations)
     emit showAssociationsSignal(show_associations_);
 }
 
+void ListBoxView::accept(LatexVisitor& v)
+{
+    v.visit(this);
+}
+
 bool ListBoxView::canShowAssociations() const { return can_show_associations_; }
 
 void ListBoxView::updateSelection()
@@ -203,7 +215,7 @@ void ListBoxView::updateSelection()
         widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
 
-void ListBoxView::unshowViewPointSlot (ViewPoint* vp)
+void ListBoxView::unshowViewPointSlot (const ViewPoint* vp)
 {
     loginf << "ListBoxView: unshowViewPoint";
 
@@ -212,7 +224,7 @@ void ListBoxView::unshowViewPointSlot (ViewPoint* vp)
     data_source_->unshowViewPoint(vp);
 }
 
-void ListBoxView::showViewPointSlot (ViewPoint* vp)
+void ListBoxView::showViewPointSlot (const ViewPoint* vp)
 {
     loginf << "ListBoxView: showViewPoint";
 

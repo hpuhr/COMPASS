@@ -51,8 +51,8 @@ class FilterManager : public QObject, public Configurable
     void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 
-    void unshowViewPointSlot (ViewPoint* vp);
-    void showViewPointSlot (ViewPoint* vp);
+    void unshowViewPointSlot (const ViewPoint* vp);
+    void showViewPointSlot (const ViewPoint* vp);
 
   public:
     /// @brief Constructor

@@ -406,7 +406,9 @@ void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
         auto it = find_if(conditions_.begin(), conditions_.end(),
                           [cond_name] (const DBFilterCondition* c) { return c->instanceId() == cond_name; } );
 
-        assert (it != conditions_.end());
-        (*it)->setValue(value);
+        if (it == conditions_.end())
+            logerr << "DBFilter " << name_ << ": loadViewPointConditions: cond_name '" << cond_name << "' not found";
+        else
+            (*it)->setValue(value);
     }
 }
