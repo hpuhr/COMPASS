@@ -29,6 +29,32 @@ On the right hand side, available synchronization actions are shown. They can be
 
 At the bottom, the data sources as existing in the currently opened database are shown and can also be edited, as well as synchronized to the configuration. \\
 
+\paragraph {Data Sources Table Content}
+\label{sec:task_manage_datasources_table_content}
+
+\begin{itemize}  
+\item ID: Number indentifier (unique)
+\item Name: Name of the data source
+\item Short Name: Short name of the data source (optional)
+\item SAC: System Area Code, number between [0,255]
+\item SIC: System Identification Code, number between [0,255]
+\item Required for Radars only:
+\begin{itemize}  
+\item Latitude: Source center position as WGS-84 latitude, in degrees
+\item Longitude: Source center position as WGS-84 longitude, in degrees
+\item Altitude: Source center altitude above MSL, in meters
+\end{itemize}
+\item For Radars only (optional):
+\begin{itemize}  
+\item Primary Azimuth StdDev: PSR azimuth standard deviation, in degrees
+\item Primary Range StdDev: PSR range standard deviation, in meters
+\item Secondary Azimuth StdDev: SSR azimuth standard deviation, in degrees
+\item Secondary Range StdDev: SSR range standard deviation, in meters
+\item Mode S Azimuth StdDev: Mode S Radar azimuth standard deviation, in degrees
+\item Mode S Range StdDev: Mode S Radar range standard deviation, in meters
+\end{itemize}
+\end{itemize}
+\ \\
 
 \subsection{Editing Database Data Sources}
 
