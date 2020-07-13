@@ -86,7 +86,7 @@ class JSONImportTask : public Task, public Configurable
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
-    bool hasSchema(const std::string& name) { return schemas_.count(name) > 0; }
+    bool hasSchema(const std::string& name);
     bool hasCurrentSchema();
     JSONParsingSchema& currentSchema();
     void removeCurrentSchema();

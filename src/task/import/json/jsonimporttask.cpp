@@ -39,6 +39,10 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 
+#if USE_JASTERIX
+#include "asteriximporttask.h"
+#endif
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDateTime>
@@ -199,10 +203,25 @@ void JSONImportTask::currentFilename(const std::string& filename)
     emit statusChangedSignal(name_);
 }
 
+bool JSONImportTask::hasSchema(const std::string& name)
+{
+#if USE_JASTERIX
+    if (name == "jASTERIX")
+        return true;
+#endif
+
+    return schemas_.count(name) > 0;
+}
+
 bool JSONImportTask::hasCurrentSchema()
 {
     if (!current_schema_.size())
         return false;
+
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        return true;
+#endif
 
     return schemas_.count(current_schema_) > 0;
 }
@@ -210,14 +229,24 @@ bool JSONImportTask::hasCurrentSchema()
 JSONParsingSchema& JSONImportTask::currentSchema()
 {
     assert(hasCurrentSchema());
+
+#if USE_JASTERIX
+    return *task_manager_.asterixImporterTask().schema();
+#endif
+
     return schemas_.at(current_schema_);
 }
 
 void JSONImportTask::removeCurrentSchema()
 {
-    assert(hasSchema(current_schema_));
+    assert(hasCurrentSchema());
+
+#if USE_JASTERIX
+    assert (current_schema_ != "jASTERIX");
+#endif
+
     schemas_.erase(current_schema_);
-    assert(!hasSchema(current_schema_));
+    assert(!hasCurrentSchema());
 
     current_schema_ = "";
 
@@ -282,6 +311,11 @@ bool JSONImportTask::canImportFile()
     if (!current_schema_.size())
         return false;
 
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        return true;
+#endif
+
     if (!schemas_.count(current_schema_))
     {
         current_schema_ = "";
@@ -325,8 +359,10 @@ void JSONImportTask::run()
 
     all_done_ = false;
 
-    assert(schemas_.count(current_schema_));
-    for (auto& map_it : schemas_.at(current_schema_))
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
+
+    for (auto& map_it : current_schema)
         if (!map_it.second.initialized())
             map_it.second.initialize();
 
@@ -425,12 +461,13 @@ void JSONImportTask::parseJSONDoneSlot()
 
     logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
 
-    assert(schemas_.count(current_schema_));
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
 
     std::vector<std::string> data_records_keys{"records"};
 
     std::shared_ptr<JSONMappingJob> json_map_job = std::make_shared<JSONMappingJob>(
-        std::move(json_objects), data_records_keys, schemas_.at(current_schema_).parsers());
+        std::move(json_objects), data_records_keys, current_schema.parsers());
 
     connect(json_map_job.get(), &JSONMappingJob::obsoleteSignal, this,
             &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
@@ -510,11 +547,13 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
-    assert(schemas_.count(current_schema_));
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
+    //assert(schemas_.count(current_schema_));
 
     if (!dbo_variable_sets_.size())  // initialize if empty
     {
-        for (auto& parser_it : schemas_.at(current_schema_))
+        for (auto& parser_it : current_schema)
         {
             std::string dbo_name = parser_it.second.dbObject().name();
 
