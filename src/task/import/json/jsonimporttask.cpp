@@ -284,6 +284,8 @@ bool JSONImportTask::checkPrerequisites()
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
+    loginf << "JSONImportTask: checkPrerequisites: done " << done_;
+
     return true;
 }
 

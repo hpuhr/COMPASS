@@ -219,6 +219,32 @@ void JSONImportTaskWidget::addFileSlot()
         addFile(filename.toStdString());
 }
 
+void JSONImportTaskWidget::selectFile(const std::string& filename)
+{
+    assert(task_.hasFile(filename));
+    task_.currentFilename(filename);
+
+    assert (file_list_);
+    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+    assert (items.size() > 0);
+
+    for (auto item_it : items)
+    {
+        assert (item_it);
+        file_list_->setCurrentItem(item_it);
+    }
+
+}
+
+void JSONImportTaskWidget::selectSchema(const std::string& schema_name)
+{
+    assert(task_.hasSchema(schema_name));
+    task_.currentSchemaName(schema_name);
+
+    updateToCurrentSchema();
+
+}
+
 void JSONImportTaskWidget::deleteFileSlot()
 {
     loginf << "JSONImportTaskWidget: deleteFileSlot";

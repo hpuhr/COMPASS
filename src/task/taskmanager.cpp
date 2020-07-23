@@ -499,6 +499,17 @@ void TaskManager::importASTERIXFile(const std::string& filename)
 }
 #endif
 
+void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
+{
+    loginf << "TaskManager: importJSONFile: filename '" << filename << "' schema '" << schema << "'";
+
+    assert (schema.size());
+
+    json_import_file_ = true;
+    json_import_filename_ = filename;
+    json_import_schema_ = schema;
+}
+
 void TaskManager::importGPSTrailFile(const std::string& filename)
 {
     automatic_tasks_defined_ = true;
@@ -714,6 +725,53 @@ void TaskManager::performAutomaticTasks ()
         }
     }
     #endif
+
+    if (json_import_file_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
+               << json_import_filename_ << "'";
+
+        if (!Files::fileExists(json_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        if(!json_import_task_->hasSchema(json_import_schema_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*json_import_task_);
+        if(widget_->getCurrentTaskName() != json_import_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        JSONImportTaskWidget* json_import_task_widget =
+            dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+        assert(json_import_task_widget);
+
+        json_import_task_widget->addFile(json_import_filename_);
+        json_import_task_widget->selectFile(json_import_filename_);
+        json_import_task_widget->selectSchema(json_import_schema_);
+
+        assert(json_import_task_->canRun());
+        json_import_task_->showDoneSummary(false);
+
+        widget_->runTask(*json_import_task_);
+
+        while (!json_import_task_->done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+    }
 
     if (gps_trail_import_file_)
     {

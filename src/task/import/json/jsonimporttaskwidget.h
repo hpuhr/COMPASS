@@ -63,6 +63,8 @@ class JSONImportTaskWidget : public TaskWidget
     virtual ~JSONImportTaskWidget();
 
     void addFile(const std::string& filename);
+    void selectFile(const std::string& filename);
+    void selectSchema(const std::string& schema_name);
 
     void runStarted();
     void runDone();

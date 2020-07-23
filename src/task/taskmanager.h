@@ -108,6 +108,7 @@ class TaskManager : public QObject, public Configurable
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
 #endif
+    void importJSONFile(const std::string& filename, const std::string& schema);
     void importGPSTrailFile(const std::string& filename);
 
 
@@ -121,9 +122,6 @@ class TaskManager : public QObject, public Configurable
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
-
-
-
 
 protected:
     bool expert_mode_{false};
@@ -143,6 +141,10 @@ protected:
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
 #endif
+
+    bool json_import_file_ {false};
+    std::string json_import_filename_;
+    std::string json_import_schema_;
 
     bool gps_trail_import_file_ {false};
     std::string gps_trail_import_filename_;
