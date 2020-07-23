@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "task.h"
+#include "asterixpostprocess.h"
 
 #include <QObject>
 #include <memory>
@@ -111,13 +112,15 @@ class JSONImportTask : public Task, public Configurable
     std::string current_schema_;
     std::map<std::string, JSONParsingSchema> schemas_;
 
+    ASTERIXPostProcess post_process_;
+
     size_t insert_active_{0};
 
     std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set<int> added_data_sources_;
 
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
-    std::vector<std::shared_ptr<JSONParseJob>> json_parse_jobs_;
+    std::shared_ptr<JSONParseJob> json_parse_job_;
     std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
 
     bool test_{false};

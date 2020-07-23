@@ -520,6 +520,8 @@ void JSONImportTaskWidget::updateParserBox()
             return;
 #endif
 
+        loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentSchema().name();
+
         for (auto& parser_it : task_.currentSchema())
         {
             object_parser_box_->addItem(parser_it.first.c_str());
