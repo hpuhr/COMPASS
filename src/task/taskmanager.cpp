@@ -771,6 +771,8 @@ void TaskManager::performAutomaticTasks ()
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
+
+        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
     }
 
     if (gps_trail_import_file_)
@@ -810,6 +812,13 @@ void TaskManager::performAutomaticTasks ()
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
+    }
+
+    start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
     }
 
     if (auto_process_)
