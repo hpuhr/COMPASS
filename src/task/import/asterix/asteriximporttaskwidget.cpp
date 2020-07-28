@@ -213,18 +213,17 @@ void ASTERIXImportTaskWidget::addFile(const std::string& filename)
 
 void ASTERIXImportTaskWidget::selectFile(const std::string& filename)
 {
-    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
-    assert (items.size() > 0);
-
     assert(task_.hasFile(filename));
     task_.currentFilename(filename);
+
+    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+    assert (items.size() > 0);
 
     for (auto item_it : items)
     {
         assert (item_it);
         file_list_->setCurrentItem(item_it);
     }
-
 }
 
 void ASTERIXImportTaskWidget::deleteFileSlot()

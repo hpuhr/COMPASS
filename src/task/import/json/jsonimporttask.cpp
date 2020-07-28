@@ -39,6 +39,10 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 
+#if USE_JASTERIX
+#include "asteriximporttask.h"
+#endif
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDateTime>
@@ -90,8 +94,8 @@ void JSONImportTask::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "JSONParsingSchema")
     {
         std::string name = configuration()
-                               .getSubConfiguration(class_id, instance_id)
-                               .getParameterConfigValueString("name");
+                .getSubConfiguration(class_id, instance_id)
+                .getParameterConfigValueString("name");
 
         assert(schemas_.find(name) == schemas_.end());
 
@@ -99,9 +103,9 @@ void JSONImportTask::generateSubConfigurable(const std::string& class_id,
                << " with name " << name;
 
         schemas_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(name),                          // args for key
-            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+                    std::piecewise_construct,
+                    std::forward_as_tuple(name),                          // args for key
+                    std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error("JSONImporterTask: generateSubConfigurable: unknown class_id " +
@@ -199,10 +203,25 @@ void JSONImportTask::currentFilename(const std::string& filename)
     emit statusChangedSignal(name_);
 }
 
+bool JSONImportTask::hasSchema(const std::string& name)
+{
+#if USE_JASTERIX
+    if (name == "jASTERIX")
+        return true;
+#endif
+
+    return schemas_.count(name) > 0;
+}
+
 bool JSONImportTask::hasCurrentSchema()
 {
     if (!current_schema_.size())
         return false;
+
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        return true;
+#endif
 
     return schemas_.count(current_schema_) > 0;
 }
@@ -210,14 +229,27 @@ bool JSONImportTask::hasCurrentSchema()
 JSONParsingSchema& JSONImportTask::currentSchema()
 {
     assert(hasCurrentSchema());
+
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        return *task_manager_.asterixImporterTask().schema();
+    else
+        return schemas_.at(current_schema_);
+#else
     return schemas_.at(current_schema_);
+#endif
 }
 
 void JSONImportTask::removeCurrentSchema()
 {
-    assert(hasSchema(current_schema_));
+    assert(hasCurrentSchema());
+
+#if USE_JASTERIX
+    assert (current_schema_ != "jASTERIX");
+#endif
+
     schemas_.erase(current_schema_);
-    assert(!hasSchema(current_schema_));
+    assert(!hasCurrentSchema());
 
     current_schema_ = "";
 
@@ -234,9 +266,14 @@ std::string JSONImportTask::currentSchemaName() const { return current_schema_; 
 
 void JSONImportTask::currentSchemaName(const std::string& current_schema)
 {
+    loginf << "JSONImportTask: currentSchemaName: " << current_schema;
+
     current_schema_ = current_schema;
 
+    loginf << "JSONImportTask: currentSchemaName: emitting signal";
     emit statusChangedSignal(name_);
+
+    loginf << "JSONImportTask: currentSchemaName: done";
 }
 
 bool JSONImportTask::checkPrerequisites()
@@ -246,6 +283,8 @@ bool JSONImportTask::checkPrerequisites()
 
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+
+    loginf << "JSONImportTask: checkPrerequisites: done " << done_;
 
     return true;
 }
@@ -281,6 +320,11 @@ bool JSONImportTask::canImportFile()
 
     if (!current_schema_.size())
         return false;
+
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        return true;
+#endif
 
     if (!schemas_.count(current_schema_))
     {
@@ -325,14 +369,23 @@ void JSONImportTask::run()
 
     all_done_ = false;
 
-    assert(schemas_.count(current_schema_));
-    for (auto& map_it : schemas_.at(current_schema_))
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
+
+    for (auto& map_it : current_schema)
         if (!map_it.second.initialized())
             map_it.second.initialize();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+        read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, 1);
+    else
+        read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
+#else
     read_json_job_ = std::make_shared<ReadJSONFileJob>(current_filename_, num_objects_chunk);
+#endif
 
     connect(read_json_job_.get(), &ReadJSONFileJob::readJSONFilePartSignal, this,
             &JSONImportTask::addReadJSONSlot, Qt::QueuedConnection);
@@ -356,8 +409,8 @@ void JSONImportTask::addReadJSONSlot()
 
     loginf << "JSONImporterTask: addReadJSONSlot: moving objects";
 
-    if (maxLoadReached())
-        read_json_job_->pause();
+//    if (maxLoadReached())
+//        read_json_job_->pause();
 
     std::vector<std::string> objects = read_json_job_->objects();
 
@@ -368,19 +421,28 @@ void JSONImportTask::addReadJSONSlot()
     loginf << "JSONImporterTask: addReadJSONSlot: bytes " << bytes_read_ << " to read "
            << bytes_to_read_ << " percent " << read_status_percent_;
 
-    // start parse job
-    loginf << "JSONImporterTask: addReadJSONSlot: starting parse job";
-    std::shared_ptr<JSONParseJob> json_parse_job =
-        std::make_shared<JSONParseJob>(std::move(objects));
+    while (json_parse_job_)  // only one can exist at a time
+    {
+        if (read_json_job_)
+            read_json_job_->pause();
 
-    connect(json_parse_job.get(), &JSONParseJob::obsoleteSignal, this,
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
+    // start parse job
+    assert (!json_parse_job_);
+
+    loginf << "JSONImporterTask: addReadJSONSlot: starting parse job";
+    json_parse_job_ =
+            std::make_shared<JSONParseJob>(std::move(objects), current_schema_, post_process_);
+
+    connect(json_parse_job_.get(), &JSONParseJob::obsoleteSignal, this,
             &JSONImportTask::parseJSONObsoleteSlot, Qt::QueuedConnection);
-    connect(json_parse_job.get(), &JSONParseJob::doneSignal, this,
+    connect(json_parse_job_.get(), &JSONParseJob::doneSignal, this,
             &JSONImportTask::parseJSONDoneSlot, Qt::QueuedConnection);
 
-    JobManager::instance().addNonBlockingJob(json_parse_job);
-
-    json_parse_jobs_.push_back(json_parse_job);
+    JobManager::instance().addNonBlockingJob(json_parse_job_);
 
     loginf << "JSONImporterTask: addReadJSONSlot: updating message box";
     updateMsgBox();
@@ -411,26 +473,56 @@ void JSONImportTask::parseJSONDoneSlot()
 {
     logdbg << "JSONImporterTask: parseJSONDoneSlot";
 
-    JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
-    assert(parse_job);
+    assert (json_parse_job_);
 
-    objects_parsed_ += parse_job->objectsParsed();
-    objects_parse_errors_ += parse_job->parseErrors();
-    std::unique_ptr<nlohmann::json> json_objects = parse_job->jsonObjects();
-    assert(json_objects->contains("records"));
+    objects_parsed_ += json_parse_job_->objectsParsed();
+    objects_parse_errors_ += json_parse_job_->parseErrors();
+    std::unique_ptr<nlohmann::json> json_objects = json_parse_job_->jsonObjects();
 
-    json_parse_jobs_.erase(json_parse_jobs_.begin());
+    json_parse_job_ = nullptr;
 
-    size_t count = json_objects->at("records").size();
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
 
+    std::vector<std::string> keys;
+
+#if USE_JASTERIX
+    if (current_schema_ == "jASTERIX")
+    {
+        //loginf << "UGA '" << json_objects->dump(4) << "'";
+
+        if (json_objects->contains("frames")) // framed
+        {
+            keys = {"frames", "content", "data_blocks", "content", "records"};
+        }
+        else // not framed
+        {
+            assert (json_objects->contains("data_blocks"));
+            keys = {"data_blocks", "content", "records"};
+        }
+
+        //loginf << "UGA2";
+    }
+    else
+    {
+        assert(json_objects->contains("data")); // always written in data array
+        keys = {"data"};
+
+        size_t count = json_objects->at("data").size();
+        logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
+    }
+#else
+    assert(json_objects->contains("data")); // always written in data array
+    keys = {"data"};
+
+    size_t count = json_objects->at("data").size();
     logdbg << "JSONImporterTask: parseJSONDoneSlot: " << count << " parsed objects";
+#endif
 
-    assert(schemas_.count(current_schema_));
-
-    std::vector<std::string> data_records_keys{"records"};
+    //loginf << "UGA3";
 
     std::shared_ptr<JSONMappingJob> json_map_job = std::make_shared<JSONMappingJob>(
-        std::move(json_objects), data_records_keys, schemas_.at(current_schema_).parsers());
+                std::move(json_objects), keys, current_schema.parsers());
 
     connect(json_map_job.get(), &JSONMappingJob::obsoleteSignal, this,
             &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
@@ -510,11 +602,13 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
-    assert(schemas_.count(current_schema_));
+    assert (hasCurrentSchema());
+    JSONParsingSchema& current_schema = currentSchema();
+    //assert(schemas_.count(current_schema_));
 
     if (!dbo_variable_sets_.size())  // initialize if empty
     {
-        for (auto& parser_it : schemas_.at(current_schema_))
+        for (auto& parser_it : current_schema)
         {
             std::string dbo_name = parser_it.second.dbObject().name();
 
@@ -567,7 +661,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         ++insert_active_;
 
         has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic") &&
-                      buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
+                buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
         logdbg << "JSONImportTask: insertData: " << db_object.name() << " has sac/sic "
                << has_sac_sic << " buffer size " << buffer->size();
@@ -633,7 +727,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
         for (auto ds_key_it : data_source_keys)
             if (datasources_existing.count(ds_key_it) == 0 &&
-                added_data_sources_.count(ds_key_it) == 0)
+                    added_data_sources_.count(ds_key_it) == 0)
             {
                 if (datasources_to_add.count(ds_key_it) == 0)
                 {
@@ -669,18 +763,18 @@ void JSONImportTask::checkAllDone()
     logdbg << "JSONImporterTask: checkAllDone";
 
     loginf << "JSONImporterTask: checkAllDone: all done " << all_done_ << " read "
-           << (read_json_job_ == nullptr) << " parse jobs " << json_parse_jobs_.empty()
+           << (read_json_job_ == nullptr) << " parse jobs " << (json_parse_job_ == nullptr)
            << " map jobs " << json_map_jobs_.empty() << " insert active " << (insert_active_ == 0);
 
-    if (!all_done_ && read_json_job_ == nullptr && json_parse_jobs_.size() == 0 &&
-        json_map_jobs_.size() == 0 && insert_active_ == 0)
+    if (!all_done_ && read_json_job_ == nullptr && json_parse_job_ == nullptr &&
+            json_map_jobs_.size() == 0 && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
 
         boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
         std::string time_str =
-            String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
+                String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
@@ -709,9 +803,9 @@ void JSONImportTask::checkAllDone()
 
             // in case data was imported, clear other task done properties
             ATSDB::instance().interface().setProperty(
-                RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
             ATSDB::instance().interface().setProperty(
-                CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
+                        CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
             ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
@@ -758,7 +852,7 @@ void JSONImportTask::updateMsgBox()
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     std::string elapsed_time_str =
-        String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
+            String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
     // calculate insert rate
     double objects_per_second = 0.0;
@@ -778,7 +872,7 @@ void JSONImportTask::updateMsgBox()
         double avg_time_per_obj_s = 1.0 / objects_per_second;
 
         double avg_mapped_obj_bytes =
-            static_cast<double>(bytes_read_) / static_cast<double>(objects_mapped_);
+                static_cast<double>(bytes_read_) / static_cast<double>(objects_mapped_);
         double num_obj_total = static_cast<double>(bytes_to_read_) / avg_mapped_obj_bytes;
 
         double remaining_obj_num = 0.0;
@@ -786,7 +880,7 @@ void JSONImportTask::updateMsgBox()
         if (objects_not_mapped_ < objects_parsed_)  // skipped objects ok
         {
             double not_skipped_ratio = static_cast<double>(objects_parsed_ - objects_not_mapped_) /
-                                       static_cast<double>(objects_parsed_);
+                    static_cast<double>(objects_parsed_);
             remaining_obj_num = (num_obj_total * not_skipped_ratio) - objects_inserted_;
 
             //        loginf << "UGA avg bytes " << avg_obj_bytes << " num total " << num_obj_total
@@ -812,10 +906,10 @@ void JSONImportTask::updateMsgBox()
 
     if (bytes_read_ > 1e9)
         msg += "Data read: " +
-               String::doubleToStringPrecision(static_cast<double>(bytes_read_) * 1e-9, 2) + " GB";
+                String::doubleToStringPrecision(static_cast<double>(bytes_read_) * 1e-9, 2) + " GB";
     else
         msg += "Data read: " +
-               String::doubleToStringPrecision(static_cast<double>(bytes_read_) * 1e-6, 2) + " MB";
+                String::doubleToStringPrecision(static_cast<double>(bytes_read_) * 1e-6, 2) + " MB";
 
     if (bytes_to_read_)
         msg += " (" + std::to_string(static_cast<int>(read_status_percent_)) + "%)\n\n";
@@ -852,7 +946,7 @@ void JSONImportTask::updateMsgBox()
 
 bool JSONImportTask::maxLoadReached()
 {
-    return json_parse_jobs_.size() > 2 || json_map_jobs_.size() > 2;
+    return json_parse_job_ != nullptr || json_map_jobs_.size() > 2;
 }
 
 void JSONImportTask::insertProgressSlot(float percent)

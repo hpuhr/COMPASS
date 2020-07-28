@@ -111,6 +111,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
     if (framing_ == "")
     {
         assert(extracted_data_->contains("data_blocks"));
+        assert(extracted_data_->at("data_blocks").is_array());
 
         std::vector<std::string> keys{"content", "records"};
 
@@ -203,6 +204,7 @@ size_t ASTERIXDecodeJob::numErrors() const { return num_errors_; }
 
 std::string ASTERIXDecodeJob::errorMessage() const { return error_message_; }
 
+// equivalent function in JSONParseJob
 void ASTERIXDecodeJob::checkCAT001SacSics(nlohmann::json& data_block)
 {
     if (!data_block.contains("content"))
