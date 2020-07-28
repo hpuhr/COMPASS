@@ -13,9 +13,15 @@
                     "local_key": "ds_id",
                     "longitude_column": "ds_tracker.POS_LONG_DEG",
                     "meta_table": "TrackerDataSources",
+                    "mode_s_azimuth_stddev_column": "",
+                    "mode_s_range_stddev_column": "",
                     "name_column": "le_ds.DS_NAME",
+                    "primary_azimuth_stddev_column": "",
+                    "primary_range_stddev_column": "",
                     "sac_column": "le_ds.SAC",
                     "schema": "SCDB Extended",
+                    "secondary_azimuth_stddev_column": "",
+                    "secondary_range_stddev_column": "",
                     "short_name_column": "le_ds.DS_SHORT_NAME",
                     "sic_column": "le_ds.SIC"
                 }
@@ -28,9 +34,15 @@
                     "local_key": "ds_id",
                     "longitude_column": "ds_tracker.POS_LONG_DEG",
                     "meta_table": "TrackerDataSources",
+                    "mode_s_azimuth_stddev_column": "",
+                    "mode_s_range_stddev_column": "",
                     "name_column": "le_ds.DS_NAME",
+                    "primary_azimuth_stddev_column": "",
+                    "primary_range_stddev_column": "",
                     "sac_column": "le_ds.SAC",
                     "schema": "SCDB",
+                    "secondary_azimuth_stddev_column": "",
+                    "secondary_range_stddev_column": "",
                     "short_name_column": "le_ds.DS_SHORT_NAME",
                     "sic_column": "le_ds.SIC"
                 }
