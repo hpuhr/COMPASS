@@ -731,12 +731,14 @@ void TaskManager::performAutomaticTasks ()
         loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
                << json_import_filename_ << "'";
 
+#if USE_JASTERIX
         if (!Files::fileExists(json_import_filename_))
         {
             logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
                    << "' does not exist";
             return;
         }
+#endif
 
         if(!json_import_task_->hasSchema(json_import_schema_))
         {
