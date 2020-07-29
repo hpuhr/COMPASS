@@ -65,6 +65,14 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_primary_range_stddev_)
         primary_range_stddev_ = other.primaryRangeStdDev();
 
+    has_primary_ir_min_ = other.hasPrimaryRangeMin();
+    if (has_primary_ir_min_)
+        primary_ir_min_ = other.primaryRangeMin();
+
+    has_primary_ir_max_ = other.hasPrimaryRangeMax();
+    if (has_primary_ir_max_)
+        primary_ir_max_ = other.primaryRangeMax();
+
     // ssr
     has_secondary_azimuth_stddev_ = other.hasSecondaryAzimuthStdDev();
     if (has_secondary_azimuth_stddev_)
@@ -73,6 +81,14 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     has_secondary_range_stddev_ = other.hasSecondaryRangeStdDev();
     if (has_secondary_range_stddev_)
         secondary_range_stddev_ = other.secondaryRangeStdDev();
+
+    has_secondary_ir_min_ = other.hasSecondaryRangeMin();
+    if (has_secondary_ir_min_)
+        secondary_ir_min_ = other.secondaryRangeMin();
+
+    has_secondary_ir_max_ = other.hasSecondaryRangeMax();
+    if (has_secondary_ir_max_)
+        secondary_ir_max_ = other.secondaryRangeMax();
 
     // mode s
     has_mode_s_azimuth_stddev_ = other.hasModeSAzimuthStdDev();
@@ -83,7 +99,13 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_mode_s_range_stddev_)
         mode_s_range_stddev_ = other.modeSRangeStdDev();
 
-    // TODO
+    has_mode_s_ir_min_ = other.hasModeSRangeMin();
+    if (has_mode_s_ir_min_)
+        mode_s_ir_min_ = other.modeSRangeMin();
+
+    has_mode_s_ir_max_ = other.hasModeSRangeMax();
+    if (has_mode_s_ir_max_)
+        mode_s_ir_max_ = other.modeSRangeMax();
 
 //    loginf << "DBODataSource: operator=: name " << name_ << " short name "
 //           << (has_short_name_ ? short_name_ : "false") << " sac "
@@ -115,25 +137,44 @@ bool DBODataSource::operator==(const StoredDBODataSource& other) const
             && (has_altitude_ == other.hasAltitude())
             && (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true)
 
+            // psr
             && (has_primary_azimuth_stddev_ == other.hasPrimaryAzimuthStdDev())
             && (has_primary_azimuth_stddev_ ? fabs(primary_azimuth_stddev_ - other.primaryAzimuthStdDev()) < 1e-10 : true)
 
             && (has_primary_range_stddev_ == other.hasPrimaryRangeStdDev())
             && (has_primary_range_stddev_ ? fabs(primary_range_stddev_ - other.primaryRangeStdDev()) < 1e-10 : true)
 
+            && (has_primary_ir_min_ == other.hasPrimaryRangeMin())
+            && (has_primary_ir_min_ ? fabs(primary_ir_min_ - other.primaryRangeMin()) == 0 : true)
+
+            && (has_primary_ir_max_ == other.hasPrimaryRangeMax())
+            && (has_primary_ir_max_ ? fabs(primary_ir_max_ - other.primaryRangeMax()) == 0 : true)
+
+            // ssr
             && (has_secondary_azimuth_stddev_ == other.hasSecondaryAzimuthStdDev())
             && (has_secondary_azimuth_stddev_ ? fabs(secondary_azimuth_stddev_ - other.secondaryAzimuthStdDev()) < 1e-10 : true)
 
             && (has_secondary_range_stddev_ == other.hasSecondaryRangeStdDev())
             && (has_secondary_range_stddev_ ? fabs(secondary_range_stddev_ - other.secondaryRangeStdDev()) < 1e-10 : true)
 
+            && (has_secondary_ir_min_ == other.hasSecondaryRangeMin())
+            && (has_secondary_ir_min_ ? fabs(secondary_ir_min_ - other.secondaryRangeMin()) == 0 : true)
+
+            && (has_secondary_ir_max_ == other.hasSecondaryRangeMax())
+            && (has_secondary_ir_max_ ? fabs(secondary_ir_max_ - other.secondaryRangeMax()) == 0 : true)
+
+            // mode s
             && (has_mode_s_azimuth_stddev_ == other.hasModeSAzimuthStdDev())
             && (has_mode_s_azimuth_stddev_ ? fabs(mode_s_azimuth_stddev_ - other.modeSAzimuthStdDev()) < 1e-10 : true)
 
             && (has_mode_s_range_stddev_ == other.hasModeSRangeStdDev())
-            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true);
+            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true)
 
-    // TODO
+            && (has_mode_s_ir_min_ == other.hasModeSRangeMin())
+            && (has_mode_s_ir_min_ ? fabs(mode_s_ir_min_ - other.modeSRangeMin()) == 0 : true)
+
+            && (has_mode_s_ir_max_ == other.hasModeSRangeMax())
+            && (has_mode_s_ir_max_ ? fabs(mode_s_ir_max_ - other.modeSRangeMax()) == 0 : true);
 }
 
 DBODataSource::~DBODataSource() { logdbg << "DBODataSource: dtor: id " << std::to_string(id_); }
@@ -372,7 +413,7 @@ double DBODataSource::modeSRangeStdDev() const
     return mode_s_range_stddev_;
 }
 
-// ssr min range
+// mode s min range
 
 bool DBODataSource::hasModeSRangeMin() const
 {
@@ -394,7 +435,7 @@ int DBODataSource::modeSRangeMin() const
     return mode_s_ir_min_;
 }
 
-// ssr max range
+// mode s max range
 
 bool DBODataSource::hasModeSRangeMax() const
 {

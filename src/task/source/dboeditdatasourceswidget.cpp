@@ -493,6 +493,122 @@ void DBOEditDataSourcesWidget::updateConfigDSTable()
                 config_ds_table_->setItem(row, col, item);
             }
         }
+        // psr ranges
+        if (has_primary_range_min_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasPrimaryRangeMin())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMin()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_primary_range_max_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasPrimaryRangeMax())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.primaryRangeMax()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        // ssr ranges
+        if (has_secondary_range_min_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasSecondaryRangeMin())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMin()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_secondary_range_max_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasSecondaryRangeMax())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.secondaryRangeMax()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        // mode s ranges
+        if (has_mode_s_range_min_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasModeSRangeMin())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMin()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        if (has_mode_s_range_max_)  // psr azm
+        {
+            ++col;
+            if (ds_it.second.hasModeSRangeMax())
+            {
+                QTableWidgetItem* item =
+                    new QTableWidgetItem(QString::number(ds_it.second.modeSRangeMax()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
 
         // psr std devs
         if (has_primary_azimuth_stddev_)  // psr azm
@@ -1120,15 +1236,37 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
     else if (col_name == "Primary Range StdDev")
     {
         if (!text.size())
-        {
             ds.removePrimaryRangeStdDev();
-        }
         else
         {
             double value = item->text().toDouble(&ok);
 
             if (ok)
                 ds.primaryRangeStdDev(value);
+        }
+    }
+    else if (col_name == "Primary IR Range Min")
+    {
+        if (!text.size())
+            ds.removePrimaryRangeMin();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.primaryRangeMin(value);
+        }
+    }
+    else if (col_name == "Primary IR Range Max")
+    {
+        if (!text.size())
+            ds.removePrimaryRangeMax();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.primaryRangeMax(value);
         }
     }
     else if (col_name == "Secondary Azimuth StdDev")
@@ -1155,6 +1293,30 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
                 ds.secondaryRangeStdDev(value);
         }
     }
+    else if (col_name == "Secondary IR Range Min")
+    {
+        if (!text.size())
+            ds.removeSecondaryRangeMin();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.secondaryRangeMin(value);
+        }
+    }
+    else if (col_name == "Secondary IR Range Max")
+    {
+        if (!text.size())
+            ds.removeSecondaryRangeMax();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.secondaryRangeMax(value);
+        }
+    }
     else if (col_name == "Mode S Azimuth StdDev")
     {
         if (!text.size())
@@ -1177,6 +1339,30 @@ void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem* item)
 
             if (ok)
                 ds.modeSRangeStdDev(value);
+        }
+    }
+    else if (col_name == "Mode S IR Range Min")
+    {
+        if (!text.size())
+            ds.removeModeSRangeMin();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.modeSRangeMin(value);
+        }
+    }
+    else if (col_name == "Mode S IR Range Max")
+    {
+        if (!text.size())
+            ds.removeModeSRangeMax();
+        else
+        {
+            int value = item->text().toInt(&ok);
+
+            if (ok)
+                ds.modeSRangeMax(value);
         }
     }
     else

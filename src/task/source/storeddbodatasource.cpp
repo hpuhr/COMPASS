@@ -46,18 +46,38 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id,
     registerParameter("has_altitude", &has_altitude_, false);
     registerParameter("altitude", &altitude_, 0);
 
+    // psr
     registerParameter("has_primary_azimuth_stddev", &has_primary_azimuth_stddev_, false);
     registerParameter("primary_azimuth_stddev", &primary_azimuth_stddev_, 0);
     registerParameter("has_primary_range_stddev", &has_primary_range_stddev_, false);
     registerParameter("primary_range_stddev", &primary_range_stddev_, 0);
+
+    registerParameter("has_primary_ir_min", &has_primary_ir_min_, false);
+    registerParameter("primary_ir_min", &primary_ir_min_, 0);
+    registerParameter("has_primary_ir_max", &has_primary_ir_max_, false);
+    registerParameter("primary_ir_max", &primary_ir_max_, 0);
+
+    // ssr
     registerParameter("has_secondary_azimuth_stddev", &has_secondary_azimuth_stddev_, false);
     registerParameter("secondary_azimuth_stddev", &secondary_azimuth_stddev_, 0);
     registerParameter("has_secondary_range_stddev", &has_secondary_range_stddev_, false);
     registerParameter("secondary_range_stddev", &secondary_range_stddev_, 0);
+
+    registerParameter("has_secondary_ir_min", &has_secondary_ir_min_, false);
+    registerParameter("secondary_ir_min", &secondary_ir_min_, 0);
+    registerParameter("has_secondary_ir_max", &has_secondary_ir_max_, false);
+    registerParameter("secondary_ir_max", &secondary_ir_max_, 0);
+
+    // mode s
     registerParameter("has_mode_s_azimuth_stddev", &has_mode_s_azimuth_stddev_, false);
     registerParameter("mode_s_azimuth_stddev", &mode_s_azimuth_stddev_, 0);
     registerParameter("has_mode_s_range_stddev", &has_mode_s_range_stddev_, false);
     registerParameter("mode_s_range_stddev", &mode_s_range_stddev_, 0);
+
+    registerParameter("has_mode_s_ir_min", &has_mode_s_ir_min_, false);
+    registerParameter("mode_s_ir_min", &mode_s_ir_min_, 0);
+    registerParameter("has_mode_s_ir_max", &has_mode_s_ir_max_, false);
+    registerParameter("mode_s_ir_max", &mode_s_ir_max_, 0);
 }
 
 StoredDBODataSource::~StoredDBODataSource() {}
@@ -96,6 +116,14 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
     if (has_primary_range_stddev_)
         primary_range_stddev_ = other.primaryRangeStdDev();
 
+    has_primary_ir_min_ = other.hasPrimaryRangeMin();
+    if (has_primary_ir_min_)
+        primary_ir_min_ = other.primaryRangeMin();
+
+    has_primary_ir_max_ = other.hasPrimaryRangeMax();
+    if (has_primary_ir_max_)
+        primary_ir_max_ = other.primaryRangeMax();
+
     // ssr
     has_secondary_azimuth_stddev_ = other.hasSecondaryAzimuthStdDev();
     if (has_secondary_azimuth_stddev_)
@@ -105,6 +133,14 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
     if (has_secondary_range_stddev_)
         secondary_range_stddev_ = other.secondaryRangeStdDev();
 
+    has_secondary_ir_min_ = other.hasSecondaryRangeMin();
+    if (has_secondary_ir_min_)
+        secondary_ir_min_ = other.secondaryRangeMin();
+
+    has_secondary_ir_max_ = other.hasSecondaryRangeMax();
+    if (has_secondary_ir_max_)
+        secondary_ir_max_ = other.secondaryRangeMax();
+
     // mode s
     has_mode_s_azimuth_stddev_ = other.hasModeSAzimuthStdDev();
     if (has_mode_s_azimuth_stddev_)
@@ -113,6 +149,14 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
     has_mode_s_range_stddev_ = other.hasModeSRangeStdDev();
     if (has_mode_s_range_stddev_)
         mode_s_range_stddev_ = other.modeSRangeStdDev();
+
+    has_mode_s_ir_min_ = other.hasModeSRangeMin();
+    if (has_mode_s_ir_min_)
+        mode_s_ir_min_ = other.modeSRangeMin();
+
+    has_mode_s_ir_max_ = other.hasModeSRangeMax();
+    if (has_mode_s_ir_max_)
+        mode_s_ir_max_ = other.modeSRangeMax();
 
     return *this;
 }
@@ -154,17 +198,32 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     has_primary_range_stddev_ = other.has_primary_range_stddev_;
     primary_range_stddev_ = other.primary_range_stddev_;
 
+    has_primary_ir_min_ = other.has_primary_ir_min_;
+    primary_ir_min_= other.primary_ir_min_;
+    has_primary_ir_max_ = other.has_primary_ir_max_;
+    primary_ir_max_ = other.primary_ir_max_;
+
     // ssr
     has_secondary_azimuth_stddev_ = other.has_secondary_azimuth_stddev_;
     secondary_azimuth_stddev_ = other.secondary_azimuth_stddev_;
     has_secondary_range_stddev_ = other.has_secondary_range_stddev_;
     secondary_range_stddev_ = other.secondary_range_stddev_;
 
+    has_secondary_ir_min_ = other.has_secondary_ir_min_;
+    secondary_ir_min_= other.secondary_ir_min_;
+    has_secondary_ir_max_ = other.has_secondary_ir_max_;
+    secondary_ir_max_ = other.secondary_ir_max_;
+
     // mode s
     has_mode_s_azimuth_stddev_ = other.has_mode_s_azimuth_stddev_;
     mode_s_azimuth_stddev_ = other.mode_s_azimuth_stddev_;
     has_mode_s_range_stddev_ = other.has_mode_s_range_stddev_;
     mode_s_range_stddev_ = other.mode_s_range_stddev_;
+
+    has_mode_s_ir_min_ = other.has_mode_s_ir_min_;
+    mode_s_ir_min_= other.mode_s_ir_min_;
+    has_mode_s_ir_max_ = other.has_mode_s_ir_max_;
+    mode_s_ir_max_ = other.mode_s_ir_max_;
 
     other.configuration().updateParameterPointer("dbo_name", &dbo_name_);
     other.configuration().updateParameterPointer("id", &id_);
@@ -182,18 +241,38 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     other.configuration().updateParameterPointer("has_altitude", &has_altitude_);
     other.configuration().updateParameterPointer("altitude", &altitude_);
 
+    // psr
     other.configuration().updateParameterPointer("has_primary_azimuth_stddev", &has_primary_azimuth_stddev_);
     other.configuration().updateParameterPointer("primary_azimuth_stddev", &primary_azimuth_stddev_);
     other.configuration().updateParameterPointer("has_primary_range_stddev", &has_primary_range_stddev_);
     other.configuration().updateParameterPointer("primary_range_stddev", &primary_range_stddev_);
+
+    other.configuration().updateParameterPointer("has_primary_ir_min", &has_primary_ir_min_);
+    other.configuration().updateParameterPointer("primary_ir_min", &primary_ir_min_);
+    other.configuration().updateParameterPointer("has_primary_ir_max", &has_primary_ir_max_);
+    other.configuration().updateParameterPointer("primary_ir_max", &primary_ir_max_);
+
+    // ssr
     other.configuration().updateParameterPointer("has_secondary_azimuth_stddev", &has_secondary_azimuth_stddev_);
     other.configuration().updateParameterPointer("secondary_azimuth_stddev", &secondary_azimuth_stddev_);
     other.configuration().updateParameterPointer("has_secondary_range_stddev", &has_secondary_range_stddev_);
     other.configuration().updateParameterPointer("secondary_range_stddev", &secondary_range_stddev_);
+
+    other.configuration().updateParameterPointer("has_secondary_ir_min", &has_secondary_ir_min_);
+    other.configuration().updateParameterPointer("secondary_ir_min", &secondary_ir_min_);
+    other.configuration().updateParameterPointer("has_secondary_ir_max", &has_secondary_ir_max_);
+    other.configuration().updateParameterPointer("secondary_ir_max", &secondary_ir_max_);
+
+    // mode s
     other.configuration().updateParameterPointer("has_mode_s_azimuth_stddev", &has_mode_s_azimuth_stddev_);
     other.configuration().updateParameterPointer("mode_s_azimuth_stddev", &mode_s_azimuth_stddev_);
     other.configuration().updateParameterPointer("has_mode_s_range_stddev", &has_mode_s_range_stddev_);
     other.configuration().updateParameterPointer("mode_s_range_stddev", &mode_s_range_stddev_);
+
+    other.configuration().updateParameterPointer("has_mode_s_ir_min", &has_mode_s_ir_min_);
+    other.configuration().updateParameterPointer("mode_s_ir_min", &mode_s_ir_min_);
+    other.configuration().updateParameterPointer("has_mode_s_ir_max", &has_mode_s_ir_max_);
+    other.configuration().updateParameterPointer("mode_s_ir_max", &mode_s_ir_max_);
 
     return static_cast<StoredDBODataSource&>(Configurable::operator=(std::move(other)));
 }
@@ -218,23 +297,44 @@ bool StoredDBODataSource::operator==(const DBODataSource& other) const
             && (has_altitude_ == other.hasAltitude())
             && (has_altitude_ ? fabs(altitude_ - other.altitude()) < 1e-10 : true)
 
+            // psr
             && (has_primary_azimuth_stddev_ == other.hasPrimaryAzimuthStdDev())
             && (has_primary_azimuth_stddev_ ? fabs(primary_azimuth_stddev_ - other.primaryAzimuthStdDev()) < 1e-10 : true)
 
             && (has_primary_range_stddev_ == other.hasPrimaryRangeStdDev())
             && (has_primary_range_stddev_ ? fabs(primary_range_stddev_ - other.primaryRangeStdDev()) < 1e-10 : true)
 
+            && (has_primary_ir_min_ == other.hasPrimaryRangeMin())
+            && (has_primary_ir_min_ ? fabs(primary_ir_min_ - other.primaryRangeMin()) == 0 : true)
+
+            && (has_primary_ir_max_ == other.hasPrimaryRangeMax())
+            && (has_primary_ir_max_ ? fabs(primary_ir_max_ - other.primaryRangeMax()) == 0 : true)
+
+            // ssr
             && (has_secondary_azimuth_stddev_ == other.hasSecondaryAzimuthStdDev())
             && (has_secondary_azimuth_stddev_ ? fabs(secondary_azimuth_stddev_ - other.secondaryAzimuthStdDev()) < 1e-10 : true)
 
             && (has_secondary_range_stddev_ == other.hasSecondaryRangeStdDev())
             && (has_secondary_range_stddev_ ? fabs(secondary_range_stddev_ - other.secondaryRangeStdDev()) < 1e-10 : true)
 
+            && (has_secondary_ir_min_ == other.hasSecondaryRangeMin())
+            && (has_secondary_ir_min_ ? fabs(secondary_ir_min_ - other.secondaryRangeMin()) == 0 : true)
+
+            && (has_secondary_ir_max_ == other.hasSecondaryRangeMax())
+            && (has_secondary_ir_max_ ? fabs(secondary_ir_max_ - other.secondaryRangeMax()) == 0 : true)
+
+            // mode s
             && (has_mode_s_azimuth_stddev_ == other.hasModeSAzimuthStdDev())
             && (has_mode_s_azimuth_stddev_ ? fabs(mode_s_azimuth_stddev_ - other.modeSAzimuthStdDev()) < 1e-10 : true)
 
             && (has_mode_s_range_stddev_ == other.hasModeSRangeStdDev())
-            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true);
+            && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true)
+
+            && (has_mode_s_ir_min_ == other.hasModeSRangeMin())
+            && (has_mode_s_ir_min_ ? fabs(mode_s_ir_min_ - other.modeSRangeMin()) == 0 : true)
+
+            && (has_mode_s_ir_max_ == other.hasModeSRangeMax())
+            && (has_mode_s_ir_max_ ? fabs(mode_s_ir_max_ - other.modeSRangeMax()) == 0 : true);
 }
 
 double StoredDBODataSource::altitude() const
@@ -289,6 +389,50 @@ double StoredDBODataSource::primaryRangeStdDev() const
     return primary_range_stddev_;
 }
 
+// psr min range
+
+bool StoredDBODataSource::hasPrimaryRangeMin() const
+{
+    return has_primary_ir_min_;
+}
+void StoredDBODataSource::removePrimaryRangeMin()
+{
+    has_primary_ir_min_ = false;
+    primary_ir_min_ = 0;
+}
+void StoredDBODataSource::primaryRangeMin(int value)
+{
+    has_primary_ir_min_ = true;
+    primary_ir_min_ = value;
+}
+int StoredDBODataSource::primaryRangeMin() const
+{
+    assert (has_primary_ir_min_);
+    return primary_ir_min_;
+}
+
+// psr max range
+
+bool StoredDBODataSource::hasPrimaryRangeMax() const
+{
+    return has_primary_ir_max_;
+}
+void StoredDBODataSource::removePrimaryRangeMax()
+{
+    has_primary_ir_max_ = false;
+    primary_ir_max_ = 0;
+}
+void StoredDBODataSource::primaryRangeMax(int value)
+{
+    has_primary_ir_max_ = true;
+    primary_ir_max_ = value;
+}
+int StoredDBODataSource::primaryRangeMax() const
+{
+    assert (has_primary_ir_max_);
+    return primary_ir_max_;
+}
+
 // ssr azm
 bool StoredDBODataSource::hasSecondaryAzimuthStdDev() const
 {
@@ -335,6 +479,50 @@ double StoredDBODataSource::secondaryRangeStdDev() const
     return secondary_range_stddev_;
 }
 
+// ssr min range
+
+bool StoredDBODataSource::hasSecondaryRangeMin() const
+{
+    return has_secondary_ir_min_;
+}
+void StoredDBODataSource::removeSecondaryRangeMin()
+{
+    has_secondary_ir_min_ = false;
+    secondary_ir_min_ = 0;
+}
+void StoredDBODataSource::secondaryRangeMin(int value)
+{
+    has_secondary_ir_min_ = true;
+    secondary_ir_min_ = value;
+}
+int StoredDBODataSource::secondaryRangeMin() const
+{
+    assert (has_secondary_ir_min_);
+    return secondary_ir_min_;
+}
+
+// ssr max range
+
+bool StoredDBODataSource::hasSecondaryRangeMax() const
+{
+    return has_secondary_ir_max_;
+}
+void StoredDBODataSource::removeSecondaryRangeMax()
+{
+    has_secondary_ir_max_ = false;
+    secondary_ir_max_ = 0;
+}
+void StoredDBODataSource::secondaryRangeMax(int value)
+{
+    has_secondary_ir_max_ = true;
+    secondary_ir_max_ = value;
+}
+int StoredDBODataSource::secondaryRangeMax() const
+{
+    assert (has_secondary_ir_max_);
+    return secondary_ir_max_;
+}
+
 // mode s azm
 bool StoredDBODataSource::hasModeSAzimuthStdDev() const
 {
@@ -379,6 +567,50 @@ void StoredDBODataSource::modeSRangeStdDev(double value)
 double StoredDBODataSource::modeSRangeStdDev() const
 {
     return mode_s_range_stddev_;
+}
+
+// mode s min range
+
+bool StoredDBODataSource::hasModeSRangeMin() const
+{
+    return has_mode_s_ir_min_;
+}
+void StoredDBODataSource::removeModeSRangeMin()
+{
+    has_mode_s_ir_min_ = false;
+    mode_s_ir_min_ = 0;
+}
+void StoredDBODataSource::modeSRangeMin(int value)
+{
+    has_mode_s_ir_min_ = true;
+    mode_s_ir_min_ = value;
+}
+int StoredDBODataSource::modeSRangeMin() const
+{
+    assert (has_mode_s_ir_min_);
+    return mode_s_ir_min_;
+}
+
+// mode s max range
+
+bool StoredDBODataSource::hasModeSRangeMax() const
+{
+    return has_mode_s_ir_max_;
+}
+void StoredDBODataSource::removeModeSRangeMax()
+{
+    has_mode_s_ir_max_ = false;
+    mode_s_ir_max_ = 0;
+}
+void StoredDBODataSource::modeSRangeMax(int value)
+{
+    has_mode_s_ir_max_ = true;
+    mode_s_ir_max_ = value;
+}
+int StoredDBODataSource::modeSRangeMax() const
+{
+    assert (has_mode_s_ir_max_);
+    return mode_s_ir_max_;
 }
 
 std::string StoredDBODataSource::dboName() const { return dbo_name_; }
@@ -533,18 +765,38 @@ json StoredDBODataSource::getAsJSON()
     if (has_altitude_)
         j["altitude"] = altitude_;
 
+    // psr
     if (has_primary_azimuth_stddev_)
         j["primary_azimuth_stddev"] = primary_azimuth_stddev_;
     if (has_primary_range_stddev_)
         j["primary_range_stddev"] = primary_range_stddev_;
+
+    if (has_primary_ir_min_)
+        j["primary_ir_min"] = primary_ir_min_;
+    if (has_primary_ir_max_)
+        j["primary_ir_max"] = primary_ir_max_;
+
+    // ssr
     if (has_secondary_azimuth_stddev_)
         j["secondary_azimuth_stddev"] = secondary_azimuth_stddev_;
     if (has_secondary_range_stddev_)
         j["secondary_range_stddev"] = secondary_range_stddev_;
+
+    if (has_secondary_ir_min_)
+        j["secondary_ir_min"] = secondary_ir_min_;
+    if (has_secondary_ir_max_)
+        j["secondary_ir_max"] = secondary_ir_max_;
+
+    // mode s
     if (has_mode_s_azimuth_stddev_)
         j["mode_s_azimuth_stddev"] = mode_s_azimuth_stddev_;
     if (has_mode_s_range_stddev_)
         j["mode_s_range_stddev"] = mode_s_range_stddev_;
+
+    if (has_mode_s_ir_min_)
+        j["mode_s_ir_min"] = mode_s_ir_min_;
+    if (has_mode_s_ir_max_)
+        j["mode_s_ir_max"] = mode_s_ir_max_;
 
     return j;
 }
@@ -587,6 +839,14 @@ void StoredDBODataSource::setFromJSON(json& j)
     if (has_primary_range_stddev_)
         primary_range_stddev_ = j.at("primary_range_stddev");
 
+    has_primary_ir_min_ = j.contains("primary_ir_min");
+    if (has_primary_ir_min_)
+        primary_ir_min_ = j.at("primary_ir_min");
+
+    has_primary_ir_max_ = j.contains("primary_ir_max");
+    if (has_primary_ir_max_)
+        primary_ir_max_ = j.at("primary_ir_max");
+
     // ssr
     has_secondary_azimuth_stddev_ = j.contains("secondary_azimuth_stddev");
     if (has_secondary_azimuth_stddev_)
@@ -596,6 +856,14 @@ void StoredDBODataSource::setFromJSON(json& j)
     if (has_secondary_range_stddev_)
         secondary_range_stddev_ = j.at("secondary_range_stddev");
 
+    has_secondary_ir_min_ = j.contains("secondary_ir_min");
+    if (has_secondary_ir_min_)
+        secondary_ir_min_ = j.at("secondary_ir_min");
+
+    has_secondary_ir_max_ = j.contains("secondary_ir_max");
+    if (has_secondary_ir_max_)
+        secondary_ir_max_ = j.at("secondary_ir_max");
+
     // mode s
     has_mode_s_azimuth_stddev_ = j.contains("mode_s_azimuth_stddev");
     if (has_mode_s_azimuth_stddev_)
@@ -604,4 +872,12 @@ void StoredDBODataSource::setFromJSON(json& j)
     has_mode_s_range_stddev_ = j.contains("mode_s_range_stddev");
     if (has_mode_s_range_stddev_)
         mode_s_range_stddev_ = j.at("mode_s_range_stddev");
+
+    has_mode_s_ir_min_ = j.contains("mode_s_ir_min");
+    if (has_mode_s_ir_min_)
+        mode_s_ir_min_ = j.at("mode_s_ir_min");
+
+    has_mode_s_ir_max_ = j.contains("mode_s_ir_max");
+    if (has_mode_s_ir_max_)
+        mode_s_ir_max_ = j.at("mode_s_ir_max");
 }
