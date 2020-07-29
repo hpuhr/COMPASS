@@ -83,6 +83,8 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_mode_s_range_stddev_)
         mode_s_range_stddev_ = other.modeSRangeStdDev();
 
+    // TODO
+
 //    loginf << "DBODataSource: operator=: name " << name_ << " short name "
 //           << (has_short_name_ ? short_name_ : "false") << " sac "
 //           << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false") << " sic "
@@ -130,6 +132,8 @@ bool DBODataSource::operator==(const StoredDBODataSource& other) const
 
             && (has_mode_s_range_stddev_ == other.hasModeSRangeStdDev())
             && (has_mode_s_range_stddev_ ? fabs(mode_s_range_stddev_ - other.modeSRangeStdDev()) < 1e-10 : true);
+
+    // TODO
 }
 
 DBODataSource::~DBODataSource() { logdbg << "DBODataSource: dtor: id " << std::to_string(id_); }
@@ -188,6 +192,50 @@ double DBODataSource::primaryRangeStdDev() const
     return primary_range_stddev_;
 }
 
+// psr min range
+
+bool DBODataSource::hasPrimaryRangeMin() const
+{
+    return has_primary_ir_min_;
+}
+void DBODataSource::removePrimaryRangeMin()
+{
+    has_primary_ir_min_ = false;
+    primary_ir_min_ = 0;
+}
+void DBODataSource::primaryRangeMin(int value)
+{
+    has_primary_ir_min_ = true;
+    primary_ir_min_ = value;
+}
+int DBODataSource::primaryRangeMin() const
+{
+    assert (has_primary_ir_min_);
+    return primary_ir_min_;
+}
+
+// psr max range
+
+bool DBODataSource::hasPrimaryRangeMax() const
+{
+    return has_primary_ir_max_;
+}
+void DBODataSource::removePrimaryRangeMax()
+{
+    has_primary_ir_max_ = false;
+    primary_ir_max_ = 0;
+}
+void DBODataSource::primaryRangeMax(int value)
+{
+    has_primary_ir_max_ = true;
+    primary_ir_max_ = value;
+}
+int DBODataSource::primaryRangeMax() const
+{
+    assert (has_primary_ir_max_);
+    return primary_ir_max_;
+}
+
 // ssr azm
 bool DBODataSource::hasSecondaryAzimuthStdDev() const
 {
@@ -234,6 +282,50 @@ double DBODataSource::secondaryRangeStdDev() const
     return secondary_range_stddev_;
 }
 
+// ssr min range
+
+bool DBODataSource::hasSecondaryRangeMin() const
+{
+    return has_secondary_ir_min_;
+}
+void DBODataSource::removeSecondaryRangeMin()
+{
+    has_secondary_ir_min_ = false;
+    secondary_ir_min_ = 0;
+}
+void DBODataSource::secondaryRangeMin(int value)
+{
+    has_secondary_ir_min_ = true;
+    secondary_ir_min_ = value;
+}
+int DBODataSource::secondaryRangeMin() const
+{
+    assert (has_secondary_ir_min_);
+    return secondary_ir_min_;
+}
+
+// ssr max range
+
+bool DBODataSource::hasSecondaryRangeMax() const
+{
+    return has_secondary_ir_max_;
+}
+void DBODataSource::removeSecondaryRangeMax()
+{
+    has_secondary_ir_max_ = false;
+    secondary_ir_max_ = 0;
+}
+void DBODataSource::secondaryRangeMax(int value)
+{
+    has_secondary_ir_max_ = true;
+    secondary_ir_max_ = value;
+}
+int DBODataSource::secondaryRangeMax() const
+{
+    assert (has_secondary_ir_max_);
+    return secondary_ir_max_;
+}
+
 // mode s azm
 bool DBODataSource::hasModeSAzimuthStdDev() const
 {
@@ -278,6 +370,50 @@ void DBODataSource::modeSRangeStdDev(double value)
 double DBODataSource::modeSRangeStdDev() const
 {
     return mode_s_range_stddev_;
+}
+
+// ssr min range
+
+bool DBODataSource::hasModeSRangeMin() const
+{
+    return has_mode_s_ir_min_;
+}
+void DBODataSource::removeModeSRangeMin()
+{
+    has_mode_s_ir_min_ = false;
+    mode_s_ir_min_ = 0;
+}
+void DBODataSource::modeSRangeMin(int value)
+{
+    has_mode_s_ir_min_ = true;
+    mode_s_ir_min_ = value;
+}
+int DBODataSource::modeSRangeMin() const
+{
+    assert (has_mode_s_ir_min_);
+    return mode_s_ir_min_;
+}
+
+// ssr max range
+
+bool DBODataSource::hasModeSRangeMax() const
+{
+    return has_mode_s_ir_max_;
+}
+void DBODataSource::removeModeSRangeMax()
+{
+    has_mode_s_ir_max_ = false;
+    mode_s_ir_max_ = 0;
+}
+void DBODataSource::modeSRangeMax(int value)
+{
+    has_mode_s_ir_max_ = true;
+    mode_s_ir_max_ = value;
+}
+int DBODataSource::modeSRangeMax() const
+{
+    assert (has_mode_s_ir_max_);
+    return mode_s_ir_max_;
 }
 
 

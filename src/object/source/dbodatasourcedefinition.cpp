@@ -39,12 +39,18 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string& class_id,
 
     registerParameter("primary_azimuth_stddev_column", &primary_azimuth_stddev_column_, "");
     registerParameter("primary_range_stddev_column", &primary_range_stddev_column_, "");
+    registerParameter("primary_ir_min_column", &primary_ir_min_column_, "");
+    registerParameter("primary_ir_max_column", &primary_ir_max_column_, "");
 
     registerParameter("secondary_azimuth_stddev_column", &secondary_azimuth_stddev_column_, "");
     registerParameter("secondary_range_stddev_column", &secondary_range_stddev_column_, "");
+    registerParameter("secondary_ir_min_column", &secondary_ir_min_column_, "");
+    registerParameter("secondary_ir_max_column", &secondary_ir_max_column_, "");
 
     registerParameter("mode_s_azimuth_stddev_column", &mode_s_azimuth_stddev_column_, "");
     registerParameter("mode_s_range_stddev_column", &mode_s_range_stddev_column_, "");
+    registerParameter("mode_s_ir_min_column", &mode_s_ir_min_column_, "");
+    registerParameter("mode_s_ir_max_column", &mode_s_ir_max_column_, "");
 }
 
 DBODataSourceDefinition::~DBODataSourceDefinition()
@@ -126,6 +132,7 @@ void DBODataSourceDefinition::primaryAzimuthStdDevColumn(const std::string& valu
     emit definitionChangedSignal();
 }
 
+// psr
 std::string DBODataSourceDefinition::primaryRangeStdDevColumn() const
 {
     return primary_range_stddev_column_;
@@ -138,6 +145,29 @@ void DBODataSourceDefinition::primaryRangeStdDevColumn(const std::string& value)
     emit definitionChangedSignal();
 }
 
+std::string DBODataSourceDefinition::primaryIRMinColumn() const
+{
+    return primary_ir_min_column_;
+}
+void DBODataSourceDefinition::primaryIRMinColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: primaryIRMinColumn: value " << value;
+    primary_ir_min_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::primaryIRMaxColumn() const
+{
+    return primary_ir_max_column_;
+}
+void DBODataSourceDefinition::primaryIRMaxColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: primaryIRMaxColumn: value " << value;
+    primary_ir_max_column_ = value;
+    emit definitionChangedSignal();
+}
+
+// ssr
 std::string DBODataSourceDefinition::secondaryAzimuthStdDevColumn() const
 {
     return secondary_azimuth_stddev_column_;
@@ -161,6 +191,30 @@ void DBODataSourceDefinition::secondaryRangeStdDevColumn(const std::string& valu
     secondary_range_stddev_column_ = value;
     emit definitionChangedSignal();
 }
+
+std::string DBODataSourceDefinition::secondaryIRMinColumn() const
+{
+    return secondary_ir_min_column_;
+}
+void DBODataSourceDefinition::secondaryIRMinColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: secondaryIRMinColumn: value " << value;
+    secondary_ir_min_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::secondaryIRMaxColumn() const
+{
+    return secondary_ir_max_column_;
+}
+void DBODataSourceDefinition::secondaryIRMaxColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: secondaryIRMaxColumn: value " << value;
+    secondary_ir_max_column_ = value;
+    emit definitionChangedSignal();
+}
+
+// mode s
 
 std::string DBODataSourceDefinition::modeSAzimuthStdDevColumn() const
 {
@@ -186,6 +240,29 @@ void DBODataSourceDefinition::modeSRangeStdDevColumn(const std::string& value)
     emit definitionChangedSignal();
 }
 
+std::string DBODataSourceDefinition::modeSIRMinColumn() const
+{
+    return mode_s_ir_min_column_;
+}
+void DBODataSourceDefinition::modeSIRMinColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: modeSIRMinColumn: value " << value;
+    mode_s_ir_min_column_ = value;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::modeSIRMaxColumn() const
+{
+    return mode_s_ir_max_column_;
+}
+void DBODataSourceDefinition::modeSIRMaxColumn(const std::string& value)
+{
+    loginf << "DBODataSourceDefinition: modeSIRMaxColumn: value " << value;
+    mode_s_ir_max_column_ = value;
+    emit definitionChangedSignal();
+}
+
+// others
 void DBODataSourceDefinition::latitudeColumn(const std::string& latitude_column)
 {
     loginf << "DBODataSourceDefinition: latitudeColumn: value " << latitude_column;

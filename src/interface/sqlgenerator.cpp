@@ -287,6 +287,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
         columns.push_back(&meta.column(ds.primaryRangeStdDevColumn()));
     }
 
+    if (ds.hasPrimaryIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.primaryIRMinColumn()));
+        columns.push_back(&meta.column(ds.primaryIRMinColumn()));
+    }
+
+    if (ds.hasPrimaryIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.primaryIRMaxColumn()));
+        columns.push_back(&meta.column(ds.primaryIRMaxColumn()));
+    }
+
     // ssr
     if (ds.hasSecondaryAzimuthStdDevColumn())
     {
@@ -300,6 +312,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
         columns.push_back(&meta.column(ds.secondaryRangeStdDevColumn()));
     }
 
+    if (ds.hasSecondaryIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryIRMinColumn()));
+        columns.push_back(&meta.column(ds.secondaryIRMinColumn()));
+    }
+
+    if (ds.hasSecondaryIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryIRMaxColumn()));
+        columns.push_back(&meta.column(ds.secondaryIRMaxColumn()));
+    }
+
     // mode s
     if (ds.hasModeSAzimuthStdDevColumn())
     {
@@ -311,6 +335,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
     {
         assert (meta.hasColumn(ds.modeSRangeStdDevColumn()));
         columns.push_back(&meta.column(ds.modeSRangeStdDevColumn()));
+    }
+
+    if (ds.hasModeSIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.modeSIRMinColumn()));
+        columns.push_back(&meta.column(ds.modeSIRMinColumn()));
+    }
+
+    if (ds.hasModeSIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.modeSIRMaxColumn()));
+        columns.push_back(&meta.column(ds.modeSIRMaxColumn()));
     }
 
     return getSelectCommand(meta, columns);
