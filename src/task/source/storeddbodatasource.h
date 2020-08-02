@@ -91,6 +91,16 @@ class StoredDBODataSource : public Configurable
     void primaryRangeStdDev(double value);
     double primaryRangeStdDev() const;
 
+    bool hasPrimaryRangeMin() const;
+    void removePrimaryRangeMin();
+    void primaryRangeMin(int value);
+    int primaryRangeMin() const;
+
+    bool hasPrimaryRangeMax() const;
+    void removePrimaryRangeMax();
+    void primaryRangeMax(int value);
+    int primaryRangeMax() const;
+
     //ssr
     bool hasSecondaryAzimuthStdDev() const;
     void removeSecondaryAzimuthStdDev();
@@ -102,6 +112,16 @@ class StoredDBODataSource : public Configurable
     void secondaryRangeStdDev(double value);
     double secondaryRangeStdDev() const;
 
+    bool hasSecondaryRangeMin() const;
+    void removeSecondaryRangeMin();
+    void secondaryRangeMin(int value);
+    int secondaryRangeMin() const;
+
+    bool hasSecondaryRangeMax() const;
+    void removeSecondaryRangeMax();
+    void secondaryRangeMax(int value);
+    int secondaryRangeMax() const;
+
     // mode s
     bool hasModeSAzimuthStdDev() const;
     void removeModeSAzimuthStdDev();
@@ -112,6 +132,16 @@ class StoredDBODataSource : public Configurable
     void removeModeSRangeStdDev();
     void modeSRangeStdDev(double value);
     double modeSRangeStdDev() const;
+
+    bool hasModeSRangeMin() const;
+    void removeModeSRangeMin();
+    void modeSRangeMin(int value);
+    int modeSRangeMin() const;
+
+    bool hasModeSRangeMax() const;
+    void removeModeSRangeMax();
+    void modeSRangeMax(int value);
+    int modeSRangeMax() const;
 
     std::string dboName() const;
 
@@ -148,6 +178,12 @@ class StoredDBODataSource : public Configurable
     bool has_primary_range_stddev_{false};
     double primary_range_stddev_ {0};  // meters
 
+    bool has_primary_ir_min_ {false};
+    int primary_ir_min_ {0};  // nm
+
+    bool has_primary_ir_max_ {false};
+    int primary_ir_max_ {0};  // nm
+
     // ssr azm bias
     // ssr range bias
     // ssr range gain
@@ -159,6 +195,12 @@ class StoredDBODataSource : public Configurable
     bool has_secondary_range_stddev_{false};
     double secondary_range_stddev_ {0};  // meters
 
+    bool has_secondary_ir_min_ {false};
+    int secondary_ir_min_ {0};  // nm
+
+    bool has_secondary_ir_max_ {false};
+    int secondary_ir_max_ {0};  // nm
+
     // mode s azm bias
     // mode s range bias
     // mode s range gain
@@ -169,6 +211,12 @@ class StoredDBODataSource : public Configurable
     // mode s range standard dev
     bool has_mode_s_range_stddev_{false};
     double mode_s_range_stddev_ {0};  // meters
+
+    bool has_mode_s_ir_min_ {false};
+    int mode_s_ir_min_ {0};  // nm
+
+    bool has_mode_s_ir_max_ {false};
+    int mode_s_ir_max_ {0};  // nm
 
   protected:
     virtual void checkSubConfigurables() {}

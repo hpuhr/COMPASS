@@ -457,6 +457,32 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
             buffer->get<double>(col.name()).setNull(0);
     }
 
+    if (ds_def.hasPrimaryIRMinColumn())
+    {
+        loginf << "UGA1";
+        const DBTableColumn& col = meta.column(ds_def.primaryIRMinColumn());
+        assert(col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasPrimaryRangeMin())
+            buffer->get<char>(col.name()).set(0, data_source.primaryRangeMin());
+        else
+            buffer->get<char>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasPrimaryIRMaxColumn())
+    {
+        loginf << "UGA2";
+        const DBTableColumn& col = meta.column(ds_def.primaryIRMaxColumn());
+        assert(col.propertyType() == PropertyDataType::INT);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasPrimaryRangeMax())
+            buffer->get<int>(col.name()).set(0, data_source.primaryRangeMax());
+        else
+            buffer->get<int>(col.name()).setNull(0);
+    }
+
+    loginf << "UGA3";
+
     // ssr
     if (ds_def.hasSecondaryAzimuthStdDevColumn())
     {
@@ -480,6 +506,28 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
             buffer->get<double>(col.name()).setNull(0);
     }
 
+    if (ds_def.hasSecondaryIRMinColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.secondaryIRMinColumn());
+        assert(col.propertyType() == PropertyDataType::INT);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasSecondaryRangeMin())
+            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMin());
+        else
+            buffer->get<int>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasSecondaryIRMaxColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.secondaryIRMaxColumn());
+        assert(col.propertyType() == PropertyDataType::INT);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasSecondaryRangeMax())
+            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMax());
+        else
+            buffer->get<int>(col.name()).setNull(0);
+    }
+
     // mode s
     if (ds_def.hasModeSAzimuthStdDevColumn())
     {
@@ -501,6 +549,28 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
             buffer->get<double>(col.name()).set(0, data_source.modeSRangeStdDev());
         else
             buffer->get<double>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasModeSIRMinColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.modeSIRMinColumn());
+        assert(col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasModeSRangeMin())
+            buffer->get<char>(col.name()).set(0, data_source.modeSRangeMin());
+        else
+            buffer->get<char>(col.name()).setNull(0);
+    }
+
+    if (ds_def.hasModeSIRMaxColumn())
+    {
+        const DBTableColumn& col = meta.column(ds_def.modeSIRMaxColumn());
+        assert(col.propertyType() == PropertyDataType::INT);
+        buffer->addProperty(col.name(), col.propertyType());
+        if (data_source.hasModeSRangeMax())
+            buffer->get<int>(col.name()).set(0, data_source.modeSRangeMax());
+        else
+            buffer->get<int>(col.name()).setNull(0);
     }
 
     assert(foreign_key_col.propertyType() == PropertyDataType::INT);
@@ -629,6 +699,25 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         assert(buffer->properties().hasProperty(primary_range_stddev_col_name) &&
                buffer->properties().get(primary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
     }
+
+    bool has_primary_ir_min = ds.hasPrimaryIRMinColumn();
+    std::string primary_ir_min_col_name;
+    if (has_primary_ir_min)
+    {
+        primary_ir_min_col_name = meta.column(ds.primaryIRMinColumn()).name();
+        assert(buffer->properties().hasProperty(primary_ir_min_col_name) &&
+               buffer->properties().get(primary_ir_min_col_name).dataType() == PropertyDataType::CHAR);
+    }
+
+    bool has_primary_ir_max = ds.hasPrimaryIRMaxColumn();
+    std::string primary_ir_max_col_name;
+    if (has_primary_ir_max)
+    {
+        primary_ir_max_col_name = meta.column(ds.primaryIRMaxColumn()).name();
+        assert(buffer->properties().hasProperty(primary_ir_max_col_name) &&
+               buffer->properties().get(primary_ir_max_col_name).dataType() == PropertyDataType::INT);
+    }
+
     // ssr
     bool has_secondary_azimuth_stddev = ds.hasSecondaryAzimuthStdDevColumn();
     std::string secondary_azimuth_stddev_col_name;
@@ -647,6 +736,25 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         assert(buffer->properties().hasProperty(secondary_range_stddev_col_name) &&
                buffer->properties().get(secondary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
     }
+
+    bool has_secondary_ir_min = ds.hasSecondaryIRMinColumn();
+    std::string secondary_ir_min_col_name;
+    if (has_secondary_ir_min)
+    {
+        secondary_ir_min_col_name = meta.column(ds.secondaryIRMinColumn()).name();
+        assert(buffer->properties().hasProperty(secondary_ir_min_col_name) &&
+               buffer->properties().get(secondary_ir_min_col_name).dataType() == PropertyDataType::INT);
+    }
+
+    bool has_secondary_ir_max = ds.hasSecondaryIRMaxColumn();
+    std::string secondary_ir_max_col_name;
+    if (has_secondary_ir_max)
+    {
+        secondary_ir_max_col_name = meta.column(ds.secondaryIRMaxColumn()).name();
+        assert(buffer->properties().hasProperty(secondary_ir_max_col_name) &&
+               buffer->properties().get(secondary_ir_max_col_name).dataType() == PropertyDataType::INT);
+    }
+
     // mode s
     bool has_mode_s_azimuth_stddev = ds.hasModeSAzimuthStdDevColumn();
     std::string mode_s_azimuth_stddev_col_name;
@@ -665,6 +773,25 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         assert(buffer->properties().hasProperty(mode_s_range_stddev_col_name) &&
                buffer->properties().get(mode_s_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
     }
+
+    bool has_mode_s_ir_min = ds.hasModeSIRMinColumn();
+    std::string mode_s_ir_min_col_name;
+    if (has_mode_s_ir_min)
+    {
+        mode_s_ir_min_col_name = meta.column(ds.modeSIRMinColumn()).name();
+        assert(buffer->properties().hasProperty(mode_s_ir_min_col_name) &&
+               buffer->properties().get(mode_s_ir_min_col_name).dataType() == PropertyDataType::CHAR);
+    }
+
+    bool has_mode_s_ir_max = ds.hasModeSIRMaxColumn();
+    std::string mode_s_ir_max_col_name;
+    if (has_mode_s_ir_max)
+    {
+        mode_s_ir_max_col_name = meta.column(ds.modeSIRMaxColumn()).name();
+        assert(buffer->properties().hasProperty(mode_s_ir_max_col_name) &&
+               buffer->properties().get(mode_s_ir_max_col_name).dataType() == PropertyDataType::INT);
+    }
+
     std::map<int, DBODataSource> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
@@ -742,6 +869,12 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         if (has_primary_range_stddev && !buffer->get<double>(primary_range_stddev_col_name).isNull(cnt))
             sources.at(key).primaryRangeStdDev(buffer->get<double>(primary_range_stddev_col_name).get(cnt));
 
+        if (has_primary_ir_min && !buffer->get<char>(primary_ir_min_col_name).isNull(cnt))
+            sources.at(key).primaryRangeMin(buffer->get<char>(primary_ir_min_col_name).get(cnt));
+
+        if (has_primary_ir_max && !buffer->get<int>(primary_ir_max_col_name).isNull(cnt))
+            sources.at(key).primaryRangeMax(buffer->get<int>(primary_ir_max_col_name).get(cnt));
+
         // ssr
         if (has_secondary_azimuth_stddev && !buffer->get<double>(secondary_azimuth_stddev_col_name).isNull(cnt))
             sources.at(key).secondaryAzimuthStdDev(buffer->get<double>(secondary_azimuth_stddev_col_name).get(cnt));
@@ -749,12 +882,24 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         if (has_secondary_range_stddev && !buffer->get<double>(secondary_range_stddev_col_name).isNull(cnt))
             sources.at(key).secondaryRangeStdDev(buffer->get<double>(secondary_range_stddev_col_name).get(cnt));
 
+        if (has_secondary_ir_min && !buffer->get<int>(secondary_ir_min_col_name).isNull(cnt))
+            sources.at(key).secondaryRangeMin(buffer->get<int>(secondary_ir_min_col_name).get(cnt));
+
+        if (has_secondary_ir_max && !buffer->get<int>(secondary_ir_max_col_name).isNull(cnt))
+            sources.at(key).secondaryRangeMax(buffer->get<int>(secondary_ir_max_col_name).get(cnt));
+
         // mode s
         if (has_mode_s_azimuth_stddev && !buffer->get<double>(mode_s_azimuth_stddev_col_name).isNull(cnt))
             sources.at(key).modeSAzimuthStdDev(buffer->get<double>(mode_s_azimuth_stddev_col_name).get(cnt));
 
         if (has_mode_s_range_stddev && !buffer->get<double>(mode_s_range_stddev_col_name).isNull(cnt))
             sources.at(key).modeSRangeStdDev(buffer->get<double>(mode_s_range_stddev_col_name).get(cnt));
+
+        if (has_mode_s_ir_min && !buffer->get<char>(mode_s_ir_min_col_name).isNull(cnt))
+            sources.at(key).modeSRangeMin(buffer->get<char>(mode_s_ir_min_col_name).get(cnt));
+
+        if (has_mode_s_ir_max && !buffer->get<int>(mode_s_ir_max_col_name).isNull(cnt))
+            sources.at(key).modeSRangeMax(buffer->get<int>(mode_s_ir_max_col_name).get(cnt));
 
         // removed json content
 

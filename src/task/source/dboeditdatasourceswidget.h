@@ -65,10 +65,23 @@ class DBOEditDataSourcesWidget : public QWidget
     QStringList table_columns_{"ID",  "Name", "Short Name", "SAC",
                                "SIC", "Latitude", "Longitude",  "Altitude"};
 
+    // radar ranges
+    bool has_primary_range_min_{false};
+    bool has_primary_range_max_{false};
+
+    bool has_secondary_range_min_{false};
+    bool has_secondary_range_max_{false};
+
+    bool has_mode_s_range_min_{false};
+    bool has_mode_s_range_max_{false};
+
+    // radar std devs
     bool has_primary_azimuth_stddev_{false};
     bool has_primary_range_stddev_{false};
+
     bool has_secondary_azimuth_stddev_{false};
     bool has_secondary_range_stddev_{false};
+
     bool has_mode_s_azimuth_stddev_{false};
     bool has_mode_s_range_stddev_{false};
 

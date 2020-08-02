@@ -42,13 +42,21 @@ class DBODataSourceDefinitionWidget : public QWidget
     void changedLongitudeColumnSlot();
     void changedAltitudeColumnSlot();
 
+    // psr
     void changedPrimaryAzimuthStdDevColumnSlot();
     void changedPrimaryRangeStdDevColumnSlot();
+    void changedPrimaryIRMinSlot();
+    void changedPrimaryIRMaxSlot();
+    // ssr
     void changedSecondaryAzimuthStdDevColumnSlot();
     void changedSecondaryRangeStdDevColumnSlot();
+    void changedSecondaryIRMinSlot();
+    void changedSecondaryIRMaxSlot();
+    // mode s
     void changedModeSAzimuthStdDevColumnSlot();
     void changedModeSRangeStdDevColumnSlot();
-
+    void changedModeSIRMinSlot();
+    void changedModeSIRMaxSlot();
 
     /// @brief Updates data source local key selection
     void updateLocalKeySlot();
@@ -65,12 +73,21 @@ class DBODataSourceDefinitionWidget : public QWidget
     void updateLongitudeColumnSlot();
     void updateAltitudeColumnSlot();
 
+    // psr
     void updatePrimaryAzimuthStdDevColumnSlot();
     void updatePrimaryRangeStdDevColumnSlot();
+    void updatePrimaryIRMinColumnSlot();
+    void updatePrimaryIRMaxColumnSlot();
+    // ssr
     void updateSecondaryAzimuthStdDevColumnSlot();
     void updateSecondaryRangeStdDevColumnSlot();
+    void updateSecondaryIRMinColumnSlot();
+    void updateSecondaryIRMaxColumnSlot();
+    // mode s
     void updateModeSAzimuthStdDevColumnSlot();
     void updateModeSRangeStdDevColumnSlot();
+    void updateModeSIRMinColumnSlot();
+    void updateModeSIRMaxColumnSlot();
 
     // signals:
     //    void definitionChangedSignal();
@@ -98,13 +115,21 @@ class DBODataSourceDefinitionWidget : public QWidget
     QComboBox* latitude_box_{nullptr};
     QComboBox* longitude_box_{nullptr};
     QComboBox* altitude_box_{nullptr};
-    /// radar noise
+    /// psr
     QComboBox* primary_azimuth_stddev_box_{nullptr};
     QComboBox* primary_range_stddev_box_{nullptr};
+    QComboBox* primary_ir_min_box_{nullptr};
+    QComboBox* primary_ir_max_box_{nullptr};
+    // ssr
     QComboBox* secondary_azimuth_stddev_box_{nullptr};
     QComboBox* secondary_range_stddev_box_{nullptr};
+    QComboBox* secondary_ir_min_box_{nullptr};
+    QComboBox* secondary_ir_max_box_{nullptr};
+    // mode s
     QComboBox* mode_s_azimuth_stddev_box_{nullptr};
     QComboBox* mode_s_range_stddev_box_{nullptr};
+    QComboBox* mode_s_ir_min_box_{nullptr};
+    QComboBox* mode_s_ir_max_box_{nullptr};
 
     /// @brief Updates a variable selection box
     void updateVariableSelectionBox(QComboBox* box, const std::string& schema_name,
