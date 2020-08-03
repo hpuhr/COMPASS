@@ -33,6 +33,8 @@
 #include "managedbobjectstaskwidget.h"
 #include "manageschematask.h"
 #include "manageschemataskwidget.h"
+#include "managesectorstask.h"
+#include "managesectorstaskwidget.h"
 #include "mysqldbimporttask.h"
 #include "mysqldbimporttaskwidget.h"
 #include "postprocesstask.h"
@@ -81,8 +83,9 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 #endif
 
     task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "GPSTrailImportTask",
-                                         "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
-                                         "PostProcessTask", "CreateARTASAssociationsTask"});
+                                         "ManageDataSourcesTask", "ManageSectorsTask",
+                                         "RadarPlotPositionCalculatorTask", "PostProcessTask",
+                                         "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
         assert(tasks_.count(task_it));
@@ -157,6 +160,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         manage_datasources_task_.reset(new ManageDataSourcesTask(class_id, instance_id, *this));
         assert(manage_datasources_task_);
         addTask(class_id, manage_datasources_task_.get());
+    }
+    else if (class_id.compare("ManageSectorsTask") == 0)
+    {
+        assert(!manage_sectors_task_);
+        manage_sectors_task_.reset(new ManageSectorsTask(class_id, instance_id, *this));
+        assert(manage_sectors_task_);
+        addTask(class_id, manage_sectors_task_.get());
     }
     else if (class_id.compare("RadarPlotPositionCalculatorTask") == 0)
     {
@@ -251,6 +261,12 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
         assert(manage_datasources_task_);
+    }
+
+    if (!manage_sectors_task_)
+    {
+        generateSubConfigurable("ManageSectorsTask", "ManageSectorsTask0");
+        assert(manage_sectors_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
@@ -353,6 +369,7 @@ void TaskManager::shutdown()
     mysqldb_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
     manage_datasources_task_ = nullptr;
+    manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
     post_process_task_ = nullptr;
@@ -417,6 +434,12 @@ ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const
 {
     assert(manage_datasources_task_);
     return *manage_datasources_task_;
+}
+
+ManageSectorsTask& TaskManager::manageSectorsTask() const
+{
+    assert(manage_sectors_task_);
+    return *manage_sectors_task_;
 }
 
 #if USE_JASTERIX

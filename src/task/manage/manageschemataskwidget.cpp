@@ -17,14 +17,14 @@
 
 #include "manageschemataskwidget.h"
 
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QVBoxLayout>
-
 #include "atsdb.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 #include "manageschematask.h"
+
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
 
 ManageSchemaTaskWidget::ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)

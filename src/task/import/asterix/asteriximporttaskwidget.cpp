@@ -16,6 +16,11 @@
  */
 
 #include "asteriximporttaskwidget.h"
+#include "asterixconfigwidget.h"
+#include "asteriximporttask.h"
+#include "asterixoverridewidget.h"
+#include "logger.h"
+#include "selectdbobjectdialog.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -29,12 +34,6 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QVBoxLayout>
-
-#include "asterixconfigwidget.h"
-#include "asteriximporttask.h"
-#include "asterixoverridewidget.h"
-#include "logger.h"
-#include "selectdbobjectdialog.h"
 
 using namespace Utils;
 
@@ -134,6 +133,7 @@ void ASTERIXImportTaskWidget::addMainTab()
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
 }
+
 void ASTERIXImportTaskWidget::addASTERIXConfigTab()
 {
     assert(tab_widget_);

@@ -9,9 +9,13 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/manageschemataskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstask.h"
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstaskwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/managesectorstask.h"
+        "${CMAKE_CURRENT_LIST_DIR}/managesectorstaskwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/manageschematask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/manageschemataskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstaskwidget.cpp"
-)
+        "${CMAKE_CURRENT_LIST_DIR}/managesectorstask.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/managesectorstaskwidget.cpp"
+    )
