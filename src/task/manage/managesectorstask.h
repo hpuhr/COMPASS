@@ -44,7 +44,14 @@ protected:
 
   std::unique_ptr<ManageSectorsTaskWidget> widget_;
 
+  std::vector<std::string> polygon_names_; // for uniqueness check
+  std::map<std::string, std::map<std::string, std::vector<std::pair<double,double>>>> data_; // layer-> polygon -> points
+
   virtual void checkSubConfigurables() {}
+
+  void parseCurrentFile ();
+  void addPolygon (const std::string& layer_name, const std::string& polyon_name,
+                   std::vector<std::pair<double,double>> points);
 };
 
 #endif // MANAGESECTORSTASK_H
