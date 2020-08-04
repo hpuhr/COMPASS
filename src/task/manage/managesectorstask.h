@@ -16,6 +16,7 @@ class ManageSectorsTask : public Task, public Configurable
 public:
     ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
+    virtual ~ManageSectorsTask();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -37,15 +38,19 @@ public:
     void currentFilename(const std::string& filename);
     const std::string& currentFilename() { return current_filename_; }
 
+    std::string parseMessage() const;
+    const std::map<std::string, std::map<std::string, std::vector<std::pair<double, double>>>>& parsedData() const;
 
 protected:
-  std::map<std::string, SavedFile*> file_list_;
-  std::string current_filename_;
+    std::map<std::string, SavedFile*> file_list_;
+    std::string current_filename_;
 
-  std::unique_ptr<ManageSectorsTaskWidget> widget_;
+    std::unique_ptr<ManageSectorsTaskWidget> widget_;
 
   std::vector<std::string> polygon_names_; // for uniqueness check
   std::map<std::string, std::map<std::string, std::vector<std::pair<double,double>>>> data_; // layer-> polygon -> points
+
+  std::string parse_message_;
 
   virtual void checkSubConfigurables() {}
 

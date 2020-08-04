@@ -5,13 +5,14 @@
 
 class ManageSectorsTask;
 
-class QHBoxLayout;
+class QVBoxLayout;
 class QPushButton;
 class QListWidget;
-class QComboBox;
-class QStackedWidget;
+//class QComboBox;
+//class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
+class QTextEdit;
 
 class ManageSectorsTaskWidget : public TaskWidget
 {
@@ -25,16 +26,20 @@ public slots:
   void selectedFileSlot();
   void updateFileListSlot();
 
+  void importSlot();
+
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
 
     void addFile(const std::string& filename);
     void selectFile(const std::string& filename);
 
+    void updateParseMessage ();
+
 protected:
     ManageSectorsTask& task_;
 
-    QHBoxLayout* main_layout_{nullptr};
+    QVBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
 
@@ -42,6 +47,10 @@ protected:
     QPushButton* add_file_button_{nullptr};
     QPushButton* delete_file_button_{nullptr};
     QPushButton* delete_all_files_button_{nullptr};
+
+    QTextEdit* parse_msg_edit_ {nullptr};
+
+    QPushButton* import_button_ {nullptr};
 
     void addMainTab();
 };

@@ -31,6 +31,14 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
         parseCurrentFile();
 }
 
+ManageSectorsTask::~ManageSectorsTask()
+{
+    for (auto it : file_list_)
+        delete it.second;
+
+    file_list_.clear();
+}
+
 TaskWidget* ManageSectorsTask::widget()
 {
     if (!widget_)
@@ -143,6 +151,16 @@ void ManageSectorsTask::currentFilename(const std::string& filename)
         emit statusChangedSignal(name_);
 }
 
+std::string ManageSectorsTask::parseMessage() const
+{
+    return parse_message_;
+}
+
+const map<string, map<string, vector<pair<double, double>>>>& ManageSectorsTask::parsedData() const
+{
+    return data_;
+}
+
 bool ManageSectorsTask::canImportFile()
 {
     if (!current_filename_.size())
@@ -171,10 +189,13 @@ void ManageSectorsTask::parseCurrentFile ()
     if(data_set == NULL)
     {
         logwrn << "ManageSectorsTask: parseCurrentFile: open failed";
+        parse_message_ = "file '"+current_filename_+"' open failed.";
         return;
     }
 
+    parse_message_ = "";
     data_.clear();
+    polygon_names_.clear(); // init with existing sector names later
 
     for (auto* layer_it : data_set->GetLayers()) // OGRLayer*
     {
@@ -231,8 +252,8 @@ void ManageSectorsTask::parseCurrentFile ()
                         vector<pair<double,double>> points;
                         for (auto& point_it : *ring_it)
                         {
-                            loginf << "ManageSectorsTask: parseCurrentFile: point x " << point_it.getX()
-                                   << " y " << point_it.getY() << " z " << point_it.getZ();
+                            loginf << "ManageSectorsTask: parseCurrentFile: point lat " << point_it.getY()
+                                   << " lon " << point_it.getX() << " z " << point_it.getZ();
 
                             points.push_back({point_it.getY(), point_it.getX()});
                         }
@@ -257,8 +278,9 @@ void ManageSectorsTask::parseCurrentFile ()
 
                             for (auto& point_it : *ring_it)
                             {
-                                loginf << "ManageSectorsTask: parseCurrentFile: point x " << point_it.getX()
-                                       << " y " << point_it.getY() << " z " << point_it.getZ();
+                                loginf << "ManageSectorsTask: parseCurrentFile: point lat " << point_it.getY()
+                                       << " lon " << point_it.getX() << " z " << point_it.getZ();
+
                                 points.push_back({point_it.getY(), point_it.getX()});
                             }
 
@@ -274,6 +296,18 @@ void ManageSectorsTask::parseCurrentFile ()
                 loginf << "ManageSectorsTask: parseCurrentFile: no geometry found";
         }
     }
+
+    for (auto& layer_it : data_)
+    {
+        for (auto& poly_it : layer_it.second)
+        {
+            parse_message_ += "Found layer '"+layer_it.first+"' sector '"+poly_it.first
+                    +"' num points "+to_string(poly_it.second.size());
+        }
+    }
+
+    if (widget_)
+        widget_->updateParseMessage();
 }
 
 void ManageSectorsTask::addPolygon (const std::string& layer_name, const std::string& polyon_name,

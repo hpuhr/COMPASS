@@ -14,11 +14,12 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QTextEdit>
 
 ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
 {
-    main_layout_ = new QHBoxLayout();
+    main_layout_ = new QVBoxLayout();
 
     tab_widget_ = new QTabWidget();
 
@@ -75,32 +76,19 @@ void ManageSectorsTaskWidget::addMainTab()
         files_layout->addLayout(button_layout);
 
         main_tab_layout->addLayout(files_layout);
+
+        parse_msg_edit_ = new QTextEdit ();
+        parse_msg_edit_->setReadOnly(true);
+        main_tab_layout->addWidget(parse_msg_edit_);
     }
 
-    // final stuff
-    {
-//        debug_check_ = new QCheckBox("Debug in Console");
-//        debug_check_->setChecked(task_.debug());
-//        connect(debug_check_, &QCheckBox::clicked, this,
-//                &ManageSectorsTaskWidget::debugChangedSlot);
-//        main_tab_layout->addWidget(debug_check_);
+    import_button_ = new QPushButton("Import");
+    connect (import_button_, &QPushButton::clicked, this, &ManageSectorsTaskWidget::importSlot);
+    import_button_->setDisabled(true);
+    main_layout_->addWidget(import_button_); // is enabled in updateContext
 
-//        limit_ram_check_ = new QCheckBox("Limit RAM Usage");
-//        limit_ram_check_->setChecked(task_.limitRAM());
-//        connect(limit_ram_check_, &QCheckBox::clicked, this,
-//                &ManageSectorsTaskWidget::limitRAMChangedSlot);
-//        main_tab_layout->addWidget(limit_ram_check_);
-
-//        create_mapping_stubs_button_ = new QPushButton("Create Mapping Stubs");
-//        connect(create_mapping_stubs_button_, &QPushButton::clicked, this,
-//                &ManageSectorsTaskWidget::createMappingsSlot);
-//        main_tab_layout->addWidget(create_mapping_stubs_button_);
-
-//        test_button_ = new QPushButton("Test Import");
-//        connect(test_button_, &QPushButton::clicked, this,
-//                &ManageSectorsTaskWidget::testImportSlot);
-//        main_tab_layout->addWidget(test_button_);
-    }
+    if (task_.currentFilename().size())
+        updateParseMessage();
 
     QWidget* main_tab_widget = new QWidget();
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
@@ -142,6 +130,15 @@ void ManageSectorsTaskWidget::selectFile(const std::string& filename)
         assert (item_it);
         file_list_->setCurrentItem(item_it);
     }
+}
+
+void ManageSectorsTaskWidget::updateParseMessage ()
+{
+    loginf << "ViewPointsImportTaskWidget: updateParseMessage";
+
+    assert (parse_msg_edit_);
+    parse_msg_edit_->setText(task_.parseMessage().c_str());
+    import_button_->setEnabled(task_.parsedData().size());
 }
 
 void ManageSectorsTaskWidget::deleteFileSlot()
@@ -189,4 +186,9 @@ void ManageSectorsTaskWidget::updateFileListSlot()
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }
+}
+
+void ManageSectorsTaskWidget::importSlot()
+{
+    loginf << "ManageSectorsTaskWidget: importSlot";
 }
