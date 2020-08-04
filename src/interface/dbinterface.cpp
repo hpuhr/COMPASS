@@ -48,14 +48,16 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "sector.h"
 
 using namespace Utils;
+using namespace std;
 
 /**
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
  * count_), creates write_table_names_,
  */
-DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB* atsdb)
+DBInterface::DBInterface(string class_id, string instance_id, ATSDB* atsdb)
     : Configurable(class_id, instance_id, atsdb), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
@@ -100,7 +102,7 @@ DBInterface::~DBInterface()
  * Generates connection based on the DB_CONNECTION_TYPE of info, calls init on it. If a new database
  * will be created, creates the buffer_writer_, else calls updateExists and updateCount.
  */
-void DBInterface::useConnection(const std::string& connection_type)
+void DBInterface::useConnection(const string& connection_type)
 {
     logdbg << "DBInterface: useConnection: '" << connection_type << "'";
     if (current_connection_)
@@ -173,7 +175,7 @@ QWidget* DBInterface::connectionWidget()
     return current_connection_->widget();
 }
 
-std::vector<std::string> DBInterface::getDatabases()
+vector<string> DBInterface::getDatabases()
 {
     assert(current_connection_);
     return current_connection_->getDatabases();
@@ -197,26 +199,26 @@ DBConnection& DBInterface::connection()
     return *current_connection_;
 }
 
-void DBInterface::generateSubConfigurable(const std::string& class_id,
-                                          const std::string& instance_id)
+void DBInterface::generateSubConfigurable(const string& class_id,
+                                          const string& instance_id)
 {
     logdbg << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "MySQLppConnection")
     {
         MySQLppConnection* connection = new MySQLppConnection(class_id, instance_id, this);
         assert(connections_.count(connection->instanceId()) == 0);
-        connections_.insert(std::pair<std::string, DBConnection*>(
+        connections_.insert(pair<string, DBConnection*>(
             connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
     }
     else if (class_id == "SQLiteConnection")
     {
         SQLiteConnection* connection = new SQLiteConnection(class_id, instance_id, this);
         assert(connections_.count(connection->instanceId()) == 0);
-        connections_.insert(std::pair<std::string, DBConnection*>(
+        connections_.insert(pair<string, DBConnection*>(
             connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
     }
     else
-        throw std::runtime_error("DBInterface: generateSubConfigurable: unknown class_id " +
+        throw runtime_error("DBInterface: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
@@ -235,7 +237,7 @@ void DBInterface::checkSubConfigurables()
     }
 }
 
-bool DBInterface::existsTable(const std::string& table_name)
+bool DBInterface::existsTable(const string& table_name)
 {
     QMutexLocker locker(&connection_mutex_);  // TODO
     return table_info_.count(table_name) == 1;
@@ -250,7 +252,7 @@ void DBInterface::createTable(DBTable& table)
         return;
     }
 
-    std::string statement = sql_generator_.getCreateTableStatement(table);
+    string statement = sql_generator_.getCreateTableStatement(table);
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -280,7 +282,7 @@ bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPER
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is
 // returned.
 // */
-std::set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
+set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 {
     logdbg << "DBInterface: queryActiveSensorNumbers: start";
 
@@ -289,19 +291,19 @@ std::set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 
     QMutexLocker locker(&connection_mutex_);
 
-    std::string local_key_dbovar = object.currentDataSourceDefinition().localKey();
+    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
     assert(object.hasVariable(local_key_dbovar));
     const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-    std::set<int> data;
+    set<int> data;
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
+    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(*command);
+    shared_ptr<DBResult> result = current_connection_->execute(*command);
 
     assert(result->containsData());
 
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
     for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
     {
         if (buffer->get<int>(local_key_col.name()).isNull(cnt))
@@ -339,7 +341,7 @@ bool DBInterface::hasDataSourceTables(DBObject& object)
     if (!meta.hasColumn(ds.nameColumn()))
         return false;
 
-    std::string main_table_name = meta.mainTableName();
+    string main_table_name = meta.mainTableName();
 
     if (!existsTable(main_table_name))
         return false;
@@ -353,7 +355,7 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
            << data_source.id();
 
     DBObject& object = data_source.object();
-    std::shared_ptr<Buffer> buffer{new Buffer()};
+    shared_ptr<Buffer> buffer{new Buffer()};
 
     const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
     const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
@@ -366,7 +368,7 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     const DBTableColumn& name_col = meta.column(ds_def.nameColumn());
     assert(name_col.propertyType() == PropertyDataType::STRING);
     buffer->addProperty(name_col.name(), name_col.propertyType());
-    buffer->get<std::string>(name_col.name()).set(0, data_source.name());
+    buffer->get<string>(name_col.name()).set(0, data_source.name());
 
     if (ds_def.hasShortNameColumn())
     {
@@ -374,9 +376,9 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
         assert(col.propertyType() == PropertyDataType::STRING);
         buffer->addProperty(col.name(), col.propertyType());
         if (data_source.hasShortName())
-            buffer->get<std::string>(col.name()).set(0, data_source.shortName());
+            buffer->get<string>(col.name()).set(0, data_source.shortName());
         else
-            buffer->get<std::string>(col.name()).setNull(0);
+            buffer->get<string>(col.name()).setNull(0);
     }
 
     if (ds_def.hasSacColumn())
@@ -587,19 +589,19 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */
-std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
+map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getDataSources: start";
 
     QMutexLocker locker(&connection_mutex_);
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
+    shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
     logdbg << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(*command);
+    shared_ptr<DBResult> result = current_connection_->execute(*command);
     assert(result->containsData());
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
 
     logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
@@ -618,7 +620,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     assert(buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
 
     bool has_short_name = ds.hasShortNameColumn();
-    std::string short_name_col_name;
+    string short_name_col_name;
     if (has_short_name)
     {
         short_name_col_name = meta.column(ds.shortNameColumn()).name();
@@ -629,7 +631,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 
     bool has_sac = ds.hasSacColumn();
     bool has_int_sacsic = false;
-    std::string sac_col_name;
+    string sac_col_name;
     if (has_sac)
     {
         sac_col_name = meta.column(ds.sacColumn()).name();
@@ -642,7 +644,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_sic = ds.hasSicColumn();
-    std::string sic_col_name;
+    string sic_col_name;
     if (has_sic)
     {
         sic_col_name = meta.column(ds.sicColumn()).name();
@@ -655,7 +657,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_latitude = ds.hasLatitudeColumn();
-    std::string latitude_col_name;
+    string latitude_col_name;
     if (has_latitude)
     {
         latitude_col_name = meta.column(ds.latitudeColumn()).name();
@@ -664,7 +666,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_longitude = ds.hasLongitudeColumn();
-    std::string longitude_col_name;
+    string longitude_col_name;
     if (has_longitude)
     {
         longitude_col_name = meta.column(ds.longitudeColumn()).name();
@@ -673,7 +675,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_altitude = ds.hasAltitudeColumn();
-    std::string altitude_col_name;
+    string altitude_col_name;
     if (has_altitude)
     {
         altitude_col_name = meta.column(ds.altitudeColumn()).name();
@@ -683,7 +685,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 
     // psr
     bool has_primary_azimuth_stddev = ds.hasPrimaryAzimuthStdDevColumn();
-    std::string primary_azimuth_stddev_col_name;
+    string primary_azimuth_stddev_col_name;
     if (has_primary_azimuth_stddev)
     {
         primary_azimuth_stddev_col_name = meta.column(ds.primaryAzimuthStdDevColumn()).name();
@@ -692,7 +694,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_primary_range_stddev = ds.hasPrimaryRangeStdDevColumn();
-    std::string primary_range_stddev_col_name;
+    string primary_range_stddev_col_name;
     if (has_primary_range_stddev)
     {
         primary_range_stddev_col_name = meta.column(ds.primaryRangeStdDevColumn()).name();
@@ -701,7 +703,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_primary_ir_min = ds.hasPrimaryIRMinColumn();
-    std::string primary_ir_min_col_name;
+    string primary_ir_min_col_name;
     if (has_primary_ir_min)
     {
         primary_ir_min_col_name = meta.column(ds.primaryIRMinColumn()).name();
@@ -710,7 +712,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_primary_ir_max = ds.hasPrimaryIRMaxColumn();
-    std::string primary_ir_max_col_name;
+    string primary_ir_max_col_name;
     if (has_primary_ir_max)
     {
         primary_ir_max_col_name = meta.column(ds.primaryIRMaxColumn()).name();
@@ -720,7 +722,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 
     // ssr
     bool has_secondary_azimuth_stddev = ds.hasSecondaryAzimuthStdDevColumn();
-    std::string secondary_azimuth_stddev_col_name;
+    string secondary_azimuth_stddev_col_name;
     if (has_secondary_azimuth_stddev)
     {
         secondary_azimuth_stddev_col_name = meta.column(ds.secondaryAzimuthStdDevColumn()).name();
@@ -729,7 +731,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_secondary_range_stddev = ds.hasSecondaryRangeStdDevColumn();
-    std::string secondary_range_stddev_col_name;
+    string secondary_range_stddev_col_name;
     if (has_secondary_range_stddev)
     {
         secondary_range_stddev_col_name = meta.column(ds.secondaryRangeStdDevColumn()).name();
@@ -738,7 +740,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_secondary_ir_min = ds.hasSecondaryIRMinColumn();
-    std::string secondary_ir_min_col_name;
+    string secondary_ir_min_col_name;
     if (has_secondary_ir_min)
     {
         secondary_ir_min_col_name = meta.column(ds.secondaryIRMinColumn()).name();
@@ -747,7 +749,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_secondary_ir_max = ds.hasSecondaryIRMaxColumn();
-    std::string secondary_ir_max_col_name;
+    string secondary_ir_max_col_name;
     if (has_secondary_ir_max)
     {
         secondary_ir_max_col_name = meta.column(ds.secondaryIRMaxColumn()).name();
@@ -757,7 +759,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 
     // mode s
     bool has_mode_s_azimuth_stddev = ds.hasModeSAzimuthStdDevColumn();
-    std::string mode_s_azimuth_stddev_col_name;
+    string mode_s_azimuth_stddev_col_name;
     if (has_mode_s_azimuth_stddev)
     {
         mode_s_azimuth_stddev_col_name = meta.column(ds.modeSAzimuthStdDevColumn()).name();
@@ -766,7 +768,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_mode_s_range_stddev = ds.hasModeSRangeStdDevColumn();
-    std::string mode_s_range_stddev_col_name;
+    string mode_s_range_stddev_col_name;
     if (has_mode_s_range_stddev)
     {
         mode_s_range_stddev_col_name = meta.column(ds.modeSRangeStdDevColumn()).name();
@@ -775,7 +777,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_mode_s_ir_min = ds.hasModeSIRMinColumn();
-    std::string mode_s_ir_min_col_name;
+    string mode_s_ir_min_col_name;
     if (has_mode_s_ir_min)
     {
         mode_s_ir_min_col_name = meta.column(ds.modeSIRMinColumn()).name();
@@ -784,7 +786,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     }
 
     bool has_mode_s_ir_max = ds.hasModeSIRMaxColumn();
-    std::string mode_s_ir_max_col_name;
+    string mode_s_ir_max_col_name;
     if (has_mode_s_ir_max)
     {
         mode_s_ir_max_col_name = meta.column(ds.modeSIRMaxColumn()).name();
@@ -792,7 +794,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
                buffer->properties().get(mode_s_ir_max_col_name).dataType() == PropertyDataType::INT);
     }
 
-    std::map<int, DBODataSource> sources;
+    map<int, DBODataSource> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
@@ -803,7 +805,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
             continue;
         }
 
-        if (buffer->get<std::string>(name_col.name()).isNull(cnt))
+        if (buffer->get<string>(name_col.name()).isNull(cnt))
         {
             loginf << "DBInterface: getDataSources: object " << object.name()
                    << " has NULL name, which will be omitted";
@@ -811,19 +813,19 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         }
 
         int key = buffer->get<int>(foreign_key_col.name()).get(cnt);
-        std::string name = buffer->get<std::string>(name_col.name()).get(cnt);
+        string name = buffer->get<string>(name_col.name()).get(cnt);
 
         assert(sources.count(key) == 0);
         logdbg << "DBInterface: getDataSources: object " << object.name() << " key " << key
                << " name " << name;
-        // sources.insert(std::make_pair(key, DBODataSource(key, name)));
+        // sources.insert(make_pair(key, DBODataSource(key, name)));
 
-        sources.emplace(std::piecewise_construct,
-                        std::forward_as_tuple(key),                 // args for key
-                        std::forward_as_tuple(object, key, name));  // args for mapped value
+        sources.emplace(piecewise_construct,
+                        forward_as_tuple(key),                 // args for key
+                        forward_as_tuple(object, key, name));  // args for mapped value
 
-        if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNull(cnt))
-            sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));
+        if (has_short_name && !buffer->get<string>(short_name_col_name).isNull(cnt))
+            sources.at(key).shortName(buffer->get<string>(short_name_col_name).get(cnt));
 
         if (has_sac)
         {
@@ -911,7 +913,7 @@ std::map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     return sources;
 }
 
-size_t DBInterface::count(const std::string& table)
+size_t DBInterface::count(const string& table)
 {
     logdbg << "DBInterface: count: table " << table;
     assert(existsTable(table));
@@ -919,7 +921,7 @@ size_t DBInterface::count(const std::string& table)
     QMutexLocker locker(&connection_mutex_);
     assert(current_connection_);
 
-    std::string sql = sql_generator_.getCountStatement(table);
+    string sql = sql_generator_.getCountStatement(table);
 
     logdbg << "DBInterface: count: sql '" << sql << "'";
 
@@ -930,7 +932,7 @@ size_t DBInterface::count(const std::string& table)
     list.addProperty("count", PropertyDataType::INT);
     command.list(list);
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = current_connection_->execute(command);
 
     assert(result->containsData());
     int tmp = result->buffer()->get<int>("count").get(0);
@@ -939,18 +941,18 @@ size_t DBInterface::count(const std::string& table)
     return static_cast<size_t>(tmp);
 }
 
-void DBInterface::setProperty(const std::string& id, const std::string& value)
+void DBInterface::setProperty(const string& id, const string& value)
 {
     properties_[id] = value;
 }
 
-std::string DBInterface::getProperty(const std::string& id)
+string DBInterface::getProperty(const string& id)
 {
     assert(hasProperty(id));
     return properties_.at(id);
 }
 
-bool DBInterface::hasProperty(const std::string& id) { return properties_.count(id); }
+bool DBInterface::hasProperty(const string& id) { return properties_.count(id); }
 
 void DBInterface::loadProperties()
 {
@@ -966,18 +968,18 @@ void DBInterface::loadProperties()
     list.addProperty("value", PropertyDataType::STRING);
     command.list(list);
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = current_connection_->execute(command);
 
     assert(result->containsData());
 
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
 
     assert(buffer);
-    assert(buffer->has<std::string>("id"));
-    assert(buffer->has<std::string>("value"));
+    assert(buffer->has<string>("id"));
+    assert(buffer->has<string>("value"));
 
-    NullableVector<std::string> id_vec = buffer->get<std::string>("id");
-    NullableVector<std::string> value_vec = buffer->get<std::string>("value");
+    NullableVector<string> id_vec = buffer->get<string>("id");
+    NullableVector<string> value_vec = buffer->get<string>("value");
 
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
@@ -1005,23 +1007,77 @@ void DBInterface::saveProperties()
     // QMutexLocker locker(&connection_mutex_); // done in closeConnection
     assert(current_connection_);
 
-    std::string str;
+    string str;
 
     for (auto& prop_it : properties_)
     {
-        std::string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
+        string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
         current_connection_->executeSQL(str);
     }
 
     loginf << "DBInterface: saveProperties: done";
 }
 
-void DBInterface::insertMinMax(const std::string& id, const std::string& object_name,
-                               const std::string& min, const std::string& max)
+void DBInterface::loadSectors()
+{
+    loginf << "DBInterface: loadSectors";
+
+    QMutexLocker locker(&connection_mutex_);
+
+    DBCommand command;
+    command.set(sql_generator_.getSelectAllSectorsStatement());
+
+    PropertyList list;
+    list.addProperty("name", PropertyDataType::STRING);
+    list.addProperty("layer_name", PropertyDataType::STRING);
+    list.addProperty("json", PropertyDataType::STRING);
+    command.list(list);
+
+    shared_ptr<DBResult> result = current_connection_->execute(command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    assert(buffer);
+    assert(buffer->has<string>("name"));
+    assert(buffer->has<string>("layer_name"));
+    assert(buffer->has<string>("json"));
+
+    NullableVector<string> name_vec = buffer->get<string>("name");
+    NullableVector<string> layer_name_vec = buffer->get<string>("layer_name");
+    NullableVector<string> json_vec = buffer->get<string>("json");
+
+    string name;
+    string layer_name;
+    string json_str;
+
+    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+    {
+        assert(!name_vec.isNull(cnt));
+        assert(!layer_name_vec.isNull(cnt));
+        assert(!json_vec.isNull(cnt));
+
+        name = name_vec.get(cnt);
+        layer_name = layer_name_vec.get(cnt);
+        json_str = json_vec.get(cnt);
+
+        assert (!hasSector(name, layer_name));
+        if (!sector_layers_.count(layer_name))
+            sector_layers_[layer_name] = make_shared<SectorLayer>(layer_name);
+
+        sector_layers_.at(layer_name)->addSector(make_shared<Sector>(name, layer_name, json_str));
+
+        loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '" << layer_name << "'";
+    }
+}
+
+void DBInterface::insertMinMax(const string& id, const string& object_name,
+                               const string& min, const string& max)
 {
     QMutexLocker locker(&connection_mutex_);
 
-    std::string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
+    string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
     current_connection_->executeSQL(str);
 }
 
@@ -1030,7 +1086,7 @@ void DBInterface::insertMinMax(const std::string& id, const std::string& object_
  * values for all subvariables and calculates the min/max for all subvariables. If the variable
  * needs a unit transformation, it is performed (locally in this thread).
  */
-std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariable& var)
+pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
 {
     logdbg << "DBInterface: getMinMaxString: var " << var.name();
 
@@ -1038,20 +1094,20 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariab
     {
         logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
                << " does not exist in db";
-        return std::pair<std::string, std::string>(NULL_STRING, NULL_STRING);
+        return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
     if (!var.dbObject().count())  // object doesn't exist in this database
     {
         logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
                << " has no data in db";
-        return std::pair<std::string, std::string>(NULL_STRING, NULL_STRING);
+        return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
     if (!var.existsInDB())  // variable doesn't exist in this database
     {
         logerr << "DBInterface: getMinMaxString: var " << var.name() << " does not exist in db";
-        return std::pair<std::string, std::string>(NULL_STRING, NULL_STRING);
+        return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
     QMutexLocker locker(&connection_mutex_);
@@ -1069,29 +1125,29 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariab
 
     logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = current_connection_->execute(command);
 
     assert(result);
     assert(result->containsData());
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
 
     assert(buffer);
     if (buffer->size() != 1)
     {
         logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has "
                << buffer->size() << " minmax values";
-        return std::pair<std::string, std::string>(NULL_STRING, NULL_STRING);
+        return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
-    if (buffer->get<std::string>("min").isNull(0) || buffer->get<std::string>("max").isNull(0))
+    if (buffer->get<string>("min").isNull(0) || buffer->get<string>("max").isNull(0))
     {
         logerr << "DBInterface: getMinMaxString: variable " << var.name()
                << " has NULL minimum/maximum";
-        return std::pair<std::string, std::string>(NULL_STRING, NULL_STRING);
+        return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
-    std::string min = buffer->get<std::string>("min").get(0);
-    std::string max = buffer->get<std::string>("max").get(0);
+    string min = buffer->get<string>("min").get(0);
+    string max = buffer->get<string>("max").get(0);
 
     logdbg << "DBInterface: getMinMaxString: minstr '" << min << " maxstr " << max;
 
@@ -1102,7 +1158,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariab
         {
             logerr << "DBInterface: getMinMaxString: unknown dimension '" << var.dimensionConst()
                    << "'";
-            throw std::runtime_error("DBInterface: getMinMaxString: unknown dimension '" +
+            throw runtime_error("DBInterface: getMinMaxString: unknown dimension '" +
                                      var.dimensionConst() + "'");
         }
 
@@ -1124,7 +1180,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString(const DBOVariab
 
     logdbg << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max "
            << max;
-    return std::pair<std::string, std::string>(min, max);
+    return pair<string, string>(min, max);
 }
 
 bool DBInterface::existsViewPointsTable()
@@ -1145,7 +1201,7 @@ void DBInterface::createViewPointsTable()
     updateTableInfo();
 }
 
-void DBInterface::setViewPoint(const unsigned int id, const std::string& value)
+void DBInterface::setViewPoint(const unsigned int id, const string& value)
 {
     if (!current_connection_)
     {
@@ -1159,13 +1215,13 @@ void DBInterface::setViewPoint(const unsigned int id, const std::string& value)
     if (!existsViewPointsTable())
         createViewPointsTable();
 
-    std::string str = sql_generator_.getInsertViewPointStatement(id, value);
+    string str = sql_generator_.getInsertViewPointStatement(id, value);
 
     logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
     current_connection_->executeSQL(str);
 }
 
-std::map<unsigned int, std::string> DBInterface::viewPoints()
+map<unsigned int, string> DBInterface::viewPoints()
 {
     loginf << "DBInterface: viewPoints";
 
@@ -1181,20 +1237,20 @@ std::map<unsigned int, std::string> DBInterface::viewPoints()
     list.addProperty("json", PropertyDataType::STRING);
     command.list(list);
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = current_connection_->execute(command);
 
     assert(result->containsData());
 
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
 
     assert(buffer);
     assert(buffer->has<unsigned int>("id"));
-    assert(buffer->has<std::string>("json"));
+    assert(buffer->has<string>("json"));
 
     NullableVector<unsigned int> id_vec = buffer->get<unsigned int>("id");
-    NullableVector<std::string> json_vec = buffer->get<std::string>("json");
+    NullableVector<string> json_vec = buffer->get<string>("json");
 
-    std::map<unsigned int, std::string> view_points;
+    map<unsigned int, string> view_points;
 
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
@@ -1213,7 +1269,7 @@ void DBInterface::deleteViewPoint(const unsigned int id)
 {
     QMutexLocker locker(&connection_mutex_);
     current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
-                                                                      "id="+std::to_string(id)));
+                                                                      "id="+to_string(id)));
 }
 
 void DBInterface::deleteAllViewPoints()
@@ -1221,6 +1277,87 @@ void DBInterface::deleteAllViewPoints()
     clearTableContent(TABLE_NAME_VIEWPOINTS);
 }
 
+
+bool DBInterface::existsSectorsTable()
+{
+    return existsTable(TABLE_NAME_SECTORS);
+}
+
+void DBInterface::createSectorsTable()
+{
+    assert(!existsSectorsTable());
+
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getTableSectorsCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo();
+}
+
+bool DBInterface::hasSector (const string& name, const string& layer_name)
+{
+    if (!sector_layers_.count(layer_name))
+        return false;
+
+    return sector_layers_.at(layer_name)->hasSector(name);
+}
+
+
+std::map<std::string, std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
+{
+    return sector_layers_;
+}
+
+void DBInterface::addSector(shared_ptr<Sector> sector)
+{
+    if (!current_connection_)
+    {
+        logwrn << "DBInterface: addSector: failed since no database connection exists";
+        return;
+    }
+
+    // QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    assert(current_connection_);
+
+    if (!existsViewPointsTable())
+        createViewPointsTable();
+
+    string str = sql_generator_.getInsertSectorStatement(sector->name(), sector->layerName(), sector->jsonData());
+
+    logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
+    {
+        QMutexLocker locker(&connection_mutex_);
+        current_connection_->executeSQL(str);
+    }
+
+    emit sectorsChangedSignal();
+}
+
+void DBInterface::deleteSector(shared_ptr<Sector> sector)
+{
+    assert (hasSector(sector->name(), sector->layerName()));
+
+    sector_layers_.at(sector->layerName())->removeSector(sector);
+
+    if (!sector_layers_.at(sector->layerName())->size())
+        sector_layers_.erase(sector->layerName());
+
+    {
+    QMutexLocker locker(&connection_mutex_);
+    current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,
+                                                                      "name="+sector->name()));
+    }
+
+    emit sectorsChangedSignal();
+}
+
+void DBInterface::deleteAllSectors()
+{
+    sector_layers_.clear();
+    clearTableContent(TABLE_NAME_SECTORS);
+
+    emit sectorsChangedSignal();
+}
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {
@@ -1236,40 +1373,40 @@ bool DBInterface::hasActiveDataSources(DBObject& object)
 /**
  * Gets active sensor numbers as property, splits it and packs it into a set.
  */
-std::set<int> DBInterface::getActiveDataSources(DBObject& object)
+set<int> DBInterface::getActiveDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getActiveDataSources: start";
 
     assert(hasActiveDataSources(object));
 
-    std::string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+    string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
 
-    std::set<int> ret;
+    set<int> ret;
 
-    std::vector<std::string> tmp2 = String::split(tmp, ',');
+    vector<string> tmp2 = String::split(tmp, ',');
 
     loginf << "DBInterface: getActiveDataSources: got " << tmp2.size() << " parts from '" << tmp
            << "'";
 
     for (unsigned int cnt = 0; cnt < tmp2.size(); cnt++)
     {
-        ret.insert(std::stoi(tmp2.at(cnt)));
+        ret.insert(stoi(tmp2.at(cnt)));
         loginf << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
-               << std::stoi(tmp2.at(cnt)) << "'";
+               << stoi(tmp2.at(cnt)) << "'";
     }
 
     logdbg << "DBInterface: getActiveDataSources: end";
     return ret;
 }
 
-void DBInterface::insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(MetaDBTable& meta_table, shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size "
            << buffer->size();
     assert (buffer->size());
 
     logdbg << "DBInterface: insertBuffer: main table " << meta_table.mainTable().name();
-    std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert(partial_buffer->size());
     insertBuffer(meta_table.mainTable(), partial_buffer);
 
@@ -1283,7 +1420,7 @@ void DBInterface::insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> 
     }
 }
 
-void DBInterface::insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(DBTable& table, shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size "
            << buffer->size();
@@ -1299,7 +1436,7 @@ void DBInterface::insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer)
                << "'";
 
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error("DBInterface: insertBuffer: column '" +
+            throw runtime_error("DBInterface: insertBuffer: column '" +
                                      properties.at(cnt).name() + "' does not exist in table " +
                                      table.name());
     }
@@ -1310,7 +1447,7 @@ void DBInterface::insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer)
 
     assert(table.existsInDB());
 
-    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
+    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -1331,7 +1468,7 @@ void DBInterface::insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer)
     current_connection_->finalizeBindStatement();
 }
 
-void DBInterface::insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
 {
     loginf << "DBInterface: insertBuffer: table name " << table_name << " buffer size "
            << buffer->size();
@@ -1340,7 +1477,7 @@ void DBInterface::insertBuffer(const std::string& table_name, std::shared_ptr<Bu
     assert(buffer);
 
     if (!existsTable(table_name))
-        throw std::runtime_error("DBInterface: insertBuffer: table with name '" + table_name +
+        throw runtime_error("DBInterface: insertBuffer: table with name '" + table_name +
                                  "' does not exist");
 
     const PropertyList& properties = buffer->properties();
@@ -1355,12 +1492,12 @@ void DBInterface::insertBuffer(const std::string& table_name, std::shared_ptr<Bu
                << "'";
 
         if (!table_info.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error("DBInterface: insertBuffer: column '" +
+            throw runtime_error("DBInterface: insertBuffer: column '" +
                                      properties.at(cnt).name() + "' does not exist in table " +
                                      table_name);
     }
 
-    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
+    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -1382,8 +1519,8 @@ void DBInterface::insertBuffer(const std::string& table_name, std::shared_ptr<Bu
     current_connection_->finalizeBindStatement();
 }
 
-std::shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
-                                                      std::shared_ptr<Buffer> buffer)
+shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
+                                                      shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
            << buffer->size();
@@ -1407,7 +1544,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
                    << " skipping property " << org_prop.name();
     }
 
-    std::shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
+    shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
 
     logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
     assert (tmp_buffer->size());
@@ -1416,7 +1553,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
 }
 
 bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
-                                    std::shared_ptr<Buffer> buffer)
+                                    shared_ptr<Buffer> buffer)
 {
     if (!object.existsInDB())
         return false;
@@ -1458,12 +1595,12 @@ bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOV
 }
 
 void DBInterface::updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
-                               std::shared_ptr<Buffer> buffer, int from_index, int to_index)
+                               shared_ptr<Buffer> buffer, int from_index, int to_index)
 {
     logdbg << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size "
            << buffer->size() << " key " << key_col.identifier();
 
-    std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert(partial_buffer->size());
     updateBuffer(meta_table.mainTable(), key_col, partial_buffer, from_index, to_index);
 
@@ -1493,7 +1630,7 @@ void DBInterface::updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key
 }
 
 void DBInterface::updateBuffer(DBTable& table, const DBTableColumn& key_col,
-                               std::shared_ptr<Buffer> buffer, int from_index, int to_index)
+                               shared_ptr<Buffer> buffer, int from_index, int to_index)
 {
     logdbg << "DBInterface: updateBuffer: table " << table.name() << " buffer size "
            << buffer->size() << " key " << key_col.identifier();
@@ -1507,12 +1644,12 @@ void DBInterface::updateBuffer(DBTable& table, const DBTableColumn& key_col,
     for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
     {
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error("DBInterface: updateBuffer: column '" +
+            throw runtime_error("DBInterface: updateBuffer: column '" +
                                      properties.at(cnt).name() + "' does not exist in table " +
                                      table.name());
     }
 
-    std::string bind_statement =
+    string bind_statement =
         sql_generator_.createDBUpdateStringBind(buffer, key_col, table.name());
 
     QMutexLocker locker(&connection_mutex_);
@@ -1540,10 +1677,10 @@ void DBInterface::updateBuffer(DBTable& table, const DBTableColumn& key_col,
 }
 
 void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
-                              std::string custom_filter_clause,
-                              std::vector<DBOVariable*> filtered_variables, bool use_order,
+                              string custom_filter_clause,
+                              vector<DBOVariable*> filtered_variables, bool use_order,
                               DBOVariable* order_variable, bool use_order_ascending,
-                              const std::string& limit)
+                              const string& limit)
 {
     assert(current_connection_);
 
@@ -1560,7 +1697,7 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
 
     connection_mutex_.lock();
 
-    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
+    shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
         dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,
         order_variable, use_order_ascending, limit, true);
 
@@ -1572,26 +1709,26 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
  * Retrieves result from connection stepPreparedCommand, calls activateKeySearch on buffer and
  * returns it.
  */
-std::shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
+shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
 {
     // locked by prepareRead
     assert(current_connection_);
 
-    std::shared_ptr<DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);
+    shared_ptr<DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);
 
     if (!result)
     {
         logerr << "DBInterface: readDataChunk: connection returned error";
-        throw std::runtime_error("DBInterface: readDataChunk: connection returned error");
+        throw runtime_error("DBInterface: readDataChunk: connection returned error");
     }
 
     if (!result->containsData())
     {
         logerr << "DBInterface: readDataChunk: buffer does not contain data";
-        throw std::runtime_error("DBInterface: readDataChunk: buffer does not contain data");
+        throw runtime_error("DBInterface: readDataChunk: buffer does not contain data");
     }
 
-    std::shared_ptr<Buffer> buffer = result->buffer();
+    shared_ptr<Buffer> buffer = result->buffer();
 
     buffer->dboName(dbobject.name());
 
@@ -1632,26 +1769,26 @@ void DBInterface::createMinMaxTable()
     updateTableInfo();
 }
 
-void DBInterface::clearTableContent(const std::string& table_name)
+void DBInterface::clearTableContent(const string& table_name)
 {
     QMutexLocker locker(&connection_mutex_);
     // DELETE FROM tablename;
     current_connection_->executeSQL("DELETE FROM " + table_name + ";");
 }
 
-std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const DBTable& table)
+shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const DBTable& table)
 {
     QMutexLocker locker(&connection_mutex_);
     logdbg << "DBInterface: queryMinMaxForTable: getting command";
-    std::shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
+    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
 
     // loginf  << "DBInterface: queryMinMaxForTable: executing command '" <<
     // command->getCommandString() << "'";
-    std::shared_ptr<DBResult> result = current_connection_->execute(*command);
+    shared_ptr<DBResult> result = current_connection_->execute(*command);
     return result;
 }
 
-void DBInterface::insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer,
+void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,
                                                            unsigned int row)
 {
     assert(buffer);
@@ -1661,7 +1798,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffe
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: creating bind for " << size
            << " elements";
 
-    std::string connection_type = current_connection_->type();
+    string connection_type = current_connection_->type();
 
     assert(connection_type == MYSQL_IDENTIFIER || connection_type == SQLITE_IDENTIFIER);
 
@@ -1681,7 +1818,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffe
         else if (connection_type == MYSQL_IDENTIFIER)
             index_cnt = cnt + 1;
         else
-            throw std::runtime_error(
+            throw runtime_error(
                 "DBInterface: insertBindStatementForCurrentIndex: unknown db type");
 
         if (buffer->isNone(property, row))
@@ -1733,15 +1870,15 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffe
             case PropertyDataType::STRING:
                 if (connection_type == SQLITE_IDENTIFIER)
                     current_connection_->bindVariable(
-                        index_cnt, buffer->get<std::string>(property.name()).get(row));
+                        index_cnt, buffer->get<string>(property.name()).get(row));
                 else  // MYSQL assumed
                     current_connection_->bindVariable(
-                        index_cnt, "'" + buffer->get<std::string>(property.name()).get(row) + "'");
+                        index_cnt, "'" + buffer->get<string>(property.name()).get(row) + "'");
                 break;
             default:
                 logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
                        << Property::asString(data_type);
-                throw std::runtime_error(
+                throw runtime_error(
                     "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
                     Property::asString(data_type));
         }
@@ -1752,7 +1889,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffe
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
 }
 
-void DBInterface::createAssociationsTable(const std::string& table_name)
+void DBInterface::createAssociationsTable(const string& table_name)
 {
     assert(!existsTable(table_name));
     connection_mutex_.lock();
@@ -1762,22 +1899,22 @@ void DBInterface::createAssociationsTable(const std::string& table_name)
     updateTableInfo();
 }
 
-DBOAssociationCollection DBInterface::getAssociations(const std::string& table_name)
+DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
 {
     assert(existsTable(table_name));
 
     DBOAssociationCollection associations;
-    std::shared_ptr<DBCommand> command = sql_generator_.getSelectAssociationsCommand(table_name);
+    shared_ptr<DBCommand> command = sql_generator_.getSelectAssociationsCommand(table_name);
 
     connection_mutex_.lock();
 
-    std::shared_ptr<DBResult> result = current_connection_->execute(*command.get());
+    shared_ptr<DBResult> result = current_connection_->execute(*command.get());
 
     connection_mutex_.unlock();
 
     if (result->containsData())
     {
-        std::shared_ptr<Buffer> buffer = result->buffer();
+        shared_ptr<Buffer> buffer = result->buffer();
 
         if (buffer->size())
         {
@@ -1805,22 +1942,22 @@ DBOAssociationCollection DBInterface::getAssociations(const std::string& table_n
     return associations;
 }
 
-// void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value,
-// std::string filter)
+// void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, string value,
+// string filter)
 //{
 //    assert (sql_generator_);
 
 //    assert (!variable->isMetaVariable());
 //    assert (variable->hasCurrentDBColumn());
 
-//    std::scoped_lock l(mutex_);
+//    scoped_lock l(mutex_);
 //    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(),
 //    value, filter));
 //}
 
-// void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value,
-// std::string new_value,
-// std::string filter)
+// void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, string value,
+// string new_value,
+// string filter)
 //{
 //    assert (sql_generator_);
 
@@ -1847,19 +1984,19 @@ DBOAssociationCollection DBInterface::getAssociations(const std::string& table_n
 //        read_list.add(variable_it.second);
 
 //    loginf << "DBInterface: testReading: preparing reading";
-//    prepareRead (object, read_list); //, std::string custom_filter_clause="", DBOVariable
+//    prepareRead (object, read_list); //, string custom_filter_clause="", DBOVariable
 //    *order=0);
 
 //    start_time = boost::posix_time::microsec_clock::local_time();
 
 //    loginf << "DBInterface: testReading: starting reading";
-//    std::vector<std::shared_ptr <Buffer>> buffer_vector;
+//    vector<shared_ptr <Buffer>> buffer_vector;
 
 //    unsigned int num_rows=0;
 
 //    while (!getReadingDone(object))
 //    {
-//        std::shared_ptr <Buffer> buffer = readDataChunk (object, false);
+//        shared_ptr <Buffer> buffer = readDataChunk (object, false);
 //        buffer_vector.push_back(buffer);
 
 //        stop_time = boost::posix_time::microsec_clock::local_time();
