@@ -208,6 +208,9 @@ void ManageSectorsTask::importFile ()
         return;
     }
 
+    task_manager_.appendInfo("ManageSectorsTask: import of file '" + current_filename_ +
+                             "' started");
+
     DBInterface& db_interface = ATSDB::instance().interface();
     assert (db_interface.ready());
 
@@ -233,6 +236,16 @@ void ManageSectorsTask::importFile ()
                << sec_it->layerName() << "' num points " << sec_it->size();
         db_interface.addSector(sec_it);
     }
+
+    task_manager_.appendSuccess("ManageSectorsTask: imported " + to_string(parsed_sectors_.size())
+                                +" sectors");
+
+    QMessageBox msgBox;
+    msgBox.setText(QString("Import of ")+QString::number(parsed_sectors_.size())+" sectors done");
+    msgBox.setIcon(QMessageBox::Information);
+
+    if (show_done_summary_)
+        msgBox.exec();
 
     loginf << "ManageSectorsTask: importFile: done";
 }
