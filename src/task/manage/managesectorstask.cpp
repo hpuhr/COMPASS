@@ -5,10 +5,13 @@
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
+#include "sector.h"
 
 #include "ogrsf_frmts.h"
 
 #include "json.hpp"
+
+#include <QMessageBox>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -27,7 +30,7 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
             "Allows management of sectors stored in the database. "
             "This task can not be run, but is performed using the GUI elements.";
 
-    if (current_filename_.size())
+    if (canImportFile())
         parseCurrentFile();
 }
 
@@ -114,6 +117,9 @@ void ManageSectorsTask::removeCurrentFilename()
     file_list_.erase(current_filename_);
     current_filename_ = "";
 
+    parse_message_ = "";
+    parsed_sectors_.clear();
+
     emit statusChangedSignal(name_);
 
     if (widget_)
@@ -132,6 +138,9 @@ void ManageSectorsTask::removeAllFiles ()
 
     current_filename_ = "";
 
+    parse_message_ = "";
+    parsed_sectors_.clear();
+
     emit statusChangedSignal(name_);
 
     if (widget_)
@@ -145,7 +154,14 @@ void ManageSectorsTask::currentFilename(const std::string& filename)
     bool had_filename = canImportFile();
 
     current_filename_ = filename;
-    parseCurrentFile();
+
+    if (canImportFile())
+        parseCurrentFile();
+    else
+    {
+        parse_message_ = "";
+        parsed_sectors_.clear();
+    }
 
     if (!had_filename)  // not on re-select
         emit statusChangedSignal(name_);
@@ -156,10 +172,10 @@ std::string ManageSectorsTask::parseMessage() const
     return parse_message_;
 }
 
-const map<string, map<string, vector<pair<double, double>>>>& ManageSectorsTask::parsedData() const
-{
-    return data_;
-}
+//const map<string, map<string, vector<pair<double, double>>>>& ManageSectorsTask::parsedData() const
+//{
+//    return data_;
+//}
 
 bool ManageSectorsTask::canImportFile()
 {
@@ -175,6 +191,52 @@ bool ManageSectorsTask::canImportFile()
 
     return true;
 }
+
+void ManageSectorsTask::importFile ()
+{
+    assert (canImportFile());
+
+    if (!parsed_sectors_.size())
+    {
+        loginf << "ManageSectorsTask: importFile: not possible since no data found";
+
+        QMessageBox msgBox;
+        msgBox.setText("Import not possible since no data was found.");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+
+        return;
+    }
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    for (auto& sec_it : parsed_sectors_) // check names
+    {
+        std::string sector_name = sec_it->name();
+
+        if (db_interface.hasSector(sector_name, sec_it->layerName()))
+        {
+            std::string new_sector_name = sector_name;
+            unsigned int cnt = 0;
+
+            while(db_interface.hasSector(new_sector_name, sec_it->layerName()))
+            {
+                new_sector_name = sector_name+to_string(cnt);
+                ++cnt;
+            }
+
+            sec_it->name(new_sector_name);
+        }
+
+        loginf << "ManageSectorsTask: importFile: adding sector '" << sec_it->name() << "' layer '"
+               << sec_it->layerName() << "' num points " << sec_it->size();
+        db_interface.addSector(sec_it);
+    }
+
+    loginf << "ManageSectorsTask: importFile: done";
+}
+
 
 void ManageSectorsTask::parseCurrentFile ()
 {
@@ -194,8 +256,7 @@ void ManageSectorsTask::parseCurrentFile ()
     }
 
     parse_message_ = "";
-    data_.clear();
-    polygon_names_.clear(); // init with existing sector names later
+    parsed_sectors_.clear();
 
     for (auto* layer_it : data_set->GetLayers()) // OGRLayer*
     {
@@ -297,13 +358,10 @@ void ManageSectorsTask::parseCurrentFile ()
         }
     }
 
-    for (auto& layer_it : data_)
+    for (auto& sec_it : parsed_sectors_)
     {
-        for (auto& poly_it : layer_it.second)
-        {
-            parse_message_ += "Found layer '"+layer_it.first+"' sector '"+poly_it.first
-                    +"' num points "+to_string(poly_it.second.size());
-        }
+        parse_message_ += "Found layer '"+sec_it->layerName()+"' sector '"+sec_it->name()
+                +"' num points "+to_string(sec_it->size());
     }
 
     if (widget_)
@@ -316,22 +374,5 @@ void ManageSectorsTask::addPolygon (const std::string& layer_name, const std::st
     loginf << "ManageSectorsTask: addPolygon: layer '" << layer_name << "' poly '" << polyon_name
            << "' num points " << points.size();
 
-    bool exists_poly = find(polygon_names_.begin(), polygon_names_.end(), polyon_name) != polygon_names_.end();
-
-    string tmp_poly_name = polyon_name;
-
-    if (exists_poly)
-    {
-        unsigned int cnt=2;
-
-        while (find(polygon_names_.begin(), polygon_names_.end(), tmp_poly_name+to_string(cnt)) != polygon_names_.end())
-            ++cnt;
-
-        tmp_poly_name = tmp_poly_name+to_string(cnt);
-    }
-
-    loginf << "ManageSectorsTask: addPolygon: using polygon name '" << tmp_poly_name << "'";
-
-    polygon_names_.push_back(tmp_poly_name);
-    data_[layer_name][tmp_poly_name] = points;
+    parsed_sectors_.push_back(make_shared<Sector> (polyon_name, layer_name, points));
 }

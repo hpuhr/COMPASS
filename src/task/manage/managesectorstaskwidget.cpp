@@ -138,7 +138,8 @@ void ManageSectorsTaskWidget::updateParseMessage ()
 
     assert (parse_msg_edit_);
     parse_msg_edit_->setText(task_.parseMessage().c_str());
-    import_button_->setEnabled(task_.parsedData().size());
+
+    import_button_->setEnabled(task_.canImportFile());
 }
 
 void ManageSectorsTaskWidget::deleteFileSlot()
@@ -191,4 +192,7 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 void ManageSectorsTaskWidget::importSlot()
 {
     loginf << "ManageSectorsTaskWidget: importSlot";
+
+    assert (task_.canImportFile());
+    task_.importFile();
 }

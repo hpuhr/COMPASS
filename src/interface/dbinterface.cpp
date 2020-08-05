@@ -123,6 +123,11 @@ void DBInterface::databaseContentChanged()
 
     loadProperties();
 
+    if (!existsSectorsTable())
+        createSectorsTable();
+
+    loadSectors();
+
     emit databaseContentChangedSignal();
 }
 
@@ -461,7 +466,6 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
 
     if (ds_def.hasPrimaryIRMinColumn())
     {
-        loginf << "UGA1";
         const DBTableColumn& col = meta.column(ds_def.primaryIRMinColumn());
         assert(col.propertyType() == PropertyDataType::CHAR);
         buffer->addProperty(col.name(), col.propertyType());
@@ -473,7 +477,6 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
 
     if (ds_def.hasPrimaryIRMaxColumn())
     {
-        loginf << "UGA2";
         const DBTableColumn& col = meta.column(ds_def.primaryIRMaxColumn());
         assert(col.propertyType() == PropertyDataType::INT);
         buffer->addProperty(col.name(), col.propertyType());
@@ -482,8 +485,6 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
         else
             buffer->get<int>(col.name()).setNull(0);
     }
-
-    loginf << "UGA3";
 
     // ssr
     if (ds_def.hasSecondaryAzimuthStdDevColumn())
@@ -1067,8 +1068,10 @@ void DBInterface::loadSectors()
             sector_layers_[layer_name] = make_shared<SectorLayer>(layer_name);
 
         sector_layers_.at(layer_name)->addSector(make_shared<Sector>(name, layer_name, json_str));
+        assert (sector_layers_.at(layer_name)->hasSector(name));
 
-        loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '" << layer_name << "'";
+        loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
+               << layer_name << "' num points " << sector_layers_.at(layer_name)->sector(name)->size();
     }
 }
 
@@ -1285,9 +1288,13 @@ bool DBInterface::existsSectorsTable()
 
 void DBInterface::createSectorsTable()
 {
+    loginf << "DBInterface: createSectorsTable";
+
     assert(!existsSectorsTable());
 
     connection_mutex_.lock();
+
+    loginf << "DBInterface: createSectorsTable: sql '" << sql_generator_.getTableSectorsCreateStatement() << "'";
     current_connection_->executeSQL(sql_generator_.getTableSectorsCreateStatement());
     connection_mutex_.unlock();
 

@@ -61,7 +61,7 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     ss.str(std::string());
 
     ss << "CREATE TABLE " << TABLE_NAME_SECTORS
-       << "(name VARCHAR(255), (layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (name));";
+       << "(name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (name));";
     table_sectors_create_statement_ = ss.str();
     ss.str(std::string());
 

@@ -10,6 +10,7 @@
 class TaskManager;
 class ManageSectorsTaskWidget;
 class SavedFile;
+class Sector;
 
 class ManageSectorsTask : public Task, public Configurable
 {
@@ -25,6 +26,7 @@ public:
     virtual void deleteWidget();
 
     bool canImportFile();
+    void importFile ();
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended() { return false; }
@@ -39,7 +41,7 @@ public:
     const std::string& currentFilename() { return current_filename_; }
 
     std::string parseMessage() const;
-    const std::map<std::string, std::map<std::string, std::vector<std::pair<double, double>>>>& parsedData() const;
+    //std::vector<std::shared_ptr<Sector>>& parsedData() const;
 
 protected:
     std::map<std::string, SavedFile*> file_list_;
@@ -47,16 +49,15 @@ protected:
 
     std::unique_ptr<ManageSectorsTaskWidget> widget_;
 
-  std::vector<std::string> polygon_names_; // for uniqueness check
-  std::map<std::string, std::map<std::string, std::vector<std::pair<double,double>>>> data_; // layer-> polygon -> points
+    std::vector<std::shared_ptr<Sector>> parsed_sectors_; // names not yet checked
 
-  std::string parse_message_;
+    std::string parse_message_;
 
-  virtual void checkSubConfigurables() {}
+    virtual void checkSubConfigurables() {}
 
-  void parseCurrentFile ();
-  void addPolygon (const std::string& layer_name, const std::string& polyon_name,
-                   std::vector<std::pair<double,double>> points);
+    void parseCurrentFile ();
+    void addPolygon (const std::string& layer_name, const std::string& polyon_name,
+                     std::vector<std::pair<double,double>> points);
 };
 
 #endif // MANAGESECTORSTASK_H
