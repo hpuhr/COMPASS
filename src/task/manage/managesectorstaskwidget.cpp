@@ -25,14 +25,14 @@ ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidge
 
     main_layout_->addWidget(tab_widget_);
 
-    addMainTab();
+    addImportTab();
 
     setLayout(main_layout_);
 }
 
 void ManageSectorsTaskWidget::expertModeChangedSlot() {}
 
-void ManageSectorsTaskWidget::addMainTab()
+void ManageSectorsTaskWidget::addImportTab()
 {
     assert(tab_widget_);
 
@@ -93,7 +93,7 @@ void ManageSectorsTaskWidget::addMainTab()
     QWidget* main_tab_widget = new QWidget();
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
-    tab_widget_->addTab(main_tab_widget, "Main");
+    tab_widget_->addTab(main_tab_widget, "Import");
 }
 
 void ManageSectorsTaskWidget::addFileSlot()

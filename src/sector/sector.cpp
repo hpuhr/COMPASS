@@ -63,6 +63,11 @@ std::string Sector::jsonData () const
     return j.dump();
 }
 
+const std::vector<std::pair<double, double>>& Sector::points() const
+{
+    return points_;
+}
+
 void Sector::name(const std::string& name)
 {
     name_ = name;

@@ -17,6 +17,8 @@ public:
 
     unsigned int size () { return points_.size(); }
 
+    const std::vector<std::pair<double, double>>& points() const;
+
 protected:
     std::string name_;
     const std::string layer_name_;

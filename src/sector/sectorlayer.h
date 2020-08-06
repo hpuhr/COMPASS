@@ -21,6 +21,7 @@ public:
 
     unsigned int size () { return sectors_.size(); };
 
+    std::map<std::string, std::shared_ptr<Sector>>& sectors() { return sectors_; }
 protected:
     const std::string name_;
 

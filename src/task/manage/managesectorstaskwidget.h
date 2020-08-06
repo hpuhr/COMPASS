@@ -52,7 +52,7 @@ protected:
 
     QPushButton* import_button_ {nullptr};
 
-    void addMainTab();
+    void addImportTab();
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H
