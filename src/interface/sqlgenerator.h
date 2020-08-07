@@ -111,7 +111,7 @@ class SQLGenerator
     std::string getInsertViewPointStatement(const unsigned int id, const std::string& json);
     std::string getSelectAllViewPointsStatement();
 
-    std::string getInsertSectorStatement(const std::string& name, const std::string& layer_name,
+    std::string getReplaceSectorStatement(const std::string& name, const std::string& layer_name,
                                          const std::string& json);
     std::string getSelectAllSectorsStatement();
 

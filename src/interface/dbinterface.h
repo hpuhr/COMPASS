@@ -173,9 +173,12 @@ class DBInterface : public QObject, public Configurable
 
     bool existsSectorsTable();
     void createSectorsTable();
+    bool hasSectorLayer (const std::string& layer_name);
+    std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
     bool hasSector (const std::string& name, const std::string& layer_name);
+    std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
     void addSector(std::shared_ptr<Sector> sector);
-    std::map<std::string, std::shared_ptr<SectorLayer>>& sectorsLayers();
+    std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
 
@@ -221,7 +224,7 @@ protected:
 
     std::map<std::string, std::string> properties_;
 
-    std::map<std::string, std::shared_ptr<SectorLayer>> sector_layers_;
+    std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
 
     virtual void checkSubConfigurables();
 

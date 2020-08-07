@@ -3,12 +3,13 @@
 
 #include <cassert>
 
+using namespace std;
+
 SectorLayer::SectorLayer(const std::string& name)
   : name_(name)
 {
 
 }
-
 
 std::string SectorLayer::name() const
 {
@@ -17,25 +18,39 @@ std::string SectorLayer::name() const
 
 bool SectorLayer::hasSector (const std::string& name)
 {
-    return sectors_.count(name);
+    auto iter = std::find_if(sectors_.begin(), sectors_.end(),
+                             [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
+
+    return iter != sectors_.end();
 }
 
 void SectorLayer::addSector (std::shared_ptr<Sector> sector)
 {
     assert (!hasSector(sector->name()));
     assert (sector->layerName() == name_);
-    sectors_[sector->name()] = sector;
+    sectors_.push_back(sector);
 }
 
 std::shared_ptr<Sector> SectorLayer::sector (const std::string& name)
 {
     assert (hasSector(name));
-    return sectors_.at(name);
+
+    auto iter = std::find_if(sectors_.begin(), sectors_.end(),
+                             [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
+    assert (iter != sectors_.end());
+
+    return *iter;
 }
 
 void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
 {
     assert (hasSector(sector->name()));
-    sectors_.erase(sector->name());
+
+    string name = sector->name();
+    auto iter = std::find_if(sectors_.begin(), sectors_.end(),
+                             [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
+    assert (iter != sectors_.end());
+
+    sectors_.erase(iter);
     assert (!hasSector(sector->name()));
 }

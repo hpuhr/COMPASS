@@ -8,11 +8,11 @@ class ManageSectorsTask;
 class QVBoxLayout;
 class QPushButton;
 class QListWidget;
-//class QComboBox;
-//class QStackedWidget;
+class QTableWidget;
 class QCheckBox;
 class QTabWidget;
 class QTextEdit;
+class QTableWidgetItem;
 
 class ManageSectorsTaskWidget : public TaskWidget
 {
@@ -27,6 +27,8 @@ public slots:
   void updateFileListSlot();
 
   void importSlot();
+
+  void sectorItemChangedSlot(QTableWidgetItem* item);
 
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
@@ -52,7 +54,14 @@ protected:
 
     QPushButton* import_button_ {nullptr};
 
+    QTableWidget* sector_table_{nullptr};
+    QStringList table_columns_{"Sector Name",  "Layer Name", "Num Points", "Altitude Minimum",
+                               "Altitude Maximum", "Color", "Delete"};
+
     void addImportTab();
+    void addManageTab();
+
+    void updateSectorTable();
 };
 
 #endif // MANAGESECTORSTASKWIDGET_H

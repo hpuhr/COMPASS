@@ -1064,14 +1064,21 @@ void DBInterface::loadSectors()
         json_str = json_vec.get(cnt);
 
         assert (!hasSector(name, layer_name));
-        if (!sector_layers_.count(layer_name))
-            sector_layers_[layer_name] = make_shared<SectorLayer>(layer_name);
 
-        sector_layers_.at(layer_name)->addSector(make_shared<Sector>(name, layer_name, json_str));
-        assert (sector_layers_.at(layer_name)->hasSector(name));
+        shared_ptr<Sector> new_sector = make_shared<Sector>(name, layer_name, json_str);
+        string layer_name = new_sector->layerName();
+
+        if (!hasSectorLayer(layer_name))
+            sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
+
+        assert (hasSectorLayer(layer_name));
+
+        sectorLayer(layer_name)->addSector(new_sector);
+
+        assert (hasSector(name, layer_name));
 
         loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
-               << layer_name << "' num points " << sector_layers_.at(layer_name)->sector(name)->size();
+               << layer_name << "' num points " << sector(name, layer_name)->size();
     }
 }
 
@@ -1301,16 +1308,40 @@ void DBInterface::createSectorsTable()
     updateTableInfo();
 }
 
-bool DBInterface::hasSector (const string& name, const string& layer_name)
+bool DBInterface::hasSectorLayer (const std::string& layer_name)
 {
-    if (!sector_layers_.count(layer_name))
-        return false;
+    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
+                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
 
-    return sector_layers_.at(layer_name)->hasSector(name);
+    return iter != sector_layers_.end();
 }
 
+std::shared_ptr<SectorLayer> DBInterface::sectorLayer (const std::string& layer_name)
+{
+    assert (hasSectorLayer(layer_name));
 
-std::map<std::string, std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
+    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
+                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+    assert (iter != sector_layers_.end());
+
+    return *iter;
+}
+
+bool DBInterface::hasSector (const string& name, const string& layer_name)
+{
+    if (!hasSectorLayer(layer_name))
+        return false;
+
+    return sectorLayer(layer_name)->hasSector(name);
+}
+
+std::shared_ptr<Sector> DBInterface::sector (const string& name, const string& layer_name)
+{
+    assert (hasSector(name, layer_name));
+    return sectorLayer(layer_name)->sector(name);
+}
+
+std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
 {
     return sector_layers_;
 }
@@ -1323,19 +1354,31 @@ void DBInterface::addSector(shared_ptr<Sector> sector)
         return;
     }
 
-    // QMutexLocker locker(&connection_mutex_); // done in closeConnection
     assert(current_connection_);
 
-    if (!existsViewPointsTable())
-        createViewPointsTable();
+    assert (!hasSector(sector->name(), sector->layerName()));
 
-    string str = sql_generator_.getInsertSectorStatement(sector->name(), sector->layerName(), sector->jsonData());
+    if (!existsSectorsTable())
+        createSectorsTable();
+
+    // insert and replace
+    string str = sql_generator_.getReplaceSectorStatement(sector->name(), sector->layerName(), sector->jsonData());
 
     logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
     {
         QMutexLocker locker(&connection_mutex_);
         current_connection_->executeSQL(str);
     }
+
+    // add to existing sectors
+    string layer_name = sector->layerName();
+
+    if (!hasSectorLayer(layer_name))
+        sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
+
+    assert (hasSectorLayer(layer_name));
+
+    sectorLayer(layer_name)->addSector(sector);
 
     emit sectorsChangedSignal();
 }
@@ -1344,10 +1387,21 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
     assert (hasSector(sector->name(), sector->layerName()));
 
-    sector_layers_.at(sector->layerName())->removeSector(sector);
+    string layer_name = sector->layerName();
 
-    if (!sector_layers_.at(sector->layerName())->size())
-        sector_layers_.erase(sector->layerName());
+    assert (hasSectorLayer(layer_name));
+
+    sectorLayer(layer_name)->removeSector(sector);
+
+    // remove sector layer if empty
+    if (!sectorLayer(layer_name)->size())
+    {
+        auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
+                                 [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+
+        assert (iter != sector_layers_.end());
+        sector_layers_.erase(iter);
+    }
 
     {
     QMutexLocker locker(&connection_mutex_);

@@ -2,7 +2,7 @@
 #define SECTORLAYER_H
 
 #include <string>
-#include <map>
+#include <vector>
 #include <memory>
 
 class Sector;
@@ -21,11 +21,11 @@ public:
 
     unsigned int size () { return sectors_.size(); };
 
-    std::map<std::string, std::shared_ptr<Sector>>& sectors() { return sectors_; }
+    std::vector<std::shared_ptr<Sector>>& sectors() { return sectors_; }
 protected:
     const std::string name_;
 
-    std::map<std::string, std::shared_ptr<Sector>> sectors_;
+    std::vector<std::shared_ptr<Sector>> sectors_;
 };
 
 #endif // SECTORLAYER_H

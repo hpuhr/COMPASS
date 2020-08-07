@@ -701,7 +701,7 @@ std::string SQLGenerator::getSelectAllViewPointsStatement()
     return ss.str();
 }
 
-std::string SQLGenerator::getInsertSectorStatement(const std::string& name, const std::string& layer_name,
+std::string SQLGenerator::getReplaceSectorStatement(const std::string& name, const std::string& layer_name,
                                      const std::string& json)
 {
     stringstream ss;

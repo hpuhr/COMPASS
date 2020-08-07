@@ -1,6 +1,10 @@
 #include "managesectorstaskwidget.h"
 #include "managesectorstask.h"
 #include "logger.h"
+#include "atsdb.h"
+#include "dbinterface.h"
+#include "sector.h"
+#include "sectorlayer.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -15,6 +19,10 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QTextEdit>
+#include <QTableWidget>
+#include <QHeaderView>
+
+using namespace std;
 
 ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
@@ -26,6 +34,9 @@ ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidge
     main_layout_->addWidget(tab_widget_);
 
     addImportTab();
+    addManageTab();
+
+    updateSectorTable();
 
     setLayout(main_layout_);
 }
@@ -80,12 +91,12 @@ void ManageSectorsTaskWidget::addImportTab()
         parse_msg_edit_ = new QTextEdit ();
         parse_msg_edit_->setReadOnly(true);
         main_tab_layout->addWidget(parse_msg_edit_);
-    }
 
-    import_button_ = new QPushButton("Import");
-    connect (import_button_, &QPushButton::clicked, this, &ManageSectorsTaskWidget::importSlot);
-    import_button_->setDisabled(true);
-    main_layout_->addWidget(import_button_); // is enabled in updateContext
+        import_button_ = new QPushButton("Import");
+        connect (import_button_, &QPushButton::clicked, this, &ManageSectorsTaskWidget::importSlot);
+        import_button_->setDisabled(true);
+        main_tab_layout->addWidget(import_button_); // is enabled in updateContext
+    }
 
     if (task_.currentFilename().size())
         updateParseMessage();
@@ -94,6 +105,159 @@ void ManageSectorsTaskWidget::addImportTab()
     main_tab_widget->setContentsMargins(0, 0, 0, 0);
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Import");
+}
+
+void ManageSectorsTaskWidget::addManageTab()
+{
+    QVBoxLayout* manage_tab_layout = new QVBoxLayout();
+
+    sector_table_ = new QTableWidget();
+    sector_table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    sector_table_->setColumnCount(table_columns_.size());
+    sector_table_->setHorizontalHeaderLabels(table_columns_);
+    sector_table_->verticalHeader()->setVisible(false);
+    connect(sector_table_, &QTableWidget::itemChanged, this,
+            &ManageSectorsTaskWidget::sectorItemChangedSlot);
+
+    manage_tab_layout->addWidget(sector_table_);
+
+    QWidget* manage_tab_widget = new QWidget();
+    manage_tab_widget->setContentsMargins(0, 0, 0, 0);
+    manage_tab_widget->setLayout(manage_tab_layout);
+    tab_widget_->addTab(manage_tab_widget, "Manage");
+}
+
+void ManageSectorsTaskWidget::updateSectorTable()
+{
+    logdbg << "ManageSectorsTaskWidget: updateSectorTable";
+
+    assert(sector_table_);
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    vector<std::shared_ptr<SectorLayer>>& sector_layers = db_interface.sectorsLayers();
+
+    unsigned int num_layers=0;
+    for (auto& sec_lay_it : sector_layers)
+        num_layers += sec_lay_it->sectors().size();
+
+    sector_table_->clearContents();
+    sector_table_->setRowCount(num_layers);
+
+    int row = 0;
+    int col = 0;
+
+    for (auto& sec_lay_it : sector_layers)
+    {
+        string layer_name = sec_lay_it->name();
+
+        for (auto& sec_it : sec_lay_it->sectors())
+        {
+            string sector_name = sec_it->name();
+            shared_ptr<Sector> sector = sec_it;
+
+            col = 0;
+            {  // Sector Name
+                QTableWidgetItem* item = new QTableWidgetItem(sector_name.c_str());
+                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                sector_table_->setItem(row, col, item);
+            }
+
+            {  // Layer Name
+                ++col;
+                QTableWidgetItem* item = new QTableWidgetItem(layer_name.c_str());
+                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                sector_table_->setItem(row, col, item);
+            }
+
+            {  // Num Points
+                ++col;
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->points().size()));
+                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                sector_table_->setItem(row, col, item);
+            }
+
+//            {  // Altitude Minimum
+//                ++col;
+//                if (ds_it.second.hasSac())
+//                {
+//                    QTableWidgetItem* item =
+//                            new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    sector_table_->setItem(row, col, item);
+//                }
+//                else
+//                {
+//                    QTableWidgetItem* item = new QTableWidgetItem();
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    item->setBackground(Qt::darkGray);
+//                    sector_table_->setItem(row, col, item);
+//                }
+//            }
+
+//            {  // Altitude Maximum
+//                ++col;
+//                if (ds_it.second.hasSic())
+//                {
+//                    QTableWidgetItem* item =
+//                            new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    sector_table_->setItem(row, col, item);
+//                }
+//                else
+//                {
+//                    QTableWidgetItem* item = new QTableWidgetItem();
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    item->setBackground(Qt::darkGray);
+//                    sector_table_->setItem(row, col, item);
+//                }
+//            }
+
+//            {  // Color
+//                ++col;
+//                if (ds_it.second.hasLatitude())
+//                {
+//                    QTableWidgetItem* item =
+//                            new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    sector_table_->setItem(row, col, item);
+//                }
+//                else
+//                {
+//                    QTableWidgetItem* item = new QTableWidgetItem();
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    item->setBackground(Qt::darkGray);
+//                    sector_table_->setItem(row, col, item);
+//                }
+//            }
+
+//            {  // Delete
+//                ++col;
+//                if (ds_it.second.hasLongitude())
+//                {
+//                    QTableWidgetItem* item =
+//                            new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    sector_table_->setItem(row, col, item);
+//                }
+//                else
+//                {
+//                    QTableWidgetItem* item = new QTableWidgetItem();
+//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+//                    item->setBackground(Qt::darkGray);
+//                    sector_table_->setItem(row, col, item);
+//                }
+//            }
+
+            ++row;
+        }
+    }
+
+    sector_table_->resizeColumnsToContents();
 }
 
 void ManageSectorsTaskWidget::addFileSlot()
@@ -195,4 +359,11 @@ void ManageSectorsTaskWidget::importSlot()
 
     assert (task_.canImportFile());
     task_.importFile();
+
+    updateSectorTable();
+}
+
+void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
+{
+    loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot";
 }

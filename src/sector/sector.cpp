@@ -30,6 +30,18 @@ Sector::Sector(const std::string& name, const std::string& layer_name, const std
         assert (point_it.size() == 2);
         points_.push_back({point_it[0], point_it[1]});
     }
+
+    has_min_altitude_ = j.contains("min_altitude");
+    if (has_min_altitude_)
+        min_altitude_ = j.at("min_altitude");
+
+    has_max_altitude_ = j.contains("max_altitude");
+    if (has_max_altitude_)
+        max_altitude_ = j.at("max_altitude");
+
+    has_color_str_ = j.contains("color_str");
+    if (has_color_str_)
+        color_str_ = j.at("color_str");
 }
 
 std::string Sector::name() const
@@ -60,6 +72,15 @@ std::string Sector::jsonData () const
         ++cnt;
     }
 
+    if (has_min_altitude_)
+        j["min_altitude"] = min_altitude_;
+
+    if (has_max_altitude_)
+        j["max_altitude"] = max_altitude_;
+
+    if (has_color_str_)
+        j["color_str"] = color_str_;
+
     return j.dump();
 }
 
@@ -71,4 +92,50 @@ const std::vector<std::pair<double, double>>& Sector::points() const
 void Sector::name(const std::string& name)
 {
     name_ = name;
+}
+
+bool Sector::hasMinimumAltitude()
+{
+    return has_min_altitude_;
+}
+
+double Sector::minimumAltitude()
+{
+    assert (has_min_altitude_);
+    return min_altitude_;
+}
+void Sector::minimumAltitude(double value)
+{
+    has_min_altitude_ = true;
+    min_altitude_ = value;
+}
+
+bool Sector::hasMaximumAltitude()
+{
+    return has_max_altitude_;
+}
+double Sector::maximumAltitude()
+{
+    assert (has_max_altitude_);
+    return max_altitude_;
+}
+void Sector::maximumAltitude(double value)
+{
+    has_max_altitude_ = true;
+    max_altitude_ = value;
+}
+
+bool Sector::hasColorStr()
+{
+    return has_color_str_;
+}
+std::string Sector::colorStr()
+{
+    assert (has_color_str_);
+    return color_str_;
+}
+void Sector::colorStr(std::string value)
+{
+    has_color_str_ = true;
+    color_str_ = value;
 }
