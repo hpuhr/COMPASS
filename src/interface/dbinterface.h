@@ -180,7 +180,10 @@ class DBInterface : public QObject, public Configurable
     void createNewSector (const std::string& name, const std::string& layer_name,
                           std::vector<std::pair<double,double>> points);
     bool hasSector (const std::string& name, const std::string& layer_name);
+    bool hasSector (unsigned int id);
     std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
+    std::shared_ptr<Sector> sector (unsigned int id);
+    void moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name); // moves sector to new layer, saves
     void saveSector(std::shared_ptr<Sector> sector); // write to db and add
     void saveSector(unsigned int id); // write to db and add
     std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();

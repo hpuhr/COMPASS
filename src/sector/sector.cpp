@@ -5,6 +5,7 @@
 #include <cassert>
 
 using namespace nlohmann;
+using namespace std;
 
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
                std::vector<std::pair<double,double>> points)
@@ -111,6 +112,16 @@ void Sector::minimumAltitude(double value)
 {
     has_min_altitude_ = true;
     min_altitude_ = value;
+
+    save();
+}
+
+void Sector::removeMinimumAltitude()
+{
+    has_min_altitude_ = false;
+    min_altitude_ = 0;
+
+    save();
 }
 
 bool Sector::hasMaximumAltitude()
@@ -126,6 +137,16 @@ void Sector::maximumAltitude(double value)
 {
     has_max_altitude_ = true;
     max_altitude_ = value;
+
+    save();
+}
+
+void Sector::removeMaximumAltitude()
+{
+    has_max_altitude_ = false;
+    max_altitude_ = 0;
+
+    save();
 }
 
 bool Sector::hasColorStr()
@@ -141,6 +162,16 @@ void Sector::colorStr(std::string value)
 {
     has_color_str_ = true;
     color_str_ = value;
+
+    save();
+}
+
+void Sector::removeColorStr()
+{
+    has_color_str_ = false;
+    color_str_ = "";
+
+    save();
 }
 
 unsigned int Sector::id() const
@@ -151,11 +182,19 @@ unsigned int Sector::id() const
 void Sector::name(const std::string& name)
 {
     name_ = name;
+
+    save();
 }
 
 void Sector::layerName(const std::string& layer_name)
 {
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    string old_layer_name = layer_name_;
     layer_name_ = layer_name;
+
+    db_interface.moveSector(id_, old_layer_name, layer_name); // moves and saves
 }
 
 void Sector::save()

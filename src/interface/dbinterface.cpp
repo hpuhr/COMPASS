@@ -1381,11 +1381,59 @@ bool DBInterface::hasSector (const string& name, const string& layer_name)
     return sectorLayer(layer_name)->hasSector(name);
 }
 
+bool DBInterface::hasSector (unsigned int id)
+{
+    for (auto& sec_lay_it : sector_layers_)
+    {
+        auto& sectors = sec_lay_it->sectors();
+        auto iter = std::find_if(sectors.begin(), sectors.end(),
+                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
+        if (iter != sectors.end())
+            return true;
+    }
+    return false;
+}
 
 std::shared_ptr<Sector> DBInterface::sector (const string& name, const string& layer_name)
 {
     assert (hasSector(name, layer_name));
     return sectorLayer(layer_name)->sector(name);
+}
+
+std::shared_ptr<Sector> DBInterface::sector (unsigned int id)
+{
+    assert (hasSector(id));
+
+    for (auto& sec_lay_it : sector_layers_)
+    {
+        auto& sectors = sec_lay_it->sectors();
+        auto iter = std::find_if(sectors.begin(), sectors.end(),
+                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
+        if (iter != sectors.end())
+            return *iter;
+    }
+
+    logerr << "DBInterface: sector: id " << id << " not found";
+    assert (false);
+}
+
+void DBInterface::moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name)
+{
+    assert (hasSector(id));
+
+    shared_ptr<Sector> tmp_sector = sector(id);
+
+    assert (hasSectorLayer(old_layer_name));
+    sectorLayer(old_layer_name)->removeSector(tmp_sector);
+
+    if (!hasSectorLayer(new_layer_name))
+        sector_layers_.push_back(make_shared<SectorLayer>(new_layer_name));
+
+    assert (hasSectorLayer(new_layer_name));
+    sectorLayer(new_layer_name)->addSector(tmp_sector);
+
+    assert (hasSector(tmp_sector->name(), new_layer_name));
+    tmp_sector->save();
 }
 
 std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
@@ -1395,19 +1443,8 @@ std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
 
 void DBInterface::saveSector(unsigned int id)
 {
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        for (auto& sec_it : sec_lay_it->sectors())
-        {
-            if (sec_it->id() == id)
-            {
-                saveSector(sec_it);
-                return;
-            }
-        }
-    }
-
-    logerr << "DBInterface: setSector: id " << id << " not found";
+    assert (hasSector(id));
+    saveSector(sector(id));
 }
 
 void DBInterface::saveSector(shared_ptr<Sector> sector)

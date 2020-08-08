@@ -31,14 +31,17 @@ public:
     bool hasMinimumAltitude();
     double minimumAltitude();
     void minimumAltitude(double value);
+    void removeMinimumAltitude();
 
     bool hasMaximumAltitude();
     double maximumAltitude();
     void maximumAltitude(double value);
+    void removeMaximumAltitude();
 
     bool hasColorStr();
     std::string colorStr();
     void colorStr(std::string value);
+    void removeColorStr();
 
     void save();
 
