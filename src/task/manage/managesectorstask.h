@@ -55,8 +55,8 @@ protected:
     virtual void checkSubConfigurables() {}
 
     void parseCurrentFile (bool import);
-    void addSector (const std::string& layer_name, const std::string& sector_name,
-                     std::vector<std::pair<double,double>> points);
+    void addSector (const std::string& sector_name, const std::string& layer_name,
+                    std::vector<std::pair<double,double>> points);
 };
 
 #endif // MANAGESECTORSTASK_H

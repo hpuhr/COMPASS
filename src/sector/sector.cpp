@@ -1,4 +1,6 @@
 #include "sector.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 #include <cassert>
 
@@ -10,7 +12,8 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
 {
 }
 
-Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name, const std::string& json_str)
+Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
+               const std::string& json_str)
     : id_(id), name_(name), layer_name_(layer_name)
 {
     json j = json::parse(json_str);
@@ -153,4 +156,12 @@ void Sector::name(const std::string& name)
 void Sector::layerName(const std::string& layer_name)
 {
     layer_name_ = layer_name;
+}
+
+void Sector::save()
+{
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    db_interface.saveSector(id_);
 }

@@ -1349,6 +1349,30 @@ unsigned int DBInterface::getMaxSectorId ()
     return id;
 }
 
+void DBInterface::createNewSector (const std::string& name, const std::string& layer_name,
+                                   std::vector<std::pair<double,double>> points)
+{
+    loginf << "DBInterface: createNewSector: name " << name << " layer_name " << layer_name
+           << " num points " << points.size();
+
+    assert (!hasSector(name, layer_name));
+
+    unsigned int id = getMaxSectorId()+1;
+
+    shared_ptr<Sector> sector = make_shared<Sector> (id, name, layer_name, points);
+
+    // add to existing sectors
+    if (!hasSectorLayer(layer_name))
+        sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
+
+    assert (hasSectorLayer(layer_name));
+
+    sectorLayer(layer_name)->addSector(sector);
+
+    assert (hasSector(name, layer_name));
+    sector->save();
+}
+
 bool DBInterface::hasSector (const string& name, const string& layer_name)
 {
     if (!hasSectorLayer(layer_name))
@@ -1369,17 +1393,37 @@ std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
     return sector_layers_;
 }
 
-void DBInterface::setSector(shared_ptr<Sector> sector)
+void DBInterface::saveSector(unsigned int id)
 {
+    for (auto& sec_lay_it : sector_layers_)
+    {
+        for (auto& sec_it : sec_lay_it->sectors())
+        {
+            if (sec_it->id() == id)
+            {
+                saveSector(sec_it);
+                return;
+            }
+        }
+    }
+
+    logerr << "DBInterface: setSector: id " << id << " not found";
+}
+
+void DBInterface::saveSector(shared_ptr<Sector> sector)
+{
+    loginf << "DBInterface: saveSector: sector " << sector->name() << " layer " << sector->layerName()
+           << " id " << sector->id();
+
     if (!current_connection_)
     {
-        logwrn << "DBInterface: setSector: failed since no database connection exists";
+        logwrn << "DBInterface: saveSector: failed since no database connection exists";
         return;
     }
 
     assert(current_connection_);
 
-    assert (!hasSector(sector->name(), sector->layerName()));
+    assert (hasSector(sector->name(), sector->layerName()));
 
     if (!existsSectorsTable())
         createSectorsTable();
@@ -1388,21 +1432,11 @@ void DBInterface::setSector(shared_ptr<Sector> sector)
     string str = sql_generator_.getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(),
                                                           sector->jsonData());
 
-    logdbg << "DBInterface: setSector: cmd '" << str << "'";
+    logdbg << "DBInterface: saveSector: cmd '" << str << "'";
     {
         QMutexLocker locker(&connection_mutex_);
         current_connection_->executeSQL(str);
     }
-
-    // add to existing sectors
-    string layer_name = sector->layerName();
-
-    if (!hasSectorLayer(layer_name))
-        sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-    assert (hasSectorLayer(layer_name));
-
-    sectorLayer(layer_name)->addSector(sector);
 
     emit sectorsChangedSignal();
 }

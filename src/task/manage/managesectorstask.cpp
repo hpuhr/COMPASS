@@ -317,7 +317,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                             ++found_sectors_num_;
 
                             if (import)
-                                addSector (layer_name, feature_name, move(points));
+                                addSector (feature_name, layer_name, move(points));
                         }
                     }
                 }
@@ -351,7 +351,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                                 ++found_sectors_num_;
 
                                 if (import)
-                                    addSector (layer_name, feature_name, move(points));
+                                    addSector (feature_name, layer_name, move(points));
                             }
                         }
                     }
@@ -368,16 +368,14 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         widget_->updateParseMessage();
 }
 
-void ManageSectorsTask::addSector (const std::string& layer_name, const std::string& sector_name,
-                                    std::vector<std::pair<double,double>> points)
+void ManageSectorsTask::addSector (const std::string& sector_name, const std::string& layer_name,
+                                   std::vector<std::pair<double,double>> points)
 {
-    loginf << "ManageSectorsTask: addPolygon: layer '" << layer_name << "' name '" << sector_name
+    loginf << "ManageSectorsTask: addSector: layer '" << layer_name << "' name '" << sector_name
            << "' num points " << points.size();
 
     DBInterface& db_interface = ATSDB::instance().interface();
     assert (db_interface.ready());
-
-    unsigned int id = db_interface.getMaxSectorId()+1;
 
     string new_sector_name = sector_name;
 
@@ -390,12 +388,7 @@ void ManageSectorsTask::addSector (const std::string& layer_name, const std::str
             new_sector_name = sector_name+to_string(cnt);
             ++cnt;
         }
-
     }
 
-    shared_ptr<Sector> sector = make_shared<Sector> (id, new_sector_name, layer_name, points);
-
-    loginf << "ManageSectorsTask: importFile: adding sector '" << sector->name() << "' layer '"
-           << sector->layerName() << "' num points " << sector->size()  << " id " << id;
-    db_interface.setSector(sector);
+    db_interface.createNewSector(new_sector_name, layer_name, points);
 }

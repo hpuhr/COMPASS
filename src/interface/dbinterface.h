@@ -177,10 +177,12 @@ class DBInterface : public QObject, public Configurable
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
     std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
 
-    unsigned int getMaxSectorId ();
+    void createNewSector (const std::string& name, const std::string& layer_name,
+                          std::vector<std::pair<double,double>> points);
     bool hasSector (const std::string& name, const std::string& layer_name);
     std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
-    void setSector(std::shared_ptr<Sector> sector); // write to db and add
+    void saveSector(std::shared_ptr<Sector> sector); // write to db and add
+    void saveSector(unsigned int id); // write to db and add
     std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
@@ -200,7 +202,6 @@ class DBInterface : public QObject, public Configurable
 
     void createAssociationsTable(const std::string& table_name);
     DBOAssociationCollection getAssociations(const std::string& table_name);
-
 
 protected:
     std::map<std::string, DBConnection*> connections_;
@@ -241,6 +242,7 @@ protected:
     void saveProperties();
 
     void loadSectors();
+    unsigned int getMaxSectorId ();
 };
 
 #endif /* DBINTERFACE_H_ */

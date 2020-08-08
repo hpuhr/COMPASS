@@ -8,6 +8,7 @@ class DBInterface;
 class Sector
 {
 public:
+    // should be protected?
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
            std::vector<std::pair<double,double>> points);
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
@@ -39,6 +40,7 @@ public:
     std::string colorStr();
     void colorStr(std::string value);
 
+    void save();
 
 protected:
     unsigned int id_;
@@ -55,9 +57,6 @@ protected:
 
     bool has_color_str_ {false};
     std::string color_str_;
-
-    friend class DBInterface;
-
 };
 
 #endif // SECTOR_H
