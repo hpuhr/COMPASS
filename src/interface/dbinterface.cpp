@@ -213,18 +213,18 @@ void DBInterface::generateSubConfigurable(const string& class_id,
         MySQLppConnection* connection = new MySQLppConnection(class_id, instance_id, this);
         assert(connections_.count(connection->instanceId()) == 0);
         connections_.insert(pair<string, DBConnection*>(
-            connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
+                                connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
     }
     else if (class_id == "SQLiteConnection")
     {
         SQLiteConnection* connection = new SQLiteConnection(class_id, instance_id, this);
         assert(connections_.count(connection->instanceId()) == 0);
         connections_.insert(pair<string, DBConnection*>(
-            connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
+                                connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
     }
     else
         throw runtime_error("DBInterface: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+                            class_id);
 }
 
 void DBInterface::checkSubConfigurables()
@@ -627,7 +627,7 @@ map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
         short_name_col_name = meta.column(ds.shortNameColumn()).name();
         assert(buffer->properties().hasProperty(short_name_col_name) &&
                buffer->properties().get(short_name_col_name).dataType() ==
-                   PropertyDataType::STRING);
+               PropertyDataType::STRING);
     }
 
     bool has_sac = ds.hasSacColumn();
@@ -1029,6 +1029,7 @@ void DBInterface::loadSectors()
     command.set(sql_generator_.getSelectAllSectorsStatement());
 
     PropertyList list;
+    list.addProperty("id", PropertyDataType::INT);
     list.addProperty("name", PropertyDataType::STRING);
     list.addProperty("layer_name", PropertyDataType::STRING);
     list.addProperty("json", PropertyDataType::STRING);
@@ -1041,31 +1042,36 @@ void DBInterface::loadSectors()
     shared_ptr<Buffer> buffer = result->buffer();
 
     assert(buffer);
+    assert(buffer->has<int>("id"));
     assert(buffer->has<string>("name"));
     assert(buffer->has<string>("layer_name"));
     assert(buffer->has<string>("json"));
 
+    NullableVector<int> id_vec = buffer->get<int>("id");
     NullableVector<string> name_vec = buffer->get<string>("name");
     NullableVector<string> layer_name_vec = buffer->get<string>("layer_name");
     NullableVector<string> json_vec = buffer->get<string>("json");
 
+    int id;
     string name;
     string layer_name;
     string json_str;
 
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
+        assert(!id_vec.isNull(cnt));
         assert(!name_vec.isNull(cnt));
         assert(!layer_name_vec.isNull(cnt));
         assert(!json_vec.isNull(cnt));
 
+        id = id_vec.get(cnt);
         name = name_vec.get(cnt);
         layer_name = layer_name_vec.get(cnt);
         json_str = json_vec.get(cnt);
 
         assert (!hasSector(name, layer_name));
 
-        shared_ptr<Sector> new_sector = make_shared<Sector>(name, layer_name, json_str);
+        shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, json_str);
         string layer_name = new_sector->layerName();
 
         if (!hasSectorLayer(layer_name))
@@ -1130,7 +1136,7 @@ pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
 
     DBCommand command;
     command.set(
-        sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
+                sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
     command.list(list);
 
     logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
@@ -1169,7 +1175,7 @@ pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
             logerr << "DBInterface: getMinMaxString: unknown dimension '" << var.dimensionConst()
                    << "'";
             throw runtime_error("DBInterface: getMinMaxString: unknown dimension '" +
-                                     var.dimensionConst() + "'");
+                                var.dimensionConst() + "'");
         }
 
         const Dimension& dimension = UnitManager::instance().dimension(var.dimensionConst());
@@ -1316,6 +1322,11 @@ bool DBInterface::hasSectorLayer (const std::string& layer_name)
     return iter != sector_layers_.end();
 }
 
+//void DBInterface::renameSectorLayer (const std::string& name, const std::string& new_name)
+//{
+//    // TODO
+//}
+
 std::shared_ptr<SectorLayer> DBInterface::sectorLayer (const std::string& layer_name)
 {
     assert (hasSectorLayer(layer_name));
@@ -1327,6 +1338,17 @@ std::shared_ptr<SectorLayer> DBInterface::sectorLayer (const std::string& layer_
     return *iter;
 }
 
+unsigned int DBInterface::getMaxSectorId ()
+{
+    unsigned int id = 0;
+    for (auto& sec_lay_it : sector_layers_)
+        for (auto& sec_it : sec_lay_it->sectors())
+            if (sec_it->id() > id)
+                id = sec_it->id();
+
+    return id;
+}
+
 bool DBInterface::hasSector (const string& name, const string& layer_name)
 {
     if (!hasSectorLayer(layer_name))
@@ -1334,6 +1356,7 @@ bool DBInterface::hasSector (const string& name, const string& layer_name)
 
     return sectorLayer(layer_name)->hasSector(name);
 }
+
 
 std::shared_ptr<Sector> DBInterface::sector (const string& name, const string& layer_name)
 {
@@ -1346,11 +1369,11 @@ std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
     return sector_layers_;
 }
 
-void DBInterface::addSector(shared_ptr<Sector> sector)
+void DBInterface::setSector(shared_ptr<Sector> sector)
 {
     if (!current_connection_)
     {
-        logwrn << "DBInterface: addSector: failed since no database connection exists";
+        logwrn << "DBInterface: setSector: failed since no database connection exists";
         return;
     }
 
@@ -1362,9 +1385,10 @@ void DBInterface::addSector(shared_ptr<Sector> sector)
         createSectorsTable();
 
     // insert and replace
-    string str = sql_generator_.getReplaceSectorStatement(sector->name(), sector->layerName(), sector->jsonData());
+    string str = sql_generator_.getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(),
+                                                          sector->jsonData());
 
-    logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
+    logdbg << "DBInterface: setSector: cmd '" << str << "'";
     {
         QMutexLocker locker(&connection_mutex_);
         current_connection_->executeSQL(str);
@@ -1404,9 +1428,9 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
     }
 
     {
-    QMutexLocker locker(&connection_mutex_);
-    current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,
-                                                                      "name="+sector->name()));
+        QMutexLocker locker(&connection_mutex_);
+        current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,
+                                                                          "name="+sector->name()));
     }
 
     emit sectorsChangedSignal();
@@ -1498,12 +1522,12 @@ void DBInterface::insertBuffer(DBTable& table, shared_ptr<Buffer> buffer)
 
         if (!table.hasColumn(properties.at(cnt).name()))
             throw runtime_error("DBInterface: insertBuffer: column '" +
-                                     properties.at(cnt).name() + "' does not exist in table " +
-                                     table.name());
+                                properties.at(cnt).name() + "' does not exist in table " +
+                                table.name());
     }
 
     if (!table.existsInDB() &&
-        !existsTable(table.name()))  // check for both since information might not be updated yet
+            !existsTable(table.name()))  // check for both since information might not be updated yet
         createTable(table);
 
     assert(table.existsInDB());
@@ -1539,7 +1563,7 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
 
     if (!existsTable(table_name))
         throw runtime_error("DBInterface: insertBuffer: table with name '" + table_name +
-                                 "' does not exist");
+                            "' does not exist");
 
     const PropertyList& properties = buffer->properties();
 
@@ -1554,8 +1578,8 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
 
         if (!table_info.hasColumn(properties.at(cnt).name()))
             throw runtime_error("DBInterface: insertBuffer: column '" +
-                                     properties.at(cnt).name() + "' does not exist in table " +
-                                     table_name);
+                                properties.at(cnt).name() + "' does not exist in table " +
+                                table_name);
     }
 
     string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
@@ -1581,7 +1605,7 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
 }
 
 shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
-                                                      shared_ptr<Buffer> buffer)
+                                                 shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
            << buffer->size();
@@ -1706,12 +1730,12 @@ void DBInterface::updateBuffer(DBTable& table, const DBTableColumn& key_col,
     {
         if (!table.hasColumn(properties.at(cnt).name()))
             throw runtime_error("DBInterface: updateBuffer: column '" +
-                                     properties.at(cnt).name() + "' does not exist in table " +
-                                     table.name());
+                                properties.at(cnt).name() + "' does not exist in table " +
+                                table.name());
     }
 
     string bind_statement =
-        sql_generator_.createDBUpdateStringBind(buffer, key_col, table.name());
+            sql_generator_.createDBUpdateStringBind(buffer, key_col, table.name());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -1759,8 +1783,8 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
     connection_mutex_.lock();
 
     shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
-        dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,
-        order_variable, use_order_ascending, limit, true);
+                dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,
+                order_variable, use_order_ascending, limit, true);
 
     logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
@@ -1880,7 +1904,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             index_cnt = cnt + 1;
         else
             throw runtime_error(
-                "DBInterface: insertBindStatementForCurrentIndex: unknown db type");
+                    "DBInterface: insertBindStatementForCurrentIndex: unknown db type");
 
         if (buffer->isNone(property, row))
         {
@@ -1894,22 +1918,22 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         {
             case PropertyDataType::BOOL:
                 current_connection_->bindVariable(
-                    index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
+                            index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
                 break;
             case PropertyDataType::CHAR:
                 current_connection_->bindVariable(
-                    index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
+                            index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
                 break;
             case PropertyDataType::UCHAR:
                 current_connection_->bindVariable(
-                    index_cnt,
-                    static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
+                            index_cnt,
+                            static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
                 break;
             case PropertyDataType::INT:
                 logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt
                        << " is '" << buffer->get<int>(property.name()).get(row) << "'";
                 current_connection_->bindVariable(
-                    index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
+                            index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
                 break;
             case PropertyDataType::UINT:
                 assert(false);
@@ -1922,7 +1946,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
                 break;
             case PropertyDataType::FLOAT:
                 current_connection_->bindVariable(
-                    index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
+                            index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
                 break;
             case PropertyDataType::DOUBLE:
                 current_connection_->bindVariable(index_cnt,
@@ -1931,17 +1955,17 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             case PropertyDataType::STRING:
                 if (connection_type == SQLITE_IDENTIFIER)
                     current_connection_->bindVariable(
-                        index_cnt, buffer->get<string>(property.name()).get(row));
+                                index_cnt, buffer->get<string>(property.name()).get(row));
                 else  // MYSQL assumed
                     current_connection_->bindVariable(
-                        index_cnt, "'" + buffer->get<string>(property.name()).get(row) + "'");
+                                index_cnt, "'" + buffer->get<string>(property.name()).get(row) + "'");
                 break;
             default:
                 logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
                        << Property::asString(data_type);
                 throw runtime_error(
-                    "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
-                    Property::asString(data_type));
+                            "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
+                            Property::asString(data_type));
         }
     }
 

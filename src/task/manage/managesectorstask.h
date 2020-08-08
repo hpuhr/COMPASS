@@ -49,14 +49,13 @@ protected:
 
     std::unique_ptr<ManageSectorsTaskWidget> widget_;
 
-    std::vector<std::shared_ptr<Sector>> parsed_sectors_; // names not yet checked
-
+    unsigned int found_sectors_num_{0};
     std::string parse_message_;
 
     virtual void checkSubConfigurables() {}
 
-    void parseCurrentFile ();
-    void addPolygon (const std::string& layer_name, const std::string& polyon_name,
+    void parseCurrentFile (bool import);
+    void addSector (const std::string& layer_name, const std::string& sector_name,
                      std::vector<std::pair<double,double>> points);
 };
 

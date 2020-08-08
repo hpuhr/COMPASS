@@ -4,23 +4,27 @@
 
 using namespace nlohmann;
 
-Sector::Sector(const std::string& name, const std::string& layer_name, std::vector<std::pair<double,double>> points)
-    : name_(name), layer_name_(layer_name), points_(points)
+Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
+               std::vector<std::pair<double,double>> points)
+    : id_(id), name_(name), layer_name_(layer_name), points_(points)
 {
 }
 
-Sector::Sector(const std::string& name, const std::string& layer_name, const std::string& json_str)
-: name_(name), layer_name_(layer_name)
+Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name, const std::string& json_str)
+    : id_(id), name_(name), layer_name_(layer_name)
 {
     json j = json::parse(json_str);
 
-    assert (j.contains("name"));
-    assert (j.contains("layer_name"));
-    assert (j.contains("points"));
+    assert (j.contains("id"));
+    assert (j.at("id") == id_);
 
+    assert (j.contains("name"));
     assert (j.at("name") == name_);
+
+    assert (j.contains("layer_name"));
     assert (j.at("layer_name") == layer_name_);
 
+    assert (j.contains("points"));
     json& points = j.at("points");
     assert (points.is_array());
 
@@ -58,6 +62,7 @@ std::string Sector::jsonData () const
 {
     json j = json::object();
 
+    j["id"] = id_;
     j["name"] = name_;
     j["layer_name"] = layer_name_;
 
@@ -87,11 +92,6 @@ std::string Sector::jsonData () const
 const std::vector<std::pair<double, double>>& Sector::points() const
 {
     return points_;
-}
-
-void Sector::name(const std::string& name)
-{
-    name_ = name;
 }
 
 bool Sector::hasMinimumAltitude()
@@ -138,4 +138,19 @@ void Sector::colorStr(std::string value)
 {
     has_color_str_ = true;
     color_str_ = value;
+}
+
+unsigned int Sector::id() const
+{
+    return id_;
+}
+
+void Sector::name(const std::string& name)
+{
+    name_ = name;
+}
+
+void Sector::layerName(const std::string& layer_name)
+{
+    layer_name_ = layer_name;
 }

@@ -61,7 +61,7 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     ss.str(std::string());
 
     ss << "CREATE TABLE " << TABLE_NAME_SECTORS
-       << "(name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (name));";
+       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (id));";
     table_sectors_create_statement_ = ss.str();
     ss.str(std::string());
 
@@ -701,21 +701,21 @@ std::string SQLGenerator::getSelectAllViewPointsStatement()
     return ss.str();
 }
 
-std::string SQLGenerator::getReplaceSectorStatement(const std::string& name, const std::string& layer_name,
-                                     const std::string& json)
+std::string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const std::string& name,
+                                                    const std::string& layer_name, const std::string& json)
 {
     stringstream ss;
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
-    ss << "REPLACE INTO " << TABLE_NAME_SECTORS << " VALUES ('" << name << "', '" << layer_name << "', '" << json
-       << "');";
+    ss << "REPLACE INTO " << TABLE_NAME_SECTORS << " VALUES ('" << id << "', '" << name << "', '"
+       << layer_name << "', '" << json << "');";
     return ss.str();
 }
 
 std::string SQLGenerator::getSelectAllSectorsStatement()
 {
     stringstream ss;
-    ss << "SELECT name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
+    ss << "SELECT id, name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
     return ss.str();
 }
 

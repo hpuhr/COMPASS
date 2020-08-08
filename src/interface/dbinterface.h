@@ -174,10 +174,13 @@ class DBInterface : public QObject, public Configurable
     bool existsSectorsTable();
     void createSectorsTable();
     bool hasSectorLayer (const std::string& layer_name);
+    //void renameSectorLayer (const std::string& name, const std::string& new_name);
     std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
+
+    unsigned int getMaxSectorId ();
     bool hasSector (const std::string& name, const std::string& layer_name);
     std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
-    void addSector(std::shared_ptr<Sector> sector);
+    void setSector(std::shared_ptr<Sector> sector); // write to db and add
     std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
