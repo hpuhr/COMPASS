@@ -126,6 +126,32 @@ void ManageSectorsTaskWidget::addManageTab()
 
     manage_tab_layout->addWidget(sector_table_);
 
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    // bottom buttons
+    {
+        QHBoxLayout* button_layout = new QHBoxLayout();
+
+        QPushButton* export_button_ = new QPushButton("Export All");
+        connect(export_button_, &QPushButton::clicked, this,
+                &ManageSectorsTaskWidget::exportSectorsSlot);
+        button_layout->addWidget(export_button_);
+
+        QPushButton* clear_button_ = new QPushButton("Clear All");
+        connect(clear_button_, &QPushButton::clicked, this,
+                &ManageSectorsTaskWidget::clearSectorsSlot);
+        button_layout->addWidget(clear_button_);
+
+        QPushButton* import_button_ = new QPushButton("Import");
+        connect(import_button_, &QPushButton::clicked, this,
+                &ManageSectorsTaskWidget::importSectorsSlot);
+        button_layout->addWidget(import_button_);
+
+        manage_tab_layout->addLayout(button_layout);
+    }
+
     QWidget* manage_tab_widget = new QWidget();
     manage_tab_widget->setContentsMargins(0, 0, 0, 0);
     manage_tab_widget->setLayout(manage_tab_layout);
@@ -149,7 +175,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
     for (auto& sec_lay_it : sector_layers)
         num_layers += sec_lay_it->sectors().size();
 
-    sector_table_->setDisabled(true);
+    sector_table_->setDisabled(true); // otherwise first element is edited after
     sector_table_->clearContents();
     sector_table_->setRowCount(num_layers);
 
@@ -473,8 +499,8 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
     QColor current_color = QColor(sector->colorStr().c_str());
 
     QColor color =
-        QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color",
-                               QColorDialog::DontUseNativeDialog);
+            QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color",
+                                   QColorDialog::DontUseNativeDialog);
 
     if (color.isValid())
     {
@@ -507,4 +533,65 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
     db_interface.deleteSector(sector);
 
     updateSectorTable();
+}
+
+void ManageSectorsTaskWidget::exportSectorsSlot ()
+{
+    loginf << "ManageSectorsTaskWidget: exportSectorsSlot";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    QFileDialog dialog(nullptr);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setNameFilter("JSON Files (*.json)");
+    dialog.setDefaultSuffix("json");
+    dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+
+    QStringList file_names;
+    if (dialog.exec())
+        file_names = dialog.selectedFiles();
+
+    QString filename;
+
+    if (file_names.size() == 1)
+        filename = file_names.at(0);
+    else
+        loginf << "ManageDataSourcesTask: exportSectorsSlot: cancelled";
+
+    if (filename.size() > 0)
+        db_interface.exportSectors(filename.toStdString());
+}
+
+void ManageSectorsTaskWidget::clearSectorsSlot ()
+{
+    loginf << "ManageSectorsTaskWidget: clearSectorsSlot";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    db_interface.deleteAllSectors();
+
+    updateSectorTable();
+}
+
+void ManageSectorsTaskWidget::importSectorsSlot ()
+{
+    loginf << "ManageSectorsTaskWidget: importSectorsSlot";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    QString filename =
+        QFileDialog::getOpenFileName(nullptr, "Export Sectors as JSON", "", "*.json");
+
+    if (filename.size() > 0)
+    {
+        assert (Files::fileExists(filename.toStdString()));
+
+        db_interface.importSectors(filename.toStdString());
+        updateSectorTable();
+    }
+    else
+        loginf << "ManageDataSourcesTask: importSectorsSlot: cancelled";
 }

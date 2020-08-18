@@ -66,7 +66,7 @@ std::string Sector::layerName() const
     return layer_name_;
 }
 
-std::string Sector::jsonData () const
+nlohmann::json Sector::jsonData () const
 {
     json j = json::object();
 
@@ -93,7 +93,12 @@ std::string Sector::jsonData () const
 
     j["color_str"] = color_str_;
 
-    return j.dump();
+    return j;
+}
+
+std::string Sector::jsonDataStr() const
+{
+    return jsonData().dump();
 }
 
 const std::vector<std::pair<double, double>>& Sector::points() const

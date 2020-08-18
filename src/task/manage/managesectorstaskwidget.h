@@ -33,6 +33,10 @@ public slots:
   void changeSectorColorSlot();
   void deleteSectorSlot();
 
+  void exportSectorsSlot ();
+  void clearSectorsSlot ();
+  void importSectorsSlot ();
+
 public:
     ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent = nullptr);
 

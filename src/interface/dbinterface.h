@@ -189,6 +189,8 @@ class DBInterface : public QObject, public Configurable
     std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
+    void importSectors (const std::string& filename);
+    void exportSectors (const std::string& filename);
 
     /// @brief Deletes table content for given table name
     void clearTableContent(const std::string& table_name);

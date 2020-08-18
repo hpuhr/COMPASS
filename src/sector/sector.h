@@ -22,7 +22,8 @@ public:
     std::string layerName() const;
     void layerName(const std::string& layer_name);
 
-    std::string jsonData() const;
+    nlohmann::json jsonData() const;
+    std::string jsonDataStr() const;
 
     unsigned int size () { return points_.size(); }
 

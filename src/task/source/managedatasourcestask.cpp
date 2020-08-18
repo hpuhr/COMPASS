@@ -17,9 +17,6 @@
 
 #include "managedatasourcestask.h"
 
-#include <QFileDialog>
-#include <fstream>
-
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -29,6 +26,10 @@
 #include "json.hpp"
 #include "managedatasourcestaskwidget.h"
 #include "taskmanager.h"
+
+#include <QFileDialog>
+
+#include <fstream>
 
 using namespace nlohmann;
 

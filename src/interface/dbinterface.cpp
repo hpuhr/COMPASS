@@ -16,14 +16,7 @@
  */
 
 #include "dbinterface.h"
-
-#include <QApplication>
-#include <QMessageBox>
-#include <QMutexLocker>
-#include <QThread>
-
 #include "atsdb.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
@@ -50,8 +43,20 @@
 #include "unitmanager.h"
 #include "sector.h"
 
+#include "json.hpp"
+
+#include <fstream>
+
+#include <QApplication>
+#include <QMessageBox>
+#include <QMutexLocker>
+#include <QThread>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 using namespace Utils;
 using namespace std;
+using namespace nlohmann;
 
 /**
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
@@ -1467,7 +1472,7 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
 
     // insert and replace
     string str = sql_generator_.getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(),
-                                                          sector->jsonData());
+                                                          sector->jsonDataStr());
 
     logdbg << "DBInterface: saveSector: cmd '" << str << "'";
     {
@@ -1517,6 +1522,104 @@ void DBInterface::deleteAllSectors()
     clearTableContent(TABLE_NAME_SECTORS);
 
     emit sectorsChangedSignal();
+}
+
+void DBInterface::importSectors (const std::string& filename)
+{
+    loginf << "DBInterface: importSectors: filename '" << filename << "'";
+
+    sector_layers_.clear();
+    clearTableContent(TABLE_NAME_SECTORS);
+
+    std::ifstream input_file(filename, std::ifstream::in);
+
+    try
+    {
+        json j = json::parse(input_file);
+
+        if (!j.contains("sectors"))
+        {
+            logerr << "DBInterface: importSectors: file does not contain sectors";
+            return;
+        }
+
+        json& sectors = j["sectors"];
+
+        if (!sectors.is_array())
+        {
+            logerr << "DBInterface: importSectors: file sectors is not an array";
+            return;
+        }
+
+        unsigned int id;
+        string name;
+        string layer_name;
+        string json_str;
+
+        for (auto& j_sec_it : sectors.get<json::array_t>())
+        {
+            if (!j_sec_it.contains("id")
+                    || !j_sec_it.contains("name")
+                    || !j_sec_it.contains("layer_name")
+                    || !j_sec_it.contains("points"))
+            {
+                logerr << "DBInterface: importSectors: ill-defined sectors skipped, json '" << j_sec_it.dump(4)
+                       << "'";
+                continue;
+            }
+
+            id = j_sec_it.at("id");
+            name = j_sec_it.at("name");
+            layer_name = j_sec_it.at("layer_name");
+
+            shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, j_sec_it.dump());
+
+            if (!hasSectorLayer(layer_name))
+                sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
+
+            sectorLayer(layer_name)->addSector(new_sector);
+
+            assert (hasSector(name, layer_name));
+
+            loginf << "DBInterface: importSectors: loaded sector '" << name << "' in layer '"
+                   << layer_name << "' num points " << sector(name, layer_name)->size();
+        }
+    }
+    catch (json::exception& e)
+    {
+        logerr << "DBInterface: importSectors: could not load file '"
+               << filename << "'";
+        throw e;
+    }
+
+    emit sectorsChangedSignal();
+}
+
+void DBInterface::exportSectors (const std::string& filename)
+{
+    loginf << "DBInterface: exportSectors: filename '" << filename << "'";
+
+    json j;
+
+    j["sectors"] = json::array();
+    json& sectors = j["sectors"];
+
+    unsigned int cnt = 0;
+
+    for (auto& sec_lay_it : sector_layers_)
+    {
+        for (auto& sec_it : sec_lay_it->sectors())
+        {
+            sectors[cnt] = sec_it->jsonData();
+            ++cnt;
+        }
+    }
+
+    std::ofstream output_file;
+    output_file.open(filename, std::ios_base::out);
+
+    output_file << j.dump(4);
+
 }
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
