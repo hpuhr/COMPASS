@@ -1482,6 +1482,8 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
     assert (hasSector(sector->name(), sector->layerName()));
 
+    unsigned int sector_id = sector->id();
+
     string layer_name = sector->layerName();
 
     assert (hasSectorLayer(layer_name));
@@ -1500,8 +1502,10 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
 
     {
         QMutexLocker locker(&connection_mutex_);
-        current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,
-                                                                          "name="+sector->name()));
+        string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
+
+        //loginf << "UGA '" << cmd << "'";
+        current_connection_->executeSQL(cmd);
     }
 
     emit sectorsChangedSignal();

@@ -7,10 +7,13 @@
 using namespace nlohmann;
 using namespace std;
 
+const string default_color{"#AAAAAA"};
+
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
                std::vector<std::pair<double,double>> points)
     : id_(id), name_(name), layer_name_(layer_name), points_(points)
 {
+    color_str_ = default_color;
 }
 
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
@@ -47,8 +50,9 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
     if (has_max_altitude_)
         max_altitude_ = j.at("max_altitude");
 
-    has_color_str_ = j.contains("color_str");
-    if (has_color_str_)
+    if (!j.contains("color_str"))
+        color_str_ = default_color;
+    else
         color_str_ = j.at("color_str");
 }
 
@@ -87,8 +91,7 @@ std::string Sector::jsonData () const
     if (has_max_altitude_)
         j["max_altitude"] = max_altitude_;
 
-    if (has_color_str_)
-        j["color_str"] = color_str_;
+    j["color_str"] = color_str_;
 
     return j.dump();
 }
@@ -110,6 +113,8 @@ double Sector::minimumAltitude()
 }
 void Sector::minimumAltitude(double value)
 {
+    loginf << "Sector: minimumAltitude: " << value << "";
+
     has_min_altitude_ = true;
     min_altitude_ = value;
 
@@ -118,6 +123,8 @@ void Sector::minimumAltitude(double value)
 
 void Sector::removeMinimumAltitude()
 {
+    loginf << "Sector: removeMinimumAltitude";
+
     has_min_altitude_ = false;
     min_altitude_ = 0;
 
@@ -135,6 +142,8 @@ double Sector::maximumAltitude()
 }
 void Sector::maximumAltitude(double value)
 {
+    loginf << "Sector: maximumAltitude: " << value << "";
+
     has_max_altitude_ = true;
     max_altitude_ = value;
 
@@ -143,24 +152,22 @@ void Sector::maximumAltitude(double value)
 
 void Sector::removeMaximumAltitude()
 {
+    loginf << "Sector: removeMaximumAltitude";
+
     has_max_altitude_ = false;
     max_altitude_ = 0;
 
     save();
 }
 
-bool Sector::hasColorStr()
-{
-    return has_color_str_;
-}
 std::string Sector::colorStr()
 {
-    assert (has_color_str_);
     return color_str_;
 }
 void Sector::colorStr(std::string value)
 {
-    has_color_str_ = true;
+    loginf << "Sector: colorStr: '" << value << "'";
+
     color_str_ = value;
 
     save();
@@ -168,8 +175,7 @@ void Sector::colorStr(std::string value)
 
 void Sector::removeColorStr()
 {
-    has_color_str_ = false;
-    color_str_ = "";
+    color_str_ = default_color;
 
     save();
 }
@@ -181,6 +187,8 @@ unsigned int Sector::id() const
 
 void Sector::name(const std::string& name)
 {
+    loginf << "Sector: name: '" << name << "'";
+
     name_ = name;
 
     save();
@@ -188,6 +196,8 @@ void Sector::name(const std::string& name)
 
 void Sector::layerName(const std::string& layer_name)
 {
+    loginf << "Sector: layerName: '" << layer_name << "'";
+
     DBInterface& db_interface = ATSDB::instance().interface();
     assert (db_interface.ready());
 

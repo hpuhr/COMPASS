@@ -5,6 +5,7 @@
 #include "dbinterface.h"
 #include "sector.h"
 #include "sectorlayer.h"
+#include "files.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -21,8 +22,11 @@
 #include <QTextEdit>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QColorDialog>
+#include <QApplication>
 
 using namespace std;
+using namespace Utils;
 
 ManageSectorsTaskWidget::ManageSectorsTaskWidget(ManageSectorsTask& task, QWidget* parent)
     : TaskWidget(parent), task_(task)
@@ -116,6 +120,7 @@ void ManageSectorsTaskWidget::addManageTab()
     sector_table_->setColumnCount(table_columns_.size());
     sector_table_->setHorizontalHeaderLabels(table_columns_);
     sector_table_->verticalHeader()->setVisible(false);
+    sector_table_->sortByColumn(2, Qt::DescendingOrder);
     connect(sector_table_, &QTableWidget::itemChanged, this,
             &ManageSectorsTaskWidget::sectorItemChangedSlot);
 
@@ -133,6 +138,8 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
     assert(sector_table_);
 
+    sector_table_->blockSignals(true);
+
     DBInterface& db_interface = ATSDB::instance().interface();
     assert (db_interface.ready());
 
@@ -142,6 +149,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
     for (auto& sec_lay_it : sector_layers)
         num_layers += sec_lay_it->sectors().size();
 
+    sector_table_->setDisabled(true);
     sector_table_->clearContents();
     sector_table_->setRowCount(num_layers);
 
@@ -154,110 +162,122 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
         for (auto& sec_it : sec_lay_it->sectors())
         {
-            string sector_name = sec_it->name();
+            unsigned int sector_id = sec_it->id();
             shared_ptr<Sector> sector = sec_it;
 
             col = 0;
+
+            {  // Sector ID
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->id()));
+                item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_id));
+                sector_table_->setItem(row, col, item);
+            }
+
             {  // Sector Name
-                QTableWidgetItem* item = new QTableWidgetItem(sector_name.c_str());
-                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                ++col;
+                QTableWidgetItem* item = new QTableWidgetItem(sector->name().c_str());
+                item->setFlags(item->flags() | Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
             }
 
             {  // Layer Name
                 ++col;
                 QTableWidgetItem* item = new QTableWidgetItem(layer_name.c_str());
-                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                item->setFlags(item->flags() | Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
             }
 
             {  // Num Points
                 ++col;
                 QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->points().size()));
-                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-                item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
+                item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+                item->setData(Qt::UserRole, QVariant(sector_id));
                 sector_table_->setItem(row, col, item);
             }
 
-//            {  // Altitude Minimum
-//                ++col;
-//                if (ds_it.second.hasSac())
-//                {
-//                    QTableWidgetItem* item =
-//                            new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    sector_table_->setItem(row, col, item);
-//                }
-//                else
-//                {
-//                    QTableWidgetItem* item = new QTableWidgetItem();
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    item->setBackground(Qt::darkGray);
-//                    sector_table_->setItem(row, col, item);
-//                }
-//            }
+            {  // Altitude Minimum
+                ++col;
+                if (sector->hasMinimumAltitude())
+                {
+                    QTableWidgetItem* item =
+                            new QTableWidgetItem(QString::number(sector->minimumAltitude()));
+                    item->setFlags(item->flags() | Qt::ItemIsEditable);
+                    item->setData(Qt::UserRole, QVariant(sector_id));
+                    sector_table_->setItem(row, col, item);
+                }
+                else
+                {
+                    QTableWidgetItem* item = new QTableWidgetItem();
+                    item->setFlags(item->flags() | Qt::ItemIsEditable);
+                    item->setData(Qt::UserRole, QVariant(sector_id));
+                    item->setBackground(Qt::darkGray);
+                    sector_table_->setItem(row, col, item);
+                }
+            }
 
-//            {  // Altitude Maximum
-//                ++col;
-//                if (ds_it.second.hasSic())
-//                {
-//                    QTableWidgetItem* item =
-//                            new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    sector_table_->setItem(row, col, item);
-//                }
-//                else
-//                {
-//                    QTableWidgetItem* item = new QTableWidgetItem();
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    item->setBackground(Qt::darkGray);
-//                    sector_table_->setItem(row, col, item);
-//                }
-//            }
+            {  // Altitude Maximum
+                ++col;
+                if (sector->hasMaximumAltitude())
+                {
+                    QTableWidgetItem* item =
+                            new QTableWidgetItem(QString::number(sector->maximumAltitude()));
+                    item->setFlags(item->flags() | Qt::ItemIsEditable);
+                    item->setData(Qt::UserRole, QVariant(sector_id));
+                    sector_table_->setItem(row, col, item);
+                }
+                else
+                {
+                    QTableWidgetItem* item = new QTableWidgetItem();
+                    item->setFlags(item->flags() | Qt::ItemIsEditable);
+                    item->setData(Qt::UserRole, QVariant(sector_id));
+                    item->setBackground(Qt::darkGray);
+                    sector_table_->setItem(row, col, item);
+                }
+            }
 
-//            {  // Color
-//                ++col;
-//                if (ds_it.second.hasLatitude())
-//                {
-//                    QTableWidgetItem* item =
-//                            new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    sector_table_->setItem(row, col, item);
-//                }
-//                else
-//                {
-//                    QTableWidgetItem* item = new QTableWidgetItem();
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    item->setBackground(Qt::darkGray);
-//                    sector_table_->setItem(row, col, item);
-//                }
-//            }
+            {  // Color
+                ++col;
 
-//            {  // Delete
-//                ++col;
-//                if (ds_it.second.hasLongitude())
-//                {
-//                    QTableWidgetItem* item =
-//                            new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    sector_table_->setItem(row, col, item);
-//                }
-//                else
-//                {
-//                    QTableWidgetItem* item = new QTableWidgetItem();
-//                    item->setData(Qt::UserRole, QVariant(sector_name.c_str()));
-//                    item->setBackground(Qt::darkGray);
-//                    sector_table_->setItem(row, col, item);
-//                }
-//            }
+                QPushButton* button = new QPushButton();
+                QPalette pal = button->palette();
+                pal.setColor(QPalette::Button, QColor(sector->colorStr().c_str()));
+                //loginf << "UGA " << QColor(sector->colorStr().c_str()).name().toStdString();
+                button->setAutoFillBackground(true);
+                button->setPalette(pal);
+                button->setFlat(true);
+                button->update();
+
+                connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::changeSectorColorSlot);
+
+                button->setProperty("sector_id", QVariant(sector->id()));
+                sector_table_->setCellWidget(row, col, button);
+            }
+
+            {  // Delete
+                ++col;
+
+                QPushButton* button = new QPushButton();
+                button->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
+                button->setFlat(true);
+
+                connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::deleteSectorSlot);
+
+                button->setProperty("sector_id", QVariant(sector->id()));
+                sector_table_->setCellWidget(row, col, button);
+            }
 
             ++row;
         }
     }
 
     sector_table_->resizeColumnsToContents();
+
+    sector_table_->blockSignals(false);
+
+    sector_table_->setDisabled(false);
 }
 
 void ManageSectorsTaskWidget::addFileSlot()
@@ -366,4 +386,125 @@ void ManageSectorsTaskWidget::importSlot()
 void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
 {
     loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot";
+
+    assert(item);
+    assert(sector_table_);
+
+
+    bool ok;
+    unsigned int sector_id = item->data(Qt::UserRole).toUInt(&ok);
+    assert(ok);
+    int col = sector_table_->currentColumn();
+
+    assert (col < table_columns_.size());
+    std::string col_name = table_columns_.at(col).toStdString();
+
+    std::string text = item->text().toStdString();
+
+    loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot: sector_id " << sector_id
+           << " col_name " << col_name << " text '" << text << "'";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    assert (db_interface.hasSector(sector_id));
+
+    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+
+    if (col_name == "Sector Name")
+    {
+        if (text.size())
+            sector->name(text);
+    }
+    else if (col_name == "Layer Name")
+    {
+        if (text.size())
+            sector->layerName(text);
+    }
+    else if (col_name == "Altitude Minimum")
+    {
+        if (!text.size())
+            sector->removeMinimumAltitude();
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+                sector->minimumAltitude(value);
+        }
+    }
+    else if (col_name == "Altitude Maximum")
+    {
+        if (!text.size())
+            sector->removeMaximumAltitude();
+        else
+        {
+            double value = item->text().toDouble(&ok);
+
+            if (ok)
+                sector->maximumAltitude(value);
+        }
+    }
+    else
+        assert(false);  // impossible
+
+    updateSectorTable();
+}
+
+void ManageSectorsTaskWidget::changeSectorColorSlot()
+{
+    loginf << "ManageSectorsTaskWidget: changeSectorColorSlot";
+
+    QPushButton* button = dynamic_cast<QPushButton*>(sender());
+    assert (button);
+
+    QVariant sector_id_var = button->property("sector_id");
+    assert (sector_id_var.isValid());
+
+    unsigned int sector_id = sector_id_var.toUInt();
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    assert (db_interface.hasSector(sector_id));
+
+    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+
+    QColor current_color = QColor(sector->colorStr().c_str());
+
+    QColor color =
+        QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color",
+                               QColorDialog::DontUseNativeDialog);
+
+    if (color.isValid())
+    {
+        loginf << "ManageSectorsTaskWidget: changeSectorColorSlot: color " << color.name().toStdString();
+        sector->colorStr(color.name().toStdString());
+        updateSectorTable();
+    }
+
+}
+
+void ManageSectorsTaskWidget::deleteSectorSlot()
+{
+    loginf << "ManageSectorsTaskWidget: deleteSectorSlot";
+
+    QPushButton* button = dynamic_cast<QPushButton*>(sender());
+    assert (button);
+
+    QVariant sector_id_var = button->property("sector_id");
+    assert (sector_id_var.isValid());
+
+    unsigned int sector_id = sector_id_var.toUInt();
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    assert (db_interface.hasSector(sector_id));
+
+    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+
+    db_interface.deleteSector(sector);
+
+    updateSectorTable();
 }

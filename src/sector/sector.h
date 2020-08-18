@@ -38,7 +38,6 @@ public:
     void maximumAltitude(double value);
     void removeMaximumAltitude();
 
-    bool hasColorStr();
     std::string colorStr();
     void colorStr(std::string value);
     void removeColorStr();
@@ -58,7 +57,6 @@ protected:
     bool has_max_altitude_ {false};
     double max_altitude_{0.0};
 
-    bool has_color_str_ {false};
     std::string color_str_;
 };
 
