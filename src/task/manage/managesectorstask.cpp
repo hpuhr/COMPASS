@@ -247,125 +247,161 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         return;
     }
 
+    OGRLayer* layer = nullptr;
 
-    for (auto* layer_it : data_set->GetLayers()) // OGRLayer*
+    for (int layer_cnt=0; layer_cnt < data_set->GetLayerCount(); ++layer_cnt) // OGRLayer*
     {
-        loginf << "ManageSectorsTask: parseCurrentFile: found layer '" << layer_it->GetName() << "'";
+        layer = data_set->GetLayer(layer_cnt);
+        assert (layer);
 
-        std::string layer_name = layer_it->GetName();
+        loginf << "ManageSectorsTask: parseCurrentFile: found layer '" << layer->GetName() << "'";
 
-        for (auto& feature_t : layer_it) // OGRFeature
+        std::string layer_name = layer->GetName();
+
+        OGRFeature* feature = nullptr;
+
+        for (int feature_cnt=0; feature_cnt < layer->GetFeatureCount(); ++feature_cnt) // OGRFeature
         {
+            feature = layer->GetFeature(feature_cnt);
+            assert (feature);
+
             loginf << "ManageSectorsTask: parseCurrentFile: found feature '"
-                   << feature_t->GetDefnRef()->GetName() << "'";
+                   << feature->GetDefnRef()->GetName() << "'";
 
-            std::string feature_name = feature_t->GetDefnRef()->GetName();
+            std::string feature_name = feature->GetDefnRef()->GetName();
 
-            for( auto&& field_t: *feature_t )
+            OGRFeatureDefn* feature_def = layer->GetLayerDefn();
+            assert (feature_def);
+            int field_cnt;
+
+            for (field_cnt = 0; field_cnt < feature_def->GetFieldCount(); field_cnt++)
             {
-                switch( field_t.GetType() )
+                OGRFieldDefn* field_def = feature_def->GetFieldDefn(field_cnt);
+                assert (field_def);
+
+                switch(field_def->GetType())
                 {
                     case OFTInteger:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int " << field_t.GetInteger();
+                        loginf << "ManageSectorsTask: parseCurrentFile: int " << feature->GetFieldAsInteger(field_cnt);
                         break;
                     case OFTInteger64:
-                        loginf << "ManageSectorsTask: parseCurrentFile: int64 " << field_t.GetInteger64();
+                        loginf << "ManageSectorsTask: parseCurrentFile: int64 "
+                               << feature->GetFieldAsInteger64(field_cnt);
                         //printf( CPL_FRMT_GIB ",", oField.GetInteger64() );
                         break;
                     case OFTReal:
-                        loginf << "ManageSectorsTask: parseCurrentFile: double " << field_t.GetDouble();
+                        loginf << "ManageSectorsTask: parseCurrentFile: double " << feature->GetFieldAsDouble(field_cnt);
                         break;
                     case OFTString:
-                        loginf << "ManageSectorsTask: parseCurrentFile: string '" << field_t.GetString() << "'";
+                        loginf << "ManageSectorsTask: parseCurrentFile: string '"
+                               << feature->GetFieldAsString(field_cnt) << "'";
                         break;
                     default:
-                        loginf << "ManageSectorsTask: parseCurrentFile: default " << field_t.GetString();
+                        loginf << "ManageSectorsTask: parseCurrentFile: default " << feature->GetFieldAsString(field_cnt);
                         break;
                 }
             }
 
             OGRGeometry* geometry;
 
-            geometry = feature_t->GetGeometryRef();
+            //geometry = feature->GetGeometryRef();
 
-            if (geometry != NULL)
+            int geom_field_cnt;
+            int geom_field_num;
+            geom_field_num = feature->GetGeomFieldCount();
+
+            for(geom_field_cnt = 0; geom_field_cnt < geom_field_num; geom_field_cnt ++ )
             {
-                if (wkbFlatten(geometry->getGeometryType()) == wkbPolygon )
+                geometry = feature->GetGeomFieldRef(geom_field_cnt);
+                if(geometry != NULL && wkbFlatten(geometry->getGeometryType()) == wkbPolygon)
                 {
-                    OGRPolygon* polygon = geometry->toPolygon();
+                    OGRPolygon* polygon = dynamic_cast<OGRPolygon*>(geometry);
                     assert (polygon);
 
-                    for (auto* ring_it : *polygon) // OGRLinearRing
-                    {
-                        loginf << "ManageSectorsTask: parseCurrentFile: linear ring '"
-                               << ring_it->getGeometryName() << "'";
-
-                        vector<pair<double,double>> points;
-                        for (auto& point_it : *ring_it)
-                        {
-                            loginf << "ManageSectorsTask: parseCurrentFile: point lat " << point_it.getY()
-                                   << " lon " << point_it.getX() << " z " << point_it.getZ();
-
-                            points.push_back({point_it.getY(), point_it.getX()});
-                        }
-
-                        if (points.size())
-                        {
-                            parse_message_ += "Found layer '"+layer_name+"' sector '"+feature_name
-                                    +"' num points "+to_string(points.size());
-
-                            ++found_sectors_num_;
-
-                            if (import)
-                                addSector (feature_name, layer_name, move(points));
-                        }
-                    }
+                    addPolygon(feature_name, *polygon, import);
                 }
                 else if (wkbFlatten(geometry->getGeometryType()) == wkbMultiPolygon)
                 {
-                    OGRMultiPolygon* multi_polygon = geometry->toMultiPolygon();
+                    OGRMultiPolygon* multi_polygon = dynamic_cast<OGRMultiPolygon*>(geometry);
                     assert (multi_polygon);
 
-                    for (auto* poly_it : *multi_polygon) // OGRMultiPolygon
+                    OGRGeometry* sub_geometry;
+
+                    for (int poly_cnt=0; poly_cnt < multi_polygon->getNumGeometries(); ++poly_cnt)
                     {
-                        for (auto* ring_it : *poly_it) // OGRLinearRing
+                        sub_geometry = multi_polygon->getGeometryRef(poly_cnt);
+                        assert (sub_geometry);
+
+                        if (wkbFlatten(sub_geometry->getGeometryType()) == wkbPolygon)
                         {
-                            loginf << "ManageSectorsTask: parseCurrentFile: linear ring '"
-                                   << ring_it->getGeometryName() << "'";
+                            OGRPolygon* sub_polygon = dynamic_cast<OGRPolygon*>(sub_geometry);
+                            assert (sub_polygon);
 
-                            vector<pair<double,double>> points;
-
-                            for (auto& point_it : *ring_it)
-                            {
-                                loginf << "ManageSectorsTask: parseCurrentFile: point lat " << point_it.getY()
-                                       << " lon " << point_it.getX() << " z " << point_it.getZ();
-
-                                points.push_back({point_it.getY(), point_it.getX()});
-                            }
-
-                            if (points.size())
-                            {
-                                parse_message_ += "Found layer '"+layer_name+"' sector '"+feature_name
-                                        +"' num points "+to_string(points.size());
-
-                                ++found_sectors_num_;
-
-                                if (import)
-                                    addSector (feature_name, layer_name, move(points));
-                            }
+                            addPolygon(feature_name, *sub_polygon, import);
                         }
+                        else
+                            loginf << "ManageSectorsTask: parseCurrentFile: no polygon in multipolygon found";
                     }
                 }
                 else
-                    loginf << "ManageSectorsTask: parseCurrentFile: polygons found";
+                {
+                    loginf << "ManageSectorsTask: parseCurrentFile: no geometry found";
+                }
             }
-            else
-                loginf << "ManageSectorsTask: parseCurrentFile: no geometry found";
         }
     }
 
     if (widget_)
         widget_->updateParseMessage();
+}
+
+void ManageSectorsTask::addPolygon (const std::string& layer_name, OGRPolygon& polygon, bool import)
+{
+    loginf << "ManageSectorsTask: addPolygon: polygon '" << polygon.getGeometryName() << "'";
+
+    OGRLinearRing* ring = polygon.getExteriorRing();
+    assert (ring);
+
+    addLinearRing(layer_name, polygon.getGeometryName(), *ring, import);
+
+     for (int ring_cnt=0; ring_cnt < polygon.getNumInteriorRings(); ++ring_cnt) // OGRLinearRing
+     {
+         ring = polygon.getInteriorRing(ring_cnt);
+         assert (ring);
+         addLinearRing(layer_name, polygon.getGeometryName(), *ring, import);
+     }
+}
+
+void ManageSectorsTask::addLinearRing (const std::string& layer_name, const std::string& polygon_name,
+                                       OGRLinearRing& ring, bool import)
+{
+    loginf << "ManageSectorsTask: addLinearRing: layer '" << layer_name << "' polygon_name '" << polygon_name;
+
+    vector<pair<double,double>> points;
+
+    OGRPoint point;
+
+    for (int point_cnt=0; point_cnt < ring.getNumPoints(); ++point_cnt)
+    {
+        ring.getPoint(point_cnt, &point);
+        assert (!point.IsEmpty());
+
+        loginf << "ManageSectorsTask: addLinearRing: point lat " << point.getY()
+               << " lon " << point.getX() << " z " << point.getZ();
+
+        points.push_back({point.getY(), point.getX()});
+    }
+
+    if (points.size())
+    {
+        parse_message_ += "Found layer '"+layer_name+"' polygon_name '"+polygon_name
+                +"' num points "+to_string(points.size());
+
+        ++found_sectors_num_;
+
+        if (import)
+            addSector (polygon_name, layer_name, move(points));
+    }
 }
 
 void ManageSectorsTask::addSector (const std::string& sector_name, const std::string& layer_name,
@@ -383,12 +419,13 @@ void ManageSectorsTask::addSector (const std::string& sector_name, const std::st
     {
         unsigned int cnt = 2;
 
-        while(db_interface.hasSector(new_sector_name, new_sector_name))
+        while(db_interface.hasSector(new_sector_name, layer_name))
         {
             new_sector_name = sector_name+to_string(cnt);
             ++cnt;
         }
     }
 
+    loginf << "ManageSectorsTask: addSector: adding layer '" << layer_name << "' name '" << new_sector_name;
     db_interface.createNewSector(new_sector_name, layer_name, points);
 }

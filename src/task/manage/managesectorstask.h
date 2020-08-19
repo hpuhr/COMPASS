@@ -11,6 +11,8 @@ class TaskManager;
 class ManageSectorsTaskWidget;
 class SavedFile;
 class Sector;
+class OGRPolygon;
+class OGRLinearRing;
 
 class ManageSectorsTask : public Task, public Configurable
 {
@@ -55,6 +57,11 @@ protected:
     virtual void checkSubConfigurables() {}
 
     void parseCurrentFile (bool import);
+
+    void addPolygon (const std::string& layer_name, OGRPolygon& polygon, bool import);
+    void addLinearRing (const std::string& layer_name, const std::string& polygon_name, OGRLinearRing& ring,
+                        bool import);
+
     void addSector (const std::string& sector_name, const std::string& layer_name,
                     std::vector<std::pair<double,double>> points);
 };
