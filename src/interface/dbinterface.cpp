@@ -1581,6 +1581,8 @@ void DBInterface::importSectors (const std::string& filename)
 
             assert (hasSector(name, layer_name));
 
+            new_sector->save();
+
             loginf << "DBInterface: importSectors: loaded sector '" << name << "' in layer '"
                    << layer_name << "' num points " << sector(name, layer_name)->size();
         }
