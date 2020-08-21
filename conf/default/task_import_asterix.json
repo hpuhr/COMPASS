@@ -533,6 +533,118 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping121": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 32398.7265625",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "071.Time of Applicability for Position",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping122": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 60.88485702127616",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "131.Latitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping123": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value -50.84131700891701",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "131.Longitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping124": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "200.ME",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping125": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Target Report Descriptor.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping126": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "400.RID",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping127": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"1b12daad\"",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "SPF",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping14": {
                                         "parameters": {
                                             "active": true,
@@ -1441,7 +1553,7 @@
                                             "in_array": false,
                                             "json_key": "130.Latitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },
@@ -1617,7 +1729,7 @@
                                             "in_array": false,
                                             "json_key": "130.Longitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },
@@ -1793,7 +1905,7 @@
                                             "in_array": false,
                                             "json_key": "073.Time of Message Reception for Position",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Second"
                                         }
                                     },
