@@ -27,6 +27,7 @@ addons:
      - libgdal-dev
      - libarchive-dev
      - libtbb-dev
+     - libgdal-dev
 
 compiler:
  - gcc
