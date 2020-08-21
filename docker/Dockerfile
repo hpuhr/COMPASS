@@ -74,12 +74,12 @@ ENV QTLIBDIR="${QTDIR}/gcc_64/"
 RUN add-apt-repository ppa:ubuntugis/ppa
 RUN apt-get update && apt-get --only-upgrade install libgdal-dev  -y
 
-RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.4.zip
-RUN unzip OpenSceneGraph-3.6.4.zip
-RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.4/build
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make -j 4
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.4/build && make install
+RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
+RUN unzip OpenSceneGraph-3.6.5.zip
+RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j 4
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 
 RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
 RUN unzip Qt4.zip
