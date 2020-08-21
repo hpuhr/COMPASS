@@ -7,6 +7,8 @@
 #include "files.h"
 #include "sector.h"
 
+#include "gdal.h"
+#include "gdal_priv.h"
 #include "ogrsf_frmts.h"
 
 #include "json.hpp"
