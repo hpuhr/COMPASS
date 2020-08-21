@@ -60,6 +60,11 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     table_properties_create_statement_ = ss.str();
     ss.str(std::string());
 
+    ss << "CREATE TABLE " << TABLE_NAME_SECTORS
+       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (id));";
+    table_sectors_create_statement_ = ss.str();
+    ss.str(std::string());
+
     ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
        << "(id INT, json VARCHAR(65535), PRIMARY KEY (id));";
     table_view_points_create_statement_ = ss.str();
@@ -696,6 +701,24 @@ std::string SQLGenerator::getSelectAllViewPointsStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const std::string& name,
+                                                    const std::string& layer_name, const std::string& json)
+{
+    stringstream ss;
+
+    // REPLACE into table (id, name, age) values(1, "A", 19)
+    ss << "REPLACE INTO " << TABLE_NAME_SECTORS << " VALUES ('" << id << "', '" << name << "', '"
+       << layer_name << "', '" << json << "');";
+    return ss.str();
+}
+
+std::string SQLGenerator::getSelectAllSectorsStatement()
+{
+    stringstream ss;
+    ss << "SELECT id, name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
+    return ss.str();
+}
+
 std::string SQLGenerator::getInsertMinMaxStatement(const std::string& variable_name,
                                                    const std::string& object_name,
                                                    const std::string& min, const std::string& max)
@@ -726,6 +749,11 @@ std::string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_
 std::string SQLGenerator::getTablePropertiesCreateStatement()
 {
     return table_properties_create_statement_;
+}
+
+std::string SQLGenerator::getTableSectorsCreateStatement()
+{
+    return table_sectors_create_statement_;
 }
 
 std::string SQLGenerator::getTableViewPointsCreateStatement()

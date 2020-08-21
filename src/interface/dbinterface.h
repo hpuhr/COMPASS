@@ -18,21 +18,23 @@
 #ifndef DBINTERFACE_H_
 #define DBINTERFACE_H_
 
+#include "configurable.h"
+#include "dboassociationcollection.h"
+#include "dbovariableset.h"
+#include "propertylist.h"
+#include "sqlgenerator.h"
+#include "sectorlayer.h"
+
 #include <qobject.h>
 
 #include <QMutex>
 #include <memory>
 #include <set>
 
-#include "configurable.h"
-#include "dboassociationcollection.h"
-#include "dbovariableset.h"
-#include "propertylist.h"
-#include "sqlgenerator.h"
-
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
 static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
+static const std::string TABLE_NAME_SECTORS = "atsdb_sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 
 class ATSDB;
@@ -68,6 +70,7 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
   signals:
     void databaseContentChangedSignal();
+    void sectorsChangedSignal();
 
   public:
     /// @brief Constructor
@@ -168,6 +171,27 @@ class DBInterface : public QObject, public Configurable
     void deleteViewPoint(const unsigned int id);
     void deleteAllViewPoints();
 
+    bool existsSectorsTable();
+    void createSectorsTable();
+    bool hasSectorLayer (const std::string& layer_name);
+    //void renameSectorLayer (const std::string& name, const std::string& new_name);
+    std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
+
+    void createNewSector (const std::string& name, const std::string& layer_name,
+                          std::vector<std::pair<double,double>> points);
+    bool hasSector (const std::string& name, const std::string& layer_name);
+    bool hasSector (unsigned int id);
+    std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
+    std::shared_ptr<Sector> sector (unsigned int id);
+    void moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name); // moves sector to new layer, saves
+    void saveSector(std::shared_ptr<Sector> sector); // write to db and add
+    void saveSector(unsigned int id); // write to db and add
+    std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
+    void deleteSector(std::shared_ptr<Sector> sector);
+    void deleteAllSectors();
+    void importSectors (const std::string& filename);
+    void exportSectors (const std::string& filename);
+
     /// @brief Deletes table content for given table name
     void clearTableContent(const std::string& table_name);
 
@@ -184,7 +208,7 @@ class DBInterface : public QObject, public Configurable
     void createAssociationsTable(const std::string& table_name);
     DBOAssociationCollection getAssociations(const std::string& table_name);
 
-  protected:
+protected:
     std::map<std::string, DBConnection*> connections_;
 
     std::string used_connection_;
@@ -209,6 +233,8 @@ class DBInterface : public QObject, public Configurable
 
     std::map<std::string, std::string> properties_;
 
+    std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
+
     virtual void checkSubConfigurables();
 
     void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
@@ -219,6 +245,9 @@ class DBInterface : public QObject, public Configurable
 
     void loadProperties();
     void saveProperties();
+
+    void loadSectors();
+    unsigned int getMaxSectorId ();
 };
 
 #endif /* DBINTERFACE_H_ */

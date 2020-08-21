@@ -88,6 +88,11 @@
                 "document":"SUR.ET1.ST05.2000-STD-12-01",
                 "date":"May 2011",
                 "file":"021/cat021_2.1.json"
+            },
+            "2.4":{
+                "document":"EUROCONTROL-SPEC-0149-12",
+                "date":"15/06/2015",
+                "file":"021/cat021_2.4.json"
             }
         },
         "mappings":{
