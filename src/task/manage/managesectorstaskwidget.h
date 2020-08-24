@@ -45,6 +45,8 @@ public:
 
     void updateParseMessage ();
 
+    void importSectorsJSON (const std::string& filename);
+
 protected:
     ManageSectorsTask& task_;
 

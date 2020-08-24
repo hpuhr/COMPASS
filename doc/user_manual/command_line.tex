@@ -22,6 +22,7 @@ Allowed options:
   --import_view_points arg        imports view points JSON file with given filename, e.g. '/data/file1.json'
   --import_asterix arg            imports ASTERIX file with given filename, e.g. '/data/file1.ff'
   --import_gps_trail arg          imports gps trail NMEA with given filename, e.g. '/data/file2.txt'
+  --import_sectors_json arg       imports exported sectors JSON with given filename, e.g. '/data/sectors.json'
   --auto_process                  start automatic processing of imported data
   --start                         start after finishing previous steps
   --load_data                     load data after start
@@ -81,6 +82,15 @@ After a database was opened, adds the supplied filename and starts an import usi
 \begin{itemize}
  \item \nameref{sec:task_import_gps}
 \end{itemize}
+
+\subsection{--import\_sectors\_json}
+
+After a database was opened, adds imports a previously exported sectors JSON file using the following tasks:
+
+\begin{itemize}
+ \item \nameref{sec:task_manage_sectors}
+\end{itemize}
+
 
 \subsection{--auto\_process}
 

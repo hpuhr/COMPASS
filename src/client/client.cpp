@@ -62,6 +62,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     std::string import_json_filename;
     std::string import_json_schema;
     std::string import_gps_trail_filename;
+    std::string import_sectors_filename;
 
     bool auto_process {false};
     bool start {false};
@@ -88,6 +89,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
                 "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
                 "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
+                "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
@@ -146,6 +149,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (import_gps_trail_filename.size())
         task_man.importGPSTrailFile(import_gps_trail_filename);
+
+    if (import_sectors_filename.size())
+        task_man.importSectorsFile(import_sectors_filename);
 
     if (auto_process)
         task_man.autoProcess(auto_process);

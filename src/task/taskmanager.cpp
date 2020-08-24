@@ -540,6 +540,13 @@ void TaskManager::importGPSTrailFile(const std::string& filename)
     gps_trail_import_filename_ = filename;
 }
 
+void TaskManager::importSectorsFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    sectors_import_file_ = true;
+    sectors_import_filename_ = filename;
+}
+
 void TaskManager::importViewPointsFile(const std::string& filename)
 {
     loginf << "TaskManager: importViewPointsFile: filename '" << filename << "'";
@@ -837,6 +844,42 @@ void TaskManager::performAutomaticTasks ()
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
+    }
+
+    if (sectors_import_file_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: importing sectors file '"
+               << sectors_import_filename_ << "'";
+
+        if (!Files::fileExists(sectors_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: sectors file file '" << sectors_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*manage_sectors_task_);
+        if(widget_->getCurrentTaskName() != manage_sectors_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        ManageSectorsTaskWidget* manage_sectors_task_widget =
+            dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
+        assert(manage_sectors_task_widget);
+
+        manage_sectors_task_->showDoneSummary(false);
+        manage_sectors_task_widget->importSectorsJSON(sectors_import_filename_);
+
+        //widget_->runTask(*manage_sectors_task_);
+
+//        while (!manage_sectors_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
     }
 
     start_time = boost::posix_time::microsec_clock::local_time();

@@ -579,19 +579,26 @@ void ManageSectorsTaskWidget::importSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: importSectorsSlot";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
-
     QString filename =
         QFileDialog::getOpenFileName(nullptr, "Export Sectors as JSON", "", "*.json");
 
     if (filename.size() > 0)
     {
-        assert (Files::fileExists(filename.toStdString()));
-
-        db_interface.importSectors(filename.toStdString());
-        updateSectorTable();
+        importSectorsJSON(filename.toStdString());
     }
     else
         loginf << "ManageDataSourcesTask: importSectorsSlot: cancelled";
+}
+
+void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
+{
+    loginf << "ManageSectorsTaskWidget: importSectorsJSON: filename '" << filename << "'";
+
+    assert (Files::fileExists(filename));
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+    assert (db_interface.ready());
+
+    db_interface.importSectors(filename);
+    updateSectorTable();
 }

@@ -112,7 +112,7 @@ class TaskManager : public QObject, public Configurable
 #endif
     void importJSONFile(const std::string& filename, const std::string& schema);
     void importGPSTrailFile(const std::string& filename);
-
+    void importSectorsFile(const std::string& filename);
 
     void autoProcess(bool value);
 
@@ -150,6 +150,9 @@ protected:
 
     bool gps_trail_import_file_ {false};
     std::string gps_trail_import_filename_;
+
+    bool sectors_import_file_ {false};
+    std::string sectors_import_filename_;
 
     bool auto_process_ {false};
     bool start_ {false};
