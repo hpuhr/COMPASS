@@ -38,6 +38,7 @@ class RadarPlotPositionCalculatorTask;
 class PostProcessTask;
 class TaskManagerWidget;
 class ManageDataSourcesTask;
+class ManageSectorsTask;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
@@ -97,6 +98,7 @@ class TaskManager : public QObject, public Configurable
     MySQLDBImportTask& mysqldbImportTask() const;
     GPSTrailImportTask& gpsTrailImportTask() const;
     ManageDataSourcesTask& manageDatasourcesTask() const;
+    ManageSectorsTask& manageSectorsTask() const;
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     PostProcessTask& postProcessTask() const;
@@ -108,8 +110,9 @@ class TaskManager : public QObject, public Configurable
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
 #endif
+    void importJSONFile(const std::string& filename, const std::string& schema);
     void importGPSTrailFile(const std::string& filename);
-
+    void importSectorsFile(const std::string& filename);
 
     void autoProcess(bool value);
 
@@ -121,9 +124,6 @@ class TaskManager : public QObject, public Configurable
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
-
-
-
 
 protected:
     bool expert_mode_{false};
@@ -144,8 +144,15 @@ protected:
     std::string asterix_import_filename_;
 #endif
 
+    bool json_import_file_ {false};
+    std::string json_import_filename_;
+    std::string json_import_schema_;
+
     bool gps_trail_import_file_ {false};
     std::string gps_trail_import_filename_;
+
+    bool sectors_import_file_ {false};
+    std::string sectors_import_filename_;
 
     bool auto_process_ {false};
     bool start_ {false};
@@ -166,6 +173,7 @@ protected:
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
     std::unique_ptr<GPSTrailImportTask> gps_trail_import_task_;
     std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
+    std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<PostProcessTask> post_process_task_;

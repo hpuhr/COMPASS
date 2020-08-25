@@ -533,6 +533,118 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping121": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 32398.7265625",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "071.Time of Applicability for Position",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping122": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 60.88485702127616",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "131.Latitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping123": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value -50.84131700891701",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "131.Longitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping124": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "200.ME",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping125": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.Target Report Descriptor.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping126": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "400.RID",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping127": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"1b12daad\"",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "SPF",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping14": {
                                         "parameters": {
                                             "active": true,
@@ -1441,7 +1553,7 @@
                                             "in_array": false,
                                             "json_key": "130.Latitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },
@@ -1617,7 +1729,7 @@
                                             "in_array": false,
                                             "json_key": "130.Longitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },
@@ -1793,7 +1905,7 @@
                                             "in_array": false,
                                             "json_key": "073.Time of Message Reception for Position",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Second"
                                         }
                                     },
@@ -5920,6 +6032,261 @@
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "JSONObjectParserRef to RefTrajRefTraj0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "RefTraj",
+                                "json_container_key": "",
+                                "json_key": "category",
+                                "json_value": "255",
+                                "name": "Ref to RefTraj",
+                                "override_data_source": false
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "tod",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "callsign",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping10": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "heading_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "heading_deg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping11": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "ds_id",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping12": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "pos_std_dev_lat_deg",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "pos_std_dev_lat_deg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping13": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "pos_std_dev_long_deg",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "pos_std_dev_long_deg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping14": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "pos_std_dev_latlong_corr_coeff",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "pos_std_dev_latlong_corr_coeff",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "mode3a_code",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode3a_code",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "pos_lat_deg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "pos_long_deg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "sac",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "sac",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "sic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "sic",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping7": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_addr",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping8": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "modec_code_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "modec_code_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping9": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "RefTraj",
+                                            "dbovariable_name": "groundspeed_kt",
+                                            "dimension": "Speed",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "groundspeed_kt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Knots"
                                         }
                                     }
                                 }

@@ -165,6 +165,24 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
             this, SLOT(changedPrimaryRangeStdDevColumnSlot()));
     grid->addWidget(primary_range_stddev_box_, row, 1);
 
+    row++;
+    grid->addWidget(new QLabel("Primary IR Minimum column"), row, 0);
+
+    primary_ir_min_box_ = new QComboBox();
+    updatePrimaryIRMinColumnSlot();
+    connect(primary_ir_min_box_, SIGNAL(activated(int)),
+            this, SLOT(changedPrimaryIRMinSlot()));
+    grid->addWidget(primary_ir_min_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Primary IR Maximum column"), row, 0);
+
+    primary_ir_max_box_ = new QComboBox();
+    updatePrimaryIRMaxColumnSlot();
+    connect(primary_ir_max_box_, SIGNAL(activated(int)),
+            this, SLOT(changedPrimaryIRMaxSlot()));
+    grid->addWidget(primary_ir_max_box_, row, 1);
+
     // ssr
     row++;
     grid->addWidget(new QLabel("Secondary Azimuth Standard Deviation column"), row, 0);
@@ -184,6 +202,24 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
             this, SLOT(changedSecondaryRangeStdDevColumnSlot()));
     grid->addWidget(secondary_range_stddev_box_, row, 1);
 
+    row++;
+    grid->addWidget(new QLabel("Secondary IR Minimum column"), row, 0);
+
+    secondary_ir_min_box_ = new QComboBox();
+    updateSecondaryIRMinColumnSlot();
+    connect(secondary_ir_min_box_, SIGNAL(activated(int)),
+            this, SLOT(changedSecondaryIRMinSlot()));
+    grid->addWidget(secondary_ir_min_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Secondary IR Maximum column"), row, 0);
+
+    secondary_ir_max_box_ = new QComboBox();
+    updateSecondaryIRMaxColumnSlot();
+    connect(secondary_ir_max_box_, SIGNAL(activated(int)),
+            this, SLOT(changedSecondaryIRMaxSlot()));
+    grid->addWidget(secondary_ir_max_box_, row, 1);
+
     // mode s
     row++;
     grid->addWidget(new QLabel("Mode S Azimuth Standard Deviation column"), row, 0);
@@ -202,6 +238,24 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
     connect(mode_s_range_stddev_box_, SIGNAL(activated(int)),
             this, SLOT(changedModeSRangeStdDevColumnSlot()));
     grid->addWidget(mode_s_range_stddev_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Mode S IR Minimum column"), row, 0);
+
+    mode_s_ir_min_box_ = new QComboBox();
+    updateModeSIRMinColumnSlot();
+    connect(mode_s_ir_min_box_, SIGNAL(activated(int)),
+            this, SLOT(changedModeSIRMinSlot()));
+    grid->addWidget(mode_s_ir_min_box_, row, 1);
+
+    row++;
+    grid->addWidget(new QLabel("Mode S IR Maximum column"), row, 0);
+
+    mode_s_ir_max_box_ = new QComboBox();
+    updateModeSIRMaxColumnSlot();
+    connect(mode_s_ir_max_box_, SIGNAL(activated(int)),
+            this, SLOT(changedModeSIRMaxSlot()));
+    grid->addWidget(mode_s_ir_max_box_, row, 1);
 
     main_layout->addLayout(grid);
 
@@ -237,10 +291,18 @@ void DBODataSourceDefinitionWidget::changedMetaTableSlot()
 
     updatePrimaryAzimuthStdDevColumnSlot();
     updatePrimaryRangeStdDevColumnSlot();
+    updatePrimaryIRMinColumnSlot();
+    updatePrimaryIRMaxColumnSlot();
+
     updateSecondaryAzimuthStdDevColumnSlot();
     updateSecondaryRangeStdDevColumnSlot();
+    updateSecondaryIRMinColumnSlot();
+    updateSecondaryIRMaxColumnSlot();
+
     updateModeSAzimuthStdDevColumnSlot();
     updateModeSRangeStdDevColumnSlot();
+    updateModeSIRMinColumnSlot();
+    updateModeSIRMaxColumnSlot();
 }
 
 void DBODataSourceDefinitionWidget::changedForeignKeySlot()
@@ -321,6 +383,20 @@ void DBODataSourceDefinitionWidget::changedPrimaryRangeStdDevColumnSlot()
     std::string value = primary_range_stddev_box_->currentText().toStdString();
     definition_.primaryRangeStdDevColumn(value);
 }
+void DBODataSourceDefinitionWidget::changedPrimaryIRMinSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedPrimaryIRMinSlot";
+    assert(primary_ir_min_box_);
+    std::string value = primary_ir_min_box_->currentText().toStdString();
+    definition_.primaryIRMinColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedPrimaryIRMaxSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedPrimaryIRMaxSlot";
+    assert(primary_ir_max_box_);
+    std::string value = primary_ir_max_box_->currentText().toStdString();
+    definition_.primaryIRMaxColumn(value);
+}
 void DBODataSourceDefinitionWidget::changedSecondaryAzimuthStdDevColumnSlot()
 {
     logdbg << "DBODataSourceDefinitionWidget: changedSecondaryAzimuthStdDevColumnSlot";
@@ -334,6 +410,20 @@ void DBODataSourceDefinitionWidget::changedSecondaryRangeStdDevColumnSlot()
     assert(secondary_range_stddev_box_);
     std::string value = secondary_range_stddev_box_->currentText().toStdString();
     definition_.secondaryRangeStdDevColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedSecondaryIRMinSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedSecondaryIRMinSlot";
+    assert(secondary_ir_min_box_);
+    std::string value = secondary_ir_min_box_->currentText().toStdString();
+    definition_.secondaryIRMinColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedSecondaryIRMaxSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedSecondaryIRMaxSlot";
+    assert(secondary_ir_max_box_);
+    std::string value = secondary_ir_max_box_->currentText().toStdString();
+    definition_.secondaryIRMaxColumn(value);
 }
 void DBODataSourceDefinitionWidget::changedModeSAzimuthStdDevColumnSlot()
 {
@@ -349,7 +439,20 @@ void DBODataSourceDefinitionWidget::changedModeSRangeStdDevColumnSlot()
     std::string value = mode_s_range_stddev_box_->currentText().toStdString();
     definition_.modeSRangeStdDevColumn(value);
 }
-
+void DBODataSourceDefinitionWidget::changedModeSIRMinSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedModeSIRMinSlot";
+    assert(mode_s_ir_min_box_);
+    std::string value = mode_s_ir_min_box_->currentText().toStdString();
+    definition_.modeSIRMinColumn(value);
+}
+void DBODataSourceDefinitionWidget::changedModeSIRMaxSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: changedModeSIRMaxSlot";
+    assert(mode_s_ir_max_box_);
+    std::string value = mode_s_ir_max_box_->currentText().toStdString();
+    definition_.modeSIRMaxColumn(value);
+}
 void DBODataSourceDefinitionWidget::updateLocalKeySlot()
 {
     logdbg << "DBODataSourceDefinitionWidget: updateLocalKeySlot";
@@ -547,6 +650,31 @@ void DBODataSourceDefinitionWidget::updatePrimaryRangeStdDevColumnSlot()
     updateVariableSelectionBox(primary_range_stddev_box_, schema_name, meta_table_name,
                                definition_.primaryRangeStdDevColumn(), true);
 }
+void DBODataSourceDefinitionWidget::updatePrimaryIRMinColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updatePrimaryIRMinColumnSlot";
+    assert(primary_ir_min_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(primary_ir_min_box_, schema_name, meta_table_name,
+                               definition_.primaryIRMinColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updatePrimaryIRMaxColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updatePrimaryIRMaxColumnSlot";
+    assert(primary_ir_max_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(primary_ir_max_box_, schema_name, meta_table_name,
+                               definition_.primaryIRMaxColumn(), true);
+}
+
 void DBODataSourceDefinitionWidget::updateSecondaryAzimuthStdDevColumnSlot()
 {
     logdbg << "DBODataSourceDefinitionWidget: updateSecondaryAzimuthStdDevColumnSlot";
@@ -571,6 +699,31 @@ void DBODataSourceDefinitionWidget::updateSecondaryRangeStdDevColumnSlot()
     updateVariableSelectionBox(secondary_range_stddev_box_, schema_name, meta_table_name,
                                definition_.secondaryRangeStdDevColumn(), true);
 }
+void DBODataSourceDefinitionWidget::updateSecondaryIRMinColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateSecondaryIRMinColumnSlot";
+    assert(secondary_ir_min_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(secondary_ir_min_box_, schema_name, meta_table_name,
+                               definition_.secondaryIRMinColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateSecondaryIRMaxColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateSecondaryIRMaxColumnSlot";
+    assert(secondary_ir_max_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(secondary_ir_max_box_, schema_name, meta_table_name,
+                               definition_.secondaryIRMaxColumn(), true);
+}
+
 void DBODataSourceDefinitionWidget::updateModeSAzimuthStdDevColumnSlot()
 {
     logdbg << "DBODataSourceDefinitionWidget: updateModeSAzimuthStdDevColumnSlot";
@@ -594,6 +747,30 @@ void DBODataSourceDefinitionWidget::updateModeSRangeStdDevColumnSlot()
 
     updateVariableSelectionBox(mode_s_range_stddev_box_, schema_name, meta_table_name,
                                definition_.modeSRangeStdDevColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateModeSIRMinColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateModeSIRMinColumnSlot";
+    assert(mode_s_ir_min_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(mode_s_ir_min_box_, schema_name, meta_table_name,
+                               definition_.modeSIRMinColumn(), true);
+}
+void DBODataSourceDefinitionWidget::updateModeSIRMaxColumnSlot()
+{
+    logdbg << "DBODataSourceDefinitionWidget: updateModeSIRMaxColumnSlot";
+    assert(mode_s_ir_max_box_);
+    assert(meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox(mode_s_ir_max_box_, schema_name, meta_table_name,
+                               definition_.modeSIRMaxColumn(), true);
 }
 
 void DBODataSourceDefinitionWidget::updateVariableSelectionBox(QComboBox* box,

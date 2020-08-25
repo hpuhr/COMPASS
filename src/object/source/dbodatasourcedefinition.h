@@ -82,10 +82,20 @@ class DBODataSourceDefinition : public QObject, public Configurable
     std::string primaryAzimuthStdDevColumn() const;
     void primaryAzimuthStdDevColumn(const std::string& value);
 
+    // psr
     bool hasPrimaryRangeStdDevColumn() const { return primary_range_stddev_column_.size() > 0; }
     std::string primaryRangeStdDevColumn() const;
     void primaryRangeStdDevColumn(const std::string& value);
 
+    bool hasPrimaryIRMinColumn() const { return primary_ir_min_column_.size() > 0; }
+    std::string primaryIRMinColumn() const;
+    void primaryIRMinColumn(const std::string& value);
+
+    bool hasPrimaryIRMaxColumn() const { return primary_ir_max_column_.size() > 0; }
+    std::string primaryIRMaxColumn() const;
+    void primaryIRMaxColumn(const std::string& value);
+
+    // ssr
     bool hasSecondaryAzimuthStdDevColumn() const { return secondary_azimuth_stddev_column_.size() > 0; }
     std::string secondaryAzimuthStdDevColumn() const;
     void secondaryAzimuthStdDevColumn(const std::string& value);
@@ -94,6 +104,15 @@ class DBODataSourceDefinition : public QObject, public Configurable
     std::string secondaryRangeStdDevColumn() const;
     void secondaryRangeStdDevColumn(const std::string& value);
 
+    bool hasSecondaryIRMinColumn() const { return secondary_ir_min_column_.size() > 0; }
+    std::string secondaryIRMinColumn() const;
+    void secondaryIRMinColumn(const std::string& value);
+
+    bool hasSecondaryIRMaxColumn() const { return secondary_ir_max_column_.size() > 0; }
+    std::string secondaryIRMaxColumn() const;
+    void secondaryIRMaxColumn(const std::string& value);
+
+    // mode s
     bool hasModeSAzimuthStdDevColumn() const { return mode_s_azimuth_stddev_column_.size() > 0; }
     std::string modeSAzimuthStdDevColumn() const;
     void modeSAzimuthStdDevColumn(const std::string& value);
@@ -101,6 +120,14 @@ class DBODataSourceDefinition : public QObject, public Configurable
     bool hasModeSRangeStdDevColumn() const { return mode_s_range_stddev_column_.size() > 0; }
     std::string modeSRangeStdDevColumn() const;
     void modeSRangeStdDevColumn(const std::string& value);
+
+    bool hasModeSIRMinColumn() const { return mode_s_ir_min_column_.size() > 0; }
+    std::string modeSIRMinColumn() const;
+    void modeSIRMinColumn(const std::string& value);
+
+    bool hasModeSIRMaxColumn() const { return mode_s_ir_max_column_.size() > 0; }
+    std::string modeSIRMaxColumn() const;
+    void modeSIRMaxColumn(const std::string& value);
 
 protected:
     DBObject* object_{nullptr};
@@ -121,13 +148,22 @@ protected:
     std::string latitude_column_;
     std::string longitude_column_;
     std::string altitude_column_;
-    /// radar noise columns
+
+    /// radar columns
     std::string primary_azimuth_stddev_column_;
     std::string primary_range_stddev_column_;
+    std::string primary_ir_min_column_;
+    std::string primary_ir_max_column_;
+
     std::string secondary_azimuth_stddev_column_;
     std::string secondary_range_stddev_column_;
+    std::string secondary_ir_min_column_;
+    std::string secondary_ir_max_column_;
+
     std::string mode_s_azimuth_stddev_column_;
     std::string mode_s_range_stddev_column_;
+    std::string mode_s_ir_min_column_;
+    std::string mode_s_ir_max_column_;
 
     DBODataSourceDefinitionWidget* widget_{nullptr};
 };

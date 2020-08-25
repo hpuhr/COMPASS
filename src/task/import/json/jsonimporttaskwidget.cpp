@@ -161,9 +161,9 @@ void JSONImportTaskWidget::addMappingsTab()
     {
         QVBoxLayout* parsers_layout = new QVBoxLayout();
 
-        QLabel* parser_label = new QLabel("JSON Object Parsers");
-        parser_label->setFont(font_bold);
-        parsers_layout->addWidget(parser_label);
+        parser_label_ = new QLabel("JSON Object Parsers");
+        parser_label_->setFont(font_bold);
+        parsers_layout->addWidget(parser_label_);
 
         object_parser_box_ = new QComboBox();
         connect(object_parser_box_, SIGNAL(currentIndexChanged(const QString&)), this,
@@ -192,7 +192,7 @@ void JSONImportTaskWidget::addMappingsTab()
         object_parser_widget_ = new QStackedWidget();
         parsers_layout->addWidget(object_parser_widget_);
 
-        updateParserBox();
+        updateToCurrentSchema();
 
         mappings_layout->addLayout(parsers_layout);
     }
@@ -217,6 +217,32 @@ void JSONImportTaskWidget::addFileSlot()
 
     if (filename.size() > 0)
         addFile(filename.toStdString());
+}
+
+void JSONImportTaskWidget::selectFile(const std::string& filename)
+{
+    assert(task_.hasFile(filename));
+    task_.currentFilename(filename);
+
+    assert (file_list_);
+    QList<QListWidgetItem*> items = file_list_->findItems(filename.c_str(), Qt::MatchExactly);
+    assert (items.size() > 0);
+
+    for (auto item_it : items)
+    {
+        assert (item_it);
+        file_list_->setCurrentItem(item_it);
+    }
+
+}
+
+void JSONImportTaskWidget::selectSchema(const std::string& schema_name)
+{
+    assert(task_.hasSchema(schema_name));
+    task_.currentSchemaName(schema_name);
+
+    updateToCurrentSchema();
+
 }
 
 void JSONImportTaskWidget::deleteFileSlot()
@@ -324,7 +350,7 @@ void JSONImportTaskWidget::removeSchemaSlot()
 
     task_.removeCurrentSchema();
     updateSchemasBox();
-    updateParserBox();
+    updateToCurrentSchema();
 }
 
 void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
@@ -334,7 +360,7 @@ void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
     assert(task_.hasSchema(text.toStdString()));
     task_.currentSchemaName(text.toStdString());
 
-    updateParserBox();
+    updateToCurrentSchema();
 }
 
 void JSONImportTaskWidget::updateSchemasBox()
@@ -342,6 +368,10 @@ void JSONImportTaskWidget::updateSchemasBox()
     loginf << "JSONImportTaskWidget: updateSchemasBox";
 
     schema_box_->clear();
+
+#if USE_JASTERIX
+    schema_box_->addItem("jASTERIX");
+#endif
 
     for (auto& schema_it : task_)
     {
@@ -356,6 +386,32 @@ void JSONImportTaskWidget::updateSchemasBox()
     {
         task_.currentSchemaName(schema_box_->currentText().toStdString());
     }
+}
+
+void JSONImportTaskWidget::updateToCurrentSchema()
+{
+    updateParserBox();
+
+#if USE_JASTERIX
+    if (task_.currentSchemaName() == "jASTERIX")
+    {
+        parser_label_->setText("Editing Only Possible in Import ASTERIX Task");
+        object_parser_box_->setDisabled(true);
+        delete_schema_button_->setDisabled(true);
+        add_object_parser_button_->setDisabled(true);
+        delete_object_parser_button_->setDisabled(true);
+        object_parser_widget_->setDisabled(true);
+    }
+    else
+    {
+        parser_label_->setText("JSON Object Parsers");
+        object_parser_box_->setDisabled(false);
+        delete_schema_button_->setDisabled(false);
+        add_object_parser_button_->setDisabled(false);
+        delete_object_parser_button_->setDisabled(false);
+        object_parser_widget_->setDisabled(false);
+    }
+#endif
 }
 
 void JSONImportTaskWidget::addObjectParserSlot()
@@ -485,6 +541,13 @@ void JSONImportTaskWidget::updateParserBox()
 
     if (task_.hasCurrentSchema())
     {
+#if USE_JASTERIX
+        if (task_.currentSchemaName() == "jASTERIX")
+            return;
+#endif
+
+        loginf << "JSONImportTaskWidget: updateParserBox: current schema " << task_.currentSchema().name();
+
         for (auto& parser_it : task_.currentSchema())
         {
             object_parser_box_->addItem(parser_it.first.c_str());

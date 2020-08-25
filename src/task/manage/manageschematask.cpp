@@ -16,7 +16,6 @@
  */
 
 #include "manageschematask.h"
-
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "manageschemataskwidget.h"

@@ -59,7 +59,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 #if USE_JASTERIX
     std::string import_asterix_filename;
 #endif
+    std::string import_json_filename;
+    std::string import_json_schema;
     std::string import_gps_trail_filename;
+    std::string import_sectors_filename;
 
     bool auto_process {false};
     bool start {false};
@@ -80,8 +83,14 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
                 "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
 #endif
+            ("import_json", po::value<std::string>(&import_json_filename),
+                "imports JSON file with given filename, e.g. '/data/file1.json'")
+            ("json_schema", po::value<std::string>(&import_json_schema),
+                "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
                 "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+            ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
+                "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
@@ -113,6 +122,12 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     if (quit_requested_)
         return;
 
+    if (import_json_filename.size() && !import_json_schema.size())
+    {
+        loginf << "ATSDBClient: schema name must be set for JSON import";
+        return;
+    }
+
     TaskManager& task_man = ATSDB::instance().taskManager();
 
     if (create_new_sqlite3_db_filename.size())
@@ -129,8 +144,14 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         task_man.importASTERIXFile(import_asterix_filename);
 #endif
 
+    if (import_json_filename.size())
+        task_man.importJSONFile(import_json_filename, import_json_schema);
+
     if (import_gps_trail_filename.size())
         task_man.importGPSTrailFile(import_gps_trail_filename);
+
+    if (import_sectors_filename.size())
+        task_man.importSectorsFile(import_sectors_filename);
 
     if (auto_process)
         task_man.autoProcess(auto_process);

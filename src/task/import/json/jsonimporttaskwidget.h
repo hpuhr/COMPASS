@@ -33,6 +33,7 @@ class QComboBox;
 class QHBoxLayout;
 class QStackedWidget;
 class QTabWidget;
+class QLabel;
 
 class JSONImportTaskWidget : public TaskWidget
 {
@@ -62,6 +63,8 @@ class JSONImportTaskWidget : public TaskWidget
     virtual ~JSONImportTaskWidget();
 
     void addFile(const std::string& filename);
+    void selectFile(const std::string& filename);
+    void selectSchema(const std::string& schema_name);
 
     void runStarted();
     void runDone();
@@ -82,6 +85,7 @@ class JSONImportTaskWidget : public TaskWidget
     QPushButton* add_schema_button_{nullptr};
     QPushButton* delete_schema_button_{nullptr};
 
+    QLabel* parser_label_{nullptr};
     QComboBox* object_parser_box_{nullptr};
     QPushButton* add_object_parser_button_{nullptr};
     QPushButton* delete_object_parser_button_{nullptr};
@@ -94,6 +98,7 @@ class JSONImportTaskWidget : public TaskWidget
     void addMappingsTab();
 
     void updateSchemasBox();
+    void updateToCurrentSchema();
     void updateParserBox();
 };
 

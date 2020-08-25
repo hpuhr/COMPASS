@@ -50,6 +50,14 @@ void ReadJSONFileJob::run()
 
         bytes_read_tmp_ = 0;
         readFilePart();
+
+        if(objects_.size())
+        {
+            emit readJSONFilePartSignal();
+
+            while (objects_.size())
+                QThread::msleep(1);
+        }
     }
 
     // cleanCommas ();
@@ -205,7 +213,7 @@ void ReadJSONFileJob::readFilePart()
                 // parsed buffer, reached obj limit
                 {
                     //|| (objects_.size() && bytes_read_tmp_ > 1e7)
-                    // loginf << "UGA returning " << bytes_read_tmp_;
+                    loginf << "ReadJSONFileJob: readFilePart: reached limit, returning";
                     entry_done_ = false;
                     return;
                 }
@@ -219,6 +227,7 @@ void ReadJSONFileJob::readFilePart()
             {
                 assert(open_count_ == 0);  // nothing left open
                 assert(tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
+                loginf << "ReadJSONFileJob: readFilePart: entry done";
                 return;
             }
         }
@@ -275,12 +284,6 @@ void ReadJSONFileJob::readFilePart()
     }
 
     loginf << "ReadJSONFileJob: readFilePart: emitting signal";
-
-    assert(objects_.size());
-    emit readJSONFilePartSignal();
-
-    while (objects_.size())
-        QThread::msleep(1);
 
     loginf << "ReadJSONFileJob: readFilePart: done";
 }

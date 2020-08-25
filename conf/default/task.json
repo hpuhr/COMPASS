@@ -44,6 +44,11 @@
             "path": "task_manage_schema.json"
         },
         {
+            "class_id": "ManageSectorsTask",
+            "instance_id": "ManageSectorsTask0",
+            "path": "task_manage_sectors.json"
+        },
+        {
             "class_id": "MySQLDBImportTask",
             "instance_id": "MySQLDBImportTask0",
             "path": "task_import_mysqldb.json"

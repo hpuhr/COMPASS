@@ -60,6 +60,11 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     table_properties_create_statement_ = ss.str();
     ss.str(std::string());
 
+    ss << "CREATE TABLE " << TABLE_NAME_SECTORS
+       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (id));";
+    table_sectors_create_statement_ = ss.str();
+    ss.str(std::string());
+
     ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
        << "(id INT, json VARCHAR(65535), PRIMARY KEY (id));";
     table_view_points_create_statement_ = ss.str();
@@ -287,6 +292,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
         columns.push_back(&meta.column(ds.primaryRangeStdDevColumn()));
     }
 
+    if (ds.hasPrimaryIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.primaryIRMinColumn()));
+        columns.push_back(&meta.column(ds.primaryIRMinColumn()));
+    }
+
+    if (ds.hasPrimaryIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.primaryIRMaxColumn()));
+        columns.push_back(&meta.column(ds.primaryIRMaxColumn()));
+    }
+
     // ssr
     if (ds.hasSecondaryAzimuthStdDevColumn())
     {
@@ -300,6 +317,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
         columns.push_back(&meta.column(ds.secondaryRangeStdDevColumn()));
     }
 
+    if (ds.hasSecondaryIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryIRMinColumn()));
+        columns.push_back(&meta.column(ds.secondaryIRMinColumn()));
+    }
+
+    if (ds.hasSecondaryIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.secondaryIRMaxColumn()));
+        columns.push_back(&meta.column(ds.secondaryIRMaxColumn()));
+    }
+
     // mode s
     if (ds.hasModeSAzimuthStdDevColumn())
     {
@@ -311,6 +340,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
     {
         assert (meta.hasColumn(ds.modeSRangeStdDevColumn()));
         columns.push_back(&meta.column(ds.modeSRangeStdDevColumn()));
+    }
+
+    if (ds.hasModeSIRMinColumn())
+    {
+        assert (meta.hasColumn(ds.modeSIRMinColumn()));
+        columns.push_back(&meta.column(ds.modeSIRMinColumn()));
+    }
+
+    if (ds.hasModeSIRMaxColumn())
+    {
+        assert (meta.hasColumn(ds.modeSIRMaxColumn()));
+        columns.push_back(&meta.column(ds.modeSIRMaxColumn()));
     }
 
     return getSelectCommand(meta, columns);
@@ -660,6 +701,24 @@ std::string SQLGenerator::getSelectAllViewPointsStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const std::string& name,
+                                                    const std::string& layer_name, const std::string& json)
+{
+    stringstream ss;
+
+    // REPLACE into table (id, name, age) values(1, "A", 19)
+    ss << "REPLACE INTO " << TABLE_NAME_SECTORS << " VALUES ('" << id << "', '" << name << "', '"
+       << layer_name << "', '" << json << "');";
+    return ss.str();
+}
+
+std::string SQLGenerator::getSelectAllSectorsStatement()
+{
+    stringstream ss;
+    ss << "SELECT id, name, layer_name, json FROM " << TABLE_NAME_SECTORS << ";";
+    return ss.str();
+}
+
 std::string SQLGenerator::getInsertMinMaxStatement(const std::string& variable_name,
                                                    const std::string& object_name,
                                                    const std::string& min, const std::string& max)
@@ -690,6 +749,11 @@ std::string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_
 std::string SQLGenerator::getTablePropertiesCreateStatement()
 {
     return table_properties_create_statement_;
+}
+
+std::string SQLGenerator::getTableSectorsCreateStatement()
+{
+    return table_sectors_create_statement_;
 }
 
 std::string SQLGenerator::getTableViewPointsCreateStatement()

@@ -33,6 +33,8 @@
 #include "managedbobjectstaskwidget.h"
 #include "manageschematask.h"
 #include "manageschemataskwidget.h"
+#include "managesectorstask.h"
+#include "managesectorstaskwidget.h"
 #include "mysqldbimporttask.h"
 #include "mysqldbimporttaskwidget.h"
 #include "postprocesstask.h"
@@ -81,8 +83,9 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 #endif
 
     task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "GPSTrailImportTask",
-                                         "ManageDataSourcesTask", "RadarPlotPositionCalculatorTask",
-                                         "PostProcessTask", "CreateARTASAssociationsTask"});
+                                         "ManageDataSourcesTask", "ManageSectorsTask",
+                                         "RadarPlotPositionCalculatorTask", "PostProcessTask",
+                                         "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
         assert(tasks_.count(task_it));
@@ -157,6 +160,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         manage_datasources_task_.reset(new ManageDataSourcesTask(class_id, instance_id, *this));
         assert(manage_datasources_task_);
         addTask(class_id, manage_datasources_task_.get());
+    }
+    else if (class_id.compare("ManageSectorsTask") == 0)
+    {
+        assert(!manage_sectors_task_);
+        manage_sectors_task_.reset(new ManageSectorsTask(class_id, instance_id, *this));
+        assert(manage_sectors_task_);
+        addTask(class_id, manage_sectors_task_.get());
     }
     else if (class_id.compare("RadarPlotPositionCalculatorTask") == 0)
     {
@@ -251,6 +261,12 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
         assert(manage_datasources_task_);
+    }
+
+    if (!manage_sectors_task_)
+    {
+        generateSubConfigurable("ManageSectorsTask", "ManageSectorsTask0");
+        assert(manage_sectors_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
@@ -353,6 +369,7 @@ void TaskManager::shutdown()
     mysqldb_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
     manage_datasources_task_ = nullptr;
+    manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
     post_process_task_ = nullptr;
@@ -417,6 +434,12 @@ ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const
 {
     assert(manage_datasources_task_);
     return *manage_datasources_task_;
+}
+
+ManageSectorsTask& TaskManager::manageSectorsTask() const
+{
+    assert(manage_sectors_task_);
+    return *manage_sectors_task_;
 }
 
 #if USE_JASTERIX
@@ -499,11 +522,29 @@ void TaskManager::importASTERIXFile(const std::string& filename)
 }
 #endif
 
+void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
+{
+    loginf << "TaskManager: importJSONFile: filename '" << filename << "' schema '" << schema << "'";
+
+    assert (schema.size());
+
+    json_import_file_ = true;
+    json_import_filename_ = filename;
+    json_import_schema_ = schema;
+}
+
 void TaskManager::importGPSTrailFile(const std::string& filename)
 {
     automatic_tasks_defined_ = true;
     gps_trail_import_file_ = true;
     gps_trail_import_filename_ = filename;
+}
+
+void TaskManager::importSectorsFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    sectors_import_file_ = true;
+    sectors_import_filename_ = filename;
 }
 
 void TaskManager::importViewPointsFile(const std::string& filename)
@@ -715,6 +756,57 @@ void TaskManager::performAutomaticTasks ()
     }
     #endif
 
+    if (json_import_file_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
+               << json_import_filename_ << "'";
+
+#if USE_JASTERIX
+        if (!Files::fileExists(json_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
+                   << "' does not exist";
+            return;
+        }
+#endif
+
+        if(!json_import_task_->hasSchema(json_import_schema_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*json_import_task_);
+        if(widget_->getCurrentTaskName() != json_import_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        JSONImportTaskWidget* json_import_task_widget =
+            dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+        assert(json_import_task_widget);
+
+        json_import_task_widget->addFile(json_import_filename_);
+        json_import_task_widget->selectFile(json_import_filename_);
+        json_import_task_widget->selectSchema(json_import_schema_);
+
+        assert(json_import_task_->canRun());
+        json_import_task_->showDoneSummary(false);
+
+        widget_->runTask(*json_import_task_);
+
+        while (!json_import_task_->done())
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(1);
+        }
+
+        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
+    }
+
     if (gps_trail_import_file_)
     {
         loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
@@ -752,6 +844,49 @@ void TaskManager::performAutomaticTasks ()
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
+    }
+
+    if (sectors_import_file_)
+    {
+        loginf << "TaskManager: performAutomaticTasks: importing sectors file '"
+               << sectors_import_filename_ << "'";
+
+        if (!Files::fileExists(sectors_import_filename_))
+        {
+            logerr << "TaskManager: performAutomaticTasks: sectors file file '" << sectors_import_filename_
+                   << "' does not exist";
+            return;
+        }
+
+        widget_->setCurrentTask(*manage_sectors_task_);
+        if(widget_->getCurrentTaskName() != manage_sectors_task_->name())
+        {
+            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                   << "' selected, aborting";
+            return;
+        }
+
+        ManageSectorsTaskWidget* manage_sectors_task_widget =
+            dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
+        assert(manage_sectors_task_widget);
+
+        manage_sectors_task_->showDoneSummary(false);
+        manage_sectors_task_widget->importSectorsJSON(sectors_import_filename_);
+
+        //widget_->runTask(*manage_sectors_task_);
+
+//        while (!manage_sectors_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
+    }
+
+    start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
     }
 
     if (auto_process_)
