@@ -3,9 +3,10 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 
 - Support of multiple database systems, e.g. Sqlite3, MySQL
 - Support of multiple, configurable database schemas, e.g. SCDB
-- Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
+- Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
 - Dynamic ASTERIX import using [jASTERIX](https://github.com/hpuhr/jASTERIX)
 - Import of (D)GPS trails from NMEA files
+- Import of polygons from GML,KML,ESRI Shapefiles
 - MySQL database import and management of SCDB databases
 - High performance processing, low memory footprint
 - Filtering for detailed analysis
@@ -34,9 +35,9 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental Version v0.5.4-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.4-beta/ATSDB-v0.5.4.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.4-beta/user_manual_v0.5.4.pdf)
+## Released Experimental Version v0.5.5-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.5-beta/ATSDB-v0.5.5.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.5-beta/user_manual_v0.5.5.pdf)
 - [Improved Offline Map](https://github.com/hpuhr/ATSDB/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
 
 ## Screenshots
