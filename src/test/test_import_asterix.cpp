@@ -77,6 +77,7 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
     REQUIRE(connection_widget);
 
     connection_widget->addFile(db_filename);
+    connection_widget->selectFile(db_filename);
     connection_widget->openFileSlot();
 
     while (client.hasPendingEvents())
