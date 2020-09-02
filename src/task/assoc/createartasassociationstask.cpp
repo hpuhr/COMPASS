@@ -17,10 +17,6 @@
 
 #include "createartasassociationstask.h"
 
-#include <QApplication>
-#include <QMessageBox>
-#include <sstream>
-
 #include "atsdb.h"
 #include "createartasassociationsstatusdialog.h"
 #include "createartasassociationstaskwidget.h"
@@ -35,6 +31,10 @@
 #include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+
+#include <QApplication>
+#include <QMessageBox>
+#include <sstream>
 
 using namespace std;
 using namespace Utils;
