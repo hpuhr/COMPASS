@@ -39,6 +39,7 @@ class PostProcessTask;
 class TaskManagerWidget;
 class ManageDataSourcesTask;
 class ManageSectorsTask;
+class CreateAssociationsTask;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
@@ -102,6 +103,7 @@ class TaskManager : public QObject, public Configurable
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     PostProcessTask& postProcessTask() const;
+    CreateAssociationsTask& createAssociationsTask() const;
 
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
@@ -175,8 +177,9 @@ protected:
     std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
-    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<PostProcessTask> post_process_task_;
+    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
+    std::unique_ptr<CreateAssociationsTask> create_associations_task_;
 
     std::unique_ptr<TaskManagerWidget> widget_;
 

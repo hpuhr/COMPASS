@@ -50,9 +50,12 @@
 #include "viewpointsimporttaskwidget.h"
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskwidget.h"
+#include "createassociationstask.h"
+#include "createassociationstaskwidget.h"
 #include "viewmanager.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
+
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -85,7 +88,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "GPSTrailImportTask",
                                          "ManageDataSourcesTask", "ManageSectorsTask",
                                          "RadarPlotPositionCalculatorTask", "PostProcessTask",
-                                         "CreateARTASAssociationsTask"});
+                                         "CreateAssociationsTask", "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
         assert(tasks_.count(task_it));
@@ -183,6 +186,14 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
             new CreateARTASAssociationsTask(class_id, instance_id, *this));
         assert(create_artas_associations_task_);
         addTask(class_id, create_artas_associations_task_.get());
+    }
+    else if (class_id.compare("CreateAssociationsTask") == 0)
+    {
+        assert(!create_associations_task_);
+        create_associations_task_.reset(
+            new CreateAssociationsTask(class_id, instance_id, *this));
+        assert(create_associations_task_);
+        addTask(class_id, create_associations_task_.get());
     }
     else if (class_id.compare("PostProcessTask") == 0)
     {
@@ -282,6 +293,12 @@ void TaskManager::checkSubConfigurables()
         assert(create_artas_associations_task_);
     }
 
+    if (!create_associations_task_)
+    {
+        generateSubConfigurable("CreateAssociationsTask", "CreateAssociationsTask0");
+        assert(create_associations_task_);
+    }
+
     if (!post_process_task_)
     {
         generateSubConfigurable("PostProcessTask", "PostProcessTask0");
@@ -373,6 +390,7 @@ void TaskManager::shutdown()
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
     post_process_task_ = nullptr;
+    create_associations_task_ = nullptr;
 
     widget_ = nullptr;
 }
@@ -483,14 +501,20 @@ RadarPlotPositionCalculatorTask& TaskManager::radarPlotPositionCalculatorTask() 
 
 CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
 {
-    assert(manage_datasources_task_);
+    assert(create_artas_associations_task_);
     return *create_artas_associations_task_;
 }
 
 PostProcessTask& TaskManager::postProcessTask() const
 {
-    assert(manage_datasources_task_);
+    assert(post_process_task_);
     return *post_process_task_;
+}
+
+CreateAssociationsTask& TaskManager::createAssociationsTask() const
+{
+    assert(create_associations_task_);
+    return *create_associations_task_;
 }
 
 void TaskManager::createAndOpenNewSqlite3DB(const std::string& filename)

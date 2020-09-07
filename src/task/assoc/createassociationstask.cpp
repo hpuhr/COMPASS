@@ -26,7 +26,7 @@ const std::string CreateAssociationsTask::DONE_PROPERTY_NAME = "associations_cre
 CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
                                                const std::string& instance_id,
                                                TaskManager& task_manager)
-    : Task("ARTASAssociationsTask", "Associate Target Reports", true, false, task_manager),
+    : Task("CreateAssociationsTask", "Associate Target Reports", true, false, task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_calc_assoc.json")
 {
     tooltip_ =
