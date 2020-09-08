@@ -104,10 +104,12 @@ bool CreateAssociationsTask::checkPrerequisites()
 
 bool CreateAssociationsTask::isRecommended()
 {
-    if (!checkPrerequisites())
-        return false;
+//    if (!checkPrerequisites())
+//        return false;
 
-    return !done_;
+//    return !done_;
+
+    return false;
 }
 
 bool CreateAssociationsTask::canRun()

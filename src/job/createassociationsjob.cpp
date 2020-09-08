@@ -5,7 +5,10 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "metadbovariable.h"
+#include "dbovariable.h"
 
+using namespace std;
 using namespace Utils;
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
@@ -63,4 +66,68 @@ void CreateAssociationsJob::run()
 void CreateAssociationsJob::createUTNS()
 {
     loginf << "CreateAssociationsJob: createUTNS";
+
+    MetaDBOVariable* meta_key_var = task_.keyVar();
+    MetaDBOVariable* meta_tod_var = task_.todVar();
+    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
+
+    assert (meta_key_var);
+    assert (meta_tod_var);
+    assert (meta_ta_var);
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    for (auto& buf_it : buffers_) // dbo name, buffer
+    {
+        string dbo_name = buf_it.first;
+        DBObject& dbo = object_man.object(dbo_name);
+
+        shared_ptr<Buffer> buffer = buf_it.second;
+        size_t buffer_size = buffer->size();
+
+        assert (meta_key_var->existsIn(dbo_name));
+        DBOVariable& key_var = meta_key_var->getFor(dbo_name);
+
+        assert (meta_tod_var->existsIn(dbo_name));
+        DBOVariable& tod_var = meta_tod_var->getFor(dbo_name);
+
+        assert (meta_ta_var->existsIn(dbo_name));
+        DBOVariable& ta_var = meta_ta_var->getFor(dbo_name);
+
+        assert (buffer->has<int>(key_var.name()));
+        assert (buffer->has<float>(tod_var.name()));
+        assert (buffer->has<int>(ta_var.name()));
+
+        NullableVector<int> rec_nums = buffer->get<int>(key_var.name());
+        NullableVector<float> tods = buffer->get<float>(tod_var.name());
+        NullableVector<int> tas = buffer->get<int>(ta_var.name());
+
+        unsigned int rec_num;
+        unsigned int target_addr;
+        unsigned int utn;
+
+        for (size_t cnt = 0; cnt < buffer_size; ++cnt)
+        {
+            assert (!rec_nums.isNull(cnt));
+
+            if (tas.isNull(cnt))
+                continue;
+
+            rec_num = rec_nums.get(cnt);
+            target_addr = tas.get(cnt);
+
+            if (ta_2_utn_.count(target_addr) == 0)
+            {
+                ta_2_utn_[target_addr] = utn_cnt_;
+                ++utn_cnt_;
+            }
+
+            utn = ta_2_utn_[target_addr];
+
+            dbo.addAssociation(rec_num, utn, false, 0);
+        }
+
+        dbo.saveAssociations();
+    }
+
 }

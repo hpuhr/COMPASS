@@ -348,7 +348,7 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-            tracker_object.addAssociation(assoc_it.first, ut_it.first, assoc_it.first);
+            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
 }
 
 void CreateARTASAssociationsJob::createSensorAssociations()
@@ -498,7 +498,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     }
 
                     object_man.object(best_match_dbo_name)
-                        .addAssociation(best_match_rec_num, ut_it.first, assoc_it.first);
+                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
                     ++found_hashes_cnt_;
                 }
                 else

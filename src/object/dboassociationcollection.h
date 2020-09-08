@@ -9,14 +9,15 @@ class DBOAssociationEntry
   public:
     // unsigned int assoc_id, unsigned int rec_num,
     // assoc_id_(assoc_id), rec_num_(rec_num),
-    DBOAssociationEntry(unsigned int utn, unsigned int src_rec_num)
-        : utn_(utn), src_rec_num_(src_rec_num)
+    DBOAssociationEntry(unsigned int utn, bool has_src, unsigned int src_rec_num)
+        : utn_(utn), has_src_(has_src), src_rec_num_(src_rec_num)
     {
     }
 
     // unsigned int assoc_id_;
     // unsigned int rec_num_;
     unsigned int utn_;
+    bool has_src_;
     unsigned int src_rec_num_;
 };
 

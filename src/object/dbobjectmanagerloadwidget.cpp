@@ -299,7 +299,7 @@ void DBObjectManagerLoadWidget::updateSlot()
             associations_label_->setText(tmp.c_str());
         }
         else
-            associations_label_->setText("From All");
+            associations_label_->setText("All");
     }
     else
         associations_label_->setText("None");
