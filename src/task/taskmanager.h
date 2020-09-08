@@ -118,6 +118,8 @@ class TaskManager : public QObject, public Configurable
 
     void autoProcess(bool value);
 
+    void associateData(bool value);
+
     void quit(bool value);
     void start(bool value);
 
@@ -157,6 +159,9 @@ protected:
     std::string sectors_import_filename_;
 
     bool auto_process_ {false};
+
+    bool associate_data_ {false};
+
     bool start_ {false};
     bool load_data_ {false};
     bool export_view_points_report_ {false};

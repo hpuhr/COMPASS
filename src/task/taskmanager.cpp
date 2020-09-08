@@ -588,6 +588,14 @@ void TaskManager::autoProcess(bool value)
     auto_process_ = value;
 }
 
+void TaskManager::associateData(bool value)
+{
+    loginf << "TaskManager: associateData: value " << value;
+
+    automatic_tasks_defined_ = true;
+    associate_data_ = value;
+}
+
 void TaskManager::quit(bool value)
 {
     loginf << "TaskManager: autoQuitAfterProcess: value " << value;
@@ -966,7 +974,7 @@ void TaskManager::performAutomaticTasks ()
 
         loginf << "TaskManager: performAutomaticTasks: post-processing task done";
 
-        // assocs
+        // artas assocs
         if (create_artas_associations_task_->isRecommended())
         {
             loginf << "TaskManager: performAutomaticTasks: starting association task";
@@ -989,6 +997,32 @@ void TaskManager::performAutomaticTasks ()
                 QThread::msleep(1);
             }
         }
+    }
+
+    if (associate_data_)
+    {
+        if (create_associations_task_->canRun())
+        {
+            widget_->setCurrentTask(*create_associations_task_);
+            if(widget_->getCurrentTaskName() != create_associations_task_->name())
+            {
+                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+                       << "' selected, aborting";
+                return;
+            }
+
+            create_associations_task_->showDoneSummary(false);
+
+            widget_->runTask(*create_associations_task_);
+
+            while (!create_associations_task_->done())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
+        }
+        else
+            logerr << "TaskManager: performAutomaticTasks: associate data task can not be run";
     }
 
     loginf << "TaskManager: performAutomaticTasks: done";
