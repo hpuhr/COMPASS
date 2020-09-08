@@ -31,15 +31,15 @@ class CreateARTASAssociationsStatusDialog : public QDialog
 {
     Q_OBJECT
 
-  signals:
+signals:
     void closeSignal();
 
-  public slots:
+public slots:
     void okClickedSlot();
 
-  public:
+public:
     CreateARTASAssociationsStatusDialog(CreateARTASAssociationsTask& task,
-                                        QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+                                        QWidget* parent=nullptr, Qt::WindowFlags f=0);
 
     void markStartTime();
     void setDone();
@@ -54,7 +54,7 @@ class CreateARTASAssociationsStatusDialog : public QDialog
     void setDubiousAssociations(const size_t& dubious_associations);
     void setFoundDuplicates(const size_t& found_duplicates);
 
-  private:
+private:
     CreateARTASAssociationsTask& task_;
 
     boost::posix_time::ptime start_time_;

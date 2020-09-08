@@ -156,11 +156,11 @@ void CreateAssociationsTask::run()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    //    assert(!status_dialog_);
-    //    status_dialog_.reset(new CreateARTASAssociationsStatusDialog(*this));
-    //    connect(status_dialog_.get(), &CreateARTASAssociationsStatusDialog::closeSignal, this,
-    //            &CreateARTASAssociationsTask::closeStatusDialogSlot);
-    //    status_dialog_->markStartTime();
+    assert(!status_dialog_);
+    status_dialog_.reset(new CreateAssociationsStatusDialog(*this));
+    connect(status_dialog_.get(), &CreateAssociationsStatusDialog::closeSignal, this,
+            &CreateAssociationsTask::closeStatusDialogSlot);
+    status_dialog_->markStartTime();
 
     checkAndSetMetaVariable(key_var_str_, &key_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
@@ -184,8 +184,8 @@ void CreateAssociationsTask::run()
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
-//    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
-//    status_dialog_->show();
+    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    status_dialog_->show();
 }
 
 void CreateAssociationsTask::newDataSlot(DBObject& object)
@@ -202,8 +202,8 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 
     dbo_loading_done_flags_.at(object.name()) = true;
 
-    //    assert(status_dialog_);
-    //    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    assert(status_dialog_);
+    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
 
     dbo_loading_done_ = true;
 
@@ -247,7 +247,7 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 
         JobManager::instance().addDBJob(create_job_);
 
-//        status_dialog_->setAssociationStatus("In Progress");
+        status_dialog_->setAssociationStatus("In Progress");
     }
 }
 
@@ -257,17 +257,17 @@ void CreateAssociationsTask::createDoneSlot()
 
     create_job_done_ = true;
 
-//    status_dialog_->setAssociationStatus("Done");
+    status_dialog_->setAssociationStatus("Done");
 //    status_dialog_->setFoundHashes(create_job_->foundHashes());
 //    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
 //    status_dialog_->setMissingHashes(create_job_->missingHashes());
 //    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
 //    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
 
-//    status_dialog_->setDone();
+    status_dialog_->setDone();
 
-//    if (!show_done_summary_)
-//        status_dialog_->close();
+    if (!show_done_summary_)
+        status_dialog_->close();
 
     create_job_ = nullptr;
 
@@ -294,7 +294,15 @@ void CreateAssociationsTask::createObsoleteSlot()
 
 void CreateAssociationsTask::associationStatusSlot(QString status)
 {
+    assert(status_dialog_);
+    status_dialog_->setAssociationStatus(status.toStdString());
+}
 
+void CreateAssociationsTask::closeStatusDialogSlot()
+{
+    assert(status_dialog_);
+    status_dialog_->close();
+    status_dialog_ = nullptr;
 }
 
 std::string CreateAssociationsTask::keyVarStr() const { return key_var_str_; }

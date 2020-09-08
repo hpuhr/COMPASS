@@ -2,6 +2,7 @@
 #define CREATEASSOCIATIONSTASK_H
 
 #include "configurable.h"
+#include "createassociationsstatusdialog.h"
 #include "dbovariableset.h"
 #include "task.h"
 
@@ -30,6 +31,8 @@ public slots:
     void loadingDoneSlot(DBObject& object);
 
     void associationStatusSlot(QString status);
+
+    void closeStatusDialogSlot();
 
 public:
     CreateAssociationsTask(const std::string& class_id, const std::string& instance_id,
@@ -75,6 +78,8 @@ protected:
     boost::posix_time::ptime stop_time_;
 
     std::unique_ptr<CreateAssociationsTaskWidget> widget_;
+
+    std::unique_ptr<CreateAssociationsStatusDialog> status_dialog_{nullptr};
 
     std::map<std::string, bool> dbo_loading_done_flags_;
     bool dbo_loading_done_{false};
