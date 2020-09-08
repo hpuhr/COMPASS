@@ -1,10 +1,4 @@
 #include "createartasassociationsjob.h"
-
-#include <math.h>
-
-#include <QThread>
-#include <algorithm>
-
 #include "atsdb.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
@@ -15,6 +9,11 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "stringconv.h"
+
+#include <math.h>
+
+#include <QThread>
+#include <algorithm>
 
 using namespace Utils;
 
@@ -108,7 +107,7 @@ void CreateARTASAssociationsJob::run()
         dbo_it.second->saveAssociations();
     }
 
-    object_man.setAssociations(tracker_dbo_name_, task_.currentDataSourceName());
+    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -349,7 +348,7 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-            tracker_object.addAssociation(assoc_it.first, ut_it.first, assoc_it.first);
+            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
 }
 
 void CreateARTASAssociationsJob::createSensorAssociations()
@@ -499,7 +498,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     }
 
                     object_man.object(best_match_dbo_name)
-                        .addAssociation(best_match_rec_num, ut_it.first, assoc_it.first);
+                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
                     ++found_hashes_cnt_;
                 }
                 else

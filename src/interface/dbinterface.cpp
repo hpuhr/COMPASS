@@ -2192,14 +2192,21 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
             NullableVector<int>& utns = buffer->get<int>("utn");
             NullableVector<int>& src_rec_nums = buffer->get<int>("src_rec_num");
 
+            bool has_src;
+
             for (size_t cnt = 0; cnt < num_associations; ++cnt)
             {
                 assert(!rec_nums.isNull(cnt));
                 assert(!utns.isNull(cnt));
-                assert(!src_rec_nums.isNull(cnt));
 
-                associations.add(rec_nums.get(cnt),
-                                 DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
+                has_src = !src_rec_nums.isNull(cnt);
+
+                if (has_src)
+                    associations.add(rec_nums.get(cnt),
+                                     DBOAssociationEntry(utns.get(cnt), true, src_rec_nums.get(cnt)));
+                else
+                    associations.add(rec_nums.get(cnt),
+                                     DBOAssociationEntry(utns.get(cnt), false, 0));
             }
         }
     }

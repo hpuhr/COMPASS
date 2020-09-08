@@ -1282,9 +1282,9 @@ void DBObject::loadAssociations()
 
 bool DBObject::hasAssociations() { return associations_.size() > 0; }
 
-void DBObject::addAssociation(unsigned int rec_num, unsigned int utn, unsigned int src_rec_num)
+void DBObject::addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num)
 {
-    associations_.add(rec_num, DBOAssociationEntry(utn, src_rec_num));
+    associations_.add(rec_num, DBOAssociationEntry(utn, has_src, src_rec_num));
     associations_changed_ = true;
     associations_loaded_ = true;
 }
@@ -1332,7 +1332,10 @@ void DBObject::saveAssociations()
     {
         rec_nums.set(cnt, assoc_it.first);
         utns.set(cnt, assoc_it.second.utn_);
-        src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
+
+        if (assoc_it.second.has_src_)
+            src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
+
         ++cnt;
     }
 

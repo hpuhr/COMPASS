@@ -259,7 +259,7 @@ class DBObject : public QObject, public Configurable
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
     bool hasAssociations();
-    void addAssociation(unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
+    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }
     void clearAssociations();
     void saveAssociations();

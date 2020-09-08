@@ -126,9 +126,11 @@ class DBObjectManager : public QObject, public Configurable
     void removeDependenciesForSchema(const std::string& schema_name);
 
     bool hasAssociations() const;
-    void setAssociations(const std::string& dbo, const std::string& data_source_name);
+    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
+    void setAssociationsByAll();
     void removeAssociations();
 
+    bool hasAssociationsDataSource() const;
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 

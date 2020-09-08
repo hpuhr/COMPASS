@@ -529,7 +529,7 @@ void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name
 
 bool DBObjectManager::hasAssociations() const { return has_associations_; }
 
-void DBObjectManager::setAssociations(const std::string& dbo, const std::string& data_source_name)
+void DBObjectManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
 {
     ATSDB::instance().interface().setProperty("associations_generated", "1");
     ATSDB::instance().interface().setProperty("associations_dbo", dbo);
@@ -539,6 +539,20 @@ void DBObjectManager::setAssociations(const std::string& dbo, const std::string&
     associations_dbo_ = dbo;
     assert(existsObject(associations_dbo_));
     associations_ds_ = data_source_name;
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
+}
+
+void DBObjectManager::setAssociationsByAll()
+{
+    ATSDB::instance().interface().setProperty("associations_generated", "1");
+    ATSDB::instance().interface().setProperty("associations_dbo", "");
+    ATSDB::instance().interface().setProperty("associations_ds", "");
+
+    has_associations_ = true;
+    associations_dbo_ = "";
+    associations_ds_ = "";
 
     if (load_widget_)
         loadWidget()->updateSlot();
@@ -559,6 +573,11 @@ void DBObjectManager::removeAssociations()
 
     if (load_widget_)
         loadWidget()->updateSlot();
+}
+
+bool DBObjectManager::hasAssociationsDataSource() const
+{
+    return associations_dbo_.size() && associations_ds_.size();
 }
 
 std::string DBObjectManager::associationsDBObject() const { return associations_dbo_; }

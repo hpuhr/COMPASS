@@ -65,6 +65,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     std::string import_sectors_filename;
 
     bool auto_process {false};
+    bool associate_data {false};
+
     bool start {false};
     bool load_data {false};
     std::string export_view_points_report_filename;
@@ -92,6 +94,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
                 "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
+            ("associate_data", po::bool_switch(&associate_data), "associate target reports")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
@@ -155,6 +158,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (auto_process)
         task_man.autoProcess(auto_process);
+
+    if (associate_data)
+        task_man.associateData(associate_data);
 
     if (start)
         task_man.start(start);

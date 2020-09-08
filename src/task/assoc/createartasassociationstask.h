@@ -18,15 +18,16 @@
 #ifndef CREATEARTASASSOCIATIONSTASK_H
 #define CREATEARTASASSOCIATIONSTASK_H
 
-#include <QObject>
-#include <memory>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "configurable.h"
 #include "createartasassociationsjob.h"
 #include "createartasassociationsstatusdialog.h"
 #include "dbovariableset.h"
 #include "task.h"
+
+#include <QObject>
+#include <memory>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
@@ -39,7 +40,7 @@ class CreateARTASAssociationsTask : public Task, public Configurable
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void createDoneSlot();
     void createObsoleteSlot();
 
@@ -51,7 +52,7 @@ class CreateARTASAssociationsTask : public Task, public Configurable
 
     void closeStatusDialogSlot();
 
-  public:
+public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
@@ -135,7 +136,7 @@ class CreateARTASAssociationsTask : public Task, public Configurable
 
     static const std::string DONE_PROPERTY_NAME;
 
-  protected:
+protected:
     std::string current_data_source_name_;
 
     std::string tracker_ds_id_var_str_;
