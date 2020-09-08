@@ -16,6 +16,7 @@ class DBOVariable;
 class MetaDBOVariable;
 class DBObject;
 class Buffer;
+class CreateAssociationsJob;
 
 class CreateAssociationsTask : public Task, public Configurable
 {
@@ -27,6 +28,8 @@ public slots:
 
     void newDataSlot(DBObject& object);
     void loadingDoneSlot(DBObject& object);
+
+    void associationStatusSlot(QString status);
 
 public:
     CreateAssociationsTask(const std::string& class_id, const std::string& instance_id,
@@ -75,6 +78,9 @@ protected:
 
     std::map<std::string, bool> dbo_loading_done_flags_;
     bool dbo_loading_done_{false};
+
+    std::shared_ptr<CreateAssociationsJob> create_job_;
+    bool create_job_done_{false};
 
     void checkAndSetMetaVariable(std::string& name_str, MetaDBOVariable** var);
 

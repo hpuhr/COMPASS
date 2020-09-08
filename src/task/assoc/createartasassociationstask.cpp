@@ -263,7 +263,7 @@ void CreateARTASAssociationsTask::run()
 {
     assert(canRun());
 
-    loginf << "CreateARTASAssociationsTask: run: post-processing started";
+    loginf << "CreateARTASAssociationsTask: run: started";
 
     task_manager_.appendInfo("CreateARTASAssociationsTask: started");
 
@@ -342,16 +342,12 @@ void CreateARTASAssociationsTask::run()
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
-    //    updateProgressSlot();
-    //    msg_box_->show();
-
     status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
     status_dialog_->show();
 }
 
 void CreateARTASAssociationsTask::newDataSlot(DBObject& object)
 {
-    // updateProgressSlot();
 }
 
 void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
@@ -366,7 +362,6 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 
     assert(status_dialog_);
     status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
-    // updateProgressSlot();
 
     dbo_loading_done_ = true;
 
@@ -405,8 +400,6 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 
         status_dialog_->setAssociationStatus("In Progress");
     }
-
-    // updateProgressSlot();
 }
 
 void CreateARTASAssociationsTask::createDoneSlot()
@@ -427,7 +420,6 @@ void CreateARTASAssociationsTask::createDoneSlot()
     if (!show_done_summary_)
         status_dialog_->close();
 
-    // updateProgressSlot();
     create_job_ = nullptr;
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();

@@ -1,10 +1,4 @@
 #include "createartasassociationsjob.h"
-
-#include <math.h>
-
-#include <QThread>
-#include <algorithm>
-
 #include "atsdb.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
@@ -15,6 +9,11 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "stringconv.h"
+
+#include <math.h>
+
+#include <QThread>
+#include <algorithm>
 
 using namespace Utils;
 
@@ -108,7 +107,7 @@ void CreateARTASAssociationsJob::run()
         dbo_it.second->saveAssociations();
     }
 
-    object_man.setAssociations(tracker_dbo_name_, task_.currentDataSourceName());
+    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 

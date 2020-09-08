@@ -292,9 +292,14 @@ void DBObjectManagerLoadWidget::updateSlot()
     assert(associations_label_);
     if (object_manager_.hasAssociations())
     {
-        std::string tmp = "From " + object_manager_.associationsDBObject() + ":" +
-                          object_manager_.associationsDataSourceName();
-        associations_label_->setText(tmp.c_str());
+        if (object_manager_.hasAssociationsDataSource())
+        {
+            std::string tmp = "From " + object_manager_.associationsDBObject() + ":" +
+                              object_manager_.associationsDataSourceName();
+            associations_label_->setText(tmp.c_str());
+        }
+        else
+            associations_label_->setText("From All");
     }
     else
         associations_label_->setText("None");
