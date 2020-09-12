@@ -34,6 +34,7 @@
 #include "projectionmanager.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
+#include "evaluationmanager.h"
 
 using namespace std;
 
@@ -56,6 +57,7 @@ ATSDB::ATSDB() : Configurable("ATSDB", "ATSDB0", 0, "atsdb.json")
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
+    assert(eval_manager_);
 
     QObject::connect(db_schema_manager_.get(), &DBSchemaManager::schemaChangedSignal,
                      dbo_manager_.get(), &DBObjectManager::updateSchemaInformationSlot);
@@ -108,6 +110,7 @@ ATSDB::~ATSDB()
     assert(!filter_manager_);
     assert(!task_manager_);
     assert(!view_manager_);
+    assert (!eval_manager_);
 
     logdbg << "ATSDB: destructor: end";
 }
@@ -153,6 +156,12 @@ void ATSDB::generateSubConfigurable(const std::string& class_id, const std::stri
         view_manager_.reset(new ViewManager(class_id, instance_id, this));
         assert(view_manager_);
     }
+    else if (class_id == "EvaluationManager")
+    {
+        assert(!eval_manager_);
+        eval_manager_.reset(new EvaluationManager(class_id, instance_id, this));
+        assert(eval_manager_);
+    }
     else
         throw std::runtime_error("ATSDB: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -195,6 +204,12 @@ void ATSDB::checkSubConfigurables()
         addNewSubConfiguration("ViewManager", "ViewManager0");
         generateSubConfigurable("ViewManager", "ViewManager0");
         assert(view_manager_);
+    }
+    if (!eval_manager_)
+    {
+        addNewSubConfiguration("EvaluationManager", "EvaluationManager0");
+        generateSubConfigurable("EvaluationManager", "EvaluationManager0");
+        assert(eval_manager_);
     }
 }
 
@@ -247,6 +262,12 @@ SimpleConfig& ATSDB::config()
     return *simple_config_;
 }
 
+EvaluationManager& ATSDB::evaluationManager()
+{
+    assert(eval_manager_);
+    return *eval_manager_;
+}
+
 bool ATSDB::ready()
 {
     if (!db_interface_)  // || !initialized_)
@@ -271,6 +292,10 @@ void ATSDB::shutdown()
 
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
+
+    assert(eval_manager_);
+    eval_manager_->close();
+    eval_manager_ = nullptr;
 
     assert(view_manager_);
     view_manager_->close();
