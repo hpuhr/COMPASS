@@ -42,8 +42,8 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "sector.h"
-
-#include "json.hpp"
+#include "sectorlayer.h"
+#include "evaluationmanager.h"
 
 #include <fstream>
 
@@ -131,7 +131,7 @@ void DBInterface::databaseContentChanged()
     if (!existsSectorsTable())
         createSectorsTable();
 
-    loadSectors();
+    ATSDB::instance().evaluationManager().init(); // loads sectors
 
     emit databaseContentChangedSignal();
 }
@@ -1024,7 +1024,7 @@ void DBInterface::saveProperties()
     loginf << "DBInterface: saveProperties: done";
 }
 
-void DBInterface::loadSectors()
+std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 {
     loginf << "DBInterface: loadSectors";
 
@@ -1062,6 +1062,8 @@ void DBInterface::loadSectors()
     string layer_name;
     string json_str;
 
+    std::vector<std::shared_ptr<SectorLayer>> sector_layers;
+
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
         assert(!id_vec.isNull(cnt));
@@ -1074,23 +1076,29 @@ void DBInterface::loadSectors()
         layer_name = layer_name_vec.get(cnt);
         json_str = json_vec.get(cnt);
 
-        assert (!hasSector(name, layer_name));
+        auto lay_it = std::find_if(sector_layers.begin(), sector_layers.end(),
+                                   [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+
+        if (lay_it == sector_layers.end())
+        {
+            sector_layers.push_back(make_shared<SectorLayer>(layer_name));
+
+            lay_it = std::find_if(
+                        sector_layers.begin(), sector_layers.end(),
+                        [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+        }
 
         shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, json_str);
         string layer_name = new_sector->layerName();
 
-        if (!hasSectorLayer(layer_name))
-            sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-        assert (hasSectorLayer(layer_name));
-
-        sectorLayer(layer_name)->addSector(new_sector);
-
-        assert (hasSector(name, layer_name));
+        (*lay_it)->addSector(new_sector);
+        assert ((*lay_it)->hasSector(name));
 
         loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
-               << layer_name << "' num points " << sector(name, layer_name)->size();
+               << layer_name << "' num points " << (*lay_it)->sector(name)->size();
     }
+
+    return sector_layers;
 }
 
 void DBInterface::insertMinMax(const string& id, const string& object_name,
@@ -1319,138 +1327,12 @@ void DBInterface::createSectorsTable()
     updateTableInfo();
 }
 
-bool DBInterface::hasSectorLayer (const std::string& layer_name)
-{
-    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
 
-    return iter != sector_layers_.end();
+void DBInterface::clearSectorsTable()
+{
+    clearTableContent(TABLE_NAME_SECTORS);
 }
 
-//void DBInterface::renameSectorLayer (const std::string& name, const std::string& new_name)
-//{
-//    // TODO
-//}
-
-std::shared_ptr<SectorLayer> DBInterface::sectorLayer (const std::string& layer_name)
-{
-    assert (hasSectorLayer(layer_name));
-
-    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
-    assert (iter != sector_layers_.end());
-
-    return *iter;
-}
-
-unsigned int DBInterface::getMaxSectorId ()
-{
-    unsigned int id = 0;
-    for (auto& sec_lay_it : sector_layers_)
-        for (auto& sec_it : sec_lay_it->sectors())
-            if (sec_it->id() > id)
-                id = sec_it->id();
-
-    return id;
-}
-
-void DBInterface::createNewSector (const std::string& name, const std::string& layer_name,
-                                   std::vector<std::pair<double,double>> points)
-{
-    loginf << "DBInterface: createNewSector: name " << name << " layer_name " << layer_name
-           << " num points " << points.size();
-
-    assert (!hasSector(name, layer_name));
-
-    unsigned int id = getMaxSectorId()+1;
-
-    shared_ptr<Sector> sector = make_shared<Sector> (id, name, layer_name, points);
-
-    // add to existing sectors
-    if (!hasSectorLayer(layer_name))
-        sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-    assert (hasSectorLayer(layer_name));
-
-    sectorLayer(layer_name)->addSector(sector);
-
-    assert (hasSector(name, layer_name));
-    sector->save();
-}
-
-bool DBInterface::hasSector (const string& name, const string& layer_name)
-{
-    if (!hasSectorLayer(layer_name))
-        return false;
-
-    return sectorLayer(layer_name)->hasSector(name);
-}
-
-bool DBInterface::hasSector (unsigned int id)
-{
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        auto& sectors = sec_lay_it->sectors();
-        auto iter = std::find_if(sectors.begin(), sectors.end(),
-                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
-        if (iter != sectors.end())
-            return true;
-    }
-    return false;
-}
-
-std::shared_ptr<Sector> DBInterface::sector (const string& name, const string& layer_name)
-{
-    assert (hasSector(name, layer_name));
-    return sectorLayer(layer_name)->sector(name);
-}
-
-std::shared_ptr<Sector> DBInterface::sector (unsigned int id)
-{
-    assert (hasSector(id));
-
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        auto& sectors = sec_lay_it->sectors();
-        auto iter = std::find_if(sectors.begin(), sectors.end(),
-                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
-        if (iter != sectors.end())
-            return *iter;
-    }
-
-    logerr << "DBInterface: sector: id " << id << " not found";
-    assert (false);
-}
-
-void DBInterface::moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name)
-{
-    assert (hasSector(id));
-
-    shared_ptr<Sector> tmp_sector = sector(id);
-
-    assert (hasSectorLayer(old_layer_name));
-    sectorLayer(old_layer_name)->removeSector(tmp_sector);
-
-    if (!hasSectorLayer(new_layer_name))
-        sector_layers_.push_back(make_shared<SectorLayer>(new_layer_name));
-
-    assert (hasSectorLayer(new_layer_name));
-    sectorLayer(new_layer_name)->addSector(tmp_sector);
-
-    assert (hasSector(tmp_sector->name(), new_layer_name));
-    tmp_sector->save();
-}
-
-std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
-{
-    return sector_layers_;
-}
-
-void DBInterface::saveSector(unsigned int id)
-{
-    assert (hasSector(id));
-    saveSector(sector(id));
-}
 
 void DBInterface::saveSector(shared_ptr<Sector> sector)
 {
@@ -1465,8 +1347,6 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
 
     assert(current_connection_);
 
-    assert (hasSector(sector->name(), sector->layerName()));
-
     if (!existsSectorsTable())
         createSectorsTable();
 
@@ -1480,149 +1360,25 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
         current_connection_->executeSQL(str);
     }
 
-    emit sectorsChangedSignal();
+
 }
 
 void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
-    assert (hasSector(sector->name(), sector->layerName()));
-
     unsigned int sector_id = sector->id();
 
-    string layer_name = sector->layerName();
+    QMutexLocker locker(&connection_mutex_);
+    string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
 
-    assert (hasSectorLayer(layer_name));
-
-    sectorLayer(layer_name)->removeSector(sector);
-
-    // remove sector layer if empty
-    if (!sectorLayer(layer_name)->size())
-    {
-        auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                                 [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
-
-        assert (iter != sector_layers_.end());
-        sector_layers_.erase(iter);
-    }
-
-    {
-        QMutexLocker locker(&connection_mutex_);
-        string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
-
-        //loginf << "UGA '" << cmd << "'";
-        current_connection_->executeSQL(cmd);
-    }
-
-    emit sectorsChangedSignal();
+    //loginf << "UGA '" << cmd << "'";
+    current_connection_->executeSQL(cmd);
 }
 
 void DBInterface::deleteAllSectors()
 {
-    sector_layers_.clear();
     clearTableContent(TABLE_NAME_SECTORS);
-
-    emit sectorsChangedSignal();
 }
 
-void DBInterface::importSectors (const std::string& filename)
-{
-    loginf << "DBInterface: importSectors: filename '" << filename << "'";
-
-    sector_layers_.clear();
-    clearTableContent(TABLE_NAME_SECTORS);
-
-    std::ifstream input_file(filename, std::ifstream::in);
-
-    try
-    {
-        json j = json::parse(input_file);
-
-        if (!j.contains("sectors"))
-        {
-            logerr << "DBInterface: importSectors: file does not contain sectors";
-            return;
-        }
-
-        json& sectors = j["sectors"];
-
-        if (!sectors.is_array())
-        {
-            logerr << "DBInterface: importSectors: file sectors is not an array";
-            return;
-        }
-
-        unsigned int id;
-        string name;
-        string layer_name;
-        string json_str;
-
-        for (auto& j_sec_it : sectors.get<json::array_t>())
-        {
-            if (!j_sec_it.contains("id")
-                    || !j_sec_it.contains("name")
-                    || !j_sec_it.contains("layer_name")
-                    || !j_sec_it.contains("points"))
-            {
-                logerr << "DBInterface: importSectors: ill-defined sectors skipped, json '" << j_sec_it.dump(4)
-                       << "'";
-                continue;
-            }
-
-            id = j_sec_it.at("id");
-            name = j_sec_it.at("name");
-            layer_name = j_sec_it.at("layer_name");
-
-            shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, j_sec_it.dump());
-
-            if (!hasSectorLayer(layer_name))
-                sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-            sectorLayer(layer_name)->addSector(new_sector);
-
-            assert (hasSector(name, layer_name));
-
-            new_sector->save();
-
-            loginf << "DBInterface: importSectors: loaded sector '" << name << "' in layer '"
-                   << layer_name << "' num points " << sector(name, layer_name)->size();
-        }
-    }
-    catch (json::exception& e)
-    {
-        logerr << "DBInterface: importSectors: could not load file '"
-               << filename << "'";
-        throw e;
-    }
-
-    emit sectorsChangedSignal();
-}
-
-void DBInterface::exportSectors (const std::string& filename)
-{
-    loginf << "DBInterface: exportSectors: filename '" << filename << "'";
-
-    json j;
-
-    j["sectors"] = json::array();
-    json& sectors = j["sectors"];
-
-    unsigned int cnt = 0;
-
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        for (auto& sec_it : sec_lay_it->sectors())
-        {
-            sectors[cnt] = sec_it->jsonData();
-            ++cnt;
-        }
-    }
-
-    std::ofstream output_file;
-    output_file.open(filename, std::ios_base::out);
-
-    output_file << j.dump(4);
-
-}
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {

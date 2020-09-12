@@ -1,6 +1,7 @@
 #include "managesectorstask.h"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "evaluationmanager.h"
 #include "managesectorstaskwidget.h"
 #include "taskmanager.h"
 #include "savedfile.h"
@@ -412,16 +413,15 @@ void ManageSectorsTask::addSector (const std::string& sector_name, const std::st
     loginf << "ManageSectorsTask: addSector: layer '" << layer_name << "' name '" << sector_name
            << "' num points " << points.size();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
     string new_sector_name = sector_name;
 
-    if (db_interface.hasSector(new_sector_name, layer_name))
+    if (eval_man.hasSector(new_sector_name, layer_name))
     {
         unsigned int cnt = 2;
 
-        while(db_interface.hasSector(new_sector_name, layer_name))
+        while(eval_man.hasSector(new_sector_name, layer_name))
         {
             new_sector_name = sector_name+to_string(cnt);
             ++cnt;
@@ -429,5 +429,5 @@ void ManageSectorsTask::addSector (const std::string& sector_name, const std::st
     }
 
     loginf << "ManageSectorsTask: addSector: adding layer '" << layer_name << "' name '" << new_sector_name;
-    db_interface.createNewSector(new_sector_name, layer_name, points);
+    eval_man.createNewSector(new_sector_name, layer_name, points);
 }

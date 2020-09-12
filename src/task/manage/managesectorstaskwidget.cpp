@@ -2,7 +2,8 @@
 #include "managesectorstask.h"
 #include "logger.h"
 #include "atsdb.h"
-#include "dbinterface.h"
+//#include "dbinterface.h"
+#include "evaluationmanager.h"
 #include "sector.h"
 #include "sectorlayer.h"
 #include "files.h"
@@ -166,10 +167,9 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
     sector_table_->blockSignals(true);
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
-    vector<std::shared_ptr<SectorLayer>>& sector_layers = db_interface.sectorsLayers();
+    vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man.sectorsLayers();
 
     unsigned int num_layers=0;
     for (auto& sec_lay_it : sector_layers)
@@ -430,12 +430,11 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot: sector_id " << sector_id
            << " col_name " << col_name << " text '" << text << "'";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
-    assert (db_interface.hasSector(sector_id));
+    assert (eval_man.hasSector(sector_id));
 
-    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+    std::shared_ptr<Sector> sector = eval_man.sector(sector_id);
 
     if (col_name == "Sector Name")
     {
@@ -489,12 +488,11 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
-    assert (db_interface.hasSector(sector_id));
+    assert (eval_man.hasSector(sector_id));
 
-    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+    std::shared_ptr<Sector> sector = eval_man.sector(sector_id);
 
     QColor current_color = QColor(sector->colorStr().c_str());
 
@@ -523,14 +521,13 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
-    assert (db_interface.hasSector(sector_id));
+    assert (eval_man.hasSector(sector_id));
 
-    std::shared_ptr<Sector> sector = db_interface.sector(sector_id);
+    std::shared_ptr<Sector> sector = eval_man.sector(sector_id);
 
-    db_interface.deleteSector(sector);
+    eval_man.deleteSector(sector);
 
     updateSectorTable();
 }
@@ -539,8 +536,7 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: exportSectorsSlot";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -560,17 +556,14 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
         loginf << "ManageDataSourcesTask: exportSectorsSlot: cancelled";
 
     if (filename.size() > 0)
-        db_interface.exportSectors(filename.toStdString());
+        eval_man.exportSectors(filename.toStdString());
 }
 
 void ManageSectorsTaskWidget::clearSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: clearSectorsSlot";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
-
-    db_interface.deleteAllSectors();
+    ATSDB::instance().evaluationManager().deleteAllSectors();
 
     updateSectorTable();
 }
@@ -596,9 +589,7 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
     assert (Files::fileExists(filename));
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    ATSDB::instance().evaluationManager().importSectors(filename);
 
-    db_interface.importSectors(filename);
     updateSectorTable();
 }

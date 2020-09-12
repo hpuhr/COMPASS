@@ -1,6 +1,6 @@
 #include "sector.h"
 #include "atsdb.h"
-#include "dbinterface.h"
+#include "evaluationmanager.h"
 
 #include <cassert>
 
@@ -203,19 +203,17 @@ void Sector::layerName(const std::string& layer_name)
 {
     loginf << "Sector: layerName: '" << layer_name << "'";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
     string old_layer_name = layer_name_;
     layer_name_ = layer_name;
 
-    db_interface.moveSector(id_, old_layer_name, layer_name); // moves and saves
+    eval_man.moveSector(id_, old_layer_name, layer_name); // moves and saves
 }
 
 void Sector::save()
 {
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
-    db_interface.saveSector(id_);
+    eval_man.saveSector(id_);
 }
