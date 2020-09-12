@@ -33,6 +33,7 @@
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointswidget.h"
+#include "evaluationmanager.h"
 
 #include <QApplication>
 #include <QCloseEvent>
@@ -150,6 +151,7 @@ void MainWindow::startSlot()
 //        QThread::msleep(1);
 //    }
 
+    ATSDB::instance().evaluationManager().init(tab_widget_); // adds eval widget
     ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);

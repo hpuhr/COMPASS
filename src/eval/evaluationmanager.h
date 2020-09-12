@@ -8,6 +8,10 @@
 #include "sectorlayer.h"
 
 class ATSDB;
+class EvaluationManagerWidget;
+
+class QWidget;
+class QTabWidget;
 
 class EvaluationManager : public QObject, public Configurable
 {
@@ -22,11 +26,13 @@ public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
     virtual ~EvaluationManager();
 
-    void init ();
+    void init(QTabWidget* tab_widget);
     void close();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
+
+    EvaluationManagerWidget* widget();
 
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
@@ -48,10 +54,21 @@ public:
     void exportSectors (const std::string& filename);
 
 
+    std::string dboNameRef() const;
+    void dboNameRef(const std::string& name);
+
+    std::string dboNameTst() const;
+    void dboNameTst(const std::string& name);
+
 protected:
     ATSDB& atsdb_;
 
     bool initialized_ {false};
+
+    std::string dbo_name_ref_;
+    std::string dbo_name_tst_;
+
+    std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
 

@@ -31,6 +31,7 @@ class QAction;
 class ViewManagerWidget : public QFrame
 {
     Q_OBJECT
+
   private slots:
     void databaseBusy();
     void databaseIdle();

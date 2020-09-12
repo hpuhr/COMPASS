@@ -1,9 +1,12 @@
 #include "evaluationmanager.h"
+#include "evaluationmanagerwidget.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "sector.h"
 
 #include "json.hpp"
+
+#include <QTabWidget>
 
 #include <memory>
 #include <fstream>
@@ -15,18 +18,24 @@ using namespace nlohmann;
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
     : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb)
 {
+    registerParameter("dbo_name_ref", &dbo_name_ref_, "");
+    registerParameter("dbo_name_tst", &dbo_name_tst_, "");
+
     createSubConfigurables();
 }
 
-void EvaluationManager::init()
+void EvaluationManager::init(QTabWidget* tab_widget)
 {
     loginf << "EvaluationManager: init";
 
     assert (!initialized_);
+    assert (tab_widget);
 
     loadSectors();
 
     initialized_ = true;
+
+    tab_widget->addTab(widget(), "Evaluation");
 }
 
 void EvaluationManager::close()
@@ -44,6 +53,17 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 {
     throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
                              class_id);
+}
+
+EvaluationManagerWidget* EvaluationManager::widget()
+{
+    if (!widget_)
+    {
+        widget_.reset(new EvaluationManagerWidget(*this));
+    }
+
+    assert(widget_);
+    return widget_.get();
 }
 
 void EvaluationManager::checkSubConfigurables()
@@ -359,4 +379,28 @@ void EvaluationManager::exportSectors (const std::string& filename)
 
     output_file << j.dump(4);
 
+}
+
+std::string EvaluationManager::dboNameRef() const
+{
+    return dbo_name_ref_;
+}
+
+void EvaluationManager::dboNameRef(const std::string& name)
+{
+    loginf << "EvaluationManager: dboNameRef: name " << name;
+
+    dbo_name_ref_ = name;
+}
+
+std::string EvaluationManager::dboNameTst() const
+{
+    return dbo_name_tst_;
+}
+
+void EvaluationManager::dboNameTst(const std::string& name)
+{
+    loginf << "EvaluationManager: dboNameTst: name " << name;
+
+    dbo_name_tst_ = name;
 }
