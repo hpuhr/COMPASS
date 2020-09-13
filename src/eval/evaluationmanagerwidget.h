@@ -2,8 +2,10 @@
 #define EVALUATIONMANAGERWIDGET_H
 
 #include <QWidget>
+#include <memory>
 
 class EvaluationManager;
+class EvaluationDataSourceWidget;
 
 class QHBoxLayout;
 class QTabWidget;
@@ -24,6 +26,9 @@ protected:
     QHBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
+
+    std::unique_ptr<EvaluationDataSourceWidget> data_source_ref_widget_ {nullptr};
+    std::unique_ptr<EvaluationDataSourceWidget> data_source_tst_widget_ {nullptr};
 
     void addMainWidget ();
     void addTargetsWidget ();

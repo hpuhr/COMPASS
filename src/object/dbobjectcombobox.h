@@ -68,7 +68,7 @@ class DBObjectComboBox : public QComboBox
     }
 
   protected:
-    bool allow_meta_;
+    bool allow_meta_ {false};
 };
 
 #endif  // DBOOBJECTCOMBOBOX_H

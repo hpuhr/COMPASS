@@ -34,6 +34,7 @@ class QGridLayout;
 class DataSourcesFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
+
   protected slots:
     /// @brief Updates the sensor active checkboxes
     void toggleDataSource();

@@ -20,15 +20,11 @@ using namespace nlohmann;
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
     : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb)
 {
-    registerParameter("dbo_name_ref", &dbo_name_ref_, "");
+    registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
 
-    updateReferenceDBO();
-
-    registerParameter("dbo_name_tst", &dbo_name_tst_, "");
+    registerParameter("dbo_name_tst", &dbo_name_tst_, "Tracker");
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
-
-    updateTestDBO();
 
     createSubConfigurables();
 }
@@ -41,6 +37,9 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     assert (tab_widget);
 
     loadSectors();
+
+    updateReferenceDBO();
+    updateTestDBO();
 
     initialized_ = true;
 
@@ -526,8 +525,8 @@ void EvaluationManager::updateTestDBO()
 {
     loginf << "EvaluationManager: updateTestDBO";
 
-    data_sources_ref_.clear();
-    active_sources_ref_.clear();
+    data_sources_tst_.clear();
+    active_sources_tst_.clear();
 
     if (!hasValidTestDBO())
         return;

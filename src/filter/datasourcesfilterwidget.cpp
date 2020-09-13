@@ -16,15 +16,14 @@
  */
 
 #include "datasourcesfilterwidget.h"
-
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QPushButton>
-
 #include "atsdb.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "filtermanager.h"
+
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QPushButton>
 
 /**
  * Initializes members, creates GUI elements.
