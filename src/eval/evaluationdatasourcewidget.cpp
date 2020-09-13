@@ -9,7 +9,7 @@
 #include <QGridLayout>
 #include <QVariant>
 
-EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title, std::string& dbo_name,
+EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name,
                                                        std::map<int, ActiveDataSource>& data_sources,
                                                        QWidget* parent, Qt::WindowFlags f)
     : QFrame(parent, f), title_(title), dbo_name_(dbo_name), data_sources_(data_sources)
@@ -22,39 +22,27 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
     QLabel* main_label = new QLabel(title_.c_str());
     main_layout->addWidget(main_label);
 
-    QGridLayout* sensorboxlay = new QGridLayout();
+    // dbo
+    QGridLayout* dbo_lay = new QGridLayout();
 
-    main_layout->addLayout(sensorboxlay);
+    dbo_lay->addWidget(new QLabel("DBObject"), 0, 0);
 
-    sensorboxlay->addWidget(new QLabel("DBObject"), 0, 0);
+    dbo_combo_ = new DBObjectComboBox(false);
+    dbo_combo_->setObjectName(dbo_name_);
+    connect (dbo_combo_, &DBObjectComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
 
-    DBObjectComboBox* obj_combo = new DBObjectComboBox(false);
-    obj_combo->setObjectName(dbo_name_);
-    connect (obj_combo, &DBObjectComboBox::changedObject, this, &EvaluationDataSourceWidget::dboNameChangedSlot);
+    dbo_lay->addWidget(dbo_combo_, 0, 1);
 
-    sensorboxlay->addWidget(obj_combo, 0, 1);
 
-    unsigned int col, row;
-    unsigned int cnt = 0;
+    main_layout->addLayout(dbo_lay);
 
-    for (auto& it : data_sources_)
-    {
-        QCheckBox* radar_checkbox = new QCheckBox(tr(it.second.getName().c_str()));
-        radar_checkbox->setChecked(true);
-        radar_checkbox->setProperty("id", it.first);
-        connect(radar_checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
+    // data sources
+    data_source_layout_ = new QGridLayout();
 
-        loginf << "EvaluationDataSourceWidget: EvaluationDataSourceWidget: got sensor " << it.first << " name "
-               << it.second.getName() << " active " << radar_checkbox->isChecked();
+    updateDataSources();
 
-        data_sources_checkboxes_[it.first] = radar_checkbox;
+    main_layout->addLayout(data_source_layout_);
 
-        row = 1 + cnt / 2;
-        col = cnt % 2;
-
-        sensorboxlay->addWidget(radar_checkbox, row, col);
-        cnt++;
-    }
 
     updateCheckboxesChecked();
     updateCheckboxesDisabled();
@@ -64,6 +52,48 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
 
 EvaluationDataSourceWidget::~EvaluationDataSourceWidget()
 {
+}
+
+void EvaluationDataSourceWidget::updateDataSources()
+{
+    assert (data_source_layout_);
+
+    QLayoutItem* child;
+    while ((child = data_source_layout_->takeAt(0)) != nullptr)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+
+//        if (child->widget())
+//            data_source_layout_->removeWidget(child->widget());
+
+//        data_source_layout_->removeItem(child);
+//        delete child;
+    }
+    data_sources_checkboxes_.clear();
+
+    unsigned int col, row;
+    unsigned int cnt = 0;
+
+    for (auto& it : data_sources_)
+    {
+        QCheckBox* checkbox = new QCheckBox(tr(it.second.getName().c_str()));
+        checkbox->setChecked(true);
+        checkbox->setProperty("id", it.first);
+        connect(checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
+
+        loginf << "EvaluationDataSourceWidget: EvaluationDataSourceWidget: got sensor " << it.first << " name "
+               << it.second.getName() << " active " << checkbox->isChecked();
+
+        data_sources_checkboxes_[it.first] = checkbox;
+
+        row = 1 + cnt / 2;
+        col = cnt % 2;
+
+        data_source_layout_->addWidget(checkbox, row, col);
+        cnt++;
+    }
 }
 
 void EvaluationDataSourceWidget::updateCheckboxesChecked()
@@ -80,7 +110,18 @@ void EvaluationDataSourceWidget::updateCheckboxesChecked()
 
 void EvaluationDataSourceWidget::dboNameChangedSlot()
 {
-    loginf << "EvaluationDataSourceWidget: dboNameChangedSlot";
+    assert (dbo_combo_);
+
+    dbo_name_ = dbo_combo_->getObjectName();
+
+    loginf << "EvaluationDataSourceWidget: dboNameChangedSlot: name " << dbo_name_;
+
+    emit dboNameChangedSignal(dbo_name_);
+
+    updateDataSources();
+
+    updateCheckboxesChecked();
+    updateCheckboxesDisabled();
 }
 
 void EvaluationDataSourceWidget::updateCheckboxesDisabled()

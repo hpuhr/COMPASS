@@ -15,6 +15,8 @@ class EvaluationManagerWidget : public QWidget
     Q_OBJECT
 
 private slots:
+    void dboRefNameChangedSlot(const std::string& dbo_name);
+    void dboTstNameChangedSlot(const std::string& dbo_name);
 
 public:
     EvaluationManagerWidget(EvaluationManager& eval_man);

@@ -56,13 +56,11 @@ public:
     void exportSectors (const std::string& filename);
 
     std::string dboNameRef() const;
-    std::string& dboNameRefNonConst() { return dbo_name_ref_; }
     void dboNameRef(const std::string& name);
     bool hasValidReferenceDBO ();
     std::map<int, ActiveDataSource>& dataSourcesRef() { return data_sources_ref_; }
 
     std::string dboNameTst() const;
-    std::string& dboNameTstNonConst() { return dbo_name_tst_; }
     void dboNameTst(const std::string& name);
     bool hasValidTestDBO ();
     std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }

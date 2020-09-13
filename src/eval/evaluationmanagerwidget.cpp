@@ -52,12 +52,16 @@ void EvaluationManagerWidget::addMainWidget ()
 
     QHBoxLayout* data_sources_layout = new QHBoxLayout();
 
-    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRefNonConst(),
+    data_source_ref_widget_.reset(new EvaluationDataSourceWidget("Reference Data", eval_man_.dboNameRef(),
                                                              eval_man_.dataSourcesRef()));
+    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
+             this, &EvaluationManagerWidget::dboRefNameChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
 
-    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTstNonConst(),
+    data_source_tst_widget_.reset(new EvaluationDataSourceWidget("Test Data", eval_man_.dboNameTst(),
                                                              eval_man_.dataSourcesTst()));
+    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dboNameChangedSignal,
+             this, &EvaluationManagerWidget::dboTstNameChangedSlot);
     data_sources_layout->addWidget(data_source_tst_widget_.get());
 
 
@@ -99,4 +103,18 @@ void EvaluationManagerWidget::addResultsWidget ()
     tab_widget->setContentsMargins(0, 0, 0, 0);
     tab_widget->setLayout(tab_layout);
     tab_widget_->addTab(tab_widget, "Results");
+}
+
+void EvaluationManagerWidget::dboRefNameChangedSlot(const std::string& dbo_name)
+{
+    loginf << "EvaluationManagerWidget: dboRefNameChangedSlot: name " << dbo_name;
+
+    eval_man_.dboNameRef(dbo_name);
+}
+
+void EvaluationManagerWidget::dboTstNameChangedSlot(const std::string& dbo_name)
+{
+    loginf << "EvaluationManagerWidget: dboTstNameChangedSlot: name " << dbo_name;
+
+    eval_man_.dboNameTst(dbo_name);
 }
