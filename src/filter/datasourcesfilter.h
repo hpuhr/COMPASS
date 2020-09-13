@@ -19,51 +19,7 @@
 #define DATASOURCESFILTER_H_
 
 #include "dbfilter.h"
-
-/**
- * @brief Definition for a data source in a DataSourcesFilter
- */
-class DataSourcesFilterDataSource
-{
-  public:
-    /// @brief Constructor
-    DataSourcesFilterDataSource(unsigned int number, const std::string& name,
-                                nlohmann::json::boolean_t& active_in_filter)
-        : number_(number), name_(name), active_in_filter_(active_in_filter)
-    {
-    }
-    /// @brief Destructor
-    virtual ~DataSourcesFilterDataSource() {}
-
-  protected:
-    /// Number id
-    unsigned int number_ {0};
-    /// Name id
-    std::string name_;
-    /// Flag indicating if active in data
-    bool active_in_data_ {false};
-    /// Flag indicating if active in filter
-    nlohmann::json::boolean_t& active_in_filter_;
-
-  public:
-    bool isActiveInData() const { return active_in_data_; }
-
-    void setActiveInData(bool active_in_data) { active_in_data_ = active_in_data; }
-
-    bool isActiveInFilter() const
-    {
-        return active_in_filter_;
-    }
-
-    void setActiveInFilter(bool active_in_filter)
-    {
-        active_in_filter_ = active_in_filter;
-    }
-
-    std::string getName() const { return name_; }
-
-    unsigned int getNumber() const { return number_; }
-};
+#include "activedatasource.h"
 
 class DBObject;
 
@@ -94,7 +50,7 @@ class DataSourcesFilter : public DBFilter
 
     const std::string& dbObjectName() { return dbo_name_; }
 
-    std::map<int, DataSourcesFilterDataSource>& dataSources() { return data_sources_; }
+    std::map<int, ActiveDataSource>& dataSources() { return data_sources_; }
 
     virtual void saveViewPointConditions (nlohmann::json& filters);
     virtual void loadViewPointConditions (const nlohmann::json& filters);
@@ -106,7 +62,7 @@ class DataSourcesFilter : public DBFilter
     /// Sensor id column name in database table
     std::string ds_column_name_;
     /// Container with all possible data sources and active flag pointers
-    std::map<int, DataSourcesFilterDataSource> data_sources_;
+    std::map<int, ActiveDataSource> data_sources_;
     nlohmann::json active_sources_;
 
     /// @brief Load data sources and updates data_sources_ container

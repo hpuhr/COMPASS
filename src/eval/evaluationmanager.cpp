@@ -2,6 +2,8 @@
 #include "evaluationmanagerwidget.h"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
 #include "sector.h"
 
 #include "json.hpp"
@@ -19,7 +21,14 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "");
+    registerParameter("active_sources_ref", &active_sources_ref_, json::object());
+
+    updateReferenceDBO();
+
     registerParameter("dbo_name_tst", &dbo_name_tst_, "");
+    registerParameter("active_sources_tst", &active_sources_tst_, json::object());
+
+    updateTestDBO();
 
     createSubConfigurables();
 }
@@ -391,6 +400,24 @@ void EvaluationManager::dboNameRef(const std::string& name)
     loginf << "EvaluationManager: dboNameRef: name " << name;
 
     dbo_name_ref_ = name;
+
+    updateReferenceDBO();
+}
+
+bool EvaluationManager::hasValidReferenceDBO ()
+{
+    if (!dbo_name_ref_.size())
+        return false;
+
+    if (!ATSDB::instance().objectManager().existsObject(dbo_name_ref_))
+        return false;
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+
+    if (!object.hasCurrentDataSourceDefinition())
+        return false;
+
+    return object.hasDataSources();
 }
 
 std::string EvaluationManager::dboNameTst() const
@@ -403,4 +430,166 @@ void EvaluationManager::dboNameTst(const std::string& name)
     loginf << "EvaluationManager: dboNameTst: name " << name;
 
     dbo_name_tst_ = name;
+
+    updateTestDBO();
+}
+
+bool EvaluationManager::hasValidTestDBO ()
+{
+    if (!dbo_name_tst_.size())
+        return false;
+
+    if (!ATSDB::instance().objectManager().existsObject(dbo_name_tst_))
+        return false;
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+
+    if (!object.hasCurrentDataSourceDefinition())
+        return false;
+
+    return object.hasDataSources();
+}
+
+void EvaluationManager::updateReferenceDBO()
+{
+    loginf << "EvaluationManager: updateReferenceDBO";
+
+    data_sources_ref_.clear();
+    active_sources_ref_.clear();
+
+    if (!hasValidReferenceDBO())
+        return;
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+
+    if (object.hasDataSources())
+        updateReferenceDataSources();
+
+    if (object.hasActiveDataSourcesInfo())
+        updateReferenceDataSourcesActive();
+}
+
+void EvaluationManager::updateReferenceDataSources()
+{
+    loginf << "EvaluationManager: updateReferenceDataSources";
+
+    assert (hasValidReferenceDBO());
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+
+    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+    {
+        if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
+        {
+            if (!active_sources_ref_.contains(to_string(ds_it->first)))
+                active_sources_ref_[to_string(ds_it->first)] = true; // init with default true
+
+            // needed for old compiler
+            json::boolean_t& active = active_sources_ref_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+            data_sources_ref_.emplace(std::piecewise_construct,
+                                  std::forward_as_tuple(ds_it->first),  // args for key
+                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+                                                        active));
+        }
+    }
+}
+
+void EvaluationManager::updateReferenceDataSourcesActive()
+{
+    loginf << "EvaluationManager: updateReferenceDataSourcesActive";
+
+    assert (hasValidReferenceDBO());
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+
+    assert (object.hasActiveDataSourcesInfo());
+
+    for (auto& srcit : data_sources_ref_)
+        srcit.second.setActiveInData(false);
+
+    for (auto& it : object.getActiveDataSources())
+    {
+        assert(data_sources_ref_.find(it) != data_sources_ref_.end());
+        ActiveDataSource& src = data_sources_ref_.at(it);
+        src.setActiveInData(true);
+    }
+
+    for (auto& srcit : data_sources_ref_)
+    {
+        if (!srcit.second.isActiveInData())
+            srcit.second.setActive(false);
+    }
+}
+
+void EvaluationManager::updateTestDBO()
+{
+    loginf << "EvaluationManager: updateTestDBO";
+
+    data_sources_ref_.clear();
+    active_sources_ref_.clear();
+
+    if (!hasValidTestDBO())
+        return;
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+
+    if (object.hasDataSources())
+        updateTestDataSources();
+
+    if (object.hasActiveDataSourcesInfo())
+        updateTestDataSourcesActive();
+}
+
+void EvaluationManager::updateTestDataSources()
+{
+    loginf << "EvaluationManager: updateTestDataSources";
+
+    assert (hasValidTestDBO());
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+
+    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+    {
+        if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
+        {
+            if (!active_sources_tst_.contains(to_string(ds_it->first)))
+                active_sources_tst_[to_string(ds_it->first)] = true; // init with default true
+
+            // needed for old compiler
+            json::boolean_t& active = active_sources_tst_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+            data_sources_tst_.emplace(std::piecewise_construct,
+                                  std::forward_as_tuple(ds_it->first),  // args for key
+                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+                                                        active));
+        }
+    }
+}
+
+void EvaluationManager::updateTestDataSourcesActive()
+{
+    loginf << "EvaluationManager: updateTestDataSourcesActive";
+
+    assert (hasValidTestDBO());
+
+    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+
+    assert (object.hasActiveDataSourcesInfo());
+
+    for (auto& srcit : data_sources_tst_)
+        srcit.second.setActiveInData(false);
+
+    for (auto& it : object.getActiveDataSources())
+    {
+        assert(data_sources_tst_.find(it) != data_sources_tst_.end());
+        ActiveDataSource& src = data_sources_tst_.at(it);
+        src.setActiveInData(true);
+    }
+
+    for (auto& srcit : data_sources_tst_)
+    {
+        if (!srcit.second.isActiveInData())
+            srcit.second.setActive(false);
+    }
 }

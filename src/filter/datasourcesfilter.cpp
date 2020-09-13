@@ -121,11 +121,11 @@ std::string DataSourcesFilter::getConditionString(const std::string& dbo_name, b
 
             std::stringstream values;
 
-            std::map<int, DataSourcesFilterDataSource>::iterator it;
+            std::map<int, ActiveDataSource>::iterator it;
 
             for (auto& it : data_sources_)
             {
-                if (it.second.isActiveInFilter())  // in selection
+                if (it.second.isActive())  // in selection
                 {
                     if (values.str().size() > 0)
                         values << ",";
@@ -204,14 +204,14 @@ void DataSourcesFilter::updateDataSourcesActive()
     for (auto& it : object_->getActiveDataSources())
     {
         assert(data_sources_.find(it) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(it);
+        ActiveDataSource& src = data_sources_.at(it);
         src.setActiveInData(true);
     }
 
     for (auto& srcit : data_sources_)
     {
         if (!srcit.second.isActiveInData())
-            srcit.second.setActiveInFilter(false);
+            srcit.second.setActive(false);
     }
 }
 
@@ -254,7 +254,7 @@ void DataSourcesFilter::checkSubConfigurables()
 void DataSourcesFilter::reset()
 {
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(true);
+        it.second.setActive(true);
 
     widget_->update();
 }
@@ -274,7 +274,7 @@ void DataSourcesFilter::saveViewPointConditions (nlohmann::json& filters)
 
     for (auto& ds_it : data_sources_)
     {
-        if (ds_it.second.isActiveInFilter())
+        if (ds_it.second.isActive())
         {
             values[cnt] = ds_it.second.getNumber();
             ++cnt;
@@ -296,7 +296,7 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
 
     // disable all sources
     for (auto& ds_it : data_sources_)
-        ds_it.second.setActiveInFilter(false);
+        ds_it.second.setActive(false);
 
     // set active sources
     for (auto& ds_it : active_sources.get<json::array_t>())
@@ -304,7 +304,7 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
         int number = ds_it;
 
         if (data_sources_.count(number))
-            data_sources_.at(number).setActiveInFilter(true);
+            data_sources_.at(number).setActive(true);
         else
             logwrn << "DataSourcesFilter: loadViewPointConditions: source " << number << " not found";
     }

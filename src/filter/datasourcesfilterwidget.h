@@ -63,7 +63,7 @@ class DataSourcesFilterWidget : public DBFilterWidget
     /// Filtered DBObject type
     std::string dbo_name_;
     /// Container with checkboxes for all sensors (sensor number -> checkbox)
-    std::map<int, DataSourcesFilterDataSource>& data_sources_;
+    std::map<int, ActiveDataSource>& data_sources_;
 
     void updateCheckboxesChecked();
     void updateCheckboxesDisabled();

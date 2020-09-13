@@ -3,9 +3,11 @@
 
 #include <QObject>
 
-#include "configurable.h"
+#include "json.hpp"
 
+#include "configurable.h"
 #include "sectorlayer.h"
+#include "activedatasource.h"
 
 class ATSDB;
 class EvaluationManagerWidget;
@@ -53,12 +55,15 @@ public:
     void importSectors (const std::string& filename);
     void exportSectors (const std::string& filename);
 
-
     std::string dboNameRef() const;
     void dboNameRef(const std::string& name);
+    bool hasValidReferenceDBO ();
+    std::map<int, ActiveDataSource>& dataSourcesRef() { return data_sources_ref_; }
 
     std::string dboNameTst() const;
     void dboNameTst(const std::string& name);
+    bool hasValidTestDBO ();
+    std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }
 
 protected:
     ATSDB& atsdb_;
@@ -66,7 +71,12 @@ protected:
     bool initialized_ {false};
 
     std::string dbo_name_ref_;
+    std::map<int, ActiveDataSource> data_sources_ref_;
+    nlohmann::json active_sources_ref_;
+
     std::string dbo_name_tst_;
+    std::map<int, ActiveDataSource> data_sources_tst_;
+    nlohmann::json active_sources_tst_;
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
@@ -77,6 +87,14 @@ protected:
     void loadSectors();
 
     unsigned int getMaxSectorId ();
+
+    void updateReferenceDBO();
+    void updateReferenceDataSources();
+    void updateReferenceDataSourcesActive();
+
+    void updateTestDBO();
+    void updateTestDataSources();
+    void updateTestDataSourcesActive();
 };
 
 #endif // EVALUATIONMANAGER_H
