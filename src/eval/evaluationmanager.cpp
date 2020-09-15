@@ -46,6 +46,43 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     tab_widget->addTab(widget(), "Evaluation");
 }
 
+void EvaluationManager::loadData ()
+{
+    loginf << "EvaluationManager: loadData";
+
+    assert (initialized_);
+
+    data_loaded_ = true;
+
+    if (widget_)
+        widget_->updateButtons();
+}
+
+void EvaluationManager::evaluate ()
+{
+    loginf << "EvaluationManager: evaluate";
+
+    assert (initialized_);
+    assert (data_loaded_);
+
+    evaluated_ = true;
+
+    if (widget_)
+        widget_->updateButtons();
+}
+
+void EvaluationManager::generateReport ()
+{
+    loginf << "EvaluationManager: generateReport";
+
+    assert (initialized_);
+    assert (data_loaded_);
+    assert (evaluated_);
+
+    if (widget_)
+        widget_->updateButtons();
+}
+
 void EvaluationManager::close()
 {
     initialized_ = false;
@@ -447,6 +484,16 @@ bool EvaluationManager::hasValidTestDBO ()
         return false;
 
     return object.hasDataSources();
+}
+
+bool EvaluationManager::dataLoaded() const
+{
+    return data_loaded_;
+}
+
+bool EvaluationManager::evaluated() const
+{
+    return evaluated_;
 }
 
 void EvaluationManager::updateReferenceDBO()

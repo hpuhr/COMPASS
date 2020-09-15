@@ -22,6 +22,13 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
     QLabel* main_label = new QLabel(title_.c_str());
     main_layout->addWidget(main_label);
 
+    QFrame* line = new QFrame();
+    //line->setObjectName(QString::fromUtf8("line"));
+    //line->setGeometry(QRect(320, 150, 118, 3));
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    main_layout->addWidget(line);
+
     // dbo
     QGridLayout* dbo_lay = new QGridLayout();
 
@@ -43,9 +50,12 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(const std::string& title,
 
     main_layout->addLayout(data_source_layout_);
 
+    main_layout->addStretch();
 
     updateCheckboxesChecked();
     updateCheckboxesDisabled();
+
+    // buttons
 
     setLayout(main_layout);
 }
@@ -148,3 +158,6 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
 
     updateCheckboxesChecked();
 }
+
+
+

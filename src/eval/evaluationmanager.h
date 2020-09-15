@@ -29,6 +29,11 @@ public:
     virtual ~EvaluationManager();
 
     void init(QTabWidget* tab_widget);
+
+    void loadData ();
+    void evaluate ();
+    void generateReport ();
+
     void close();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -65,10 +70,15 @@ public:
     bool hasValidTestDBO ();
     std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }
 
+    bool dataLoaded() const;
+    bool evaluated() const;
+
 protected:
     ATSDB& atsdb_;
 
     bool initialized_ {false};
+    bool data_loaded_ {false};
+    bool evaluated_ {false};
 
     std::string dbo_name_ref_;
     std::map<int, ActiveDataSource> data_sources_ref_;

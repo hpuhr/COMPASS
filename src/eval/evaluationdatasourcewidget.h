@@ -21,6 +21,7 @@ protected slots:
     /// @brief Updates the sensor active checkboxes
     void toggleDataSourceSlot();
 
+
 public:
     EvaluationDataSourceWidget(const std::string& title, const std::string& dbo_name,
                                std::map<int, ActiveDataSource>& data_sources,
