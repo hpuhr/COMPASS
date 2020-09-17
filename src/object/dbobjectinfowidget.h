@@ -45,6 +45,8 @@ class DBObjectInfoWidget : public QWidget
     /// @brief Destructor
     virtual ~DBObjectInfoWidget();
 
+    void setLoad (bool value);
+
   private:
     /// @brief DBObject to be managed
     DBObject& object_;

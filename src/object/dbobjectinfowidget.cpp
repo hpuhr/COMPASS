@@ -52,6 +52,14 @@ DBObjectInfoWidget::DBObjectInfoWidget(DBObject& object, QWidget* parent, Qt::Wi
 
 DBObjectInfoWidget::~DBObjectInfoWidget() {}
 
+void DBObjectInfoWidget::setLoad (bool value)
+{
+    assert(main_check_);
+
+    main_check_->setChecked(value);
+    object_.loadingWanted(value);
+}
+
 void DBObjectInfoWidget::loadChangedSlot()
 {
     assert(main_check_);

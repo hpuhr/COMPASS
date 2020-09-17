@@ -8,9 +8,11 @@
 #include "configurable.h"
 #include "sectorlayer.h"
 #include "activedatasource.h"
+#include "evaluationdata.h"
 
 class ATSDB;
 class EvaluationManagerWidget;
+class DBObject;
 
 class QWidget;
 class QTabWidget;
@@ -23,6 +25,8 @@ signals:
     void sectorsChangedSignal();
 
 public slots:
+    void newDataSlot(DBObject& object);
+    void loadingDoneSlot(DBObject& object);
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
@@ -78,6 +82,10 @@ protected:
 
     bool initialized_ {false};
     bool data_loaded_ {false};
+
+    bool reference_data_loaded_ {false};
+    bool test_data_loaded_ {false};
+
     bool evaluated_ {false};
 
     std::string dbo_name_ref_;
@@ -91,6 +99,8 @@ protected:
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
+
+    EvaluationData data_;
 
     virtual void checkSubConfigurables();
 

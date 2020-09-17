@@ -413,3 +413,17 @@ void FilterManager::disableAllFilters ()
     for (auto fil_it : filters_)
         fil_it->setActive(false);
 }
+
+DataSourcesFilter* FilterManager::getDataSourcesFilter (const std::string& dbo_name)
+{
+    for (auto fil_it : filters_)
+    {
+        DataSourcesFilter* ds_fil = dynamic_cast<DataSourcesFilter*>(fil_it);
+
+        if (ds_fil && ds_fil->dbObjectName() == dbo_name)
+            return ds_fil;
+    }
+
+    logerr << "FilterManager: getDataSourcesFilter: data source filter not found for " << dbo_name;
+    throw std::runtime_error ("FilterManager: getDataSourcesFilter: data source filter not found for " + dbo_name);
+}

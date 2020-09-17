@@ -107,6 +107,8 @@ void DataSourcesFilterWidget::updateCheckboxesChecked()
 {
     logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked";
 
+    DBFilterWidget::update();
+
     for (auto& checkit : data_sources_checkboxes_)
     {
         assert(data_sources_.find(checkit.second) != data_sources_.end());

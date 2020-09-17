@@ -27,6 +27,7 @@
 #include "singleton.h"
 
 class DBFilter;
+class DataSourcesFilter;
 class ATSDB;
 class FilterManagerWidget;
 class DBOVariable;
@@ -80,6 +81,8 @@ class FilterManager : public QObject, public Configurable
 
     void setConfigInViewPoint (nlohmann::json& data);
     void disableAllFilters ();
+
+    DataSourcesFilter* getDataSourcesFilter (const std::string& dbo_name);
 
   protected:
     /// Database definition, resets if changed

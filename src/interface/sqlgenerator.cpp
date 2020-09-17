@@ -1156,8 +1156,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
                 used_tables.push_back(table_db_name);
         }
         else
-            logwrn << "SQLGenerator: getSelectCommand: meta table does not contain variable '"
-                   << var_it->name() << "'";
+            logwrn << "SQLGenerator: getSelectCommand: meta table '" << meta_table.name()
+                   << "' does not contain variable '" << var_it->name() << "'";
     }
 
     std::string main_table_name = meta_table.mainTableName();

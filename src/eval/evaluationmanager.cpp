@@ -4,7 +4,15 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "dbobjectmanagerloadwidget.h"
+#include "dbobjectinfowidget.h"
 #include "sector.h"
+#include "metadbovariable.h"
+#include "dbovariable.h"
+#include "buffer.h"
+#include "filtermanager.h"
+#include "datasourcesfilter.h"
+#include "datasourcesfilterwidget.h"
 
 #include "json.hpp"
 
@@ -18,7 +26,7 @@ using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb)
+    : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb), data_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
@@ -52,10 +60,193 @@ void EvaluationManager::loadData ()
 
     assert (initialized_);
 
-    data_loaded_ = true;
+    reference_data_loaded_ = false;
+    test_data_loaded_ = false;
+    data_loaded_ = false;
+
+    evaluated_ = false;
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    // set use filters
+    object_man.useFilters(true);
+    object_man.loadWidget()->updateUseFilters();
+
+    // clear data
+    data_.clear();
+
+    // set if load for dbos
+    for (auto& obj_it : object_man)
+    {
+        obj_it.second->infoWidget()->setLoad(obj_it.first == dbo_name_ref_
+                                             || obj_it.first == dbo_name_tst_);
+    }
+
+    // set ref data sources filters
+    FilterManager& fil_man = ATSDB::instance().filterManager();
+
+    fil_man.disableAllFilters();
+
+    {
+        DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+        ref_filter->setActive(true);
+
+        for (auto& fil_ds_it : ref_filter->dataSources())
+        {
+            assert (data_sources_ref_.count(fil_ds_it.first));
+            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
+        }
+
+        ref_filter->widget()->update();
+    }
+
+    {
+        DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
+        tst_filter->setActive(true);
+
+        for (auto& fil_ds_it : tst_filter->dataSources())
+        {
+            assert (data_sources_tst_.count(fil_ds_it.first));
+            fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
+        }
+
+        tst_filter->widget()->update();
+    }
+
+//    // reference data
+//    {
+//        assert (object_man.existsObject(dbo_name_ref_));
+//        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+
+//        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
+
+//        DBOVariableSet read_set;
+//        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_ref_));
+
+//        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_ref_));
+
+//        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
+//        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
+
+//        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+
+//        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_ref_);
+//        string ds_fil_str;
+
+//        for (auto& ds_it : data_sources_ref_)
+//        {
+//            if (!ds_fil_str.size())
+//                ds_fil_str = to_string(ds_it.second.getNumber());
+//            else
+//                ds_fil_str += ","+to_string(ds_it.second.getNumber());
+//        }
+
+//        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
+
+
+//        dbo_ref.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
+//                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
+
+//    }
+
+//    // test data
+
+//    {
+//        assert (object_man.existsObject(dbo_name_tst_));
+//        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+
+//        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
+
+//        DBOVariableSet read_set;
+//        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_tst_));
+//        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_tst_));
+
+//        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_tst_));
+
+//        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_tst_));
+//        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_tst_));
+
+//        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+//        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+
+//        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_tst_);
+//        string ds_fil_str;
+
+//        for (auto& ds_it : data_sources_tst_)
+//        {
+//            if (!ds_fil_str.size())
+//                ds_fil_str = to_string(ds_it.second.getNumber());
+//            else
+//                ds_fil_str += ","+to_string(ds_it.second.getNumber());
+//        }
+
+//        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
+
+
+//        dbo_tst.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
+//                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
+//    }
+
+    data_loaded_ = false;
+
+    //emit object_man.loadingStartedSignal();
+
+    object_man.loadSlot();
 
     if (widget_)
         widget_->updateButtons();
+}
+
+void EvaluationManager::newDataSlot(DBObject& object)
+{
+    loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
+}
+void EvaluationManager::loadingDoneSlot(DBObject& object)
+{
+    loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    if (object.name() == dbo_name_ref_)
+    {
+        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+
+        disconnect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+        disconnect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+
+        data_.addReferenceData(dbo_ref, object.data());
+
+        reference_data_loaded_ = true;
+    }
+
+    if (object.name() == dbo_name_tst_)
+    {
+        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+
+        disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+        disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+
+        data_.addTestData(dbo_tst, object.data());
+
+        test_data_loaded_ = true;
+    }
+
+    data_loaded_ = reference_data_loaded_ && test_data_loaded_;
+
+    if (data_loaded_)
+        emit object_man.allLoadingDoneSignal();
 }
 
 void EvaluationManager::evaluate ()
@@ -94,7 +285,7 @@ EvaluationManager::~EvaluationManager()
 }
 
 void EvaluationManager::generateSubConfigurable(const std::string& class_id,
-                                          const std::string& instance_id)
+                                                const std::string& instance_id)
 {
     throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
                              class_id);
@@ -166,7 +357,7 @@ unsigned int EvaluationManager::getMaxSectorId ()
 }
 
 void EvaluationManager::createNewSector (const std::string& name, const std::string& layer_name,
-                                   std::vector<std::pair<double,double>> points)
+                                         std::vector<std::pair<double,double>> points)
 {
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
@@ -534,9 +725,9 @@ void EvaluationManager::updateReferenceDataSources()
             json::boolean_t& active = active_sources_ref_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_ref_.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(ds_it->first),  // args for key
-                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                        active));
+                                      std::forward_as_tuple(ds_it->first),  // args for key
+                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+                                                            active));
         }
     }
 }
@@ -606,9 +797,9 @@ void EvaluationManager::updateTestDataSources()
             json::boolean_t& active = active_sources_tst_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_tst_.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(ds_it->first),  // args for key
-                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                        active));
+                                      std::forward_as_tuple(ds_it->first),  // args for key
+                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+                                                            active));
         }
     }
 }
