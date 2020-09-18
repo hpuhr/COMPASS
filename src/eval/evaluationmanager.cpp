@@ -113,10 +113,11 @@ void EvaluationManager::loadData ()
         tst_filter->widget()->update();
     }
 
-//    // reference data
-//    {
-//        assert (object_man.existsObject(dbo_name_ref_));
-//        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
+    // TODO add required variables from standard requirements
+    // reference data
+    {
+        assert (object_man.existsObject(dbo_name_ref_));
+        DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
 //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
 
@@ -134,8 +135,8 @@ void EvaluationManager::loadData ()
 //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
 //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
 
-//        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+        connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
 //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_ref_);
 //        string ds_fil_str;
@@ -146,7 +147,7 @@ void EvaluationManager::loadData ()
 //                ds_fil_str = to_string(ds_it.second.getNumber());
 //            else
 //                ds_fil_str += ","+to_string(ds_it.second.getNumber());
-//        }
+        }
 
 //        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
 
@@ -156,11 +157,11 @@ void EvaluationManager::loadData ()
 
 //    }
 
-//    // test data
+    // test data
 
-//    {
-//        assert (object_man.existsObject(dbo_name_tst_));
-//        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
+    {
+        assert (object_man.existsObject(dbo_name_tst_));
+        DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
 //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
 
@@ -178,8 +179,8 @@ void EvaluationManager::loadData ()
 //        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_tst_));
 //        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_tst_));
 
-//        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-//        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+        connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
 //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_tst_);
 //        string ds_fil_str;
@@ -197,11 +198,7 @@ void EvaluationManager::loadData ()
 
 //        dbo_tst.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
 //                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
-//    }
-
-    data_loaded_ = false;
-
-    //emit object_man.loadingStartedSignal();
+    }
 
     object_man.loadSlot();
 
@@ -245,8 +242,14 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
 
     data_loaded_ = reference_data_loaded_ && test_data_loaded_;
 
+    loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
+
     if (data_loaded_)
-        emit object_man.allLoadingDoneSignal();
+        data_.finalize();
+
+    if (widget_)
+        widget_->updateButtons();
+
 }
 
 void EvaluationManager::evaluate ()
