@@ -22,6 +22,7 @@ public:
     unsigned int size () { return sectors_.size(); };
 
     std::vector<std::shared_ptr<Sector>>& sectors() { return sectors_; }
+
 protected:
     const std::string name_;
 

@@ -24,6 +24,10 @@ void EvaluationRequirementConfig::generateSubConfigurable(const std::string& cla
 
 }
 
+std::string EvaluationRequirementConfig::name() const
+{
+    return name_;
+}
 
 void EvaluationRequirementConfig::checkSubConfigurables()
 {

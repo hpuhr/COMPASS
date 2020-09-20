@@ -23,6 +23,8 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    std::string name() const;
+
 protected:
     EvaluationRequirementGroup& group_;
     std::string name_;
