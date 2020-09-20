@@ -1,5 +1,6 @@
 #include "evaluationmanager.h"
 #include "evaluationmanagerwidget.h"
+#include "evaluationdatawidget.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -688,6 +689,11 @@ bool EvaluationManager::dataLoaded() const
 bool EvaluationManager::evaluated() const
 {
     return evaluated_;
+}
+
+EvaluationData& EvaluationManager::getData()
+{
+    return data_;
 }
 
 void EvaluationManager::updateReferenceDBO()

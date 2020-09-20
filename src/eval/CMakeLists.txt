@@ -10,6 +10,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetdata.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandard.h"
     PRIVATE
@@ -17,6 +18,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetdata.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandard.cpp"
 )

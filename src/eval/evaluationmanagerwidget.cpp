@@ -1,6 +1,8 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
 #include "evaluationdatasourcewidget.h"
+#include "evaluationdata.h"
+#include "evaluationdatawidget.h"
 #include "logger.h"
 
 #include <QCheckBox>
@@ -106,6 +108,8 @@ void EvaluationManagerWidget::addMainWidget ()
 void EvaluationManagerWidget::addTargetsWidget ()
 {
     QVBoxLayout* tab_layout = new QVBoxLayout();
+
+    tab_layout->addWidget(eval_man_.getData().widget());
 
     QWidget* tab_widget = new QWidget();
     tab_widget->setContentsMargins(0, 0, 0, 0);

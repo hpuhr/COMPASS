@@ -1,4 +1,5 @@
 #include "evaluationdata.h"
+#include "evaluationdatawidget.h"
 #include "dbobject.h"
 #include "buffer.h"
 
@@ -49,19 +50,19 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
 
         for (auto utn_it : utn_vec)
         {
-            if (!target_data_.count(utn_it))
-            {
-                target_data_.emplace(std::piecewise_construct,
-                                          std::forward_as_tuple(utn_it),  // args for key
-                                          std::forward_as_tuple(utn_it));
-            }
+            if (!hasTargetData(utn_it))
+                target_data_.push_back({utn_it});
 
-            EvaluationTargetData& target_data = target_data_.at(utn_it);
+            assert (hasTargetData(utn_it));
 
-            if (!target_data.hasRefBuffer())
-                target_data.setRefBuffer(buffer);
+            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
+            auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-            target_data.addRefRecNum(tod, rec_num);
+            if (!targetData(utn_it).hasRefBuffer())
+                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+
+            target_data_.modify(index_it, [tod, rec_num](EvaluationTargetData& t) { t.addRefRecNum(tod, rec_num); });
+
             ++associated_ref_cnt_;
         }
     }
@@ -111,19 +112,19 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
 
         for (auto utn_it : utn_vec)
         {
-            if (!target_data_.count(utn_it))
-            {
-                target_data_.emplace(std::piecewise_construct,
-                                          std::forward_as_tuple(utn_it),  // args for key
-                                          std::forward_as_tuple(utn_it));
-            }
+            if (!hasTargetData(utn_it))
+                target_data_.push_back({utn_it});
 
-            EvaluationTargetData& target_data = target_data_.at(utn_it);
+            assert (hasTargetData(utn_it));
 
-            if (!target_data.hasTstBuffer())
-                target_data.setTstBuffer(buffer);
+            auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
+            auto index_it = target_data_.project<0>(tr_tag_it);  // get iterator for random access
 
-            target_data.addTstRecNum(tod, rec_num);
+            if (!targetData(utn_it).hasTstBuffer())
+                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
+
+            target_data_.modify(index_it, [tod, rec_num](EvaluationTargetData& t) { t.addTstRecNum(tod, rec_num); });
+
             ++associated_tst_cnt_;
         }
     }
@@ -136,17 +137,173 @@ void EvaluationData::finalize ()
 {
     loginf << "EvaluationData: finalize";
 
-    for (auto& target_it : target_data_)
-        target_it.second.finalize();
+    beginResetModel();
+
+    for (auto target_it : target_data_)
+        target_it.finalize();
+
+    finalized_ = true;
+
+    endResetModel();
+}
+
+bool EvaluationData::hasTargetData (unsigned int utn)
+{
+    return target_data_.get<target_tag>().find(utn) != target_data_.get<target_tag>().end();
+}
+
+const EvaluationTargetData& EvaluationData::targetData(unsigned int utn)
+{
+    assert (hasTargetData(utn));
+
+    return *target_data_.get<target_tag>().find(utn);
 }
 
 void EvaluationData::clear()
 {
+    beginResetModel();
+
     target_data_.clear();
+    finalized_ = false;
 
     unassociated_ref_cnt_ = 0;
     associated_ref_cnt_ = 0;
 
     unassociated_tst_cnt_ = 0;
     associated_tst_cnt_ = 0;
+
+    endResetModel();
+}
+
+QVariant EvaluationData::data(const QModelIndex& index, int role) const
+{
+    if (!index.isValid() || !finalized_)
+        return QVariant();
+
+    switch (role)
+    {
+        case Qt::DisplayRole:
+        case Qt::EditRole:
+            {
+                logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
+
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
+
+                const EvaluationTargetData& target = target_data_.at(index.row());
+
+                logdbg << "EvaluationData: data: got utn " << target.utn_;
+
+                assert (index.column() < table_columns_.size());
+                std::string col_name = table_columns_.at(index.column()).toStdString();
+
+                if (col_name == "UTN")
+                {
+                    return target.utn_;
+                }
+                else if (col_name == "Begin")
+                {
+                    return "1"; // TODO
+                }
+                else if (col_name == "End")
+                {
+                    return "2"; // TODO
+                }
+                else if (col_name == "Updates")
+                {
+                    return target.numUpdates();
+                }
+
+                //return String::timeStringFromDouble(data).c_str();
+
+            }
+        case Qt::DecorationRole:
+            {
+                assert (index.column() < table_columns_.size());
+
+                //                if (table_columns_.at(index.column()) == "status")
+                //                {
+                //                    assert (index.row() >= 0);
+                //                    assert (index.row() < view_points_.size());
+
+                //                    const ViewPoint& vp = view_points_.at(index.row());
+
+                //                    const json& data = vp.data().at("status");
+                //                    assert (data.is_string());
+
+                //                    std::string status = data;
+
+                //                    if (status == "open")
+                //                        return open_icon_;
+                //                    else if (status == "closed")
+                //                        return closed_icon_;
+                //                    else if (status == "todo")
+                //                        return todo_icon_;
+                //                    else
+                //                        return unknown_icon_;
+                //                }
+                //                else
+                return QVariant();
+            }
+        default:
+            {
+                return QVariant();
+            }
+    }
+}
+
+QVariant EvaluationData::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        assert (section < table_columns_.size());
+        return table_columns_.at(section);
+    }
+
+    return QVariant();
+}
+
+QModelIndex EvaluationData::index(int row, int column, const QModelIndex& parent) const
+{
+    return createIndex(row, column);
+}
+
+int EvaluationData::rowCount(const QModelIndex& parent) const
+{
+    if (!finalized_)
+        return 0;
+
+    return target_data_.size();
+}
+
+int EvaluationData::columnCount(const QModelIndex& parent) const
+{
+    return table_columns_.size();
+}
+
+QModelIndex EvaluationData::parent(const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
+
+Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    assert (index.column() < table_columns_.size());
+
+    //    if (table_columns_.at(index.column()) == "comment")
+    //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    //    else
+    return QAbstractItemModel::flags(index);
+}
+
+EvaluationDataWidget* EvaluationData::widget()
+{
+    if (!widget_)
+        widget_.reset(new EvaluationDataWidget(*this));
+
+    return widget_.get();
 }

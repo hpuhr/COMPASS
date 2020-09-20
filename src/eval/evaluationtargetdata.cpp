@@ -9,7 +9,7 @@ EvaluationTargetData::EvaluationTargetData(unsigned int utn)
 
 }
 
-bool EvaluationTargetData::hasRefBuffer ()
+bool EvaluationTargetData::hasRefBuffer () const
 {
     return ref_buffer != nullptr;
 }
@@ -26,7 +26,7 @@ void EvaluationTargetData::addRefRecNum (float tod, unsigned int rec_num)
 }
 
 
-bool EvaluationTargetData::hasTstBuffer ()
+bool EvaluationTargetData::hasTstBuffer () const
 {
     return tst_buffer != nullptr;
 }
@@ -42,19 +42,33 @@ void EvaluationTargetData::addTstRecNum (float tod, unsigned int rec_num)
     tst_rec_nums_.insert({tod, rec_num});
 }
 
-bool EvaluationTargetData::hasRefData ()
+bool EvaluationTargetData::hasRefData () const
 {
     return ref_rec_nums_.size();
 }
 
-bool EvaluationTargetData::hasTstData ()
+bool EvaluationTargetData::hasTstData () const
 {
     return tst_rec_nums_.size();
 }
 
 void EvaluationTargetData::finalize ()
 {
-    loginf << "EvaluationTargetData: finalize: utn " << utn_
-           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
-           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
+//    loginf << "EvaluationTargetData: finalize: utn " << utn_
+//           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
+//           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
+}
+
+unsigned int EvaluationTargetData::numUpdates () const
+{
+    return ref_rec_nums_.size() + tst_rec_nums_.size();
+}
+
+unsigned int EvaluationTargetData::numRefUpdates () const
+{
+    return ref_rec_nums_.size();
+}
+unsigned int EvaluationTargetData::numTstUpdates () const
+{
+    return tst_rec_nums_.size();
 }

@@ -77,6 +77,8 @@ public:
     bool dataLoaded() const;
     bool evaluated() const;
 
+    EvaluationData& getData();
+
 protected:
     ATSDB& atsdb_;
 

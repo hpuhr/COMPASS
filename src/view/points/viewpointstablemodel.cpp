@@ -82,12 +82,6 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
 
                 const ViewPoint& vp = view_points_.at(index.row());
 
-//                auto map_it = view_points_.begin();
-//                std::advance(map_it, index.row());
-
-//                if (map_it == view_points_.end())
-//                    return QVariant();
-
                 logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
 
                 assert (index.column() < table_columns_.size());
@@ -119,12 +113,6 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
 
                 if (table_columns_.at(index.column()) == "status")
                 {
-//                    auto map_it = view_points_.begin();
-//                    std::advance(map_it, index.row());
-
-//                    if (map_it == view_points_.end())
-//                        return QVariant();
-
                     assert (index.row() >= 0);
                     assert (index.row() < view_points_.size());
 
