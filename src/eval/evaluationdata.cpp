@@ -236,17 +236,47 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 {
                     return target.numTstUpdates();
                 }
-                else if (col_name == "Mode 3/A")
+                else if (col_name == "Callsign")
                 {
-                    std::vector<unsigned int> codes = target.modeACodes();
+                    std::vector<string> values = target.callsigns();
 
                     std::ostringstream out;
 
-                    for (unsigned int cnt=0; cnt < codes.size(); ++cnt)
+                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
                     {
                         if (cnt != 0)
                             out << ",";
-                        out << String::octStringFromInt(codes.at(cnt), 4, '0');
+                        out << values.at(cnt);
+                    }
+
+                    return out.str().c_str();
+                }
+                else if (col_name == "Target Addr.")
+                {
+                    std::vector<unsigned int> values = target.targetAddresses();
+
+                    std::ostringstream out;
+
+                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
+                    {
+                        if (cnt != 0)
+                            out << ",";
+                        out << String::hexStringFromInt(values.at(cnt), 6, '0');
+                    }
+
+                    return out.str().c_str();
+                }
+                else if (col_name == "Mode 3/A")
+                {
+                    std::vector<unsigned int> values = target.modeACodes();
+
+                    std::ostringstream out;
+
+                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
+                    {
+                        if (cnt != 0)
+                            out << ",";
+                        out << String::octStringFromInt(values.at(cnt), 4, '0');
                     }
 
                     return out.str().c_str();

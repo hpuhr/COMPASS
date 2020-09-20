@@ -35,7 +35,10 @@ public:
     float timeBegin() const;
     float timeEnd() const;
 
+    std::vector<std::string> callsigns() const;
+    std::vector<unsigned int> targetAddresses() const;
     std::vector<unsigned int> modeACodes() const;
+
 
 protected:
 
@@ -48,8 +51,12 @@ protected:
     std::shared_ptr<Buffer> ref_buffer;
     std::shared_ptr<Buffer> tst_buffer;
 
+    std::vector<std::string> callsigns_;
+    std::vector<unsigned int> target_addresses_;
     std::vector<unsigned int> mode_a_codes_;
 
+    void updateCallsigns();
+    void updateTargetAddresses();
     void updateModeACodes();
 };
 

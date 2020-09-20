@@ -73,6 +73,8 @@ void EvaluationTargetData::finalize ()
     for (auto& tst_it : tst_data_)
         tst_indexes_.push_back(tst_it.second);
 
+    updateCallsigns();
+    updateTargetAddresses();
     updateModeACodes();
 }
 
@@ -118,6 +120,74 @@ std::vector<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
+}
+
+std::vector<string> EvaluationTargetData::callsigns() const
+{
+    return callsigns_;
+}
+
+std::vector<unsigned int> EvaluationTargetData::targetAddresses() const
+{
+    return target_addresses_;
+}
+
+void EvaluationTargetData::updateCallsigns()
+{
+    callsigns_.clear();
+
+    if (ref_data_.size())
+    {
+        NullableVector<string>& value_vec = ref_buffer->get<string>("callsign");
+        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
+
+        for (auto& val_it : distinct_values)
+        {
+            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
+                callsigns_.push_back(val_it.first);
+        }
+    }
+
+    if (tst_data_.size())
+    {
+        NullableVector<string>& value_vec = tst_buffer->get<string>("callsign");
+        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
+
+        for (auto& val_it : distinct_values)
+        {
+            if (find(callsigns_.begin(), callsigns_.end(), val_it.first) == callsigns_.end())
+                callsigns_.push_back(val_it.first);
+        }
+    }
+}
+
+void EvaluationTargetData::updateTargetAddresses()
+{
+    target_addresses_.clear();
+
+    if (ref_data_.size())
+    {
+        NullableVector<int>& value_vec = ref_buffer->get<int>("target_addr");
+        map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
+
+        for (auto& val_it : distinct_values)
+        {
+            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
+                target_addresses_.push_back(val_it.first);
+        }
+    }
+
+    if (tst_data_.size())
+    {
+        NullableVector<int>& value_vec = tst_buffer->get<int>("target_addr");
+        map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
+
+        for (auto& val_it : distinct_values)
+        {
+            if (find(target_addresses_.begin(), target_addresses_.end(), val_it.first) == target_addresses_.end())
+                target_addresses_.push_back(val_it.first);
+        }
+    }
 }
 
 void EvaluationTargetData::updateModeACodes()
