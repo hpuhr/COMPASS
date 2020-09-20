@@ -2,6 +2,12 @@
 #include "evaluationdatawidget.h"
 #include "dbobject.h"
 #include "buffer.h"
+#include "stringconv.h"
+
+#include <sstream>
+
+using namespace std;
+using namespace Utils;
 
 EvaluationData::EvaluationData(EvaluationManager& eval_man)
     : eval_man_(eval_man)
@@ -61,7 +67,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
             if (!targetData(utn_it).hasRefBuffer())
                 target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
-            target_data_.modify(index_it, [tod, rec_num](EvaluationTargetData& t) { t.addRefRecNum(tod, rec_num); });
+            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
 
             ++associated_ref_cnt_;
         }
@@ -123,7 +129,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
             if (!targetData(utn_it).hasTstBuffer())
                 target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
 
-            target_data_.modify(index_it, [tod, rec_num](EvaluationTargetData& t) { t.addTstRecNum(tod, rec_num); });
+            target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
 
             ++associated_tst_cnt_;
         }
@@ -139,12 +145,15 @@ void EvaluationData::finalize ()
 
     beginResetModel();
 
-    for (auto target_it : target_data_)
-        target_it.finalize();
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
 
     finalized_ = true;
 
     endResetModel();
+
+    if (widget_)
+        widget_->resizeColumnsToContents();
 }
 
 bool EvaluationData::hasTargetData (unsigned int utn)
@@ -203,18 +212,45 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
                 else if (col_name == "Begin")
                 {
-                    return "1"; // TODO
+                    if (target.hasData())
+                        return String::timeStringFromDouble(target.timeBegin()).c_str();
+                    else
+                        return QVariant();
                 }
                 else if (col_name == "End")
                 {
-                    return "2"; // TODO
+                    if (target.hasData())
+                        return String::timeStringFromDouble(target.timeEnd()).c_str();
+                    else
+                        return QVariant();
                 }
-                else if (col_name == "Updates")
+                else if (col_name == "# All")
                 {
                     return target.numUpdates();
                 }
+                else if (col_name == "# Ref")
+                {
+                    return target.numRefUpdates();
+                }
+                else if (col_name == "# Tst")
+                {
+                    return target.numTstUpdates();
+                }
+                else if (col_name == "Mode 3/A")
+                {
+                    std::vector<unsigned int> codes = target.modeACodes();
 
-                //return String::timeStringFromDouble(data).c_str();
+                    std::ostringstream out;
+
+                    for (unsigned int cnt=0; cnt < codes.size(); ++cnt)
+                    {
+                        if (cnt != 0)
+                            out << ",";
+                        out << String::octStringFromInt(codes.at(cnt), 4, '0');
+                    }
+
+                    return out.str().c_str();
+                }
 
             }
         case Qt::DecorationRole:

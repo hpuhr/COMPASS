@@ -1,5 +1,6 @@
 #include "evaluationdatawidget.h"
 #include "evaluationdata.h"
+#include "logger.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -31,4 +32,11 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data)
     main_layout->addWidget(table_view_);
 
     setLayout(main_layout);
+}
+
+void EvaluationDataWidget::resizeColumnsToContents()
+{
+    loginf << "EvaluationDataWidget: resizeColumnsToContents";
+    //table_model_->update();
+    table_view_->resizeColumnsToContents();
 }

@@ -13,6 +13,8 @@ class EvaluationDataWidget : public QWidget
 public:
     EvaluationDataWidget(EvaluationData& eval_data);
 
+    void resizeColumnsToContents();
+
 protected:
     EvaluationData& eval_data_;
 
