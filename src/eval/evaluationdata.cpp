@@ -281,6 +281,20 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                     return out.str().c_str();
                 }
+                else if (col_name == "Mode C Min")
+                {
+                    if (target.hasModeC())
+                        return to_string(target.modeCMin()).c_str();
+                    else
+                        return QVariant();
+                }
+                else if (col_name == "Mode C Max")
+                {
+                    if (target.hasModeC())
+                        return to_string(target.modeCMax()).c_str();
+                    else
+                        return QVariant();
+                }
 
             }
         case Qt::DecorationRole:

@@ -2,8 +2,13 @@
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "dbovariable.h"
+#include "metadbovariable.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
 
 #include <cassert>
+#include <algorithm>
 
 using namespace std;
 using namespace Utils;
@@ -76,6 +81,7 @@ void EvaluationTargetData::finalize ()
     updateCallsigns();
     updateTargetAddresses();
     updateModeACodes();
+    updateModeCMinMax();
 }
 
 unsigned int EvaluationTargetData::numUpdates () const
@@ -120,6 +126,23 @@ std::vector<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
+}
+
+bool EvaluationTargetData::hasModeC() const
+{
+    return has_mode_c_;
+}
+
+int EvaluationTargetData::modeCMin() const
+{
+    assert (has_mode_c_);
+    return mode_c_min_;
+}
+
+int EvaluationTargetData::modeCMax() const
+{
+    assert (has_mode_c_);
+    return mode_c_max_;
 }
 
 std::vector<string> EvaluationTargetData::callsigns() const
@@ -233,3 +256,69 @@ void EvaluationTargetData::updateModeACodes()
     logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
 }
 
+void EvaluationTargetData::updateModeCMinMax()
+{
+    logdbg << "EvaluationTargetData: updateModeC: utn " << utn_;
+
+    // TODO garbled, valid flags
+
+    has_mode_c_ = false;
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    if (ref_data_.size())
+    {
+        string modec_name = object_man.metaVariable("modec_code_ft").getFor(ref_buffer->dboName()).name();
+
+        assert (ref_buffer->has<int>(modec_name));
+        NullableVector<int>& modec_codes_ft = ref_buffer->get<int>(modec_name);
+
+        for (auto ind_it : ref_indexes_)
+        {
+            assert (ind_it < modec_codes_ft.size());
+
+            if (!modec_codes_ft.isNull(ind_it))
+            {
+                if (!has_mode_c_)
+                {
+                    has_mode_c_ = true;
+                    mode_c_min_ = modec_codes_ft.get(ind_it);
+                    mode_c_max_ = modec_codes_ft.get(ind_it);
+                }
+                else
+                {
+                    mode_c_min_ = min(mode_c_min_, modec_codes_ft.get(ind_it));
+                    mode_c_max_ = max(mode_c_max_, modec_codes_ft.get(ind_it));
+                }
+            }
+        }
+    }
+
+    if (tst_data_.size())
+    {
+        string modec_name = object_man.metaVariable("modec_code_ft").getFor(tst_buffer->dboName()).name();
+
+        assert (tst_buffer->has<int>(modec_name));
+        NullableVector<int>& modec_codes_ft = tst_buffer->get<int>(modec_name);
+
+        for (auto ind_it : tst_indexes_)
+        {
+            assert (ind_it < modec_codes_ft.size());
+
+            if (!modec_codes_ft.isNull(ind_it))
+            {
+                if (!has_mode_c_)
+                {
+                    has_mode_c_ = true;
+                    mode_c_min_ = modec_codes_ft.get(ind_it);
+                    mode_c_max_ = modec_codes_ft.get(ind_it);
+                }
+                else
+                {
+                    mode_c_min_ = min(mode_c_min_, modec_codes_ft.get(ind_it));
+                    mode_c_max_ = max(mode_c_max_, modec_codes_ft.get(ind_it));
+                }
+            }
+        }
+    }
+}

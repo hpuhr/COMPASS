@@ -39,6 +39,10 @@ public:
     std::vector<unsigned int> targetAddresses() const;
     std::vector<unsigned int> modeACodes() const;
 
+    bool hasModeC() const;
+    int modeCMin() const;
+    int modeCMax() const;
+
 
 protected:
 
@@ -55,9 +59,14 @@ protected:
     std::vector<unsigned int> target_addresses_;
     std::vector<unsigned int> mode_a_codes_;
 
+    bool has_mode_c_ {false};
+    int mode_c_min_ {0};
+    int mode_c_max_ {0};
+
     void updateCallsigns();
     void updateTargetAddresses();
     void updateModeACodes();
+    void updateModeCMinMax();
 };
 
 #endif // EVALUATIONTARGETDATA_H
