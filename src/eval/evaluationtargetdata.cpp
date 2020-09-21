@@ -145,6 +145,16 @@ int EvaluationTargetData::modeCMax() const
     return mode_c_max_;
 }
 
+bool EvaluationTargetData::use() const
+{
+    return use_;
+}
+
+void EvaluationTargetData::use(bool use)
+{
+    use_ = use;
+}
+
 std::vector<string> EvaluationTargetData::callsigns() const
 {
     return callsigns_;

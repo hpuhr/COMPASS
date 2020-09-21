@@ -191,6 +191,23 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
+        case Qt::CheckStateRole:
+            {
+                if (index.column() == 0)  // selected special case
+                {
+                    assert (index.row() >= 0);
+                    assert (index.row() < target_data_.size());
+
+                    const EvaluationTargetData& target = target_data_.at(index.row());
+
+                    if (target.use())
+                        return Qt::Checked;
+                    else
+                        return Qt::Unchecked;
+                }
+                else
+                    return QVariant();
+            }
         case Qt::DisplayRole:
         case Qt::EditRole:
             {
@@ -206,7 +223,11 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 assert (index.column() < table_columns_.size());
                 std::string col_name = table_columns_.at(index.column()).toStdString();
 
-                if (col_name == "UTN")
+                if (col_name == "Use")
+                {
+                    return "";
+                }
+                else if (col_name == "UTN")
                 {
                     return target.utn_;
                 }
@@ -377,7 +398,16 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
     //    if (table_columns_.at(index.column()) == "comment")
     //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     //    else
-    return QAbstractItemModel::flags(index);
+    if (index.column() == 0) // Use
+    {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+        //        flags |= Qt::ItemIsEnabled;
+        //        flags |= Qt::ItemIsUserCheckable;
+        //        flags |= Qt::ItemIsEditable;
+        // flags |= Qt::ItemIsSelectable;
+    }
+    else
+        return QAbstractItemModel::flags(index);
 }
 
 EvaluationDataWidget* EvaluationData::widget()

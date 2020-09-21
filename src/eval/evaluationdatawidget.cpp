@@ -18,7 +18,7 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data)
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
     table_view_->setSortingEnabled(true);
-    table_view_->sortByColumn(0, Qt::AscendingOrder);
+    table_view_->sortByColumn(1, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);

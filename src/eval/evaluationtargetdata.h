@@ -43,8 +43,11 @@ public:
     int modeCMin() const;
     int modeCMax() const;
 
+    bool use() const;
+    void use(bool use);
 
 protected:
+    bool use_ {true};
 
     std::multimap<float, unsigned int> ref_data_; // tod -> index
     std::vector<unsigned int> ref_indexes_;
