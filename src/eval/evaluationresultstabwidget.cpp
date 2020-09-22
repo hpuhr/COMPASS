@@ -13,8 +13,6 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    main_layout->addWidget(eval_man_.getData().widget());
-
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
 }

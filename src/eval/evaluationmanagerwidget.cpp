@@ -96,7 +96,7 @@ void EvaluationManagerWidget::addResultsWidget ()
 {
     results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
 
-    tab_widget_->addTab(results_tab_widget_.get(), "Standard");
+    tab_widget_->addTab(results_tab_widget_.get(), "Results");
 }
 
 void EvaluationManagerWidget::loadDataSlot()
