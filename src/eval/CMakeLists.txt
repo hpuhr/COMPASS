@@ -10,12 +10,18 @@ target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagermaintabwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationmaintabwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetstabwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationstandardtabwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagermaintabwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationmaintabwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetstabwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationstandardtabwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.cpp"
 )
 

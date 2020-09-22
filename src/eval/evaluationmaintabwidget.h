@@ -10,7 +10,7 @@ class EvaluationManagerWidget;
 class EvaluationDataSourceWidget;
 class EvaluationStandardComboBox;
 
-class EvaluationManagerMainTabWidget : public QWidget
+class EvaluationMainTabWidget : public QWidget
 {
     Q_OBJECT
 
@@ -19,11 +19,11 @@ private slots:
     void dboTstNameChangedSlot(const std::string& dbo_name);
 
     void changedStandardSlot(const QString& standard_name); // from std box
-    void changedStandardsSlot();
+    void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 
 public:
-    EvaluationManagerMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
+    EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
 
 protected:
     EvaluationManager& eval_man_;

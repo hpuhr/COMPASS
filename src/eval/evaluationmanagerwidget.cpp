@@ -1,5 +1,8 @@
 #include "evaluationmanagerwidget.h"
-#include "evaluationmanagermaintabwidget.h"
+#include "evaluationmaintabwidget.h"
+#include "evaluationtargetstabwidget.h"
+#include "evaluationstandardtabwidget.h"
+#include "evaluationresultstabwidget.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
@@ -36,7 +39,6 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
     main_layout_->addWidget(tab_widget_);
 
     // buttons
-
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     load_button_ = new QPushButton("Load Data");
@@ -71,41 +73,30 @@ void EvaluationManagerWidget::updateButtons()
 
 void EvaluationManagerWidget::addMainWidget ()
 {
-    main_tab_widget_.reset(new EvaluationManagerMainTabWidget(eval_man_, *this));
+    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
 
     tab_widget_->addTab(main_tab_widget_.get(), "Main");
 }
 
 void EvaluationManagerWidget::addTargetsWidget ()
 {
-    QVBoxLayout* tab_layout = new QVBoxLayout();
+    targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
 
-    tab_layout->addWidget(eval_man_.getData().widget());
-
-    QWidget* tab_widget = new QWidget();
-    tab_widget->setContentsMargins(0, 0, 0, 0);
-    tab_widget->setLayout(tab_layout);
-    tab_widget_->addTab(tab_widget, "Targets");
+    tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
 }
 
 void EvaluationManagerWidget::addStandardWidget ()
 {
-    QVBoxLayout* tab_layout = new QVBoxLayout();
+    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
 
-    QWidget* tab_widget = new QWidget();
-    tab_widget->setContentsMargins(0, 0, 0, 0);
-    tab_widget->setLayout(tab_layout);
-    tab_widget_->addTab(tab_widget, "Standard");
+    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
 }
 
 void EvaluationManagerWidget::addResultsWidget ()
 {
-    QVBoxLayout* tab_layout = new QVBoxLayout();
+    results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
 
-    QWidget* tab_widget = new QWidget();
-    tab_widget->setContentsMargins(0, 0, 0, 0);
-    tab_widget->setLayout(tab_layout);
-    tab_widget_->addTab(tab_widget, "Results");
+    tab_widget_->addTab(results_tab_widget_.get(), "Standard");
 }
 
 void EvaluationManagerWidget::loadDataSlot()

@@ -6,7 +6,10 @@
 #include <memory>
 
 class EvaluationManager;
-class EvaluationManagerMainTabWidget;
+class EvaluationMainTabWidget;
+class EvaluationTargetsTabWidget;
+class EvaluationStandardTabWidget;
+class EvaluationResultsTabWidget;
 
 class QVBoxLayout;
 class QTabWidget;
@@ -34,7 +37,10 @@ protected:
 
     QTabWidget* tab_widget_{nullptr};
 
-    std::unique_ptr<EvaluationManagerMainTabWidget> main_tab_widget_;
+    std::unique_ptr<EvaluationMainTabWidget> main_tab_widget_;
+    std::unique_ptr<EvaluationTargetsTabWidget> targets_tab_widget_;
+    std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
+    std::unique_ptr<EvaluationResultsTabWidget> results_tab_widget_;
 
     QPushButton* load_button_ {nullptr};
     QPushButton* evaluate_button_ {nullptr};
