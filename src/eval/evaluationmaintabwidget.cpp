@@ -8,6 +8,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFormLayout>
 
 EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
                                                  EvaluationManagerWidget& man_widget)
@@ -40,12 +41,20 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     main_layout->addLayout(data_sources_layout);
 
     // standard
+    QHBoxLayout* std_layout = new QHBoxLayout();
+
+    QLabel* standard_label = new QLabel("Standard");
+    standard_label->setFont(font_bold);
+    std_layout->addWidget(standard_label);
 
     standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
-    main_layout->addWidget(standard_box_.get());
 
     if (eval_man_.hasCurrentStandard())
         standard_box_->setStandardName(eval_man_.currentStandard());
+
+    std_layout->addWidget(standard_box_.get());
+
+    main_layout->addLayout(std_layout);
 
     main_layout->addStretch();
 
@@ -84,6 +93,9 @@ void EvaluationMainTabWidget::changedStandardSlot(const QString& standard_name)
 void EvaluationMainTabWidget::changedStandardsSlot()
 {
     loginf << "EvaluationMainTabWidget: changedStandardsSlot";
+
+    assert (standard_box_);
+    standard_box_->updateStandards();
 }
 
 void EvaluationMainTabWidget::changedCurrentStandardSlot()

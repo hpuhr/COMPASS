@@ -24,8 +24,8 @@ class EvaluationManager : public QObject, public Configurable
 
 signals:
     void sectorsChangedSignal();
-    void standardsChangedSignal();
-    void currentStandardChangedSignal();
+    void standardsChangedSignal(); // emitted if standard was added or deleted
+    void currentStandardChangedSignal(); // emitted if current standard was changed
 
 public slots:
     void newDataSlot(DBObject& object);
@@ -86,7 +86,11 @@ public:
     std::string currentStandard() const;
     void currentStandard(const std::string& current_standard);
 
-    using EvaluationStandardIterator = typename std::map<std::string, EvaluationStandard*>::iterator;
+    bool hasStandard(const std::string& name);
+    void addStandard(const std::string& name);
+    void deleteStandard(const std::string& name);
+
+    using EvaluationStandardIterator = typename std::map<std::string, std::unique_ptr<EvaluationStandard>>::iterator;
     EvaluationStandardIterator standardsBegin() { return standards_.begin(); }
     EvaluationStandardIterator standardsEnd() { return standards_.end(); }
     unsigned int standardsSize () { return standards_.size(); };
@@ -115,7 +119,7 @@ protected:
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
-    std::map<std::string, EvaluationStandard*> standards_;
+    std::map<std::string, std::unique_ptr<EvaluationStandard>> standards_;
 
     EvaluationData data_;
 

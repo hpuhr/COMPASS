@@ -37,6 +37,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("dbo_name_tst", &dbo_name_tst_, "Tracker");
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
 
+    registerParameter("current_standard", &current_standard_, "");
+
     createSubConfigurables();
 }
 
@@ -299,10 +301,14 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationManager: generateSubConfigurable: adding standard " << standard->name();
 
         assert(standards_.find(standard->name()) == standards_.end());
-        standards_.insert(std::pair<std::string, EvaluationStandard*>(standard->name(), standard));
+
+        standards_[standard->name()].reset(standard);
+
+        //standards_.insert(std::pair<std::string, EvaluationStandard*>(standard->name(), standard));
     }
-    throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
-                             class_id);
+    else
+        throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
+                                 class_id);
 }
 
 EvaluationManagerWidget* EvaluationManager::widget()
@@ -720,6 +726,40 @@ std::string EvaluationManager::currentStandard() const
 void EvaluationManager::currentStandard(const std::string& current_standard)
 {
     current_standard_ = current_standard;
+
+    emit currentStandardChangedSignal();
+}
+
+bool EvaluationManager::hasStandard(const std::string& name)
+{
+    return standards_.count(name);
+}
+
+void EvaluationManager::addStandard(const std::string& name)
+{
+    loginf << "EvaluationManager: addStandard: name " << name;
+
+    assert (!hasStandard(name));
+
+    std::string instance = "EvaluationStandard" + name + "0";
+
+    Configuration& config = addNewSubConfiguration("EvaluationStandard", instance);
+    config.addParameterString("name", name);
+
+    generateSubConfigurable("EvaluationStandard", instance);
+
+    emit standardsChangedSignal();
+
+    if (!hasCurrentStandard())
+        currentStandard(name);
+}
+
+void EvaluationManager::deleteStandard(const std::string& name)
+{
+    loginf << "EvaluationManager: deleteStandard: name " << name;
+
+    assert (hasStandard(name));
+
 }
 
 void EvaluationManager::updateReferenceDBO()

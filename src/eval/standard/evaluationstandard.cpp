@@ -10,7 +10,7 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
                                        EvaluationManager& eval_man)
     : Configurable(class_id, instance_id, &eval_man), eval_man_(eval_man)
 {
-    registerParameter("name_", &name_, "");
+    registerParameter("name", &name_, "");
 
     assert (name_.size());
 

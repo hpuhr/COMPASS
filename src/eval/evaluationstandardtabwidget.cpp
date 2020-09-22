@@ -6,7 +6,11 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QMessageBox>
 
 EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval_man,
                                                          EvaluationManagerWidget& man_widget)
@@ -18,11 +22,50 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
     font_bold.setBold(true);
 
     // standard
-    standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
-    main_layout->addWidget(standard_box_.get());
+    {
+        QHBoxLayout* std_layout = new QHBoxLayout();
 
-    if (eval_man_.hasCurrentStandard())
-        standard_box_->setStandardName(eval_man_.currentStandard());
+        QLabel* standard_label = new QLabel("Standard");
+        standard_label->setFont(font_bold);
+        std_layout->addWidget(standard_label);
+
+        standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
+
+        if (eval_man_.hasCurrentStandard())
+            standard_box_->setStandardName(eval_man_.currentStandard());
+
+        connect (standard_box_.get(), &EvaluationStandardComboBox::changedStandardSignal,
+                 this, &EvaluationStandardTabWidget::changedStandardSlot);
+
+        std_layout->addWidget(standard_box_.get());
+
+        main_layout->addLayout(std_layout);
+    }
+
+    // buttons
+    {
+        QHBoxLayout* button_layout = new QHBoxLayout();
+
+        add_button_ = new QPushButton("Add");
+        connect (add_button_, &QPushButton::clicked,
+                 this, &EvaluationStandardTabWidget::addStandardSlot);
+        button_layout->addWidget(add_button_);
+
+        rename_button_ = new QPushButton("Rename");
+        button_layout->addWidget(rename_button_);
+
+        copy_button_ = new QPushButton("Copy");
+        button_layout->addWidget(copy_button_);
+
+        remove_button_ = new QPushButton("Remove");
+        connect (remove_button_, &QPushButton::clicked,
+                 this, &EvaluationStandardTabWidget::removeStandardSlot);
+        button_layout->addWidget(remove_button_);
+
+        updateButtons();
+
+        main_layout->addLayout(button_layout);
+    }
 
     main_layout->addStretch();
 
@@ -46,6 +89,9 @@ void EvaluationStandardTabWidget::changedStandardSlot(const QString& standard_na
 void EvaluationStandardTabWidget::changedStandardsSlot()
 {
     loginf << "EvaluationStandardTabWidget: changedStandardsSlot";
+
+    assert (standard_box_);
+    standard_box_->updateStandards();
 }
 
 void EvaluationStandardTabWidget::changedCurrentStandardSlot()
@@ -54,4 +100,49 @@ void EvaluationStandardTabWidget::changedCurrentStandardSlot()
 
     assert (standard_box_);
     standard_box_->setStandardName(eval_man_.currentStandard());
+
+    updateButtons();
+}
+
+void EvaluationStandardTabWidget::addStandardSlot ()
+{
+    loginf << "EvaluationStandardTabWidget: addStandardSlot";
+
+    bool ok;
+    QString text =
+        QInputDialog::getText(this, tr("Standard Name"),
+                              tr("Specify a (unique) standard name:"), QLineEdit::Normal, "", &ok);
+
+    if (ok && !text.isEmpty())
+    {
+        std::string name = text.toStdString();
+
+        if (eval_man_.hasStandard(name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Standard Failed",
+            "Standard with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        eval_man_.addStandard(name);
+    }
+}
+
+void EvaluationStandardTabWidget::removeStandardSlot ()
+{
+    loginf << "EvaluationStandardTabWidget: removeStandardSlot";
+}
+
+
+void EvaluationStandardTabWidget::updateButtons()
+{
+    assert (add_button_);
+    add_button_->setDisabled(false);
+    assert (rename_button_);
+    rename_button_->setDisabled(true);
+    assert (copy_button_);
+    copy_button_->setDisabled(true);
+    assert (remove_button_);
+    remove_button_->setDisabled(!eval_man_.hasCurrentStandard());
 }

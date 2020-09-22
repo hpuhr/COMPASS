@@ -7,7 +7,7 @@ EvaluationRequirementGroup::EvaluationRequirementGroup(const std::string& class_
                                                        EvaluationStandard& standard)
     : Configurable(class_id, instance_id, &standard), standard_(standard)
 {
-    registerParameter("name_", &name_, "");
+    registerParameter("name", &name_, "");
 
     assert (name_.size());
 
