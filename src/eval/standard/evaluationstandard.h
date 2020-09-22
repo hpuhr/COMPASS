@@ -9,6 +9,7 @@
 
 class EvaluationManager;
 class EvaluationRequirementGroup;
+class EvaluationStandardWidget;
 
 class EvaluationStandard : public QObject, public Configurable
 {
@@ -38,9 +39,13 @@ public:
     EvaluationRequirementGroupIterator end() { return groups_.end(); }
     unsigned int size () { return groups_.size(); };
 
+    EvaluationStandardWidget* widget();
+
 protected:
     EvaluationManager& eval_man_;
     std::string name_;
+
+    std::unique_ptr<EvaluationStandardWidget> widget_;
 
     std::map<std::string, EvaluationRequirementGroup*> groups_;
 

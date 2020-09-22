@@ -1,6 +1,7 @@
 #include "evaluationstandard.h"
 #include "evaluationmanager.h"
 #include "evaluationrequirementgroup.h"
+#include "evaluationstandardwidget.h"
 #include "logger.h"
 
 using namespace std;
@@ -72,6 +73,14 @@ void EvaluationStandard::removeGroup (const std::string& name)
     groups_.erase(name);
 
     emit groupsChangedSignal();
+}
+
+EvaluationStandardWidget* EvaluationStandard::widget()
+{
+    if (!widget_)
+        widget_.reset(new EvaluationStandardWidget(*this));
+
+    return widget_.get();
 }
 
 void EvaluationStandard::checkSubConfigurables()

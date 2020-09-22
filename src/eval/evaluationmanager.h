@@ -79,6 +79,9 @@ public:
 
     EvaluationData& getData();
 
+    std::string currentStandard() const;
+    void currentStandard(const std::string& current_standard);
+
 protected:
     ATSDB& atsdb_;
 
@@ -97,6 +100,8 @@ protected:
     std::string dbo_name_tst_;
     std::map<int, ActiveDataSource> data_sources_tst_;
     nlohmann::json active_sources_tst_;
+
+    std::string current_standard_;
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

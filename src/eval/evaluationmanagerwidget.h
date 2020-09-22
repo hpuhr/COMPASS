@@ -2,10 +2,11 @@
 #define EVALUATIONMANAGERWIDGET_H
 
 #include <QWidget>
+
 #include <memory>
 
 class EvaluationManager;
-class EvaluationDataSourceWidget;
+class EvaluationManagerMainTabWidget;
 
 class QVBoxLayout;
 class QTabWidget;
@@ -16,9 +17,6 @@ class EvaluationManagerWidget : public QWidget
     Q_OBJECT
 
 private slots:
-    void dboRefNameChangedSlot(const std::string& dbo_name);
-    void dboTstNameChangedSlot(const std::string& dbo_name);
-
     void loadDataSlot();
     void evaluateSlot();
     void generateReportSlot();
@@ -36,8 +34,7 @@ protected:
 
     QTabWidget* tab_widget_{nullptr};
 
-    std::unique_ptr<EvaluationDataSourceWidget> data_source_ref_widget_ {nullptr};
-    std::unique_ptr<EvaluationDataSourceWidget> data_source_tst_widget_ {nullptr};
+    std::unique_ptr<EvaluationManagerMainTabWidget> main_tab_widget_;
 
     QPushButton* load_button_ {nullptr};
     QPushButton* evaluate_button_ {nullptr};

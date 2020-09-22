@@ -696,13 +696,23 @@ EvaluationData& EvaluationManager::getData()
     return data_;
 }
 
+std::string EvaluationManager::currentStandard() const
+{
+    return current_standard_;
+}
+
+void EvaluationManager::currentStandard(const std::string& current_standard)
+{
+    current_standard_ = current_standard;
+}
+
 void EvaluationManager::updateReferenceDBO()
 {
     loginf << "EvaluationManager: updateReferenceDBO";
-
+    
     data_sources_ref_.clear();
     active_sources_ref_.clear();
-
+    
     if (!hasValidReferenceDBO())
         return;
 
