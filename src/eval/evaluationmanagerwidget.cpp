@@ -1,5 +1,6 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanagermaintabwidget.h"
+#include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"

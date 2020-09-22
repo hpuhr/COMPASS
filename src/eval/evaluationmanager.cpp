@@ -1,6 +1,8 @@
 #include "evaluationmanager.h"
 #include "evaluationmanagerwidget.h"
 #include "evaluationdatawidget.h"
+#include "evaluationstandard.h"
+#include "evaluationstandardwidget.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -291,6 +293,14 @@ EvaluationManager::~EvaluationManager()
 void EvaluationManager::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
+    if (class_id.compare("EvaluationStandard") == 0)
+    {
+        EvaluationStandard* standard = new EvaluationStandard(class_id, instance_id, *this);
+        logdbg << "EvaluationManager: generateSubConfigurable: adding standard " << standard->name();
+
+        assert(standards_.find(standard->name()) == standards_.end());
+        standards_.insert(std::pair<std::string, EvaluationStandard*>(standard->name(), standard));
+    }
     throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
                              class_id);
 }
@@ -696,8 +706,14 @@ EvaluationData& EvaluationManager::getData()
     return data_;
 }
 
+bool EvaluationManager::hasCurrentStandard()
+{
+    return current_standard_.size();
+}
+
 std::string EvaluationManager::currentStandard() const
 {
+    assert (current_standard_.size());
     return current_standard_;
 }
 

@@ -12,6 +12,7 @@
 
 class ATSDB;
 class EvaluationManagerWidget;
+class EvaluationStandard;
 class DBObject;
 
 class QWidget;
@@ -23,6 +24,8 @@ class EvaluationManager : public QObject, public Configurable
 
 signals:
     void sectorsChangedSignal();
+    void standardsChangedSignal();
+    void currentStandardChangedSignal();
 
 public slots:
     void newDataSlot(DBObject& object);
@@ -79,8 +82,14 @@ public:
 
     EvaluationData& getData();
 
+    bool hasCurrentStandard();
     std::string currentStandard() const;
     void currentStandard(const std::string& current_standard);
+
+    using EvaluationStandardIterator = typename std::map<std::string, EvaluationStandard*>::iterator;
+    EvaluationStandardIterator standardsBegin() { return standards_.begin(); }
+    EvaluationStandardIterator standardsEnd() { return standards_.end(); }
+    unsigned int standardsSize () { return standards_.size(); };
 
 protected:
     ATSDB& atsdb_;
@@ -106,6 +115,7 @@ protected:
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
+    std::map<std::string, EvaluationStandard*> standards_;
 
     EvaluationData data_;
 

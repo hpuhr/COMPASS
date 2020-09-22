@@ -2,6 +2,7 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationdatasourcewidget.h"
 #include "evaluationmanager.h"
+#include "evaluationstandardcombobox.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -17,6 +18,7 @@ EvaluationManagerMainTabWidget::EvaluationManagerMainTabWidget(EvaluationManager
     QFont font_bold;
     font_bold.setBold(true);
 
+    // data sources
     QLabel* main_label = new QLabel("Data Selection");
     main_label->setFont(font_bold);
     main_layout->addWidget(main_label);
@@ -37,7 +39,22 @@ EvaluationManagerMainTabWidget::EvaluationManagerMainTabWidget(EvaluationManager
 
     main_layout->addLayout(data_sources_layout);
 
+    // standard
+
+    standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
+    main_layout->addWidget(standard_box_.get());
+
+    if (eval_man_.hasCurrentStandard())
+        standard_box_->setStandardName(eval_man_.currentStandard());
+
     main_layout->addStretch();
+
+    // connections
+
+    connect (&eval_man_, &EvaluationManager::standardsChangedSignal,
+             this, &EvaluationManagerMainTabWidget::changedStandardsSlot);
+    connect (&eval_man_, &EvaluationManager::currentStandardChangedSignal,
+             this, &EvaluationManagerMainTabWidget::changedCurrentStandardSlot);
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
@@ -55,4 +72,24 @@ void EvaluationManagerMainTabWidget::dboTstNameChangedSlot(const std::string& db
     loginf << "EvaluationManagerMainTabWidget: dboTstNameChangedSlot: name " << dbo_name;
 
     eval_man_.dboNameTst(dbo_name);
+}
+
+void EvaluationManagerMainTabWidget::changedStandardSlot(const QString& standard_name)
+{
+    loginf << "EvaluationManagerMainTabWidget: changedStandardSlot: name " << standard_name.toStdString();
+
+    eval_man_.currentStandard(standard_name.toStdString());
+}
+
+void EvaluationManagerMainTabWidget::changedStandardsSlot()
+{
+    loginf << "EvaluationManagerMainTabWidget: changedStandardsSlot";
+}
+
+void EvaluationManagerMainTabWidget::changedCurrentStandardSlot()
+{
+    loginf << "EvaluationManagerMainTabWidget: changedCurrentStandardSlot";
+
+    assert (standard_box_);
+    standard_box_->setStandardName(eval_man_.currentStandard());
 }
