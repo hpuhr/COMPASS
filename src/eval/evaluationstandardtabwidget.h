@@ -16,7 +16,6 @@ class EvaluationStandardTabWidget : public QWidget
     Q_OBJECT
 
 private slots:
-    void changedStandardSlot(const QString& standard_name); // from std box
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 

@@ -719,13 +719,15 @@ bool EvaluationManager::hasCurrentStandard()
 
 std::string EvaluationManager::currentStandard() const
 {
-    assert (current_standard_.size());
     return current_standard_;
 }
 
 void EvaluationManager::currentStandard(const std::string& current_standard)
 {
     current_standard_ = current_standard;
+
+    if (current_standard_.size())
+        assert (hasStandard(current_standard_));
 
     emit currentStandardChangedSignal();
 }

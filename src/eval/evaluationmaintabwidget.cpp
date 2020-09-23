@@ -83,13 +83,6 @@ void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbo_name)
     eval_man_.dboNameTst(dbo_name);
 }
 
-void EvaluationMainTabWidget::changedStandardSlot(const QString& standard_name)
-{
-    loginf << "EvaluationMainTabWidget: changedStandardSlot: name " << standard_name.toStdString();
-
-    eval_man_.currentStandard(standard_name.toStdString());
-}
-
 void EvaluationMainTabWidget::changedStandardsSlot()
 {
     loginf << "EvaluationMainTabWidget: changedStandardsSlot";

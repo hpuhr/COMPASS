@@ -34,8 +34,8 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
         if (eval_man_.hasCurrentStandard())
             standard_box_->setStandardName(eval_man_.currentStandard());
 
-        connect (standard_box_.get(), &EvaluationStandardComboBox::changedStandardSignal,
-                 this, &EvaluationStandardTabWidget::changedStandardSlot);
+//        connect (standard_box_.get(), &EvaluationStandardComboBox::changedStandardSignal,
+//                 this, &EvaluationStandardTabWidget::changedStandardSlot);
 
         std_layout->addWidget(standard_box_.get());
 
@@ -79,13 +79,6 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
     setLayout(main_layout);
 }
 
-void EvaluationStandardTabWidget::changedStandardSlot(const QString& standard_name)
-{
-    loginf << "EvaluationStandardTabWidget: changedStandardSlot: name " << standard_name.toStdString();
-
-    eval_man_.currentStandard(standard_name.toStdString());
-}
-
 void EvaluationStandardTabWidget::changedStandardsSlot()
 {
     loginf << "EvaluationStandardTabWidget: changedStandardsSlot";
@@ -116,6 +109,14 @@ void EvaluationStandardTabWidget::addStandardSlot ()
     if (ok && !text.isEmpty())
     {
         std::string name = text.toStdString();
+
+        if (!name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Standard Failed",
+            "Standard has to have a non-empty name.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
 
         if (eval_man_.hasStandard(name))
         {

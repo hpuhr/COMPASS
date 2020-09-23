@@ -1,17 +1,31 @@
 #include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
+#include "logger.h"
+
+using namespace std;
 
 EvaluationStandardComboBox::EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent)
     : QComboBox(parent), eval_man_(eval_man)
 {
     updateStandards();
 
-    connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedStandardSignal(const QString&)));
+    connect(this, &QComboBox::currentTextChanged,
+            this, &EvaluationStandardComboBox::changedStandardSlot);
 }
 
 EvaluationStandardComboBox::~EvaluationStandardComboBox()
 {
 
+}
+
+void EvaluationStandardComboBox::changedStandardSlot(const QString& standard_name)
+{
+    string std_name = standard_name.toStdString();
+
+    loginf << "EvaluationStandardComboBox: changedStandardSlot: standard " << std_name;
+
+    if (!eval_man_.hasCurrentStandard() || eval_man_.currentStandard() != std_name)
+        eval_man_.currentStandard(std_name);
 }
 
 void EvaluationStandardComboBox::setStandardName(const std::string& value)

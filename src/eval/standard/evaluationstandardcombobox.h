@@ -9,9 +9,9 @@ class EvaluationStandardComboBox : public QComboBox
 {
     Q_OBJECT
 
-signals:
+public slots:
     /// @brief Emitted if type was changed
-    void changedStandardSignal(const QString& standard_name);
+    void changedStandardSlot(const QString& standard_name); // slot for box
 
 public:
     EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent=0);

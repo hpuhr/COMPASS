@@ -83,7 +83,7 @@ public:
     EvaluationData& getData();
 
     bool hasCurrentStandard();
-    std::string currentStandard() const;
+    std::string currentStandard() const; // can return empty string, indicating no standard
     void currentStandard(const std::string& current_standard);
 
     bool hasStandard(const std::string& name);

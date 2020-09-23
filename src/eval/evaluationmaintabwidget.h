@@ -18,7 +18,6 @@ private slots:
     void dboRefNameChangedSlot(const std::string& dbo_name);
     void dboTstNameChangedSlot(const std::string& dbo_name);
 
-    void changedStandardSlot(const QString& standard_name); // from std box
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 
