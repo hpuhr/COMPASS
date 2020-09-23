@@ -5,7 +5,7 @@
 
 EvaluationRequirementGroup::EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
                                                        EvaluationStandard& standard)
-    : Configurable(class_id, instance_id, &standard), standard_(standard)
+    : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard)
 {
     registerParameter("name", &name_, "");
 
@@ -29,7 +29,7 @@ void EvaluationRequirementGroup::generateSubConfigurable(const std::string& clas
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(configs_.find(config->name()) == configs_.end());
-        configs_.insert(std::pair<std::string, EvaluationRequirementConfig*>(config->name(), config));
+        configs_[config->name()].reset(config);
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -51,7 +51,12 @@ void EvaluationRequirementGroup::addRequirementConfig (const std::string& name)
 {
     assert (!hasRequirementConfig(name));
 
-    generateSubConfigurable("EvaluationRequirementConfig", "EvaluationRequirementConfig"+name+"0");
+    std::string instance = "EvaluationRequirementConfig" + name + "0";
+
+    Configuration& config = addNewSubConfiguration("EvaluationRequirementConfig", instance);
+    config.addParameterString("name", name);
+
+    generateSubConfigurable("EvaluationRequirementConfig", instance);
 
     assert (hasRequirementConfig(name));
 
@@ -67,7 +72,6 @@ EvaluationRequirementConfig& EvaluationRequirementGroup::requirementConfig (cons
 void EvaluationRequirementGroup::removeRequirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
-    delete configs_.at(name);
     configs_.erase(name);
 
     emit configsChangedSignal();
@@ -76,4 +80,40 @@ void EvaluationRequirementGroup::removeRequirementConfig (const std::string& nam
 void EvaluationRequirementGroup::checkSubConfigurables()
 {
 
+}
+
+EvaluationStandardTreeItem* EvaluationRequirementGroup::child(int row)
+{
+    if (row < 0 || row >= configs_.size())
+        return nullptr;
+
+    auto group_it = configs_.begin();
+
+    std::advance(group_it, row);
+
+    assert (group_it != configs_.end());
+
+    return group_it->second.get();
+}
+
+int EvaluationRequirementGroup::childCount() const
+{
+    return configs_.size();
+}
+
+int EvaluationRequirementGroup::columnCount() const
+{
+    return 1;
+}
+
+QVariant EvaluationRequirementGroup::data(int column) const
+{
+    assert (column == 0);
+
+    return name_.c_str();
+}
+
+int EvaluationRequirementGroup::row() const
+{
+    return 0;
 }

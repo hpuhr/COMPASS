@@ -44,7 +44,7 @@ public:
     void close();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     EvaluationManagerWidget* widget();
 
@@ -124,7 +124,7 @@ protected:
 
     EvaluationData data_;
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 
     void loadSectors();
 

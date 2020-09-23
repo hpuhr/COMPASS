@@ -4,11 +4,14 @@
 #include "evaluationstandardwidget.h"
 #include "logger.h"
 
+#include <QTreeView>
+
 using namespace std;
 
 EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::string& instance_id,
                                        EvaluationManager& eval_man)
-    : Configurable(class_id, instance_id, &eval_man), eval_man_(eval_man)
+    : Configurable(class_id, instance_id, &eval_man), EvaluationStandardTreeItem(&root_item_), eval_man_(eval_man),
+      root_item_(*this)
 {
     registerParameter("name", &name_, "");
 
@@ -19,7 +22,6 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
 
 EvaluationStandard::~EvaluationStandard()
 {
-
 }
 
 
@@ -32,7 +34,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
         assert(groups_.find(group->name()) == groups_.end());
-        groups_.insert(std::pair<std::string, EvaluationRequirementGroup*>(group->name(), group));
+        groups_[group->name()].reset(group);
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -53,7 +55,12 @@ void EvaluationStandard::addGroup (const std::string& name)
 {
     assert (!hasGroup(name));
 
-    generateSubConfigurable("EvaluationRequirementGroup", "EvaluationRequirementGroup"+name+"0");
+    std::string instance = "EvaluationRequirementGroup" + name + "0";
+
+    Configuration& config = addNewSubConfiguration("EvaluationRequirementGroup", instance);
+    config.addParameterString("name", name);
+
+    generateSubConfigurable("EvaluationRequirementGroup", instance);
 
     assert (hasGroup(name));
 
@@ -69,7 +76,6 @@ EvaluationRequirementGroup& EvaluationStandard::group (const std::string& name)
 void EvaluationStandard::removeGroup (const std::string& name)
 {
     assert (hasGroup(name));
-    delete groups_.at(name);
     groups_.erase(name);
 
     emit groupsChangedSignal();
@@ -85,5 +91,49 @@ EvaluationStandardWidget* EvaluationStandard::widget()
 
 void EvaluationStandard::checkSubConfigurables()
 {
-
+    if (!hasGroup("All"))
+        addGroup("All");
 }
+
+EvaluationStandardTreeItem* EvaluationStandard::child(int row)
+{
+    if (row < 0 || row >= groups_.size())
+        return nullptr;
+
+    auto group_it = groups_.begin();
+
+    std::advance(group_it, row);
+
+    assert (group_it != groups_.end());
+
+    return group_it->second.get();
+}
+
+int EvaluationStandard::childCount() const
+{
+    return groups_.size();
+}
+
+int EvaluationStandard::columnCount() const
+{
+    return 1;
+}
+
+QVariant EvaluationStandard::data(int column) const
+{
+    assert (column == 0);
+
+    return name_.c_str();
+}
+
+int EvaluationStandard::row() const
+{
+    return 0;
+}
+
+EvaluationStandardRootItem& EvaluationStandard::rootItem()
+{
+    return root_item_;
+}
+
+

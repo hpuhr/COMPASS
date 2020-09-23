@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <QStackedWidget>
 #include <QFrame>
+#include <QTreeView>
 
 using namespace std;
 

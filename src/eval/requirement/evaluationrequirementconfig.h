@@ -4,10 +4,11 @@
 #include <QObject>
 
 #include "configurable.h"
+#include "evaluationstandardtreeitem.h"
 
 class EvaluationRequirementGroup;
 
-class EvaluationRequirementConfig : public QObject, public Configurable
+class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
 
@@ -24,6 +25,12 @@ public:
                                          const std::string& instance_id);
 
     std::string name() const;
+
+    virtual EvaluationStandardTreeItem *child(int row) override;
+    virtual int childCount() const override;
+    virtual int columnCount() const override;
+    virtual QVariant data(int column) const override;
+    virtual int row() const override;
 
 protected:
     EvaluationRequirementGroup& group_;

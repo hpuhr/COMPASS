@@ -1,14 +1,17 @@
 #ifndef EVALUATIONREQUIREMENTGROUP_H
 #define EVALUATIONREQUIREMENTGROUP_H
 
+#include "configurable.h"
+#include "evaluationstandardtreeitem.h"
+
 #include <QObject>
 
-#include "configurable.h"
+#include <memory>
 
 class EvaluationStandard;
 class EvaluationRequirementConfig;
 
-class EvaluationRequirementGroup : public QObject, public Configurable
+class EvaluationRequirementGroup : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
 
@@ -23,7 +26,7 @@ public:
     virtual ~EvaluationRequirementGroup();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     std::string name() const;
 
@@ -32,18 +35,26 @@ public:
     EvaluationRequirementConfig& requirementConfig (const std::string& name);
     void removeRequirementConfig (const std::string& name);
 
-    using EvaluationRequirementConfigIterator = typename std::map<std::string, EvaluationRequirementConfig*>::iterator;
+    using EvaluationRequirementConfigIterator =
+    typename std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>>::iterator;
+
     EvaluationRequirementConfigIterator begin() { return configs_.begin(); }
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
     unsigned int size () { return configs_.size(); };
+
+    virtual EvaluationStandardTreeItem *child(int row) override;
+    virtual int childCount() const override;
+    virtual int columnCount() const override;
+    virtual QVariant data(int column) const override;
+    virtual int row() const override;
 
 protected:
     EvaluationStandard& standard_;
     std::string name_;
 
-    std::map<std::string, EvaluationRequirementConfig*> configs_;
+    std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>> configs_;
 
-    virtual void checkSubConfigurables();
+    virtual void checkSubConfigurables() override;
 };
 
 #endif // EVALUATIONREQUIREMENTGROUP_H
