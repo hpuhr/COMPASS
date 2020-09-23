@@ -10,6 +10,7 @@ class EvaluationManagerWidget;
 class EvaluationStandardComboBox;
 
 class QPushButton;
+class QStackedWidget;
 
 class EvaluationStandardTabWidget : public QWidget
 {
@@ -36,7 +37,10 @@ protected:
     QPushButton* copy_button_ {nullptr};
     QPushButton* remove_button_ {nullptr};
 
+    QStackedWidget* standards_widget_{nullptr};
+
     void updateButtons();
+    void updateStandardStack();
 };
 
 #endif // EVALUATIONSTANDARDTABWIDGET_H

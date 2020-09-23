@@ -83,12 +83,13 @@ public:
     EvaluationData& getData();
 
     bool hasCurrentStandard();
-    std::string currentStandard() const; // can return empty string, indicating no standard
-    void currentStandard(const std::string& current_standard);
+    std::string currentStandardName() const; // can return empty string, indicating no standard
+    void currentStandardName(const std::string& current_standard);
+    EvaluationStandard& currentStandard();
 
     bool hasStandard(const std::string& name);
     void addStandard(const std::string& name);
-    void deleteStandard(const std::string& name);
+    void deleteCurrentStandard();
 
     using EvaluationStandardIterator = typename std::map<std::string, std::unique_ptr<EvaluationStandard>>::iterator;
     EvaluationStandardIterator standardsBegin() { return standards_.begin(); }

@@ -714,15 +714,15 @@ EvaluationData& EvaluationManager::getData()
 
 bool EvaluationManager::hasCurrentStandard()
 {
-    return current_standard_.size();
+    return current_standard_.size() && hasStandard(current_standard_);
 }
 
-std::string EvaluationManager::currentStandard() const
+std::string EvaluationManager::currentStandardName() const
 {
     return current_standard_;
 }
 
-void EvaluationManager::currentStandard(const std::string& current_standard)
+void EvaluationManager::currentStandardName(const std::string& current_standard)
 {
     current_standard_ = current_standard;
 
@@ -730,6 +730,13 @@ void EvaluationManager::currentStandard(const std::string& current_standard)
         assert (hasStandard(current_standard_));
 
     emit currentStandardChangedSignal();
+}
+
+EvaluationStandard& EvaluationManager::currentStandard()
+{
+    assert (hasCurrentStandard());
+
+    return *standards_.at(current_standard_).get();
 }
 
 bool EvaluationManager::hasStandard(const std::string& name)
@@ -752,16 +759,20 @@ void EvaluationManager::addStandard(const std::string& name)
 
     emit standardsChangedSignal();
 
-    if (!hasCurrentStandard())
-        currentStandard(name);
+    currentStandardName(name);
 }
 
-void EvaluationManager::deleteStandard(const std::string& name)
+void EvaluationManager::deleteCurrentStandard()
 {
-    loginf << "EvaluationManager: deleteStandard: name " << name;
+    loginf << "EvaluationManager: deleteCurrentStandard: name " << current_standard_;
 
-    assert (hasStandard(name));
+    assert (hasCurrentStandard());
 
+    standards_.erase(current_standard_);
+
+    emit standardsChangedSignal();
+
+    currentStandardName("");
 }
 
 void EvaluationManager::updateReferenceDBO()

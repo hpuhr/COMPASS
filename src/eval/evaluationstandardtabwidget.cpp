@@ -2,6 +2,8 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
 #include "evaluationstandardcombobox.h"
+#include "evaluationstandard.h"
+#include "evaluationstandardwidget.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -11,6 +13,10 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QStackedWidget>
+#include <QFrame>
+
+using namespace std;
 
 EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval_man,
                                                          EvaluationManagerWidget& man_widget)
@@ -31,11 +37,8 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
         standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
 
-        if (eval_man_.hasCurrentStandard())
-            standard_box_->setStandardName(eval_man_.currentStandard());
-
-//        connect (standard_box_.get(), &EvaluationStandardComboBox::changedStandardSignal,
-//                 this, &EvaluationStandardTabWidget::changedStandardSlot);
+//        if (eval_man_.hasCurrentStandard())
+//            standard_box_->setStandardName(eval_man_.currentStandardName());
 
         std_layout->addWidget(standard_box_.get());
 
@@ -67,6 +70,21 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
         main_layout->addLayout(button_layout);
     }
 
+    // standards stack
+    {
+        QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        main_layout->addWidget(line);
+
+        standards_widget_ = new QStackedWidget();
+        main_layout->addWidget(standards_widget_);
+    }
+
+    if (eval_man_.hasCurrentStandard())
+        updateStandardStack();
+
+
     main_layout->addStretch();
 
     // connections
@@ -92,9 +110,10 @@ void EvaluationStandardTabWidget::changedCurrentStandardSlot()
     loginf << "EvaluationStandardTabWidget: changedCurrentStandardSlot";
 
     assert (standard_box_);
-    standard_box_->setStandardName(eval_man_.currentStandard());
+    standard_box_->setStandardName(eval_man_.currentStandardName());
 
     updateButtons();
+    updateStandardStack();
 }
 
 void EvaluationStandardTabWidget::addStandardSlot ()
@@ -133,6 +152,9 @@ void EvaluationStandardTabWidget::addStandardSlot ()
 void EvaluationStandardTabWidget::removeStandardSlot ()
 {
     loginf << "EvaluationStandardTabWidget: removeStandardSlot";
+
+    assert (eval_man_.hasCurrentStandard());
+    eval_man_.deleteCurrentStandard();
 }
 
 
@@ -146,4 +168,25 @@ void EvaluationStandardTabWidget::updateButtons()
     copy_button_->setDisabled(true);
     assert (remove_button_);
     remove_button_->setDisabled(!eval_man_.hasCurrentStandard());
+}
+
+void EvaluationStandardTabWidget::updateStandardStack()
+{
+    assert(standards_widget_);
+
+    string standard_name = eval_man_.currentStandardName();
+
+    if (!standard_name.size())
+    {
+        while (standards_widget_->count() > 0)  // remove all widgets
+            standards_widget_->removeWidget(standards_widget_->widget(0));
+        return;
+    }
+
+    EvaluationStandard& standard = eval_man_.currentStandard();
+
+    if (standards_widget_->indexOf(standard.widget()) < 0)
+        standards_widget_->addWidget(standard.widget());
+
+    standards_widget_->setCurrentWidget(standard.widget());
 }

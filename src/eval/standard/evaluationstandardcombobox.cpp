@@ -9,27 +9,31 @@ EvaluationStandardComboBox::EvaluationStandardComboBox(EvaluationManager& eval_m
 {
     updateStandards();
 
-    connect(this, &QComboBox::currentTextChanged,
-            this, &EvaluationStandardComboBox::changedStandardSlot);
+    connect(this, SIGNAL(activated(const QString&)),
+            this, SLOT(changedStandardSlot(const QString&)));
 }
 
 EvaluationStandardComboBox::~EvaluationStandardComboBox()
 {
-
 }
 
 void EvaluationStandardComboBox::changedStandardSlot(const QString& standard_name)
 {
     string std_name = standard_name.toStdString();
 
-    loginf << "EvaluationStandardComboBox: changedStandardSlot: standard " << std_name;
+    loginf << "EvaluationStandardComboBox: changedStandardSlot: standard '" << std_name << "'";
 
-    if (!eval_man_.hasCurrentStandard() || eval_man_.currentStandard() != std_name)
-        eval_man_.currentStandard(std_name);
+    if (eval_man_.currentStandardName() != std_name)
+    {
+        loginf << "EvaluationStandardComboBox: changedStandardSlot: setting standard '" << std_name << "'";
+        eval_man_.currentStandardName(std_name);
+    }
 }
 
 void EvaluationStandardComboBox::setStandardName(const std::string& value)
 {
+    loginf << "EvaluationStandardComboBox: setStandardName: standard '" << value << "'";
+
     int index = findText(QString(value.c_str()));
     assert(index >= 0);
     setCurrentIndex(index);
@@ -37,6 +41,8 @@ void EvaluationStandardComboBox::setStandardName(const std::string& value)
 
 void EvaluationStandardComboBox::updateStandards()
 {
+    loginf << "EvaluationStandardComboBox: updateStandards";
+
     clear();
 
     addItem("");
@@ -46,5 +52,15 @@ void EvaluationStandardComboBox::updateStandards()
         addItem(std_it->first.c_str());
     }
 
-    setCurrentIndex(0);
+    if (eval_man_.hasCurrentStandard())
+    {
+        int index = findText(eval_man_.currentStandardName().c_str());
+
+        if (index >= 0)
+            setCurrentIndex(index);
+        else
+            setCurrentIndex(0);
+    }
+    else
+        setCurrentIndex(0);
 }

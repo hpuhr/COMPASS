@@ -49,8 +49,8 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
 
-    if (eval_man_.hasCurrentStandard())
-        standard_box_->setStandardName(eval_man_.currentStandard());
+//    if (eval_man_.hasCurrentStandard())
+//        standard_box_->setStandardName(eval_man_.currentStandardName());
 
     std_layout->addWidget(standard_box_.get());
 
@@ -96,5 +96,5 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
     loginf << "EvaluationMainTabWidget: changedCurrentStandardSlot";
 
     assert (standard_box_);
-    standard_box_->setStandardName(eval_man_.currentStandard());
+    standard_box_->setStandardName(eval_man_.currentStandardName());
 }
