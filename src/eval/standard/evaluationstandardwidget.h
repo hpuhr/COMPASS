@@ -12,6 +12,7 @@
 class EvaluationStandard;
 
 class QTreeView;
+class QStackedWidget;
 
 class EvaluationStandardWidget : public QWidget
 {
@@ -28,6 +29,8 @@ protected:
 
     EvaluationStandardTreeModel standard_model_;
     std::unique_ptr<QTreeView> tree_view_;
+
+    QStackedWidget* requirements_widget_{nullptr};
 };
 
 #endif // EVALUATIONSTANDARDWIDGET_H

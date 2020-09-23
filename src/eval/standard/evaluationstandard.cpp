@@ -18,6 +18,12 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
     assert (name_.size());
 
     createSubConfigurables();
+
+    // menu creation
+    {
+        QAction* add_action = menu_.addAction("Add Group");
+        connect(add_action, &QAction::triggered, this, &EvaluationStandard::addGroupSlot);
+    }
 }
 
 EvaluationStandard::~EvaluationStandard()
@@ -134,6 +140,17 @@ int EvaluationStandard::row() const
 EvaluationStandardRootItem& EvaluationStandard::rootItem()
 {
     return root_item_;
+}
+
+void EvaluationStandard::showMenu ()
+{
+    menu_.exec(QCursor::pos());
+}
+
+
+void EvaluationStandard::addGroupSlot()
+{
+    loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot";
 }
 
 

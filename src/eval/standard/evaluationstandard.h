@@ -2,6 +2,7 @@
 #define EVALUATIONSTANDARD_H
 
 #include <QObject>
+#include <QMenu>
 
 #include <memory>
 
@@ -21,6 +22,7 @@ signals:
     void groupsChangedSignal();
 
 public slots:
+    void addGroupSlot();
 
 public:
     EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationManager& eval_man);
@@ -53,6 +55,8 @@ public:
 
     EvaluationStandardRootItem& rootItem();
 
+    void showMenu ();
+
 protected:
     EvaluationManager& eval_man_;
     std::string name_;
@@ -62,6 +66,8 @@ protected:
     std::unique_ptr<EvaluationStandardWidget> widget_;
 
     std::map<std::string, std::unique_ptr<EvaluationRequirementGroup>> groups_;
+
+    QMenu menu_;
 
     virtual void checkSubConfigurables() override;
 };

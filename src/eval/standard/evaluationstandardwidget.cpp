@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStackedWidget>
 
 using namespace std;
 
@@ -26,6 +27,10 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
 
     req_layout->addWidget(tree_view_.get());
 
+    // requirements stack
+    requirements_widget_ = new QStackedWidget();
+    req_layout->addWidget(requirements_widget_);
+
     main_layout->addLayout(req_layout);
 
     setLayout(main_layout);
@@ -39,14 +44,24 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
     if (dynamic_cast<EvaluationStandard*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got standard";
+
+        EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
+
+        std->showMenu();
     }
     else if (dynamic_cast<EvaluationRequirementGroup*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
+
+        EvaluationRequirementGroup* group = dynamic_cast<EvaluationRequirementGroup*>(item);
+
+        group->showMenu();
     }
     else if (dynamic_cast<EvaluationRequirementConfig*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
+
+        EvaluationRequirementConfig* config = dynamic_cast<EvaluationRequirementConfig*>(item);
     }
     else
         assert (false);

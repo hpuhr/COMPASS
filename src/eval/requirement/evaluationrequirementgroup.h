@@ -5,6 +5,7 @@
 #include "evaluationstandardtreeitem.h"
 
 #include <QObject>
+#include <QMenu>
 
 #include <memory>
 
@@ -19,6 +20,9 @@ signals:
     void configsChangedSignal();
 
 public slots:
+    void deleteGroupSlot();
+    void addRequirementSlot();
+
 
 public:
     EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
@@ -48,11 +52,15 @@ public:
     virtual QVariant data(int column) const override;
     virtual int row() const override;
 
+    void showMenu ();
+
 protected:
     EvaluationStandard& standard_;
     std::string name_;
 
     std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>> configs_;
+
+    QMenu menu_;
 
     virtual void checkSubConfigurables() override;
 };

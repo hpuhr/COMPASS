@@ -38,9 +38,6 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
         standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
 
-//        if (eval_man_.hasCurrentStandard())
-//            standard_box_->setStandardName(eval_man_.currentStandardName());
-
         std_layout->addWidget(standard_box_.get());
 
         main_layout->addLayout(std_layout);
@@ -84,9 +81,6 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
     if (eval_man_.hasCurrentStandard())
         updateStandardStack();
-
-
-    main_layout->addStretch();
 
     // connections
     connect (&eval_man_, &EvaluationManager::standardsChangedSignal,
