@@ -3,6 +3,10 @@
 #include "evaluationrequirementconfig.h"
 #include "logger.h"
 
+#include <algorithm>
+
+using namespace std;
+
 EvaluationRequirementGroup::EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
                                                        EvaluationStandard& standard)
     : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard)
@@ -23,15 +27,15 @@ EvaluationRequirementGroup::~EvaluationRequirementGroup()
 void EvaluationRequirementGroup::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationRequirementConfig") == 0)
-    {
-        EvaluationRequirementConfig* config = new EvaluationRequirementConfig(class_id, instance_id, *this);
-        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+//    if (class_id.compare("EvaluationRequirementConfig") == 0)
+//    {
+//        EvaluationRequirementConfig* config = new EvaluationRequirementConfig(class_id, instance_id, *this);
+//        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
-        assert(configs_.find(config->name()) == configs_.end());
-        configs_[config->name()].reset(config);
-    }
-    else
+//        assert(configs_.find(config->name()) == configs_.end());
+//        configs_[config->name()].reset(config);
+//    }
+//    else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
@@ -44,19 +48,29 @@ std::string EvaluationRequirementGroup::name() const
 
 bool EvaluationRequirementGroup::hasRequirementConfig (const std::string& name)
 {
-    return configs_.count(name);
+    auto iter = std::find_if(configs_.begin(), configs_.end(),
+                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+
+    return iter != configs_.end();
 }
 
-void EvaluationRequirementGroup::addRequirementConfig (const std::string& name)
+void EvaluationRequirementGroup::addRequirementConfig (const std::string& class_id, const std::string& name,
+                                                       const std::string& short_name)
 {
+    loginf << "EvaluationRequirementGroup: addRequirementConfig: class_id " << class_id << " name " << name
+           << " short_name " << short_name;
+
     assert (!hasRequirementConfig(name));
 
-    std::string instance = "EvaluationRequirementConfig" + name + "0";
+    std::string instance = class_id + name + "0";
 
-    Configuration& config = addNewSubConfiguration("EvaluationRequirementConfig", instance);
+    Configuration& config = addNewSubConfiguration(class_id, instance);
     config.addParameterString("name", name);
+    config.addParameterString("short_name", short_name);
 
-    generateSubConfigurable("EvaluationRequirementConfig", instance);
+    generateSubConfigurable(class_id, instance);
+
+    sortConfigs();
 
     assert (hasRequirementConfig(name));
 
@@ -66,13 +80,21 @@ void EvaluationRequirementGroup::addRequirementConfig (const std::string& name)
 EvaluationRequirementConfig& EvaluationRequirementGroup::requirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
-    return *configs_.at(name);
+
+    auto iter = std::find_if(configs_.begin(), configs_.end(),
+                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+
+    return **iter;
 }
 
 void EvaluationRequirementGroup::removeRequirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
-    configs_.erase(name);
+
+    auto iter = std::find_if(configs_.begin(), configs_.end(),
+                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+
+    configs_.erase(iter);
 
     emit configsChangedSignal();
 }
@@ -87,13 +109,7 @@ EvaluationStandardTreeItem* EvaluationRequirementGroup::child(int row)
     if (row < 0 || row >= configs_.size())
         return nullptr;
 
-    auto group_it = configs_.begin();
-
-    std::advance(group_it, row);
-
-    assert (group_it != configs_.end());
-
-    return group_it->second.get();
+    return configs_.at(row).get();
 }
 
 int EvaluationRequirementGroup::childCount() const
@@ -126,8 +142,13 @@ void EvaluationRequirementGroup::showMenu ()
     {
         QAction* del_action = menu.addAction("Delete Group");
         connect(del_action, &QAction::triggered, this, &EvaluationRequirementGroup::deleteGroupSlot);
-        QAction* add_action = menu.addAction("Add Requirement");
-        connect(add_action, &QAction::triggered, this, &EvaluationRequirementGroup::addRequirementSlot);
+
+        // requirements
+        QMenu* req_menu = menu.addMenu("Add Requirement");;
+
+        QAction* add_det_action = req_menu->addAction("Detection");
+        add_det_action->setData("EvaluationRequirementDetectionConfig");
+        connect(add_det_action, &QAction::triggered, this, &EvaluationRequirementGroup::addRequirementSlot);
     }
 
     menu.exec(QCursor::pos());
@@ -143,4 +164,23 @@ void EvaluationRequirementGroup::deleteGroupSlot()
 void EvaluationRequirementGroup::addRequirementSlot()
 {
     loginf << "EvaluationRequirementGroup " << name_ << ": addRequirementSlot";
+
+    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+    assert (action);
+
+    QVariant data = action->data();
+    assert (data.isValid());
+
+    string class_id = data.toString().toStdString();
+
+    loginf << "EvaluationRequirementGroup " << name_ << ": addRequirementSlot: class_id " << class_id;
+}
+
+void EvaluationRequirementGroup::sortConfigs()
+{
+    sort(configs_.begin(), configs_.end(),
+        [](const unique_ptr<EvaluationRequirementConfig>&a, const unique_ptr<EvaluationRequirementConfig>& b) -> bool
+    {
+        return a->name() > b->name();
+    });
 }

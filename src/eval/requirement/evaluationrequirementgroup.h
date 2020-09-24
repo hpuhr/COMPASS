@@ -35,12 +35,12 @@ public:
     std::string name() const;
 
     bool hasRequirementConfig (const std::string& name);
-    void addRequirementConfig (const std::string& name);
+    void addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name);
     EvaluationRequirementConfig& requirementConfig (const std::string& name);
     void removeRequirementConfig (const std::string& name);
 
     using EvaluationRequirementConfigIterator =
-    typename std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>>::iterator;
+    typename std::vector<std::unique_ptr<EvaluationRequirementConfig>>::iterator;
 
     EvaluationRequirementConfigIterator begin() { return configs_.begin(); }
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
@@ -58,9 +58,11 @@ protected:
     EvaluationStandard& standard_;
     std::string name_;
 
-    std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>> configs_;
+    std::vector<std::unique_ptr<EvaluationRequirementConfig>> configs_;
 
     virtual void checkSubConfigurables() override;
+
+    void sortConfigs();
 };
 
 #endif // EVALUATIONREQUIREMENTGROUP_H

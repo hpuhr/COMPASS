@@ -1,13 +1,23 @@
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirementgroup.h"
+#include "logger.h"
 
-EvaluationRequirementConfig::EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                                         EvaluationRequirementGroup& group)
-    : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group), group_(group)
+#include <QFormLayout>
+#include <QLineEdit>
+
+using namespace std;
+
+EvaluationRequirementConfig::EvaluationRequirementConfig(
+        const std::string& class_id, const std::string& instance_id,
+        EvaluationRequirementGroup& group, EvaluationRequirementStandard& standard)
+    : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
+      group_(group), standard_(standard)
 {
     registerParameter("name", &name_, "");
+    registerParameter("short_name", &short_name_, "");
 
     assert (name_.size());
+    assert (short_name_.size());
 
     createSubConfigurables();
 }
@@ -31,6 +41,21 @@ std::string EvaluationRequirementConfig::name() const
 
 void EvaluationRequirementConfig::checkSubConfigurables()
 {
+}
+
+void EvaluationRequirementConfig::addGUIElements(QFormLayout* layout)
+{
+    assert (layout);
+
+    QLineEdit* name_edit = new QLineEdit (name_.c_str());
+    connect(name_edit, &QLineEdit::textEdited, this, &EvaluationRequirementConfig::changedNameSlot);
+
+    layout->addRow("Name", name_edit);
+
+    QLineEdit* short_name_edit = new QLineEdit (short_name_.c_str());
+    connect(short_name_edit, &QLineEdit::textEdited, this, &EvaluationRequirementConfig::changedShortNameSlot);
+
+    layout->addRow("Short Name", short_name_edit);
 }
 
 EvaluationStandardTreeItem* EvaluationRequirementConfig::child(int row)
@@ -58,4 +83,33 @@ QVariant EvaluationRequirementConfig::data(int column) const
 int EvaluationRequirementConfig::row() const
 {
     return 0;
+}
+
+void EvaluationRequirementConfig::changedNameSlot(const QString& value)
+{
+    string value_str = value.toStdString();
+
+    loginf << "EvaluationRequirementConfig: changedNameSlot: name '" << value_str << "'";
+}
+
+void EvaluationRequirementConfig::changedShortNameSlot(const QString& value)
+{
+    string value_str = value.toStdString();
+
+    loginf << "EvaluationRequirementConfig: changedShortNameSlot: name '" << value_str << "'";
+}
+
+void EvaluationRequirementConfig::name(const std::string& name)
+{
+    name_ = name;
+}
+
+void EvaluationRequirementConfig::shortName(const std::string& short_name)
+{
+    short_name_ = short_name;
+}
+
+std::string EvaluationRequirementConfig::shortName() const
+{
+    return short_name_;
 }

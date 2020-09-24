@@ -7,6 +7,10 @@
 #include "evaluationstandardtreeitem.h"
 
 class EvaluationRequirementGroup;
+class EvaluationRequirementStandard;
+
+class QWidget;
+class QFormLayout;
 
 class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
@@ -15,16 +19,23 @@ class EvaluationRequirementConfig : public QObject, public Configurable, public 
 signals:
 
 public slots:
+    void changedNameSlot(const QString& value);
+    void changedShortNameSlot(const QString& value);
 
 public:
     EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                EvaluationRequirementGroup& group);
+                                EvaluationRequirementGroup& group, EvaluationRequirementStandard& standard);
     virtual ~EvaluationRequirementConfig();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id);
+                                         const std::string& instance_id) override;
 
     std::string name() const;
+    void name(const std::string& name);
+
+    bool hasShortName () const;
+    std::string shortName() const;
+    void shortName(const std::string& short_name);
 
     virtual EvaluationStandardTreeItem *child(int row) override;
     virtual int childCount() const override;
@@ -32,11 +43,18 @@ public:
     virtual QVariant data(int column) const override;
     virtual int row() const override;
 
+    virtual QWidget* widget() = 0;
+
 protected:
     EvaluationRequirementGroup& group_;
-    std::string name_;
+    EvaluationRequirementStandard& standard_;
 
-    virtual void checkSubConfigurables();
+    std::string name_;
+    std::string short_name_;
+
+    virtual void checkSubConfigurables() override;
+
+    virtual void addGUIElements(QFormLayout* layout);
 };
 
 #endif // EVALUATIONREQUIREMENTCONFIG_H
