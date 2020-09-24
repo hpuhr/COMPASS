@@ -12,14 +12,6 @@ EvaluationRequirementGroup::EvaluationRequirementGroup(const std::string& class_
     assert (name_.size());
 
     createSubConfigurables();
-
-    // menu creation
-    {
-        QAction* del_action = menu_.addAction("Delete Group");
-        connect(del_action, &QAction::triggered, this, &EvaluationRequirementGroup::deleteGroupSlot);
-        QAction* add_action = menu_.addAction("Add Requirement");
-        connect(add_action, &QAction::triggered, this, &EvaluationRequirementGroup::addRequirementSlot);
-    }
 }
 
 EvaluationRequirementGroup::~EvaluationRequirementGroup()
@@ -128,12 +120,24 @@ int EvaluationRequirementGroup::row() const
 
 void EvaluationRequirementGroup::showMenu ()
 {
-    menu_.exec(QCursor::pos());
+    QMenu menu;
+
+    // menu creation
+    {
+        QAction* del_action = menu.addAction("Delete Group");
+        connect(del_action, &QAction::triggered, this, &EvaluationRequirementGroup::deleteGroupSlot);
+        QAction* add_action = menu.addAction("Add Requirement");
+        connect(add_action, &QAction::triggered, this, &EvaluationRequirementGroup::addRequirementSlot);
+    }
+
+    menu.exec(QCursor::pos());
 }
 
 void EvaluationRequirementGroup::deleteGroupSlot()
 {
     loginf << "EvaluationRequirementGroup " << name_ << ": deleteGroupSlot";
+
+    standard_.removeGroup (name_);
 }
 
 void EvaluationRequirementGroup::addRequirementSlot()

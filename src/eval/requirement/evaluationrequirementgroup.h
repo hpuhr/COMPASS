@@ -60,8 +60,6 @@ protected:
 
     std::map<std::string, std::unique_ptr<EvaluationRequirementConfig>> configs_;
 
-    QMenu menu_;
-
     virtual void checkSubConfigurables() override;
 };
 

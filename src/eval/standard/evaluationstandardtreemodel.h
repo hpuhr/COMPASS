@@ -27,6 +27,9 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+    void beginReset();
+    void endReset();
+
 private:
     EvaluationStandard& standard_;
 

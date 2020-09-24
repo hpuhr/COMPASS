@@ -36,6 +36,11 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     setLayout(main_layout);
 }
 
+EvaluationStandardTreeModel& EvaluationStandardWidget::model()
+{
+    return standard_model_;
+}
+
 void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 {
     EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
@@ -65,4 +70,9 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
     }
     else
         assert (false);
+}
+
+void EvaluationStandardWidget::expandAll()
+{
+    tree_view_->expandAll();
 }

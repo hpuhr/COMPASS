@@ -24,6 +24,9 @@ public slots:
 public:
     EvaluationStandardWidget(EvaluationStandard& standard);
 
+    EvaluationStandardTreeModel& model();
+    void expandAll();
+
 protected:
     EvaluationStandard& standard_;
 

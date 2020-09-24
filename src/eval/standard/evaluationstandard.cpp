@@ -2,9 +2,12 @@
 #include "evaluationmanager.h"
 #include "evaluationrequirementgroup.h"
 #include "evaluationstandardwidget.h"
+#include "evaluationstandardtreemodel.h"
 #include "logger.h"
 
 #include <QTreeView>
+#include <QInputDialog>
+#include <QMessageBox>
 
 using namespace std;
 
@@ -61,6 +64,9 @@ void EvaluationStandard::addGroup (const std::string& name)
 {
     assert (!hasGroup(name));
 
+    if (widget_)
+        beginModelReset();
+
     std::string instance = "EvaluationRequirementGroup" + name + "0";
 
     Configuration& config = addNewSubConfiguration("EvaluationRequirementGroup", instance);
@@ -69,6 +75,9 @@ void EvaluationStandard::addGroup (const std::string& name)
     generateSubConfigurable("EvaluationRequirementGroup", instance);
 
     assert (hasGroup(name));
+
+    if (widget_)
+        endModelReset();
 
     emit groupsChangedSignal();
 }
@@ -82,7 +91,14 @@ EvaluationRequirementGroup& EvaluationStandard::group (const std::string& name)
 void EvaluationStandard::removeGroup (const std::string& name)
 {
     assert (hasGroup(name));
+
+    if (widget_)
+        beginModelReset();
+
     groups_.erase(name);
+
+    if (widget_)
+        endModelReset();
 
     emit groupsChangedSignal();
 }
@@ -97,8 +113,6 @@ EvaluationStandardWidget* EvaluationStandard::widget()
 
 void EvaluationStandard::checkSubConfigurables()
 {
-    if (!hasGroup("All"))
-        addGroup("All");
 }
 
 EvaluationStandardTreeItem* EvaluationStandard::child(int row)
@@ -147,10 +161,52 @@ void EvaluationStandard::showMenu ()
     menu_.exec(QCursor::pos());
 }
 
+void EvaluationStandard::beginModelReset()
+{
+    widget()->model().beginReset();
+}
+
+void EvaluationStandard::endModelReset()
+{
+    widget()->model().endReset();
+    widget()->expandAll();
+}
+
 
 void EvaluationStandard::addGroupSlot()
 {
-    loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot";
+    loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot: " << groups_.size() << " groups" ;
+
+    bool ok;
+    QString text =
+        QInputDialog::getText(nullptr, tr("Group Name"),
+                              tr("Specify a (unique) group name:"), QLineEdit::Normal, "", &ok);
+
+    if (ok && !text.isEmpty())
+    {
+        std::string name = text.toStdString();
+
+        if (!name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
+            "Group has to have a non-empty name.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        if (hasGroup(name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
+            "Group with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        addGroup(name);
+
+        loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot: added " << name << ", "
+               << groups_.size() << " groups" ;
+    }
 }
 
 

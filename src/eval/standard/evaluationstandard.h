@@ -13,6 +13,7 @@
 class EvaluationManager;
 class EvaluationRequirementGroup;
 class EvaluationStandardWidget;
+class EvaluationStandardTreeModel;
 
 class EvaluationStandard : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
@@ -56,6 +57,8 @@ public:
     EvaluationStandardRootItem& rootItem();
 
     void showMenu ();
+    void beginModelReset();
+    void endModelReset();
 
 protected:
     EvaluationManager& eval_man_;

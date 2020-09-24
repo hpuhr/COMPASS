@@ -94,4 +94,13 @@ int EvaluationStandardTreeModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
+void EvaluationStandardTreeModel::beginReset()
+{
+    beginResetModel();
+}
+void EvaluationStandardTreeModel::endReset()
+{
+    endResetModel();
+}
+
 
