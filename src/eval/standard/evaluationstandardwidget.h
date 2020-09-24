@@ -27,6 +27,8 @@ public:
     EvaluationStandardTreeModel& model();
     void expandAll();
 
+    void showRequirementWidget(QWidget* widget); // can be nullptr
+
 protected:
     EvaluationStandard& standard_;
 

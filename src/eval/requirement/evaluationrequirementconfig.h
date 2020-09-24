@@ -7,7 +7,7 @@
 #include "evaluationstandardtreeitem.h"
 
 class EvaluationRequirementGroup;
-class EvaluationRequirementStandard;
+class EvaluationStandard;
 
 class QWidget;
 class QFormLayout;
@@ -24,7 +24,7 @@ public slots:
 
 public:
     EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                EvaluationRequirementGroup& group, EvaluationRequirementStandard& standard);
+                                EvaluationRequirementGroup& group, EvaluationStandard& standard);
     virtual ~EvaluationRequirementConfig();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -47,7 +47,7 @@ public:
 
 protected:
     EvaluationRequirementGroup& group_;
-    EvaluationRequirementStandard& standard_;
+    EvaluationStandard& standard_;
 
     std::string name_;
     std::string short_name_;

@@ -10,9 +10,9 @@
 #include <memory>
 
 class EvaluationRequirementGroup;
-class EvaluationRequirementStandard;
+class EvaluationStandard;
 
-class EvaluationRequirementDetectionConfig : EvaluationRequirementConfig
+class EvaluationRequirementDetectionConfig : public EvaluationRequirementConfig
 {
     Q_OBJECT
 
@@ -22,13 +22,41 @@ public slots:
 
 public:
     EvaluationRequirementDetectionConfig(const std::string& class_id, const std::string& instance_id,
-                                         EvaluationRequirementGroup& group, EvaluationRequirementStandard& standard);
+                                         EvaluationRequirementGroup& group, EvaluationStandard& standard);
     virtual ~EvaluationRequirementDetectionConfig();
 
     virtual void addGUIElements(QFormLayout* layout) override;
     EvaluationRequirementDetectionConfigWidget* widget() override;
 
+    float updateInterval() const;
+    void updateInterval(float value);
+
+    float minimumProbability() const;
+    void minimumProbability(float value);
+
+    bool useMaxGapInterval() const;
+    void useMaxGapInterval(bool value);
+
+    float maxGapInterval() const;
+    void maxGapInterval(float value);
+
+    bool useMissTolerance() const;
+    void useMissTolerance(bool value);
+
+    float missTolerance() const;
+    void missTolerance(float value);
+
 protected:
+    float update_interval_s{0};
+
+    float minimum_probability_{0};
+
+    bool use_max_gap_interval_{true};
+    float max_gap_interval_s{0};
+
+    bool use_miss_tolerance_{false};
+    float miss_tolerance_s{0};
+
     std::unique_ptr<EvaluationRequirementDetectionConfigWidget> widget_;
 };
 

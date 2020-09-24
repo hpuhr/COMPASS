@@ -52,13 +52,18 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 
         EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
 
+        showRequirementWidget(nullptr);
+
         std->showMenu();
+
     }
     else if (dynamic_cast<EvaluationRequirementGroup*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
 
         EvaluationRequirementGroup* group = dynamic_cast<EvaluationRequirementGroup*>(item);
+
+        showRequirementWidget(nullptr);
 
         group->showMenu();
     }
@@ -67,6 +72,8 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
         loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
 
         EvaluationRequirementConfig* config = dynamic_cast<EvaluationRequirementConfig*>(item);
+
+        showRequirementWidget(config->widget());
     }
     else
         assert (false);
@@ -75,4 +82,21 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 void EvaluationStandardWidget::expandAll()
 {
     tree_view_->expandAll();
+}
+
+void EvaluationStandardWidget::showRequirementWidget(QWidget* widget)
+{
+    assert(requirements_widget_);
+
+    if (!widget)
+    {
+        while (requirements_widget_->count() > 0)  // remove all widgets
+            requirements_widget_->removeWidget(requirements_widget_->widget(0));
+        return;
+    }
+
+    if (requirements_widget_->indexOf(widget) < 0)
+        requirements_widget_->addWidget(widget);
+
+    requirements_widget_->setCurrentWidget(widget);
 }

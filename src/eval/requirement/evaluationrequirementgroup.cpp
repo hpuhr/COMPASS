@@ -1,7 +1,10 @@
 #include "evaluationrequirementgroup.h"
 #include "evaluationstandard.h"
-#include "evaluationrequirementconfig.h"
+#include "evaluationrequirementdetectionconfig.h"
 #include "logger.h"
+
+#include <QInputDialog>
+#include <QMessageBox>
 
 #include <algorithm>
 
@@ -27,15 +30,16 @@ EvaluationRequirementGroup::~EvaluationRequirementGroup()
 void EvaluationRequirementGroup::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
 {
-//    if (class_id.compare("EvaluationRequirementConfig") == 0)
-//    {
-//        EvaluationRequirementConfig* config = new EvaluationRequirementConfig(class_id, instance_id, *this);
-//        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+    if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
+    {
+        EvaluationRequirementDetectionConfig* config = new EvaluationRequirementDetectionConfig(
+                    class_id, instance_id, *this, standard_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
-//        assert(configs_.find(config->name()) == configs_.end());
-//        configs_[config->name()].reset(config);
-//    }
-//    else
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirementConfig>(config));
+    }
+    else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
@@ -62,6 +66,8 @@ void EvaluationRequirementGroup::addRequirementConfig (const std::string& class_
 
     assert (!hasRequirementConfig(name));
 
+    standard_.beginModelReset();
+
     std::string instance = class_id + name + "0";
 
     Configuration& config = addNewSubConfiguration(class_id, instance);
@@ -71,6 +77,8 @@ void EvaluationRequirementGroup::addRequirementConfig (const std::string& class_
     generateSubConfigurable(class_id, instance);
 
     sortConfigs();
+
+    standard_.endModelReset();
 
     assert (hasRequirementConfig(name));
 
@@ -174,12 +182,56 @@ void EvaluationRequirementGroup::addRequirementSlot()
     string class_id = data.toString().toStdString();
 
     loginf << "EvaluationRequirementGroup " << name_ << ": addRequirementSlot: class_id " << class_id;
+
+    bool ok;
+    QString text =
+            QInputDialog::getText(nullptr, tr("Requirement Name"),
+                                  tr("Specify a (unique) requirement name:"), QLineEdit::Normal,
+                                  "", &ok);
+
+    std::string req_name;
+
+    if (ok && !text.isEmpty())
+    {
+        req_name = text.toStdString();
+        if (!req_name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Requirement Failed",
+                                  "Requirement has to have a non-empty name.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        if (hasRequirementConfig(req_name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Adding Requirement Failed",
+                                  "Requirement with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+    }
+
+    std::string req_short_name;
+
+    text =  QInputDialog::getText(nullptr, tr("Requirement Short Name"),
+                                  tr("Specify a requirement short name:"), QLineEdit::Normal,
+                                  "", &ok);
+
+    if (ok && !text.isEmpty())
+    {
+        req_short_name = text.toStdString();
+    }
+
+    loginf << "EvaluationRequirementGroup " << name_ << ": addRequirementSlot: class_id " << class_id
+           << " req_name '" << req_name << "' req_short_name '" << req_short_name << "'";
+
+    addRequirementConfig(class_id, req_name, req_short_name);
 }
 
 void EvaluationRequirementGroup::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
-        [](const unique_ptr<EvaluationRequirementConfig>&a, const unique_ptr<EvaluationRequirementConfig>& b) -> bool
+         [](const unique_ptr<EvaluationRequirementConfig>&a, const unique_ptr<EvaluationRequirementConfig>& b) -> bool
     {
         return a->name() > b->name();
     });
