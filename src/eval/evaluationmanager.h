@@ -9,6 +9,7 @@
 #include "sectorlayer.h"
 #include "activedatasource.h"
 #include "evaluationdata.h"
+#include "evaluationresultsgenerator.h"
 
 class ATSDB;
 class EvaluationManagerWidget;
@@ -123,6 +124,7 @@ protected:
     std::map<std::string, std::unique_ptr<EvaluationStandard>> standards_;
 
     EvaluationData data_;
+    EvaluationResultsGenerator results_gen_;
 
     virtual void checkSubConfigurables() override;
 

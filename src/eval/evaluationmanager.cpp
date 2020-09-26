@@ -29,7 +29,7 @@ using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb), data_(*this)
+    : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb), data_(*this), results_gen_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
@@ -263,6 +263,9 @@ void EvaluationManager::evaluate ()
 
     assert (initialized_);
     assert (data_loaded_);
+    assert (hasCurrentStandard());
+
+    results_gen_.evaluate(data_, currentStandard());
 
     evaluated_ = true;
 
@@ -730,6 +733,9 @@ void EvaluationManager::currentStandardName(const std::string& current_standard)
         assert (hasStandard(current_standard_));
 
     emit currentStandardChangedSignal();
+
+    if (widget_)
+        widget_->updateButtons();
 }
 
 EvaluationStandard& EvaluationManager::currentStandard()

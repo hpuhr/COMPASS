@@ -1,5 +1,6 @@
 include("${CMAKE_CURRENT_LIST_DIR}/data/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/requirement/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/results/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/standard/CMakeLists.txt")
 
 include_directories (

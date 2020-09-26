@@ -43,8 +43,6 @@ EvaluationRequirementDetectionConfigWidget* EvaluationRequirementDetectionConfig
 
 std::shared_ptr<EvaluationRequirement> EvaluationRequirementDetectionConfig::createRequirement()
 {
-    //EvaluationRequirement req (name_, short_name_, group_.name());
-
     shared_ptr<EvaluationRequirementDetection> req = make_shared<EvaluationRequirementDetection>(
                 name_, short_name_, group_.name(), update_interval_s_, minimum_probability_,
                 use_max_gap_interval_, max_gap_interval_s_, use_miss_tolerance_, miss_tolerance_s_);

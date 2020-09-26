@@ -67,7 +67,7 @@ EvaluationManagerWidget::~EvaluationManagerWidget()
 
 void EvaluationManagerWidget::updateButtons()
 {
-    evaluate_button_->setEnabled(eval_man_.dataLoaded());
+    evaluate_button_->setEnabled(eval_man_.dataLoaded() && eval_man_.hasCurrentStandard());
     gen_report_button_->setEnabled(eval_man_.evaluated());
 }
 
