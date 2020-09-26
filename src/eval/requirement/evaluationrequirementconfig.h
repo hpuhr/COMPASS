@@ -8,6 +8,7 @@
 
 class EvaluationRequirementGroup;
 class EvaluationStandard;
+class EvaluationRequirement;
 
 class QWidget;
 class QFormLayout;
@@ -44,6 +45,7 @@ public:
     virtual int row() const override;
 
     virtual QWidget* widget() = 0;
+    virtual std::shared_ptr<EvaluationRequirement> createRequirement() = 0;
 
 protected:
     EvaluationRequirementGroup& group_;

@@ -4,6 +4,7 @@
 #include "configurable.h"
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirementdetectionconfigwidget.h"
+#include "evaluationrequirementdetection.h"
 
 #include <QObject>
 
@@ -27,6 +28,7 @@ public:
 
     virtual void addGUIElements(QFormLayout* layout) override;
     EvaluationRequirementDetectionConfigWidget* widget() override;
+    std::shared_ptr<EvaluationRequirement> createRequirement() override;
 
     float updateInterval() const;
     void updateInterval(float value);
@@ -47,15 +49,15 @@ public:
     void missTolerance(float value);
 
 protected:
-    float update_interval_s{0};
+    float update_interval_s_{0};
 
     float minimum_probability_{0};
 
     bool use_max_gap_interval_{true};
-    float max_gap_interval_s{0};
+    float max_gap_interval_s_{0};
 
     bool use_miss_tolerance_{false};
-    float miss_tolerance_s{0};
+    float miss_tolerance_s_{0};
 
     std::unique_ptr<EvaluationRequirementDetectionConfigWidget> widget_;
 };
