@@ -51,6 +51,9 @@ public:
     const std::multimap<float, unsigned int>& refData() const;
     const std::multimap<float, unsigned int>& tstData() const;
 
+    bool hasRefDataForTime (float tod, float d_max) const;
+    std::pair<float, float> refTimesFor (float tod) const;
+
 protected:
     bool use_ {true};
 

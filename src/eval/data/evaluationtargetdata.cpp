@@ -166,6 +166,52 @@ const std::multimap<float, unsigned int>& EvaluationTargetData::tstData() const
     return tst_data_;
 }
 
+bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
+{
+    if (ref_data_.count(tod))
+        return true; // contains exact value
+
+//    Return iterator to lower bound
+//    Returns an iterator pointing to the first element in the container whose key is not considered to go
+//    before k (i.e., either it is equivalent or goes after).
+
+    auto lb_it = ref_data_.lower_bound(tod);
+
+    if (lb_it == ref_data_.end())
+        return false;
+
+    assert (lb_it->first >= tod);
+
+    if (lb_it->first - tod > d_max)
+        return false; // too much time difference
+
+    // save value
+    float upper = lb_it->first;
+
+    lb_it--;
+
+    if (lb_it == ref_data_.end())
+        return false;
+
+    assert (tod >= lb_it->first);
+
+    if (tod - lb_it->first > d_max)
+        return false; // too much time difference
+
+    float lower = lb_it->first;
+
+    logdbg << "EvaluationTargetData: hasRefDataForTime: found " << String::timeStringFromDouble(lower)
+           << " <= " << String::timeStringFromDouble(tod)
+           << " <= " << String::timeStringFromDouble(upper);
+
+    return true;
+}
+
+std::pair<float, float> EvaluationTargetData::refTimesFor (float tod)  const
+{
+    // TODO
+}
+
 std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
 {
     return ref_buffer;

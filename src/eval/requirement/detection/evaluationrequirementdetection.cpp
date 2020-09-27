@@ -66,6 +66,10 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
     float missed_uis {0};
     float max_gap_uis {0};
 
+    bool no_ref_exists {false};
+    float no_ref_first_tod {0};
+    float no_ref_uis {0};
+
     for (const auto& tst_id : tst_data)
     {
         last_tod = tod;
@@ -76,6 +80,27 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
             first = false;
             first_tod = tod;
             continue;
+        }
+
+        if (!target_data.hasRefDataForTime(tod, 4)) // seconds max time difference
+        {
+            if (!no_ref_exists)
+                no_ref_first_tod = tod; // save first occurance of no ref
+
+            no_ref_exists = true;
+            continue; // try next time
+        }
+
+        if (no_ref_exists) // previously no ref existed
+        {
+            assert (no_ref_first_tod);
+            assert (tod >= no_ref_first_tod);
+            no_ref_uis = floor(tod - no_ref_first_tod);
+
+            no_ref_exists = false;
+            no_ref_first_tod = 0;
+
+            continue; // cannot assess this time, goto next
         }
 
         assert (tod >= last_tod);
@@ -106,7 +131,9 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
 
     if (!first && sum_uis)
     {
-        float pd = 1.0 - (missed_uis/(sum_uis-max_gap_uis));
+        assert (sum_uis >= max_gap_uis+no_ref_uis);
+
+        float pd = 1.0 - (missed_uis/(sum_uis-max_gap_uis-no_ref_uis));
 
         loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " pd " << String::percentToString(100.0 * pd);
