@@ -24,7 +24,7 @@ public:
 
     float missTolerance() const;
 
-    virtual void evaluate (EvaluationTargetData& target_data) override;
+    virtual void evaluate (const EvaluationTargetData& target_data) override;
 
 protected:
     float update_interval_s_{0};

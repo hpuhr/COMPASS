@@ -10,7 +10,7 @@ class EvaluationRequirement
 public:
     EvaluationRequirement(const std::string& name, const std::string& short_name, const std::string& group_name);
 
-    virtual void evaluate (EvaluationTargetData& target_data) = 0;
+    virtual void evaluate (const EvaluationTargetData& target_data) = 0;
 
     std::string name() const;
     std::string shortname() const;

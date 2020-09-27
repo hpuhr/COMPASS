@@ -1,5 +1,6 @@
 #include "evaluationrequirementdetection.h"
 #include "evaluationdata.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -47,7 +48,7 @@ float EvaluationRequirementDetection::missTolerance() const
     return miss_tolerance_s_;
 }
 
-void EvaluationRequirementDetection::evaluate (EvaluationTargetData& target_data)
+void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& target_data)
 {
-
+    loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_;
 }

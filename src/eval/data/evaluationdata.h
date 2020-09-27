@@ -46,6 +46,10 @@ public:
     bool hasTargetData (unsigned int utn);
     const EvaluationTargetData& targetData(unsigned int utn);
 
+    typedef TargetCache::index<target_tag>::type TargetCacheIterator;
+    TargetCacheIterator::const_iterator begin() { return target_data_.get<target_tag>().begin(); }
+    TargetCacheIterator::const_iterator end() { return target_data_.get<target_tag>().end(); }
+
     void clear();
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
