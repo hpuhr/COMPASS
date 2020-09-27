@@ -155,6 +155,27 @@ void EvaluationTargetData::use(bool use)
     use_ = use;
 }
 
+const std::multimap<float, unsigned int>& EvaluationTargetData::refData() const
+{
+    return ref_data_;
+}
+
+
+const std::multimap<float, unsigned int>& EvaluationTargetData::tstData() const
+{
+    return tst_data_;
+}
+
+std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
+{
+    return ref_buffer;
+}
+
+std::shared_ptr<Buffer> EvaluationTargetData::tstBuffer() const
+{
+    return tst_buffer;
+}
+
 std::vector<string> EvaluationTargetData::callsigns() const
 {
     return callsigns_;

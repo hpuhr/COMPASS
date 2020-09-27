@@ -36,6 +36,9 @@ protected:
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
+
+    bool isMiss (float d_tod);
+    bool isMaxGap (float d_tod);
 };
 
 #endif // EVALUATIONREQUIREMENTDETECTION_H

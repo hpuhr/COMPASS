@@ -22,18 +22,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     for (auto& req_group_it : standard)
     {
-        loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
+        logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
 
         for (auto& req_cfg_it : *req_group_it.second)
         {
-            loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
+            logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                    << " req '" << req_cfg_it->name() << "'";
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
 
             for (auto& target_data_it : data)
             {
-                loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
+                logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
 
                 req->evaluate(target_data_it);

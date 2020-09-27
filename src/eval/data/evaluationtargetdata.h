@@ -15,9 +15,11 @@ public:
     bool hasRefBuffer () const;
     void setRefBuffer (std::shared_ptr<Buffer> buffer);
     void addRefIndex (float tod, unsigned int index);
+    std::shared_ptr<Buffer> refBuffer() const;
 
     bool hasTstBuffer () const;
     void setTstBuffer (std::shared_ptr<Buffer> buffer);
+    std::shared_ptr<Buffer> tstBuffer() const;
     void addTstIndex (float tod, unsigned int index);
 
     bool hasData() const;
@@ -45,6 +47,9 @@ public:
 
     bool use() const;
     void use(bool use);
+
+    const std::multimap<float, unsigned int>& refData() const;
+    const std::multimap<float, unsigned int>& tstData() const;
 
 protected:
     bool use_ {true};
