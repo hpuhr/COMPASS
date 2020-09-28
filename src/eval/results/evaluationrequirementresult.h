@@ -6,6 +6,10 @@
 
 class EvaluationRequirement;
 
+namespace EvaluationResultsReport {
+    class RootItem;
+}
+
 class EvaluationRequirementResult
 {
 public:
@@ -18,6 +22,7 @@ public:
     virtual std::shared_ptr<EvaluationRequirementResult> copy() = 0; // copies this instance
 
     virtual void print() = 0;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     std::vector<unsigned int> utns() const;
     std::string utnsString() const;

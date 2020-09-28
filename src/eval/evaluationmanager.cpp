@@ -781,6 +781,11 @@ void EvaluationManager::deleteCurrentStandard()
     currentStandardName("");
 }
 
+EvaluationResultsGenerator& EvaluationManager::resultsGenerator()
+{
+    return results_gen_;
+}
+
 bool EvaluationManager::sectorsLoaded() const
 {
     return sectors_loaded_;

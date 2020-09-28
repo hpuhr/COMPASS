@@ -21,6 +21,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 {
     loginf << "EvaluationResultsGenerator: evaluate";
 
+    results_model_.beginReset();
+
+    std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
+
     for (auto& req_group_it : standard)
     {
         logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
@@ -47,6 +51,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 std::shared_ptr<EvaluationRequirementResult> result = req->evaluate(target_data_it, req);
 
                 result->print();
+                result->addToReport(root_item);
 
                 if (!result_sum)
                     result_sum = result->copy();
@@ -57,4 +62,11 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             result_sum->print();
         }
     }
+
+    results_model_.endReset();
+}
+
+EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
+{
+    return results_model_;
 }

@@ -4,7 +4,7 @@
 EvaluationStandardTreeModel::EvaluationStandardTreeModel(EvaluationStandard& standard, QObject* parent)
     : QAbstractItemModel(parent), standard_(standard)
 {
-    root_item = &standard.rootItem();
+    root_item_ = &standard.rootItem();
 }
 
 EvaluationStandardTreeModel::~EvaluationStandardTreeModel()
@@ -15,7 +15,7 @@ int EvaluationStandardTreeModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return static_cast<EvaluationStandardTreeItem*>(parent.internalPointer())->columnCount();
-    return root_item->columnCount();
+    return root_item_->columnCount();
 }
 
 QVariant EvaluationStandardTreeModel::data(const QModelIndex &index, int role) const
@@ -43,7 +43,7 @@ QVariant EvaluationStandardTreeModel::headerData(int section, Qt::Orientation or
                                int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return root_item->data(section);
+        return root_item_->data(section);
 
     return QVariant();
 }
@@ -56,7 +56,7 @@ QModelIndex EvaluationStandardTreeModel::index(int row, int column, const QModel
     EvaluationStandardTreeItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = root_item;
+        parentItem = root_item_;
     else
         parentItem = static_cast<EvaluationStandardTreeItem*>(parent.internalPointer());
 
@@ -74,7 +74,7 @@ QModelIndex EvaluationStandardTreeModel::parent(const QModelIndex &index) const
     EvaluationStandardTreeItem *childItem = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
     EvaluationStandardTreeItem *parentItem = childItem->parentItem();
 
-    if (parentItem == root_item)
+    if (parentItem == root_item_)
         return QModelIndex();
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -87,7 +87,7 @@ int EvaluationStandardTreeModel::rowCount(const QModelIndex &parent) const
         return 0;
 
     if (!parent.isValid())
-        parentItem = root_item;
+        parentItem = root_item_;
     else
         parentItem = static_cast<EvaluationStandardTreeItem*>(parent.internalPointer());
 

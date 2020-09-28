@@ -168,10 +168,8 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " no data for pd";
 
-    vector<unsigned int> utns = {target_data.utn_};
-
     return make_shared<EvaluationRequirementDetectionResult>(
-                instance, utns, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
+                instance, vector<unsigned int> {target_data.utn_}, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
 }
 
 bool EvaluationRequirementDetection::isMiss (float d_tod)

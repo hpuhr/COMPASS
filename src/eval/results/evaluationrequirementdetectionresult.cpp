@@ -1,6 +1,7 @@
 #include "evaluationrequirementdetectionresult.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
+#include "eval/results/report/rootitem.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -73,4 +74,15 @@ void EvaluationRequirementDetectionResult::print()
     else
         loginf << "EvaluationRequirementDetectionResult: print: req. name " << req->name()
                << " utn " << utnsString() << " has no data";
+}
+
+void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport";
+
+    root_item->getSection("Overview");
+    root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
+
+    if (utns_.size() == 1)
+        root_item->getSection("Targets:"+to_string(utns_.at(0)));
 }

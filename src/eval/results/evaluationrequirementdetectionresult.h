@@ -14,9 +14,10 @@ public:
     virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
     // joins other result to this one
 
-    virtual std::shared_ptr<EvaluationRequirementResult> copy(); // copies this instance
+    virtual std::shared_ptr<EvaluationRequirementResult> copy() override; // copies this instance
 
     virtual void print() override;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
     float sum_uis_ {0};

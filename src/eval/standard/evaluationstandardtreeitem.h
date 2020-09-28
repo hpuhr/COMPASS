@@ -15,7 +15,7 @@ public:
     virtual int columnCount() const = 0;
     virtual QVariant data(int column) const = 0;
     virtual int row() const = 0;
-    EvaluationStandardTreeItem *parentItem();
+    EvaluationStandardTreeItem* parentItem();
 
 protected:
     EvaluationStandardTreeItem* parent_item_ {nullptr};

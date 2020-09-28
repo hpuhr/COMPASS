@@ -101,6 +101,8 @@ public:
     unsigned int standardsSize () { return standards_.size(); };
 
 
+    EvaluationResultsGenerator& resultsGenerator();
+
 protected:
     ATSDB& atsdb_;
 

@@ -9,7 +9,7 @@ class EvaluationStandard;
 class EvaluationStandardTreeItem;
 
 
-class EvaluationStandardTreeModel: public QAbstractItemModel
+class EvaluationStandardTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -33,7 +33,7 @@ public:
 private:
     EvaluationStandard& standard_;
 
-    EvaluationStandardTreeItem* root_item;
+    EvaluationStandardTreeItem* root_item_;
 };
 
 #endif // EVALUATIONSTANDARDTREEMODEL_H
