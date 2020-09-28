@@ -24,7 +24,8 @@ public:
 
     float missTolerance() const;
 
-    virtual void evaluate (const EvaluationTargetData& target_data) override;
+    virtual std::shared_ptr<EvaluationRequirementResult> evaluate (
+            const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) override;
 
 protected:
     float update_interval_s_{0};

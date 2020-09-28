@@ -49,6 +49,9 @@ public:
 
     EvaluationManagerWidget* widget();
 
+    bool sectorsLoaded() const;
+    void loadSectors();
+
     bool hasSectorLayer (const std::string& layer_name);
     //void renameSectorLayer (const std::string& name, const std::string& new_name);
     std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
@@ -97,9 +100,11 @@ public:
     EvaluationStandardIterator standardsEnd() { return standards_.end(); }
     unsigned int standardsSize () { return standards_.size(); };
 
+
 protected:
     ATSDB& atsdb_;
 
+    bool sectors_loaded_ {false};
     bool initialized_ {false};
     bool data_loaded_ {false};
 
@@ -127,8 +132,6 @@ protected:
     EvaluationResultsGenerator results_gen_;
 
     virtual void checkSubConfigurables() override;
-
-    void loadSectors();
 
     unsigned int getMaxSectorId ();
 

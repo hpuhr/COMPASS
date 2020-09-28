@@ -49,8 +49,6 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     assert (!initialized_);
     assert (tab_widget);
 
-    loadSectors();
-
     updateReferenceDBO();
     updateTestDBO();
 
@@ -361,9 +359,11 @@ void EvaluationManager::loadSectors()
 {
     loginf << "EvaluationManager: loadSectors";
 
-    assert (!initialized_);
+    assert (!sectors_loaded_);
 
     sector_layers_ = ATSDB::instance().interface().loadSectors();
+
+    sectors_loaded_ = true;
 }
 
 unsigned int EvaluationManager::getMaxSectorId ()
@@ -406,7 +406,7 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
 
 bool EvaluationManager::hasSector (const string& name, const string& layer_name)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     if (!hasSectorLayer(layer_name))
         return false;
@@ -416,7 +416,7 @@ bool EvaluationManager::hasSector (const string& name, const string& layer_name)
 
 bool EvaluationManager::hasSector (unsigned int id)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     for (auto& sec_lay_it : sector_layers_)
     {
@@ -431,7 +431,7 @@ bool EvaluationManager::hasSector (unsigned int id)
 
 std::shared_ptr<Sector> EvaluationManager::sector (const string& name, const string& layer_name)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(name, layer_name));
 
     return sectorLayer(layer_name)->sector(name);
@@ -439,7 +439,7 @@ std::shared_ptr<Sector> EvaluationManager::sector (const string& name, const str
 
 std::shared_ptr<Sector> EvaluationManager::sector (unsigned int id)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(id));
 
     for (auto& sec_lay_it : sector_layers_)
@@ -457,7 +457,7 @@ std::shared_ptr<Sector> EvaluationManager::sector (unsigned int id)
 
 void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(id));
 
     shared_ptr<Sector> tmp_sector = sector(id);
@@ -477,14 +477,14 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
 
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     return sector_layers_;
 }
 
 void EvaluationManager::saveSector(unsigned int id)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(id));
 
     saveSector(sector(id));
@@ -492,7 +492,7 @@ void EvaluationManager::saveSector(unsigned int id)
 
 void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(sector->name(), sector->layerName()));
     ATSDB::instance().interface().saveSector(sector);
 
@@ -501,7 +501,7 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
 
 void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSector(sector->name(), sector->layerName()));
 
     string layer_name = sector->layerName();
@@ -527,7 +527,7 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 
 void EvaluationManager::deleteAllSectors()
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     sector_layers_.clear();
 
     ATSDB::instance().interface().deleteAllSectors();
@@ -540,7 +540,7 @@ void EvaluationManager::importSectors (const std::string& filename)
 {
     loginf << "EvaluationManager: importSectors: filename '" << filename << "'";
 
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     sector_layers_.clear();
     ATSDB::instance().interface().clearSectorsTable();
@@ -615,7 +615,7 @@ void EvaluationManager::exportSectors (const std::string& filename)
 {
     loginf << "EvaluationManager: exportSectors: filename '" << filename << "'";
 
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     json j;
 
@@ -779,6 +779,11 @@ void EvaluationManager::deleteCurrentStandard()
     emit standardsChangedSignal();
 
     currentStandardName("");
+}
+
+bool EvaluationManager::sectorsLoaded() const
+{
+    return sectors_loaded_;
 }
 
 void EvaluationManager::updateReferenceDBO()

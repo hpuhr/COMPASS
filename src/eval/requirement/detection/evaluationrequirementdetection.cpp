@@ -1,4 +1,5 @@
 #include "evaluationrequirementdetection.h"
+#include "evaluationrequirementdetectionresult.h"
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -50,7 +51,8 @@ float EvaluationRequirementDetection::missTolerance() const
     return miss_tolerance_s_;
 }
 
-void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& target_data)
+std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::evaluate (
+        const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
            << " update_interval " << update_interval_s_ << " minimum_probability " << minimum_probability_
@@ -83,7 +85,7 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
             first = false;
             first_tod = tod;
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " first tod " << String::timeStringFromDouble(first_tod);
 
             continue;
@@ -96,7 +98,7 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
 
             no_ref_exists = true;
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " no ref at " << String::timeStringFromDouble(tod);
 
             continue; // try next time
@@ -111,7 +113,7 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
             no_ref_exists = false;
             no_ref_first_tod = 0;
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " ref after no ref at " << String::timeStringFromDouble(tod) << " no_ref_uis " << no_ref_uis;
 
 
@@ -139,7 +141,7 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
         {
             missed_uis += floor(d_tod/update_interval_s_);
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
                    << floor(d_tod/update_interval_s_)
                    << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
@@ -149,7 +151,7 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
 
     float sum_uis = floor(tod - first_tod);
 
-    loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
            << " sum_uis " << sum_uis << " max_gap_uis " << max_gap_uis << " no_ref_uis " << no_ref_uis
            << " max_gap_uis+no_ref_uis " << max_gap_uis+no_ref_uis;
 
@@ -159,12 +161,17 @@ void EvaluationRequirementDetection::evaluate (const EvaluationTargetData& targe
 
         float pd = 1.0 - (missed_uis/(sum_uis-max_gap_uis-no_ref_uis));
 
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
     }
     else
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " no data for pd";
+
+    vector<unsigned int> utns = {target_data.utn_};
+
+    return make_shared<EvaluationRequirementDetectionResult>(
+                instance, utns, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
 }
 
 bool EvaluationRequirementDetection::isMiss (float d_tod)

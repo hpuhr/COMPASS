@@ -2,15 +2,19 @@
 #define EVALUATIONREQUIREMENT_H
 
 #include <string>
+#include <memory>
 
 class EvaluationTargetData;
+class EvaluationRequirementResult;
 
 class EvaluationRequirement
 {
 public:
     EvaluationRequirement(const std::string& name, const std::string& short_name, const std::string& group_name);
 
-    virtual void evaluate (const EvaluationTargetData& target_data) = 0;
+    virtual std::shared_ptr<EvaluationRequirementResult> evaluate (
+            const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) = 0;
+    // instance is the self-reference for the result
 
     std::string name() const;
     std::string shortname() const;

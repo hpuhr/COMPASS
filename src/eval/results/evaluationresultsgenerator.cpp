@@ -5,6 +5,7 @@
 #include "evaluationrequirementgroup.h"
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirement.h"
+#include "evaluationrequirementresult.h"
 #include "logger.h"
 
 using namespace std;
@@ -24,12 +25,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     {
         logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
 
+
+
+
         for (auto& req_cfg_it : *req_group_it.second)
         {
             logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                    << " req '" << req_cfg_it->name() << "'";
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
+            std::shared_ptr<EvaluationRequirementResult> result_sum;
 
             for (auto& target_data_it : data)
             {
@@ -39,8 +44,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
 
-                req->evaluate(target_data_it);
+                std::shared_ptr<EvaluationRequirementResult> result = req->evaluate(target_data_it, req);
+
+                result->print();
+
+                if (!result_sum)
+                    result_sum = result->copy();
+                else
+                    result_sum->join(result);
             }
+
+            result_sum->print();
         }
     }
 }

@@ -131,7 +131,7 @@ void DBInterface::databaseContentChanged()
     if (!existsSectorsTable())
         createSectorsTable();
 
-    //ATSDB::instance().evaluationManager().init(); // done in mainwindow
+    ATSDB::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     emit databaseContentChangedSignal();
 }
