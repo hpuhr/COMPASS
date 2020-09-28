@@ -33,6 +33,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             for (auto& target_data_it : data)
             {
+//                if (target_data_it.utn_ != 610)
+//                    continue;
+
                 logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
 
