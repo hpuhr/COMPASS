@@ -5,13 +5,13 @@ namespace EvaluationResultsReport
 {
 
     Section::Section(string heading, TreeItem* parent_item)
-        : TreeItem(parent_item), heading_(heading)
+        : TreeItem(heading, parent_item), heading_(heading)
     {
     }
 
    TreeItem* Section::child(int row)
     {
-        if (row < sub_sections_.size() || row > 0)
+        if (row < 0 || row >= sub_sections_.size())
             return nullptr;
 
         return sub_sections_.at(row).get();

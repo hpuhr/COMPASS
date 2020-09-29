@@ -30,7 +30,7 @@ namespace EvaluationResultsReport
         void addSubSection (const std::string& heading);
 
     protected:
-        string heading_;
+        string heading_; // name same as heading
 
         vector<shared_ptr<Section>> sub_sections_;
 

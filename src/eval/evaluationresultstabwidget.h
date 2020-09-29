@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QTreeView>
+#include <QStackedWidget>
 
 #include <memory>
 
@@ -13,7 +14,8 @@ class EvaluationResultsTabWidget : public QWidget
 {
     Q_OBJECT
 
-private slots:
+public slots:
+    void itemClickedSlot(const QModelIndex& index);
 
 public:
     EvaluationResultsTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
@@ -26,7 +28,7 @@ protected:
 
     std::unique_ptr<QTreeView> tree_view_;
 
-    //QStackedWidget* requirements_widget_{nullptr};
+    QStackedWidget* results_widget_{nullptr};
 };
 
 #endif // EVALUATIONRESULTSTABWIDGET_H

@@ -10,6 +10,7 @@
 #include <map>
 
 #include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index_container.hpp>
@@ -26,7 +27,7 @@ typedef boost::multi_index_container<
     EvaluationTargetData,
     boost::multi_index::indexed_by<
         boost::multi_index::random_access<>,  // this index represents insertion order
-        boost::multi_index::hashed_unique<boost::multi_index::tag<target_tag>,
+        boost::multi_index::ordered_unique<boost::multi_index::tag<target_tag>,
             boost::multi_index::member<
         EvaluationTargetData, const unsigned int, &EvaluationTargetData::utn_> >
         > >

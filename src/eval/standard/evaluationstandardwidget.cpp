@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QStackedWidget>
+#include <QScrollArea>
 
 using namespace std;
 
@@ -28,11 +29,17 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     req_layout->addWidget(tree_view_.get());
 
     // requirements stack
+    QScrollArea* scroll_area = new QScrollArea();
+    scroll_area->setWidgetResizable(true);
+
     requirements_widget_ = new QStackedWidget();
-    req_layout->addWidget(requirements_widget_);
+
+    scroll_area->setWidget(requirements_widget_);
+    req_layout->addWidget(scroll_area, 1);
 
     main_layout->addLayout(req_layout);
 
+    setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
 }
 

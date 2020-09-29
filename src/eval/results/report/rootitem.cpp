@@ -10,7 +10,7 @@ namespace EvaluationResultsReport
 {
 
     RootItem::RootItem()
-        : TreeItem(nullptr)
+        : TreeItem("Report", nullptr)
     {
         root_section_ = make_shared<Section>("Results", this);
     }
@@ -37,7 +37,7 @@ namespace EvaluationResultsReport
     {
         assert (column == 0);
 
-        return "Report";
+        return name_.c_str();
     }
 
     int RootItem::row() const

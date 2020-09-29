@@ -7,10 +7,12 @@
 
 namespace EvaluationResultsReport
 {
+    using namespace std;
+
     class TreeItem
     {
     public:
-        TreeItem(TreeItem* parent_item);
+        TreeItem(const string name, TreeItem* parent_item);
 
         virtual TreeItem *child(int row) = 0;
         virtual int childCount() const = 0;
@@ -19,7 +21,10 @@ namespace EvaluationResultsReport
         virtual int row() const = 0;
         TreeItem* parentItem();
 
+        string name() const;
+
     protected:
+        string name_;
         TreeItem* parent_item_ {nullptr};
     };
 }
