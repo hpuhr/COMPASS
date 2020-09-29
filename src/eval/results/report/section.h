@@ -3,6 +3,8 @@
 
 #include "eval/results/report/treeitem.h"
 
+#include <QWidget>
+
 #include <memory>
 #include <vector>
 
@@ -11,6 +13,8 @@ namespace EvaluationResultsReport
     using namespace std;
 
     class RootItem;
+    class SectionContent;
+    class SectionContentText;
 
     class Section : public TreeItem
     {
@@ -29,12 +33,25 @@ namespace EvaluationResultsReport
         Section& getSubSection (const std::string& heading);
         void addSubSection (const std::string& heading);
 
+        QWidget* getContentWidget();
+
+        bool hasText (const std::string& name);
+        SectionContentText& getText (const std::string& name);
+        void addText (const std::string& name);
+
     protected:
         string heading_; // name same as heading
+
+        vector<shared_ptr<SectionContent>> content_;
+
+        unique_ptr<QWidget> content_widget_;
 
         vector<shared_ptr<Section>> sub_sections_;
 
         Section* findSubSection (const std::string& heading); // nullptr if not found
+        SectionContentText* findText (const std::string& name); // nullptr if not found
+
+        void createContentWidget();
     };
 
 }

@@ -2,6 +2,8 @@
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
 #include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -80,9 +82,30 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 {
     loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport";
 
-    root_item->getSection("Overview");
-    root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
+
+    EvaluationResultsReport::Section& req_section =
+            root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
+
+    if (!req_section.hasText("description"))
+    {
+        req_section.addText("description");
+
+        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
+
+        req_text.addText("My lovely requirement");
+    }
 
     if (utns_.size() == 1)
-        root_item->getSection("Targets:"+to_string(utns_.at(0)));
+    {
+        EvaluationResultsReport::Section& tgt_section = root_item->getSection("Targets:"+to_string(utns_.at(0)));
+
+        if (!tgt_section.hasText("description"))
+        {
+            tgt_section.addText("description");
+
+            EvaluationResultsReport::SectionContentText& tgt_text = tgt_section.getText("description");
+
+            tgt_text.addText("My lovely targert");
+        }
+    }
 }

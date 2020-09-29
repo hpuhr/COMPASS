@@ -5,6 +5,8 @@
 #include "evaluationresultsgenerator.h"
 #include "eval/results/report/treemodel.h"
 #include "eval/results/report/treeitem.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -61,6 +63,34 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 
     loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name();
 
-//    if (dynamic_cast<EvaluationStandard*>(item))
-//    {
+    if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
+    {
+        loginf << "EvaluationResultsTabWidget: itemClickedSlot: root";
+        showResultWidget(nullptr);
+    }
+    else if (dynamic_cast<EvaluationResultsReport::Section*>(item))
+    {
+        EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+        assert (section);
+
+        loginf << "EvaluationResultsTabWidget: itemClickedSlot: section " << section->name();
+        showResultWidget(section->getContentWidget());
+    }
+}
+
+void EvaluationResultsTabWidget::showResultWidget(QWidget* widget)
+{
+    assert(results_widget_);
+
+    if (!widget)
+    {
+        while (results_widget_->count() > 0)  // remove all widgets
+            results_widget_->removeWidget(results_widget_->widget(0));
+        return;
+    }
+
+    if (results_widget_->indexOf(widget) < 0)
+        results_widget_->addWidget(widget);
+
+    results_widget_->setCurrentWidget(widget);
 }

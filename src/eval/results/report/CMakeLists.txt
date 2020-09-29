@@ -9,11 +9,17 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/treemodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/rootitem.h"
         "${CMAKE_CURRENT_LIST_DIR}/section.h"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.h"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.h"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/treeitem.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/treemodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rootitem.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/section.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.cpp"
     )
 
 

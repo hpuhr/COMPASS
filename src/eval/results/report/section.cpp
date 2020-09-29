@@ -1,5 +1,9 @@
 #include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontent.h"
+#include "eval/results/report/sectioncontenttext.h"
 #include "logger.h"
+
+#include <QVBoxLayout>
 
 namespace EvaluationResultsReport
 {
@@ -9,7 +13,7 @@ namespace EvaluationResultsReport
     {
     }
 
-   TreeItem* Section::child(int row)
+    TreeItem* Section::child(int row)
     {
         if (row < 0 || row >= sub_sections_.size())
             return nullptr;
@@ -67,6 +71,36 @@ namespace EvaluationResultsReport
         assert (hasSubSection(heading));
     }
 
+    QWidget* Section::getContentWidget()
+    {
+        if (!content_widget_)
+        {
+            createContentWidget();
+            assert(content_widget_);
+        }
+
+        return content_widget_.get();
+    }
+
+    bool Section::hasText (const std::string& name)
+    {
+        return findText(name) != nullptr;
+    }
+
+    SectionContentText& Section::getText (const std::string& name)
+    {
+        SectionContentText* tmp = findText (name);
+        assert (tmp);
+        return *tmp;
+    }
+
+    void Section::addText (const std::string& name)
+    {
+        assert (!hasText(name));
+        content_.push_back(make_shared<SectionContentText>(name, this));
+        assert (hasText(name));
+    }
+
     Section* Section::findSubSection (const std::string& heading)
     {
         for (auto& sec_it : sub_sections_)
@@ -76,6 +110,37 @@ namespace EvaluationResultsReport
         }
 
         return nullptr;
+    }
+
+    SectionContentText* Section::findText (const std::string& name)
+    {
+        SectionContentText* tmp;
+
+        for (auto& cont_it : content_)
+        {
+            tmp = dynamic_cast<SectionContentText*>(cont_it.get());
+
+            if (tmp && tmp->name() == name)
+                return tmp;
+        }
+
+        return nullptr;
+    }
+
+    void Section::createContentWidget()
+    {
+        assert (!content_widget_);
+
+        content_widget_.reset(new QWidget());
+
+        QVBoxLayout* layout = new QVBoxLayout();
+
+        for (auto& cont_it : content_)
+            cont_it->addToLayout(layout);
+
+        layout->addStretch();
+
+        content_widget_->setLayout(layout);
     }
 
 }

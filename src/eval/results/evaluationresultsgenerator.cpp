@@ -6,6 +6,9 @@
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementresult.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
 #include "logger.h"
 
 using namespace std;
@@ -24,6 +27,15 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     results_model_.beginReset();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
+
+    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
+    overview_section.addText("Sample");
+
+    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
+
+    overview_text.addText("Why not visit Sweden this time of the year?");
+    overview_text.addText("It has lovely lakes");
+    overview_text.addText("Elk bytes\nline2");
 
     for (auto& req_group_it : standard)
     {

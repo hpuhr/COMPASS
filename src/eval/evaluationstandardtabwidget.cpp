@@ -70,11 +70,6 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
     // standards stack
     {
-//        QFrame* line = new QFrame();
-//        line->setFrameShape(QFrame::HLine);
-//        line->setFrameShadow(QFrame::Sunken);
-//        main_layout->addWidget(line);
-
         standards_widget_ = new QStackedWidget();
         main_layout->addWidget(standards_widget_);
     }

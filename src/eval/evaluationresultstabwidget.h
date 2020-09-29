@@ -22,6 +22,8 @@ public:
 
     void expandAll();
 
+    void showResultWidget(QWidget* widget); // can be nullptr
+
 protected:
     EvaluationManager& eval_man_;
     EvaluationManagerWidget& man_widget_;
