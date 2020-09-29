@@ -233,17 +233,11 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
                 else if (col_name == "Begin")
                 {
-                    if (target.hasData())
-                        return String::timeStringFromDouble(target.timeBegin()).c_str();
-                    else
-                        return QVariant();
+                    return target.timeBeginStr().c_str();
                 }
                 else if (col_name == "End")
                 {
-                    if (target.hasData())
-                        return String::timeStringFromDouble(target.timeEnd()).c_str();
-                    else
-                        return QVariant();
+                    return target.timeEndStr().c_str();
                 }
                 else if (col_name == "# All")
                 {
@@ -259,62 +253,23 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
                 else if (col_name == "Callsign")
                 {
-                    std::vector<string> values = target.callsigns();
-
-                    std::ostringstream out;
-
-                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
-                    {
-                        if (cnt != 0)
-                            out << ",";
-                        out << values.at(cnt);
-                    }
-
-                    return out.str().c_str();
+                    return target.callsignsStr().c_str();
                 }
                 else if (col_name == "Target Addr.")
                 {
-                    std::vector<unsigned int> values = target.targetAddresses();
-
-                    std::ostringstream out;
-
-                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
-                    {
-                        if (cnt != 0)
-                            out << ",";
-                        out << String::hexStringFromInt(values.at(cnt), 6, '0');
-                    }
-
-                    return out.str().c_str();
+                    return target.targetAddressesStr().c_str();
                 }
                 else if (col_name == "Mode 3/A")
                 {
-                    std::vector<unsigned int> values = target.modeACodes();
-
-                    std::ostringstream out;
-
-                    for (unsigned int cnt=0; cnt < values.size(); ++cnt)
-                    {
-                        if (cnt != 0)
-                            out << ",";
-                        out << String::octStringFromInt(values.at(cnt), 4, '0');
-                    }
-
-                    return out.str().c_str();
+                    return target.modeACodesStr().c_str();
                 }
                 else if (col_name == "Mode C Min")
                 {
-                    if (target.hasModeC())
-                        return to_string(target.modeCMin()).c_str();
-                    else
-                        return QVariant();
+                    return target.modeCMinStr().c_str();
                 }
                 else if (col_name == "Mode C Max")
                 {
-                    if (target.hasModeC())
-                        return to_string(target.modeCMax()).c_str();
-                    else
-                        return QVariant();
+                    return target.modeCMaxStr().c_str();
                 }
 
             }

@@ -169,7 +169,9 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
                << " no data for pd";
 
     return make_shared<EvaluationRequirementDetectionResult>(
-                instance, vector<unsigned int> {target_data.utn_}, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
+                instance, vector<unsigned int> {target_data.utn_},
+                vector<const EvaluationTargetData*> {&target_data},
+                sum_uis, missed_uis, max_gap_uis, no_ref_uis);
 }
 
 bool EvaluationRequirementDetection::isMiss (float d_tod)

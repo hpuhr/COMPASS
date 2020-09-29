@@ -35,15 +35,24 @@ public:
     unsigned int numTstUpdates () const;
 
     float timeBegin() const;
+    std::string timeBeginStr() const;
     float timeEnd() const;
+    std::string timeEndStr() const;
 
     std::vector<std::string> callsigns() const;
+    std::string callsignsStr() const;
+
     std::vector<unsigned int> targetAddresses() const;
+    std::string targetAddressesStr() const;
+
     std::vector<unsigned int> modeACodes() const;
+    std::string modeACodesStr() const;
 
     bool hasModeC() const;
     int modeCMin() const;
+    std::string modeCMinStr() const;
     int modeCMax() const;
+    std::string modeCMaxStr() const;
 
     bool use() const;
     void use(bool use);

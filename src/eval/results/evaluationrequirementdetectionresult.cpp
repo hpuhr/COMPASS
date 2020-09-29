@@ -1,9 +1,11 @@
 #include "evaluationrequirementdetectionresult.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
+#include "evaluationtargetdata.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
 
@@ -13,9 +15,10 @@ using namespace std;
 using namespace Utils;
 
 EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
-        std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns,
+        std::shared_ptr<EvaluationRequirement> requirement,
+        std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets,
         float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis)
-    : EvaluationRequirementResult(requirement, utns), sum_uis_(sum_uis), missed_uis_(missed_uis),
+    : EvaluationRequirementResult(requirement, utns, targets), sum_uis_(sum_uis), missed_uis_(missed_uis),
       max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis)
 {
     updatePD();
@@ -28,9 +31,13 @@ void EvaluationRequirementDetectionResult::updatePD()
     {
         assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
         pd_ = 1.0 - (missed_uis_/(sum_uis_ - max_gap_uis_ - no_ref_uis_));
+        has_pd_ = true;
     }
     else
+    {
         pd_ = 0;
+        has_pd_ = false;
+    }
 }
 
 void EvaluationRequirementDetectionResult::join(const std::shared_ptr<EvaluationRequirementResult> other_base)
@@ -57,7 +64,7 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetectionResul
     loginf << "EvaluationRequirementDetectionResult: copy";
 
     std::shared_ptr<EvaluationRequirementDetectionResult> copy = make_shared<EvaluationRequirementDetectionResult>(
-                requirement_, utns_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_);
+                requirement_, utns_, targets_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_);
     copy->updatePD();
 
     return copy;
@@ -97,6 +104,28 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 
     if (utns_.size() == 1)
     {
+        const EvaluationTargetData* target = targets_.at(0);
+
+        EvaluationResultsReport::Section& tgt_overview_section = root_item->getSection("Targets:Overview");
+
+        if (!tgt_overview_section.hasTable("target_table"))
+            tgt_overview_section.addTable("target_table", 13,
+            {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
+             "UIs", "MUIs", "MGUIs", "NRUIs", "PD"});
+
+        EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
+
+        QVariant pd_var;
+
+        if (has_pd_)
+            pd_var = roundf(pd_ * 10000.0) / 100.0;
+
+        target_table.addRow({utns_.at(0), target->timeBeginStr().c_str(), target->timeEndStr().c_str(),
+                             target->callsignsStr().c_str(), target->targetAddressesStr().c_str(),
+                             target->modeACodesStr().c_str(), target->modeCMinStr().c_str(),
+                             target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var});
+
+
         EvaluationResultsReport::Section& tgt_section = root_item->getSection("Targets:"+to_string(utns_.at(0)));
 
         if (!tgt_section.hasText("description"))

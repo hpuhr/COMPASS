@@ -15,6 +15,7 @@ namespace EvaluationResultsReport
     class RootItem;
     class SectionContent;
     class SectionContentText;
+    class SectionContentTable;
 
     class Section : public TreeItem
     {
@@ -39,6 +40,10 @@ namespace EvaluationResultsReport
         SectionContentText& getText (const std::string& name);
         void addText (const std::string& name);
 
+        bool hasTable (const std::string& name);
+        SectionContentTable& getTable (const std::string& name);
+        void addTable (const std::string& name, unsigned int num_columns, vector<string> headings);
+
     protected:
         string heading_; // name same as heading
 
@@ -50,6 +55,7 @@ namespace EvaluationResultsReport
 
         Section* findSubSection (const std::string& heading); // nullptr if not found
         SectionContentText* findText (const std::string& name); // nullptr if not found
+        SectionContentTable* findTable (const std::string& name); // nullptr if not found
 
         void createContentWidget();
     };

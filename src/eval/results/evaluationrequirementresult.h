@@ -5,6 +5,7 @@
 #include <vector>
 
 class EvaluationRequirement;
+class EvaluationTargetData;
 
 namespace EvaluationResultsReport {
     class RootItem;
@@ -13,7 +14,8 @@ namespace EvaluationResultsReport {
 class EvaluationRequirementResult
 {
 public:
-    EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns);
+    EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement,
+                                std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets);
 
     std::shared_ptr<EvaluationRequirement> requirement() const;
 
@@ -31,6 +33,7 @@ protected:
     std::shared_ptr<EvaluationRequirement> requirement_;
 
     std::vector<unsigned int> utns_; // utns used to generate result
+    std::vector<const EvaluationTargetData*> targets_; // targets used to generate result
 };
 
 #endif // EVALUATIONREQUIREMENTRESULT_H

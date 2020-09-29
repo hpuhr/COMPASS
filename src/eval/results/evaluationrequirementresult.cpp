@@ -7,10 +7,11 @@
 using namespace std;
 
 EvaluationRequirementResult::EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement,
-                                                         std::vector<unsigned int> utns)
-    : requirement_(requirement), utns_(utns)
+                                                         std::vector<unsigned int> utns,
+                                                         std::vector<const EvaluationTargetData*> targets)
+    : requirement_(requirement), utns_(utns), targets_(targets)
 {
-
+    assert (utns_.size() == targets_.size());
 }
 
 std::shared_ptr<EvaluationRequirement> EvaluationRequirementResult::requirement() const
@@ -25,6 +26,9 @@ void EvaluationRequirementResult::join(const std::shared_ptr<EvaluationRequireme
     assert (other_base->requirement_.get() == requirement_.get());
 
     utns_.insert(utns_.end(), other_base->utns_.begin(), other_base->utns_.end());
+    targets_.insert(targets_.end(), other_base->targets_.begin(), other_base->targets_.end());
+
+    assert (utns_.size() == targets_.size());
 }
 
 std::vector<unsigned int> EvaluationRequirementResult::utns() const

@@ -110,6 +110,14 @@ float EvaluationTargetData::timeBegin() const
         throw std::runtime_error("EvaluationTargetData: timeBegin: no data");
 }
 
+std::string EvaluationTargetData::timeBeginStr() const
+{
+    if (hasData())
+        return String::timeStringFromDouble(timeBegin()).c_str();
+    else
+        return "";
+}
+
 float EvaluationTargetData::timeEnd() const
 {
     if (ref_data_.size() && tst_data_.size())
@@ -122,10 +130,32 @@ float EvaluationTargetData::timeEnd() const
         throw std::runtime_error("EvaluationTargetData: timeEnd: no data");
 }
 
+std::string EvaluationTargetData::timeEndStr() const
+{
+    if (hasData())
+        return String::timeStringFromDouble(timeEnd()).c_str();
+    else
+        return "";
+}
+
 std::vector<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
+}
+
+std::string EvaluationTargetData::modeACodesStr() const
+{
+    std::ostringstream out;
+
+    for (unsigned int cnt=0; cnt < mode_a_codes_.size(); ++cnt)
+    {
+        if (cnt != 0)
+            out << ",";
+        out << String::octStringFromInt(mode_a_codes_.at(cnt), 4, '0');
+    }
+
+    return out.str();
 }
 
 bool EvaluationTargetData::hasModeC() const
@@ -139,10 +169,26 @@ int EvaluationTargetData::modeCMin() const
     return mode_c_min_;
 }
 
+std::string EvaluationTargetData::modeCMinStr() const
+{
+    if (has_mode_c_)
+        return to_string(mode_c_min_);
+    else
+        return "";
+}
+
 int EvaluationTargetData::modeCMax() const
 {
     assert (has_mode_c_);
     return mode_c_max_;
+}
+
+std::string EvaluationTargetData::modeCMaxStr() const
+{
+    if (has_mode_c_)
+        return to_string(mode_c_max_);
+    else
+        return "";
 }
 
 bool EvaluationTargetData::use() const
@@ -227,9 +273,37 @@ std::vector<string> EvaluationTargetData::callsigns() const
     return callsigns_;
 }
 
+string EvaluationTargetData::callsignsStr() const
+{
+    std::ostringstream out;
+
+    for (unsigned int cnt=0; cnt < callsigns_.size(); ++cnt)
+    {
+        if (cnt != 0)
+            out << ",";
+        out << callsigns_.at(cnt);
+    }
+
+    return out.str().c_str();
+}
+
 std::vector<unsigned int> EvaluationTargetData::targetAddresses() const
 {
     return target_addresses_;
+}
+
+std::string EvaluationTargetData::targetAddressesStr() const
+{
+    std::ostringstream out;
+
+    for (unsigned int cnt=0; cnt < target_addresses_.size(); ++cnt)
+    {
+        if (cnt != 0)
+            out << ",";
+        out << String::hexStringFromInt(target_addresses_.at(cnt), 6, '0');
+    }
+
+    return out.str().c_str();
 }
 
 void EvaluationTargetData::updateCallsigns()

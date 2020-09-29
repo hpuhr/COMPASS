@@ -1,6 +1,7 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -101,6 +102,26 @@ namespace EvaluationResultsReport
         assert (hasText(name));
     }
 
+    bool Section::hasTable (const std::string& name)
+    {
+        return findTable(name) != nullptr;
+    }
+
+    SectionContentTable& Section::getTable (const std::string& name)
+    {
+        SectionContentTable* tmp = findTable (name);
+        assert (tmp);
+        return *tmp;
+    }
+
+    void Section::addTable (const std::string& name, unsigned int num_columns,
+                            vector<string> headings)
+    {
+        assert (!hasTable(name));
+        content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this));
+        assert (hasTable(name));
+    }
+
     Section* Section::findSubSection (const std::string& heading)
     {
         for (auto& sec_it : sub_sections_)
@@ -127,6 +148,21 @@ namespace EvaluationResultsReport
         return nullptr;
     }
 
+    SectionContentTable* Section::findTable (const std::string& name)
+    {
+        SectionContentTable* tmp;
+
+        for (auto& cont_it : content_)
+        {
+            tmp = dynamic_cast<SectionContentTable*>(cont_it.get());
+
+            if (tmp && tmp->name() == name)
+                return tmp;
+        }
+
+        return nullptr;
+    }
+
     void Section::createContentWidget()
     {
         assert (!content_widget_);
@@ -138,9 +174,11 @@ namespace EvaluationResultsReport
         for (auto& cont_it : content_)
             cont_it->addToLayout(layout);
 
-        layout->addStretch();
+        //layout->addStretch();
 
         content_widget_->setLayout(layout);
     }
+
+
 
 }
