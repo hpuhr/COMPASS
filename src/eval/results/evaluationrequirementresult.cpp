@@ -1,4 +1,9 @@
 #include "evaluationrequirementresult.h"
+#include "evaluationrequirement.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 
 #include <sstream>
@@ -58,3 +63,22 @@ std::string EvaluationRequirementResult::utnsString() const
     else
         return ss.str();
 }
+
+EvaluationResultsReport::SectionContentTable& EvaluationRequirementResult::getReqOverviewTable (
+        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
+
+    if (!ov_sec.hasTable("req_overview"))
+        ov_sec.addTable("req_overview", 5,
+        {"Req.", "Group", "Result", "Condition", "Result"});
+
+    return ov_sec.getTable("req_overview");
+}
+
+EvaluationResultsReport::Section& EvaluationRequirementResult::getRequirementSection (
+        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    return root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
+}
+

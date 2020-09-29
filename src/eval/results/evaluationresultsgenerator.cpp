@@ -72,6 +72,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             }
 
             result_sum->print();
+            result_sum->addToReport(root_item);
         }
     }
 

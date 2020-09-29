@@ -8,7 +8,9 @@ class EvaluationRequirement;
 class EvaluationTargetData;
 
 namespace EvaluationResultsReport {
+    class Section;
     class RootItem;
+    class SectionContentTable;
 }
 
 class EvaluationRequirementResult
@@ -34,6 +36,12 @@ protected:
 
     std::vector<unsigned int> utns_; // utns used to generate result
     std::vector<const EvaluationTargetData*> targets_; // targets used to generate result
+
+    EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
+            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+    EvaluationResultsReport::Section& getRequirementSection (
+            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 };
 
 #endif // EVALUATIONREQUIREMENTRESULT_H

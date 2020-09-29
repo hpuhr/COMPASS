@@ -21,3 +21,4 @@ std::string EvaluationRequirement::groupName() const
 {
     return group_name_;
 }
+

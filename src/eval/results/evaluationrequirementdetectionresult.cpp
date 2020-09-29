@@ -89,24 +89,50 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 {
     loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport";
 
+    // add to main requirements overview
 
-    EvaluationResultsReport::Section& req_section =
-            root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
-
-    if (!req_section.hasText("description"))
+    if (!utns_.size()) // some data must exist
     {
-        req_section.addText("description");
-
-        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
-
-        req_text.addText("My lovely requirement");
+        logerr << "EvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport: no data";
+        return;
     }
 
-    if (utns_.size() == 1)
+    if (utns_.size() > 1) // is joined. TODO how to distinguish different aggregations?
     {
+        EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
+
+        // condition
+        std::shared_ptr<EvaluationRequirementDetection> req =
+                std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+        assert (req);
+
+        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+        // pd
+        QVariant pd_var;
+
+        string result {"Unknown"};
+
+        if (has_pd_)
+        {
+            pd_var = String::percentToString(pd_ * 100.0).c_str();
+
+            result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
+        }
+
+        // "Req.", "Group", "Result", "Condition", "Result"
+        ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
+                        pd_var, condition.c_str(), result.c_str()});
+    }
+    else // utns_.size() == 1
+    {
+        // add target to requirements->group->req
+
+        assert (utns_.size() == 1);
+
         const EvaluationTargetData* target = targets_.at(0);
 
-        EvaluationResultsReport::Section& tgt_overview_section = root_item->getSection("Targets:Overview");
+        EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 13,
@@ -126,15 +152,18 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
                              target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var});
 
 
-        EvaluationResultsReport::Section& tgt_section = root_item->getSection("Targets:"+to_string(utns_.at(0)));
-
-        if (!tgt_section.hasText("description"))
-        {
-            tgt_section.addText("description");
-
-            EvaluationResultsReport::SectionContentText& tgt_text = tgt_section.getText("description");
-
-            tgt_text.addText("My lovely targert");
-        }
     }
+
+    // TODO add requirement description, methods
+//    EvaluationResultsReport::Section& req_section = getRequirementSection(root_item);
+
+//    if (!req_section.hasText("description"))
+//    {
+//        req_section.addText("description");
+
+//        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
+
+//        req_text.addText("TODO Requirement description");
+//    }
+
 }
