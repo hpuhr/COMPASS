@@ -6,6 +6,7 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/viewabledataconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpoint.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.h"

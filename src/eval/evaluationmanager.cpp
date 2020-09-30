@@ -55,6 +55,9 @@ void EvaluationManager::init(QTabWidget* tab_widget)
     initialized_ = true;
 
     tab_widget->addTab(widget(), "Evaluation");
+
+    if (!ATSDB::instance().objectManager().hasAssociations())
+        widget()->setDisabled(true);
 }
 
 void EvaluationManager::loadData ()

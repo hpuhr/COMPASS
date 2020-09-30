@@ -31,7 +31,7 @@ class DataSourcesFilter;
 class ATSDB;
 class FilterManagerWidget;
 class DBOVariable;
-class ViewPoint;
+class ViewableDataConfig;
 
 /**
  * @brief Manages all filters and generates SQL conditions
@@ -52,8 +52,8 @@ class FilterManager : public QObject, public Configurable
     void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 
-    void unshowViewPointSlot (const ViewPoint* vp);
-    void showViewPointSlot (const ViewPoint* vp);
+    void unshowViewPointSlot (const ViewableDataConfig* vp);
+    void showViewPointSlot (const ViewableDataConfig* vp);
 
   public:
     /// @brief Constructor

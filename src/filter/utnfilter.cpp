@@ -18,7 +18,13 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
     name_ = "UTNs";
 
-    disabled_ = !ATSDB::instance().objectManager().hasAssociations();
+    if (!ATSDB::instance().objectManager().hasAssociations())
+    {
+        loginf << "UTNFilter: contructor: disabled since no associations";
+
+        active_ = false;
+        visible_ = false;
+    }
 
     createSubConfigurables();
 
@@ -27,12 +33,21 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
 UTNFilter::~UTNFilter() {}
 
-bool UTNFilter::filters(const std::string& dbo_type) { return true; }
+bool UTNFilter::filters(const std::string& dbo_type)
+{
+    if (!ATSDB::instance().objectManager().hasAssociations())
+        return false;
+
+    return true;
+}
 
 std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
                                           std::vector<DBOVariable*>& filtered_variables)
 {
     loginf << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+
+    if (!ATSDB::instance().objectManager().hasAssociations())
+        return "";
 
     stringstream ss;
 
@@ -105,6 +120,12 @@ void UTNFilter::generateSubConfigurable(const std::string& class_id,
     {
         assert(!widget_);
         widget_ = new UTNFilterWidget(*this, class_id, instance_id);
+
+        if (!ATSDB::instance().objectManager().hasAssociations())
+        {
+            widget_->setDisabled(true);
+            widget_->setInvisible();
+        }
     }
     else
         throw std::runtime_error("UTNFilter: generateSubConfigurable: unknown class_id " +
@@ -118,8 +139,14 @@ void UTNFilter::checkSubConfigurables()
     if (!widget_)
     {
         logdbg << "UTNFilter: checkSubConfigurables: generating my filter widget";
-        widget_ =
-            new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
+        widget_ = new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
+
+        if (!ATSDB::instance().objectManager().hasAssociations())
+        {
+            widget_->setDisabled(true);
+            widget_->setInvisible();
+        }
+
     }
     assert(widget_);
 

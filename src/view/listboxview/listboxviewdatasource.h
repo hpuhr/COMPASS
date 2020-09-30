@@ -27,7 +27,7 @@
 #include "viewselection.h"
 
 class Job;
-class ViewPoint;
+class ViewableDataConfig;
 
 /**
  * @brief Handles database queries and resulting data for ListBoxView
@@ -73,8 +73,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
     /// @brief Returns use selection flag
     // bool getUseSelection () { return use_selection_; }
 
-    void unshowViewPoint (const ViewPoint* vp); // vp can be nullptr
-    void showViewPoint (const ViewPoint* vp);
+    void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
+    void showViewPoint (const ViewableDataConfig* vp);
 
   protected:
     /// Variable read list

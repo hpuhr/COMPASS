@@ -322,13 +322,13 @@ void FilterManager::deleteFilterSlot(DBFilter* filter)
     emit changedFiltersSignal();
 }
 
-void FilterManager::unshowViewPointSlot (const ViewPoint* vp)
+void FilterManager::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: unshowViewPointSlot";
     assert (vp);
 }
 
-void FilterManager::showViewPointSlot (const ViewPoint* vp)
+void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: showViewPointSlot";
     assert (vp);

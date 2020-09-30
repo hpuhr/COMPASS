@@ -29,7 +29,7 @@ class ViewContainer;
 class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
-class ViewPoint;
+class ViewableDataConfig;
 class ViewPointsWidget;
 class ViewPointsReportGenerator;
 
@@ -42,8 +42,8 @@ class ViewManager : public QObject, public Configurable
 
   signals:
     void selectionChangedSignal();
-    void unshowViewPointSignal (const ViewPoint* vp);
-    void showViewPointSignal (const ViewPoint* vp);
+    void unshowViewPointSignal (const ViewableDataConfig* vp);
+    void showViewPointSignal (const ViewableDataConfig* vp);
 
   public slots:
     void selectionChangedSlot();
