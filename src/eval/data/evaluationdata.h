@@ -62,6 +62,8 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    const EvaluationTargetData& getTargetOf (const QModelIndex& index);
+
     EvaluationDataWidget* widget();
 
 protected:

@@ -365,10 +365,23 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
         return QAbstractItemModel::flags(index);
 }
 
+const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& index)
+{
+    assert (index.isValid());
+
+    assert (index.row() >= 0);
+    assert (index.row() < target_data_.size());
+
+    const EvaluationTargetData& target = target_data_.at(index.row());
+
+    return target;
+}
+
+
 EvaluationDataWidget* EvaluationData::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationDataWidget(*this));
+        widget_.reset(new EvaluationDataWidget(*this, eval_man_));
 
     return widget_.get();
 }

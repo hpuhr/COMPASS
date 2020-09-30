@@ -30,6 +30,8 @@ protected:
     std::vector<unsigned int> utns_;
 
     virtual void checkSubConfigurables();
+
+    bool updateUTNSFromStr(const std::string& utns); // returns success
 };
 
 #endif // UTNFILTER_H

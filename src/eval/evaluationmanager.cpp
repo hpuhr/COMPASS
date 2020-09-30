@@ -16,6 +16,8 @@
 #include "filtermanager.h"
 #include "datasourcesfilter.h"
 #include "datasourcesfilterwidget.h"
+#include "viewabledataconfig.h"
+#include "filtermanager.h"
 
 #include "json.hpp"
 
@@ -51,6 +53,11 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     updateReferenceDBO();
     updateTestDBO();
+
+    FilterManager& filter_man = ATSDB::instance().filterManager();
+
+    connect (this, &EvaluationManager::showDataSignal, &filter_man, &FilterManager::showViewPointSlot);
+    connect (this, &EvaluationManager::unshowDataSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
     initialized_ = true;
 
@@ -125,43 +132,43 @@ void EvaluationManager::loadData ()
         assert (object_man.existsObject(dbo_name_ref_));
         DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-//        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
+        //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
 
-//        DBOVariableSet read_set;
-//        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_ref_));
+        //        DBOVariableSet read_set;
+        //        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_ref_));
 
-//        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_ref_));
 
-//        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
-//        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
+        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
 
         connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
         connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
-//        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_ref_);
-//        string ds_fil_str;
+        //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_ref_);
+        //        string ds_fil_str;
 
-//        for (auto& ds_it : data_sources_ref_)
-//        {
-//            if (!ds_fil_str.size())
-//                ds_fil_str = to_string(ds_it.second.getNumber());
-//            else
-//                ds_fil_str += ","+to_string(ds_it.second.getNumber());
-        }
+        //        for (auto& ds_it : data_sources_ref_)
+        //        {
+        //            if (!ds_fil_str.size())
+        //                ds_fil_str = to_string(ds_it.second.getNumber());
+        //            else
+        //                ds_fil_str += ","+to_string(ds_it.second.getNumber());
+    }
 
-//        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
+    //        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
 
 
-//        dbo_ref.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
-//                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
+    //        dbo_ref.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
+    //                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
 
-//    }
+    //    }
 
     // test data
 
@@ -169,41 +176,41 @@ void EvaluationManager::loadData ()
         assert (object_man.existsObject(dbo_name_tst_));
         DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-//        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
+        //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
 
-//        DBOVariableSet read_set;
-//        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_tst_));
-//        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_tst_));
+        //        DBOVariableSet read_set;
+        //        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_tst_));
 
-//        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_tst_));
+        //        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_tst_));
 
-//        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_tst_));
-//        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_tst_));
+        //        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_tst_));
+        //        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_tst_));
 
         connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
         connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
-//        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_tst_);
-//        string ds_fil_str;
+        //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_tst_);
+        //        string ds_fil_str;
 
-//        for (auto& ds_it : data_sources_tst_)
-//        {
-//            if (!ds_fil_str.size())
-//                ds_fil_str = to_string(ds_it.second.getNumber());
-//            else
-//                ds_fil_str += ","+to_string(ds_it.second.getNumber());
-//        }
+        //        for (auto& ds_it : data_sources_tst_)
+        //        {
+        //            if (!ds_fil_str.size())
+        //                ds_fil_str = to_string(ds_it.second.getNumber());
+        //            else
+        //                ds_fil_str += ","+to_string(ds_it.second.getNumber());
+        //        }
 
-//        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
+        //        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
 
 
-//        dbo_tst.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
-//                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
+        //        dbo_tst.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
+        //                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
     }
 
     object_man.loadSlot();
@@ -936,4 +943,75 @@ void EvaluationManager::updateTestDataSourcesActive()
         if (!srcit.second.isActiveInData())
             srcit.second.setActive(false);
     }
+}
+
+void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
+{
+    if (current_viewable_data_set_)
+    {
+        assert (viewable_data_cfg_);
+        emit unshowDataSignal(viewable_data_cfg_.get());
+
+        current_viewable_data_set_ = false;
+    }
+
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+    current_viewable_data_set_ = true;
+
+    emit showDataSignal(viewable_data_cfg_.get());
+
+    ATSDB::instance().objectManager().loadSlot();
+
+    // TODO data selection like in ATSDB::instance().viewManager().doViewPointAfterLoad();?
+}
+
+void EvaluationManager::showUTN (unsigned int utn)
+{
+    loginf << "EvaluationManager: showUTN: utn " << utn;
+
+    nlohmann::json data = getBaseViewableDataConfig();
+    data["filters"]["UTNs"]["utns"] = to_string(utn);
+
+    loginf << "EvaluationManager: showUTN: showing";
+    setViewableDataConfig(data);
+}
+
+nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
+{
+    nlohmann::json data;
+    //    "db_objects": [
+    //    "Tracker"
+    //    ],
+    // "filters": {
+    //    "Tracker Data Sources": {
+    //    "active_sources": [
+    //    13040,
+    //    13041
+    //    ]
+    //    }
+    //    }
+
+    data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
+
+    // ref srcs
+    {
+        vector<unsigned int> active_ref_srcs;
+
+        for (auto& ds_it : data_sources_ref_)
+            active_ref_srcs.push_back(ds_it.first);
+
+        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
+    }
+
+    // tst srcs
+    {
+        vector<unsigned int> active_tst_srcs;
+
+        for (auto& ds_it : data_sources_tst_)
+            active_tst_srcs.push_back(ds_it.first);
+
+        data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
+    }
+
+    return data;
 }

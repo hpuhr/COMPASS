@@ -15,6 +15,7 @@ class ATSDB;
 class EvaluationManagerWidget;
 class EvaluationStandard;
 class DBObject;
+class ViewableDataConfig;
 
 class QWidget;
 class QTabWidget;
@@ -27,6 +28,9 @@ signals:
     void sectorsChangedSignal();
     void standardsChangedSignal(); // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
+
+    void unshowDataSignal (const ViewableDataConfig* vp);
+    void showDataSignal (const ViewableDataConfig* vp);
 
 public slots:
     void newDataSlot(DBObject& object);
@@ -100,8 +104,10 @@ public:
     EvaluationStandardIterator standardsEnd() { return standards_.end(); }
     unsigned int standardsSize () { return standards_.size(); };
 
-
     EvaluationResultsGenerator& resultsGenerator();
+
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
+    void showUTN (unsigned int utn);
 
 protected:
     ATSDB& atsdb_;
@@ -133,6 +139,9 @@ protected:
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
 
+    bool current_viewable_data_set_ {false};
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
     virtual void checkSubConfigurables() override;
 
     unsigned int getMaxSectorId ();
@@ -144,6 +153,8 @@ protected:
     void updateTestDBO();
     void updateTestDataSources();
     void updateTestDataSourcesActive();
+
+    nlohmann::json::object_t getBaseViewableDataConfig ();
 };
 
 #endif // EVALUATIONMANAGER_H
