@@ -50,9 +50,11 @@ class DBOAssociationCollection
     std::vector<unsigned int> getUTNsFor(unsigned int rec_num) const;
     std::string getUTNsStringFor(unsigned int rec_num) const;
 
+    std::vector<unsigned int> getRecNumsForUTN(unsigned int utn) const;
+
   protected:
     // rec_num -> assoc entry
-    std::multimap<unsigned int, DBOAssociationEntry> entries_;
+    std::multimap<unsigned int, DBOAssociationEntry> entries_; // rec_num -> entry
 };
 
 #endif  // DBOASSOCIATIONCOLLECTION_H

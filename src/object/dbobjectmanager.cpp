@@ -31,6 +31,7 @@
 #include "metadbovariable.h"
 #include "stringconv.h"
 #include "viewmanager.h"
+#include "jobmanager.h"
 
 using namespace Utils::String;
 
@@ -349,13 +350,28 @@ void DBObjectManager::loadSlot()
 
     bool load_job_created = false;
 
+    loginf << "DBObjectManager: loadSlot: loading associations";
+
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
 
         if (object.second->loadable())
             object.second->loadAssociationsIfRequired();
+    }
 
+    while (JobManager::instance().hasDBJobs())
+    {
+        logdbg << "DBObjectManager: loadSlot: waiting on association loading";
+
+        QCoreApplication::processEvents();
+        QThread::msleep(5);
+    }
+
+    loginf << "DBObjectManager: loadSlot: starting loading";
+
+    for (auto& object : objects_)
+    {
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
