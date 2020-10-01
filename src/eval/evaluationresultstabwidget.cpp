@@ -7,21 +7,44 @@
 #include "eval/results/report/treeitem.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
+#include "files.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
+#include <QPushButton>
+#include <QSplitter>
+#include <QSettings>
 
 using namespace EvaluationResultsReport;
+using namespace Utils;
 
 EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget)
     : QWidget(nullptr), eval_man_(eval_man), man_widget_(man_widget)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QHBoxLayout* res_layout = new QHBoxLayout();
+    { // button layout
+        QHBoxLayout* button_layout = new QHBoxLayout();
+
+        QIcon left_icon(Files::getIconFilepath("arrow_to_left.png").c_str());
+
+        back_button_ = new QPushButton ();
+        back_button_->setIcon(left_icon);
+        connect (back_button_, &QPushButton::clicked, this, &EvaluationResultsTabWidget::stepBackSlot);
+        button_layout->addWidget(back_button_);
+
+        button_layout->addStretch();
+
+        main_layout->addLayout(button_layout);
+
+    }
+    //QHBoxLayout* res_layout = new QHBoxLayout();
+
+    splitter_ = new QSplitter();
+    splitter_->setOrientation(Qt::Horizontal);
 
     tree_view_.reset(new QTreeView());
     tree_view_->setModel(&eval_man_.resultsGenerator().resultsModel());
@@ -30,7 +53,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
 
     connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationResultsTabWidget::itemClickedSlot);
 
-    res_layout->addWidget(tree_view_.get());
+    splitter_->addWidget(tree_view_.get());
 
     // results stack
 
@@ -40,12 +63,27 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     results_widget_ = new QStackedWidget();
 
     scroll_area->setWidget(results_widget_);
-    res_layout->addWidget(scroll_area, 1);
+    splitter_->addWidget(scroll_area);
 
-    main_layout->addLayout(res_layout);
+    splitter_->setStretchFactor(1, 1);
+
+    QSettings settings("ATSDB", "EvalManagerResultsWidget");
+    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+
+    main_layout->addWidget(splitter_);
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
+
+    updateBackButton();
+}
+
+EvaluationResultsTabWidget::~EvaluationResultsTabWidget()
+{
+    assert (splitter_);
+
+    QSettings settings("ATSDB", "EvalManagerResultsWidget");
+    settings.setValue("splitterSizes", splitter_->saveState());
 }
 
 void EvaluationResultsTabWidget::expand()
@@ -77,11 +115,12 @@ void EvaluationResultsTabWidget::selectId (const std::string& id)
     itemClickedSlot(index);
 }
 
-
 void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 {
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
     assert (item);
+
+    id_history_.push_back(item->id());
 
     loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name();
 
@@ -98,6 +137,22 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
         loginf << "EvaluationResultsTabWidget: itemClickedSlot: section " << section->name();
         showResultWidget(section->getContentWidget());
     }
+
+    updateBackButton();
+}
+
+void EvaluationResultsTabWidget::stepBackSlot()
+{
+    loginf << "EvaluationResultsTabWidget: stepBackSlot";
+
+    assert (id_history_.size() > 1);
+
+    id_history_.pop_back();
+    selectId(*id_history_.rbegin());
+
+    id_history_.pop_back(); // remove re-added id. slightly hacky
+
+    updateBackButton();
 }
 
 void EvaluationResultsTabWidget::showResultWidget(QWidget* widget)
@@ -130,4 +185,11 @@ void EvaluationResultsTabWidget::expandAllParents (QModelIndex index)
         if (!tree_view_->isExpanded(parent_index))
             tree_view_->expand(parent_index);
     }
+}
+
+void EvaluationResultsTabWidget::updateBackButton ()
+{
+    assert (back_button_);
+
+    back_button_->setEnabled(id_history_.size() > 1);
 }
