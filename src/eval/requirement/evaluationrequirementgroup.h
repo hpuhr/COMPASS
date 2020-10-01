@@ -11,6 +11,7 @@
 
 class EvaluationStandard;
 class EvaluationRequirementConfig;
+class EvaluationManager;
 
 class EvaluationRequirementGroup : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
@@ -26,7 +27,7 @@ public slots:
 
 public:
     EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
-                               EvaluationStandard& standard);
+                               EvaluationStandard& standard, EvaluationManager& eval_man);
     virtual ~EvaluationRequirementGroup();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -56,6 +57,7 @@ public:
 
 protected:
     EvaluationStandard& standard_;
+    EvaluationManager& eval_man_;
     std::string name_;
 
     std::vector<std::unique_ptr<EvaluationRequirementConfig>> configs_;

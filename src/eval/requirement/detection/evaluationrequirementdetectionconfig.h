@@ -23,7 +23,8 @@ public slots:
 
 public:
     EvaluationRequirementDetectionConfig(const std::string& class_id, const std::string& instance_id,
-                                         EvaluationRequirementGroup& group, EvaluationStandard& standard);
+                                         EvaluationRequirementGroup& group, EvaluationStandard& standard,
+                                         EvaluationManager& eval_man);
     virtual ~EvaluationRequirementDetectionConfig();
 
     virtual void addGUIElements(QFormLayout* layout) override;

@@ -39,7 +39,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id.compare("EvaluationRequirementGroup") == 0)
     {
-        EvaluationRequirementGroup* group = new EvaluationRequirementGroup(class_id, instance_id, *this);
+        EvaluationRequirementGroup* group = new EvaluationRequirementGroup(class_id, instance_id, *this, eval_man_);
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
         assert(groups_.find(group->name()) == groups_.end());

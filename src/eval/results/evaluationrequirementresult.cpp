@@ -11,10 +11,10 @@
 
 using namespace std;
 
-EvaluationRequirementResult::EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement,
-                                                         std::vector<unsigned int> utns,
-                                                         std::vector<const EvaluationTargetData*> targets)
-    : requirement_(requirement), utns_(utns), targets_(targets)
+EvaluationRequirementResult::EvaluationRequirementResult(
+        std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns,
+        std::vector<const EvaluationTargetData*> targets, EvaluationManager& eval_man)
+    : requirement_(requirement), utns_(utns), targets_(targets), eval_man_(eval_man)
 {
     assert (utns_.size() == targets_.size());
 }

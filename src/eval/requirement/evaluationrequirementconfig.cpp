@@ -9,9 +9,9 @@ using namespace std;
 
 EvaluationRequirementConfig::EvaluationRequirementConfig(
         const std::string& class_id, const std::string& instance_id,
-        EvaluationRequirementGroup& group, EvaluationStandard& standard)
+        EvaluationRequirementGroup& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
-      group_(group), standard_(standard)
+      group_(group), standard_(standard), eval_man_(eval_man)
 {
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");

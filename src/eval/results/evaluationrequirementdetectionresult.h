@@ -6,11 +6,10 @@
 class EvaluationRequirementDetectionResult : public EvaluationRequirementResult
 {
 public:
-    EvaluationRequirementDetectionResult(std::shared_ptr<EvaluationRequirement> requirement,
-                                         std::vector<unsigned int> utns,
-                                         std::vector<const EvaluationTargetData*> targets,
-                                         float sum_uis, float missed_uis, float max_gap_uis,
-                                         float no_ref_uis);
+    EvaluationRequirementDetectionResult(
+            std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns,
+            std::vector<const EvaluationTargetData*> targets, EvaluationManager& eval_man,
+            float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis);
 
     virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
     // joins other result to this one

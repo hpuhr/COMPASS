@@ -1,4 +1,5 @@
 #include "eval/results/report/sectioncontenttable.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -8,19 +9,29 @@
 
 #include <cassert>
 
+using namespace std;
+
 namespace EvaluationResultsReport
 {
 
 SectionContentTable::SectionContentTable(const string& name, unsigned int num_columns,
-                                         vector<string> headings, Section* parent_section)
-    : SectionContent(name, parent_section), num_columns_(num_columns), headings_(headings)
+                                         vector<string> headings, Section* parent_section,
+                                         EvaluationManager& eval_man)
+    : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings)
 {
 
 }
 
-void SectionContentTable::addRow (vector<QVariant> row)
+void SectionContentTable::addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data)
 {
     assert (row.size() == num_columns_);
+    assert (viewable_data_.size() == rows_.size());
+
+    if (viewable_data)
+        viewable_data_.push_back(move(viewable_data));
+    else
+        viewable_data_.push_back(nullptr);
+
     rows_.push_back(row);
 }
 
@@ -28,11 +39,11 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
 {
     assert (layout);
 
-    QSortFilterProxyModel* proxy_model = new QSortFilterProxyModel();
-    proxy_model->setSourceModel(this);
+    proxy_model_ = new QSortFilterProxyModel();
+    proxy_model_->setSourceModel(this);
 
     QTableView* table_view = new QTableView();
-    table_view->setModel(proxy_model);
+    table_view->setModel(proxy_model_);
     table_view->setSortingEnabled(true);
     table_view->sortByColumn(0, Qt::AscendingOrder);
     table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -40,6 +51,9 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
     table_view->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
     table_view->setWordWrap(true);
     table_view->reset();
+
+    connect(table_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
+            this, &SectionContentTable::currentRowChanged);
 
     table_view->resizeColumnsToContents();
     table_view->resizeRowsToContents();
@@ -119,5 +133,28 @@ Qt::ItemFlags SectionContentTable::flags(const QModelIndex &index) const
 
     return QAbstractItemModel::flags(index);
 }
+
+void SectionContentTable::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    if (!current.isValid())
+    {
+        loginf << "SectionContentTable: currentRowChanged: invalid index";
+        return;
+    }
+
+    auto const source_index = proxy_model_->mapToSource(current);
+    assert (source_index.isValid());
+
+    assert (source_index.row() >= 0);
+    assert (source_index.row() < rows_.size());
+
+    if (viewable_data_.at(source_index.row()))
+    {
+        loginf << "SectionContentTable: currentRowChanged: index has associated viewable";
+
+        eval_man_.setViewableDataConfig(*viewable_data_.at(source_index.row()).get());
+    }
+}
+
 
 }

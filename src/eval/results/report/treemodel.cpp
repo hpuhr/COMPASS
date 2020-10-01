@@ -5,10 +5,10 @@
 
 namespace EvaluationResultsReport
 {
-    TreeModel::TreeModel()
-     : QAbstractItemModel(nullptr)
+    TreeModel::TreeModel(EvaluationManager& eval_man)
+     : QAbstractItemModel(nullptr), eval_man_(eval_man)
     {
-        root_item_ = make_shared<RootItem>();
+        root_item_ = make_shared<RootItem>(eval_man_);
     }
 
     int TreeModel::columnCount(const QModelIndex &parent) const

@@ -9,10 +9,10 @@ using namespace Utils;
 namespace EvaluationResultsReport
 {
 
-    RootItem::RootItem()
-        : TreeItem("Report", nullptr)
+    RootItem::RootItem(EvaluationManager& eval_man)
+        : TreeItem("Report", nullptr), eval_man_(eval_man)
     {
-        root_section_ = make_shared<Section>("Results", this);
+        root_section_ = make_shared<Section>("Results", this, eval_man_);
     }
 
    TreeItem* RootItem::child(int row)

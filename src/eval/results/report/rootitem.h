@@ -5,6 +5,8 @@
 
 #include <memory>
 
+class EvaluationManager;
+
 namespace EvaluationResultsReport
 {
 
@@ -13,7 +15,7 @@ namespace EvaluationResultsReport
     class RootItem : public TreeItem
     {
     public:
-        RootItem();
+        RootItem(EvaluationManager& eval_man);
 
         virtual TreeItem *child(int row) override;
         virtual int childCount() const override;
@@ -26,6 +28,8 @@ namespace EvaluationResultsReport
         Section& getSection (const std::string& id); // bla:bla2
 
     protected:
+        EvaluationManager& eval_man_;
+
         std::shared_ptr<Section> root_section_;
     };
 

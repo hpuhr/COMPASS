@@ -6,6 +6,7 @@
 
 class EvaluationRequirement;
 class EvaluationTargetData;
+class EvaluationManager;
 
 namespace EvaluationResultsReport {
     class Section;
@@ -17,7 +18,8 @@ class EvaluationRequirementResult
 {
 public:
     EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement,
-                                std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets);
+                                std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets,
+                                EvaluationManager& eval_man);
 
     std::shared_ptr<EvaluationRequirement> requirement() const;
 
@@ -36,6 +38,8 @@ protected:
 
     std::vector<unsigned int> utns_; // utns used to generate result
     std::vector<const EvaluationTargetData*> targets_; // targets used to generate result
+
+    EvaluationManager& eval_man_;
 
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

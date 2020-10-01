@@ -3,6 +3,8 @@
 
 #include <string>
 
+class EvaluationManager;
+
 class QWidget;
 class QVBoxLayout;
 
@@ -15,15 +17,16 @@ namespace EvaluationResultsReport
     class SectionContent
     {
     public:
-        SectionContent(const string& name, Section* parent_section);
+        SectionContent(const string& name, Section* parent_section, EvaluationManager& eval_man);
 
         string name() const;
 
-        virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout, do not store/delete after
+        virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
 
     protected:
         string name_;
         Section* parent_section_ {nullptr};
+        EvaluationManager& eval_man_;
 
     };
 

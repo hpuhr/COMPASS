@@ -8,12 +8,12 @@ using namespace std;
 using namespace Utils;
 
 
-EvaluationRequirementDetection::EvaluationRequirementDetection(const std::string& name, const std::string& short_name,
-                                                               const std::string& group_name, float update_interval_s,
-                                                               float minimum_probability, bool use_max_gap_interval,
-                                                               float max_gap_interval_s, bool use_miss_tolerance,
-                                                               float miss_tolerance_s)
-    : EvaluationRequirement(name, short_name, group_name), update_interval_s_(update_interval_s),
+EvaluationRequirementDetection::EvaluationRequirementDetection(
+        const std::string& name, const std::string& short_name, const std::string& group_name,
+        EvaluationManager& eval_man,
+        float update_interval_s, float minimum_probability, bool use_max_gap_interval,
+        float max_gap_interval_s, bool use_miss_tolerance, float miss_tolerance_s)
+    : EvaluationRequirement(name, short_name, group_name, eval_man), update_interval_s_(update_interval_s),
       minimum_probability_(minimum_probability), use_max_gap_interval_(use_max_gap_interval),
       max_gap_interval_s_(max_gap_interval_s), use_miss_tolerance_(use_miss_tolerance),
       miss_tolerance_s_(miss_tolerance_s)
@@ -169,9 +169,8 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
                << " no data for pd";
 
     return make_shared<EvaluationRequirementDetectionResult>(
-                instance, vector<unsigned int> {target_data.utn_},
-                vector<const EvaluationTargetData*> {&target_data},
-                sum_uis, missed_uis, max_gap_uis, no_ref_uis);
+                instance, vector<unsigned int> {target_data.utn_}, vector<const EvaluationTargetData*> {&target_data},
+                eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
 }
 
 bool EvaluationRequirementDetection::isMiss (float d_tod)

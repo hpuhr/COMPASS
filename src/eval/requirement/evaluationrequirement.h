@@ -6,11 +6,13 @@
 
 class EvaluationTargetData;
 class EvaluationRequirementResult;
+class EvaluationManager;
 
 class EvaluationRequirement
 {
 public:
-    EvaluationRequirement(const std::string& name, const std::string& short_name, const std::string& group_name);
+    EvaluationRequirement(const std::string& name, const std::string& short_name, const std::string& group_name,
+                          EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) = 0;
@@ -24,6 +26,8 @@ protected:
     std::string name_;
     std::string short_name_;
     std::string group_name_;
+
+    EvaluationManager& eval_man_;
 };
 
 #endif // EVALUATIONREQUIREMENT_H

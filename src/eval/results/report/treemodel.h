@@ -7,6 +7,9 @@
 
 #include <memory>
 
+class EvaluationManager;
+
+
 namespace EvaluationResultsReport
 {
     using namespace std;
@@ -16,7 +19,7 @@ namespace EvaluationResultsReport
     class TreeModel : public QAbstractItemModel
     {
     public:
-        TreeModel();
+        TreeModel(EvaluationManager& eval_man);
 
         QVariant data(const QModelIndex& index, int role) const override;
         Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -34,6 +37,8 @@ namespace EvaluationResultsReport
         shared_ptr<RootItem> rootItem() const;
 
     protected:
+        EvaluationManager& eval_man_;
+
         shared_ptr<RootItem> root_item_;
     };
 

@@ -12,6 +12,7 @@ class EvaluationRequirement;
 
 class QWidget;
 class QFormLayout;
+class EvaluationManager;
 
 class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
@@ -25,7 +26,8 @@ public slots:
 
 public:
     EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                EvaluationRequirementGroup& group, EvaluationStandard& standard);
+                                EvaluationRequirementGroup& group, EvaluationStandard& standard,
+                                EvaluationManager& eval_man);
     virtual ~EvaluationRequirementConfig();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -50,6 +52,7 @@ public:
 protected:
     EvaluationRequirementGroup& group_;
     EvaluationStandard& standard_;
+    EvaluationManager& eval_man_;
 
     std::string name_;
     std::string short_name_;

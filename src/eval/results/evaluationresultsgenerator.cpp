@@ -14,7 +14,7 @@
 using namespace std;
 
 EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
-    : eval_man_(eval_man)
+    : eval_man_(eval_man), results_model_(eval_man_)
 {
 
 }
@@ -40,8 +40,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     for (auto& req_group_it : standard)
     {
         logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
-
-
 
 
         for (auto& req_cfg_it : *req_group_it.second)

@@ -12,7 +12,7 @@ namespace EvaluationResultsReport
     class SectionContentText : public SectionContent
     {
     public:
-        SectionContentText(const string& name, Section* parent_section);
+        SectionContentText(const string& name, Section* parent_section, EvaluationManager& eval_man);
 
         void addText (const string& text);
 

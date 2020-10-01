@@ -1,4 +1,5 @@
 #include "eval/results/report/sectioncontenttext.h"
+#include "evaluationmanager.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -7,8 +8,8 @@
 
 namespace EvaluationResultsReport
 {
-SectionContentText::SectionContentText(const string& name, Section* parent_section)
-    : SectionContent(name, parent_section)
+SectionContentText::SectionContentText(const string& name, Section* parent_section, EvaluationManager& eval_man)
+    : SectionContent(name, parent_section, eval_man)
 {
 
 }

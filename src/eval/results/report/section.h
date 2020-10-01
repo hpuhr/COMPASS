@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+class EvaluationManager;
+
 namespace EvaluationResultsReport
 {
     using namespace std;
@@ -20,7 +22,7 @@ namespace EvaluationResultsReport
     class Section : public TreeItem
     {
     public:
-        Section(string heading, TreeItem* parent_item);
+        Section(string heading, TreeItem* parent_item, EvaluationManager& eval_man);
 
         virtual TreeItem *child(int row) override;
         virtual int childCount() const override;
@@ -46,6 +48,7 @@ namespace EvaluationResultsReport
 
     protected:
         string heading_; // name same as heading
+        EvaluationManager& eval_man_;
 
         vector<shared_ptr<SectionContent>> content_;
 

@@ -11,8 +11,9 @@
 using namespace std;
 
 EvaluationRequirementGroup::EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
-                                                       EvaluationStandard& standard)
-    : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard)
+                                                       EvaluationStandard& standard, EvaluationManager& eval_man)
+    : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard),
+      eval_man_(eval_man)
 {
     registerParameter("name", &name_, "");
 
@@ -33,7 +34,7 @@ void EvaluationRequirementGroup::generateSubConfigurable(const std::string& clas
     if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
     {
         EvaluationRequirementDetectionConfig* config = new EvaluationRequirementDetectionConfig(
-                    class_id, instance_id, *this, standard_);
+                    class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));

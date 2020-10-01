@@ -3,8 +3,8 @@
 
 namespace EvaluationResultsReport
 {
-    SectionContent::SectionContent(const string& name, Section* parent_section)
-        : name_(name), parent_section_(parent_section)
+    SectionContent::SectionContent(const string& name, Section* parent_section, EvaluationManager& eval_man)
+        : name_(name), parent_section_(parent_section), eval_man_(eval_man)
     {
         assert (parent_section_);
     }

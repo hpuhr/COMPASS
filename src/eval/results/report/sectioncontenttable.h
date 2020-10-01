@@ -2,23 +2,35 @@
 #define SECTIONCONTENTTABLE_H
 
 #include "eval/results/report/sectioncontent.h"
+#include "viewabledataconfig.h"
 
 #include <QVariant>
 #include <QAbstractItemModel>
 
+#include "json.hpp"
+
 #include <vector>
+
+class ViewableDataConfig;
+
+class QSortFilterProxyModel;
 
 namespace EvaluationResultsReport
 {
     using namespace std;
 
-    class SectionContentTable : public SectionContent, public QAbstractItemModel
+    class SectionContentTable : public QAbstractItemModel, public SectionContent
     {
+        Q_OBJECT
+
+    public slots:
+        void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
-                            vector<string> headings, Section* parent_section);
+                            vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
-        void addRow (vector<QVariant> row);
+        void addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -36,6 +48,9 @@ namespace EvaluationResultsReport
         vector<string> headings_;
 
         vector<vector<QVariant>> rows_;
+        vector<std::unique_ptr<nlohmann::json::object_t>> viewable_data_;
+
+        QSortFilterProxyModel* proxy_model_ {nullptr};
     };
 
 }

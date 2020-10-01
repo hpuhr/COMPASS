@@ -7,8 +7,8 @@ using namespace std;
 
 EvaluationRequirementDetectionConfig::EvaluationRequirementDetectionConfig(
         const std::string& class_id, const std::string& instance_id,
-        EvaluationRequirementGroup& group, EvaluationStandard& standard)
-    : EvaluationRequirementConfig(class_id, instance_id, group, standard)
+        EvaluationRequirementGroup& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : EvaluationRequirementConfig(class_id, instance_id, group, standard, eval_man)
 {
     registerParameter("update_interval", &update_interval_s_, 1);
     registerParameter("minimum_probability", &minimum_probability_, 0.99);
@@ -44,7 +44,7 @@ EvaluationRequirementDetectionConfigWidget* EvaluationRequirementDetectionConfig
 std::shared_ptr<EvaluationRequirement> EvaluationRequirementDetectionConfig::createRequirement()
 {
     shared_ptr<EvaluationRequirementDetection> req = make_shared<EvaluationRequirementDetection>(
-                name_, short_name_, group_.name(), update_interval_s_, minimum_probability_,
+                name_, short_name_, group_.name(), eval_man_, update_interval_s_, minimum_probability_,
                 use_max_gap_interval_, max_gap_interval_s_, use_miss_tolerance_, miss_tolerance_s_);
 
     return req;

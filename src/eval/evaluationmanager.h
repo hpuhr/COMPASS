@@ -10,12 +10,12 @@
 #include "activedatasource.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
+#include "viewabledataconfig.h"
 
 class ATSDB;
 class EvaluationManagerWidget;
 class EvaluationStandard;
 class DBObject;
-class ViewableDataConfig;
 
 class QWidget;
 class QTabWidget;
@@ -108,6 +108,7 @@ public:
 
     void setViewableDataConfig (const nlohmann::json::object_t& data);
     void showUTN (unsigned int utn);
+    std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn);
 
 protected:
     ATSDB& atsdb_;

@@ -976,6 +976,14 @@ void EvaluationManager::showUTN (unsigned int utn)
     setViewableDataConfig(data);
 }
 
+std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForUTN (unsigned int utn)
+{
+    nlohmann::json::object_t data = getBaseViewableDataConfig();
+    data["filters"]["UTNs"]["utns"] = to_string(utn);
+
+    return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
+}
+
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 {
     nlohmann::json data;

@@ -9,8 +9,8 @@
 namespace EvaluationResultsReport
 {
 
-    Section::Section(string heading, TreeItem* parent_item)
-        : TreeItem(heading, parent_item), heading_(heading)
+    Section::Section(string heading, TreeItem* parent_item, EvaluationManager& eval_man)
+        : TreeItem(heading, parent_item), heading_(heading), eval_man_(eval_man)
     {
     }
 
@@ -68,7 +68,7 @@ namespace EvaluationResultsReport
         loginf << "Section " << heading_ << ": addSubSection: adding " << heading;
 
         assert (!hasSubSection(heading));
-        sub_sections_.push_back(make_shared<Section>(heading, this));
+        sub_sections_.push_back(make_shared<Section>(heading, this, eval_man_));
         assert (hasSubSection(heading));
     }
 
@@ -98,7 +98,7 @@ namespace EvaluationResultsReport
     void Section::addText (const std::string& name)
     {
         assert (!hasText(name));
-        content_.push_back(make_shared<SectionContentText>(name, this));
+        content_.push_back(make_shared<SectionContentText>(name, this, eval_man_));
         assert (hasText(name));
     }
 
@@ -118,7 +118,7 @@ namespace EvaluationResultsReport
                             vector<string> headings)
     {
         assert (!hasTable(name));
-        content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this));
+        content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_));
         assert (hasTable(name));
     }
 

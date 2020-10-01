@@ -2,6 +2,7 @@
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
 #include "evaluationtargetdata.h"
+#include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -17,8 +18,9 @@ using namespace Utils;
 EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
         std::shared_ptr<EvaluationRequirement> requirement,
         std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets,
+        EvaluationManager& eval_man,
         float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis)
-    : EvaluationRequirementResult(requirement, utns, targets), sum_uis_(sum_uis), missed_uis_(missed_uis),
+    : EvaluationRequirementResult(requirement, utns, targets, eval_man), sum_uis_(sum_uis), missed_uis_(missed_uis),
       max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis)
 {
     updatePD();
@@ -64,7 +66,7 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetectionResul
     loginf << "EvaluationRequirementDetectionResult: copy";
 
     std::shared_ptr<EvaluationRequirementDetectionResult> copy = make_shared<EvaluationRequirementDetectionResult>(
-                requirement_, utns_, targets_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_);
+                requirement_, utns_, targets_, eval_man_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_);
     copy->updatePD();
 
     return copy;
@@ -73,7 +75,7 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetectionResul
 void EvaluationRequirementDetectionResult::print()
 {
     std::shared_ptr<EvaluationRequirementDetection> req =
-                std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+            std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     if (sum_uis_)
@@ -99,6 +101,9 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 
     if (utns_.size() > 1) // is joined. TODO how to distinguish different aggregations?
     {
+        loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name()
+               << ": addToReport: adding joined result";
+
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
         // condition
@@ -122,11 +127,14 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                        pd_var, condition.c_str(), result.c_str()});
+                         pd_var, condition.c_str(), result.c_str()}, nullptr);
     }
     else // utns_.size() == 1
     {
         // add target to requirements->group->req
+
+        loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name()
+               << ": addToReport: adding single result";
 
         assert (utns_.size() == 1);
 
@@ -146,24 +154,24 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
         if (has_pd_)
             pd_var = roundf(pd_ * 10000.0) / 100.0;
 
-        target_table.addRow({utns_.at(0), target->timeBeginStr().c_str(), target->timeEndStr().c_str(),
-                             target->callsignsStr().c_str(), target->targetAddressesStr().c_str(),
-                             target->modeACodesStr().c_str(), target->modeCMinStr().c_str(),
-                             target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var});
-
-
+        target_table.addRow(
+        {utns_.at(0), target->timeBeginStr().c_str(), target->timeEndStr().c_str(),
+         target->callsignsStr().c_str(), target->targetAddressesStr().c_str(),
+         target->modeACodesStr().c_str(), target->modeCMinStr().c_str(),
+         target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
+                    eval_man_.getViewableForUTN(utns_.at(0)));
     }
 
     // TODO add requirement description, methods
-//    EvaluationResultsReport::Section& req_section = getRequirementSection(root_item);
+    //    EvaluationResultsReport::Section& req_section = getRequirementSection(root_item);
 
-//    if (!req_section.hasText("description"))
-//    {
-//        req_section.addText("description");
+    //    if (!req_section.hasText("description"))
+    //    {
+    //        req_section.addText("description");
 
-//        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
+    //        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
 
-//        req_text.addText("TODO Requirement description");
-//    }
+    //        req_text.addText("TODO Requirement description");
+    //    }
 
 }

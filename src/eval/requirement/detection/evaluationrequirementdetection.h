@@ -6,11 +6,11 @@
 class EvaluationRequirementDetection : public EvaluationRequirement
 {
 public:
-    EvaluationRequirementDetection(const std::string& name, const std::string& short_name,
-                                   const std::string& group_name, float update_interval_s,
-                                   float minimum_probability, bool use_max_gap_interval,
-                                   float max_gap_interval_s, bool use_miss_tolerance,
-                                   float miss_tolerance_s);
+    EvaluationRequirementDetection(
+            const std::string& name, const std::string& short_name, const std::string& group_name,
+            EvaluationManager& eval_man,
+            float update_interval_s, float minimum_probability, bool use_max_gap_interval,
+            float max_gap_interval_s, bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;
 
