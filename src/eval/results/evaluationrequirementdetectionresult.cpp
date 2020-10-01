@@ -19,9 +19,10 @@ EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
         std::shared_ptr<EvaluationRequirement> requirement,
         std::vector<unsigned int> utns, std::vector<const EvaluationTargetData*> targets,
         EvaluationManager& eval_man,
-        float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis)
+        float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
+        std::vector<EvaluationRequirementDetectionDetail> details)
     : EvaluationRequirementResult(requirement, utns, targets, eval_man), sum_uis_(sum_uis), missed_uis_(missed_uis),
-      max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis)
+      max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
 {
     updatePD();
 }
@@ -58,6 +59,8 @@ void EvaluationRequirementDetectionResult::join(const std::shared_ptr<Evaluation
     max_gap_uis_ += other->max_gap_uis_;
     no_ref_uis_ += other->no_ref_uis_;
 
+    // details not joined
+
     updatePD();
 }
 
@@ -66,7 +69,8 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetectionResul
     loginf << "EvaluationRequirementDetectionResult: copy";
 
     std::shared_ptr<EvaluationRequirementDetectionResult> copy = make_shared<EvaluationRequirementDetectionResult>(
-                requirement_, utns_, targets_, eval_man_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_);
+                requirement_, utns_, targets_, eval_man_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_,
+                std::vector<EvaluationRequirementDetectionDetail>{}); // details not copied
     copy->updatePD();
 
     return copy;
@@ -169,10 +173,11 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(utn_req_section_heading);
 
-        if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 3, {"Name", "comment", "Value"});
+        if (!utn_req_section.hasTable("details_overview_table"))
+            utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"});
 
-        EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_table");
+        EvaluationResultsReport::SectionContentTable& utn_req_table =
+                utn_req_section.getTable("details_overview_table");
 
         utn_req_table.addRow({"EUIs", "Expected Update Intervals", sum_uis_});
         utn_req_table.addRow({"MUIs", "Missed Update Intervals", missed_uis_});
@@ -195,6 +200,32 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
             result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()});
+
+        // add further details
+
+        if (!utn_req_section.hasTable("details_table"))
+            utn_req_section.addTable("details_table", 7,
+            {"ToD", "DToD", "Ref.", "MUI", "MGUI", "NRUI", "Comment"});
+
+        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+                utn_req_section.getTable("details_table");
+
+        for (auto& rq_det_it : details_)
+        {
+            if (rq_det_it.has_d_tod_)
+                utn_req_details_table.addRow(
+                {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                 String::timeStringFromDouble(rq_det_it.d_tod_).c_str(),
+                 rq_det_it.ref_exists_, rq_det_it.missed_uis_,
+                 rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_, rq_det_it.comment_.c_str()});
+            else
+                utn_req_details_table.addRow(
+                {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                 QVariant(),
+                 rq_det_it.ref_exists_, rq_det_it.missed_uis_,
+                 rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_,
+                 rq_det_it.comment_.c_str()});
+        }
     }
 
     // TODO add requirement description, methods

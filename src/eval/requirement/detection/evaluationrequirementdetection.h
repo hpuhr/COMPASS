@@ -3,6 +3,30 @@
 
 #include "evaluationrequirement.h"
 
+class EvaluationRequirementDetectionDetail
+{
+public:
+    EvaluationRequirementDetectionDetail(
+            float tod, bool has_d_tod, float d_tod, bool ref_exists, float missed_uis, float max_gap_uis,
+            float no_ref_uis, const std::string& comment)
+        : tod_(tod), has_d_tod_(has_d_tod), d_tod_(d_tod), ref_exists_(ref_exists), missed_uis_(missed_uis),
+          max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), comment_(comment)
+    {
+    }
+
+    float tod_ {0};
+    bool has_d_tod_ {false};
+    float d_tod_ {0};
+
+    bool ref_exists_ {false};
+
+    float missed_uis_ {0};
+    float max_gap_uis_ {0};
+    float no_ref_uis_ {0};
+
+    std::string comment_;
+};
+
 class EvaluationRequirementDetection : public EvaluationRequirement
 {
 public:

@@ -2,6 +2,7 @@
 #define EVALUATIONREQUIREMENTDETECTIONRESULT_H
 
 #include "evaluationrequirementresult.h"
+#include "evaluationrequirementdetection.h"
 
 class EvaluationRequirementDetectionResult : public EvaluationRequirementResult
 {
@@ -9,7 +10,8 @@ public:
     EvaluationRequirementDetectionResult(
             std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns,
             std::vector<const EvaluationTargetData*> targets, EvaluationManager& eval_man,
-            float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis);
+            float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
+            std::vector<EvaluationRequirementDetectionDetail> details);
 
     virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
     // joins other result to this one
@@ -24,6 +26,8 @@ protected:
     float missed_uis_ {0};
     float max_gap_uis_ {0};
     float no_ref_uis_ {0};
+
+    std::vector<EvaluationRequirementDetectionDetail> details_;
 
     bool has_pd_ {false};
     float pd_{0};

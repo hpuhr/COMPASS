@@ -75,6 +75,8 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
     float no_ref_first_tod {0};
     float no_ref_uis {0};
 
+    vector<EvaluationRequirementDetectionDetail> details;
+
     for (const auto& tst_id : tst_data)
     {
         last_tod = tod;
@@ -88,13 +90,27 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
             logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " first tod " << String::timeStringFromDouble(first_tod);
 
+            details.push_back(
+            {tod, false, 0, target_data.hasRefDataForTime(tod, 4), missed_uis, max_gap_uis, no_ref_uis,
+             "First target report"});
+
             continue;
         }
 
         if (!target_data.hasRefDataForTime(tod, 4)) // seconds max time difference
         {
             if (!no_ref_exists)
+            {
                 no_ref_first_tod = tod; // save first occurance of no ref
+
+                details.push_back(
+                {tod, false, 0, false, missed_uis, max_gap_uis, no_ref_uis,
+                 "Occurance of no reference"});
+
+            }
+            else
+                details.push_back(
+                {tod, false, 0, false, missed_uis, max_gap_uis, no_ref_uis, "Still no reference"});
 
             no_ref_exists = true;
 
@@ -110,12 +126,15 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
             assert (tod >= no_ref_first_tod);
             no_ref_uis = floor(tod - no_ref_first_tod);
 
+            details.push_back(
+            {tod, false, 0, true, missed_uis, max_gap_uis, no_ref_uis,
+             "Reference exists again, was missing since "+String::timeStringFromDouble(no_ref_first_tod)});
+
             no_ref_exists = false;
             no_ref_first_tod = 0;
 
             logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " ref after no ref at " << String::timeStringFromDouble(tod) << " no_ref_uis " << no_ref_uis;
-
 
             continue; // cannot assess this time, goto next
         }
@@ -134,6 +153,11 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
                    << " max gap of " << String::timeStringFromDouble(floor(d_tod/update_interval_s_))
                    << " at " << String::timeStringFromDouble(tod) << " max_gap_uis " << max_gap_uis;
 
+            details.push_back(
+            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis,
+             "Max gap detected (DToD > "+to_string(max_gap_interval_s_)
+             +"), last was "+String::timeStringFromDouble(last_tod)});
+
             continue;
         }
 
@@ -146,8 +170,20 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
                    << floor(d_tod/update_interval_s_)
                    << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
                    << "] missed_uis " << missed_uis;
+
+            details.push_back(
+            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis,
+             "Miss detected (DToD > "
+             +to_string(use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_)
+             +"), last was "+String::timeStringFromDouble(last_tod)});
         }
+        else
+            details.push_back(
+            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis, "OK (DToD <= "
+             +to_string(update_interval_s_)+")"});
     }
+
+    assert (details.size() == tst_data.size());
 
     float sum_uis = floor(tod - first_tod);
 
@@ -169,8 +205,9 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
                << " no data for pd";
 
     return make_shared<EvaluationRequirementDetectionResult>(
-                instance, vector<unsigned int> {target_data.utn_}, vector<const EvaluationTargetData*> {&target_data},
-                eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis);
+                instance, vector<unsigned int> {target_data.utn_},
+                vector<const EvaluationTargetData*> {&target_data},
+                eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }
 
 bool EvaluationRequirementDetection::isMiss (float d_tod)
