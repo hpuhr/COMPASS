@@ -24,6 +24,8 @@ public:
 
     void showResultWidget(QWidget* widget); // can be nullptr
 
+    void selectId (const std::string& id);
+
 protected:
     EvaluationManager& eval_man_;
     EvaluationManagerWidget& man_widget_;

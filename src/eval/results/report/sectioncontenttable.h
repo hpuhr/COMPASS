@@ -24,13 +24,15 @@ namespace EvaluationResultsReport
         Q_OBJECT
 
     public slots:
-        void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
+        void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
+        void doubleClickedSlot(const QModelIndex& index);
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
-        void addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data);
+        void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data,
+                     const string& reference);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -48,7 +50,8 @@ namespace EvaluationResultsReport
         vector<string> headings_;
 
         vector<vector<QVariant>> rows_;
-        vector<std::unique_ptr<nlohmann::json::object_t>> viewable_data_;
+        vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
+        vector<string> references_;
 
         QSortFilterProxyModel* proxy_model_ {nullptr};
     };

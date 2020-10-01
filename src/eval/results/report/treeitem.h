@@ -22,9 +22,12 @@ namespace EvaluationResultsReport
         TreeItem* parentItem();
 
         string name() const;
+        string id() const; // (parent_id):name
 
     protected:
         string name_;
+        string id_;
+
         TreeItem* parent_item_ {nullptr};
     };
 }

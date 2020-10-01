@@ -30,6 +30,8 @@ public:
 
     void updateButtons();
 
+    void showResultId (const std::string& id);
+
 protected:
     EvaluationManager& eval_man_;
 

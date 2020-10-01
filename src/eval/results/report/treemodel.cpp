@@ -1,7 +1,7 @@
 #include "eval/results/report/treemodel.h"
 #include "eval/results/report/treeitem.h"
 #include "eval/results/report/rootitem.h"
-
+#include "logger.h"
 
 namespace EvaluationResultsReport
 {
@@ -24,12 +24,15 @@ namespace EvaluationResultsReport
         if (!index.isValid())
             return QVariant();
 
-        if (role != Qt::DisplayRole)
-            return QVariant();
-
         TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+        assert (item);
 
-        return item->data(index.column());
+        if (role == Qt::DisplayRole)
+            return item->data(index.column());
+        if (role == Qt::UserRole)
+            return item->id().c_str();
+        else
+            return QVariant();
     }
 
     Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
@@ -93,6 +96,27 @@ namespace EvaluationResultsReport
             parentItem = static_cast<TreeItem*>(parent.internalPointer());
 
         return parentItem->childCount();
+    }
+
+    QModelIndex TreeModel::findItem (const string& id)
+    {
+        QModelIndexList items = match(
+                    index(0, 0),
+                    Qt::UserRole,
+                    QVariant(id.c_str()),
+                    2, // look *
+                    Qt::MatchRecursive); // look *
+
+        if (items.size() == 1)
+        {
+            loginf << "TreeModel: findItem: id '" << id << "' found";
+            return items.at(0);
+        }
+        else
+        {
+            loginf << "TreeModel: findItem: id '" << id << " found " << items.size() << " matches";
+            return QModelIndex(); // none or too many found
+        }
     }
 
     void TreeModel::beginReset()

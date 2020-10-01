@@ -22,17 +22,20 @@ SectionContentTable::SectionContentTable(const string& name, unsigned int num_co
 
 }
 
-void SectionContentTable::addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data)
+void SectionContentTable::addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data,
+                                  const string& reference)
 {
     assert (row.size() == num_columns_);
     assert (viewable_data_.size() == rows_.size());
+
+    rows_.push_back(row);
 
     if (viewable_data)
         viewable_data_.push_back(move(viewable_data));
     else
         viewable_data_.push_back(nullptr);
 
-    rows_.push_back(row);
+    references_.push_back(reference);
 }
 
 void SectionContentTable::addToLayout (QVBoxLayout* layout)
@@ -53,7 +56,9 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
     table_view->reset();
 
     connect(table_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
-            this, &SectionContentTable::currentRowChanged);
+            this, &SectionContentTable::currentRowChangedSlot);
+    connect(table_view, &QTableView::doubleClicked,
+            this, &SectionContentTable::doubleClickedSlot);
 
     table_view->resizeColumnsToContents();
     table_view->resizeRowsToContents();
@@ -134,11 +139,11 @@ Qt::ItemFlags SectionContentTable::flags(const QModelIndex &index) const
     return QAbstractItemModel::flags(index);
 }
 
-void SectionContentTable::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
 {
     if (!current.isValid())
     {
-        loginf << "SectionContentTable: currentRowChanged: invalid index";
+        loginf << "SectionContentTable: currentRowChangedSlot: invalid index";
         return;
     }
 
@@ -150,11 +155,35 @@ void SectionContentTable::currentRowChanged(const QModelIndex& current, const QM
 
     if (viewable_data_.at(source_index.row()))
     {
-        loginf << "SectionContentTable: currentRowChanged: index has associated viewable";
+        loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
 
         eval_man_.setViewableDataConfig(*viewable_data_.at(source_index.row()).get());
     }
 }
 
+void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
+{
+    if (!index.isValid())
+    {
+        loginf << "SectionContentTable: doubleClickedSlot: invalid index";
+        return;
+    }
+
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
+
+    assert (source_index.row() >= 0);
+    assert (source_index.row() < rows_.size());
+
+    loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
+
+    if (references_.at(source_index.row()) != "")
+    {
+        loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference ' "
+               << references_.at(source_index.row()) << "'";
+
+        eval_man_.showResultId(references_.at(source_index.row()));
+    }
+}
 
 }

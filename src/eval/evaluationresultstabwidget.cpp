@@ -55,6 +55,24 @@ void EvaluationResultsTabWidget::expandAll()
     tree_view_->expandAll();
 }
 
+void EvaluationResultsTabWidget::selectId (const std::string& id)
+{
+    loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
+
+    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(id);
+
+    if (!index.isValid())
+    {
+        logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
+        return;
+    }
+
+    assert (tree_view_);
+    tree_view_->selectionModel()->clear();
+    tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    itemClickedSlot(index);
+}
+
 
 void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 {

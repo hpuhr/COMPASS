@@ -127,7 +127,8 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                         pd_var, condition.c_str(), result.c_str()}, nullptr);
+                         pd_var, condition.c_str(), result.c_str()}, nullptr,
+                        "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
     }
     else // utns_.size() == 1
     {
@@ -159,7 +160,7 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
          target->callsignsStr().c_str(), target->targetAddressesStr().c_str(),
          target->modeACodesStr().c_str(), target->modeCMinStr().c_str(),
          target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
-                    eval_man_.getViewableForUTN(utns_.at(0)));
+                    eval_man_.getViewableForUTN(utns_.at(0)), "");
     }
 
     // TODO add requirement description, methods

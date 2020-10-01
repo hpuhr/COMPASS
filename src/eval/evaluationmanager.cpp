@@ -984,6 +984,14 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForUTN (
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
+void EvaluationManager::showResultId (const std::string& id)
+{
+    loginf << "EvaluationManager: showResultId: id '" << id << "'";
+
+    assert (widget_);
+    widget_->showResultId(id);
+}
+
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 {
     nlohmann::json data;

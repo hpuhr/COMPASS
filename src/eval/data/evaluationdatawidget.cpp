@@ -38,6 +38,7 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     setLayout(main_layout);
 }
 
+
 void EvaluationDataWidget::resizeColumnsToContents()
 {
     loginf << "EvaluationDataWidget: resizeColumnsToContents";

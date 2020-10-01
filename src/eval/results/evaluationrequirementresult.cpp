@@ -76,9 +76,14 @@ EvaluationResultsReport::SectionContentTable& EvaluationRequirementResult::getRe
     return ov_sec.getTable("req_overview");
 }
 
+std::string EvaluationRequirementResult::getRequirementSectionID ()
+{
+    return "Requirements:"+requirement_->groupName()+":"+requirement_->name();
+}
+
 EvaluationResultsReport::Section& EvaluationRequirementResult::getRequirementSection (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    return root_item->getSection("Requirements:"+requirement_->groupName()+":"+requirement_->name());
+    return root_item->getSection(getRequirementSectionID());
 }
 

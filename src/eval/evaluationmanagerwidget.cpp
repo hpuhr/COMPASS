@@ -71,6 +71,12 @@ void EvaluationManagerWidget::updateButtons()
     gen_report_button_->setEnabled(eval_man_.evaluated());
 }
 
+void EvaluationManagerWidget::showResultId (const std::string& id)
+{
+    assert (results_tab_widget_);
+    results_tab_widget_->selectId(id);
+}
+
 void EvaluationManagerWidget::addMainWidget ()
 {
     main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));

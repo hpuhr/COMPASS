@@ -31,6 +31,8 @@ namespace EvaluationResultsReport
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
         int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+        QModelIndex findItem (const string& id); // "Report:Results:Overview"
+
         void beginReset();
         void endReset();
 

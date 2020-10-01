@@ -110,6 +110,8 @@ public:
     void showUTN (unsigned int utn);
     std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn);
 
+    void showResultId (const std::string& id);
+
 protected:
     ATSDB& atsdb_;
 
