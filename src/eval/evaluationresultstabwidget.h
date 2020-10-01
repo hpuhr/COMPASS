@@ -20,7 +20,7 @@ public slots:
 public:
     EvaluationResultsTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
 
-    void expandAll();
+    void expand();
 
     void showResultWidget(QWidget* widget); // can be nullptr
 
@@ -33,6 +33,8 @@ protected:
     std::unique_ptr<QTreeView> tree_view_;
 
     QStackedWidget* results_widget_{nullptr};
+
+    void expandAllParents (QModelIndex index);
 };
 
 #endif // EVALUATIONRESULTSTABWIDGET_H

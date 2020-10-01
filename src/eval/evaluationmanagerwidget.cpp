@@ -119,7 +119,7 @@ void EvaluationManagerWidget::evaluateSlot()
     eval_man_.evaluate();
     assert (results_tab_widget_);
 
-    results_tab_widget_->expandAll();
+    results_tab_widget_->expand();
 }
 
 

@@ -31,8 +31,8 @@ namespace EvaluationResultsReport
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
-        void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data,
-                     const string& reference);
+        void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
+                     const string& reference = "");
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 

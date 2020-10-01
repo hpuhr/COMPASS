@@ -26,7 +26,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     tree_view_.reset(new QTreeView());
     tree_view_->setModel(&eval_man_.resultsGenerator().resultsModel());
     tree_view_->setRootIsDecorated(false);
-    tree_view_->expandAll();
+    tree_view_->expandToDepth(3);
 
     connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationResultsTabWidget::itemClickedSlot);
 
@@ -48,11 +48,11 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     setLayout(main_layout);
 }
 
-void EvaluationResultsTabWidget::expandAll()
+void EvaluationResultsTabWidget::expand()
 {
-    loginf << "EvaluationResultsTabWidget: expandAll";
+    loginf << "EvaluationResultsTabWidget: expand";
 
-    tree_view_->expandAll();
+    tree_view_->expandToDepth(3);
 }
 
 void EvaluationResultsTabWidget::selectId (const std::string& id)
@@ -69,7 +69,11 @@ void EvaluationResultsTabWidget::selectId (const std::string& id)
 
     assert (tree_view_);
     tree_view_->selectionModel()->clear();
+
+    expandAllParents(index);
+
     tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    tree_view_->scrollTo(index);
     itemClickedSlot(index);
 }
 
@@ -111,4 +115,19 @@ void EvaluationResultsTabWidget::showResultWidget(QWidget* widget)
         results_widget_->addWidget(widget);
 
     results_widget_->setCurrentWidget(widget);
+}
+
+void EvaluationResultsTabWidget::expandAllParents (QModelIndex index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+
+    QModelIndex parent_index;
+
+    for (parent_index = index.parent(); parent_index.isValid(); parent_index = parent_index.parent())
+    {
+        if (!tree_view_->isExpanded(parent_index))
+            tree_view_->expand(parent_index);
+    }
 }

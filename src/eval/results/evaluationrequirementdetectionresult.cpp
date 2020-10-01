@@ -146,7 +146,7 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 13,
             {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
-             "UIs", "MUIs", "MGUIs", "NRUIs", "PD"});
+             "EUIs", "MUIs", "MGUIs", "NRUIs", "PD"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
@@ -155,24 +155,47 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
         if (has_pd_)
             pd_var = roundf(pd_ * 10000.0) / 100.0;
 
+        string utn_req_section_heading =
+                "Details:Targets:"+to_string(utns_.at(0))+":"+requirement_->groupName()+":"+requirement_->name();
+
         target_table.addRow(
         {utns_.at(0), target->timeBeginStr().c_str(), target->timeEndStr().c_str(),
          target->callsignsStr().c_str(), target->targetAddressesStr().c_str(),
          target->modeACodesStr().c_str(), target->modeCMinStr().c_str(),
          target->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
-                    eval_man_.getViewableForUTN(utns_.at(0)), "");
+                    eval_man_.getViewableForUTN(utns_.at(0)), "Report:Results:"+utn_req_section_heading);
+
+        // add requirement to targets->utn->requirements->group->req
+
+        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(utn_req_section_heading);
+
+        if (!utn_req_section.hasTable("details_table"))
+            utn_req_section.addTable("details_table", 3, {"Name", "comment", "Value"});
+
+        EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_table");
+
+        utn_req_table.addRow({"EUIs", "Expected Update Intervals", sum_uis_});
+        utn_req_table.addRow({"MUIs", "Missed Update Intervals", missed_uis_});
+        utn_req_table.addRow({"MGUIs", "Max. Gap Update Intervals", max_gap_uis_});
+        utn_req_table.addRow({"NRUIs", "No Reference Update Intervals", no_ref_uis_});
+        utn_req_table.addRow({"PD", "Probability of Dectection", pd_var});
+
+        // condition
+        std::shared_ptr<EvaluationRequirementDetection> req =
+                std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+        assert (req);
+
+        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+        utn_req_table.addRow({"Condition", "", condition.c_str()});
+
+        string result {"Unknown"};
+
+        if (has_pd_)
+            result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
+
+        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()});
     }
 
     // TODO add requirement description, methods
-    //    EvaluationResultsReport::Section& req_section = getRequirementSection(root_item);
-
-    //    if (!req_section.hasText("description"))
-    //    {
-    //        req_section.addText("description");
-
-    //        EvaluationResultsReport::SectionContentText& req_text = req_section.getText("description");
-
-    //        req_text.addText("TODO Requirement description");
-    //    }
-
 }
