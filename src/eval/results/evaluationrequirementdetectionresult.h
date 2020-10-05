@@ -1,13 +1,13 @@
 #ifndef EVALUATIONREQUIREMENTDETECTIONRESULT_H
 #define EVALUATIONREQUIREMENTDETECTIONRESULT_H
 
-#include "singleevaluationrequirementdetectionresult.h"
+#include "eval/results/single.h"
 #include "evaluationrequirementdetection.h"
 
 namespace EvaluationRequirementResult
 {
 
-class EvaluationRequirementDetectionResult : public SingleEvaluationRequirementDetectionResult
+class EvaluationRequirementDetectionResult : public Single
 {
 public:
     EvaluationRequirementDetectionResult(

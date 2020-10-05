@@ -1,9 +1,9 @@
-#include "singleevaluationrequirementdetectionresult.h"
+#include "eval/results/single.h"
 
 namespace EvaluationRequirementResult
 {
 
-SingleEvaluationRequirementDetectionResult::SingleEvaluationRequirementDetectionResult(
+Single::Single(
         std::shared_ptr<EvaluationRequirement> requirement,
         unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man)
@@ -11,12 +11,12 @@ SingleEvaluationRequirementDetectionResult::SingleEvaluationRequirementDetection
 {
 }
 
-unsigned int SingleEvaluationRequirementDetectionResult::utn() const
+unsigned int Single::utn() const
 {
     return utn_;
 }
 
-const EvaluationTargetData* SingleEvaluationRequirementDetectionResult::target() const
+const EvaluationTargetData* Single::target() const
 {
     return target_;
 }

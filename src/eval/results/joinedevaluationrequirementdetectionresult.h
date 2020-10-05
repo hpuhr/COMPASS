@@ -1,19 +1,19 @@
 #ifndef JOINEDEVALUATIONREQUIREMENTDETECTIONRESULT_H
 #define JOINEDEVALUATIONREQUIREMENTDETECTIONRESULT_H
 
-#include "eval/results/base.h"
-#include "evaluationrequirementdetectionresult.h"
+#include "eval/results/joined.h"
+//#include "evaluationrequirementdetectionresult.h"
 
 namespace EvaluationRequirementResult
 {
 
-class JoinedEvaluationRequirementDetectionResult : public Base
+class JoinedEvaluationRequirementDetectionResult : public Joined
 {
 public:
     JoinedEvaluationRequirementDetectionResult(std::shared_ptr<EvaluationRequirement> requirement,
                                                EvaluationManager& eval_man);
 
-    void join(std::shared_ptr<Base> other);
+    virtual void join(std::shared_ptr<Base> other) override;
 
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
@@ -26,8 +26,6 @@ protected:
 
     bool has_pd_ {false};
     float pd_{0};
-
-    std::vector<std::shared_ptr<EvaluationRequirementDetectionResult>> results_;
 
     void updatePD();
 };

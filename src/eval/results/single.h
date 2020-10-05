@@ -6,12 +6,12 @@
 namespace EvaluationRequirementResult
 {
 
-class SingleEvaluationRequirementDetectionResult : public Base
+class Single : public Base
 {
 public:
-    SingleEvaluationRequirementDetectionResult(std::shared_ptr<EvaluationRequirement> requirement,
-                                               unsigned int utn, const EvaluationTargetData* target,
-                                               EvaluationManager& eval_man);
+    Single(std::shared_ptr<EvaluationRequirement> requirement,
+           unsigned int utn, const EvaluationTargetData* target,
+           EvaluationManager& eval_man);
 
     virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;

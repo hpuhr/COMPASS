@@ -1,6 +1,7 @@
 #include "joinedevaluationrequirementdetectionresult.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
+#include "evaluationrequirementdetectionresult.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -20,13 +21,15 @@ namespace EvaluationRequirementResult
 
 JoinedEvaluationRequirementDetectionResult::JoinedEvaluationRequirementDetectionResult(
         std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : Base(requirement, eval_man)
+    : Joined(requirement, eval_man)
 {
 }
 
 
 void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<Base> other)
 {
+    Joined::join(other);
+
     std::shared_ptr<EvaluationRequirementDetectionResult> other_sub =
             std::static_pointer_cast<EvaluationRequirementDetectionResult>(other);
     assert (other_sub);
@@ -35,8 +38,6 @@ void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<Base> othe
     missed_uis_ += other_sub->missedUIs();
     max_gap_uis_ += other_sub->maxGapUIs();
     no_ref_uis_ += other_sub->noRefUIs();
-
-    results_.push_back(other_sub);
 
     updatePD();
 }
