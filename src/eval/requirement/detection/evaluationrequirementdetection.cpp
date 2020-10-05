@@ -51,7 +51,7 @@ float EvaluationRequirementDetection::missTolerance() const
     return miss_tolerance_s_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Base> EvaluationRequirementDetection::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetection::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_

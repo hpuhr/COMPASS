@@ -1,4 +1,5 @@
 #include "eval/results/detection/single.h"
+#include "eval/results/detection/joined.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
 #include "evaluationtargetdata.h"
@@ -188,6 +189,11 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     }
 
     // TODO add requirement description, methods
+}
+
+std::shared_ptr<Joined> SingleDetection::createEmptyJoined()
+{
+    return make_shared<JoinedDetection> (requirement_, eval_man_);
 }
 
 float SingleDetection::sumUIs() const

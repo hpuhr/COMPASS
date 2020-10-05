@@ -48,7 +48,7 @@ public:
 
     float missTolerance() const;
 
-    virtual std::shared_ptr<EvaluationRequirementResult::Base> evaluate (
+    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) override;
 
 protected:

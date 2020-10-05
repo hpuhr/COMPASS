@@ -5,24 +5,27 @@
 
 namespace EvaluationRequirementResult
 {
+    class Joined;
 
-class Single : public Base
-{
-public:
-    Single(std::shared_ptr<EvaluationRequirement> requirement,
-           unsigned int utn, const EvaluationTargetData* target,
-           EvaluationManager& eval_man);
+    class Single : public Base
+    {
+    public:
+        Single(std::shared_ptr<EvaluationRequirement> requirement,
+               unsigned int utn, const EvaluationTargetData* target,
+               EvaluationManager& eval_man);
 
-    virtual void print() = 0;
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+        virtual void print() = 0;
+        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
-    unsigned int utn() const;
-    const EvaluationTargetData* target() const;
+        virtual std::shared_ptr<Joined> createEmptyJoined() = 0;
 
-protected:
-    unsigned int utn_; // used to generate result
-    const EvaluationTargetData* target_; // used to generate result
-};
+        unsigned int utn() const;
+        const EvaluationTargetData* target() const;
+
+    protected:
+        unsigned int utn_; // used to generate result
+        const EvaluationTargetData* target_; // used to generate result
+    };
 
 }
 

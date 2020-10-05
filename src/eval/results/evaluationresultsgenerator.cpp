@@ -5,7 +5,7 @@
 #include "evaluationrequirementgroup.h"
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirement.h"
-#include "eval/results/base.h"
+#include "eval/results/single.h"
 #include "eval/results/detection/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -13,6 +13,7 @@
 #include "logger.h"
 
 using namespace std;
+using namespace EvaluationRequirementResult;
 
 EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
     : eval_man_(eval_man), results_model_(eval_man_)
@@ -49,9 +50,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                    << " req '" << req_cfg_it->name() << "'";
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
-            std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result_sum
-                    = make_shared<EvaluationRequirementResult::JoinedDetection> (
-                        req, eval_man_);
+            std::shared_ptr<Joined> result_sum;
 
             for (auto& target_data_it : data)
             {
@@ -61,16 +60,22 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
 
-                std::shared_ptr<EvaluationRequirementResult::Base> result = req->evaluate(target_data_it, req);
+                std::shared_ptr<Single> result = req->evaluate(target_data_it, req);
 
                 result->print();
                 result->addToReport(root_item);
 
+                if (!result_sum)
+                    result_sum = result->createEmptyJoined();
+
                 result_sum->join(result);
             }
 
-            result_sum->print();
-            result_sum->addToReport(root_item);
+            if (result_sum)
+            {
+                result_sum->print();
+                result_sum->addToReport(root_item);
+            }
         }
     }
 

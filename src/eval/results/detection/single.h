@@ -24,6 +24,8 @@ public:
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
+    virtual std::shared_ptr<Joined> createEmptyJoined();
+
     float sumUIs() const;
     float missedUIs() const;
     float maxGapUIs() const;
