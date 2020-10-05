@@ -9,13 +9,11 @@ target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.h"
         "${CMAKE_CURRENT_LIST_DIR}/base.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionresult.h"
         "${CMAKE_CURRENT_LIST_DIR}/single.h"
         "${CMAKE_CURRENT_LIST_DIR}/joined.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionresult.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/single.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/joined.cpp"
     )

@@ -1,5 +1,5 @@
 #include "evaluationrequirementdetection.h"
-#include "evaluationrequirementdetectionresult.h"
+#include "eval/results/detection/single.h"
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -204,7 +204,7 @@ std::shared_ptr<EvaluationRequirementResult::Base> EvaluationRequirementDetectio
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " no data for pd";
 
-    return make_shared<EvaluationRequirementResult::EvaluationRequirementDetectionResult>(
+    return make_shared<EvaluationRequirementResult::SingleDetection>(
                 instance, target_data.utn_, &target_data,
                 eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }

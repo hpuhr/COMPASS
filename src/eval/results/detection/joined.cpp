@@ -1,7 +1,7 @@
 #include "eval/results/detection/joined.h"
+#include "eval/results/detection/single.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
-#include "evaluationrequirementdetectionresult.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -30,8 +30,8 @@ void JoinedDetection::join(std::shared_ptr<Base> other)
 {
     Joined::join(other);
 
-    std::shared_ptr<EvaluationRequirementDetectionResult> other_sub =
-            std::static_pointer_cast<EvaluationRequirementDetectionResult>(other);
+    std::shared_ptr<SingleDetection> other_sub =
+            std::static_pointer_cast<SingleDetection>(other);
     assert (other_sub);
 
     sum_uis_ += other_sub->sumUIs();

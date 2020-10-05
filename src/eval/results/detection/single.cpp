@@ -1,4 +1,4 @@
-#include "evaluationrequirementdetectionresult.h"
+#include "eval/results/detection/single.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
 #include "evaluationtargetdata.h"
@@ -18,7 +18,7 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
+SingleDetection::SingleDetection(
         std::shared_ptr<EvaluationRequirement> requirement,
         unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
@@ -31,7 +31,7 @@ EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
 }
 
 
-void EvaluationRequirementDetectionResult::updatePD()
+void SingleDetection::updatePD()
 {
     if (sum_uis_)
     {
@@ -79,30 +79,30 @@ void EvaluationRequirementDetectionResult::updatePD()
 //    return copy;
 //}
 
-void EvaluationRequirementDetectionResult::print()
+void SingleDetection::print()
 {
     std::shared_ptr<EvaluationRequirementDetection> req =
             std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     if (sum_uis_)
-        loginf << "EvaluationRequirementDetectionResult: print: req. name " << req->name()
+        loginf << "SingleDetection: print: req. name " << req->name()
                << " utn " << utn_
                << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
     else
-        loginf << "EvaluationRequirementDetectionResult: print: req. name " << req->name()
+        loginf << "SingleDetection: print: req. name " << req->name()
                << " utn " << utn_ << " has no data";
 }
 
-void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport";
+    loginf << "SingleDetection " <<  requirement_->name() <<": addToReport";
 
     // add to main requirements overview
 
     // add target to requirements->group->req
 
-    loginf << "EvaluationRequirementDetectionResult " <<  requirement_->name()
+    loginf << "SingleDetection " <<  requirement_->name()
            << ": addToReport: adding single result";
 
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
@@ -190,22 +190,22 @@ void EvaluationRequirementDetectionResult::addToReport (std::shared_ptr<Evaluati
     // TODO add requirement description, methods
 }
 
-float EvaluationRequirementDetectionResult::sumUIs() const
+float SingleDetection::sumUIs() const
 {
     return sum_uis_;
 }
 
-float EvaluationRequirementDetectionResult::missedUIs() const
+float SingleDetection::missedUIs() const
 {
     return missed_uis_;
 }
 
-float EvaluationRequirementDetectionResult::maxGapUIs() const
+float SingleDetection::maxGapUIs() const
 {
     return max_gap_uis_;
 }
 
-float EvaluationRequirementDetectionResult::noRefUIs() const
+float SingleDetection::noRefUIs() const
 {
     return no_ref_uis_;
 }

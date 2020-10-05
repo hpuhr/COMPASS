@@ -7,10 +7,10 @@
 namespace EvaluationRequirementResult
 {
 
-class EvaluationRequirementDetectionResult : public Single
+class SingleDetection : public Single
 {
 public:
-    EvaluationRequirementDetectionResult(
+    SingleDetection(
             std::shared_ptr<EvaluationRequirement> requirement,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
