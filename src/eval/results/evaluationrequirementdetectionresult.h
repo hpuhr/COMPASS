@@ -1,25 +1,30 @@
 #ifndef EVALUATIONREQUIREMENTDETECTIONRESULT_H
 #define EVALUATIONREQUIREMENTDETECTIONRESULT_H
 
-#include "evaluationrequirementresult.h"
+#include "singleevaluationrequirementdetectionresult.h"
 #include "evaluationrequirementdetection.h"
 
-class EvaluationRequirementDetectionResult : public EvaluationRequirementResult
+class EvaluationRequirementDetectionResult : public SingleEvaluationRequirementDetectionResult
 {
 public:
     EvaluationRequirementDetectionResult(
-            std::shared_ptr<EvaluationRequirement> requirement, std::vector<unsigned int> utns,
-            std::vector<const EvaluationTargetData*> targets, EvaluationManager& eval_man,
+            std::shared_ptr<EvaluationRequirement> requirement,
+            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
             std::vector<EvaluationRequirementDetectionDetail> details);
 
-    virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
-    // joins other result to this one
+//    virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
+//    // joins other result to this one
 
-    virtual std::shared_ptr<EvaluationRequirementResult> copy() override; // copies this instance
+//    virtual std::shared_ptr<EvaluationRequirementResult> copy() override; // copies this instance
 
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+
+    float sumUIs() const;
+    float missedUIs() const;
+    float maxGapUIs() const;
+    float noRefUIs() const;
 
 protected:
     float sum_uis_ {0};
