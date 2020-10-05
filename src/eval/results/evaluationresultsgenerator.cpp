@@ -95,7 +95,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     results_model_.endReset();
 
-    emit resultsChangedSignal();
+    emit eval_man_.resultsChangedSignal();
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()

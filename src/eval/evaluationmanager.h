@@ -32,9 +32,12 @@ signals:
     void unshowDataSignal (const ViewableDataConfig* vp);
     void showDataSignal (const ViewableDataConfig* vp);
 
+    void resultsChangedSignal();
+
 public slots:
     void newDataSlot(DBObject& object);
     void loadingDoneSlot(DBObject& object);
+
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
@@ -111,6 +114,15 @@ public:
     std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn);
 
     void showResultId (const std::string& id);
+
+    typedef std::map<std::string,
+      std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
+
+    ResultIterator begin() { return results_gen_.begin(); }
+    ResultIterator end() { return results_gen_.end(); }
+
+    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
+    const { return results_gen_.results(); } ;
 
 protected:
     ATSDB& atsdb_;

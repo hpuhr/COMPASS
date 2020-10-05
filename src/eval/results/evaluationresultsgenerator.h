@@ -3,8 +3,6 @@
 
 #include "eval/results/report/treemodel.h"
 
-#include <QObject>
-
 class EvaluationManager;
 class EvaluationStandard;
 class EvaluationData;
@@ -14,13 +12,8 @@ namespace EvaluationRequirementResult
     class Base;
 }
 
-class EvaluationResultsGenerator : public QObject
+class EvaluationResultsGenerator
 {
-    Q_OBJECT
-
-signals:
-    void resultsChangedSignal();
-
 public:
     EvaluationResultsGenerator(EvaluationManager& eval_man);
 
@@ -33,6 +26,9 @@ public:
 
     ResultIterator begin() { return results_.begin(); }
     ResultIterator end() { return results_.end(); }
+
+    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results ()
+    const { return results_; } ;
 
 protected:
     EvaluationManager& eval_man_;
