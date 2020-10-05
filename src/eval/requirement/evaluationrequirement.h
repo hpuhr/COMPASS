@@ -5,8 +5,11 @@
 #include <memory>
 
 class EvaluationTargetData;
-class EvaluationRequirementResult;
 class EvaluationManager;
+
+namespace EvaluationRequirementResult {
+    class Base;
+}
 
 class EvaluationRequirement
 {
@@ -14,7 +17,7 @@ public:
     EvaluationRequirement(const std::string& name, const std::string& short_name, const std::string& group_name,
                           EvaluationManager& eval_man);
 
-    virtual std::shared_ptr<EvaluationRequirementResult> evaluate (
+    virtual std::shared_ptr<EvaluationRequirementResult::Base> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) = 0;
     // instance is the self-reference for the result
 

@@ -4,6 +4,9 @@
 #include "singleevaluationrequirementdetectionresult.h"
 #include "evaluationrequirementdetection.h"
 
+namespace EvaluationRequirementResult
+{
+
 class EvaluationRequirementDetectionResult : public SingleEvaluationRequirementDetectionResult
 {
 public:
@@ -39,5 +42,7 @@ protected:
 
     void updatePD();
 };
+
+}
 
 #endif // EVALUATIONREQUIREMENTDETECTIONRESULT_H

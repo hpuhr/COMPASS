@@ -15,14 +15,17 @@
 using namespace std;
 using namespace Utils;
 
+namespace EvaluationRequirementResult
+{
+
 JoinedEvaluationRequirementDetectionResult::JoinedEvaluationRequirementDetectionResult(
         std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : EvaluationRequirementResult(requirement, eval_man)
+    : Base(requirement, eval_man)
 {
 }
 
 
-void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<EvaluationRequirementResult> other)
+void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<Base> other)
 {
     std::shared_ptr<EvaluationRequirementDetectionResult> other_sub =
             std::static_pointer_cast<EvaluationRequirementDetectionResult>(other);
@@ -106,4 +109,6 @@ void JoinedEvaluationRequirementDetectionResult::addToReport (
     ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
                      pd_var, condition.c_str(), result.c_str()}, nullptr,
                     "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+}
+
 }

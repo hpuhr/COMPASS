@@ -15,6 +15,9 @@
 using namespace std;
 using namespace Utils;
 
+namespace EvaluationRequirementResult
+{
+
 EvaluationRequirementDetectionResult::EvaluationRequirementDetectionResult(
         std::shared_ptr<EvaluationRequirement> requirement,
         unsigned int utn, const EvaluationTargetData* target,
@@ -205,4 +208,6 @@ float EvaluationRequirementDetectionResult::maxGapUIs() const
 float EvaluationRequirementDetectionResult::noRefUIs() const
 {
     return no_ref_uis_;
+}
+
 }

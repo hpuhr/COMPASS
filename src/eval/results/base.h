@@ -1,5 +1,5 @@
-#ifndef EVALUATIONREQUIREMENTRESULT_H
-#define EVALUATIONREQUIREMENTRESULT_H
+#ifndef EVALUATIONREQUIREMENTRESULTBASE_H
+#define EVALUATIONREQUIREMENTRESULTBASE_H
 
 #include <memory>
 #include <vector>
@@ -14,10 +14,13 @@ namespace EvaluationResultsReport {
     class SectionContentTable;
 }
 
-class EvaluationRequirementResult
+namespace EvaluationRequirementResult
+{
+
+class Base
 {
 public:
-    EvaluationRequirementResult(std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man);
+    Base(std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man);
 
     std::shared_ptr<EvaluationRequirement> requirement() const;
 
@@ -48,4 +51,6 @@ protected:
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 };
 
-#endif // EVALUATIONREQUIREMENTRESULT_H
+}
+
+#endif // EVALUATIONREQUIREMENTRESULTBASE_H

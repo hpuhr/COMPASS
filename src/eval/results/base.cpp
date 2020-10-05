@@ -1,4 +1,4 @@
-#include "evaluationrequirementresult.h"
+#include "eval/results/base.h"
 #include "evaluationrequirement.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -11,18 +11,21 @@
 
 using namespace std;
 
-EvaluationRequirementResult::EvaluationRequirementResult(
-        std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+namespace EvaluationRequirementResult
+{
+
+Base::Base( std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
     : requirement_(requirement), eval_man_(eval_man)
 {
 }
 
-std::shared_ptr<EvaluationRequirement> EvaluationRequirementResult::requirement() const
+std::shared_ptr<EvaluationRequirement> Base::requirement() const
 {
     return requirement_;
 }
 
-//void EvaluationRequirementResult::join(const std::shared_ptr<EvaluationRequirementResult> other_base)
+
+//void Base::join(const std::shared_ptr<EvaluationRequirementResult> other_base)
 //{
 //    logdbg << "EvaluationRequirementResult: join";
 
@@ -34,12 +37,12 @@ std::shared_ptr<EvaluationRequirement> EvaluationRequirementResult::requirement(
 //    assert (utns_.size() == targets_.size());
 //}
 
-//std::vector<unsigned int> EvaluationRequirementResult::utns() const
+//std::vector<unsigned int> Base::utns() const
 //{
 //    return utns_;
 //}
 
-//std::string EvaluationRequirementResult::utnsString() const
+//std::string Base::utnsString() const
 //{
 //    ostringstream ss;
 
@@ -62,7 +65,7 @@ std::shared_ptr<EvaluationRequirement> EvaluationRequirementResult::requirement(
 //        return ss.str();
 //}
 
-EvaluationResultsReport::SectionContentTable& EvaluationRequirementResult::getReqOverviewTable (
+EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
@@ -74,14 +77,15 @@ EvaluationResultsReport::SectionContentTable& EvaluationRequirementResult::getRe
     return ov_sec.getTable("req_overview");
 }
 
-std::string EvaluationRequirementResult::getRequirementSectionID ()
+std::string Base::getRequirementSectionID ()
 {
     return "Requirements:"+requirement_->groupName()+":"+requirement_->name();
 }
 
-EvaluationResultsReport::Section& EvaluationRequirementResult::getRequirementSection (
+EvaluationResultsReport::Section& Base::getRequirementSection (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     return root_item->getSection(getRequirementSectionID());
 }
 
+}

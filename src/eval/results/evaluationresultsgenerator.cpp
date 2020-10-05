@@ -5,7 +5,7 @@
 #include "evaluationrequirementgroup.h"
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirement.h"
-#include "evaluationrequirementresult.h"
+#include "eval/results/base.h"
 #include "joinedevaluationrequirementdetectionresult.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
@@ -49,8 +49,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                    << " req '" << req_cfg_it->name() << "'";
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
-            std::shared_ptr<JoinedEvaluationRequirementDetectionResult> result_sum
-                    = make_shared<JoinedEvaluationRequirementDetectionResult> (req, eval_man_);
+            std::shared_ptr<EvaluationRequirementResult::JoinedEvaluationRequirementDetectionResult> result_sum
+                    = make_shared<EvaluationRequirementResult::JoinedEvaluationRequirementDetectionResult> (
+                        req, eval_man_);
 
             for (auto& target_data_it : data)
             {
@@ -60,7 +61,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
 
-                std::shared_ptr<EvaluationRequirementResult> result = req->evaluate(target_data_it, req);
+                std::shared_ptr<EvaluationRequirementResult::Base> result = req->evaluate(target_data_it, req);
 
                 result->print();
                 result->addToReport(root_item);

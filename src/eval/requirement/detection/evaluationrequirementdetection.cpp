@@ -51,7 +51,7 @@ float EvaluationRequirementDetection::missTolerance() const
     return miss_tolerance_s_;
 }
 
-std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Base> EvaluationRequirementDetection::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -204,7 +204,7 @@ std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetection::eva
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " no data for pd";
 
-    return make_shared<EvaluationRequirementDetectionResult>(
+    return make_shared<EvaluationRequirementResult::EvaluationRequirementDetectionResult>(
                 instance, target_data.utn_, &target_data,
                 eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }

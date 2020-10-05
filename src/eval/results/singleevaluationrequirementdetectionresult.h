@@ -1,9 +1,12 @@
 #ifndef SINGLEEVALUATIONREQUIREMENTDETECTIONRESULT_H
 #define SINGLEEVALUATIONREQUIREMENTDETECTIONRESULT_H
 
-#include "evaluationrequirementresult.h"
+#include "eval/results/base.h"
 
-class SingleEvaluationRequirementDetectionResult : public EvaluationRequirementResult
+namespace EvaluationRequirementResult
+{
+
+class SingleEvaluationRequirementDetectionResult : public Base
 {
 public:
     SingleEvaluationRequirementDetectionResult(std::shared_ptr<EvaluationRequirement> requirement,
@@ -20,5 +23,7 @@ protected:
     unsigned int utn_; // used to generate result
     const EvaluationTargetData* target_; // used to generate result
 };
+
+}
 
 #endif // SINGLEEVALUATIONREQUIREMENTDETECTIONRESULT_H
