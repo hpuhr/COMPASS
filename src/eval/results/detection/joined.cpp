@@ -1,4 +1,4 @@
-#include "joinedevaluationrequirementdetectionresult.h"
+#include "eval/results/detection/joined.h"
 #include "evaluationrequirement.h"
 #include "evaluationrequirementdetection.h"
 #include "evaluationrequirementdetectionresult.h"
@@ -19,14 +19,14 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedEvaluationRequirementDetectionResult::JoinedEvaluationRequirementDetectionResult(
+JoinedDetection::JoinedDetection(
         std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
     : Joined(requirement, eval_man)
 {
 }
 
 
-void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<Base> other)
+void JoinedDetection::join(std::shared_ptr<Base> other)
 {
     Joined::join(other);
 
@@ -42,7 +42,7 @@ void JoinedEvaluationRequirementDetectionResult::join(std::shared_ptr<Base> othe
     updatePD();
 }
 
-void JoinedEvaluationRequirementDetectionResult::updatePD()
+void JoinedDetection::updatePD()
 {
     if (sum_uis_)
     {
@@ -57,32 +57,32 @@ void JoinedEvaluationRequirementDetectionResult::updatePD()
     }
 }
 
-void JoinedEvaluationRequirementDetectionResult::print()
+void JoinedDetection::print()
 {
     std::shared_ptr<EvaluationRequirementDetection> req =
             std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     if (sum_uis_)
-        loginf << "JoinedEvaluationRequirementDetectionResult: print: req. name " << req->name()
+        loginf << "JoinedDetection: print: req. name " << req->name()
                << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
     else
-        loginf << "JoinedEvaluationRequirementDetectionResult: print: req. name " << req->name()
+        loginf << "JoinedDetection: print: req. name " << req->name()
                << " has no data";
 }
 
-void JoinedEvaluationRequirementDetectionResult::addToReport (
+void JoinedDetection::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    loginf << "JoinedEvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport";
+    loginf << "JoinedDetection " <<  requirement_->name() <<": addToReport";
 
     if (!results_.size()) // some data must exist
     {
-        logerr << "JoinedEvaluationRequirementDetectionResult " <<  requirement_->name() <<": addToReport: no data";
+        logerr << "JoinedDetection " <<  requirement_->name() <<": addToReport: no data";
         return;
     }
 
-    loginf << "JoinedEvaluationRequirementDetectionResult " <<  requirement_->name()
+    loginf << "JoinedDetection " <<  requirement_->name()
            << ": addToReport: adding joined result";
 
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);

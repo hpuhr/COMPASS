@@ -1,4 +1,5 @@
 include("${CMAKE_CURRENT_LIST_DIR}/report/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/detection/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
@@ -11,14 +12,12 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionresult.h"
         "${CMAKE_CURRENT_LIST_DIR}/single.h"
         "${CMAKE_CURRENT_LIST_DIR}/joined.h"
-        "${CMAKE_CURRENT_LIST_DIR}/joinedevaluationrequirementdetectionresult.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionresult.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/single.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/joined.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/joinedevaluationrequirementdetectionresult.cpp"
     )
 
 

@@ -2,15 +2,14 @@
 #define JOINEDEVALUATIONREQUIREMENTDETECTIONRESULT_H
 
 #include "eval/results/joined.h"
-//#include "evaluationrequirementdetectionresult.h"
 
 namespace EvaluationRequirementResult
 {
 
-class JoinedEvaluationRequirementDetectionResult : public Joined
+class JoinedDetection : public Joined
 {
 public:
-    JoinedEvaluationRequirementDetectionResult(std::shared_ptr<EvaluationRequirement> requirement,
+    JoinedDetection(std::shared_ptr<EvaluationRequirement> requirement,
                                                EvaluationManager& eval_man);
 
     virtual void join(std::shared_ptr<Base> other) override;

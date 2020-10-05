@@ -6,7 +6,7 @@
 #include "evaluationrequirementconfig.h"
 #include "evaluationrequirement.h"
 #include "eval/results/base.h"
-#include "joinedevaluationrequirementdetectionresult.h"
+#include "eval/results/detection/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -49,8 +49,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                    << " req '" << req_cfg_it->name() << "'";
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
-            std::shared_ptr<EvaluationRequirementResult::JoinedEvaluationRequirementDetectionResult> result_sum
-                    = make_shared<EvaluationRequirementResult::JoinedEvaluationRequirementDetectionResult> (
+            std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result_sum
+                    = make_shared<EvaluationRequirementResult::JoinedDetection> (
                         req, eval_man_);
 
             for (auto& target_data_it : data)
