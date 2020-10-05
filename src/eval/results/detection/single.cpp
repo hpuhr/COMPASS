@@ -47,39 +47,6 @@ void SingleDetection::updatePD()
     }
 }
 
-//void EvaluationRequirementDetectionResult::join(const std::shared_ptr<EvaluationRequirementResult> other_base)
-//{
-//    logdbg << "EvaluationRequirementDetectionResult: join";
-
-//    EvaluationRequirementResult::join(other_base);
-
-//    const std::shared_ptr<EvaluationRequirementDetectionResult> other =
-//            std::static_pointer_cast<EvaluationRequirementDetectionResult>(other);
-
-//    assert (other);
-
-//    sum_uis_ += other->sum_uis_;
-//    missed_uis_ += other->missed_uis_;
-//    max_gap_uis_ += other->max_gap_uis_;
-//    no_ref_uis_ += other->no_ref_uis_;
-
-//    // details not joined
-
-//    updatePD();
-//}
-
-//std::shared_ptr<EvaluationRequirementResult> EvaluationRequirementDetectionResult::copy ()
-//{
-//    loginf << "EvaluationRequirementDetectionResult: copy";
-
-//    std::shared_ptr<EvaluationRequirementDetectionResult> copy = make_shared<EvaluationRequirementDetectionResult>(
-//                requirement_, utns_, targets_, eval_man_, sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_,
-//                std::vector<EvaluationRequirementDetectionDetail>{}); // details not copied
-//    copy->updatePD();
-
-//    return copy;
-//}
-
 void SingleDetection::print()
 {
     std::shared_ptr<EvaluationRequirementDetection> req =
@@ -98,8 +65,6 @@ void SingleDetection::print()
 void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     loginf << "SingleDetection " <<  requirement_->name() <<": addToReport";
-
-    // add to main requirements overview
 
     // add target to requirements->group->req
 

@@ -59,7 +59,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
            << " use_max_gap_interval " << use_max_gap_interval_ << " max_gap_interval " << max_gap_interval_s_
            << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
 
-
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
     bool first {true};

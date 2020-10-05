@@ -16,11 +16,6 @@ public:
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
             std::vector<EvaluationRequirementDetectionDetail> details);
 
-//    virtual void join(const std::shared_ptr<EvaluationRequirementResult> other_base) override;
-//    // joins other result to this one
-
-//    virtual std::shared_ptr<EvaluationRequirementResult> copy() override; // copies this instance
-
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
