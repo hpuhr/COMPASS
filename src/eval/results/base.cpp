@@ -24,47 +24,6 @@ std::shared_ptr<EvaluationRequirement> Base::requirement() const
     return requirement_;
 }
 
-
-//void Base::join(const std::shared_ptr<EvaluationRequirementResult> other_base)
-//{
-//    logdbg << "EvaluationRequirementResult: join";
-
-//    assert (other_base->requirement_.get() == requirement_.get());
-
-//    utns_.insert(utns_.end(), other_base->utns_.begin(), other_base->utns_.end());
-//    targets_.insert(targets_.end(), other_base->targets_.begin(), other_base->targets_.end());
-
-//    assert (utns_.size() == targets_.size());
-//}
-
-//std::vector<unsigned int> Base::utns() const
-//{
-//    return utns_;
-//}
-
-//std::string Base::utnsString() const
-//{
-//    ostringstream ss;
-
-//    bool first = true;
-
-//    for (auto utn : utns_)
-//    {
-//        if (first)
-//        {
-//            ss << to_string(utn);
-//            first = false;
-//        }
-//        else
-//            ss << "," << to_string(utn);
-//    }
-
-//    if (!utns_.size()) // no utns
-//        return "None";
-//    else
-//        return ss.str();
-//}
-
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {

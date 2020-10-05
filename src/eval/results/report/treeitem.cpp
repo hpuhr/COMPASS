@@ -11,7 +11,7 @@ namespace EvaluationResultsReport
         else
             id_ = name_;
 
-        loginf << "TreeItem: constructor: id '" << id_ << "'";
+        logdbg << "TreeItem: constructor: id '" << id_ << "'";
     }
 
     TreeItem* TreeItem::parentItem()

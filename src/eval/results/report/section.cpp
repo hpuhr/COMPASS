@@ -65,7 +65,7 @@ namespace EvaluationResultsReport
 
     void Section::addSubSection (const std::string& heading)
     {
-        loginf << "Section " << heading_ << ": addSubSection: adding " << heading;
+        logdbg << "Section " << heading_ << ": addSubSection: adding " << heading;
 
         assert (!hasSubSection(heading));
         sub_sections_.push_back(make_shared<Section>(heading, this, eval_man_));

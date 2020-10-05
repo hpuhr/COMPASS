@@ -64,12 +64,11 @@ void SingleDetection::print()
 
 void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    loginf << "SingleDetection " <<  requirement_->name() <<": addToReport";
+    logdbg << "SingleDetection " <<  requirement_->name() <<": addToReport";
 
     // add target to requirements->group->req
 
-    loginf << "SingleDetection " <<  requirement_->name()
-           << ": addToReport: adding single result";
+    logdbg << "SingleDetection " <<  requirement_->name() << ": addToReport: adding single result";
 
     EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 

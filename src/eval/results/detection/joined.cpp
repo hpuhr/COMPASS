@@ -74,7 +74,7 @@ void JoinedDetection::print()
 void JoinedDetection::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    loginf << "JoinedDetection " <<  requirement_->name() <<": addToReport";
+    logdbg << "JoinedDetection " <<  requirement_->name() <<": addToReport";
 
     if (!results_.size()) // some data must exist
     {
@@ -82,8 +82,7 @@ void JoinedDetection::addToReport (
         return;
     }
 
-    loginf << "JoinedDetection " <<  requirement_->name()
-           << ": addToReport: adding joined result";
+    logdbg << "JoinedDetection " <<  requirement_->name() << ": addToReport: adding joined result";
 
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 

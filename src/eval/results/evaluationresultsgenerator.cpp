@@ -27,6 +27,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     loginf << "EvaluationResultsGenerator: evaluate";
 
     results_model_.beginReset();
+    results_.clear();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
@@ -39,10 +40,12 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     overview_text.addText("It has lovely lakes");
     overview_text.addText("Elk bytes\nline2");
 
+    string req_grp_id;
+    string result_id;
+
     for (auto& req_group_it : standard)
     {
         logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
-
 
         for (auto& req_cfg_it : *req_group_it.second)
         {
@@ -51,6 +54,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
             std::shared_ptr<Joined> result_sum;
+
+            req_grp_id = req->groupName()+":"+req->name();
 
             for (auto& target_data_it : data)
             {
@@ -62,8 +67,15 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 std::shared_ptr<Single> result = req->evaluate(target_data_it, req);
 
-                result->print();
+                //result->print();
                 result->addToReport(root_item);
+
+                // add to results
+                // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
+
+                result_id = "UTN:"+to_string(target_data_it.utn_);
+
+                results_[req_grp_id][result_id] = result;
 
                 if (!result_sum)
                     result_sum = result->createEmptyJoined();
@@ -73,13 +85,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             if (result_sum)
             {
-                result_sum->print();
+                //result_sum->print();
                 result_sum->addToReport(root_item);
+
+                results_[req_grp_id]["All"] = result_sum;
             }
         }
     }
 
     results_model_.endReset();
+
+    emit resultsChangedSignal();
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()

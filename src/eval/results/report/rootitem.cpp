@@ -52,7 +52,7 @@ namespace EvaluationResultsReport
 
     Section& RootItem::getSection (const std::string& id)
     {
-        loginf << "RootItem: getSection: id '" << id << "'";
+        logdbg << "RootItem: getSection: id '" << id << "'";
 
         assert (id.size());
         std::vector<std::string> parts = String::split(id, ':');
