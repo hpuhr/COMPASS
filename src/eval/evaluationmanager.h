@@ -121,6 +121,7 @@ public:
     ResultIterator begin() { return results_gen_.begin(); }
     ResultIterator end() { return results_gen_.end(); }
 
+    bool hasResults() { return results_gen_.results().size(); }
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
     const { return results_gen_.results(); } ;
 
