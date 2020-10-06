@@ -4,10 +4,10 @@ namespace EvaluationRequirementResult
 {
 
 Single::Single(
-        std::shared_ptr<EvaluationRequirement> requirement,
+        const std::string& type, std::shared_ptr<EvaluationRequirement> requirement,
         unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man)
-    : Base(requirement, eval_man), utn_(utn), target_(target)
+    : Base(type, requirement, eval_man), utn_(utn), target_(target)
 {
 }
 

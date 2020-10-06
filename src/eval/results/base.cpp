@@ -14,14 +14,19 @@ using namespace std;
 namespace EvaluationRequirementResult
 {
 
-Base::Base( std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : requirement_(requirement), eval_man_(eval_man)
+Base::Base(const std::string& type, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+    : type_(type), requirement_(requirement), eval_man_(eval_man)
 {
 }
 
 std::shared_ptr<EvaluationRequirement> Base::requirement() const
 {
     return requirement_;
+}
+
+std::string Base::type() const
+{
+    return type_;
 }
 
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (

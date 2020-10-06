@@ -21,7 +21,7 @@ namespace EvaluationRequirementResult
 
 JoinedDetection::JoinedDetection(
         std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : Joined(requirement, eval_man)
+    : Joined("JoinedDetection", requirement, eval_man)
 {
 }
 

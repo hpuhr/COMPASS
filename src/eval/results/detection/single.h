@@ -26,6 +26,8 @@ public:
     float maxGapUIs() const;
     float noRefUIs() const;
 
+    std::vector<EvaluationRequirementDetectionDetail>& details();
+
 protected:
     float sum_uis_ {0};
     float missed_uis_ {0};

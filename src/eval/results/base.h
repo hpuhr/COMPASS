@@ -20,14 +20,17 @@ namespace EvaluationRequirementResult
 class Base
 {
 public:
-    Base(std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man);
+    Base(const std::string& type, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man);
 
     std::shared_ptr<EvaluationRequirement> requirement() const;
 
     virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
+    std::string type() const;
+
 protected:
+    std::string type_;
     std::shared_ptr<EvaluationRequirement> requirement_;
 
     EvaluationManager& eval_man_;

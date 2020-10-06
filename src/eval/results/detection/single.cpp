@@ -25,7 +25,7 @@ SingleDetection::SingleDetection(
         EvaluationManager& eval_man,
         float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
         std::vector<EvaluationRequirementDetectionDetail> details)
-    : Single(requirement, utn, target, eval_man),
+    : Single("SingleDetection", requirement, utn, target, eval_man),
       sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
 {
     updatePD();
@@ -178,6 +178,11 @@ float SingleDetection::maxGapUIs() const
 float SingleDetection::noRefUIs() const
 {
     return no_ref_uis_;
+}
+
+std::vector<EvaluationRequirementDetectionDetail>& SingleDetection::details()
+{
+    return details_;
 }
 
 }

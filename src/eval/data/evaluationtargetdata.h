@@ -1,6 +1,8 @@
 #ifndef EVALUATIONTARGETDATA_H
 #define EVALUATIONTARGETDATA_H
 
+#include "evaluationtargetposition.h"
+
 #include <map>
 #include <memory>
 #include <vector>
@@ -63,6 +65,9 @@ public:
     bool hasRefDataForTime (float tod, float d_max) const;
     std::pair<float, float> refTimesFor (float tod) const;
 
+    bool hasTstPosForTime (float tod) const;
+    EvaluationTargetPosition tstPosForTime (float tod) const;
+
 protected:
     bool use_ {true};
 
@@ -73,7 +78,15 @@ protected:
     std::vector<unsigned int> tst_indexes_;
 
     std::shared_ptr<Buffer> ref_buffer;
+    std::string ref_latitude_name;
+    std::string ref_longitude_name;
+    std::string ref_altitude_name;
+
+
     std::shared_ptr<Buffer> tst_buffer;
+    std::string tst_latitude_name;
+    std::string tst_longitude_name;
+    std::string tst_altitude_name;
 
     std::vector<std::string> callsigns_;
     std::vector<unsigned int> target_addresses_;

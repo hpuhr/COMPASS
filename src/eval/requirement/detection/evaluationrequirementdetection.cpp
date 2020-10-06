@@ -90,7 +90,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                    << " first tod " << String::timeStringFromDouble(first_tod);
 
             details.push_back(
-            {tod, false, 0, target_data.hasRefDataForTime(tod, 4), missed_uis, max_gap_uis, no_ref_uis,
+            {tod, false, 0, false, target_data.hasRefDataForTime(tod, 4), missed_uis, max_gap_uis, no_ref_uis,
              "First target report"});
 
             continue;
@@ -103,13 +103,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                 no_ref_first_tod = tod; // save first occurance of no ref
 
                 details.push_back(
-                {tod, false, 0, false, missed_uis, max_gap_uis, no_ref_uis,
+                {tod, false, 0, false, false, missed_uis, max_gap_uis, no_ref_uis,
                  "Occurance of no reference"});
 
             }
             else
                 details.push_back(
-                {tod, false, 0, false, missed_uis, max_gap_uis, no_ref_uis, "Still no reference"});
+                {tod, false, 0, false, false, missed_uis, max_gap_uis, no_ref_uis, "Still no reference"});
 
             no_ref_exists = true;
 
@@ -126,7 +126,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
             no_ref_uis = floor(tod - no_ref_first_tod);
 
             details.push_back(
-            {tod, false, 0, true, missed_uis, max_gap_uis, no_ref_uis,
+            {tod, false, 0, false, true, missed_uis, max_gap_uis, no_ref_uis,
              "Reference exists again, was missing since "+String::timeStringFromDouble(no_ref_first_tod)});
 
             no_ref_exists = false;
@@ -152,10 +152,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                    << " max gap of " << String::timeStringFromDouble(floor(d_tod/update_interval_s_))
                    << " at " << String::timeStringFromDouble(tod) << " max_gap_uis " << max_gap_uis;
 
-            details.push_back(
-            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis,
-             "Max gap detected (DToD > "+to_string(max_gap_interval_s_)
-             +"), last was "+String::timeStringFromDouble(last_tod)});
+            string comment = "Max gap detected (DToD > "+to_string(max_gap_interval_s_)
+                    +"), last was "+String::timeStringFromDouble(last_tod);
+
+            EvaluationRequirementDetectionDetail detail {
+                tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
+
+            detail.pos1_ = target_data.tstPosForTime(last_tod);
+            detail.pos2_ = target_data.tstPosForTime(tod);
+            detail.has_positions_ = true;
+
+            details.push_back(detail);
 
             continue;
         }
@@ -170,15 +177,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                    << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
                    << "] missed_uis " << missed_uis;
 
-            details.push_back(
-            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis,
-             "Miss detected (DToD > "
-             +to_string(use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_)
-             +"), last was "+String::timeStringFromDouble(last_tod)});
+            string comment = "Miss detected (DToD > "
+                    +to_string(use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_)
+                    +"), last was "+String::timeStringFromDouble(last_tod);
+
+            EvaluationRequirementDetectionDetail detail {
+                tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
+
+            detail.pos1_ = target_data.tstPosForTime(last_tod);
+            detail.pos2_ = target_data.tstPosForTime(tod);
+            detail.has_positions_ = true;
+
+            details.push_back(detail);
         }
         else
             details.push_back(
-            {tod, true, d_tod, true, missed_uis, max_gap_uis, no_ref_uis, "OK (DToD <= "
+            {tod, true, d_tod, false, true, missed_uis, max_gap_uis, no_ref_uis, "OK (DToD <= "
              +to_string(update_interval_s_)+")"});
     }
 

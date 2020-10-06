@@ -27,6 +27,14 @@ void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
 {
     assert (!ref_buffer);
     ref_buffer = buffer;
+
+    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+
+    string dbo_name = ref_buffer->dboName();
+
+    ref_latitude_name = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    ref_longitude_name = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    ref_altitude_name = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
@@ -44,6 +52,14 @@ void EvaluationTargetData::setTstBuffer (std::shared_ptr<Buffer> buffer)
 {
     assert (!tst_buffer);
     tst_buffer = buffer;
+
+    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+
+    string dbo_name = tst_buffer->dboName();
+
+    tst_latitude_name = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    tst_longitude_name = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    tst_altitude_name = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addTstIndex (float tod, unsigned int index)
@@ -255,7 +271,41 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
 
 std::pair<float, float> EvaluationTargetData::refTimesFor (float tod)  const
 {
+    assert (false);
     // TODO
+}
+
+bool EvaluationTargetData::hasTstPosForTime (float tod) const
+{
+    return tst_data_.count(tod);
+}
+
+EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
+{
+    assert (hasTstPosForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    EvaluationTargetPosition pos;
+
+    NullableVector<double>& latitude_vec = tst_buffer->get<double>(tst_latitude_name);
+    NullableVector<double>& longitude_vec = tst_buffer->get<double>(tst_longitude_name);
+    NullableVector<int>& altitude_vec = tst_buffer->get<int>(tst_altitude_name);
+
+    assert (!latitude_vec.isNull(index));
+    assert (!longitude_vec.isNull(index));
+
+    pos.latitude_ = latitude_vec.get(index);
+    pos.longitude_ = longitude_vec.get(index);
+
+    if (!altitude_vec.isNull(index))
+        pos.altitude_ = altitude_vec.get(index);
+
+    return pos;
 }
 
 std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
