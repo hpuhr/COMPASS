@@ -12,8 +12,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-DetectionConfigWidget::DetectionConfigWidget(
-        DetectionConfig& config)
+DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
     : QWidget(), config_(config)
 {
     form_layout_ = new QFormLayout();

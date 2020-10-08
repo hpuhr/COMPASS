@@ -6,8 +6,6 @@
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/detection/detection.h"
 
-#include <QObject>
-
 #include <memory>
 
 
@@ -17,55 +15,49 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-class DetectionConfig : public Config
-{
-    Q_OBJECT
+    class DetectionConfig : public Config
+    {
+    public:
+        DetectionConfig(const std::string& class_id, const std::string& instance_id,
+                        Group& group, EvaluationStandard& standard,
+                        EvaluationManager& eval_man);
+        virtual ~DetectionConfig();
 
-signals:
+        virtual void addGUIElements(QFormLayout* layout) override;
+        DetectionConfigWidget* widget() override;
+        std::shared_ptr<Base> createRequirement() override;
 
-public slots:
+        float updateInterval() const;
+        void updateInterval(float value);
 
-public:
-    DetectionConfig(const std::string& class_id, const std::string& instance_id,
-                                         Group& group, EvaluationStandard& standard,
-                                         EvaluationManager& eval_man);
-    virtual ~DetectionConfig();
+        float minimumProbability() const;
+        void minimumProbability(float value);
 
-    virtual void addGUIElements(QFormLayout* layout) override;
-    DetectionConfigWidget* widget() override;
-    std::shared_ptr<Base> createRequirement() override;
+        bool useMaxGapInterval() const;
+        void useMaxGapInterval(bool value);
 
-    float updateInterval() const;
-    void updateInterval(float value);
+        float maxGapInterval() const;
+        void maxGapInterval(float value);
 
-    float minimumProbability() const;
-    void minimumProbability(float value);
+        bool useMissTolerance() const;
+        void useMissTolerance(bool value);
 
-    bool useMaxGapInterval() const;
-    void useMaxGapInterval(bool value);
+        float missTolerance() const;
+        void missTolerance(float value);
 
-    float maxGapInterval() const;
-    void maxGapInterval(float value);
+    protected:
+        float update_interval_s_{0};
 
-    bool useMissTolerance() const;
-    void useMissTolerance(bool value);
+        float minimum_probability_{0};
 
-    float missTolerance() const;
-    void missTolerance(float value);
+        bool use_max_gap_interval_{true};
+        float max_gap_interval_s_{0};
 
-protected:
-    float update_interval_s_{0};
+        bool use_miss_tolerance_{false};
+        float miss_tolerance_s_{0};
 
-    float minimum_probability_{0};
-
-    bool use_max_gap_interval_{true};
-    float max_gap_interval_s_{0};
-
-    bool use_miss_tolerance_{false};
-    float miss_tolerance_s_{0};
-
-    std::unique_ptr<DetectionConfigWidget> widget_;
-};
+        std::unique_ptr<DetectionConfigWidget> widget_;
+    };
 
 }
 
