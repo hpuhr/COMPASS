@@ -7,6 +7,8 @@
 #include "atsdb.h"
 #include "dbobjectmanager.h"
 
+#include <ogr_spatialref.h>
+
 #include <cassert>
 #include <algorithm>
 
@@ -84,9 +86,9 @@ bool EvaluationTargetData::hasTstData () const
 
 void EvaluationTargetData::finalize ()
 {
-//    loginf << "EvaluationTargetData: finalize: utn " << utn_
-//           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
-//           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
+    //    loginf << "EvaluationTargetData: finalize: utn " << utn_
+    //           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
+    //           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
 
     for (auto& ref_it : ref_data_)
         ref_indexes_.push_back(ref_it.second);
@@ -233,9 +235,9 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
     if (ref_data_.count(tod))
         return true; // contains exact value
 
-//    Return iterator to lower bound
-//    Returns an iterator pointing to the first element in the container whose key is not considered to go
-//    before k (i.e., either it is equivalent or goes after).
+    //    Return iterator to lower bound
+    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    before k (i.e., either it is equivalent or goes after).
 
     auto lb_it = ref_data_.lower_bound(tod);
 
@@ -274,6 +276,140 @@ std::pair<float, float> EvaluationTargetData::refTimesFor (float tod)  const
     assert (false);
     // TODO
 }
+
+std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
+        float tod, float d_max) const
+{
+    if (ref_data_.count(tod)) // contains exact value
+        return {refPosForTime(tod), true};
+
+    //    Return iterator to lower bound
+    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    before k (i.e., either it is equivalent or goes after).
+
+    auto lb_it = ref_data_.lower_bound(tod);
+
+    assert (lb_it != ref_data_.end());
+    assert (lb_it->first >= tod); // too much time difference
+
+    assert (lb_it->first - tod <= d_max); // too much time difference
+
+    // save value
+    float upper = lb_it->first;
+
+    lb_it--;
+
+    assert (lb_it != ref_data_.end());
+
+    assert (tod >= lb_it->first);
+
+    assert (tod - lb_it->first <= d_max); // too much time difference
+
+    float lower = lb_it->first;
+
+    EvaluationTargetPosition pos1 = refPosForTime(lower);
+    EvaluationTargetPosition pos2 = refPosForTime(upper);
+    float d_t = upper - lower;
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
+
+    assert (d_t >= 0);
+
+    if (pos1.latitude_ == pos2.latitude_
+            && pos1.longitude_ == pos2.longitude_) // same pos
+        return {pos1, true};
+
+    if (lower == upper) // same time
+    {
+        logwrn << "EvaluationTargetData: interpolatedRefPosForTime: ref has same time twice";
+        return {{}, false};
+    }
+
+    OGRSpatialReference wgs84;
+    wgs84.SetWellKnownGeogCS("WGS84");
+    OGRSpatialReference local;
+    local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+
+    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+    assert (ogr_geo2cart);
+    std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
+    assert (ogr_cart2geo);
+
+    double x_pos, y_pos;
+
+    x_pos = pos2.longitude_;
+    y_pos = pos2.latitude_;
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
+    bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+    if (!ret)
+    {
+        logerr << "EvaluationTargetData: interpolatedRefPosForTime: error with latitude " << pos2.latitude_
+               << " longitude " << pos2.longitude_;
+        return {{}, false};
+    }
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << x_pos << " y " << y_pos;
+
+    double v_x = x_pos/d_t;
+    double v_y = y_pos/d_t;
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
+
+    float d_t2 = tod - lower;
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
+
+    assert (d_t2 >= 0);
+
+    x_pos = v_x * d_t2;
+    y_pos = v_y * d_t2;
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
+
+    ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+
+    // x_pos long, y_pos lat
+
+    loginf << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
+
+    return {{y_pos, x_pos, false, 0}, true};
+}
+
+bool EvaluationTargetData::hasRefPosForTime (float tod) const
+{
+    return ref_data_.count(tod);
+}
+
+EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
+{
+    assert (hasRefPosForTime(tod));
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    EvaluationTargetPosition pos;
+
+    NullableVector<double>& latitude_vec = ref_buffer->get<double>(ref_latitude_name);
+    NullableVector<double>& longitude_vec = ref_buffer->get<double>(ref_longitude_name);
+    NullableVector<int>& altitude_vec = ref_buffer->get<int>(ref_altitude_name);
+
+    assert (!latitude_vec.isNull(index));
+    assert (!longitude_vec.isNull(index));
+
+    pos.latitude_ = latitude_vec.get(index);
+    pos.longitude_ = longitude_vec.get(index);
+
+    if (!altitude_vec.isNull(index))
+        pos.altitude_ = altitude_vec.get(index);
+
+    return pos;
+}
+
 
 bool EvaluationTargetData::hasTstPosForTime (float tod) const
 {

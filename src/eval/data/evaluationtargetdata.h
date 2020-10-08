@@ -64,9 +64,16 @@ public:
 
     bool hasRefDataForTime (float tod, float d_max) const;
     std::pair<float, float> refTimesFor (float tod) const;
+    std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
+    // bool ok
+
+    bool hasRefPosForTime (float tod) const;
+    EvaluationTargetPosition refPosForTime (float tod) const;
 
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
+
+    // nullptr if none
 
 protected:
     bool use_ {true};

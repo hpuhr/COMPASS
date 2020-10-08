@@ -36,6 +36,7 @@ void JoinedPositionMaxDistance::join(std::shared_ptr<Base> other)
     assert (other_sub);
 
     num_pos_ += other_sub->numPos();
+    num_no_ref_ += other_sub->numNoRef();
     num_pos_ok_ += other_sub->numPosOk();
     num_pos_nok_ += other_sub->numPosNOk();
 
@@ -46,8 +47,8 @@ void JoinedPositionMaxDistance::updatePMaxPos()
 {
     if (num_pos_)
     {
-        assert (num_pos_ == num_pos_ok_ + num_pos_nok_);
-        p_max_pos_ = num_pos_nok_/num_pos_;
+        assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
+        p_max_pos_ = num_pos_nok_/(num_pos_ - num_no_ref_);
         has_p_max_pos_ = true;
     }
     else

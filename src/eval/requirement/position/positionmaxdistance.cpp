@@ -1,4 +1,13 @@
 #include "eval/requirement/position/positionmaxdistance.h"
+#include "eval/results/position/single.h"
+#include "evaluationdata.h"
+#include "logger.h"
+#include "stringconv.h"
+
+#include <ogr_spatialref.h>
+
+using namespace std;
+using namespace Utils;
 
 namespace EvaluationRequirement
 {
@@ -26,7 +35,81 @@ float PositionMaxDistance::maximumProbability() const
 std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
 {
-    // TODO
+    logdbg << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
+           << " max_distance " << max_distance_ << " maximum_probability " << maximum_probability_;
+
+    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+
+    int num_pos {0};
+    int num_no_ref {0};
+    int num_pos_ok {0};
+    int num_pos_nok {0};
+
+    float tod{0};
+
+    OGRSpatialReference wgs84 ("WGS84");
+    OGRSpatialReference local;
+
+    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+    //std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo;
+
+    EvaluationTargetPosition tst_pos;
+
+    double x_pos, y_pos;
+    bool ret;
+    double distance;
+
+    for (const auto& tst_id : tst_data)
+    {
+        ++num_pos;
+
+        tod = tst_id.first;
+
+        if (!target_data.hasRefDataForTime (tod, 4))
+        {
+            ++num_no_ref;
+            continue;
+        }
+
+        pair<EvaluationTargetPosition, bool> ret_pos = target_data.interpolatedRefPosForTime(tod, 4);
+
+        EvaluationTargetPosition ref_pos {ret_pos.first};
+        bool ok {ret_pos.second};
+
+        if (!ok)
+        {
+            ++num_no_ref;
+            continue;
+        }
+
+        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+
+        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+
+        tst_pos = target_data.tstPosForTime(tod);
+
+        x_pos = tst_pos.longitude_;
+        y_pos = tst_pos.latitude_;
+
+        ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+        if (!ret)
+        {
+            ++num_no_ref;
+            continue;
+        }
+
+        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+        loginf << "UGA dist " << distance;
+
+        if (distance > max_distance_)
+            ++num_pos_nok;
+        else
+            ++num_pos_ok;
+    }
+
+    return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
+                "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
+                eval_man_, num_pos, num_no_ref, num_pos_ok, num_pos_nok);
 }
 
 

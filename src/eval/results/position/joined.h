@@ -18,9 +18,10 @@ public:
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
 protected:
-    float num_pos_ {0};
-    float num_pos_ok_ {0};
-    float num_pos_nok_ {0};
+    int num_pos_ {0};
+    int num_no_ref_ {0};
+    int num_pos_ok_ {0};
+    int num_pos_nok_ {0};
 
     bool has_p_max_pos_ {false};
     float p_max_pos_{0};

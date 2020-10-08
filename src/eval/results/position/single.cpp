@@ -22,9 +22,9 @@ namespace EvaluationRequirementResult
 SinglePositionMaxDistance::SinglePositionMaxDistance(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-        float num_pos, float num_pos_ok, float num_pos_nok)
+        int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok)
     : Single("SinglePositionMaxDistance", result_id, requirement, utn, target, eval_man),
-      num_pos_(num_pos), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok)
+      num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok)
 {
     updatePMaxPos();
 }
@@ -34,8 +34,8 @@ void SinglePositionMaxDistance::updatePMaxPos()
 {
     if (num_pos_)
     {
-        assert (num_pos_ == num_pos_ok_ + num_pos_nok_);
-        p_max_pos_ = num_pos_nok_/num_pos_;
+        assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
+        p_max_pos_ = num_pos_nok_/(num_pos_ - num_no_ref_);
         has_p_max_pos_ = true;
     }
     else
@@ -160,17 +160,22 @@ std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::
     return make_shared<JoinedPositionMaxDistance> (result_id, requirement_, eval_man_);
 }
 
-float SinglePositionMaxDistance::numPos() const
+int SinglePositionMaxDistance::numPos() const
 {
     return num_pos_;
 }
 
-float SinglePositionMaxDistance::numPosOk() const
+int SinglePositionMaxDistance::numNoRef() const
+{
+    return num_no_ref_;
+}
+
+int SinglePositionMaxDistance::numPosOk() const
 {
     return num_pos_ok_;
 }
 
-float SinglePositionMaxDistance::numPosNOk() const
+int SinglePositionMaxDistance::numPosNOk() const
 {
     return num_pos_nok_;
 }
