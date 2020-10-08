@@ -11,7 +11,7 @@ class SingleDetection : public Single
 {
 public:
     SingleDetection(
-            std::shared_ptr<EvaluationRequirement> requirement,
+            const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
             std::vector<EvaluationRequirementDetectionDetail> details);
@@ -19,7 +19,7 @@ public:
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
-    virtual std::shared_ptr<Joined> createEmptyJoined();
+    virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id);
 
     float sumUIs() const;
     float missedUIs() const;

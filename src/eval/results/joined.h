@@ -9,7 +9,7 @@ namespace EvaluationRequirementResult
 class Joined : public Base
 {
 public:
-    Joined(const std::string& type, std::shared_ptr<EvaluationRequirement> requirement,
+    Joined(const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement,
            EvaluationManager& eval_man);
 
     virtual void join(std::shared_ptr<Base> other);

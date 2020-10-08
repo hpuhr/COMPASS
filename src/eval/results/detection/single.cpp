@@ -20,12 +20,12 @@ namespace EvaluationRequirementResult
 {
 
 SingleDetection::SingleDetection(
-        std::shared_ptr<EvaluationRequirement> requirement,
+        const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement,
         unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
         float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
         std::vector<EvaluationRequirementDetectionDetail> details)
-    : Single("SingleDetection", requirement, utn, target, eval_man),
+    : Single("SingleDetection", result_id, requirement, utn, target, eval_man),
       sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
 {
     updatePD();
@@ -92,7 +92,8 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
-                eval_man_.getViewableForUTN(utn_), "Report:Results:"+utn_req_section_heading);
+                eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
+                "Report:Results:"+utn_req_section_heading);
 
     // add requirement to targets->utn->requirements->group->req
 
@@ -155,9 +156,9 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
-std::shared_ptr<Joined> SingleDetection::createEmptyJoined()
+std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedDetection> (requirement_, eval_man_);
+    return make_shared<JoinedDetection> (result_id, requirement_, eval_man_);
 }
 
 float SingleDetection::sumUIs() const

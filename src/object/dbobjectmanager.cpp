@@ -408,10 +408,7 @@ void DBObjectManager::loadSlot()
     emit loadingStartedSignal();
 
     if (!load_job_created)
-    {
-        if (load_widget_)
-            load_widget_->loadingDone();
-    }
+        finishLoading();
 }
 
 void DBObjectManager::quitLoading()
@@ -469,28 +466,32 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
     bool done = true;
 
     for (auto& object_it : objects_)
+    {
         if (object_it.second->isLoading())
         {
             logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";
             done = false;
             break;
         }
+    }
 
     if (done)
-    {
-        loginf << "DBObjectManager: loadingDoneSlot: all done";
-        load_in_progress_ = false;
-
-        ATSDB::instance().viewManager().doViewPointAfterLoad();
-
-        emit allLoadingDoneSignal();
-
-        if (load_widget_)
-            load_widget_->loadingDone();
-
-    }
+        finishLoading();
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";
+}
+
+void DBObjectManager::finishLoading()
+{
+    loginf << "DBObjectManager: loadingDoneSlot: all done";
+    load_in_progress_ = false;
+
+    ATSDB::instance().viewManager().doViewPointAfterLoad();
+
+    emit allLoadingDoneSignal();
+
+    if (load_widget_)
+        load_widget_->loadingDone();
 }
 
 void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)

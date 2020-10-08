@@ -112,7 +112,10 @@ public:
     void setViewableDataConfig (const nlohmann::json::object_t& data);
     void showUTN (unsigned int utn);
     std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn);
-
+    std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (
+            const std::string& req_grp_id, const std::string& result_id); // empty load
+    std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (
+            unsigned int utn, const std::string& req_grp_id, const std::string& result_id); // with data
     void showResultId (const std::string& id);
 
     typedef std::map<std::string,
@@ -171,6 +174,7 @@ protected:
     void updateTestDataSourcesActive();
 
     nlohmann::json::object_t getBaseViewableDataConfig ();
+    nlohmann::json::object_t getBaseViewableNoDataConfig ();
 };
 
 #endif // EVALUATIONMANAGER_H

@@ -20,8 +20,8 @@ namespace EvaluationRequirementResult
 {
 
 JoinedDetection::JoinedDetection(
-        std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : Joined("JoinedDetection", requirement, eval_man)
+        const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+    : Joined("JoinedDetection", result_id, requirement, eval_man)
 {
 }
 
@@ -107,7 +107,8 @@ void JoinedDetection::addToReport (
 
     // "Req.", "Group", "Result", "Condition", "Result"
     ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                     pd_var, condition.c_str(), result.c_str()}, nullptr,
+                     pd_var, condition.c_str(), result.c_str()},
+                    eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
                     "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
 }
 

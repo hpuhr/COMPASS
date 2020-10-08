@@ -218,7 +218,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                << " no data for pd";
 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
-                instance, target_data.utn_, &target_data,
+                "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
                 eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }
 

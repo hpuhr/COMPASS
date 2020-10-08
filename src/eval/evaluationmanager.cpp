@@ -984,6 +984,31 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForUTN (
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
+std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvaluation (
+        const std::string& req_grp_id, const std::string& result_id)
+{
+    nlohmann::json::object_t data = getBaseViewableNoDataConfig();
+
+    data["evaluation_results"]["show_results"] = true;
+    data["evaluation_results"]["req_grp_id"] = req_grp_id;
+    data["evaluation_results"]["result_id"] = result_id;
+
+    return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
+}
+
+std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvaluation (
+        unsigned int utn, const std::string& req_grp_id, const std::string& result_id)
+{
+    nlohmann::json::object_t data = getBaseViewableDataConfig();
+    data["filters"]["UTNs"]["utns"] = to_string(utn);
+
+    data["evaluation_results"]["show_results"] = true;
+    data["evaluation_results"]["req_grp_id"] = req_grp_id;
+    data["evaluation_results"]["result_id"] = result_id;
+
+    return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
+}
+
 void EvaluationManager::showResultId (const std::string& id)
 {
     loginf << "EvaluationManager: showResultId: id '" << id << "'";
@@ -1028,6 +1053,15 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 
         data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
     }
+
+    return data;
+}
+
+nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
+{
+    nlohmann::json data;
+
+    data["db_objects"] = vector<string>{};
 
     return data;
 }

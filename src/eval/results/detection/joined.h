@@ -9,8 +9,8 @@ namespace EvaluationRequirementResult
 class JoinedDetection : public Joined
 {
 public:
-    JoinedDetection(std::shared_ptr<EvaluationRequirement> requirement,
-                                               EvaluationManager& eval_man);
+    JoinedDetection(const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement,
+                    EvaluationManager& eval_man);
 
     virtual void join(std::shared_ptr<Base> other) override;
 

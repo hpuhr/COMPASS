@@ -14,9 +14,12 @@ using namespace std;
 namespace EvaluationRequirementResult
 {
 
-Base::Base(const std::string& type, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
-    : type_(type), requirement_(requirement), eval_man_(eval_man)
+Base::Base(const std::string& type, const std::string& result_id,
+           std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+    : type_(type), result_id_(result_id), requirement_(requirement), eval_man_(eval_man)
 {
+    assert (requirement_);
+    req_grp_id_ = requirement_->groupName()+":"+requirement_->name();
 }
 
 std::shared_ptr<EvaluationRequirement> Base::requirement() const
@@ -27,6 +30,16 @@ std::shared_ptr<EvaluationRequirement> Base::requirement() const
 std::string Base::type() const
 {
     return type_;
+}
+
+std::string Base::resultId() const
+{
+    return result_id_;
+}
+
+std::string Base::reqGrpId() const
+{
+    return req_grp_id_;
 }
 
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (

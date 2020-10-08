@@ -167,6 +167,7 @@ class DBObjectManager : public QObject, public Configurable
     DBObjectManagerLoadWidget* load_widget_{nullptr};
 
     virtual void checkSubConfigurables();
+    void finishLoading();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

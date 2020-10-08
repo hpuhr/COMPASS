@@ -40,8 +40,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     overview_text.addText("It has lovely lakes");
     overview_text.addText("Elk bytes\nline2");
 
-    string req_grp_id;
-    string result_id;
+    //string req_grp_id;
+    //string result_id;
 
     for (auto& req_group_it : standard)
     {
@@ -55,7 +55,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
             std::shared_ptr<Joined> result_sum;
 
-            req_grp_id = req->groupName()+":"+req->name();
+            //req_grp_id = req->groupName()+":"+req->name();
 
             for (auto& target_data_it : data)
             {
@@ -73,12 +73,12 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 // add to results
                 // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
 
-                result_id = "UTN:"+to_string(target_data_it.utn_);
+                //result_id = "UTN:"+to_string(target_data_it.utn_);
 
-                results_[req_grp_id][result_id] = result;
+                results_[result->reqGrpId()][result->resultId()] = result;
 
                 if (!result_sum)
-                    result_sum = result->createEmptyJoined();
+                    result_sum = result->createEmptyJoined("All");
 
                 result_sum->join(result);
             }
@@ -88,7 +88,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 //result_sum->print();
                 result_sum->addToReport(root_item);
 
-                results_[req_grp_id]["All"] = result_sum;
+                results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
             }
         }
     }
