@@ -2,9 +2,9 @@
 #define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 
 #include "configurable.h"
-#include "evaluationrequirementconfig.h"
-#include "evaluationrequirementdetectionconfigwidget.h"
-#include "evaluationrequirementdetection.h"
+#include "eval/requirement/config.h"
+#include "eval/requirement/detection/detectionconfigwidget.h"
+#include "eval/requirement/detection/detection.h"
 
 #include <QObject>
 

@@ -1,5 +1,5 @@
-#include "evaluationrequirementconfig.h"
-#include "evaluationrequirementgroup.h"
+#include "eval/requirement/config.h"
+#include "eval/requirement/group.h"
 #include "logger.h"
 
 #include <QFormLayout>

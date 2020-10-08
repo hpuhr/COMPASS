@@ -1,7 +1,7 @@
 #include "evaluationstandardwidget.h"
 #include "evaluationstandard.h"
-#include "evaluationrequirementgroup.h"
-#include "evaluationrequirementconfig.h"
+#include "eval/requirement/group.h"
+#include "eval/requirement/config.h"
 #include "logger.h"
 
 #include <QVBoxLayout>

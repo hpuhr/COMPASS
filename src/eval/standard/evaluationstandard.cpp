@@ -1,6 +1,6 @@
 #include "evaluationstandard.h"
 #include "evaluationmanager.h"
-#include "evaluationrequirementgroup.h"
+#include "eval/requirement/group.h"
 #include "evaluationstandardwidget.h"
 #include "evaluationstandardtreemodel.h"
 #include "logger.h"

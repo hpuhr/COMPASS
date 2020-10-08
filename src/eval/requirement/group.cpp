@@ -1,6 +1,6 @@
-#include "evaluationrequirementgroup.h"
+#include "eval/requirement/group.h"
 #include "evaluationstandard.h"
-#include "evaluationrequirementdetectionconfig.h"
+#include "eval/requirement/detection/detectionconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>

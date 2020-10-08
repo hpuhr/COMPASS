@@ -6,13 +6,13 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementconfig.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementgroup.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirement.h"
+        "${CMAKE_CURRENT_LIST_DIR}/config.h"
+        "${CMAKE_CURRENT_LIST_DIR}/group.h"
+        "${CMAKE_CURRENT_LIST_DIR}/base.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementconfig.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementgroup.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirement.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/group.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/base.cpp"
 )
 
 

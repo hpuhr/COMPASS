@@ -2,7 +2,7 @@
 #define EVALUATIONREQUIREMENTDETECTIONRESULT_H
 
 #include "eval/results/single.h"
-#include "evaluationrequirementdetection.h"
+#include "eval/requirement/detection/detection.h"
 
 namespace EvaluationRequirementResult
 {

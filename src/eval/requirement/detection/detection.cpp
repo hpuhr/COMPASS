@@ -1,4 +1,4 @@
-#include "evaluationrequirementdetection.h"
+#include "eval/requirement/detection/detection.h"
 #include "eval/results/detection/single.h"
 #include "evaluationdata.h"
 #include "logger.h"

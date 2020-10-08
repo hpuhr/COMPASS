@@ -4,13 +4,13 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionconfig.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionconfigwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/detectionconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/detectionconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/detection.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionconfig.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetectionconfigwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationrequirementdetection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/detectionconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/detectionconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/detection.cpp"
 )
 
 

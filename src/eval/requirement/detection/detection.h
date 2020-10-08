@@ -1,7 +1,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTION_H
 #define EVALUATIONREQUIREMENTDETECTION_H
 
-#include "evaluationrequirement.h"
+#include "eval/requirement/base.h"
 #include "evaluationtargetposition.h"
 
 namespace EvaluationRequirement
