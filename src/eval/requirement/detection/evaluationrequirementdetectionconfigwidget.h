@@ -6,9 +6,11 @@
 class QLineEdit;
 class QCheckBox;
 
-class EvaluationRequirementDetectionConfig;
-
 class QFormLayout;
+
+namespace EvaluationRequirement
+{
+class EvaluationRequirementDetectionConfig;
 
 class EvaluationRequirementDetectionConfigWidget : public QWidget
 {
@@ -42,5 +44,7 @@ protected:
     QLineEdit* miss_tolerance_edit_{nullptr};
 
 };
+
+}
 
 #endif // EVALUATIONREQUIREMENTDETECTIONCONFIGWIDGET_H

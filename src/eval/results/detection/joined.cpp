@@ -20,7 +20,8 @@ namespace EvaluationRequirementResult
 {
 
 JoinedDetection::JoinedDetection(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        EvaluationManager& eval_man)
     : Joined("JoinedDetection", result_id, requirement, eval_man)
 {
 }
@@ -59,8 +60,8 @@ void JoinedDetection::updatePD()
 
 void JoinedDetection::print()
 {
-    std::shared_ptr<EvaluationRequirementDetection> req =
-            std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+    std::shared_ptr<EvaluationRequirement::EvaluationRequirementDetection> req =
+            std::static_pointer_cast<EvaluationRequirement::EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     if (sum_uis_)
@@ -87,8 +88,8 @@ void JoinedDetection::addToReport (
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
     // condition
-    std::shared_ptr<EvaluationRequirementDetection> req =
-            std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+    std::shared_ptr<EvaluationRequirement::EvaluationRequirementDetection> req =
+            std::static_pointer_cast<EvaluationRequirement::EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);

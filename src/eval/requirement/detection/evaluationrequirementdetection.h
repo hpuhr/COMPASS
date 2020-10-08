@@ -4,6 +4,8 @@
 #include "evaluationrequirement.h"
 #include "evaluationtargetposition.h"
 
+namespace EvaluationRequirement
+{
 
 class EvaluationRequirementDetectionDetail
 {
@@ -37,7 +39,7 @@ public:
     std::string comment_;
 };
 
-class EvaluationRequirementDetection : public EvaluationRequirement
+class EvaluationRequirementDetection : public Base
 {
 public:
     EvaluationRequirementDetection(
@@ -59,7 +61,7 @@ public:
     float missTolerance() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-            const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance) override;
+            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance) override;
 
 protected:
     float update_interval_s_{0};
@@ -76,4 +78,5 @@ protected:
     bool isMaxGap (float d_tod);
 };
 
+}
 #endif // EVALUATIONREQUIREMENTDETECTION_H

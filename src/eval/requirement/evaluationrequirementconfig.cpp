@@ -7,6 +7,9 @@
 
 using namespace std;
 
+namespace EvaluationRequirement
+{
+
 EvaluationRequirementConfig::EvaluationRequirementConfig(
         const std::string& class_id, const std::string& instance_id,
         EvaluationRequirementGroup& group, EvaluationStandard& standard, EvaluationManager& eval_man)
@@ -112,4 +115,6 @@ void EvaluationRequirementConfig::shortName(const std::string& short_name)
 std::string EvaluationRequirementConfig::shortName() const
 {
     return short_name_;
+}
+
 }

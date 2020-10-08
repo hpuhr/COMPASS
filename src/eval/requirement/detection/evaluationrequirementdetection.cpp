@@ -7,13 +7,15 @@
 using namespace std;
 using namespace Utils;
 
+namespace EvaluationRequirement
+{
 
 EvaluationRequirementDetection::EvaluationRequirementDetection(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
         float update_interval_s, float minimum_probability, bool use_max_gap_interval,
         float max_gap_interval_s, bool use_miss_tolerance, float miss_tolerance_s)
-    : EvaluationRequirement(name, short_name, group_name, eval_man), update_interval_s_(update_interval_s),
+    : Base(name, short_name, group_name, eval_man), update_interval_s_(update_interval_s),
       minimum_probability_(minimum_probability), use_max_gap_interval_(use_max_gap_interval),
       max_gap_interval_s_(max_gap_interval_s), use_miss_tolerance_(use_miss_tolerance),
       miss_tolerance_s_(miss_tolerance_s)
@@ -52,7 +54,7 @@ float EvaluationRequirementDetection::missTolerance() const
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetection::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<EvaluationRequirement> instance)
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
            << " update_interval " << update_interval_s_ << " minimum_probability " << minimum_probability_
@@ -236,4 +238,6 @@ bool EvaluationRequirementDetection::isMaxGap (float d_tod)
         return d_tod > max_gap_interval_s_;
     else
         return false;
+}
+
 }

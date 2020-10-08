@@ -15,14 +15,14 @@ namespace EvaluationRequirementResult
 {
 
 Base::Base(const std::string& type, const std::string& result_id,
-           std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+           std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man)
     : type_(type), result_id_(result_id), requirement_(requirement), eval_man_(eval_man)
 {
     assert (requirement_);
     req_grp_id_ = requirement_->groupName()+":"+requirement_->name();
 }
 
-std::shared_ptr<EvaluationRequirement> Base::requirement() const
+std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
 {
     return requirement_;
 }

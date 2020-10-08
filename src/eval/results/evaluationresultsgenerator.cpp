@@ -52,7 +52,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                    << " req '" << req_cfg_it->name() << "'";
 
-            std::shared_ptr<EvaluationRequirement> req = req_cfg_it->createRequirement();
+            std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
             std::shared_ptr<Joined> result_sum;
 
             //req_grp_id = req->groupName()+":"+req->name();

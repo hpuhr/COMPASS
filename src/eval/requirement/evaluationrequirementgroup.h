@@ -10,8 +10,11 @@
 #include <memory>
 
 class EvaluationStandard;
-class EvaluationRequirementConfig;
 class EvaluationManager;
+
+namespace EvaluationRequirement {
+class EvaluationRequirementConfig;
+}
 
 class EvaluationRequirementGroup : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
@@ -37,11 +40,11 @@ public:
 
     bool hasRequirementConfig (const std::string& name);
     void addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name);
-    EvaluationRequirementConfig& requirementConfig (const std::string& name);
+    EvaluationRequirement::EvaluationRequirementConfig& requirementConfig (const std::string& name);
     void removeRequirementConfig (const std::string& name);
 
     using EvaluationRequirementConfigIterator =
-    typename std::vector<std::unique_ptr<EvaluationRequirementConfig>>::iterator;
+    typename std::vector<std::unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>>::iterator;
 
     EvaluationRequirementConfigIterator begin() { return configs_.begin(); }
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
@@ -60,7 +63,7 @@ protected:
     EvaluationManager& eval_man_;
     std::string name_;
 
-    std::vector<std::unique_ptr<EvaluationRequirementConfig>> configs_;
+    std::vector<std::unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>> configs_;
 
     virtual void checkSubConfigurables() override;
 

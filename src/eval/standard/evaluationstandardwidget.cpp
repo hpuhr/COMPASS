@@ -74,11 +74,12 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 
         group->showMenu();
     }
-    else if (dynamic_cast<EvaluationRequirementConfig*>(item))
+    else if (dynamic_cast<EvaluationRequirement::EvaluationRequirementConfig*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
 
-        EvaluationRequirementConfig* config = dynamic_cast<EvaluationRequirementConfig*>(item);
+        EvaluationRequirement::EvaluationRequirementConfig* config =
+                dynamic_cast<EvaluationRequirement::EvaluationRequirementConfig*>(item);
 
         showRequirementWidget(config->widget());
     }

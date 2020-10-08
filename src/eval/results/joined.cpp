@@ -4,7 +4,8 @@ namespace EvaluationRequirementResult
 {
 
 
-Joined::Joined(const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man)
+Joined::Joined(const std::string& type, const std::string& result_id,
+               std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man)
     : Base(type, result_id, requirement, eval_man)
 {
 }

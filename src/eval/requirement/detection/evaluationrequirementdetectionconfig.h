@@ -10,8 +10,12 @@
 
 #include <memory>
 
+
 class EvaluationRequirementGroup;
 class EvaluationStandard;
+
+namespace EvaluationRequirement
+{
 
 class EvaluationRequirementDetectionConfig : public EvaluationRequirementConfig
 {
@@ -29,7 +33,7 @@ public:
 
     virtual void addGUIElements(QFormLayout* layout) override;
     EvaluationRequirementDetectionConfigWidget* widget() override;
-    std::shared_ptr<EvaluationRequirement> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
     float updateInterval() const;
     void updateInterval(float value);
@@ -62,5 +66,7 @@ protected:
 
     std::unique_ptr<EvaluationRequirementDetectionConfigWidget> widget_;
 };
+
+}
 
 #endif // EVALUATIONREQUIREMENTDETECTIONCONFIG_H

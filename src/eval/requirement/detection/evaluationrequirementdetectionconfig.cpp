@@ -5,6 +5,9 @@
 
 using namespace std;
 
+namespace EvaluationRequirement
+{
+
 EvaluationRequirementDetectionConfig::EvaluationRequirementDetectionConfig(
         const std::string& class_id, const std::string& instance_id,
         EvaluationRequirementGroup& group, EvaluationStandard& standard, EvaluationManager& eval_man)
@@ -41,7 +44,7 @@ EvaluationRequirementDetectionConfigWidget* EvaluationRequirementDetectionConfig
     return widget_.get();
 }
 
-std::shared_ptr<EvaluationRequirement> EvaluationRequirementDetectionConfig::createRequirement()
+std::shared_ptr<Base> EvaluationRequirementDetectionConfig::createRequirement()
 {
     shared_ptr<EvaluationRequirementDetection> req = make_shared<EvaluationRequirementDetection>(
                 name_, short_name_, group_.name(), eval_man_, update_interval_s_, minimum_probability_,
@@ -108,4 +111,6 @@ float EvaluationRequirementDetectionConfig::missTolerance() const
 void EvaluationRequirementDetectionConfig::missTolerance(float value)
 {
     miss_tolerance_s_ = value;
+}
+
 }

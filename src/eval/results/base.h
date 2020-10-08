@@ -4,9 +4,12 @@
 #include <memory>
 #include <vector>
 
-class EvaluationRequirement;
 class EvaluationTargetData;
 class EvaluationManager;
+
+namespace EvaluationRequirement {
+    class Base;
+}
 
 namespace EvaluationResultsReport {
     class Section;
@@ -21,9 +24,9 @@ class Base
 {
 public:
     Base(const std::string& type, const std::string& result_id,
-         std::shared_ptr<EvaluationRequirement> requirement, EvaluationManager& eval_man);
+         std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man);
 
-    std::shared_ptr<EvaluationRequirement> requirement() const;
+    std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
     virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
@@ -37,7 +40,7 @@ protected:
     std::string result_id_;
     std::string req_grp_id_;
 
-    std::shared_ptr<EvaluationRequirement> requirement_;
+    std::shared_ptr<EvaluationRequirement::Base> requirement_;
 
     EvaluationManager& eval_man_;
 

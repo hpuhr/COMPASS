@@ -33,12 +33,13 @@ void EvaluationRequirementGroup::generateSubConfigurable(const std::string& clas
 {
     if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
     {
-        EvaluationRequirementDetectionConfig* config = new EvaluationRequirementDetectionConfig(
+        EvaluationRequirement::EvaluationRequirementDetectionConfig* config =
+                new EvaluationRequirement::EvaluationRequirementDetectionConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirementConfig>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>(config));
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -54,7 +55,7 @@ std::string EvaluationRequirementGroup::name() const
 bool EvaluationRequirementGroup::hasRequirementConfig (const std::string& name)
 {
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+       [&name](const unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>& x) { return x->name() == name;});
 
     return iter != configs_.end();
 }
@@ -86,12 +87,12 @@ void EvaluationRequirementGroup::addRequirementConfig (const std::string& class_
     emit configsChangedSignal();
 }
 
-EvaluationRequirementConfig& EvaluationRequirementGroup::requirementConfig (const std::string& name)
+EvaluationRequirement::EvaluationRequirementConfig& EvaluationRequirementGroup::requirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>& x) { return x->name() == name;});
 
     return **iter;
 }
@@ -101,7 +102,7 @@ void EvaluationRequirementGroup::removeRequirementConfig (const std::string& nam
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirementConfig>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>& x) { return x->name() == name;});
 
     configs_.erase(iter);
 
@@ -232,7 +233,7 @@ void EvaluationRequirementGroup::addRequirementSlot()
 void EvaluationRequirementGroup::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
-         [](const unique_ptr<EvaluationRequirementConfig>&a, const unique_ptr<EvaluationRequirementConfig>& b) -> bool
+         [](const unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>&a, const unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>& b) -> bool
     {
         return a->name() > b->name();
     });

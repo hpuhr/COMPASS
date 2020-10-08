@@ -20,11 +20,11 @@ namespace EvaluationRequirementResult
 {
 
 SingleDetection::SingleDetection(
-        const std::string& result_id, std::shared_ptr<EvaluationRequirement> requirement,
+        const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
         float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
-        std::vector<EvaluationRequirementDetectionDetail> details)
+        std::vector<EvaluationRequirement::EvaluationRequirementDetectionDetail> details)
     : Single("SingleDetection", result_id, requirement, utn, target, eval_man),
       sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
 {
@@ -49,8 +49,8 @@ void SingleDetection::updatePD()
 
 void SingleDetection::print()
 {
-    std::shared_ptr<EvaluationRequirementDetection> req =
-            std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+    std::shared_ptr<EvaluationRequirement::EvaluationRequirementDetection> req =
+            std::static_pointer_cast<EvaluationRequirement::EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     if (sum_uis_)
@@ -112,8 +112,8 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     utn_req_table.addRow({"PD", "Probability of Dectection", pd_var});
 
     // condition
-    std::shared_ptr<EvaluationRequirementDetection> req =
-            std::static_pointer_cast<EvaluationRequirementDetection>(requirement_);
+    std::shared_ptr<EvaluationRequirement::EvaluationRequirementDetection> req =
+            std::static_pointer_cast<EvaluationRequirement::EvaluationRequirementDetection>(requirement_);
     assert (req);
 
     string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
@@ -181,7 +181,7 @@ float SingleDetection::noRefUIs() const
     return no_ref_uis_;
 }
 
-std::vector<EvaluationRequirementDetectionDetail>& SingleDetection::details()
+std::vector<EvaluationRequirement::EvaluationRequirementDetectionDetail>& SingleDetection::details()
 {
     return details_;
 }

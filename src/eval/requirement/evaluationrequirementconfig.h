@@ -8,58 +8,65 @@
 
 class EvaluationRequirementGroup;
 class EvaluationStandard;
-class EvaluationRequirement;
+
 
 class QWidget;
 class QFormLayout;
 class EvaluationManager;
 
-class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
+namespace EvaluationRequirement
 {
-    Q_OBJECT
 
-signals:
+    class Base;
 
-public slots:
-    void changedNameSlot(const QString& value);
-    void changedShortNameSlot(const QString& value);
+    class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
+    {
+        Q_OBJECT
 
-public:
-    EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                EvaluationRequirementGroup& group, EvaluationStandard& standard,
-                                EvaluationManager& eval_man);
-    virtual ~EvaluationRequirementConfig();
+    signals:
 
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id) override;
+    public slots:
+        void changedNameSlot(const QString& value);
+        void changedShortNameSlot(const QString& value);
 
-    std::string name() const;
-    void name(const std::string& name);
+    public:
+        EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
+                                    EvaluationRequirementGroup& group, EvaluationStandard& standard,
+                                    EvaluationManager& eval_man);
+        virtual ~EvaluationRequirementConfig();
 
-    bool hasShortName () const;
-    std::string shortName() const;
-    void shortName(const std::string& short_name);
+        virtual void generateSubConfigurable(const std::string& class_id,
+                                             const std::string& instance_id) override;
 
-    virtual EvaluationStandardTreeItem *child(int row) override;
-    virtual int childCount() const override;
-    virtual int columnCount() const override;
-    virtual QVariant data(int column) const override;
-    virtual int row() const override;
+        std::string name() const;
+        void name(const std::string& name);
 
-    virtual QWidget* widget() = 0;
-    virtual std::shared_ptr<EvaluationRequirement> createRequirement() = 0;
+        bool hasShortName () const;
+        std::string shortName() const;
+        void shortName(const std::string& short_name);
 
-protected:
-    EvaluationRequirementGroup& group_;
-    EvaluationStandard& standard_;
-    EvaluationManager& eval_man_;
+        virtual EvaluationStandardTreeItem *child(int row) override;
+        virtual int childCount() const override;
+        virtual int columnCount() const override;
+        virtual QVariant data(int column) const override;
+        virtual int row() const override;
 
-    std::string name_;
-    std::string short_name_;
+        virtual QWidget* widget() = 0;
+        virtual std::shared_ptr<Base> createRequirement() = 0;
 
-    virtual void checkSubConfigurables() override;
+    protected:
+        EvaluationRequirementGroup& group_;
+        EvaluationStandard& standard_;
+        EvaluationManager& eval_man_;
 
-    virtual void addGUIElements(QFormLayout* layout);
-};
+        std::string name_;
+        std::string short_name_;
+
+        virtual void checkSubConfigurables() override;
+
+        virtual void addGUIElements(QFormLayout* layout);
+    };
+
+}
 
 #endif // EVALUATIONREQUIREMENTCONFIG_H

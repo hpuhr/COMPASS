@@ -9,6 +9,9 @@
 
 using namespace std;
 
+namespace EvaluationRequirement
+{
+
 EvaluationRequirementDetectionConfigWidget::EvaluationRequirementDetectionConfigWidget(
         EvaluationRequirementDetectionConfig& config)
     : QWidget(), config_(config)
@@ -131,4 +134,6 @@ void EvaluationRequirementDetectionConfigWidget::missToleranceEditSlot(QString v
         config_.missTolerance(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: missToleranceEditSlot: invalid value";
+}
+
 }

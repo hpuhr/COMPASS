@@ -11,7 +11,7 @@ namespace EvaluationRequirementResult
     {
     public:
         Single(const std::string& type, const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement> requirement,
+               std::shared_ptr<EvaluationRequirement::Base> requirement,
                unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man);
 
         virtual void print() = 0;
