@@ -1,6 +1,7 @@
 #include "eval/requirement/group.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
+#include "eval/requirement/position/positionmaxdistanceconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -35,6 +36,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::DetectionConfig* config =
                 new EvaluationRequirement::DetectionConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementPositionMaxDistanceConfig") == 0)
+    {
+        EvaluationRequirement::PositionMaxDistanceConfig* config =
+                new EvaluationRequirement::PositionMaxDistanceConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -156,9 +167,18 @@ void Group::showMenu ()
         // requirements
         QMenu* req_menu = menu.addMenu("Add Requirement");;
 
-        QAction* add_det_action = req_menu->addAction("Detection");
-        add_det_action->setData("EvaluationRequirementDetectionConfig");
-        connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        { // detection
+            QAction* add_det_action = req_menu->addAction("Detection");
+            add_det_action->setData("EvaluationRequirementDetectionConfig");
+            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // position
+            QAction* add_pos_action = req_menu->addAction("Position");
+            add_pos_action->setData("EvaluationRequirementPositionMaxDistanceConfig");
+            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
     }
 
     menu.exec(QCursor::pos());
