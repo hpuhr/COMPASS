@@ -13,10 +13,10 @@ class EvaluationStandard;
 class EvaluationManager;
 
 namespace EvaluationRequirement {
-class EvaluationRequirementConfig;
+class Config;
 }
 
-class EvaluationRequirementGroup : public QObject, public Configurable, public EvaluationStandardTreeItem
+class Group : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
 
@@ -29,9 +29,9 @@ public slots:
 
 
 public:
-    EvaluationRequirementGroup(const std::string& class_id, const std::string& instance_id,
+    Group(const std::string& class_id, const std::string& instance_id,
                                EvaluationStandard& standard, EvaluationManager& eval_man);
-    virtual ~EvaluationRequirementGroup();
+    virtual ~Group();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -40,11 +40,11 @@ public:
 
     bool hasRequirementConfig (const std::string& name);
     void addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name);
-    EvaluationRequirement::EvaluationRequirementConfig& requirementConfig (const std::string& name);
+    EvaluationRequirement::Config& requirementConfig (const std::string& name);
     void removeRequirementConfig (const std::string& name);
 
     using EvaluationRequirementConfigIterator =
-    typename std::vector<std::unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>>::iterator;
+    typename std::vector<std::unique_ptr<EvaluationRequirement::Config>>::iterator;
 
     EvaluationRequirementConfigIterator begin() { return configs_.begin(); }
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
@@ -63,7 +63,7 @@ protected:
     EvaluationManager& eval_man_;
     std::string name_;
 
-    std::vector<std::unique_ptr<EvaluationRequirement::EvaluationRequirementConfig>> configs_;
+    std::vector<std::unique_ptr<EvaluationRequirement::Config>> configs_;
 
     virtual void checkSubConfigurables() override;
 

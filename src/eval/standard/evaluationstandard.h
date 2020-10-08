@@ -11,7 +11,7 @@
 #include "evaluationstandardrootitem.h"
 
 class EvaluationManager;
-class EvaluationRequirementGroup;
+class Group;
 class EvaluationStandardWidget;
 class EvaluationStandardTreeModel;
 
@@ -36,11 +36,11 @@ public:
 
     bool hasGroup (const std::string& name);
     void addGroup (const std::string& name);
-    EvaluationRequirementGroup& group (const std::string& name);
+    Group& group (const std::string& name);
     void removeGroup (const std::string& name);
 
     using EvaluationRequirementGroupIterator =
-    typename std::map<std::string, std::unique_ptr<EvaluationRequirementGroup>>::iterator;
+    typename std::map<std::string, std::unique_ptr<Group>>::iterator;
 
     EvaluationRequirementGroupIterator begin() { return groups_.begin(); }
     EvaluationRequirementGroupIterator end() { return groups_.end(); }
@@ -68,7 +68,7 @@ protected:
 
     std::unique_ptr<EvaluationStandardWidget> widget_;
 
-    std::map<std::string, std::unique_ptr<EvaluationRequirementGroup>> groups_;
+    std::map<std::string, std::unique_ptr<Group>> groups_;
 
     QMenu menu_;
 

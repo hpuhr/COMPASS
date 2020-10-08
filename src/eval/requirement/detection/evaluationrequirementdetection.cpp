@@ -10,7 +10,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-EvaluationRequirementDetection::EvaluationRequirementDetection(
+Detection::Detection(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
         float update_interval_s, float minimum_probability, bool use_max_gap_interval,
@@ -23,37 +23,37 @@ EvaluationRequirementDetection::EvaluationRequirementDetection(
 
 }
 
-float EvaluationRequirementDetection::updateInterval() const
+float Detection::updateInterval() const
 {
     return update_interval_s_;
 }
 
-float EvaluationRequirementDetection::minimumProbability() const
+float Detection::minimumProbability() const
 {
     return minimum_probability_;
 }
 
-bool EvaluationRequirementDetection::useMaxGapInterval() const
+bool Detection::useMaxGapInterval() const
 {
     return use_max_gap_interval_;
 }
 
-float EvaluationRequirementDetection::maxGapInterval() const
+float Detection::maxGapInterval() const
 {
     return max_gap_interval_s_;
 }
 
-bool EvaluationRequirementDetection::useMissTolerance() const
+bool Detection::useMissTolerance() const
 {
     return use_miss_tolerance_;
 }
 
-float EvaluationRequirementDetection::missTolerance() const
+float Detection::missTolerance() const
 {
     return miss_tolerance_s_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetection::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -76,7 +76,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
     float no_ref_first_tod {0};
     float no_ref_uis {0};
 
-    vector<EvaluationRequirementDetectionDetail> details;
+    vector<DetectionDetail> details;
 
     for (const auto& tst_id : tst_data)
     {
@@ -157,7 +157,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
             string comment = "Max gap detected (DToD > "+to_string(max_gap_interval_s_)
                     +"), last was "+String::timeStringFromDouble(last_tod);
 
-            EvaluationRequirementDetectionDetail detail {
+            DetectionDetail detail {
                 tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
 
             detail.pos1_ = target_data.tstPosForTime(last_tod);
@@ -183,7 +183,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                     +to_string(use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_)
                     +"), last was "+String::timeStringFromDouble(last_tod);
 
-            EvaluationRequirementDetectionDetail detail {
+            DetectionDetail detail {
                 tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
 
             detail.pos1_ = target_data.tstPosForTime(last_tod);
@@ -224,7 +224,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> EvaluationRequirementDetect
                 eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }
 
-bool EvaluationRequirementDetection::isMiss (float d_tod)
+bool Detection::isMiss (float d_tod)
 {
     if (use_miss_tolerance_)
         return d_tod > (update_interval_s_ + miss_tolerance_s_);
@@ -232,7 +232,7 @@ bool EvaluationRequirementDetection::isMiss (float d_tod)
         return d_tod > update_interval_s_;
 }
 
-bool EvaluationRequirementDetection::isMaxGap (float d_tod)
+bool Detection::isMaxGap (float d_tod)
 {
     if (use_max_gap_interval_)
         return d_tod > max_gap_interval_s_;

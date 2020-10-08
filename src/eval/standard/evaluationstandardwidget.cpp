@@ -64,22 +64,22 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
         std->showMenu();
 
     }
-    else if (dynamic_cast<EvaluationRequirementGroup*>(item))
+    else if (dynamic_cast<Group*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
 
-        EvaluationRequirementGroup* group = dynamic_cast<EvaluationRequirementGroup*>(item);
+        Group* group = dynamic_cast<Group*>(item);
 
         showRequirementWidget(nullptr);
 
         group->showMenu();
     }
-    else if (dynamic_cast<EvaluationRequirement::EvaluationRequirementConfig*>(item))
+    else if (dynamic_cast<EvaluationRequirement::Config*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
 
-        EvaluationRequirement::EvaluationRequirementConfig* config =
-                dynamic_cast<EvaluationRequirement::EvaluationRequirementConfig*>(item);
+        EvaluationRequirement::Config* config =
+                dynamic_cast<EvaluationRequirement::Config*>(item);
 
         showRequirementWidget(config->widget());
     }

@@ -10,9 +10,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-class EvaluationRequirementDetectionConfig;
+class DetectionConfig;
 
-class EvaluationRequirementDetectionConfigWidget : public QWidget
+class DetectionConfigWidget : public QWidget
 {
     Q_OBJECT
 
@@ -27,10 +27,10 @@ public slots:
     void missToleranceEditSlot(QString value);
 
 public:
-    EvaluationRequirementDetectionConfigWidget(EvaluationRequirementDetectionConfig& config);
+    DetectionConfigWidget(DetectionConfig& config);
 
 protected:
-    EvaluationRequirementDetectionConfig& config_;
+    DetectionConfig& config_;
 
     QFormLayout* form_layout_ {nullptr};
 

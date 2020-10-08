@@ -7,10 +7,10 @@
 namespace EvaluationRequirement
 {
 
-class EvaluationRequirementDetectionDetail
+class DetectionDetail
 {
 public:
-    EvaluationRequirementDetectionDetail(
+    DetectionDetail(
             float tod, bool has_d_tod, float d_tod,
             bool miss_occurred,
             bool ref_exists, float missed_uis, float max_gap_uis,
@@ -39,10 +39,10 @@ public:
     std::string comment_;
 };
 
-class EvaluationRequirementDetection : public Base
+class Detection : public Base
 {
 public:
-    EvaluationRequirementDetection(
+    Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man,
             float update_interval_s, float minimum_probability, bool use_max_gap_interval,

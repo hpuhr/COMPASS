@@ -11,13 +11,13 @@
 #include <memory>
 
 
-class EvaluationRequirementGroup;
+class Group;
 class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
 
-class EvaluationRequirementDetectionConfig : public EvaluationRequirementConfig
+class DetectionConfig : public Config
 {
     Q_OBJECT
 
@@ -26,13 +26,13 @@ signals:
 public slots:
 
 public:
-    EvaluationRequirementDetectionConfig(const std::string& class_id, const std::string& instance_id,
-                                         EvaluationRequirementGroup& group, EvaluationStandard& standard,
+    DetectionConfig(const std::string& class_id, const std::string& instance_id,
+                                         Group& group, EvaluationStandard& standard,
                                          EvaluationManager& eval_man);
-    virtual ~EvaluationRequirementDetectionConfig();
+    virtual ~DetectionConfig();
 
     virtual void addGUIElements(QFormLayout* layout) override;
-    EvaluationRequirementDetectionConfigWidget* widget() override;
+    DetectionConfigWidget* widget() override;
     std::shared_ptr<Base> createRequirement() override;
 
     float updateInterval() const;
@@ -64,7 +64,7 @@ protected:
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
 
-    std::unique_ptr<EvaluationRequirementDetectionConfigWidget> widget_;
+    std::unique_ptr<DetectionConfigWidget> widget_;
 };
 
 }

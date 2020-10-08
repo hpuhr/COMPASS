@@ -6,7 +6,7 @@
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
 
-class EvaluationRequirementGroup;
+class Group;
 class EvaluationStandard;
 
 
@@ -19,7 +19,7 @@ namespace EvaluationRequirement
 
     class Base;
 
-    class EvaluationRequirementConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
+    class Config : public QObject, public Configurable, public EvaluationStandardTreeItem
     {
         Q_OBJECT
 
@@ -30,10 +30,10 @@ namespace EvaluationRequirement
         void changedShortNameSlot(const QString& value);
 
     public:
-        EvaluationRequirementConfig(const std::string& class_id, const std::string& instance_id,
-                                    EvaluationRequirementGroup& group, EvaluationStandard& standard,
+        Config(const std::string& class_id, const std::string& instance_id,
+                                    Group& group, EvaluationStandard& standard,
                                     EvaluationManager& eval_man);
-        virtual ~EvaluationRequirementConfig();
+        virtual ~Config();
 
         virtual void generateSubConfigurable(const std::string& class_id,
                                              const std::string& instance_id) override;
@@ -55,7 +55,7 @@ namespace EvaluationRequirement
         virtual std::shared_ptr<Base> createRequirement() = 0;
 
     protected:
-        EvaluationRequirementGroup& group_;
+        Group& group_;
         EvaluationStandard& standard_;
         EvaluationManager& eval_man_;
 

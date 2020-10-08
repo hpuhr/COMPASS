@@ -8,10 +8,10 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-EvaluationRequirementDetectionConfig::EvaluationRequirementDetectionConfig(
+DetectionConfig::DetectionConfig(
         const std::string& class_id, const std::string& instance_id,
-        EvaluationRequirementGroup& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : EvaluationRequirementConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : Config(class_id, instance_id, group, standard, eval_man)
 {
     registerParameter("update_interval", &update_interval_s_, 1);
     registerParameter("minimum_probability", &minimum_probability_, 0.99);
@@ -24,91 +24,91 @@ EvaluationRequirementDetectionConfig::EvaluationRequirementDetectionConfig(
 
 }
 
-EvaluationRequirementDetectionConfig::~EvaluationRequirementDetectionConfig()
+DetectionConfig::~DetectionConfig()
 {
 
 }
 
-void EvaluationRequirementDetectionConfig::addGUIElements(QFormLayout* layout)
+void DetectionConfig::addGUIElements(QFormLayout* layout)
 {
     assert (layout);
 
-    EvaluationRequirementConfig::addGUIElements(layout);
+    Config::addGUIElements(layout);
 }
 
-EvaluationRequirementDetectionConfigWidget* EvaluationRequirementDetectionConfig::widget()
+DetectionConfigWidget* DetectionConfig::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationRequirementDetectionConfigWidget(*this));
+        widget_.reset(new DetectionConfigWidget(*this));
 
     return widget_.get();
 }
 
-std::shared_ptr<Base> EvaluationRequirementDetectionConfig::createRequirement()
+std::shared_ptr<Base> DetectionConfig::createRequirement()
 {
-    shared_ptr<EvaluationRequirementDetection> req = make_shared<EvaluationRequirementDetection>(
+    shared_ptr<Detection> req = make_shared<Detection>(
                 name_, short_name_, group_.name(), eval_man_, update_interval_s_, minimum_probability_,
                 use_max_gap_interval_, max_gap_interval_s_, use_miss_tolerance_, miss_tolerance_s_);
 
     return req;
 }
 
-float EvaluationRequirementDetectionConfig::updateInterval() const
+float DetectionConfig::updateInterval() const
 {
     return update_interval_s_;
 }
 
-void EvaluationRequirementDetectionConfig::updateInterval(float value)
+void DetectionConfig::updateInterval(float value)
 {
     update_interval_s_ = value;
 }
 
-float EvaluationRequirementDetectionConfig::minimumProbability() const
+float DetectionConfig::minimumProbability() const
 {
     return minimum_probability_;
 }
 
-void EvaluationRequirementDetectionConfig::minimumProbability(float value)
+void DetectionConfig::minimumProbability(float value)
 {
     minimum_probability_ = value;
 }
 
-bool EvaluationRequirementDetectionConfig::useMaxGapInterval() const
+bool DetectionConfig::useMaxGapInterval() const
 {
     return use_max_gap_interval_;
 }
 
-void EvaluationRequirementDetectionConfig::useMaxGapInterval(bool value)
+void DetectionConfig::useMaxGapInterval(bool value)
 {
     use_max_gap_interval_ = value;
 }
 
-float EvaluationRequirementDetectionConfig::maxGapInterval() const
+float DetectionConfig::maxGapInterval() const
 {
     return max_gap_interval_s_;
 }
 
-void EvaluationRequirementDetectionConfig::maxGapInterval(float value)
+void DetectionConfig::maxGapInterval(float value)
 {
     max_gap_interval_s_ = value;
 }
 
-bool EvaluationRequirementDetectionConfig::useMissTolerance() const
+bool DetectionConfig::useMissTolerance() const
 {
     return use_miss_tolerance_;
 }
 
-void EvaluationRequirementDetectionConfig::useMissTolerance(bool value)
+void DetectionConfig::useMissTolerance(bool value)
 {
     use_miss_tolerance_ = value;
 }
 
-float EvaluationRequirementDetectionConfig::missTolerance() const
+float DetectionConfig::missTolerance() const
 {
     return miss_tolerance_s_;
 }
 
-void EvaluationRequirementDetectionConfig::missTolerance(float value)
+void DetectionConfig::missTolerance(float value)
 {
     miss_tolerance_s_ = value;
 }
