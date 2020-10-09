@@ -6,6 +6,7 @@
 #include <QTableView>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+#include <QMenu>
 
 #include <cassert>
 
@@ -23,7 +24,7 @@ namespace EvaluationResultsReport
     }
 
     void SectionContentTable::addRow (vector<QVariant> row, std::unique_ptr<nlohmann::json::object_t> viewable_data,
-                                      const string& reference, bool grey)
+                                      const string& reference, bool use, int utn)
     {
         assert (row.size() == num_columns_);
         assert (viewable_data_.size() == rows_.size());
@@ -36,7 +37,8 @@ namespace EvaluationResultsReport
             viewable_data_.push_back(nullptr);
 
         references_.push_back(reference);
-        grey_.push_back(grey);
+        use_.push_back(use);
+        utns_.push_back(utn);
     }
 
     void SectionContentTable::addToLayout (QVBoxLayout* layout)
@@ -46,25 +48,29 @@ namespace EvaluationResultsReport
         proxy_model_ = new QSortFilterProxyModel();
         proxy_model_->setSourceModel(this);
 
-        QTableView* table_view = new QTableView();
-        table_view->setModel(proxy_model_);
-        table_view->setSortingEnabled(true);
-        table_view->sortByColumn(0, Qt::AscendingOrder);
-        table_view->setSelectionBehavior(QAbstractItemView::SelectRows);
-        table_view->setSelectionMode(QAbstractItemView::SingleSelection);
-        table_view->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-        table_view->setWordWrap(true);
-        table_view->reset();
+        table_view_ = new QTableView();
+        table_view_->setModel(proxy_model_);
+        table_view_->setSortingEnabled(true);
+        table_view_->sortByColumn(0, Qt::AscendingOrder);
+        table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
+        table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+        table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+        table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
+        table_view_->setWordWrap(true);
+        table_view_->reset();
 
-        connect(table_view->selectionModel(), &QItemSelectionModel::currentRowChanged,
+        connect(table_view_, &QTableView::customContextMenuRequested,
+                this, &SectionContentTable::customContextMenuSlot);
+
+        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
                 this, &SectionContentTable::currentRowChangedSlot);
-        connect(table_view, &QTableView::doubleClicked,
+        connect(table_view_, &QTableView::doubleClicked,
                 this, &SectionContentTable::doubleClickedSlot);
 
-        table_view->resizeColumnsToContents();
-        table_view->resizeRowsToContents();
+        table_view_->resizeColumnsToContents();
+        table_view_->resizeRowsToContents();
 
-        layout->addWidget(table_view);
+        layout->addWidget(table_view_);
 
         //    for (auto& text : texts_)
         //    {
@@ -107,7 +113,7 @@ namespace EvaluationResultsReport
                     assert (index.row() >= 0);
                     assert (index.row() < rows_.size());
 
-                    if (grey_.at(index.row()))
+                    if (!use_.at(index.row()))
                         return QBrush(Qt::lightGray);
                     else
                         return QVariant();
@@ -196,6 +202,46 @@ namespace EvaluationResultsReport
 
             eval_man_.showResultId(references_.at(source_index.row()));
         }
+    }
+
+    void SectionContentTable::customContextMenuSlot(const QPoint& p)
+    {
+        logdbg << "SectionContentTable: customContextMenuSlot";
+
+        assert (table_view_);
+
+        QModelIndex index = table_view_->indexAt(p);
+        if (index.isValid())
+        {
+
+            logdbg << "SectionContentTable: customContextMenuSlot: row " << index.row();
+
+            assert (index.row() >= 0);
+            assert (index.row() < rows_.size());
+
+            if (utns_.at(index.row() != -1))
+            {
+                QMenu menu;
+
+                QAction* action = new QAction("Remove", this);
+                connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
+                action->setData(utns_.at(index.row()));
+
+                menu.addAction(action);
+
+                menu.exec(table_view_->viewport()->mapToGlobal(p));
+            }
+        }
+    }
+
+    void SectionContentTable::removeUTNSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
     }
 
 }

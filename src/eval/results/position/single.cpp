@@ -100,7 +100,7 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var},
                 eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
-                "Report:Results:"+utn_req_section_heading, !use_);
+                "Report:Results:"+utn_req_section_heading, use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
 

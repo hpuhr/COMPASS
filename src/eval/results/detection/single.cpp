@@ -97,7 +97,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
                 eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
-                "Report:Results:"+utn_req_section_heading, !use_);
+                "Report:Results:"+utn_req_section_heading, use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
 

@@ -14,6 +14,7 @@
 class ViewableDataConfig;
 
 class QSortFilterProxyModel;
+class QTableView;
 
 namespace EvaluationResultsReport
 {
@@ -26,13 +27,15 @@ namespace EvaluationResultsReport
     public slots:
         void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
         void doubleClickedSlot(const QModelIndex& index);
+        void customContextMenuSlot(const QPoint& p);
+        void removeUTNSlot ();
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
         void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
-                     const string& reference = "", bool grey = false);
+                     const string& reference = "", bool use = true, int utn=-1);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -52,9 +55,12 @@ namespace EvaluationResultsReport
         vector<vector<QVariant>> rows_;
         vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
         vector<string> references_;
-        vector<bool> grey_;
+        vector<bool> use_; // indicated whether that data was used
+        vector<int> utns_; // only set for rows associated with a specific utn, else -1
+
 
         QSortFilterProxyModel* proxy_model_ {nullptr};
+        QTableView* table_view_ {nullptr};
     };
 
 }
