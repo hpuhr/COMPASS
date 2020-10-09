@@ -35,7 +35,9 @@
 
 #include <string>
 #include <locale.h>
+#include <thread>
 
+#include <tbb/tbb.h>
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -54,6 +56,8 @@ namespace po = boost::program_options;
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
+
+    tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;
@@ -132,6 +136,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         loginf << "ATSDBClient: schema name must be set for JSON import";
         return;
     }
+
+    loginf << "ATSDBClient: started with " << std::thread::hardware_concurrency() << " threads";
 
     TaskManager& task_man = ATSDB::instance().taskManager();
 

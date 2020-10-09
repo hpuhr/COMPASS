@@ -55,6 +55,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     //string req_grp_id;
     //string result_id;
 
+    vector<unsigned int> utns;
+
+    for (auto& target_data_it : data)
+        utns.push_back(target_data_it.utn_);
+
+    unsigned int num_utns = utns.size();
+
     for (auto& req_group_it : standard)
     {
         logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
@@ -69,38 +76,31 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             //req_grp_id = req->groupName()+":"+req->name();
 
-//            tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
-//                if (!isNull(cnt))
-//                {
-//                    data_.at(cnt) = data_.at(cnt) && tmp_factor;
-//                }
-//            });
+            vector<shared_ptr<Single>> results;
+            results.resize(num_utns);
 
-
-            for (auto& target_data_it : data)
+            // generate results
+            tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
             {
-                //                if (target_data_it.utn_ != 610)
-                //                    continue;
+                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req);
+            });
 
-                logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
-                       << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
-
-                std::shared_ptr<Single> result = req->evaluate(target_data_it, req);
-
+            for (auto& result_it : results)
+            {
                 //result->print();
-                result->addToReport(root_item);
+                result_it->addToReport(root_item);
 
                 // add to results
                 // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
 
                 //result_id = "UTN:"+to_string(target_data_it.utn_);
 
-                results_[result->reqGrpId()][result->resultId()] = result;
+                results_[result_it->reqGrpId()][result_it->resultId()] = result_it;
 
                 if (!result_sum)
-                    result_sum = result->createEmptyJoined("All");
+                    result_sum = result_it->createEmptyJoined("All");
 
-                result_sum->join(result);
+                result_sum->join(result_it);
             }
 
             if (result_sum)
