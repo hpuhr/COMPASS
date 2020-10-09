@@ -11,9 +11,15 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "logger.h"
+#include "stringconv.h"
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <tbb/tbb.h>
 
 using namespace std;
 using namespace EvaluationRequirementResult;
+using namespace Utils;
 
 EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
     : eval_man_(eval_man), results_model_(eval_man_)
@@ -25,6 +31,12 @@ EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_m
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
     loginf << "EvaluationResultsGenerator: evaluate";
+
+    boost::posix_time::ptime loading_start_time_;
+    boost::posix_time::ptime loading_stop_time_;
+
+    loading_start_time_ = boost::posix_time::microsec_clock::local_time();
+
 
     results_model_.beginReset();
     results_.clear();
@@ -57,10 +69,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             //req_grp_id = req->groupName()+":"+req->name();
 
+//            tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+//                if (!isNull(cnt))
+//                {
+//                    data_.at(cnt) = data_.at(cnt) && tmp_factor;
+//                }
+//            });
+
+
             for (auto& target_data_it : data)
             {
-//                if (target_data_it.utn_ != 610)
-//                    continue;
+                //                if (target_data_it.utn_ != 610)
+                //                    continue;
 
                 logdbg << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "' utn " << target_data_it.utn_;
@@ -94,6 +114,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     }
 
     results_model_.endReset();
+
+    loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+    double load_time;
+    boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
+    load_time = diff.total_milliseconds() / 1000.0;
+
+    loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(load_time, true);
+
+    // 00:06:22.852 with no parallel
 
     emit eval_man_.resultsChangedSignal();
 }

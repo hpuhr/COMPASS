@@ -11,9 +11,9 @@
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
+#include "evaluationmanagerwidget.h"
 
 class ATSDB;
-class EvaluationManagerWidget;
 class EvaluationStandard;
 class DBObject;
 

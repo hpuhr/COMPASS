@@ -311,7 +311,7 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     EvaluationTargetPosition pos2 = refPosForTime(upper);
     float d_t = upper - lower;
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -330,8 +330,8 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     OGRSpatialReference local;
     local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
     assert (ogr_geo2cart);
@@ -340,10 +340,18 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
 
     double x_pos, y_pos;
 
-    x_pos = pos2.longitude_;
-    y_pos = pos2.latitude_;
+    if (getenv("APPDIR")) // inside appimage
+    {
+        x_pos = pos2.longitude_;
+        y_pos = pos2.latitude_;
+    }
+    else
+    {
+        x_pos = pos2.latitude_;
+        y_pos = pos2.longitude_;
+    }
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
     bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
     if (!ret)
     {
@@ -352,29 +360,33 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
         return {{}, false};
     }
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << x_pos << " y " << y_pos;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << fixed << x_pos
+           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
     double v_x = x_pos/d_t;
     double v_y = y_pos/d_t;
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
 
     float d_t2 = tod - lower;
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     x_pos = v_x * d_t2;
     y_pos = v_y * d_t2;
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
 
     ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
 
     // x_pos long, y_pos lat
 
-    loginf << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
 
-    return {{y_pos, x_pos, false, 0}, true};
+    if (getenv("APPDIR")) // inside appimage
+        return {{y_pos, x_pos, false, 0}, true};
+    else
+        return {{x_pos, y_pos, false, 0}, true};
 }
 
 bool EvaluationTargetData::hasRefPosForTime (float tod) const

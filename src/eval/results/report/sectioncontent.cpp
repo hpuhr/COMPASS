@@ -1,6 +1,8 @@
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/section.h"
 
+#include <cassert>
+
 namespace EvaluationResultsReport
 {
     SectionContent::SectionContent(const string& name, Section* parent_section, EvaluationManager& eval_man)

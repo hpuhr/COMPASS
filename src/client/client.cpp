@@ -17,14 +17,6 @@
 
 #include "client.h"
 
-#include <locale.h>
-
-#include <QApplication>
-#include <QMessageBox>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-#include <string>
-
 #include "atsdb.h"
 #include "config.h"
 #include "configurationmanager.h"
@@ -34,6 +26,16 @@
 #include "mainwindow.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+
+#include <QApplication>
+#include <QMessageBox>
+
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+
+#include <string>
+#include <locale.h>
+
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>

@@ -47,7 +47,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
     float tod{0};
 
-    OGRSpatialReference wgs84 ("WGS84");
+    OGRSpatialReference wgs84;
+    wgs84.SetWellKnownGeogCS("WGS84");
+
     OGRSpatialReference local;
 
     std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
@@ -88,8 +90,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
         tst_pos = target_data.tstPosForTime(tod);
 
-        x_pos = tst_pos.longitude_;
-        y_pos = tst_pos.latitude_;
+        if (getenv("APPDIR")) // inside appimage
+        {
+            x_pos = tst_pos.longitude_;
+            y_pos = tst_pos.latitude_;
+        }
+        else
+        {
+            x_pos = tst_pos.latitude_;
+            y_pos = tst_pos.longitude_;
+        }
 
         ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ret)
@@ -99,13 +109,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         }
 
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-        loginf << "UGA dist " << distance;
 
         if (distance > max_distance_)
             ++num_pos_nok;
         else
             ++num_pos_ok;
     }
+
+    loginf << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
+           << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+           << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok;
 
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,

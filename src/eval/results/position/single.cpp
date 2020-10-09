@@ -32,7 +32,9 @@ SinglePositionMaxDistance::SinglePositionMaxDistance(
 
 void SinglePositionMaxDistance::updatePMaxPos()
 {
-    if (num_pos_)
+    assert (num_no_ref_ <= num_pos_);
+
+    if (num_pos_ - num_no_ref_)
     {
         assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
         p_max_pos_ = num_pos_nok_/(num_pos_ - num_no_ref_);
