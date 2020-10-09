@@ -50,7 +50,7 @@ void JoinedPositionMaxDistance::updatePMaxPos()
     if (num_pos_ - num_no_ref_)
     {
         assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
-        p_max_pos_ = num_pos_nok_/(num_pos_ - num_no_ref_);
+        p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_);
         has_p_max_pos_ = true;
     }
     else
@@ -77,42 +77,42 @@ void JoinedPositionMaxDistance::print()
 void JoinedPositionMaxDistance::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-//    logdbg << "JoinedPositionMaxDistance " <<  requirement_->name() <<": addToReport";
+    logdbg << "JoinedPositionMaxDistance " <<  requirement_->name() <<": addToReport";
 
-//    if (!results_.size()) // some data must exist
-//    {
-//        logerr << "JoinedPositionMaxDistance " <<  requirement_->name() <<": addToReport: no data";
-//        return;
-//    }
+    if (!results_.size()) // some data must exist
+    {
+        logerr << "JoinedPositionMaxDistance " <<  requirement_->name() <<": addToReport: no data";
+        return;
+    }
 
-//    logdbg << "JoinedPositionMaxDistance " <<  requirement_->name() << ": addToReport: adding joined result";
+    logdbg << "JoinedPositionMaxDistance " <<  requirement_->name() << ": addToReport: adding joined result";
 
-//    EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
+    EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
-//    // condition
-//    std::shared_ptr<EvaluationRequirement::Detection> req =
-//            std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-//    assert (req);
+    // condition
+    std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
+    assert (req);
 
-//    string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+    string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
 
-//    // pd
-//    QVariant pd_var;
+    // pd
+    QVariant pd_var;
 
-//    string result {"Unknown"};
+    string result {"Unknown"};
 
-//    if (has_pd_)
-//    {
-//        pd_var = String::percentToString(pd_ * 100.0).c_str();
+    if (has_p_max_pos_)
+    {
+        pd_var = String::percentToString(p_max_pos_ * 100.0).c_str();
 
-//        result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
-//    }
+        result = p_max_pos_ <= req->maximumProbability() ? "Passed" : "Failed";
+    }
 
-//    // "Req.", "Group", "Result", "Condition", "Result"
-//    ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-//                     pd_var, condition.c_str(), result.c_str()},
-//                    eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
-//                    "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+    // "Req.", "Group", "Result", "Condition", "Result"
+    ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
+                     pd_var, condition.c_str(), result.c_str()},
+                    eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
+                    "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
 }
 
 }

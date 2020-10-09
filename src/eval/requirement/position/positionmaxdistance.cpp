@@ -45,6 +45,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
     int num_pos_ok {0};
     int num_pos_nok {0};
 
+    std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details;
+
     float tod{0};
 
     OGRSpatialReference wgs84;
@@ -66,9 +68,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         ++num_pos;
 
         tod = tst_id.first;
+        tst_pos = target_data.tstPosForTime(tod);
 
         if (!target_data.hasRefDataForTime (tod, 4))
         {
+            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+
             ++num_no_ref;
             continue;
         }
@@ -80,6 +85,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
         if (!ok)
         {
+            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+
             ++num_no_ref;
             continue;
         }
@@ -87,8 +94,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
         ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-        tst_pos = target_data.tstPosForTime(tod);
 
         if (getenv("APPDIR")) // inside appimage
         {
@@ -104,6 +109,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ret)
         {
+            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
             ++num_no_ref;
             continue;
         }
@@ -111,18 +117,31 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
         if (distance > max_distance_)
+        {
+            details.push_back({tod, tst_pos, true, ref_pos, distance, false,
+                               num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+
             ++num_pos_nok;
+        }
         else
+        {
+            details.push_back({tod, tst_pos, true, ref_pos, distance, true,
+                               num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+
             ++num_pos_ok;
+        }
+
     }
 
     loginf << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
            << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok;
 
+    assert (details.size() == num_pos);
+
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_ok, num_pos_nok);
+                eval_man_, num_pos, num_no_ref, num_pos_ok, num_pos_nok, details);
 }
 
 

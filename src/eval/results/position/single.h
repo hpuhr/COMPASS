@@ -13,7 +13,8 @@ public:
     SinglePositionMaxDistance(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok);
+            int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok,
+            std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details);
 
     virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
@@ -25,6 +26,8 @@ public:
     int numPosOk() const;
     int numPosNOk() const;
 
+    std::vector<EvaluationRequirement::PositionMaxDistanceDetail>& details();
+
 protected:
     int num_pos_ {0};
     int num_no_ref_ {0};
@@ -34,7 +37,10 @@ protected:
     bool has_p_max_pos_ {false};
     float p_max_pos_{0};
 
+    std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details_;
+
     void updatePMaxPos();
+
 };
 
 }

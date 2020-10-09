@@ -105,11 +105,11 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
-    utn_req_table.addRow({"EUIs", "Expected Update Intervals", sum_uis_});
-    utn_req_table.addRow({"MUIs", "Missed Update Intervals", missed_uis_});
-    utn_req_table.addRow({"MGUIs", "Max. Gap Update Intervals", max_gap_uis_});
-    utn_req_table.addRow({"NRUIs", "No Reference Update Intervals", no_ref_uis_});
-    utn_req_table.addRow({"PD", "Probability of Dectection", pd_var});
+    utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_});
+    utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_});
+    utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_});
+    utn_req_table.addRow({"NRUIs [1]", "No Reference Update Intervals", no_ref_uis_});
+    utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var});
 
     // condition
     std::shared_ptr<EvaluationRequirement::Detection> req =
