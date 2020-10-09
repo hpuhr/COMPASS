@@ -41,11 +41,15 @@ void SinglePositionMaxDistance::updatePMaxPos()
         assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
         p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_);
         has_p_max_pos_ = true;
+
+        use_ = target_->use();
     }
     else
     {
         p_max_pos_ = 0;
         has_p_max_pos_ = false;
+
+        use_ = false;
     }
 }
 
@@ -96,7 +100,7 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var},
                 eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
-                "Report:Results:"+utn_req_section_heading);
+                "Report:Results:"+utn_req_section_heading, !use_);
 
     // add requirement to targets->utn->requirements->group->req
 
@@ -108,6 +112,7 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
+    utn_req_table.addRow({"Use", "To be used in results", use_});
     utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_});
     utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions ", num_no_ref_});
     utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_});

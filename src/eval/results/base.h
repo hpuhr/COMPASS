@@ -35,10 +35,15 @@ public:
     std::string resultId() const;
     std::string reqGrpId() const;
 
+    bool use() const;
+    void use(bool use);
+
 protected:
     std::string type_;
     std::string result_id_;
     std::string req_grp_id_;
+
+    bool use_ {true};
 
     std::shared_ptr<EvaluationRequirement::Base> requirement_;
 

@@ -42,6 +42,16 @@ std::string Base::reqGrpId() const
     return req_grp_id_;
 }
 
+bool Base::use() const
+{
+    return use_;
+}
+
+void Base::use(bool use)
+{
+    use_ = use;
+}
+
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {

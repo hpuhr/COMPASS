@@ -32,7 +32,7 @@ namespace EvaluationResultsReport
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
         void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
-                     const string& reference = "");
+                     const string& reference = "", bool grey = false);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -52,6 +52,7 @@ namespace EvaluationResultsReport
         vector<vector<QVariant>> rows_;
         vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
         vector<string> references_;
+        vector<bool> grey_;
 
         QSortFilterProxyModel* proxy_model_ {nullptr};
     };

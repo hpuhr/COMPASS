@@ -15,7 +15,12 @@ namespace EvaluationResultsReport
         root_section_ = make_shared<Section>("Results", this, eval_man_);
     }
 
-   TreeItem* RootItem::child(int row)
+    RootItem::~RootItem()
+    {
+        loginf << "EvaluationResultsReport::RootItem: destructor";
+    }
+
+    TreeItem* RootItem::child(int row)
     {
         if (row < 0 || row > 0)
             return nullptr;

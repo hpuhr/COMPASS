@@ -39,11 +39,15 @@ void SingleDetection::updatePD()
         assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
         pd_ = 1.0 - (missed_uis_/(sum_uis_ - max_gap_uis_ - no_ref_uis_));
         has_pd_ = true;
+
+        use_ = target_->use();
     }
     else
     {
         pd_ = 0;
         has_pd_ = false;
+
+        use_ = false;
     }
 }
 
@@ -93,7 +97,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
                 eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
-                "Report:Results:"+utn_req_section_heading);
+                "Report:Results:"+utn_req_section_heading, !use_);
 
     // add requirement to targets->utn->requirements->group->req
 
@@ -105,6 +109,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
+    utn_req_table.addRow({"Use", "To be used in results", use_});
     utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_});
     utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_});
     utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_});

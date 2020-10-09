@@ -16,6 +16,7 @@ namespace EvaluationResultsReport
     {
     public:
         RootItem(EvaluationManager& eval_man);
+        virtual ~RootItem();
 
         virtual TreeItem *child(int row) override;
         virtual int childCount() const override;

@@ -123,6 +123,14 @@ namespace EvaluationResultsReport
     {
         beginResetModel();
     }
+
+    void TreeModel::clear()
+    {
+        loginf << "TreeModel: clear";
+
+        root_item_ = make_shared<RootItem>(eval_man_);
+    }
+
     void TreeModel::endReset()
     {
         endResetModel();

@@ -34,6 +34,7 @@ namespace EvaluationResultsReport
         QModelIndex findItem (const string& id); // "Report:Results:Overview"
 
         void beginReset();
+        void clear();
         void endReset();
 
         shared_ptr<RootItem> rootItem() const;

@@ -37,9 +37,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-
+    // clear everything
     results_model_.beginReset();
+    results_model_.clear();
     results_.clear();
+    results_model_.endReset();
+
+    // prepare for new data
+    results_model_.beginReset();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
@@ -100,7 +105,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 if (!result_sum)
                     result_sum = result_it->createEmptyJoined("All");
 
-                result_sum->join(result_it);
+                if (result_it->use())
+                    result_sum->join(result_it);
             }
 
             if (result_sum)

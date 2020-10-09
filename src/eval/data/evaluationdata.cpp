@@ -308,6 +308,35 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
     }
 }
 
+bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, int role)
+{
+    if (!index.isValid() /*|| role != Qt::EditRole*/)
+        return false;
+
+
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
+
+        auto it = target_data_.begin()+index.row();
+
+        if ((Qt::CheckState)value.toInt() == Qt::Checked)
+        {
+            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(true); });
+            return true;
+        }
+        else
+        {
+            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 QVariant EvaluationData::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -341,7 +370,6 @@ QModelIndex EvaluationData::parent(const QModelIndex& index) const
 {
     return QModelIndex();
 }
-
 
 Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
 {
