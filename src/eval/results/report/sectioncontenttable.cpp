@@ -27,7 +27,8 @@ namespace EvaluationResultsReport
     void SectionContentTable::addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
                                       QVariant annotation,
                                      // std::unique_ptr<nlohmann::json::object_t> viewable_data,
-                                      const string& reference, bool use, int utn)
+                                      //const string& reference,
+                                      bool use, int utn)
     {
         assert (row.size() == num_columns_);
         //assert (viewable_data_.size() == rows_.size());
@@ -41,14 +42,14 @@ namespace EvaluationResultsReport
 //        else
 //            viewable_data_.push_back(nullptr);
 
-        references_.push_back(reference);
+        //references_.push_back(reference);
         use_.push_back(use);
         utns_.push_back(utn);
 
         assert (annotations_.size() == rows_.size());
         assert (result_ptrs_.size() == rows_.size());
         //assert (viewable_data_.size() == rows_.size());
-        assert (references_.size() == rows_.size());
+        //assert (references_.size() == rows_.size());
         assert (use_.size() == rows_.size());
         assert (utns_.size() == rows_.size());
     }
@@ -183,16 +184,16 @@ namespace EvaluationResultsReport
         assert (source_index.row() >= 0);
         assert (source_index.row() < rows_.size());
 
-        unsigned int index = source_index.row();
+        unsigned int row_index = source_index.row();
 
-        if (result_ptrs_.at(index)) // try to generate viewable from result
+        if (result_ptrs_.at(row_index)) // try to generate viewable from result
         {
-            if (result_ptrs_.at(index)->hasViewableData(*this, annotations_.at(index)))
+            if (result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
             {
                 loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
 
                 std::unique_ptr<nlohmann::json::object_t> viewable =
-                        result_ptrs_.at(index)->viewableData(*this, annotations_.at(index));
+                        result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
                 assert (viewable);
 
                 eval_man_.setViewableDataConfig(*viewable.get());
@@ -223,12 +224,17 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
 
-        if (references_.at(source_index.row()) != "")
-        {
-            loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference ' "
-                   << references_.at(source_index.row()) << "'";
+        unsigned int row_index = source_index.row();
 
-            eval_man_.showResultId(references_.at(source_index.row()));
+        if (result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
+        {
+            string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
+            assert (reference.size());
+
+            loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
+                   << reference << "'";
+
+            eval_man_.showResultId(reference);
         }
     }
 

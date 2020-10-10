@@ -47,6 +47,11 @@ public:
     virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
+    virtual bool hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
+    virtual std::string reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
+
 protected:
     std::string type_;
     std::string result_id_;

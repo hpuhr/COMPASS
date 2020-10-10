@@ -25,6 +25,11 @@ namespace EvaluationRequirementResult
         virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+        virtual bool hasReference (
+                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+        virtual std::string reference(
+                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+
     protected:
         int num_pos_ {0};
         int num_no_ref_ {0};

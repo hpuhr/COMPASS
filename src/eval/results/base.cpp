@@ -64,6 +64,19 @@ std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
     return nullptr;
 }
 
+
+bool Base::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return false;
+}
+
+std::string Base::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (false);
+}
+
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {

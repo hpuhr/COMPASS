@@ -101,7 +101,7 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var}, this, {utn_},
-                "Report:Results:"+utn_req_section_heading, use_, utn_);
+                use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
 
@@ -177,6 +177,26 @@ std::unique_ptr<nlohmann::json::object_t> SinglePositionMaxDistance::viewableDat
 
     assert (hasViewableData(table, annotation));
     return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+}
+
+bool SinglePositionMaxDistance::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;;
+}
+
+std::string SinglePositionMaxDistance::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (hasReference(table, annotation));
+
+    string utn_req_section_heading =
+            "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
+
+    return "Report:Results:"+utn_req_section_heading;
 }
 
 std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::string& result_id)

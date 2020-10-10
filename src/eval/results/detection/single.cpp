@@ -98,7 +98,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
      target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var}, this, {utn_},
-                "Report:Results:"+utn_req_section_heading, use_, utn_);
+                use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
 
@@ -162,6 +162,43 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
+bool SingleDetection::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;
+}
+
+std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+
+    assert (hasViewableData(table, annotation));
+    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+}
+
+bool SingleDetection::hasReference (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;;
+}
+
+std::string SingleDetection::reference(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    assert (hasReference(table, annotation));
+
+    string utn_req_section_heading =
+            "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
+
+    return "Report:Results:"+utn_req_section_heading;
+}
+
 std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)
 {
     return make_shared<JoinedDetection> (result_id, requirement_, eval_man_);
@@ -185,25 +222,6 @@ float SingleDetection::maxGapUIs() const
 float SingleDetection::noRefUIs() const
 {
     return no_ref_uis_;
-}
-
-
-bool SingleDetection::hasViewableData (
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-    if (table.name() == "target_table" && annotation.toUInt() == utn_)
-        return true;
-    else
-        throw runtime_error("SingleDetection: hasViewableData: unknown table '"+table.name()+"' annotation '"
-                            +annotation.toString().toStdString());
-}
-
-std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
-        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
-{
-
-    assert (hasViewableData(table, annotation));
-    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 std::vector<EvaluationRequirement::DetectionDetail>& SingleDetection::details()

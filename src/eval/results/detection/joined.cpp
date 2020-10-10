@@ -118,8 +118,7 @@ namespace EvaluationRequirementResult
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                         pd_var, condition.c_str(), result.c_str()}, this, {},
-                        "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+                         pd_var, condition.c_str(), result.c_str()}, this, {}); // "Report:Results:Overview"
     }
 
     bool JoinedDetection::hasViewableData (
@@ -136,6 +135,22 @@ namespace EvaluationRequirementResult
     {
         assert (hasViewableData(table, annotation));
         return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+    }
+
+    bool JoinedDetection::hasReference (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    {
+        if (table.name() == "req_overview")
+            return true;
+        else
+            return false;;
+    }
+
+    std::string JoinedDetection::reference(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    {
+        assert (hasReference(table, annotation));
+        return "Report:Results:"+getRequirementSectionID();
     }
 
     void JoinedDetection::updatesToUseChanges()
