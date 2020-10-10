@@ -97,8 +97,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-     target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var},
-                eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
+     target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var}, this, {utn_},
                 "Report:Results:"+utn_req_section_heading, use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
@@ -111,12 +110,12 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
-    utn_req_table.addRow({"Use", "To be used in results", use_});
-    utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_});
-    utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_});
-    utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_});
-    utn_req_table.addRow({"NRUIs [1]", "No Reference Update Intervals", no_ref_uis_});
-    utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var});
+    utn_req_table.addRow({"Use", "To be used in results", use_}, this);
+    utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
+    utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
+    utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_}, this);
+    utn_req_table.addRow({"NRUIs [1]", "No Reference Update Intervals", no_ref_uis_}, this);
+    utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
 
     // condition
     std::shared_ptr<EvaluationRequirement::Detection> req =
@@ -125,14 +124,14 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
 
     string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
-    utn_req_table.addRow({"Condition", "", condition.c_str()});
+    utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
 
     string result {"Unknown"};
 
     if (has_pd_)
         result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
 
-    utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()});
+    utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // add further details
 
@@ -150,14 +149,14 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              String::timeStringFromDouble(rq_det_it.d_tod_).c_str(),
              rq_det_it.ref_exists_, rq_det_it.missed_uis_,
-             rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_, rq_det_it.comment_.c_str()});
+             rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_, rq_det_it.comment_.c_str()}, this);
         else
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              QVariant(),
              rq_det_it.ref_exists_, rq_det_it.missed_uis_,
              rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_,
-             rq_det_it.comment_.c_str()});
+             rq_det_it.comment_.c_str()}, this);
     }
 
     // TODO add requirement description, methods
@@ -186,6 +185,25 @@ float SingleDetection::maxGapUIs() const
 float SingleDetection::noRefUIs() const
 {
     return no_ref_uis_;
+}
+
+
+bool SingleDetection::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        return true;
+    else
+        throw runtime_error("SingleDetection: hasViewableData: unknown table '"+table.name()+"' annotation '"
+                            +annotation.toString().toStdString());
+}
+
+std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+
+    assert (hasViewableData(table, annotation));
+    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 std::vector<EvaluationRequirement::DetectionDetail>& SingleDetection::details()

@@ -20,6 +20,11 @@ namespace EvaluationRequirementResult
 
         virtual void updatesToUseChanges() override;
 
+        virtual bool hasViewableData (
+                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+        virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+                const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
+
     protected:
         float sum_uis_ {0};
         float missed_uis_ {0};

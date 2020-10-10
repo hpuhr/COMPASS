@@ -118,9 +118,24 @@ namespace EvaluationRequirementResult
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                         pd_var, condition.c_str(), result.c_str()},
-                        eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
+                         pd_var, condition.c_str(), result.c_str()}, this, {},
                         "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+    }
+
+    bool JoinedDetection::hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    {
+        if (table.name() == "req_overview")
+            return true;
+        else
+            return false;;
+    }
+
+    std::unique_ptr<nlohmann::json::object_t> JoinedDetection::viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+    {
+        assert (hasViewableData(table, annotation));
+        return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
     }
 
     void JoinedDetection::updatesToUseChanges()

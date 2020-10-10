@@ -52,6 +52,18 @@ void Base::use(bool use)
     use_ = use;
 }
 
+bool Base::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return false;
+}
+
+std::unique_ptr<nlohmann::json::object_t> Base::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    return nullptr;
+}
+
 EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {

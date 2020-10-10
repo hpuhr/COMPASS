@@ -100,8 +100,7 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
     {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-     target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var},
-                eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_),
+     target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var}, this, {utn_},
                 "Report:Results:"+utn_req_section_heading, use_, utn_);
 
     // add requirement to targets->utn->requirements->group->req
@@ -114,12 +113,12 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
 
-    utn_req_table.addRow({"Use", "To be used in results", use_});
-    utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_});
-    utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions ", num_no_ref_});
-    utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_});
-    utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_});
-    utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var});
+    utn_req_table.addRow({"Use", "To be used in results", use_}, this);
+    utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
+    utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions ", num_no_ref_}, this);
+    utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
+    utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
+    utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
 
     // condition
     std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
@@ -128,14 +127,14 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
 
     string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
 
-    utn_req_table.addRow({"Condition", "", condition.c_str()});
+    utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
 
     string result {"Unknown"};
 
     if (has_p_max_pos_)
         result = p_max_pos_ <= req->maximumProbability() ? "Passed" : "Failed";
 
-    utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()});
+    utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
     // add further details
 
@@ -152,14 +151,32 @@ void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsRe
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              !rq_det_it.has_ref_pos_, rq_det_it.distance_,
-             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_});
+             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_}, this);
         else
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              !rq_det_it.has_ref_pos_, {},
-             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_});
+             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_}, this);
     }
     // TODO add requirement description, methods
+}
+
+
+bool SinglePositionMaxDistance::hasViewableData (
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+    if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        return true;
+    else
+        return false;
+}
+
+std::unique_ptr<nlohmann::json::object_t> SinglePositionMaxDistance::viewableData(
+        const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
+{
+
+    assert (hasViewableData(table, annotation));
+    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::string& result_id)

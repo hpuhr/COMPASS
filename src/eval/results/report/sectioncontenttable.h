@@ -16,6 +16,11 @@ class ViewableDataConfig;
 class QSortFilterProxyModel;
 class QTableView;
 
+namespace EvaluationRequirementResult
+{
+    class Base;
+}
+
 namespace EvaluationResultsReport
 {
     using namespace std;
@@ -35,7 +40,9 @@ namespace EvaluationResultsReport
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
-        void addRow (vector<QVariant> row, unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
+        void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
+                     QVariant annotation = {},
+                     //unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
                      const string& reference = "", bool use = true, int utn=-1);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
@@ -54,7 +61,9 @@ namespace EvaluationResultsReport
         vector<string> headings_;
 
         vector<vector<QVariant>> rows_;
-        vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
+        vector<EvaluationRequirementResult::Base*> result_ptrs_;
+        vector<QVariant> annotations_;
+        //vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
         vector<string> references_;
         vector<bool> use_; // indicated whether that data was used
         vector<int> utns_; // only set for rows associated with a specific utn, else -1

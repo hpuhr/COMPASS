@@ -1,6 +1,10 @@
 #ifndef EVALUATIONREQUIREMENTRESULTBASE_H
 #define EVALUATIONREQUIREMENTRESULTBASE_H
 
+#include <QVariant>
+
+#include "json.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -37,6 +41,11 @@ public:
 
     bool use() const;
     void use(bool use);
+
+    virtual bool hasViewableData (
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
+    virtual std::unique_ptr<nlohmann::json::object_t> viewableData(
+            const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
 protected:
     std::string type_;
