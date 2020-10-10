@@ -97,8 +97,7 @@ void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
      target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
      target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-     target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var}, this, {utn_},
-                use_, utn_);
+     target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var}, this, {utn_});
 
     // add requirement to targets->utn->requirements->group->req
 

@@ -232,7 +232,7 @@ void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
 
     for (auto& result_it : results_vec_)
     {
-        if (result_it->type().rfind("Single", 0) == 0) // single result
+        if (result_it->isSingle()) // single result
         {
           // s starts with prefix
 
@@ -244,7 +244,7 @@ void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
         }
         else
         {
-            assert (result_it->type().rfind("Joined", 0) == 0); // joined result
+            assert (result_it->isJoined()); // joined result
 
             shared_ptr<EvaluationRequirementResult::Joined> result =
                     static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);

@@ -14,6 +14,9 @@ namespace EvaluationRequirementResult
                std::shared_ptr<EvaluationRequirement::Base> requirement,
                unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man);
 
+        virtual bool isSingle() const override { return true; }
+        virtual bool isJoined() const override { return false; }
+
         virtual void print() = 0;
         virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 

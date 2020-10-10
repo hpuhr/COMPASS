@@ -41,10 +41,10 @@ namespace EvaluationResultsReport
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
 
         void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
-                     QVariant annotation = {},
+                     QVariant annotation = {});
                      //unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
                      //const string& reference = "",
-                     bool use = true, int utn=-1);
+                     //bool use = true, int utn=-1);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -66,8 +66,8 @@ namespace EvaluationResultsReport
         vector<QVariant> annotations_;
         //vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
         //vector<string> references_;
-        vector<bool> use_; // indicated whether that data was used
-        vector<int> utns_; // only set for rows associated with a specific utn, else -1
+        //vector<bool> use_; // indicated whether that data was used
+        //vector<int> utns_; // only set for rows associated with a specific utn, else -1
 
 
         QSortFilterProxyModel* proxy_model_ {nullptr};

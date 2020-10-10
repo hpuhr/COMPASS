@@ -12,6 +12,9 @@ public:
     Joined(const std::string& type, const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man);
 
+    virtual bool isSingle() const override { return false; }
+    virtual bool isJoined() const override { return true; }
+
     virtual void join(std::shared_ptr<Base> other);
 
     virtual void print() = 0;

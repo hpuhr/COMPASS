@@ -39,6 +39,9 @@ public:
     std::string resultId() const;
     std::string reqGrpId() const;
 
+    virtual bool isSingle() const = 0;
+    virtual bool isJoined() const = 0;
+
     bool use() const;
     void use(bool use);
 

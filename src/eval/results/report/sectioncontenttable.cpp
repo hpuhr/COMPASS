@@ -1,5 +1,6 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/base.h"
+#include "eval/results/single.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 
@@ -25,10 +26,10 @@ namespace EvaluationResultsReport
     }
 
     void SectionContentTable::addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
-                                      QVariant annotation,
-                                     // std::unique_ptr<nlohmann::json::object_t> viewable_data,
-                                      //const string& reference,
-                                      bool use, int utn)
+                                      QVariant annotation)
+    // std::unique_ptr<nlohmann::json::object_t> viewable_data,
+    //const string& reference,
+    //bool use, int utn)
     {
         assert (row.size() == num_columns_);
         //assert (viewable_data_.size() == rows_.size());
@@ -37,21 +38,21 @@ namespace EvaluationResultsReport
         result_ptrs_.push_back(result_ptr);
         annotations_.push_back(annotation);
 
-//        if (viewable_data)
-//            viewable_data_.push_back(move(viewable_data));
-//        else
-//            viewable_data_.push_back(nullptr);
+        //        if (viewable_data)
+        //            viewable_data_.push_back(move(viewable_data));
+        //        else
+        //            viewable_data_.push_back(nullptr);
 
         //references_.push_back(reference);
-        use_.push_back(use);
-        utns_.push_back(utn);
+        //use_.push_back(use);
+        //utns_.push_back(utn);
 
         assert (annotations_.size() == rows_.size());
         assert (result_ptrs_.size() == rows_.size());
         //assert (viewable_data_.size() == rows_.size());
         //assert (references_.size() == rows_.size());
-        assert (use_.size() == rows_.size());
-        assert (utns_.size() == rows_.size());
+        //assert (use_.size() == rows_.size());
+        //assert (utns_.size() == rows_.size());
     }
 
     void SectionContentTable::addToLayout (QVBoxLayout* layout)
@@ -126,7 +127,9 @@ namespace EvaluationResultsReport
                     assert (index.row() >= 0);
                     assert (index.row() < rows_.size());
 
-                    if (!use_.at(index.row()))
+                    unsigned int row_index = index.row();
+
+                    if (result_ptrs_.at(row_index) && !result_ptrs_.at(row_index)->use())
                         return QBrush(Qt::lightGray);
                     else
                         return QVariant();
@@ -186,26 +189,24 @@ namespace EvaluationResultsReport
 
         unsigned int row_index = source_index.row();
 
-        if (result_ptrs_.at(row_index)) // try to generate viewable from result
+        if (result_ptrs_.at(row_index)
+                && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
         {
-            if (result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
-            {
-                loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
+            loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
 
-                std::unique_ptr<nlohmann::json::object_t> viewable =
-                        result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
-                assert (viewable);
+            std::unique_ptr<nlohmann::json::object_t> viewable =
+                    result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
+            assert (viewable);
 
-                eval_man_.setViewableDataConfig(*viewable.get());
-            }
+            eval_man_.setViewableDataConfig(*viewable.get());
         }
 
-//        if (viewable_data_.at(source_index.row()))
-//        {
-//            loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
+        //        if (viewable_data_.at(source_index.row()))
+        //        {
+        //            loginf << "SectionContentTable: currentRowChangedSlot: index has associated viewable";
 
-//            eval_man_.setViewableDataConfig(*viewable_data_.at(source_index.row()).get());
-//        }
+        //            eval_man_.setViewableDataConfig(*viewable_data_.at(source_index.row()).get());
+        //        }
     }
 
     void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
@@ -226,7 +227,7 @@ namespace EvaluationResultsReport
 
         unsigned int row_index = source_index.row();
 
-        if (result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
+        if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
         {
             string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
             assert (reference.size());
@@ -255,11 +256,17 @@ namespace EvaluationResultsReport
         assert (source_index.row() >= 0);
         assert (source_index.row() < rows_.size());
 
-        if (utns_.at(source_index.row()) != -1)
+        unsigned int row_index = source_index.row();
+
+        if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->isSingle())
         {
+            EvaluationRequirementResult::Single* single_result =
+                    static_cast<EvaluationRequirementResult::Single*>(result_ptrs_.at(row_index));
+            assert (single_result);
+
             QMenu menu;
 
-            unsigned int utn = utns_.at(source_index.row());
+            unsigned int utn = single_result->utn();
             loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
 
             assert (eval_man_.getData().hasTargetData(utn));
