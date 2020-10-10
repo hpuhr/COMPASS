@@ -77,11 +77,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     float no_ref_uis {0};
 
     vector<DetectionDetail> details;
+    EvaluationTargetPosition pos_current;
 
     for (const auto& tst_id : tst_data)
     {
         last_tod = tod;
         tod = tst_id.first;
+        pos_current = target_data.tstPosForTime(tod);
 
         if (first)
         {
@@ -92,8 +94,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                    << " first tod " << String::timeStringFromDouble(first_tod);
 
             details.push_back(
-            {tod, false, 0, false, target_data.hasRefDataForTime(tod, 4), missed_uis, max_gap_uis, no_ref_uis,
-             "First target report"});
+            {tod, false, 0, false, pos_current, target_data.hasRefDataForTime(tod, 4),
+             missed_uis, max_gap_uis, no_ref_uis, "First target report"});
 
             continue;
         }
@@ -105,13 +107,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                 no_ref_first_tod = tod; // save first occurance of no ref
 
                 details.push_back(
-                {tod, false, 0, false, false, missed_uis, max_gap_uis, no_ref_uis,
+                {tod, false, 0, false, pos_current, false, missed_uis, max_gap_uis, no_ref_uis,
                  "Occurance of no reference"});
 
             }
             else
                 details.push_back(
-                {tod, false, 0, false, false, missed_uis, max_gap_uis, no_ref_uis, "Still no reference"});
+                {tod, false, 0, false, pos_current, false, missed_uis, max_gap_uis, no_ref_uis,
+                 "Still no reference"});
 
             no_ref_exists = true;
 
@@ -128,7 +131,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             no_ref_uis = floor(tod - no_ref_first_tod);
 
             details.push_back(
-            {tod, false, 0, false, true, missed_uis, max_gap_uis, no_ref_uis,
+            {tod, false, 0, false, pos_current, true, missed_uis, max_gap_uis, no_ref_uis,
              "Reference exists again, was missing since "+String::timeStringFromDouble(no_ref_first_tod)});
 
             no_ref_exists = false;
@@ -158,11 +161,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     +"), last was "+String::timeStringFromDouble(last_tod);
 
             DetectionDetail detail {
-                tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
+                tod, true, d_tod, true, pos_current, true, missed_uis, max_gap_uis, no_ref_uis, comment};
 
-            detail.pos1_ = target_data.tstPosForTime(last_tod);
-            detail.pos2_ = target_data.tstPosForTime(tod);
-            detail.has_positions_ = true;
+            detail.pos_last = target_data.tstPosForTime(last_tod);
+            detail.has_last_position_ = true;
 
             details.push_back(detail);
 
@@ -184,17 +186,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                     +"), last was "+String::timeStringFromDouble(last_tod);
 
             DetectionDetail detail {
-                tod, true, d_tod, true, true, missed_uis, max_gap_uis, no_ref_uis, comment};
+                tod, true, d_tod, true, pos_current, true, missed_uis, max_gap_uis, no_ref_uis, comment};
 
-            detail.pos1_ = target_data.tstPosForTime(last_tod);
-            detail.pos2_ = target_data.tstPosForTime(tod);
-            detail.has_positions_ = true;
+            detail.pos_last = target_data.tstPosForTime(last_tod);
+            detail.has_last_position_ = true;
 
             details.push_back(detail);
         }
         else
             details.push_back(
-            {tod, true, d_tod, false, true, missed_uis, max_gap_uis, no_ref_uis, "OK (DToD <= "
+            {tod, true, d_tod, false, pos_current, true, missed_uis, max_gap_uis, no_ref_uis, "OK (DToD <= "
              +to_string(update_interval_s_)+")"});
     }
 
