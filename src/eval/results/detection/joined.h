@@ -18,6 +18,8 @@ namespace EvaluationRequirementResult
         virtual void print() override;
         virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
+        virtual void updatesToUseChanges() override;
+
     protected:
         float sum_uis_ {0};
         float missed_uis_ {0};
@@ -27,6 +29,7 @@ namespace EvaluationRequirementResult
         bool has_pd_ {false};
         float pd_{0};
 
+        void addToValues (std::shared_ptr<SingleDetection> single_result);
         void updatePD();
     };
 

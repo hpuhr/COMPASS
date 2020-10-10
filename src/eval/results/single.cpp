@@ -1,4 +1,5 @@
 #include "eval/results/single.h"
+#include "evaluationtargetdata.h"
 
 namespace EvaluationRequirementResult
 {
@@ -19,6 +20,11 @@ unsigned int Single::utn() const
 const EvaluationTargetData* Single::target() const
 {
     return target_;
+}
+
+void Single::updateUseFromTarget ()
+{
+    use_ = result_usable_ && target_->use();
 }
 
 }

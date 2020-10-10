@@ -225,7 +225,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                 if (col_name == "Use")
                 {
-                    return "";
+                    return QVariant();
                 }
                 else if (col_name == "UTN")
                 {
@@ -301,6 +301,17 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 //                else
                 return QVariant();
             }
+        case Qt::UserRole: // to find the checkboxes
+            {
+                if (index.column() == 0)
+                {
+                    assert (index.row() >= 0);
+                    assert (index.row() < target_data_.size());
+
+                    const EvaluationTargetData& target = target_data_.at(index.row());
+                    return target.utn_;
+                }
+            }
         default:
             {
                 return QVariant();
@@ -323,11 +334,15 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
 
         if ((Qt::CheckState)value.toInt() == Qt::Checked)
         {
+            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << true;
+
             target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(true); });
             return true;
         }
         else
         {
+            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << false;
+
             target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
             return true;
         }
@@ -405,6 +420,24 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
     return target;
 }
 
+
+void EvaluationData::setUseTargetData (unsigned int utn, bool value)
+{
+    loginf << "EvaluationData: setUseTargetData: utn " << utn << " value " << value;
+
+    assert (hasTargetData(utn));
+
+    QModelIndexList items = match(
+                        index(0, 0),
+                        Qt::UserRole,
+                        QVariant(utn),
+                        1, // look *
+                        Qt::MatchExactly); // look *
+
+    assert (items.size() == 1);
+
+    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+}
 
 EvaluationDataWidget* EvaluationData::widget()
 {

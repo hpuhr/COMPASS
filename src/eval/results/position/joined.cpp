@@ -35,10 +35,20 @@ void JoinedPositionMaxDistance::join(std::shared_ptr<Base> other)
             std::static_pointer_cast<SinglePositionMaxDistance>(other);
     assert (other_sub);
 
-    num_pos_ += other_sub->numPos();
-    num_no_ref_ += other_sub->numNoRef();
-    num_pos_ok_ += other_sub->numPosOk();
-    num_pos_nok_ += other_sub->numPosNOk();
+    addToValues(other_sub);
+}
+
+void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDistance> single_result)
+{
+    assert (single_result);
+
+    if (!single_result->use())
+        return;
+
+    num_pos_ += single_result->numPos();
+    num_no_ref_ += single_result->numNoRef();
+    num_pos_ok_ += single_result->numPosOk();
+    num_pos_nok_ += single_result->numPosNOk();
 
     updatePMaxPos();
 }
@@ -113,6 +123,41 @@ void JoinedPositionMaxDistance::addToReport (
                      pd_var, condition.c_str(), result.c_str()},
                     eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
                     "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+}
+
+void JoinedPositionMaxDistance::updatesToUseChanges()
+{
+    loginf << "JoinedPositionMaxDistance: updatesToUseChanges: prev num_pos " << num_pos_
+           << " num_no_ref " << num_no_ref_ << " num_pos_ok " << num_pos_ok_ << " num_pos_nok " << num_pos_nok_;
+
+    if (num_pos_)
+        loginf << "JoinedPositionMaxDistance: updatesToUseChanges: prev result " << result_id_
+               << " pd " << 100.0 * p_max_pos_;
+    else
+        loginf << "JoinedPositionMaxDistance: updatesToUseChanges: prev result " << result_id_ << " has no data";
+
+    num_pos_ = 0;
+    num_no_ref_ = 0;
+    num_pos_ok_ = 0;
+    num_pos_nok_ = 0;
+
+    for (auto result_it : results_)
+    {
+        std::shared_ptr<SinglePositionMaxDistance> result =
+                std::static_pointer_cast<SinglePositionMaxDistance>(result_it);
+        assert (result);
+
+        addToValues(result);
+    }
+
+    loginf << "JoinedPositionMaxDistance: updatesToUseChanges: updt num_pos " << num_pos_
+           << " num_no_ref " << num_no_ref_ << " num_pos_ok " << num_pos_ok_ << " num_pos_nok " << num_pos_nok_;
+
+    if (num_pos_)
+        loginf << "JoinedPositionMaxDistance: updatesToUseChanges: updt result " << result_id_
+               << " pd " << 100.0 * p_max_pos_;
+    else
+        loginf << "JoinedPositionMaxDistance: updatesToUseChanges: updt result " << result_id_ << " has no data";
 }
 
 }

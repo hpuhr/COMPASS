@@ -128,6 +128,9 @@ public:
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
     const { return results_gen_.results(); } ;
 
+    void setUseTargetData (unsigned int utn, bool value);
+    void updateResultsToUseChangeOf (unsigned int utn);
+
 protected:
     ATSDB& atsdb_;
 

@@ -19,6 +19,8 @@ public:
 
     std::vector<std::shared_ptr<Base>>& results() { return results_; }
 
+    virtual void updatesToUseChanges() = 0;
+
 protected:
     std::vector<std::shared_ptr<Base>> results_;
 };

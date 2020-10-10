@@ -22,9 +22,13 @@ namespace EvaluationRequirementResult
         unsigned int utn() const;
         const EvaluationTargetData* target() const;
 
+        void updateUseFromTarget ();
+
     protected:
         unsigned int utn_; // used to generate result
         const EvaluationTargetData* target_; // used to generate result
+
+        bool result_usable_ {true}; // whether valid data exists, changed in subclass
     };
 
 }

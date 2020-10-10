@@ -216,6 +216,8 @@ bool EvaluationTargetData::use() const
 
 void EvaluationTargetData::use(bool use)
 {
+    loginf << "EvaluationTargetData: use: utn " << utn_ << " use " << use;
+
     use_ = use;
 }
 

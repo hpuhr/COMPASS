@@ -39,6 +39,11 @@ namespace EvaluationResultsReport
         references_.push_back(reference);
         use_.push_back(use);
         utns_.push_back(utn);
+
+        assert (viewable_data_.size() == rows_.size());
+        assert (references_.size() == rows_.size());
+        assert (use_.size() == rows_.size());
+        assert (utns_.size() == rows_.size());
     }
 
     void SectionContentTable::addToLayout (QVBoxLayout* layout)
@@ -211,27 +216,60 @@ namespace EvaluationResultsReport
         assert (table_view_);
 
         QModelIndex index = table_view_->indexAt(p);
-        if (index.isValid())
+        assert (index.isValid());
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        loginf << "SectionContentTable: customContextMenuSlot: row " << index.row() << " src " << source_index.row();
+
+        assert (source_index.row() >= 0);
+        assert (source_index.row() < rows_.size());
+
+        if (utns_.at(source_index.row()) != -1)
         {
+            QMenu menu;
 
-            logdbg << "SectionContentTable: customContextMenuSlot: row " << index.row();
+            unsigned int utn = utns_.at(source_index.row());
+            loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
 
-            assert (index.row() >= 0);
-            assert (index.row() < rows_.size());
+            assert (eval_man_.getData().hasTargetData(utn));
 
-            if (utns_.at(index.row() != -1))
+            const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
+
+            if (target_data.use())
             {
-                QMenu menu;
-
                 QAction* action = new QAction("Remove", this);
                 connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
-                action->setData(utns_.at(index.row()));
+                action->setData(utn);
 
                 menu.addAction(action);
-
-                menu.exec(table_view_->viewport()->mapToGlobal(p));
             }
+            else
+            {
+                QAction* action = new QAction("Add", this);
+                connect (action, &QAction::triggered, this, &SectionContentTable::addUTNSlot);
+                action->setData(utn);
+
+                menu.addAction(action);
+            }
+
+            menu.exec(table_view_->viewport()->mapToGlobal(p));
         }
+        else
+            loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
+    }
+
+    void SectionContentTable::addUTNSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: addUTNSlot: utn " << utn;
+
+        eval_man_.setUseTargetData(utn, true);
     }
 
     void SectionContentTable::removeUTNSlot ()
@@ -242,6 +280,8 @@ namespace EvaluationResultsReport
         unsigned int utn = action->data().toUInt();
 
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
+
+        eval_man_.setUseTargetData(utn, false);
     }
 
 }

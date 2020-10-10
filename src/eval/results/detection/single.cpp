@@ -40,15 +40,17 @@ void SingleDetection::updatePD()
         pd_ = 1.0 - (missed_uis_/(sum_uis_ - max_gap_uis_ - no_ref_uis_));
         has_pd_ = true;
 
-        use_ = target_->use();
+        result_usable_ = true;
     }
     else
     {
         pd_ = 0;
         has_pd_ = false;
 
-        use_ = false;
+        result_usable_ = false;
     }
+
+    updateUseFromTarget();
 }
 
 void SingleDetection::print()

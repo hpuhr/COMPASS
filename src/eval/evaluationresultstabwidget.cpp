@@ -115,6 +115,17 @@ void EvaluationResultsTabWidget::selectId (const std::string& id)
     itemClickedSlot(index);
 }
 
+void EvaluationResultsTabWidget::reshowLastId ()
+{
+    if (id_history_.size() >= 1)
+    {
+        selectId(*id_history_.rbegin()); // select last one
+
+        id_history_.pop_back(); // remove re-added id. slightly hacky
+    }
+}
+
+
 void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 {
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
@@ -147,10 +158,8 @@ void EvaluationResultsTabWidget::stepBackSlot()
 
     assert (id_history_.size() > 1);
 
-    id_history_.pop_back();
-    selectId(*id_history_.rbegin());
-
-    id_history_.pop_back(); // remove re-added id. slightly hacky
+    id_history_.pop_back(); // remove last entry
+    reshowLastId(); // show last id
 
     updateBackButton();
 }

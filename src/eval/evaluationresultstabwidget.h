@@ -31,6 +31,7 @@ public:
     void showResultWidget(QWidget* widget); // can be nullptr
 
     void selectId (const std::string& id);
+    void reshowLastId ();
 
 protected:
     EvaluationManager& eval_man_;

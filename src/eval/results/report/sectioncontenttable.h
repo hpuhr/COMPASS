@@ -28,6 +28,7 @@ namespace EvaluationResultsReport
         void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
         void doubleClickedSlot(const QModelIndex& index);
         void customContextMenuSlot(const QPoint& p);
+        void addUTNSlot ();
         void removeUTNSlot ();
 
     public:

@@ -35,10 +35,20 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<SingleDetection>(other);
         assert (other_sub);
 
-        sum_uis_ += other_sub->sumUIs();
-        missed_uis_ += other_sub->missedUIs();
-        max_gap_uis_ += other_sub->maxGapUIs();
-        no_ref_uis_ += other_sub->noRefUIs();
+        addToValues(other_sub);
+    }
+
+    void JoinedDetection::addToValues (std::shared_ptr<SingleDetection> single_result)
+    {
+        assert (single_result);
+
+        if (!single_result->use())
+            return;
+
+        sum_uis_ += single_result->sumUIs();
+        missed_uis_ += single_result->missedUIs();
+        max_gap_uis_ += single_result->maxGapUIs();
+        no_ref_uis_ += single_result->noRefUIs();
 
         updatePD();
     }
@@ -111,6 +121,41 @@ namespace EvaluationRequirementResult
                          pd_var, condition.c_str(), result.c_str()},
                         eval_man_.getViewableForEvaluation(req_grp_id_, result_id_),
                         "Report:Results:"+getRequirementSectionID()); // "Report:Results:Overview"
+    }
+
+    void JoinedDetection::updatesToUseChanges()
+    {
+        loginf << "JoinedDetection: updatesToUseChanges: prev sum_uis " << sum_uis_
+               << " missed_uis " << missed_uis_ << " max_gap_uis " << max_gap_uis_ << " no_ref_uis " << no_ref_uis_;
+
+        if (has_pd_)
+            loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_
+                   << " pd " << 100.0 * pd_;
+        else
+            loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_ << " has no data";
+
+        sum_uis_ = 0;
+        missed_uis_ = 0;
+        max_gap_uis_ = 0;
+        no_ref_uis_ = 0;
+
+        for (auto result_it : results_)
+        {
+            std::shared_ptr<SingleDetection> result =
+                    std::static_pointer_cast<SingleDetection>(result_it);
+            assert (result);
+
+            addToValues(result);
+        }
+
+        loginf << "JoinedDetection: updatesToUseChanges: updt sum_uis " << sum_uis_
+               << " missed_uis " << missed_uis_ << " max_gap_uis " << max_gap_uis_ << " no_ref_uis " << no_ref_uis_;
+
+        if (has_pd_)
+            loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_
+                   << " pd " << 100.0 * pd_;
+        else
+            loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_ << " has no data";
     }
 
 }

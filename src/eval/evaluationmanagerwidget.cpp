@@ -71,10 +71,23 @@ void EvaluationManagerWidget::updateButtons()
     gen_report_button_->setEnabled(eval_man_.evaluated());
 }
 
+void EvaluationManagerWidget::expandResults()
+{
+    assert (results_tab_widget_);
+
+    results_tab_widget_->expand();
+}
+
 void EvaluationManagerWidget::showResultId (const std::string& id)
 {
     assert (results_tab_widget_);
     results_tab_widget_->selectId(id);
+}
+
+void EvaluationManagerWidget::reshowLastResultId()
+{
+    assert (results_tab_widget_);
+    results_tab_widget_->reshowLastId();
 }
 
 void EvaluationManagerWidget::addMainWidget ()

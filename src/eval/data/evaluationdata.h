@@ -65,6 +65,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
+    void setUseTargetData (unsigned int utn, bool value);
 
     EvaluationDataWidget* widget();
 

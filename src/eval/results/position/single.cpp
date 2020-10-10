@@ -42,15 +42,17 @@ void SinglePositionMaxDistance::updatePMaxPos()
         p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_);
         has_p_max_pos_ = true;
 
-        use_ = target_->use();
+        result_usable_ = true;
     }
     else
     {
         p_max_pos_ = 0;
         has_p_max_pos_ = false;
 
-        use_ = false;
+        result_usable_ = false;
     }
+
+    updateUseFromTarget();
 }
 
 void SinglePositionMaxDistance::print()

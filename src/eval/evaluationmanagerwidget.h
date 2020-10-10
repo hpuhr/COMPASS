@@ -29,8 +29,10 @@ public:
     virtual ~EvaluationManagerWidget();
 
     void updateButtons();
+    void expandResults();
 
     void showResultId (const std::string& id);
+    void reshowLastResultId();
 
 protected:
     EvaluationManager& eval_man_;

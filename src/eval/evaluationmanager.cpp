@@ -1017,6 +1017,28 @@ void EvaluationManager::showResultId (const std::string& id)
     widget_->showResultId(id);
 }
 
+void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
+{
+    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
+
+    data_.setUseTargetData(utn, value);
+    updateResultsToUseChangeOf(utn);
+}
+
+void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
+{
+    if (evaluated_)
+    {
+        results_gen_.updateToUseChangeOf(utn);
+
+        if (widget_)
+        {
+            widget_->expandResults();
+            widget_->reshowLastResultId();
+        }
+    }
+}
+
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 {
     nlohmann::json data;

@@ -32,33 +32,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 {
     loginf << "EvaluationResultsGenerator: evaluate";
 
-    boost::posix_time::ptime loading_start_time_;
-    boost::posix_time::ptime loading_stop_time_;
+    boost::posix_time::ptime loading_start_time;
+    boost::posix_time::ptime loading_stop_time;
 
-    loading_start_time_ = boost::posix_time::microsec_clock::local_time();
+    loading_start_time = boost::posix_time::microsec_clock::local_time();
 
     // clear everything
     results_model_.beginReset();
     results_model_.clear();
     results_.clear();
+    results_vec_.clear();
     results_model_.endReset();
-
-    // prepare for new data
-    results_model_.beginReset();
-
-    std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
-
-    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
-    overview_section.addText("Sample");
-
-    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
-
-    overview_text.addText("Why not visit Sweden this time of the year?");
-    overview_text.addText("It has lovely lakes");
-    overview_text.addText("Elk bytes\nline2");
-
-    //string req_grp_id;
-    //string result_id;
 
     vector<unsigned int> utns;
 
@@ -93,7 +77,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             for (auto& result_it : results)
             {
                 //result->print();
-                result_it->addToReport(root_item);
 
                 // add to results
                 // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
@@ -101,30 +84,28 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 //result_id = "UTN:"+to_string(target_data_it.utn_);
 
                 results_[result_it->reqGrpId()][result_it->resultId()] = result_it;
+                results_vec_.push_back(result_it);
 
                 if (!result_sum)
                     result_sum = result_it->createEmptyJoined("All");
 
-                if (result_it->use())
-                    result_sum->join(result_it);
+                result_sum->join(result_it);
             }
 
             if (result_sum)
             {
                 //result_sum->print();
-                result_sum->addToReport(root_item);
 
                 results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
+                results_vec_.push_back(result_sum); // has to be added after all singles
             }
         }
     }
 
-    results_model_.endReset();
-
-    loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
+    loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
-    boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
+    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
     loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(load_time, true);
@@ -132,9 +113,84 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     // 00:06:22.852 with no parallel
 
     emit eval_man_.resultsChangedSignal();
+
+    generateResultsReport();
+}
+
+void EvaluationResultsGenerator::generateResultsReport()
+{
+    loginf << "EvaluationResultsGenerator: generateResultsReport";
+
+    boost::posix_time::ptime loading_start_time;
+    boost::posix_time::ptime loading_stop_time;
+
+    loading_start_time = boost::posix_time::microsec_clock::local_time();
+
+    // prepare for new data
+    results_model_.beginReset();
+
+    std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
+
+    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
+    overview_section.addText("Sample");
+
+    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
+
+    overview_text.addText("Why not visit Sweden this time of the year?");
+    overview_text.addText("It has lovely lakes");
+    overview_text.addText("Elk bytes\nline2");
+
+    for (auto& result_it : results_vec_)
+        result_it->addToReport(root_item);
+
+    results_model_.endReset();
+
+    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+
+    double load_time;
+    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
+    load_time = diff.total_milliseconds() / 1000.0;
+
+    loginf << "EvaluationResultsGenerator: generateResultsReport done " << String::timeStringFromDouble(load_time, true);
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
 {
     return results_model_;
+}
+
+void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
+{
+    loginf << "EvaluationResultsGenerator: updateToUseChangeOf: utn " << utn;
+
+    // clear everything
+    results_model_.beginReset();
+    results_model_.clear();
+    results_model_.endReset();
+
+    for (auto& result_it : results_vec_)
+    {
+        if (result_it->type().rfind("Single", 0) == 0) // single result
+        {
+          // s starts with prefix
+
+            shared_ptr<EvaluationRequirementResult::Single> result =
+                    static_pointer_cast<EvaluationRequirementResult::Single>(result_it);
+
+            assert (result);
+            result->updateUseFromTarget();
+        }
+        else
+        {
+            assert (result_it->type().rfind("Joined", 0) == 0); // joined result
+
+            shared_ptr<EvaluationRequirementResult::Joined> result =
+                    static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
+
+            assert (result);
+            result->updatesToUseChanges();
+        }
+    }
+
+    generateResultsReport();
 }
