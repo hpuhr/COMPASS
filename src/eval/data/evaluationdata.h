@@ -46,6 +46,7 @@ public:
 
     bool hasTargetData (unsigned int utn);
     const EvaluationTargetData& targetData(unsigned int utn);
+    unsigned int size() { return target_data_.size(); }
 
     typedef TargetCache::index<target_tag>::type TargetCacheIterator;
     TargetCacheIterator::const_iterator begin() { return target_data_.get<target_tag>().begin(); }

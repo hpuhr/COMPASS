@@ -13,6 +13,10 @@
 #include "logger.h"
 #include "stringconv.h"
 
+#include <QProgressDialog>
+#include <QApplication>
+#include <QThread>
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <tbb/tbb.h>
@@ -37,6 +41,21 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
+    unsigned int num_requirements {0};
+
+    for (auto& req_group_it : standard)
+        num_requirements += req_group_it.second->size();
+
+    unsigned int num_req_evals = num_requirements * data.size() + num_requirements; // adapt for num sums
+
+    QProgressDialog postprocess_dialog_ ("", "", 0, num_req_evals);
+    postprocess_dialog_.setWindowTitle("Evaluating");
+    postprocess_dialog_.setCancelButton(nullptr);
+    postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+    postprocess_dialog_.show();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     // clear everything
     results_model_.beginReset();
     results_model_.clear();
@@ -50,6 +69,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         utns.push_back(target_data_it.utn_);
 
     unsigned int num_utns = utns.size();
+
+    unsigned int eval_cnt = 0;
 
     for (auto& req_group_it : standard)
     {
@@ -68,11 +89,45 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             vector<shared_ptr<Single>> results;
             results.resize(num_utns);
 
+            vector<bool> done_flags;
+            done_flags.resize(num_utns);
+
             // generate results
-            tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+
+            EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
+                        results, utns, data, req, done_flags);
+            tbb::task::enqueue(*t);
+
+            bool done = false;
+            unsigned int tmp_done_cnt;
+
+            postprocess_dialog_.setLabelText(("Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
+
+            loginf << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
+                   << " req '" << req_cfg_it->name() << "'";
+
+            while (!done)
             {
-                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req);
-            });
+                done = true;
+                tmp_done_cnt = 0;
+
+                for (auto done_it : done_flags)
+                {
+                    if (!done_it)
+                        done = false;
+                    else
+                        tmp_done_cnt++;
+                }
+
+                assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+                postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
+
+                if (!done)
+                {
+                    QCoreApplication::processEvents();
+                    QThread::msleep(100);
+                }
+            }
 
             for (auto& result_it : results)
             {
@@ -99,6 +154,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                 results_vec_.push_back(result_sum); // has to be added after all singles
             }
+
+            assert (eval_cnt <= num_req_evals);
+            eval_cnt = results_vec_.size();
         }
     }
 
@@ -115,6 +173,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     emit eval_man_.resultsChangedSignal();
 
     generateResultsReport();
+
+    postprocess_dialog_.close();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void EvaluationResultsGenerator::generateResultsReport()

@@ -2,15 +2,58 @@
 #define EVALUATIONRESULTSGENERATOR_H
 
 #include "eval/results/report/treemodel.h"
+#include "eval/requirement/base.h"
+#include "evaluationdata.h"
+
+#include <tbb/tbb.h>
 
 class EvaluationManager;
 class EvaluationStandard;
-class EvaluationData;
+//class EvaluationData;
+
+//namespace EvaluationRequirement {
+//    class Base;
+//}
 
 namespace EvaluationRequirementResult
 {
     class Base;
+    class Single;
 }
+
+class EvaluateTask : public tbb::task {
+
+public:
+    EvaluateTask(std::vector<std::shared_ptr<EvaluationRequirementResult::Single>>& results,
+                 std::vector<unsigned int>& utns,
+                 EvaluationData& data,
+                 std::shared_ptr<EvaluationRequirement::Base> req,
+                 std::vector<bool>& done_flags)
+        : results_(results), utns_(utns), data_(data), req_(req), done_flags_(done_flags)
+    {
+    }
+
+    /*override*/ tbb::task* execute() {
+        // Do the job
+
+        unsigned int num_utns = utns_.size();
+
+        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+        {
+            results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_);
+            done_flags_[utn_cnt] = true;
+        });
+
+        return NULL; // or a pointer to a new task to be executed immediately
+    }
+
+protected:
+    std::vector<std::shared_ptr<EvaluationRequirementResult::Single>>& results_;
+    std::vector<unsigned int>& utns_;
+    EvaluationData& data_;
+    std::shared_ptr<EvaluationRequirement::Base> req_;
+    std::vector<bool>& done_flags_;
+};
 
 class EvaluationResultsGenerator
 {
