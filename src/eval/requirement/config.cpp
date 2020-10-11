@@ -93,6 +93,8 @@ void Config::changedNameSlot(const QString& value)
     string value_str = value.toStdString();
 
     loginf << "EvaluationRequirementConfig: changedNameSlot: name '" << value_str << "'";
+
+    name_ = value_str;
 }
 
 void Config::changedShortNameSlot(const QString& value)
@@ -100,6 +102,8 @@ void Config::changedShortNameSlot(const QString& value)
     string value_str = value.toStdString();
 
     loginf << "EvaluationRequirementConfig: changedShortNameSlot: name '" << value_str << "'";
+
+    short_name_ = value_str;
 }
 
 void Config::name(const std::string& name)

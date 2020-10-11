@@ -107,6 +107,8 @@ public:
     EvaluationStandardIterator standardsEnd() { return standards_.end(); }
     unsigned int standardsSize () { return standards_.size(); };
 
+    std::vector<std::string> currentRequirementNames();
+
     EvaluationResultsGenerator& resultsGenerator();
 
     void setViewableDataConfig (const nlohmann::json::object_t& data);

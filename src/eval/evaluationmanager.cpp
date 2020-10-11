@@ -3,6 +3,8 @@
 #include "evaluationdatawidget.h"
 #include "evaluationstandard.h"
 #include "evaluationstandardwidget.h"
+#include "eval/requirement/group.h"
+#include "eval/requirement/config.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -789,6 +791,25 @@ void EvaluationManager::deleteCurrentStandard()
     emit standardsChangedSignal();
 
     currentStandardName("");
+}
+
+std::vector<std::string> EvaluationManager::currentRequirementNames()
+{
+    std::vector<std::string> names;
+
+    if (hasCurrentStandard())
+    {
+        for (auto& req_grp_it : currentStandard())
+        {
+            for (auto& req_it : *req_grp_it.second)
+            {
+                if (find(names.begin(), names.end(), req_it->name()) == names.end())
+                    names.push_back(req_it->name());
+            }
+        }
+    }
+
+    return names;
 }
 
 EvaluationResultsGenerator& EvaluationManager::resultsGenerator()
