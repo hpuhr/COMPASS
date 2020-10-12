@@ -22,21 +22,22 @@ EvaluationTargetData::EvaluationTargetData(unsigned int utn)
 
 bool EvaluationTargetData::hasRefBuffer () const
 {
-    return ref_buffer != nullptr;
+    return ref_buffer_ != nullptr;
 }
 
 void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
 {
-    assert (!ref_buffer);
-    ref_buffer = buffer;
+    assert (!ref_buffer_);
+    ref_buffer_ = buffer;
 
     DBObjectManager& object_manager = ATSDB::instance().objectManager();
 
-    string dbo_name = ref_buffer->dboName();
+    string dbo_name = ref_buffer_->dboName();
 
-    ref_latitude_name = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
-    ref_longitude_name = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
-    ref_altitude_name = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    ref_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    ref_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
@@ -47,21 +48,22 @@ void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
 
 bool EvaluationTargetData::hasTstBuffer () const
 {
-    return tst_buffer != nullptr;
+    return tst_buffer_ != nullptr;
 }
 
 void EvaluationTargetData::setTstBuffer (std::shared_ptr<Buffer> buffer)
 {
-    assert (!tst_buffer);
-    tst_buffer = buffer;
+    assert (!tst_buffer_);
+    tst_buffer_ = buffer;
 
     DBObjectManager& object_manager = ATSDB::instance().objectManager();
 
-    string dbo_name = tst_buffer->dboName();
+    string dbo_name = tst_buffer_->dboName();
 
-    tst_latitude_name = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
-    tst_longitude_name = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
-    tst_altitude_name = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    tst_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    tst_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    tst_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    tst_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addTstIndex (float tod, unsigned int index)
@@ -273,10 +275,41 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
     return true;
 }
 
-std::pair<float, float> EvaluationTargetData::refTimesFor (float tod)  const
+std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_max)  const
 {
-    assert (false);
-    // TODO
+    if (ref_data_.count(tod))
+        return {tod, -1}; // contains exact value
+
+    //    Return iterator to lower bound
+    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    before k (i.e., either it is equivalent or goes after).
+
+    auto lb_it = ref_data_.lower_bound(tod);
+
+    if (lb_it == ref_data_.end())
+        return {-1, -1};
+
+    assert (lb_it->first >= tod);
+
+    if (lb_it->first - tod > d_max)
+        return {-1, -1}; // too much time difference
+
+    // save value
+    float upper = lb_it->first;
+
+    lb_it--;
+
+    if (lb_it == ref_data_.end())
+        return {-1, upper};
+
+    assert (tod >= lb_it->first);
+
+    if (tod - lb_it->first > d_max)
+        return {-1, upper}; // too much time difference
+
+    float lower = lb_it->first;
+
+    return {lower, upper};
 }
 
 std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
@@ -408,9 +441,9 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
 
     EvaluationTargetPosition pos;
 
-    NullableVector<double>& latitude_vec = ref_buffer->get<double>(ref_latitude_name);
-    NullableVector<double>& longitude_vec = ref_buffer->get<double>(ref_longitude_name);
-    NullableVector<int>& altitude_vec = ref_buffer->get<int>(ref_altitude_name);
+    NullableVector<double>& latitude_vec = ref_buffer_->get<double>(ref_latitude_name_);
+    NullableVector<double>& longitude_vec = ref_buffer_->get<double>(ref_longitude_name_);
+    NullableVector<int>& altitude_vec = ref_buffer_->get<int>(ref_altitude_name_);
 
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
@@ -424,6 +457,37 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
     return pos;
 }
 
+bool EvaluationTargetData::hasRefCallsignForTime (float tod) const
+{
+    if (!ref_data_.count(tod))
+        return false;
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<string>& callsign_vec = ref_buffer_->get<string>(ref_callsign_name_);
+
+    return !callsign_vec.isNull(index);
+}
+
+std::string EvaluationTargetData::refCallsignForTime (float tod) const
+{
+    assert (hasRefPosForTime(tod));
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<string>& callsign_vec = ref_buffer_->get<string>(ref_callsign_name_);
+    assert (!callsign_vec.isNull(index));
+
+    return callsign_vec.get(index);
+}
 
 bool EvaluationTargetData::hasTstPosForTime (float tod) const
 {
@@ -442,9 +506,9 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
 
     EvaluationTargetPosition pos;
 
-    NullableVector<double>& latitude_vec = tst_buffer->get<double>(tst_latitude_name);
-    NullableVector<double>& longitude_vec = tst_buffer->get<double>(tst_longitude_name);
-    NullableVector<int>& altitude_vec = tst_buffer->get<int>(tst_altitude_name);
+    NullableVector<double>& latitude_vec = tst_buffer_->get<double>(tst_latitude_name_);
+    NullableVector<double>& longitude_vec = tst_buffer_->get<double>(tst_longitude_name_);
+    NullableVector<int>& altitude_vec = tst_buffer_->get<int>(tst_altitude_name_);
 
     assert (!latitude_vec.isNull(index));
     assert (!longitude_vec.isNull(index));
@@ -458,14 +522,45 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
     return pos;
 }
 
+bool EvaluationTargetData::hasTstCallsignForTime (float tod) const
+{
+    if (!tst_data_.count(tod))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<string>& callsign_vec = tst_buffer_->get<string>(tst_callsign_name_);
+    return !callsign_vec.isNull(index);
+}
+
+std::string EvaluationTargetData::tstCallsignForTime (float tod) const
+{
+    assert (hasTstPosForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<string>& callsign_vec = tst_buffer_->get<string>(tst_callsign_name_);
+    assert (!callsign_vec.isNull(index));
+
+    return callsign_vec.get(index);
+}
+
 std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
 {
-    return ref_buffer;
+    return ref_buffer_;
 }
 
 std::shared_ptr<Buffer> EvaluationTargetData::tstBuffer() const
 {
-    return tst_buffer;
+    return tst_buffer_;
 }
 
 std::vector<string> EvaluationTargetData::callsigns() const
@@ -512,7 +607,7 @@ void EvaluationTargetData::updateCallsigns()
 
     if (ref_data_.size())
     {
-        NullableVector<string>& value_vec = ref_buffer->get<string>("callsign");
+        NullableVector<string>& value_vec = ref_buffer_->get<string>("callsign");
         map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
 
         for (auto& val_it : distinct_values)
@@ -524,7 +619,7 @@ void EvaluationTargetData::updateCallsigns()
 
     if (tst_data_.size())
     {
-        NullableVector<string>& value_vec = tst_buffer->get<string>("callsign");
+        NullableVector<string>& value_vec = tst_buffer_->get<string>("callsign");
         map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
 
         for (auto& val_it : distinct_values)
@@ -541,7 +636,7 @@ void EvaluationTargetData::updateTargetAddresses()
 
     if (ref_data_.size())
     {
-        NullableVector<int>& value_vec = ref_buffer->get<int>("target_addr");
+        NullableVector<int>& value_vec = ref_buffer_->get<int>("target_addr");
         map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(ref_indexes_);
 
         for (auto& val_it : distinct_values)
@@ -553,7 +648,7 @@ void EvaluationTargetData::updateTargetAddresses()
 
     if (tst_data_.size())
     {
-        NullableVector<int>& value_vec = tst_buffer->get<int>("target_addr");
+        NullableVector<int>& value_vec = tst_buffer_->get<int>("target_addr");
         map<int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(tst_indexes_);
 
         for (auto& val_it : distinct_values)
@@ -572,7 +667,7 @@ void EvaluationTargetData::updateModeACodes()
 
     if (ref_data_.size())
     {
-        NullableVector<int>& mode_a_codes = ref_buffer->get<int>("mode3a_code");
+        NullableVector<int>& mode_a_codes = ref_buffer_->get<int>("mode3a_code");
         map<int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(ref_indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
 
@@ -589,7 +684,7 @@ void EvaluationTargetData::updateModeACodes()
 
     if (tst_data_.size())
     {
-        NullableVector<int>& mode_a_codes = tst_buffer->get<int>("mode3a_code");
+        NullableVector<int>& mode_a_codes = tst_buffer_->get<int>("mode3a_code");
         map<int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(tst_rec_nums_).size();
 
@@ -619,10 +714,10 @@ void EvaluationTargetData::updateModeCMinMax()
 
     if (ref_data_.size())
     {
-        string modec_name = object_man.metaVariable("modec_code_ft").getFor(ref_buffer->dboName()).name();
+        string modec_name = object_man.metaVariable("modec_code_ft").getFor(ref_buffer_->dboName()).name();
 
-        assert (ref_buffer->has<int>(modec_name));
-        NullableVector<int>& modec_codes_ft = ref_buffer->get<int>(modec_name);
+        assert (ref_buffer_->has<int>(modec_name));
+        NullableVector<int>& modec_codes_ft = ref_buffer_->get<int>(modec_name);
 
         for (auto ind_it : ref_indexes_)
         {
@@ -647,10 +742,10 @@ void EvaluationTargetData::updateModeCMinMax()
 
     if (tst_data_.size())
     {
-        string modec_name = object_man.metaVariable("modec_code_ft").getFor(tst_buffer->dboName()).name();
+        string modec_name = object_man.metaVariable("modec_code_ft").getFor(tst_buffer_->dboName()).name();
 
-        assert (tst_buffer->has<int>(modec_name));
-        NullableVector<int>& modec_codes_ft = tst_buffer->get<int>(modec_name);
+        assert (tst_buffer_->has<int>(modec_name));
+        NullableVector<int>& modec_codes_ft = tst_buffer_->get<int>(modec_name);
 
         for (auto ind_it : tst_indexes_)
         {

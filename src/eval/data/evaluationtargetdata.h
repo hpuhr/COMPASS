@@ -62,16 +62,26 @@ public:
     const std::multimap<float, unsigned int>& refData() const;
     const std::multimap<float, unsigned int>& tstData() const;
 
+    // ref
+
     bool hasRefDataForTime (float tod, float d_max) const;
-    std::pair<float, float> refTimesFor (float tod) const;
+    std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
     // bool ok
 
     bool hasRefPosForTime (float tod) const;
     EvaluationTargetPosition refPosForTime (float tod) const;
 
+    bool hasRefCallsignForTime (float tod) const;
+    std::string refCallsignForTime (float tod) const;
+
+    // test
+
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
+
+    bool hasTstCallsignForTime (float tod) const;
+    std::string tstCallsignForTime (float tod) const;
 
     // nullptr if none
 
@@ -84,16 +94,18 @@ protected:
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     std::vector<unsigned int> tst_indexes_;
 
-    std::shared_ptr<Buffer> ref_buffer;
-    std::string ref_latitude_name;
-    std::string ref_longitude_name;
-    std::string ref_altitude_name;
+    std::shared_ptr<Buffer> ref_buffer_;
+    std::string ref_latitude_name_;
+    std::string ref_longitude_name_;
+    std::string ref_altitude_name_;
+    std::string ref_callsign_name_;
 
 
-    std::shared_ptr<Buffer> tst_buffer;
-    std::string tst_latitude_name;
-    std::string tst_longitude_name;
-    std::string tst_altitude_name;
+    std::shared_ptr<Buffer> tst_buffer_;
+    std::string tst_latitude_name_;
+    std::string tst_longitude_name_;
+    std::string tst_altitude_name_;
+    std::string tst_callsign_name_;
 
     std::vector<std::string> callsigns_;
     std::vector<unsigned int> target_addresses_;
