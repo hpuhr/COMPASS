@@ -27,7 +27,7 @@ namespace EvaluationRequirement
     std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
     {
-        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " minimum_probability " << minimum_probability_;
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -42,13 +42,20 @@ namespace EvaluationRequirement
         int num_correct_id {0};
         int num_false_id {0};
 
-        //vector<IdentificationDetail> details;
+        vector<IdentificationDetail> details;
         EvaluationTargetPosition pos_current;
         string callsign;
         bool callsign_ok;
 
+        bool ref_exists;
+        string comment;
+        bool lower_nok, upper_nok;
+
         for (const auto& tst_id : tst_data)
         {
+            ref_exists = false;
+            comment = "";
+
             tod = tst_id.first;
             pos_current = target_data.tstPosForTime(tod);
 
@@ -63,43 +70,76 @@ namespace EvaluationRequirement
                     if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
                             || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
                     {
+                        ref_exists = true;
                         callsign_ok = false;
 
                         if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
+                        {
                             callsign_ok = target_data.refCallsignForTime(ref_lower) == callsign;
+                            lower_nok = !callsign_ok;
+                        }
 
                         if (!callsign_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
+                        {
                             callsign_ok = target_data.refCallsignForTime(ref_upper) == callsign;
+                            upper_nok = !callsign_ok;
+                        }
 
                         if (callsign_ok)
+                        {
                             ++num_correct_id;
+                            comment = "OK";
+                        }
                         else
+                        {
                             ++num_false_id;
+                            comment = "Not OK";
+
+                            if (lower_nok)
+                                comment += " Reference at "+String::timeStringFromDouble(ref_lower)
+                                        + " has different identification '"+target_data.refCallsignForTime(ref_lower)
+                                        + "'";
+
+                            if (upper_nok)
+                                comment += " Reference at "+String::timeStringFromDouble(ref_upper)
+                                        + " has different identification '"+target_data.refCallsignForTime(ref_upper)
+                                        + "'";
+                        }
                     }
                     else
+                    {
+                        comment = "No reference data";
                         ++num_no_ref;
+                    }
                 }
                 else
+                {
+                    comment = "No reference data";
                     ++num_no_ref;
+                }
             }
             else
+            {
+                comment = "No identification given";
                 ++num_unknown_id;
+            }
 
             ++num_updates;
+
+            details.push_back({tod, pos_current, ref_exists, num_updates, num_no_ref, num_unknown_id,
+                               num_correct_id, num_false_id, comment});
         }
 
         assert (num_updates == num_no_ref+num_unknown_id+num_correct_id+num_false_id);
 
-        //assert (details.size() == tst_data.size());
-
-        //float sum_uis = floor(tod - first_tod);
+        assert (details.size() == tst_data.size());
 
         loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref " << num_no_ref
                << " num_unknown_id " << num_unknown_id << " num_correct_id " << num_correct_id
                << " num_false_id " << num_false_id;
 
-        if (num_updates)
+        if (num_correct_id+num_false_id)
         {
             float pid = (float)num_correct_id/(float)(num_correct_id+num_false_id);
 
@@ -112,6 +152,6 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleIdentification>(
                     "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref, num_unknown_id, num_correct_id, num_false_id); // , details
+                    eval_man_, num_updates, num_no_ref, num_unknown_id, num_correct_id, num_false_id, details);
     }
 }
