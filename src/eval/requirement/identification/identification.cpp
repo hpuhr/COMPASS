@@ -1,5 +1,5 @@
 #include "eval/requirement/identification/identification.h"
-#include "eval/results/detection/single.h"
+#include "eval/results/identification/single.h"
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -36,11 +36,11 @@ namespace EvaluationRequirement
 
         float ref_lower{0}, ref_upper{0};
 
-        float num_updates {0};
-        float num_no_ref {0};
-        float num_unknown_id {0};
-        float num_correct_id {0};
-        float num_false_id {0};
+        int num_updates {0};
+        int num_no_ref {0};
+        int num_unknown_id {0};
+        int num_correct_id {0};
+        int num_false_id {0};
 
         //vector<IdentificationDetail> details;
         EvaluationTargetPosition pos_current;
@@ -96,21 +96,22 @@ namespace EvaluationRequirement
 
         loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref " << num_no_ref
-               << " num_unknown_id " << num_unknown_id << " num_false_id " << num_false_id;
+               << " num_unknown_id " << num_unknown_id << " num_correct_id " << num_correct_id
+               << " num_false_id " << num_false_id;
 
         if (num_updates)
         {
-            float pd = num_false_id/(num_correct_id+num_false_id);
+            float pid = (float)num_correct_id/(float)(num_correct_id+num_false_id);
 
             loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
-                   << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
+                   << " pid " << String::percentToString(100.0 * pid) << " passed " << (pid >= minimum_probability_);
         }
         else
             loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
-                   << " no data for pd";
+                   << " no data for pid";
 
-//        return make_shared<EvaluationRequirementResult::SingleIdentification>(
-//                    "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
-//                    eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
+        return make_shared<EvaluationRequirementResult::SingleIdentification>(
+                    "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
+                    eval_man_, num_updates, num_no_ref, num_unknown_id, num_correct_id, num_false_id); // , details
     }
 }

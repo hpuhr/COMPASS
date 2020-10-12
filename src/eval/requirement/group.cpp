@@ -2,6 +2,7 @@
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/positionmaxdistanceconfig.h"
+#include "eval/requirement/identification/identificationconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -46,6 +47,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionMaxDistanceConfig* config =
                 new EvaluationRequirement::PositionMaxDistanceConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementIdentificationConfig") == 0)
+    {
+        EvaluationRequirement::IdentificationConfig* config =
+                new EvaluationRequirement::IdentificationConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -171,6 +182,12 @@ void Group::showMenu ()
             QAction* add_det_action = req_menu->addAction("Detection");
             add_det_action->setData("EvaluationRequirementDetectionConfig");
             connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // identification
+            QAction* add_pos_action = req_menu->addAction("Identification");
+            add_pos_action->setData("EvaluationRequirementIdentificationConfig");
+            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         { // position
