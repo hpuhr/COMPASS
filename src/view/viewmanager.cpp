@@ -240,10 +240,6 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
     if (current_viewable_)
         unsetCurrentViewPoint();
 
-//    assert (view_points_widget_);
-//    assert (view_points_widget_->tableModel()->hasViewPoint(id));
-
-    //current_view_point_set_ = true;
     current_viewable_ = viewable;
 
     view_point_data_selected_ = false;
@@ -261,12 +257,8 @@ void ViewManager::unsetCurrentViewPoint ()
 {
     if (current_viewable_)
     {
-        //assert (view_points_widget_);
-        //assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
-
         emit unshowViewPointSignal(current_viewable_);
 
-        //current_view_point_set_ = false;
         current_viewable_ = nullptr;
 
         view_point_data_selected_ = false;
@@ -278,16 +270,22 @@ void ViewManager::doViewPointAfterLoad ()
     loginf << "ViewManager: doViewPointAfterLoad";
 
     if (!current_viewable_)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: no viewable";
         return; // nothing to do
+    }
 
     if (view_point_data_selected_)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: data already selected";
         return; // already done, this is a re-load
+    }
 
     assert (view_points_widget_);
-    //assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
-    //const ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
     const json& data = current_viewable_->data();
+
+    logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
     bool contains_time = data.contains("time");
     float time;
@@ -295,11 +293,16 @@ void ViewManager::doViewPointAfterLoad ()
     float time_window, time_min, time_max;
 
     if (!contains_time)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: no time given";
         return; // nothing to do
+    }
     else
     {
         assert (data.at("time").is_number());
         time = data.at("time");
+
+        loginf << "ViewManager: doViewPointAfterLoad: time " << time;
     }
 
     if (contains_time_window)
@@ -356,10 +359,10 @@ void ViewManager::doViewPointAfterLoad ()
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
-            assert(buffer->has<double>(latitude_var.name()));
-            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
-            assert(buffer->has<double>(longitude_var.name()));
-            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
+//            assert(buffer->has<double>(latitude_var.name()));
+//            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
+//            assert(buffer->has<double>(longitude_var.name()));
+//            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
 
             unsigned int buffer_size = buffer->size();
 
@@ -383,13 +386,12 @@ void ViewManager::doViewPointAfterLoad ()
                         selection_changed = true;
 
                         logdbg << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
-
                     }
-                    else if (tod == time)// only time set
-                    {
-                        selected_vec.set(cnt, true);
-                        selection_changed = true;
-                    }
+                }
+                else if (contains_time && tod == time)
+                {
+                    selected_vec.set(cnt, true);
+                    selection_changed = true;
                 }
             }
         }

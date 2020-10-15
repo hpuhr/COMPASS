@@ -103,7 +103,6 @@ protected:
 
     std::unique_ptr<ViewPointsReportGenerator> view_points_report_gen_;
 
-    //bool current_view_point_set_ {false};
     const ViewableDataConfig* current_viewable_ {nullptr};
     bool view_point_data_selected_ {false};
 

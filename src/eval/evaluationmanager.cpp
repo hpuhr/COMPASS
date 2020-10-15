@@ -259,31 +259,6 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
 
     if (widget_)
         widget_->updateButtons();
-
-//    if (current_viewable_data_set_)
-//    {
-//        const nlohmann::json& data = viewable_data_cfg_->data();
-
-//        bool contains_time = data.contains("time");
-//        bool contains_time_window = data.contains("time_window");
-
-//        if (!contains_time || !contains_time_window)
-//            return; // nothing to do
-
-//        float time;
-//        float time_window, time_min, time_max;
-
-//        assert (data.at("time").is_number());
-//        time = data.at("time");
-
-//        assert (data.at("time_window").is_number());
-//        time_window = data.at("time_window");
-//        time_min = time-time_window/2.0;
-//        time_max = time+time_window/2.0;
-
-//        ATSDB::instance().viewManager().selectTimeWindow(time_min, time_max);
-//    } TODO wrong location
-
 }
 
 void EvaluationManager::evaluate ()
@@ -335,8 +310,6 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         assert(standards_.find(standard->name()) == standards_.end());
 
         standards_[standard->name()].reset(standard);
-
-        //standards_.insert(std::pair<std::string, EvaluationStandard*>(standard->name(), standard));
     }
     else
         throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
@@ -989,17 +962,13 @@ void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& d
 {
     if (viewable_data_cfg_)
     {
-        emit ATSDB::instance().viewManager().unshowViewPointSignal(viewable_data_cfg_.get());
+        ATSDB::instance().viewManager().unsetCurrentViewPoint();
         viewable_data_cfg_ = nullptr;
     }
 
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
-    emit ATSDB::instance().viewManager().showViewPointSignal(viewable_data_cfg_.get());
-
-    ATSDB::instance().objectManager().loadSlot();
-
-    // TODO data selection like in ATSDB::instance().viewManager().doViewPointAfterLoad();?
+    ATSDB::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
 void EvaluationManager::showUTN (unsigned int utn)

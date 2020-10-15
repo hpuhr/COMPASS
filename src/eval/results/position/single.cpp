@@ -202,6 +202,7 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_longitude"] = detail.tst_pos_.longitude_;
             (*viewable_ptr)["position_window_latitude"] = 0.02;
             (*viewable_ptr)["position_window_longitude"] = 0.02;
+            (*viewable_ptr)["time"] = detail.tod_;
 
             if (!detail.pos_ok_)
                 (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};

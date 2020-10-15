@@ -197,7 +197,6 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_window_latitude"] = 0.02;
             (*viewable_ptr)["position_window_longitude"] = 0.02;
             (*viewable_ptr)["time"] = detail.tod_;
-            (*viewable_ptr)["time_window"] = 0.0;
 
 //            if (!detail.pos_ok_)
 //                (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
