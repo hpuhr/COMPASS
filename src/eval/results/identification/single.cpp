@@ -166,8 +166,8 @@ namespace EvaluationRequirementResult
     {
         if (table.name() == "target_table" && annotation.toUInt() == utn_)
             return true;
-//        else if (table.name() == "details_table" && annotation.isValid() && annotation.toUInt() < details_.size())
-//            return true;
+        else if (table.name() == "details_table" && annotation.isValid() && annotation.toUInt() < details_.size())
+            return true;
         else
             return false;
     }
@@ -180,28 +180,30 @@ namespace EvaluationRequirementResult
 
         if (table.name() == "target_table")
             return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-//        else if (table.name() == "details_table" && annotation.isValid())
-//        {
-//            unsigned int detail_cnt = annotation.toUInt();
+        else if (table.name() == "details_table" && annotation.isValid())
+        {
+            unsigned int detail_cnt = annotation.toUInt();
 
-//            loginf << "SingleIdentification: viewableData: detail_cnt " << detail_cnt;
+            loginf << "SingleIdentification: viewableData: detail_cnt " << detail_cnt;
 
-//            std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-//                    = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-//            assert (viewable_ptr);
+            std::unique_ptr<nlohmann::json::object_t> viewable_ptr
+                    = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+            assert (viewable_ptr);
 
-//            const EvaluationRequirement::IdentificationDetail& detail = details_.at(detail_cnt);
+            const EvaluationRequirement::IdentificationDetail& detail = details_.at(detail_cnt);
 
-//            (*viewable_ptr)["position_latitude"] = detail.tst_pos_.latitude_;
-//            (*viewable_ptr)["position_longitude"] = detail.tst_pos_.longitude_;
-//            (*viewable_ptr)["position_window_latitude"] = 0.02;
-//            (*viewable_ptr)["position_window_longitude"] = 0.02;
+            (*viewable_ptr)["position_latitude"] = detail.pos_tst_.latitude_;
+            (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
+            (*viewable_ptr)["position_window_latitude"] = 0.02;
+            (*viewable_ptr)["position_window_longitude"] = 0.02;
+            (*viewable_ptr)["time"] = detail.tod_;
+            (*viewable_ptr)["time_window"] = 0.0;
 
 //            if (!detail.pos_ok_)
 //                (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
 
-//            return viewable_ptr;
-//        }
+            return viewable_ptr;
+        }
         else
             return nullptr;
     }

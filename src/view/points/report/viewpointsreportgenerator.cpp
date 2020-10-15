@@ -168,15 +168,16 @@ void ViewPointsReportGenerator::run ()
             break;
         }
 
+        assert (table_model->hasViewPoint(vp_id));
+        const ViewPoint& view_point = table_model->viewPoint(vp_id);
+
         loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
-        view_manager_.setCurrentViewPoint(vp_id);
+        view_manager_.setCurrentViewPoint(&view_point);
 
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
 
         // do stuff
-        assert (table_model->hasViewPoint(vp_id));
-        const ViewPoint& view_point = table_model->viewPoint(vp_id);
 
         view_point.accept(visitor);
         visitor.imagePrefix("vp_"+to_string(vp_id));

@@ -81,10 +81,11 @@ class ViewManager : public QObject, public Configurable
 
     ViewPointsReportGenerator& viewPointsGenerator();
 
-    void setCurrentViewPoint (unsigned int id);
+    void setCurrentViewPoint (const ViewableDataConfig* viewable);
     void unsetCurrentViewPoint ();
 
     void doViewPointAfterLoad ();
+    void selectTimeWindow(float time_min, float time_max);
 
 protected:
     ATSDB& atsdb_;
@@ -102,8 +103,8 @@ protected:
 
     std::unique_ptr<ViewPointsReportGenerator> view_points_report_gen_;
 
-    bool current_view_point_set_ {false};
-    unsigned int current_view_point_ {0};
+    //bool current_view_point_set_ {false};
+    const ViewableDataConfig* current_viewable_ {nullptr};
     bool view_point_data_selected_ {false};
 
     unsigned int container_count_{0};

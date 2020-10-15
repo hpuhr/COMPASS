@@ -23,7 +23,6 @@
 #include "viewwidget.h"
 #include "viewpoint.h"
 #include "atsdb.h"
-#include "evaluationmanager.h"
 
 #include <QVBoxLayout>
 #include <QWidget>
@@ -57,11 +56,6 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
 
     connect(&view_manager_, &ViewManager::unshowViewPointSignal, this, &View::unshowViewPointSlot);
     connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
-
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
-
-    connect(&eval_man, &EvaluationManager::unshowDataSignal, this, &View::unshowViewPointSlot);
-    connect(&eval_man, &EvaluationManager::showDataSignal, this, &View::showViewPointSlot);
 }
 
 /**

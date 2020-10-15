@@ -19,7 +19,7 @@
 #include "datasourcesfilter.h"
 #include "datasourcesfilterwidget.h"
 #include "viewabledataconfig.h"
-#include "filtermanager.h"
+#include "viewmanager.h"
 
 #include "json.hpp"
 
@@ -55,11 +55,6 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     updateReferenceDBO();
     updateTestDBO();
-
-    FilterManager& filter_man = ATSDB::instance().filterManager();
-
-    connect (this, &EvaluationManager::showDataSignal, &filter_man, &FilterManager::showViewPointSlot);
-    connect (this, &EvaluationManager::unshowDataSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
     initialized_ = true;
 
@@ -264,6 +259,30 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
 
     if (widget_)
         widget_->updateButtons();
+
+//    if (current_viewable_data_set_)
+//    {
+//        const nlohmann::json& data = viewable_data_cfg_->data();
+
+//        bool contains_time = data.contains("time");
+//        bool contains_time_window = data.contains("time_window");
+
+//        if (!contains_time || !contains_time_window)
+//            return; // nothing to do
+
+//        float time;
+//        float time_window, time_min, time_max;
+
+//        assert (data.at("time").is_number());
+//        time = data.at("time");
+
+//        assert (data.at("time_window").is_number());
+//        time_window = data.at("time_window");
+//        time_min = time-time_window/2.0;
+//        time_max = time+time_window/2.0;
+
+//        ATSDB::instance().viewManager().selectTimeWindow(time_min, time_max);
+//    } TODO wrong location
 
 }
 
@@ -968,18 +987,15 @@ void EvaluationManager::updateTestDataSourcesActive()
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {
-    if (current_viewable_data_set_)
+    if (viewable_data_cfg_)
     {
-        assert (viewable_data_cfg_);
-        emit unshowDataSignal(viewable_data_cfg_.get());
-
-        current_viewable_data_set_ = false;
+        emit ATSDB::instance().viewManager().unshowViewPointSignal(viewable_data_cfg_.get());
+        viewable_data_cfg_ = nullptr;
     }
 
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
-    current_viewable_data_set_ = true;
 
-    emit showDataSignal(viewable_data_cfg_.get());
+    emit ATSDB::instance().viewManager().showViewPointSignal(viewable_data_cfg_.get());
 
     ATSDB::instance().objectManager().loadSlot();
 

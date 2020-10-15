@@ -127,17 +127,17 @@ void JoinedIdentification::addToReport (
 bool JoinedIdentification::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-//    if (table.name() == "req_overview")
-//        return true;
-//    else
+    if (table.name() == "req_overview")
+        return true;
+    else
         return false;
 }
 
 std::unique_ptr<nlohmann::json::object_t> JoinedIdentification::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
-//    assert (hasViewableData(table, annotation));
-//    return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+    assert (hasViewableData(table, annotation));
+    return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
 
     return nullptr;
 }

@@ -29,9 +29,6 @@ signals:
     void standardsChangedSignal(); // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
 
-    void unshowDataSignal (const ViewableDataConfig* vp);
-    void showDataSignal (const ViewableDataConfig* vp);
-
     void resultsChangedSignal();
 
 public slots:
@@ -163,7 +160,7 @@ protected:
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
 
-    bool current_viewable_data_set_ {false};
+    //bool current_viewable_data_set_ {false};
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
     virtual void checkSubConfigurables() override;
