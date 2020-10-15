@@ -3,6 +3,7 @@
 #include "evaluationdatasourcewidget.h"
 #include "evaluationmanager.h"
 #include "evaluationstandardcombobox.h"
+#include "evaluationsectorwidget.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -48,13 +49,22 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     std_layout->addWidget(standard_label);
 
     standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
-
-//    if (eval_man_.hasCurrentStandard())
-//        standard_box_->setStandardName(eval_man_.currentStandardName());
-
     std_layout->addWidget(standard_box_.get());
 
     main_layout->addLayout(std_layout);
+
+    // sector requirement mapping
+
+    QVBoxLayout* sec_layout = new QVBoxLayout();
+
+    QLabel* sec_label = new QLabel("Sector Requirement Groups");
+    sec_label->setFont(font_bold);
+    sec_layout->addWidget(sec_label);
+
+    sector_widget_.reset(new EvaluationSectorWidget(eval_man_));
+    sec_layout->addWidget(sector_widget_.get());
+
+    main_layout->addLayout(sec_layout);
 
     main_layout->addStretch();
 
@@ -97,4 +107,7 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
 
     assert (standard_box_);
     standard_box_->setStandardName(eval_man_.currentStandardName());
+
+    assert (sector_widget_);
+    sector_widget_->update();
 }

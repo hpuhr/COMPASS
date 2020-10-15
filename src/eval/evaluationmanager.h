@@ -129,6 +129,13 @@ public:
     void setUseTargetData (unsigned int utn, bool value);
     void updateResultsToUseChangeOf (unsigned int utn);
 
+    nlohmann::json::boolean_t& useGroupInSector(const std::string& sector_layer_name, const std::string& sector_name,
+                                                const std::string& group_name);
+    void useGroupInSector(const std::string& sector_layer_name, const std::string& sector_name,
+                          const std::string& group_name, bool value);
+    nlohmann::json::boolean_t& useRequirement(const std::string& standard_name, const std::string& group_name,
+                                              const std::string& req_name);
+
 protected:
     ATSDB& atsdb_;
 
@@ -156,10 +163,12 @@ protected:
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
     std::map<std::string, std::unique_ptr<EvaluationStandard>> standards_;
 
+    nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->sector_name->req_grp_name->bool use
+    nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
+
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
 
-    //bool current_viewable_data_set_ {false};
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
     virtual void checkSubConfigurables() override;

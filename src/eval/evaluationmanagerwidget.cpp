@@ -8,6 +8,7 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationdatasourcewidget.h"
+#include "evaluationsectorwidget.h"
 #include "logger.h"
 
 #include <QCheckBox>

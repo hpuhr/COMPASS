@@ -9,6 +9,7 @@ class EvaluationManager;
 class EvaluationManagerWidget;
 class EvaluationDataSourceWidget;
 class EvaluationStandardComboBox;
+class EvaluationSectorWidget;
 
 class EvaluationMainTabWidget : public QWidget
 {
@@ -32,6 +33,7 @@ protected:
     std::unique_ptr<EvaluationDataSourceWidget> data_source_tst_widget_ {nullptr};
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};
+    std::unique_ptr<EvaluationSectorWidget> sector_widget_ {nullptr};
 };
 
 #endif // EVALUATIONMANAGERMAINTABWIDGET_H

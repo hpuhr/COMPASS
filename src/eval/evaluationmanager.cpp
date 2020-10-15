@@ -43,6 +43,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("current_standard", &current_standard_, "");
 
+    registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
+    registerParameter("use_requirement", &use_requirement_, json::object());
+
     createSubConfigurables();
 }
 
@@ -334,7 +337,7 @@ void EvaluationManager::checkSubConfigurables()
 
 bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
                              [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
@@ -349,7 +352,7 @@ bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
 
 std::shared_ptr<SectorLayer> EvaluationManager::sectorLayer (const std::string& layer_name)
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (hasSectorLayer(layer_name));
 
     auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
@@ -372,7 +375,7 @@ void EvaluationManager::loadSectors()
 
 unsigned int EvaluationManager::getMaxSectorId ()
 {
-    assert (initialized_);
+    assert (sectors_loaded_);
 
     unsigned int id = 0;
     for (auto& sec_lay_it : sector_layers_)
@@ -389,7 +392,7 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
 
-    assert (initialized_);
+    assert (sectors_loaded_);
     assert (!hasSector(name, layer_name));
 
     unsigned int id = getMaxSectorId()+1;
@@ -1043,6 +1046,46 @@ void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
             widget_->reshowLastResultId();
         }
     }
+}
+
+json::boolean_t& EvaluationManager::useGroupInSector(const std::string& sector_layer_name,
+                                                     const std::string& sector_name,
+                                                     const std::string& group_name)
+{
+    assert (hasCurrentStandard());
+
+    // standard_name->sector_layer_name->sector_name->req_grp_name->bool use
+    if (!use_grp_in_sector_.contains(current_standard_)
+            || !use_grp_in_sector_.at(current_standard_).contains(sector_layer_name)
+            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).contains(sector_name)
+            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).at(sector_name).contains(group_name))
+        use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name] = true;
+
+    return use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name].get_ref<json::boolean_t&>();
+}
+
+void EvaluationManager::useGroupInSector(const std::string& sector_layer_name, const std::string& sector_name,
+                                         const std::string& group_name, bool value)
+{
+    assert (hasCurrentStandard());
+
+    loginf << "EvaluationManager: useGroupInSector: standard_name " << current_standard_
+           << " sector_layer_name " << sector_layer_name << " sector_name " << sector_name
+           << " group_name " << group_name << " value " << value;
+
+    use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name] = value;
+}
+
+json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_name, const std::string& group_name,
+                                                   const std::string& req_name)
+{
+    // standard_name->req_grp_name->req_grp_name->bool use
+    if (!use_requirement_.contains(standard_name)
+            || !use_requirement_.at(standard_name).contains(group_name)
+            || !use_requirement_.at(standard_name).at(group_name).contains(req_name))
+        use_requirement_[standard_name][group_name][req_name] = true;
+
+    return use_requirement_[standard_name][group_name][req_name].get_ref<json::boolean_t&>();
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
