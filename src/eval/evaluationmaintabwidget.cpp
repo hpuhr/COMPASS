@@ -57,7 +57,7 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     QVBoxLayout* sec_layout = new QVBoxLayout();
 
-    QLabel* sec_label = new QLabel("Sector Requirement Groups");
+    QLabel* sec_label = new QLabel("Sector Layers: Requirement Groups Usage");
     sec_label->setFont(font_bold);
     sec_layout->addWidget(sec_label);
 

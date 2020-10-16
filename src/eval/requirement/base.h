@@ -6,6 +6,7 @@
 
 class EvaluationTargetData;
 class EvaluationManager;
+class SectorLayer;
 
 namespace EvaluationRequirementResult {
     class Single;
@@ -21,7 +22,8 @@ public:
                           EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance) = 0;
+            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+            const SectorLayer& sector_layer) = 0;
     // instance is the self-reference for the result
 
     std::string name() const;

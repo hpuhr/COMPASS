@@ -1,5 +1,6 @@
 #include "sectorlayer.h"
 #include "sector.h"
+#include "evaluationtargetposition.h"
 
 #include <cassert>
 
@@ -53,4 +54,13 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
 
     sectors_.erase(iter);
     assert (!hasSector(sector->name()));
+}
+
+bool SectorLayer::isInside(const EvaluationTargetPosition& pos)
+{
+    for (auto& sec_it : sectors_)
+        if (sec_it->isInside(pos))
+            return true;
+
+    return false;
 }

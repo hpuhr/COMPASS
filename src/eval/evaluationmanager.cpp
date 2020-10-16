@@ -1048,32 +1048,29 @@ void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
     }
 }
 
-json::boolean_t& EvaluationManager::useGroupInSector(const std::string& sector_layer_name,
-                                                     const std::string& sector_name,
-                                                     const std::string& group_name)
+json::boolean_t& EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_name,
+                                                          const std::string& group_name)
 {
     assert (hasCurrentStandard());
 
-    // standard_name->sector_layer_name->sector_name->req_grp_name->bool use
+    // standard_name->sector_layer_name->req_grp_name->bool use
     if (!use_grp_in_sector_.contains(current_standard_)
             || !use_grp_in_sector_.at(current_standard_).contains(sector_layer_name)
-            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).contains(sector_name)
-            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).at(sector_name).contains(group_name))
-        use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name] = true;
+            || !use_grp_in_sector_.at(current_standard_).at(sector_layer_name).contains(group_name))
+        use_grp_in_sector_[current_standard_][sector_layer_name][group_name] = true;
 
-    return use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name].get_ref<json::boolean_t&>();
+    return use_grp_in_sector_[current_standard_][sector_layer_name][group_name].get_ref<json::boolean_t&>();
 }
 
-void EvaluationManager::useGroupInSector(const std::string& sector_layer_name, const std::string& sector_name,
-                                         const std::string& group_name, bool value)
+void EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_name,
+                                              const std::string& group_name, bool value)
 {
     assert (hasCurrentStandard());
 
     loginf << "EvaluationManager: useGroupInSector: standard_name " << current_standard_
-           << " sector_layer_name " << sector_layer_name << " sector_name " << sector_name
-           << " group_name " << group_name << " value " << value;
+           << " sector_layer_name " << sector_layer_name << " group_name " << group_name << " value " << value;
 
-    use_grp_in_sector_[current_standard_][sector_layer_name][sector_name][group_name] = value;
+    use_grp_in_sector_[current_standard_][sector_layer_name][group_name] = value;
 }
 
 json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_name, const std::string& group_name,

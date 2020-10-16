@@ -4,12 +4,12 @@
 #include "eval/results/report/treemodel.h"
 #include "eval/requirement/base.h"
 #include "evaluationdata.h"
+#include "sectorlayer.h"
 
 #include <tbb/tbb.h>
 
 class EvaluationManager;
 class EvaluationStandard;
-//class EvaluationData;
 
 //namespace EvaluationRequirement {
 //    class Base;
@@ -28,8 +28,9 @@ public:
                  std::vector<unsigned int>& utns,
                  EvaluationData& data,
                  std::shared_ptr<EvaluationRequirement::Base> req,
+                 const SectorLayer& sector_layer,
                  std::vector<bool>& done_flags)
-        : results_(results), utns_(utns), data_(data), req_(req), done_flags_(done_flags)
+        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer), done_flags_(done_flags)
     {
     }
 
@@ -40,7 +41,7 @@ public:
 
         tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
         {
-            results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_);
+            results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_, sector_layer_);
             done_flags_[utn_cnt] = true;
         });
 
@@ -52,6 +53,7 @@ protected:
     std::vector<unsigned int>& utns_;
     EvaluationData& data_;
     std::shared_ptr<EvaluationRequirement::Base> req_;
+    const SectorLayer& sector_layer_;
     std::vector<bool>& done_flags_;
 };
 

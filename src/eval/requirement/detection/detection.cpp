@@ -54,7 +54,8 @@ float Detection::missTolerance() const
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+        const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
            << " update_interval " << update_interval_s_ << " minimum_probability " << minimum_probability_

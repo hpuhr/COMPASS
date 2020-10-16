@@ -3,7 +3,10 @@
 
 #include "json.hpp"
 
+#include "gdal_priv.h"
+
 class DBInterface;
+class EvaluationTargetPosition;
 
 class Sector
 {
@@ -45,6 +48,8 @@ public:
 
     void save();
 
+    bool isInside(const EvaluationTargetPosition& pos);
+
 protected:
     unsigned int id_;
     std::string name_;
@@ -59,6 +64,10 @@ protected:
     double max_altitude_{0.0};
 
     std::string color_str_;
+
+    std::unique_ptr<OGRPolygon> ogr_polygon_;
+
+    void createPolygon();
 };
 
 #endif // SECTOR_H

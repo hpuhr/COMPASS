@@ -1,6 +1,7 @@
 #include "sector.h"
 #include "atsdb.h"
 #include "evaluationmanager.h"
+#include "evaluationtargetposition.h"
 
 #include <cassert>
 
@@ -14,6 +15,8 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
     : id_(id), name_(name), layer_name_(layer_name), points_(points)
 {
     color_str_ = default_color;
+
+    createPolygon();
 }
 
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
@@ -54,6 +57,8 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
         color_str_ = default_color;
     else
         color_str_ = j.at("color_str");
+
+    createPolygon();
 }
 
 std::string Sector::name() const
@@ -217,3 +222,30 @@ void Sector::save()
 
     eval_man.saveSector(id_);
 }
+
+bool Sector::isInside(const EvaluationTargetPosition& pos)
+{
+    if (pos.has_altitude_)
+    {
+        if (has_min_altitude_ && pos.altitude_ < min_altitude_)
+            return false;
+        else if (has_max_altitude_ && pos.altitude_ > max_altitude_)
+            return false;
+    }
+
+    OGRPoint ogr_pos (pos.latitude_, pos.longitude_);
+    return ogr_polygon_->Contains(&ogr_pos);
+}
+
+void Sector::createPolygon()
+{
+    ogr_polygon_.reset(new OGRPolygon());
+    //ogr_polygon_->addRingDirectly()
+    OGRLinearRing* ring = new OGRLinearRing();
+
+    for (auto& point_it : points_)
+        ring->addPoint(point_it.first, point_it.second);
+
+    ogr_polygon_->addRingDirectly(ring);
+}
+

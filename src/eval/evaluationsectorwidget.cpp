@@ -36,41 +36,39 @@ void EvaluationSectorWidget::update()
     unsigned int row=0;
     unsigned int col=0;
 
+    QFont font_italic;
+    font_italic.setItalic(true);
+
     if (eval_man_.hasCurrentStandard())
     {
         EvaluationStandard& std = eval_man_.currentStandard();
-        const string& std_name = std.name();
+        //const string& std_name = std.name();
 
         for (auto& sec_lay_it : eval_man_.sectorsLayers())
         {
-            const string& sec_lay_name = sec_lay_it->name();
+            col = 0;
+            const string& sector_layer_name = sec_lay_it->name();
 
-            for (auto& sec_it : sec_lay_it->sectors())
+            QLabel* sec_label = new QLabel(sector_layer_name.c_str());
+            sec_label->setFont(font_italic);
+            grid_layout_->addWidget(sec_label, row, col);
+            ++col;
+
+            for (auto& req_grp_it : std)
             {
-                col = 0;
-                const string& sec_name = sec_it->name();
+                const string& requirement_group_name = req_grp_it.first;
 
-                QLabel* sec_label = new QLabel((sec_lay_name+":"+sec_name).c_str());
-                grid_layout_->addWidget(sec_label, row, col);
+                QCheckBox* check = new QCheckBox(requirement_group_name.c_str());
+                check->setChecked(eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));
+                check->setProperty("sector_layer_name", sector_layer_name.c_str());
+                check->setProperty("requirement_group_name", requirement_group_name.c_str());
+                connect(check, &QCheckBox::clicked, this, &EvaluationSectorWidget::toggleUseGroupSlot);
+
+                grid_layout_->addWidget(check, row, col);
+
                 ++col;
-
-                for (auto& req_grp_it : std)
-                {
-                    const string& req_grp_name = req_grp_it.first;
-
-                    QCheckBox* check = new QCheckBox(req_grp_name.c_str());
-                    check->setChecked(eval_man_.useGroupInSector(sec_lay_name, sec_name, req_grp_name));
-                    check->setProperty("sec_lay_name", sec_lay_name.c_str());
-                    check->setProperty("sec_name", sec_name.c_str());
-                    check->setProperty("req_grp_name", req_grp_name.c_str());
-                    connect(check, &QCheckBox::clicked, this, &EvaluationSectorWidget::toggleUseGroupSlot);
-
-                    grid_layout_->addWidget(check, row, col);
-
-                    ++col;
-                }
-                ++row;
             }
+            ++row;
         }
     }
 }
@@ -80,11 +78,10 @@ void EvaluationSectorWidget::toggleUseGroupSlot()
     QCheckBox* check = static_cast<QCheckBox*> (QObject::sender());
     assert (check);
 
-    string sec_lay_name = check->property("sec_lay_name").toString().toStdString();
-    string sec_name = check->property("sec_name").toString().toStdString();
-    string req_grp_name = check->property("req_grp_name").toString().toStdString();
+    string sector_layer_name = check->property("sector_layer_name").toString().toStdString();
+    string requirement_group_name = check->property("requirement_group_name").toString().toStdString();
 
     assert (eval_man_.hasCurrentStandard());
 
-    eval_man_.useGroupInSector(sec_lay_name, sec_name, req_grp_name, check->checkState() == Qt::Checked);
+    eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name, check->checkState() == Qt::Checked);
 }

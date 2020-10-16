@@ -25,7 +25,8 @@ namespace EvaluationRequirement
     }
 
     std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
-            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
+            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+            const SectorLayer& sector_layer)
     {
         loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " minimum_probability " << minimum_probability_;

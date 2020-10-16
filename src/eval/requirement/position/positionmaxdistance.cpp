@@ -33,7 +33,8 @@ float PositionMaxDistance::maximumProbability() const
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evaluate (
-        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance)
+        const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+        const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_distance " << max_distance_ << " maximum_probability " << maximum_probability_;
