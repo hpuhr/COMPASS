@@ -223,7 +223,7 @@ void Sector::save()
     eval_man.saveSector(id_);
 }
 
-bool Sector::isInside(const EvaluationTargetPosition& pos)
+bool Sector::isInside(const EvaluationTargetPosition& pos) const
 {
     if (pos.has_altitude_)
     {

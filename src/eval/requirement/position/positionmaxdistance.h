@@ -13,10 +13,10 @@ namespace EvaluationRequirement
         PositionMaxDistanceDetail(
                 float tod, EvaluationTargetPosition tst_pos,
                 bool has_ref_pos, EvaluationTargetPosition ref_pos, double distance, bool pos_ok,
-                int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok)
+                int num_pos, int num_no_ref, int num_outside, int num_pos_ok, int num_pos_nok)
             : tod_(tod), tst_pos_(tst_pos), has_ref_pos_(has_ref_pos), ref_pos_(ref_pos),
               distance_(distance), pos_ok_(pos_ok), num_pos_(num_pos), num_no_ref_(num_no_ref),
-              num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok)
+              num_outside_(num_outside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok)
         {
         }
 
@@ -32,6 +32,7 @@ namespace EvaluationRequirement
 
         int num_pos_ {0};
         int num_no_ref_ {0};
+        int num_outside_ {0};
         int num_pos_ok_ {0};
         int num_pos_nok_ {0};
     };

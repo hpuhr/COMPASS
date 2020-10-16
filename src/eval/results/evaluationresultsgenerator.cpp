@@ -36,10 +36,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 {
     loginf << "EvaluationResultsGenerator: evaluate";
 
-    boost::posix_time::ptime loading_start_time;
-    boost::posix_time::ptime loading_stop_time;
+    boost::posix_time::ptime start_time;
+    boost::posix_time::ptime elapsed_time;
 
-    loading_start_time = boost::posix_time::microsec_clock::local_time();
+    start_time = boost::posix_time::microsec_clock::local_time();
 
     //unsigned int num_requirements {0};
 
@@ -89,6 +89,12 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     unsigned int num_utns = utns.size();
 
     unsigned int eval_cnt = 0;
+
+    boost::posix_time::time_duration time_diff;
+    double elapsed_time_s;
+    double time_per_eval, remaining_time_s;
+
+    string remaining_time_str;
 
     for (auto& sec_it : sector_layers)
     {
@@ -149,6 +155,22 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     }
 
                     assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+
+                    elapsed_time = boost::posix_time::microsec_clock::local_time();
+
+                    time_diff = elapsed_time - start_time;
+                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+
+                    time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
+                    remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
+
+                    postprocess_dialog_.setLabelText(
+                                ("Sector Layer "+sector_layer_name
+                                 +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()
+                                 +"\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                                 +"\tEstimated Remaining: "
+                                 +String::timeStringFromDouble(remaining_time_s, false)).c_str());
+
                     postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
 
                     if (!done)
@@ -190,13 +212,12 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         }
     }
 
-    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+    elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-    double load_time;
-    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
-    load_time = diff.total_milliseconds() / 1000.0;
+    time_diff = elapsed_time - start_time;
+    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-    loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(load_time, true);
+    loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     // 00:06:22.852 with no parallel
 

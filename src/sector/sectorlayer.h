@@ -24,7 +24,7 @@ public:
 
     std::vector<std::shared_ptr<Sector>>& sectors() { return sectors_; }
 
-    bool isInside(const EvaluationTargetPosition& pos);
+    bool isInside(const EvaluationTargetPosition& pos) const;
 
 protected:
     const std::string name_;

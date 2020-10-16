@@ -418,10 +418,36 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
 
     logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
 
+    // calculate altitude
+    bool has_altitude = false;
+    float altitude = 0.0;
+
+    if (pos1.has_altitude_ && !pos2.has_altitude_)
+    {
+        has_altitude = true;
+        altitude = pos1.altitude_;
+    }
+    else if (!pos1.has_altitude_ && pos2.has_altitude_)
+    {
+        has_altitude = true;
+        altitude = pos2.altitude_;
+    }
+    else if (pos1.has_altitude_ && pos2.has_altitude_)
+    {
+        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+        has_altitude = true;
+        altitude = pos1.altitude_ + v_alt*d_t2;
+    }
+
+    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 has alt "
+           << pos1.has_altitude_ << " alt " << pos1.altitude_
+           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+           << " interpolated has alt " << has_altitude << " alt " << altitude;
+
     if (getenv("APPDIR")) // inside appimage
-        return {{y_pos, x_pos, false, 0}, true};
+        return {{y_pos, x_pos, has_altitude, altitude}, true};
     else
-        return {{x_pos, y_pos, false, 0}, true};
+        return {{x_pos, y_pos, has_altitude, altitude}, true};
 }
 
 bool EvaluationTargetData::hasRefPosForTime (float tod) const
@@ -452,7 +478,10 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
     pos.longitude_ = longitude_vec.get(index);
 
     if (!altitude_vec.isNull(index))
+    {
+        pos.has_altitude_ = true;
         pos.altitude_ = altitude_vec.get(index);
+    }
 
     return pos;
 }

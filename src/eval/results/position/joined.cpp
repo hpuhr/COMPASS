@@ -47,6 +47,7 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
 
     num_pos_ += single_result->numPos();
     num_no_ref_ += single_result->numNoRef();
+    num_pos_outside_ += single_result->numPosOutside();
     num_pos_ok_ += single_result->numPosOk();
     num_pos_nok_ += single_result->numPosNOk();
 
@@ -57,10 +58,10 @@ void JoinedPositionMaxDistance::updatePMaxPos()
 {
     assert (num_no_ref_ <= num_pos_);
 
-    if (num_pos_ - num_no_ref_)
+    if (num_pos_ - num_no_ref_ - num_pos_outside_)
     {
-        assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
-        p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_);
+        assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
+        p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
         has_p_max_pos_ = true;
     }
     else
@@ -168,6 +169,7 @@ void JoinedPositionMaxDistance::updatesToUseChanges()
 
     num_pos_ = 0;
     num_no_ref_ = 0;
+    num_pos_outside_ = 0;
     num_pos_ok_ = 0;
     num_pos_nok_ = 0;
 

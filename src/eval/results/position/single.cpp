@@ -23,10 +23,11 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok,
+            int num_pos, int num_no_ref, int num_pos_outside, int num_pos_ok, int num_pos_nok,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details)
         : Single("SinglePositionMaxDistance", result_id, requirement, sector_layer, utn, target, eval_man),
-          num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
+          num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
+          num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
           details_(details)
     {
         updatePMaxPos();
@@ -37,10 +38,10 @@ namespace EvaluationRequirementResult
     {
         assert (num_no_ref_ <= num_pos_);
 
-        if (num_pos_ - num_no_ref_)
+        if (num_pos_ - num_no_ref_ - num_pos_outside_)
         {
-            assert (num_pos_ == num_no_ref_ + num_pos_ok_ + num_pos_nok_);
-            p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_);
+            assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
+            p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
             has_p_max_pos_ = true;
 
             result_usable_ = true;
@@ -228,6 +229,11 @@ namespace EvaluationRequirementResult
         assert (hasReference(table, annotation));
 
         return "Report:Results:"+getTargetSectionID();
+    }
+
+    int SinglePositionMaxDistance::numPosOutside() const
+    {
+        return num_pos_outside_;
     }
 
     std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::string& result_id)

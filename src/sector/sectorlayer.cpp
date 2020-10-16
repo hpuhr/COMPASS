@@ -1,6 +1,7 @@
 #include "sectorlayer.h"
 #include "sector.h"
 #include "evaluationtargetposition.h"
+#include "logger.h"
 
 #include <cassert>
 
@@ -56,11 +57,16 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
     assert (!hasSector(sector->name()));
 }
 
-bool SectorLayer::isInside(const EvaluationTargetPosition& pos)
+bool SectorLayer::isInside(const EvaluationTargetPosition& pos)  const
 {
     for (auto& sec_it : sectors_)
         if (sec_it->isInside(pos))
+        {
+            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
+                   << " alt " << pos.altitude_;
             return true;
+        }
 
+    logdbg << "SectorLayer " << name_ << ": isInside: false";
     return false;
 }

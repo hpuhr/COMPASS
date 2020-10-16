@@ -48,7 +48,7 @@ public:
 
     void save();
 
-    bool isInside(const EvaluationTargetPosition& pos);
+    bool isInside(const EvaluationTargetPosition& pos) const;
 
 protected:
     unsigned int id_;

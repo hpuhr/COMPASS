@@ -3,6 +3,7 @@
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "sectorlayer.h"
 
 #include <ogr_spatialref.h>
 
@@ -43,6 +44,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
     int num_pos {0};
     int num_no_ref {0};
+    int num_pos_outside {0};
+    int num_pos_inside {0};
     int num_pos_ok {0};
     int num_pos_nok {0};
 
@@ -63,6 +66,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
     double x_pos, y_pos;
     bool ret;
     double distance;
+    bool is_inside;
 
     for (const auto& tst_id : tst_data)
     {
@@ -73,7 +77,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
         if (!target_data.hasRefDataForTime (tod, 4))
         {
-            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+            details.push_back({tod, tst_pos,
+                               false, {}, 0.0, true,
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_no_ref;
             continue;
@@ -86,11 +92,25 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
         if (!ok)
         {
-            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+            details.push_back({tod, tst_pos,
+                               false, {}, 0.0, true,
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_no_ref;
             continue;
         }
+
+        is_inside = sector_layer.isInside(ref_pos);
+
+        if (!is_inside)
+        {
+            details.push_back({tod, tst_pos,
+                               true, ref_pos, 0.0, true,
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
+            ++num_pos_outside;
+            continue;
+        }
+        ++num_pos_inside;
 
         local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
@@ -110,7 +130,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ret)
         {
-            details.push_back({tod, tst_pos, false, {}, 0.0, true, num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+            details.push_back({tod, tst_pos,
+                               false, {}, 0.0, true,
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
             ++num_no_ref;
             continue;
         }
@@ -119,15 +141,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
         if (distance > max_distance_)
         {
-            details.push_back({tod, tst_pos, true, ref_pos, distance, false,
-                               num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+            details.push_back({tod, tst_pos,
+                               true, ref_pos, distance, false,
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_pos_nok;
         }
         else
         {
             details.push_back({tod, tst_pos, true, ref_pos, distance, true,
-                               num_pos, num_no_ref, num_pos_ok, num_pos_nok});
+                               num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_pos_ok;
         }
@@ -136,13 +159,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
     loginf << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+           << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
            << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok;
 
     assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_ok, num_pos_nok, details);
+                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok, details);
 }
 
 
