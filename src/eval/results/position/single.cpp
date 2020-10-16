@@ -21,10 +21,11 @@ namespace EvaluationRequirementResult
 
     SinglePositionMaxDistance::SinglePositionMaxDistance(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+            const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details)
-        : Single("SinglePositionMaxDistance", result_id, requirement, utn, target, eval_man),
+        : Single("SinglePositionMaxDistance", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
           details_(details)
     {
@@ -93,8 +94,7 @@ namespace EvaluationRequirementResult
         if (has_p_max_pos_)
             pd_var = roundf(p_max_pos_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
+        string utn_req_section_heading = getTargetSectionID();
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -227,15 +227,12 @@ namespace EvaluationRequirementResult
     {
         assert (hasReference(table, annotation));
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
-
-        return "Report:Results:"+utn_req_section_heading;
+        return "Report:Results:"+getTargetSectionID();
     }
 
     std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedPositionMaxDistance> (result_id, requirement_, eval_man_);
+        return make_shared<JoinedPositionMaxDistance> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
     int SinglePositionMaxDistance::numPos() const

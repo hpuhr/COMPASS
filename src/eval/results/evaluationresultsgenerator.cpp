@@ -171,7 +171,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     results_vec_.push_back(result_it);
 
                     if (!result_sum)
-                        result_sum = result_it->createEmptyJoined(sector_layer_name);
+                        result_sum = result_it->createEmptyJoined(sector_layer_name+":Sum");
 
                     result_sum->join(result_it);
                 }

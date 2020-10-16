@@ -10,6 +10,7 @@
 
 class EvaluationTargetData;
 class EvaluationManager;
+class SectorLayer;
 
 namespace EvaluationRequirement {
     class Base;
@@ -28,7 +29,8 @@ class Base
 {
 public:
     Base(const std::string& type, const std::string& result_id,
-         std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man);
+         std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
+         EvaluationManager& eval_man);
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
@@ -63,6 +65,7 @@ protected:
     bool use_ {true};
 
     std::shared_ptr<EvaluationRequirement::Base> requirement_;
+    const SectorLayer& sector_layer_;
 
     EvaluationManager& eval_man_;
 
@@ -73,6 +76,8 @@ protected:
 
     EvaluationResultsReport::Section& getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+
 };
 
 }

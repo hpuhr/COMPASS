@@ -21,11 +21,11 @@ namespace EvaluationRequirementResult
 
     SingleDetection::SingleDetection(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            unsigned int utn, const EvaluationTargetData* target,
+            const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
             std::vector<EvaluationRequirement::DetectionDetail> details)
-        : Single("SingleDetection", result_id, requirement, utn, target, eval_man),
+        : Single("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man),
           sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
     {
         updatePD();
@@ -90,8 +90,7 @@ namespace EvaluationRequirementResult
         if (has_pd_)
             pd_var = roundf(pd_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
+        string utn_req_section_heading = getTargetSectionID();
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -226,15 +225,12 @@ namespace EvaluationRequirementResult
     {
         assert (hasReference(table, annotation));
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
-
-        return "Report:Results:"+utn_req_section_heading;
+        return "Report:Results:"+getTargetSectionID();
     }
 
     std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedDetection> (result_id, requirement_, eval_man_);
+        return make_shared<JoinedDetection> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
     float SingleDetection::sumUIs() const

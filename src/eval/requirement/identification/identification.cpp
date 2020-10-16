@@ -152,7 +152,7 @@ namespace EvaluationRequirement
                    << " no data for pid";
 
         return make_shared<EvaluationRequirementResult::SingleIdentification>(
-                    "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
+                    "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_no_ref, num_unknown_id, num_correct_id, num_false_id, details);
     }
 }

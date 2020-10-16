@@ -222,7 +222,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                << " no data for pd";
 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
-                "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
+                "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
 }
 

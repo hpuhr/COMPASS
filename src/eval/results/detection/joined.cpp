@@ -21,8 +21,8 @@ namespace EvaluationRequirementResult
 
     JoinedDetection::JoinedDetection(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            EvaluationManager& eval_man)
-        : Joined("JoinedDetection", result_id, requirement, eval_man)
+            const SectorLayer& sector_layer, EvaluationManager& eval_man)
+        : Joined("JoinedDetection", result_id, requirement, sector_layer, eval_man)
     {
     }
 
@@ -117,8 +117,9 @@ namespace EvaluationRequirementResult
         }
 
         // "Req.", "Group", "Result", "Condition", "Result"
-        ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                         pd_var, condition.c_str(), result.c_str()}, this, {}); // "Report:Results:Overview"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
+                         requirement_->groupName().c_str(), pd_var, condition.c_str(), result.c_str()}, this, {});
+        // "Report:Results:Overview"
     }
 
     bool JoinedDetection::hasViewableData (

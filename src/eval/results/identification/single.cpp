@@ -21,10 +21,11 @@ namespace EvaluationRequirementResult
 
     SingleIdentification::SingleIdentification(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+            const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_updates, int num_no_ref, int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::IdentificationDetail> details)
-        : Single("SingleIdentification", result_id, requirement, utn, target, eval_man),
+        : Single("SingleIdentification", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_(num_no_ref), num_unknown_id_(num_unknown_id),
           num_correct_id_(num_correct_id), num_false_id_(num_false_id), details_(details)
     {
@@ -92,8 +93,7 @@ namespace EvaluationRequirementResult
         if (has_pid_)
             pd_var = roundf(pid_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
+        string utn_req_section_heading = getTargetSectionID();
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -221,15 +221,12 @@ namespace EvaluationRequirementResult
     {
         assert (hasReference(table, annotation));
 
-        string utn_req_section_heading =
-                "Details:Targets:"+to_string(utn_)+":"+requirement_->groupName()+":"+requirement_->name();
-
-        return "Report:Results:"+utn_req_section_heading;
+        return "Report:Results:"+getTargetSectionID();
     }
 
     std::shared_ptr<Joined> SingleIdentification::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedIdentification> (result_id, requirement_, eval_man_);
+        return make_shared<JoinedIdentification> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
     int SingleIdentification::numNoRef() const

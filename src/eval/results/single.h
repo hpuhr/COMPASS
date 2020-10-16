@@ -5,13 +5,15 @@
 
 namespace EvaluationRequirementResult
 {
+    using namespace std;
+
     class Joined;
 
     class Single : public Base
     {
     public:
         Single(const std::string& type, const std::string& result_id,
-               std::shared_ptr<EvaluationRequirement::Base> requirement,
+               std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
                unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man);
 
         virtual bool isSingle() const override { return true; }
@@ -32,6 +34,8 @@ namespace EvaluationRequirementResult
         const EvaluationTargetData* target_; // used to generate result
 
         bool result_usable_ {true}; // whether valid data exists, changed in subclass
+
+        std::string getTargetSectionID ();
     };
 
 }

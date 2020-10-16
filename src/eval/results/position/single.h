@@ -12,6 +12,7 @@ class SinglePositionMaxDistance : public Single
 public:
     SinglePositionMaxDistance(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+            const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_pos, int num_no_ref, int num_pos_ok, int num_pos_nok,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details);

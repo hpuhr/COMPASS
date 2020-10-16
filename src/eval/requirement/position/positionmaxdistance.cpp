@@ -141,7 +141,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
     assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
-                "UTN:"+to_string(target_data.utn_), instance, target_data.utn_, &target_data,
+                "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_ok, num_pos_nok, details);
 }
 

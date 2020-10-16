@@ -4,6 +4,7 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "sectorlayer.h"
 #include "logger.h"
 
 #include <sstream>
@@ -15,11 +16,12 @@ namespace EvaluationRequirementResult
 {
 
 Base::Base(const std::string& type, const std::string& result_id,
-           std::shared_ptr<EvaluationRequirement::Base> requirement, EvaluationManager& eval_man)
-    : type_(type), result_id_(result_id), requirement_(requirement), eval_man_(eval_man)
+           std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
+           EvaluationManager& eval_man)
+    : type_(type), result_id_(result_id), requirement_(requirement), sector_layer_(sector_layer), eval_man_(eval_man)
 {
     assert (requirement_);
-    req_grp_id_ = requirement_->groupName()+":"+requirement_->name();
+    req_grp_id_ = sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
 }
 
 std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
@@ -83,15 +85,15 @@ EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
     EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
 
     if (!ov_sec.hasTable("req_overview"))
-        ov_sec.addTable("req_overview", 5,
-        {"Req.", "Group", "Result", "Condition", "Result"});
+        ov_sec.addTable("req_overview", 6,
+        {"Sector Layer", "Req.", "Group", "Result", "Condition", "Result"});
 
     return ov_sec.getTable("req_overview");
 }
 
 std::string Base::getRequirementSectionID ()
 {
-    return "Requirements:"+requirement_->groupName()+":"+requirement_->name();
+    return "Sectors:"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
 }
 
 EvaluationResultsReport::Section& Base::getRequirementSection (
@@ -99,5 +101,7 @@ EvaluationResultsReport::Section& Base::getRequirementSection (
 {
     return root_item->getSection(getRequirementSectionID());
 }
+
+
 
 }

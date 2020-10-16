@@ -12,7 +12,8 @@ class SingleDetection : public Single
 public:
     SingleDetection(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
+            const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
+            EvaluationManager& eval_man,
             float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
             std::vector<EvaluationRequirement::DetectionDetail> details);
 

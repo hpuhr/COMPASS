@@ -11,7 +11,7 @@ namespace EvaluationRequirementResult
     {
     public:
         JoinedDetection(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                        EvaluationManager& eval_man);
+                        const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
 

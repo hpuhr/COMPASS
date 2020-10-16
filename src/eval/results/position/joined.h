@@ -10,8 +10,9 @@ namespace EvaluationRequirementResult
     class JoinedPositionMaxDistance : public Joined
     {
     public:
-        JoinedPositionMaxDistance(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-                                  EvaluationManager& eval_man);
+        JoinedPositionMaxDistance(
+                const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+                const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
 

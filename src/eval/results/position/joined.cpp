@@ -21,8 +21,8 @@ namespace EvaluationRequirementResult
 
 JoinedPositionMaxDistance::JoinedPositionMaxDistance(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-        EvaluationManager& eval_man)
-    : Joined("JoinedPositionMaxDistance", result_id, requirement, eval_man)
+        const SectorLayer& sector_layer, EvaluationManager& eval_man)
+    : Joined("JoinedPositionMaxDistance", result_id, requirement, sector_layer, eval_man)
 {
 }
 
@@ -119,8 +119,8 @@ void JoinedPositionMaxDistance::addToReport (
     }
 
     // "Req.", "Group", "Result", "Condition", "Result"
-    ov_table.addRow({requirement_->shortname().c_str(), requirement_->groupName().c_str(),
-                     pd_var, condition.c_str(), result.c_str()}, this, {});
+    ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
+                     requirement_->groupName().c_str(), pd_var, condition.c_str(), result.c_str()}, this, {});
 }
 
 bool JoinedPositionMaxDistance::hasViewableData (

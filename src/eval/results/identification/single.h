@@ -12,6 +12,7 @@ class SingleIdentification : public Single
 public:
     SingleIdentification(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+            const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_updates, int num_no_ref, int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::IdentificationDetail> details);
