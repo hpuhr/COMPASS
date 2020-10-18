@@ -3,6 +3,7 @@
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "sectorlayer.h"
 
 using namespace std;
 using namespace Utils;
@@ -13,9 +14,10 @@ namespace EvaluationRequirement
 Detection::Detection(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
-        float update_interval_s, float minimum_probability, bool use_max_gap_interval,
+        float update_interval_s, float max_ref_time_diff, float minimum_probability, bool use_max_gap_interval,
         float max_gap_interval_s, bool use_miss_tolerance, float miss_tolerance_s)
     : Base(name, short_name, group_name, eval_man), update_interval_s_(update_interval_s),
+      max_ref_time_diff_(max_ref_time_diff),
       minimum_probability_(minimum_probability), use_max_gap_interval_(use_max_gap_interval),
       max_gap_interval_s_(max_gap_interval_s), use_miss_tolerance_(use_miss_tolerance),
       miss_tolerance_s_(miss_tolerance_s)
@@ -26,6 +28,11 @@ Detection::Detection(
 float Detection::updateInterval() const
 {
     return update_interval_s_;
+}
+
+float Detection::maxRefTimeDiff() const
+{
+    return max_ref_time_diff_;
 }
 
 float Detection::minimumProbability() const
@@ -77,31 +84,21 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     float no_ref_first_tod {0};
     float no_ref_uis {0};
 
+    bool ref_exists;
+    bool is_inside;
+    pair<EvaluationTargetPosition, bool> ret_pos;
+    EvaluationTargetPosition ref_pos;
+    bool ok;
+
     vector<DetectionDetail> details;
     EvaluationTargetPosition pos_current;
 
     for (const auto& tst_id : tst_data)
     {
-        last_tod = tod;
         tod = tst_id.first;
         pos_current = target_data.tstPosForTime(tod);
 
-        if (first)
-        {
-            first = false;
-            first_tod = tod;
-
-            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-                   << " first tod " << String::timeStringFromDouble(first_tod);
-
-            details.push_back(
-            {tod, false, 0, false, pos_current, target_data.hasRefDataForTime(tod, 4),
-             missed_uis, max_gap_uis, no_ref_uis, "First target report"});
-
-            continue;
-        }
-
-        if (!target_data.hasRefDataForTime(tod, 4)) // seconds max time difference
+        if (!target_data.hasRefDataForTime(tod, max_ref_time_diff_)) // seconds max time difference
         {
             if (!no_ref_exists)
             {
@@ -123,6 +120,54 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                    << " no ref at " << String::timeStringFromDouble(tod);
 
             continue; // try next time
+        }
+
+        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+
+        ref_pos = ret_pos.first;
+        ok = ret_pos.second;
+
+        if (!ok)
+        {
+            details.push_back(
+            {tod, false, 0, false, pos_current, false, missed_uis, max_gap_uis, no_ref_uis,
+             "No reference position"});
+
+            no_ref_exists = true;
+
+            //++num_no_ref_pos;
+            continue;
+        }
+
+        ref_exists = true;
+
+        is_inside = sector_layer.isInside(ref_pos);
+
+        if (!is_inside)
+        {
+            details.push_back(
+            {tod, false, 0, false, pos_current, false, missed_uis, max_gap_uis, no_ref_uis,
+             "Outside sector"});
+
+            //++num_pos_outside;
+            continue;
+        }
+
+        last_tod = tod;
+
+        if (first)
+        {
+            first = false;
+            first_tod = tod;
+
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+                   << " first tod " << String::timeStringFromDouble(first_tod);
+
+            details.push_back(
+            {tod, false, 0, false, pos_current, target_data.hasRefDataForTime(tod, max_ref_time_diff_),
+             missed_uis, max_gap_uis, no_ref_uis, "First target report"});
+
+            continue;
         }
 
         if (no_ref_exists) // previously no ref existed
@@ -210,12 +255,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
     if (!first && sum_uis)
     {
-        assert (sum_uis >= max_gap_uis+no_ref_uis);
+        //assert (sum_uis >= max_gap_uis+no_ref_uis);
+        if (sum_uis < max_gap_uis+no_ref_uis) // TODO error in calc
+        {
+            logwrn << "EvaluationRequirementDetection '" << name_ << "': evaluate: sum_is ("
+                   << sum_uis << ") too small, max_gap_uis " << max_gap_uis << " no_ref_uis " << no_ref_uis;
+        }
+        else
+        {
 
         float pd = 1.0 - (missed_uis/(sum_uis-max_gap_uis-no_ref_uis));
 
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
+        }
     }
     else
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_

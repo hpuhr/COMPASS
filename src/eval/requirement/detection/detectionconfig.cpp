@@ -14,6 +14,9 @@ namespace EvaluationRequirement
         : Config(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("update_interval", &update_interval_s_, 1);
+
+        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
+
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
 
         registerParameter("use_max_gap_interval", &use_max_gap_interval_, true);
@@ -47,7 +50,8 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> DetectionConfig::createRequirement()
     {
         shared_ptr<Detection> req = make_shared<Detection>(
-                    name_, short_name_, group_.name(), eval_man_, update_interval_s_, minimum_probability_,
+                    name_, short_name_, group_.name(), eval_man_, update_interval_s_,
+                    max_ref_time_diff_, minimum_probability_,
                     use_max_gap_interval_, max_gap_interval_s_, use_miss_tolerance_, miss_tolerance_s_);
 
         return req;
@@ -61,6 +65,16 @@ namespace EvaluationRequirement
     void DetectionConfig::updateInterval(float value)
     {
         update_interval_s_ = value;
+    }
+
+    float DetectionConfig::maxRefTimeDiff() const
+    {
+        return max_ref_time_diff_;
+    }
+
+    void DetectionConfig::maxRefTimeDiff(float value)
+    {
+        max_ref_time_diff_ = value;
     }
 
     float DetectionConfig::minimumProbability() const
