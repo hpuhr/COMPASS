@@ -20,15 +20,18 @@
 #include "datasourcesfilterwidget.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
+#include "stringconv.h"
 
 #include "json.hpp"
 
 #include <QTabWidget>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <memory>
 #include <fstream>
 
-//using namespace Utils;
+using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
@@ -258,7 +261,18 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
     loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
 
     if (data_loaded_)
+    {
+        loginf << "EvaluationManager: loadingDoneSlot: finalizing";
+
+        boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
         data_.finalize();
+
+        boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
+
+        loginf << "EvaluationManager: loadingDoneSlot: finalize done "
+               << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+    }
 
     if (widget_)
         widget_->updateButtons();

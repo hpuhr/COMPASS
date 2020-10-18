@@ -9,6 +9,21 @@
 
 class Buffer;
 
+class TstDataMapping // mapping to respective ref data
+{
+public:
+    float tod_ {0}; // tod of test
+
+    bool has_ref1_ {false};
+    float tod_ref1_ {0};
+
+    bool has_ref2_ {false};
+    float tod_ref2_ {0};
+
+    bool has_ref_pos_ {false};
+    EvaluationTargetPosition pos_ref_;
+};
+
 class EvaluationTargetData
 {
 public:
@@ -28,7 +43,7 @@ public:
     bool hasRefData () const;
     bool hasTstData () const;
 
-    void finalize ();
+    void finalize () const;
 
     const unsigned int utn_{0};
 
@@ -63,7 +78,6 @@ public:
     const std::multimap<float, unsigned int>& tstData() const;
 
     // ref
-
     bool hasRefDataForTime (float tod, float d_max) const;
     std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
@@ -86,13 +100,15 @@ public:
     // nullptr if none
 
 protected:
+    static bool in_appimage_;
+
     bool use_ {true};
 
     std::multimap<float, unsigned int> ref_data_; // tod -> index
-    std::vector<unsigned int> ref_indexes_;
+    mutable std::vector<unsigned int> ref_indexes_;
 
     std::multimap<float, unsigned int> tst_data_; // tod -> index
-    std::vector<unsigned int> tst_indexes_;
+    mutable std::vector<unsigned int> tst_indexes_;
 
     std::shared_ptr<Buffer> ref_buffer_;
     std::string ref_latitude_name_;
@@ -107,18 +123,24 @@ protected:
     std::string tst_altitude_name_;
     std::string tst_callsign_name_;
 
-    std::vector<std::string> callsigns_;
-    std::vector<unsigned int> target_addresses_;
-    std::vector<unsigned int> mode_a_codes_;
+    mutable std::vector<std::string> callsigns_;
+    mutable std::vector<unsigned int> target_addresses_;
+    mutable std::vector<unsigned int> mode_a_codes_;
 
-    bool has_mode_c_ {false};
-    int mode_c_min_ {0};
-    int mode_c_max_ {0};
+    mutable bool has_mode_c_ {false};
+    mutable int mode_c_min_ {0};
+    mutable int mode_c_max_ {0};
 
-    void updateCallsigns();
-    void updateTargetAddresses();
-    void updateModeACodes();
-    void updateModeCMinMax();
+    mutable std::map<float, TstDataMapping> test_data_mappings_;
+
+    void updateCallsigns() const;
+    void updateTargetAddresses() const;
+    void updateModeACodes() const;
+    void updateModeCMinMax() const;
+
+    void calculateTestDataMappings() const;
+    TstDataMapping calculateTestDataMapping(float tod) const; // test tod
+    void addRefPositiosToMapping (TstDataMapping& mapping) const;
 };
 
 #endif // EVALUATIONTARGETDATA_H

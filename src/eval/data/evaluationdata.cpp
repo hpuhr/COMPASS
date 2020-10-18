@@ -4,6 +4,13 @@
 #include "buffer.h"
 #include "stringconv.h"
 
+#include <QApplication>
+#include <QThread>
+#include <QProgressDialog>
+#include <QLabel>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include <sstream>
 
 using namespace std;
@@ -143,10 +150,95 @@ void EvaluationData::finalize ()
 {
     loginf << "EvaluationData: finalize";
 
+    assert (!finalized_);
+
+    boost::posix_time::ptime start_time;
+    boost::posix_time::ptime elapsed_time;
+
+    start_time = boost::posix_time::microsec_clock::local_time();
+
+    unsigned int num_targets = target_data_.size();
+
     beginResetModel();
 
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
+    QProgressDialog postprocess_dialog_ ("", "", 0, num_targets);
+    postprocess_dialog_.setWindowTitle("Finalizing Evaluation Data");
+    postprocess_dialog_.setCancelButton(nullptr);
+    postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+
+    QLabel* progress_label = new QLabel("", &postprocess_dialog_);
+    progress_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    postprocess_dialog_.setLabel(progress_label);
+
+    postprocess_dialog_.show();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    vector<bool> done_flags;
+    done_flags.resize(target_data_.size());
+
+    bool done = false;
+    unsigned int tmp_done_cnt;
+
+    boost::posix_time::time_duration time_diff;
+    double elapsed_time_s;
+    double time_per_eval, remaining_time_s;
+
+    string remaining_time_str;
+
+    EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
+                target_data_, done_flags);
+    tbb::task::enqueue(*t);
+
+    while (!done)
+    {
+        done = true;
+        tmp_done_cnt = 0;
+
+        for (auto done_it : done_flags)
+        {
+            if (!done_it)
+                done = false;
+            else
+                tmp_done_cnt++;
+        }
+
+        assert (tmp_done_cnt <= num_targets);
+
+        elapsed_time = boost::posix_time::microsec_clock::local_time();
+
+        time_diff = elapsed_time - start_time;
+        elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+
+        time_per_eval = elapsed_time_s/(double)(tmp_done_cnt);
+        remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
+
+//        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
+//               << " elapsed_time_s " << elapsed_time_s;
+
+        postprocess_dialog_.setLabelText(
+                    ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                     +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                     +" (estimated)").c_str());
+
+        postprocess_dialog_.setValue(tmp_done_cnt);
+
+        if (!done)
+        {
+            QCoreApplication::processEvents();
+            QThread::msleep(100);
+        }
+    }
+
+//    unsigned int num_targets = target_data_.size();
+
+//    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+//    {
+//        target_data_[cnt].finalize();
+//    });
+
+//    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+//        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
 
     finalized_ = true;
 
@@ -154,6 +246,10 @@ void EvaluationData::finalize ()
 
     if (widget_)
         widget_->resizeColumnsToContents();
+
+    postprocess_dialog_.close();
+
+    QApplication::restoreOverrideCursor();
 }
 
 bool EvaluationData::hasTargetData (unsigned int utn)

@@ -78,7 +78,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     postprocess_dialog_.show();
 
-
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     // clear everything
@@ -175,7 +174,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     postprocess_dialog_.setLabelText(
                                 ("Sector Layer "+sector_layer_name
                                  +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()
-                                 +"\nElapsed:   "+String::timeStringFromDouble(elapsed_time_s, false)
+                                 +"\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
                                  +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
                                  +" (estimated)").c_str());
 

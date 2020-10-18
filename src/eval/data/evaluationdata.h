@@ -6,6 +6,8 @@
 
 #include <QAbstractItemModel>
 
+#include <tbb/tbb.h>
+
 #include <memory>
 #include <map>
 
@@ -14,6 +16,7 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index_container.hpp>
+
 
 class EvaluationManager;
 class DBObject;
@@ -32,6 +35,33 @@ typedef boost::multi_index_container<
         EvaluationTargetData, const unsigned int, &EvaluationTargetData::utn_> >
         > >
     TargetCache;
+
+class EvaluateTargetsFinalizeTask : public tbb::task {
+
+public:
+    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags)
+        : target_data_(target_data), done_flags_(done_flags)
+    {
+    }
+
+    /*override*/ tbb::task* execute() {
+        // Do the job
+
+        unsigned int num_targets = target_data_.size();
+
+        tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+        {
+            target_data_[cnt].finalize();
+            done_flags_[cnt] = true;
+        });
+
+        return NULL; // or a pointer to a new task to be executed immediately
+    }
+
+protected:
+    TargetCache& target_data_;
+    std::vector<bool>& done_flags_;
+};
 
 class EvaluationData : public QAbstractItemModel
 {
