@@ -14,7 +14,8 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref, int num_unknown_id, int num_correct_id, int num_false_id,
+            int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
+            int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::IdentificationDetail> details);
 
     virtual void print() override;
@@ -23,7 +24,10 @@ public:
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
     int numUpdates() const;
-    int numNoRef() const;
+    int numNoRefPos() const;
+    int numNoRefId() const;
+    int numPosOutside() const;
+    int numPosInside() const;
     int numUnknownId() const;
     int numCorrectId() const;
     int numFalseId() const;
@@ -43,7 +47,10 @@ public:
 
 protected:
     int num_updates_ {0};
-    int num_no_ref_ {0};
+    int num_no_ref_pos_ {0};
+    int num_no_ref_id_ {0};
+    int num_pos_outside_ {0};
+    int num_pos_inside_ {0};
     int num_unknown_id_ {0};
     int num_correct_id_ {0};
     int num_false_id_ {0};

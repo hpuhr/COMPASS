@@ -119,7 +119,7 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
-        utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_no_ref_}, this);
+        utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
         utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
         utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
         utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
@@ -143,8 +143,9 @@ namespace EvaluationRequirementResult
         // add further details
 
         if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 9,
-            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef", "#PosOK", "#PosNOK"});
+            utn_req_section.addTable("details_table", 12,
+            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
+             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable("details_table");
@@ -153,18 +154,13 @@ namespace EvaluationRequirementResult
 
         for (auto& rq_det_it : details_)
         {
-            //if (rq_det_it.has_ref_pos_)
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
-             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
+             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
+             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
+             rq_det_it.comment_.c_str()},
                         this, detail_cnt);
-            //            else
-//                utn_req_details_table.addRow(
-//                {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.pos_ok_,
-//                 !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, {},
-//                 rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
-//                            this, detail_cnt);
 
             ++detail_cnt;
         }

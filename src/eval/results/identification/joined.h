@@ -32,7 +32,10 @@ namespace EvaluationRequirementResult
 
     protected:
         int num_updates_ {0};
-        int num_no_ref_ {0};
+        int num_no_ref_pos_ {0};
+        int num_no_ref_id_ {0};
+        int num_pos_outside_ {0};
+        int num_pos_inside_ {0};
         int num_unknown_id_ {0};
         int num_correct_id_ {0};
         int num_false_id_ {0};

@@ -46,7 +46,10 @@ void JoinedIdentification::addToValues (std::shared_ptr<SingleIdentification> si
         return;
 
     num_updates_ += single_result->numUpdates();
-    num_no_ref_ += single_result->numNoRef();
+    num_no_ref_pos_ += single_result->numNoRefPos();
+    num_no_ref_id_ += single_result->numNoRefId();
+    num_pos_outside_ += single_result->numPosOutside();
+    num_pos_inside_ += single_result->numPosInside();
     num_unknown_id_ += single_result->numUnknownId();
     num_correct_id_ += single_result->numCorrectId();
     num_false_id_ += single_result->numFalseId();
@@ -56,7 +59,8 @@ void JoinedIdentification::addToValues (std::shared_ptr<SingleIdentification> si
 
 void JoinedIdentification::updatePID()
 {
-    assert (num_updates_ == num_no_ref_+num_unknown_id_+num_correct_id_+num_false_id_);
+    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
 
     if (num_correct_id_+num_false_id_)
     {
@@ -164,7 +168,8 @@ std::string JoinedIdentification::reference(
 void JoinedIdentification::updatesToUseChanges()
 {
     loginf << "JoinedIdentification: updatesToUseChanges: prev num_updates " << num_updates_
-           << " num_no_ref " << num_no_ref_ << " num_unknown_id " << num_unknown_id_
+           << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
+           << " num_unknown_id " << num_unknown_id_
            << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
 
     if (has_pid_)
@@ -174,7 +179,8 @@ void JoinedIdentification::updatesToUseChanges()
         loginf << "JoinedIdentification: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
     num_updates_ = 0;
-    num_no_ref_ = 0;
+    num_no_ref_pos_ = 0;
+    num_no_ref_id_ = 0;
     num_unknown_id_ = 0;
     num_correct_id_ = 0;
     num_false_id_ = 0;
@@ -189,7 +195,8 @@ void JoinedIdentification::updatesToUseChanges()
     }
 
     loginf << "JoinedIdentification: updatesToUseChanges: updt num_updates " << num_updates_
-           << " num_no_ref " << num_no_ref_ << " num_unknown_id " << num_unknown_id_
+           << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
+           << " num_unknown_id " << num_unknown_id_
            << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
 
     if (has_pid_)

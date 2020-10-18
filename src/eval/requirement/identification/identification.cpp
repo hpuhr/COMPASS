@@ -3,6 +3,7 @@
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "sectorlayer.h"
 
 using namespace std;
 using namespace Utils;
@@ -12,10 +13,16 @@ namespace EvaluationRequirement
 
     Identification::Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float minimum_probability)
-        : Base(name, short_name, group_name, eval_man), minimum_probability_(minimum_probability)
+            EvaluationManager& eval_man, float max_ref_time_diff, float minimum_probability)
+        : Base(name, short_name, group_name, eval_man),
+          max_ref_time_diff_(max_ref_time_diff), minimum_probability_(minimum_probability)
     {
 
+    }
+
+    float Identification::maxRefTimeDiff() const
+    {
+        return max_ref_time_diff_;
     }
 
 
@@ -28,7 +35,7 @@ namespace EvaluationRequirement
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer)
     {
-        loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " minimum_probability " << minimum_probability_;
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -38,7 +45,10 @@ namespace EvaluationRequirement
         float ref_lower{0}, ref_upper{0};
 
         int num_updates {0};
-        int num_no_ref {0};
+        int num_no_ref_pos {0};
+        int num_no_ref_id {0};
+        int num_pos_outside {0};
+        int num_pos_inside {0};
         int num_unknown_id {0};
         int num_correct_id {0};
         int num_false_id {0};
@@ -49,22 +59,72 @@ namespace EvaluationRequirement
         bool callsign_ok;
 
         bool ref_exists;
+        bool is_inside;
+        pair<EvaluationTargetPosition, bool> ret_pos;
+        EvaluationTargetPosition ref_pos;
+        bool ok;
+
         string comment;
         bool lower_nok, upper_nok;
 
         for (const auto& tst_id : tst_data)
         {
             ref_exists = false;
+            is_inside = false;
             comment = "";
+
+            ++num_updates;
 
             tod = tst_id.first;
             pos_current = target_data.tstPosForTime(tod);
+
+            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
+            {
+                details.push_back({tod, pos_current,
+                                   false, {}, // ref_exists, pos_inside,
+                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                   num_unknown_id, num_correct_id, num_false_id, "No reference data"});
+
+                ++num_no_ref_pos;
+                continue;
+            }
+
+            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+
+            ref_pos = ret_pos.first;
+            ok = ret_pos.second;
+
+            if (!ok)
+            {
+                details.push_back({tod, pos_current,
+                                   false, {}, // ref_exists, pos_inside,
+                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                   num_unknown_id, num_correct_id, num_false_id, "No reference position"});
+
+                ++num_no_ref_pos;
+                continue;
+            }
+            ref_exists = true;
+
+            is_inside = sector_layer.isInside(ref_pos);
+
+            if (!is_inside)
+            {
+                details.push_back({tod, pos_current,
+                                   ref_exists, is_inside, // ref_exists, pos_inside,
+                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                   num_unknown_id, num_correct_id, num_false_id, "Outside sector"});
+
+                ++num_pos_outside;
+                continue;
+            }
+            ++num_pos_inside;
 
             if (target_data.hasTstCallsignForTime(tod))
             {
                 callsign = target_data.tstCallsignForTime(tod);
 
-                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, 4);
+                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
 
                 if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
                 {
@@ -110,35 +170,38 @@ namespace EvaluationRequirement
                     else
                     {
                         comment = "No reference data";
-                        ++num_no_ref;
+                        ++num_no_ref_id;
                     }
                 }
                 else
                 {
-                    comment = "No reference data";
-                    ++num_no_ref;
+                    comment = "No reference identification";
+                    ++num_no_ref_id;
                 }
             }
             else
             {
-                comment = "No identification given";
+                comment = "No test identification";
                 ++num_unknown_id;
             }
 
-            ++num_updates;
-
-            details.push_back({tod, pos_current, ref_exists, num_updates, num_no_ref, num_unknown_id,
-                               num_correct_id, num_false_id, comment});
+            details.push_back({tod, pos_current,
+                               ref_exists, is_inside,
+                               num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                               num_unknown_id, num_correct_id, num_false_id, comment});
         }
 
-        assert (num_updates == num_no_ref+num_unknown_id+num_correct_id+num_false_id);
-
-        assert (details.size() == tst_data.size());
-
         loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_updates " << num_updates << " num_no_ref " << num_no_ref
+               << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
+               << " num_no_ref_id " << num_no_ref_id
+               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_unknown_id " << num_unknown_id << " num_correct_id " << num_correct_id
                << " num_false_id " << num_false_id;
+
+        assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+        assert (num_pos_inside == num_no_ref_id+num_unknown_id+num_correct_id+num_false_id);
+
+        assert (details.size() == tst_data.size());
 
         if (num_correct_id+num_false_id)
         {
@@ -153,6 +216,7 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleIdentification>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref, num_unknown_id, num_correct_id, num_false_id, details);
+                    eval_man_, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
+                    num_unknown_id, num_correct_id, num_false_id, details);
     }
 }

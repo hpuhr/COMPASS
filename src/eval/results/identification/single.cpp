@@ -23,19 +23,22 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref, int num_unknown_id, int num_correct_id, int num_false_id,
+            int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
+            int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::IdentificationDetail> details)
         : Single("SingleIdentification", result_id, requirement, sector_layer, utn, target, eval_man),
-          num_updates_(num_updates), num_no_ref_(num_no_ref), num_unknown_id_(num_unknown_id),
+          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
+          num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
+          num_unknown_id_(num_unknown_id),
           num_correct_id_(num_correct_id), num_false_id_(num_false_id), details_(details)
     {
         updatePID();
     }
 
-
     void SingleIdentification::updatePID()
     {
-        assert (num_updates_ == num_no_ref_+num_unknown_id_+num_correct_id_+num_false_id_);
+        assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+        assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
 
         if (num_correct_id_+num_false_id_)
         {
@@ -98,8 +101,8 @@ namespace EvaluationRequirementResult
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), num_updates_, num_no_ref_, num_unknown_id_, num_correct_id_, num_false_id_,
+         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
          pd_var}, this, {utn_});
 
         // add requirement to targets->utn->requirements->group->req
@@ -114,7 +117,12 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
+                                num_no_ref_pos_+num_no_ref_id_}, this);
+        utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
+        utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+        utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
         utn_req_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
         utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
         utn_req_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
@@ -139,8 +147,8 @@ namespace EvaluationRequirementResult
         // add further details
 
         if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 8,
-            {"ToD", "Ref", "#Up", "#NoRef", "#UID", "#CID", "#FID", "Comment"});
+            utn_req_section.addTable("details_table", 10,
+            {"ToD", "Ref", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable("details_table");
@@ -151,7 +159,8 @@ namespace EvaluationRequirementResult
         {
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
-             rq_det_it.num_updates_, rq_det_it.num_no_ref_, rq_det_it.num_unknown_id_,
+             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
+             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
              rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
                         this, detail_cnt);
 
@@ -229,9 +238,24 @@ namespace EvaluationRequirementResult
         return make_shared<JoinedIdentification> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SingleIdentification::numNoRef() const
+    int SingleIdentification::numNoRefPos() const
     {
-        return num_no_ref_;
+        return num_no_ref_pos_;
+    }
+
+    int SingleIdentification::numNoRefId() const
+    {
+        return num_no_ref_id_;
+    }
+
+    int SingleIdentification::numPosOutside() const
+    {
+        return num_pos_outside_;
+    }
+
+    int SingleIdentification::numPosInside() const
+    {
+        return num_pos_inside_;
     }
 
     int SingleIdentification::numUpdates() const
