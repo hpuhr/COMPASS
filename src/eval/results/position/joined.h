@@ -35,6 +35,7 @@ namespace EvaluationRequirementResult
         int num_pos_ {0};
         int num_no_ref_ {0};
         int num_pos_outside_ {0};
+        int num_pos_inside_ {0};
         int num_pos_ok_ {0};
         int num_pos_nok_ {0};
 

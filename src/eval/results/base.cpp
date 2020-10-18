@@ -85,8 +85,8 @@ EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
     EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
 
     if (!ov_sec.hasTable("req_overview"))
-        ov_sec.addTable("req_overview", 6,
-        {"Sector Layer", "Req.", "Group", "Result", "Condition", "Result"});
+        ov_sec.addTable("req_overview", 7,
+        {"Sector Layer", "Req.", "Group", "#Updates", "Result", "Condition", "Result"});
 
     return ov_sec.getTable("req_overview");
 }

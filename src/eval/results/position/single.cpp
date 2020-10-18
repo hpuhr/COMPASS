@@ -23,11 +23,11 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_pos, int num_no_ref, int num_pos_outside, int num_pos_ok, int num_pos_nok,
+            int num_pos, int num_no_ref, int num_pos_outside, int num_pos_inside, int num_pos_ok, int num_pos_nok,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details)
         : Single("SinglePositionMaxDistance", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-          num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
+          num_pos_inside_(num_pos_inside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
           details_(details)
     {
         updatePMaxPos();
@@ -37,6 +37,8 @@ namespace EvaluationRequirementResult
     void SinglePositionMaxDistance::updatePMaxPos()
     {
         assert (num_no_ref_ <= num_pos_);
+        assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+        assert (num_pos_inside_ == num_pos_ok_ + num_pos_nok_);
 
         if (num_pos_ - num_no_ref_ - num_pos_outside_)
         {
@@ -84,9 +86,9 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
-            tgt_overview_section.addTable("target_table", 13,
+            tgt_overview_section.addTable("target_table", 12,
             {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
-             "#Pos", "#NoRef", "#PosOK", "#PosNOK", "PNOK"});
+             "#PosInside", "#PosOK", "#PosNOK", "PNOsK"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
@@ -101,7 +103,7 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), num_pos_, num_no_ref_, num_pos_ok_, num_pos_nok_, pd_var}, this, {utn_});
+         target_->modeCMaxStr().c_str(), num_pos_inside_, num_pos_ok_, num_pos_nok_, pd_var}, this, {utn_});
 
         // add requirement to targets->utn->requirements->group->req
 
@@ -115,7 +117,9 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions ", num_no_ref_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
+        utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+        utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_no_ref_}, this);
         utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
         utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
         utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
@@ -139,8 +143,8 @@ namespace EvaluationRequirementResult
         // add further details
 
         if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 8,
-            {"ToD", "PosOK", "NoRef", "Distance", "#Pos", "#NoRef", "#PosOK", "#PosNOK"});
+            utn_req_section.addTable("details_table", 9,
+            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef", "#PosOK", "#PosNOK"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable("details_table");
@@ -149,18 +153,18 @@ namespace EvaluationRequirementResult
 
         for (auto& rq_det_it : details_)
         {
-            if (rq_det_it.has_ref_pos_)
-                utn_req_details_table.addRow(
-                {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.pos_ok_,
-                 !rq_det_it.has_ref_pos_, rq_det_it.distance_,
-                 rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
-                            this, detail_cnt);
-            else
-                utn_req_details_table.addRow(
-                {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.pos_ok_,
-                 !rq_det_it.has_ref_pos_, {},
-                 rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
-                            this, detail_cnt);
+            //if (rq_det_it.has_ref_pos_)
+            utn_req_details_table.addRow(
+            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
+             rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
+                        this, detail_cnt);
+            //            else
+//                utn_req_details_table.addRow(
+//                {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.pos_ok_,
+//                 !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, {},
+//                 rq_det_it.num_pos_, rq_det_it.num_no_ref_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_},
+//                            this, detail_cnt);
 
             ++detail_cnt;
         }
@@ -234,6 +238,11 @@ namespace EvaluationRequirementResult
     int SinglePositionMaxDistance::numPosOutside() const
     {
         return num_pos_outside_;
+    }
+
+    int SinglePositionMaxDistance::numPosInside() const
+    {
+        return num_pos_inside_;
     }
 
     std::shared_ptr<Joined> SinglePositionMaxDistance::createEmptyJoined(const std::string& result_id)

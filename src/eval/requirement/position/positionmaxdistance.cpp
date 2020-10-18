@@ -78,7 +78,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         if (!target_data.hasRefDataForTime (tod, 4))
         {
             details.push_back({tod, tst_pos,
-                               false, {}, 0.0, true,
+                               false, {},
+                               {}, {}, true, // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_no_ref;
@@ -93,7 +94,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         if (!ok)
         {
             details.push_back({tod, tst_pos,
-                               false, {}, 0.0, true,
+                               false, {},
+                               {}, {}, true, // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_no_ref;
@@ -105,7 +107,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         if (!is_inside)
         {
             details.push_back({tod, tst_pos,
-                               true, ref_pos, 0.0, true,
+                               true, ref_pos,
+                               false, {}, true, // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
             ++num_pos_outside;
             continue;
@@ -131,7 +134,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         if (!ret)
         {
             details.push_back({tod, tst_pos,
-                               false, {}, 0.0, true,
+                               false, {},
+                               true, {}, true, // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
             ++num_no_ref;
             continue;
@@ -142,14 +146,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         if (distance > max_distance_)
         {
             details.push_back({tod, tst_pos,
-                               true, ref_pos, distance, false,
+                               true, ref_pos,
+                               true, distance, false, // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_pos_nok;
         }
         else
         {
-            details.push_back({tod, tst_pos, true, ref_pos, distance, true,
+            details.push_back({tod, tst_pos,
+                               true, ref_pos,
+                               true, distance, true, // // pos_inside, distance, pos_ok
                                num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok});
 
             ++num_pos_ok;
@@ -166,7 +173,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
 
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_ok, num_pos_nok, details);
+                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_pos_ok, num_pos_nok, details);
 }
 
 

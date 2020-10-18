@@ -135,6 +135,30 @@ namespace EvaluationResultsReport
                         return QVariant();
 
                 }
+            case Qt::ForegroundRole:
+                {
+                    assert (index.row() >= 0);
+                    assert (index.row() < rows_.size());
+                    assert (index.column() < num_columns_);
+
+                    QVariant data = rows_.at(index.row()).at(index.column());
+
+                    if (data.userType() == QMetaType::QString)
+                    {
+                        if (data == "Passed")
+                            return QVariant(QColor(Qt::darkGreen));
+                        else if (data == "Failed")
+                            return QVariant(QColor(Qt::red));
+                    }
+                    if (data.userType() == QMetaType::Bool)
+                    {
+                        if (data == true)
+                            return QVariant(QColor(Qt::darkGreen));
+                        else if (data == false)
+                            return QVariant(QColor(Qt::red));
+                    }
+                    return QVariant(QColor(Qt::black));
+                }
             default:
                 {
                     return QVariant();

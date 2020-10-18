@@ -48,6 +48,7 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
     num_pos_ += single_result->numPos();
     num_no_ref_ += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
+    num_pos_inside_ += single_result->numPosInside();
     num_pos_ok_ += single_result->numPosOk();
     num_pos_nok_ += single_result->numPosNOk();
 
@@ -57,6 +58,8 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
 void JoinedPositionMaxDistance::updatePMaxPos()
 {
     assert (num_no_ref_ <= num_pos_);
+    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+    assert (num_pos_inside_ == num_pos_ok_ + num_pos_nok_);
 
     if (num_pos_ - num_no_ref_ - num_pos_outside_)
     {
@@ -121,7 +124,8 @@ void JoinedPositionMaxDistance::addToReport (
 
     // "Req.", "Group", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                     requirement_->groupName().c_str(), pd_var, condition.c_str(), result.c_str()}, this, {});
+                     requirement_->groupName().c_str(), {num_pos_ok_+num_pos_nok_},
+                     pd_var, condition.c_str(), result.c_str()}, this, {});
 }
 
 bool JoinedPositionMaxDistance::hasViewableData (
@@ -170,6 +174,7 @@ void JoinedPositionMaxDistance::updatesToUseChanges()
     num_pos_ = 0;
     num_no_ref_ = 0;
     num_pos_outside_ = 0;
+    num_pos_inside_ = 0;
     num_pos_ok_ = 0;
     num_pos_nok_ = 0;
 

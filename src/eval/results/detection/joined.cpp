@@ -118,7 +118,8 @@ namespace EvaluationRequirementResult
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                         requirement_->groupName().c_str(), pd_var, condition.c_str(), result.c_str()}, this, {});
+                         requirement_->groupName().c_str(), {sum_uis_-max_gap_uis_-no_ref_uis_},
+                         pd_var, condition.c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }
 

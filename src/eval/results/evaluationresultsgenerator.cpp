@@ -16,6 +16,7 @@
 #include <QProgressDialog>
 #include <QApplication>
 #include <QThread>
+#include <QLabel>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -70,7 +71,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     postprocess_dialog_.setWindowTitle("Evaluating");
     postprocess_dialog_.setCancelButton(nullptr);
     postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+
+    QLabel* progress_label = new QLabel("", &postprocess_dialog_);
+    progress_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    postprocess_dialog_.setLabel(progress_label);
+
     postprocess_dialog_.show();
+
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -95,6 +102,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     double time_per_eval, remaining_time_s;
 
     string remaining_time_str;
+
 
     for (auto& sec_it : sector_layers)
     {
@@ -167,9 +175,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     postprocess_dialog_.setLabelText(
                                 ("Sector Layer "+sector_layer_name
                                  +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()
-                                 +"\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                                 +"\tEstimated Remaining: "
-                                 +String::timeStringFromDouble(remaining_time_s, false)).c_str());
+                                 +"\nElapsed:   "+String::timeStringFromDouble(elapsed_time_s, false)
+                                 +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                                 +" (estimated)").c_str());
 
                     postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
 

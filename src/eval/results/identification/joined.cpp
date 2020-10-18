@@ -121,7 +121,8 @@ void JoinedIdentification::addToReport (
 
     // "Req.", "Group", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                     requirement_->groupName().c_str(), pd_var, condition.c_str(), result.c_str()}, this, {});
+                     requirement_->groupName().c_str(), {num_correct_id_+num_false_id_},
+                     pd_var, condition.c_str(), result.c_str()}, this, {});
 }
 
 bool JoinedIdentification::hasViewableData (

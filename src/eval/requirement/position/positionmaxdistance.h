@@ -4,6 +4,8 @@
 #include "eval/requirement/base.h"
 #include "evaluationtargetposition.h"
 
+#include <QVariant>
+
 namespace EvaluationRequirement
 {
 
@@ -12,10 +14,12 @@ namespace EvaluationRequirement
     public:
         PositionMaxDistanceDetail(
                 float tod, EvaluationTargetPosition tst_pos,
-                bool has_ref_pos, EvaluationTargetPosition ref_pos, double distance, bool pos_ok,
+                bool has_ref_pos, EvaluationTargetPosition ref_pos,
+                QVariant pos_inside, QVariant distance, bool pos_ok,
                 int num_pos, int num_no_ref, int num_outside, int num_pos_ok, int num_pos_nok)
             : tod_(tod), tst_pos_(tst_pos), has_ref_pos_(has_ref_pos), ref_pos_(ref_pos),
-              distance_(distance), pos_ok_(pos_ok), num_pos_(num_pos), num_no_ref_(num_no_ref),
+              distance_(distance), pos_ok_(pos_ok), pos_inside_(pos_inside),
+              num_pos_(num_pos), num_no_ref_(num_no_ref),
               num_outside_(num_outside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok)
         {
         }
@@ -27,8 +31,10 @@ namespace EvaluationRequirement
         bool has_ref_pos_ {false};
         EvaluationTargetPosition ref_pos_;
 
-        double distance_ {0}; // only set if has_ref_pos_
+        QVariant distance_ {0}; // only set if has_ref_pos_
         bool pos_ok_ {false};
+
+        QVariant pos_inside_ {false};
 
         int num_pos_ {0};
         int num_no_ref_ {0};
