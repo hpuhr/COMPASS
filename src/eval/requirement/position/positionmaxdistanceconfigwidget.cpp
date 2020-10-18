@@ -18,6 +18,15 @@ namespace EvaluationRequirement
         config_.addGUIElements(form_layout_);
 
 
+        // max ref time diff
+        max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
+        max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
+        connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
+                this, &PositionMaxDistanceConfigWidget::maxRefTimeDiffEditSlot);
+
+        form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
+
+
         // max dist
         max_distance_edit_ = new QLineEdit(QString::number(config_.maxDistance()));
         max_distance_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
@@ -35,6 +44,19 @@ namespace EvaluationRequirement
         form_layout_->addRow("Maximum Probability [1]", maximum_prob_edit_);
 
         setLayout(form_layout_);
+    }
+
+    void PositionMaxDistanceConfigWidget::maxRefTimeDiffEditSlot(QString value)
+    {
+        loginf << "PositionMaxDistanceConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
+
+        bool ok;
+        float val = value.toFloat(&ok);
+
+        if (ok)
+            config_.maxRefTimeDiff(val);
+        else
+            loginf << "PositionMaxDistanceConfigWidget: maxRefTimeDiffEditSlot: invalid value";
     }
 
 

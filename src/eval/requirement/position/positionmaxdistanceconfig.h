@@ -30,7 +30,11 @@ public:
     float maximumProbability() const;
     void maximumProbability(float value);
 
+    float maxRefTimeDiff() const;
+    void maxRefTimeDiff(float value);
+
 protected:
+    float max_ref_time_diff_ {0};
     float max_distance_ {0};
     float maximum_probability_{0};
 

@@ -15,9 +15,9 @@ namespace EvaluationRequirement
 
 PositionMaxDistance::PositionMaxDistance(const std::string& name, const std::string& short_name, const std::string& group_name,
                                          EvaluationManager& eval_man,
-                                         float max_distance, float maximum_probability)
+                                         float max_ref_time_diff, float max_distance, float maximum_probability)
     : Base(name, short_name, group_name, eval_man),
-      max_distance_(max_distance), maximum_probability_(maximum_probability)
+      max_ref_time_diff_(max_ref_time_diff), max_distance_(max_distance), maximum_probability_(maximum_probability)
 {
 
 }
@@ -75,7 +75,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
         tod = tst_id.first;
         tst_pos = target_data.tstPosForTime(tod);
 
-        if (!target_data.hasRefDataForTime (tod, 4))
+        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
         {
             details.push_back({tod, tst_pos,
                                false, {},
@@ -86,7 +86,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
             continue;
         }
 
-        pair<EvaluationTargetPosition, bool> ret_pos = target_data.interpolatedRefPosForTime(tod, 4);
+        pair<EvaluationTargetPosition, bool> ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
 
         EvaluationTargetPosition ref_pos {ret_pos.first};
         bool ok {ret_pos.second};
@@ -174,6 +174,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evalua
     return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_pos_ok, num_pos_nok, details);
+}
+
+float PositionMaxDistance::maxRefTimeDiff() const
+{
+    return max_ref_time_diff_;
 }
 
 

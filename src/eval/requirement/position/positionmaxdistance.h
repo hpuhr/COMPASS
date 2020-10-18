@@ -50,8 +50,9 @@ namespace EvaluationRequirement
         PositionMaxDistance(
                 const std::string& name, const std::string& short_name, const std::string& group_name,
                 EvaluationManager& eval_man,
-                float max_distance, float maximum_probability);
+                float max_time_diff, float max_distance, float maximum_probability);
 
+        float maxRefTimeDiff() const;
         float maxDistance() const;
         float maximumProbability() const;
 
@@ -59,7 +60,9 @@ namespace EvaluationRequirement
                 const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
                 const SectorLayer& sector_layer) override;
 
+
     protected:
+        float max_ref_time_diff_ {0};
         float max_distance_ {0};
         float maximum_probability_{0};
     };

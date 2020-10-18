@@ -14,6 +14,7 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : Config(class_id, instance_id, group, standard, eval_man)
     {
+        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
         registerParameter("max_distance", &max_distance_, 50.0);
         registerParameter("maximum_probability", &maximum_probability_, 0.10);
     }
@@ -41,7 +42,8 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> PositionMaxDistanceConfig::createRequirement()
     {
         shared_ptr<PositionMaxDistance> req = make_shared<PositionMaxDistance>(
-                    name_, short_name_, group_.name(), eval_man_, max_distance_, maximum_probability_);
+                    name_, short_name_, group_.name(), eval_man_,
+                    max_ref_time_diff_, max_distance_, maximum_probability_);
 
         return req;
     }
@@ -64,5 +66,15 @@ namespace EvaluationRequirement
     void PositionMaxDistanceConfig::maximumProbability(float value)
     {
         maximum_probability_ = value;
+    }
+    
+    float PositionMaxDistanceConfig::maxRefTimeDiff() const
+    {
+        return max_ref_time_diff_;
+    }
+    
+    void PositionMaxDistanceConfig::maxRefTimeDiff(float value)
+    {
+        max_ref_time_diff_ = value;
     }
 }

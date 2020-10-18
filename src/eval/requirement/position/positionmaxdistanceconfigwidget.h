@@ -18,6 +18,7 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
+        void maxRefTimeDiffEditSlot(QString value);
         void maxDistanceEditSlot(QString value);
         void maximumProbEditSlot(QString value);
 
@@ -27,6 +28,7 @@ namespace EvaluationRequirement
     protected:
         PositionMaxDistanceConfig& config_;
 
+        QLineEdit* max_ref_time_diff_edit_{nullptr};
         QLineEdit* max_distance_edit_{nullptr};
         QLineEdit* maximum_prob_edit_{nullptr};
 
