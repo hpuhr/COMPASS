@@ -14,7 +14,7 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
+            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis,
             std::vector<EvaluationRequirement::DetectionDetail> details);
 
     virtual void print() override;
@@ -22,10 +22,10 @@ public:
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    float sumUIs() const;
-    float missedUIs() const;
-    float maxGapUIs() const;
-    float noRefUIs() const;
+    int sumUIs() const;
+    int missedUIs() const;
+    int maxGapUIs() const;
+    int noRefUIs() const;
 
     std::vector<EvaluationRequirement::DetectionDetail>& details();
 
@@ -40,10 +40,10 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
 protected:
-    float sum_uis_ {0};
-    float missed_uis_ {0};
-    float max_gap_uis_ {0};
-    float no_ref_uis_ {0};
+    int sum_uis_ {0};
+    int missed_uis_ {0};
+    int max_gap_uis_ {0};
+    int no_ref_uis_ {0};
 
     std::vector<EvaluationRequirement::DetectionDetail> details_;
 

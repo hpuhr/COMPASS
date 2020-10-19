@@ -23,10 +23,11 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            float sum_uis, float missed_uis, float max_gap_uis, float no_ref_uis,
+            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis,
             std::vector<EvaluationRequirement::DetectionDetail> details)
         : Single("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man),
-          sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis), details_(details)
+          sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis),
+          details_(details)
     {
         updatePD();
     }
@@ -55,7 +56,7 @@ namespace EvaluationRequirementResult
             }
             else
             {
-                pd_ = 1.0 - (missed_uis_/(sum_uis_ - max_gap_uis_ - no_ref_uis_));
+                pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_ - max_gap_uis_ - no_ref_uis_));
                 has_pd_ = true;
 
                 result_usable_ = true;
@@ -163,17 +164,17 @@ namespace EvaluationRequirementResult
 
         for (auto& rq_det_it : details_)
         {
-            if (rq_det_it.has_d_tod_)
+            if (rq_det_it.d_tod_.isValid())
                 utn_req_details_table.addRow(
                 {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-                 String::timeStringFromDouble(rq_det_it.d_tod_).c_str(),
+                 String::timeStringFromDouble(rq_det_it.d_tod_.toFloat()).c_str(),
                  rq_det_it.ref_exists_, rq_det_it.missed_uis_,
                  rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_, rq_det_it.comment_.c_str()},
                             this, detail_cnt);
             else
                 utn_req_details_table.addRow(
                 {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-                 QVariant(),
+                 rq_det_it.d_tod_,
                  rq_det_it.ref_exists_, rq_det_it.missed_uis_,
                  rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_,
                  rq_det_it.comment_.c_str()},
@@ -252,22 +253,22 @@ namespace EvaluationRequirementResult
         return make_shared<JoinedDetection> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    float SingleDetection::sumUIs() const
+    int SingleDetection::sumUIs() const
     {
         return sum_uis_;
     }
 
-    float SingleDetection::missedUIs() const
+    int SingleDetection::missedUIs() const
     {
         return missed_uis_;
     }
 
-    float SingleDetection::maxGapUIs() const
+    int SingleDetection::maxGapUIs() const
     {
         return max_gap_uis_;
     }
 
-    float SingleDetection::noRefUIs() const
+    int SingleDetection::noRefUIs() const
     {
         return no_ref_uis_;
     }
