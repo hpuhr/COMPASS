@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
+#include "timeperiod.h"
 
 using namespace std;
 using namespace Utils;
@@ -69,13 +70,67 @@ namespace EvaluationRequirement
                << " use_max_gap_interval " << use_max_gap_interval_ << " max_gap_interval " << max_gap_interval_s_
                << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
 
+        // create ref time periods
+
+        TimePeriodCollection ref_periods;
+
+        EvaluationTargetPosition ref_pos;
+        float tod{0}, last_tod{0};
+        bool first {true};
+        bool inside, was_inside;
+
+        {
+            const std::multimap<float, unsigned int>& ref_data = target_data.refData();
+
+            for (auto& ref_it : ref_data)
+            {
+                tod = ref_it.first;
+                was_inside = inside;
+
+                inside = target_data.hasRefPosForTime(tod) && sector_layer.isInside(target_data.refPosForTime(tod));
+
+                if (first)
+                {
+                    if (inside) // create time period
+                        ref_periods.add({tod, tod});
+
+                    first = false;
+
+                    continue;
+                }
+
+                // not first, was_inside is valid
+
+                if (was_inside)
+                {
+                    if (inside)
+                    {
+                        // extend last time period, if possible, or finish last and create new one
+                        if (ref_periods.lastPeriod().isCloseToEnd(tod, 4.9))
+                            ref_periods.lastPeriod().extend(tod);
+                        else
+                            ref_periods.add({tod, tod});
+                    }
+                }
+                else if (inside) // was not inside and is now inside
+                    ref_periods.add({tod, tod}); // create new time period
+            }
+        }
+        ref_periods.removeSmallPeriods(1);
+
+        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+               << " periods '" << ref_periods.print() << "'";
+
+        tod = 0;
+        last_tod = 0;
+        first = true;
+
+        // evaluate test data
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
-        bool first {true};
         float first_tod{0}; // first in inside sector leg
         float sum_uis {0};
 
-        float tod{0}, last_tod{0};
         float d_tod{0};
 
         int missed_uis {0};
@@ -89,11 +144,20 @@ namespace EvaluationRequirement
         bool is_inside;
         bool was_outside;
         pair<EvaluationTargetPosition, bool> ret_pos;
-        EvaluationTargetPosition ref_pos;
         bool ok;
 
         vector<DetectionDetail> details;
         EvaluationTargetPosition pos_current;
+
+        if (!tst_data.size())
+        {
+            sum_uis = ref_periods.getUIs(update_interval_s_);
+            missed_uis = sum_uis;
+
+            return make_shared<EvaluationRequirementResult::SingleDetection>(
+                        "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
+                        eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, ref_periods.print(true), details);
+        }
 
         for (const auto& tst_id : tst_data)
         {
@@ -170,7 +234,7 @@ namespace EvaluationRequirement
                      pos_current, false,
                      missed_uis, max_gap_uis, no_ref_uis,
                      "Outside sector, finishing leg ["+String::timeStringFromDouble(first_tod)
-                                +","+String::timeStringFromDouble(tod)+"]"});
+                     +","+String::timeStringFromDouble(tod)+"]"});
 
 
                     sum_uis += floor(tod - first_tod);
@@ -324,7 +388,7 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, details);
+                    eval_man_, sum_uis, missed_uis, max_gap_uis, no_ref_uis, ref_periods.print(true), details);
     }
 
     bool Detection::isMiss (float d_tod)

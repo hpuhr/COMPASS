@@ -9,6 +9,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetdata.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetposition.h"
+        "${CMAKE_CURRENT_LIST_DIR}/timeperiod.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdata.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatawidget.cpp"
