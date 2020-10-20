@@ -890,10 +890,14 @@ void EvaluationTargetData::updateModeCMinMax() const
 
 void EvaluationTargetData::calculateTestDataMappings() const
 {
+    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
+
     assert (!test_data_mappings_.size());
 
     for (auto& tst_it : tst_data_)
         test_data_mappings_[tst_it.first] = calculateTestDataMapping(tst_it.first);
+
+    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done";
 }
 
 TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
@@ -924,7 +928,19 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
             ret.has_ref2_ = true;
             ret.tod_ref2_ = lb_it->first;
 
-            lb_it--;
+            // search lower values by decrementing iterator
+            while (lb_it != ref_data_.end() && tod < lb_it->first)
+            {
+                if (lb_it == ref_data_.begin()) // exit condition on first value
+                {
+                    if (tod < lb_it->first) // set as not found
+                        lb_it = ref_data_.end();
+
+                    break;
+                }
+
+                lb_it--;
+            }
 
             if (lb_it != ref_data_.end()) // lower tod found
             {
