@@ -47,8 +47,8 @@ public:
     Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man,
-            float update_interval_s, float max_ref_time_diff, float minimum_probability, bool use_max_gap_interval,
-            float max_gap_interval_s, bool use_miss_tolerance, float miss_tolerance_s);
+            float update_interval_s, float max_ref_time_diff, float minimum_probability,
+            bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;
 
@@ -56,13 +56,11 @@ public:
 
     float minimumProbability() const;
 
-    bool useMaxGapInterval() const;
-
-    float maxGapInterval() const;
-
     bool useMissTolerance() const;
 
     float missTolerance() const;
+
+    float missThreshold() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -75,14 +73,10 @@ protected:
 
     float minimum_probability_{0};
 
-    bool use_max_gap_interval_{true};
-    float max_gap_interval_s_{0};
-
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
 
     bool isMiss (float d_tod);
-    bool isMaxGap (float d_tod);
 };
 
 }

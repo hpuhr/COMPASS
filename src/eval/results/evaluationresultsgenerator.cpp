@@ -42,8 +42,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    //unsigned int num_requirements {0};
-
     std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
 
     unsigned int num_req_evals = 0;
@@ -60,12 +58,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             num_req_evals += req_group_it.second->size() * data.size(); // num reqs * num target
             num_req_evals += req_group_it.second->size(); // num reqs for sector sum
-
-            //num_requirements += req_group_it.second->size();
         }
     }
-
-     //= num_requirements * data.size() + num_requirements; // adapt for num sums
 
     QProgressDialog postprocess_dialog_ ("", "", 0, num_req_evals);
     postprocess_dialog_.setWindowTitle("Evaluating");
@@ -102,7 +96,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     string remaining_time_str;
 
-
     for (auto& sec_it : sector_layers)
     {
         const string& sector_layer_name = sec_it->name();
@@ -124,8 +117,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
                 std::shared_ptr<Joined> result_sum;
 
-                //req_grp_id = req->groupName()+":"+req->name();
-
                 vector<shared_ptr<Single>> results;
                 results.resize(num_utns);
 
@@ -133,9 +124,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 done_flags.resize(num_utns);
 
                 // generate results
-
                 EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-                            results, utns, data, req, *sec_it, done_flags);
+                            results, utns, data, req, *sec_it, done_flags, false);
                 tbb::task::enqueue(*t);
 
                 bool done = false;

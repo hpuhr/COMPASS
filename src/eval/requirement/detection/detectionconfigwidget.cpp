@@ -27,6 +27,14 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
 
     form_layout_->addRow("Update Interval [s]", update_interval_edit_);
 
+    // max ref time diff
+    max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
+    max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
+    connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
+            this, &DetectionConfigWidget::maxRefTimeDiffEditSlot);
+
+    form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
+
     // prob
     minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
     minimum_prob_edit_->setValidator(new QDoubleValidator(0.01, 1.0, 2, this));
@@ -36,19 +44,19 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
     form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 
     // max gap
-    use_max_gap_check_ = new QCheckBox ();
-    use_max_gap_check_->setChecked(config_.useMaxGapInterval());
-    connect(use_max_gap_check_, &QCheckBox::clicked,
-            this, &DetectionConfigWidget::toggleUseMaxGapSlot);
+//    use_max_gap_check_ = new QCheckBox ();
+//    use_max_gap_check_->setChecked(config_.useMaxGapInterval());
+//    connect(use_max_gap_check_, &QCheckBox::clicked,
+//            this, &DetectionConfigWidget::toggleUseMaxGapSlot);
 
-    form_layout_->addRow("Use Maximum Gap Supression", use_max_gap_check_);
+//    form_layout_->addRow("Use Maximum Gap Supression", use_max_gap_check_);
 
-    max_gap_interval_edit_ = new QLineEdit(QString::number(config_.maxGapInterval()));
-    max_gap_interval_edit_->setValidator(new QDoubleValidator(0.01, 600, 2, this));
-    connect(max_gap_interval_edit_, &QLineEdit::textEdited,
-            this, &DetectionConfigWidget::maxGapEditSlot);
+//    max_gap_interval_edit_ = new QLineEdit(QString::number(config_.maxGapInterval()));
+//    max_gap_interval_edit_->setValidator(new QDoubleValidator(0.01, 600, 2, this));
+//    connect(max_gap_interval_edit_, &QLineEdit::textEdited,
+//            this, &DetectionConfigWidget::maxGapEditSlot);
 
-    form_layout_->addRow("Maximum Gap [s]", max_gap_interval_edit_);
+//    form_layout_->addRow("Maximum Gap [s]", max_gap_interval_edit_);
 
     // miss tolerance
     use_miss_tolerance_check_ = new QCheckBox ();
@@ -82,6 +90,19 @@ void DetectionConfigWidget::updateIntervalEditSlot(QString value)
         loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: invalid value";
 }
 
+void DetectionConfigWidget::maxRefTimeDiffEditSlot(QString value)
+{
+    loginf << "EvaluationRequirementDetectionConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config_.maxRefTimeDiff(val);
+    else
+        loginf << "EvaluationRequirementDetectionConfigWidget: maxRefTimeDiffEditSlot: invalid value";
+}
+
 void DetectionConfigWidget::minimumProbEditSlot(QString value)
 {
     loginf << "EvaluationRequirementDetectionConfigWidget: minimumProbEditSlot: value " << value.toStdString();
@@ -95,25 +116,25 @@ void DetectionConfigWidget::minimumProbEditSlot(QString value)
         loginf << "EvaluationRequirementDetectionConfigWidget: minimumProbEditSlot: invalid value";
 }
 
-void DetectionConfigWidget::toggleUseMaxGapSlot()
-{
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMaxGapSlot";
+//void DetectionConfigWidget::toggleUseMaxGapSlot()
+//{
+//    loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMaxGapSlot";
 
-    assert (use_max_gap_check_);
-    config_.useMaxGapInterval(use_max_gap_check_->checkState() == Qt::Checked);
-}
-void DetectionConfigWidget::maxGapEditSlot(QString value)
-{
-    loginf << "EvaluationRequirementDetectionConfigWidget: maxGapEditSlot: value " << value.toStdString();
+//    assert (use_max_gap_check_);
+//    config_.useMaxGapInterval(use_max_gap_check_->checkState() == Qt::Checked);
+//}
+//void DetectionConfigWidget::maxGapEditSlot(QString value)
+//{
+//    loginf << "EvaluationRequirementDetectionConfigWidget: maxGapEditSlot: value " << value.toStdString();
 
-    bool ok;
-    float val = value.toFloat(&ok);
+//    bool ok;
+//    float val = value.toFloat(&ok);
 
-    if (ok)
-        config_.maxGapInterval(val);
-    else
-        loginf << "EvaluationRequirementDetectionConfigWidget: maxGapEditSlot: invalid value";
-}
+//    if (ok)
+//        config_.maxGapInterval(val);
+//    else
+//        loginf << "EvaluationRequirementDetectionConfigWidget: maxGapEditSlot: invalid value";
+//}
 
 void DetectionConfigWidget::toggleUseMissToleranceSlot()
 {

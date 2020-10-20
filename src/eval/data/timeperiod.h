@@ -87,7 +87,33 @@ public:
         return false;
     }
 
+    unsigned int getPeriodIndex (float time)
+    {
+        for (unsigned int cnt=0; cnt < periods_.size(); ++cnt)
+            if (periods_.at(cnt).isInside(time))
+                return cnt;
+
+        throw std::runtime_error("TimePeriodCollection: time "+std::to_string(time)+" not inside");
+    }
+
+    int getPeriodMaxIndexBefore (float time) // -1 if none
+    {
+        int index {-1};
+
+        for (unsigned int cnt=0; cnt < periods_.size(); ++cnt)
+            if (periods_.at(cnt).end() < time)
+                index = cnt;
+
+        return index;
+    }
+
     unsigned int size() { return periods_.size(); }
+
+    TimePeriod& period (unsigned int index)
+    {
+        assert (index < periods_.size());
+        return periods_.at(index);
+    }
 
     TimePeriod& lastPeriod()
     {

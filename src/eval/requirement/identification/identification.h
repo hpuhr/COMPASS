@@ -48,7 +48,7 @@ class Identification : public Base
 public:
     Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float max_time_diff, float minimum_probability);
+            EvaluationManager& eval_man, float max_ref_time_diff, float minimum_probability);
 
     float maxRefTimeDiff() const;
     float minimumProbability() const;

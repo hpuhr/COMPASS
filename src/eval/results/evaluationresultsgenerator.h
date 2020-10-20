@@ -29,8 +29,9 @@ public:
                  EvaluationData& data,
                  std::shared_ptr<EvaluationRequirement::Base> req,
                  const SectorLayer& sector_layer,
-                 std::vector<bool>& done_flags)
-        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer), done_flags_(done_flags)
+                 std::vector<bool>& done_flags, bool single_thread)
+        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer), done_flags_(done_flags),
+          single_thread_(single_thread)
     {
     }
 
@@ -39,11 +40,22 @@ public:
 
         unsigned int num_utns = utns_.size();
 
-        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+        if (single_thread_)
         {
-            results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_, sector_layer_);
-            done_flags_[utn_cnt] = true;
-        });
+            for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+            {
+                results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_, sector_layer_);
+                done_flags_[utn_cnt] = true;
+            }
+        }
+        else
+        {
+            tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+            {
+                results_[utn_cnt] = req_->evaluate(data_.targetData(utns_.at(utn_cnt)), req_, sector_layer_);
+                done_flags_[utn_cnt] = true;
+            });
+        }
 
         return NULL; // or a pointer to a new task to be executed immediately
     }
@@ -55,6 +67,7 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> req_;
     const SectorLayer& sector_layer_;
     std::vector<bool>& done_flags_;
+    bool single_thread_;
 };
 
 class EvaluationResultsGenerator
@@ -67,7 +80,7 @@ public:
     EvaluationResultsReport::TreeModel& resultsModel();
 
     typedef std::map<std::string,
-      std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
+    std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
 
     ResultIterator begin() { return results_.begin(); }
     ResultIterator end() { return results_.end(); }

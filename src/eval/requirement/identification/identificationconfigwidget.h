@@ -17,6 +17,7 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
+        void maxRefTimeDiffEditSlot(QString value);
         void minimumProbEditSlot(QString value);
 
     public:
@@ -27,6 +28,7 @@ namespace EvaluationRequirement
 
         QFormLayout* form_layout_ {nullptr};
 
+        QLineEdit* max_ref_time_diff_edit_{nullptr};
         QLineEdit* minimum_prob_edit_{nullptr};
     };
 

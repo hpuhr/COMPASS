@@ -17,7 +17,6 @@ namespace EvaluationRequirement
 
         config_.addGUIElements(form_layout_);
 
-
         // max ref time diff
         max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
         max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));

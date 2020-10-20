@@ -36,11 +36,11 @@ namespace EvaluationRequirement
         float minimumProbability() const;
         void minimumProbability(float value);
 
-        bool useMaxGapInterval() const;
-        void useMaxGapInterval(bool value);
+//        bool useMaxGapInterval() const;
+//        void useMaxGapInterval(bool value);
 
-        float maxGapInterval() const;
-        void maxGapInterval(float value);
+//        float maxGapInterval() const;
+//        void maxGapInterval(float value);
 
         bool useMissTolerance() const;
         void useMissTolerance(bool value);
@@ -55,8 +55,8 @@ namespace EvaluationRequirement
 
         float minimum_probability_{0};
 
-        bool use_max_gap_interval_{true};
-        float max_gap_interval_s_{0};
+//        bool use_max_gap_interval_{true};
+//        float max_gap_interval_s_{0};
 
         bool use_miss_tolerance_{false};
         float miss_tolerance_s_{0};

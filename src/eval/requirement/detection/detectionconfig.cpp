@@ -15,12 +15,12 @@ namespace EvaluationRequirement
     {
         registerParameter("update_interval", &update_interval_s_, 1);
 
-        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
+        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 5.0);
 
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
 
-        registerParameter("use_max_gap_interval", &use_max_gap_interval_, true);
-        registerParameter("max_gap_interval", &max_gap_interval_s_, 30);
+//        registerParameter("use_max_gap_interval", &use_max_gap_interval_, true);
+//        registerParameter("max_gap_interval", &max_gap_interval_s_, 30);
 
         registerParameter("use_miss_tolerance", &use_miss_tolerance_, false);
         registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01);
@@ -52,7 +52,8 @@ namespace EvaluationRequirement
         shared_ptr<Detection> req = make_shared<Detection>(
                     name_, short_name_, group_.name(), eval_man_, update_interval_s_,
                     max_ref_time_diff_, minimum_probability_,
-                    use_max_gap_interval_, max_gap_interval_s_, use_miss_tolerance_, miss_tolerance_s_);
+                    //use_max_gap_interval_, max_gap_interval_s_,
+                    use_miss_tolerance_, miss_tolerance_s_);
 
         return req;
     }
@@ -87,25 +88,25 @@ namespace EvaluationRequirement
         minimum_probability_ = value;
     }
 
-    bool DetectionConfig::useMaxGapInterval() const
-    {
-        return use_max_gap_interval_;
-    }
+//    bool DetectionConfig::useMaxGapInterval() const
+//    {
+//        return use_max_gap_interval_;
+//    }
 
-    void DetectionConfig::useMaxGapInterval(bool value)
-    {
-        use_max_gap_interval_ = value;
-    }
+//    void DetectionConfig::useMaxGapInterval(bool value)
+//    {
+//        use_max_gap_interval_ = value;
+//    }
 
-    float DetectionConfig::maxGapInterval() const
-    {
-        return max_gap_interval_s_;
-    }
+//    float DetectionConfig::maxGapInterval() const
+//    {
+//        return max_gap_interval_s_;
+//    }
 
-    void DetectionConfig::maxGapInterval(float value)
-    {
-        max_gap_interval_s_ = value;
-    }
+//    void DetectionConfig::maxGapInterval(float value)
+//    {
+//        max_gap_interval_s_ = value;
+//    }
 
     bool DetectionConfig::useMissTolerance() const
     {
