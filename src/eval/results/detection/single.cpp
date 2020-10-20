@@ -23,7 +23,7 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis, std::string ref_periods,
+            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis, TimePeriodCollection ref_periods,
             std::vector<EvaluationRequirement::DetectionDetail> details)
         : Single("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man),
           sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis),
@@ -134,7 +134,11 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_}, this);
         utn_req_table.addRow({"NRUIs [1]", "No Reference Update Intervals", no_ref_uis_}, this);
         utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
-        utn_req_table.addRow({"Reference Periods", "Time inside sector", ref_periods_.c_str()}, this);
+
+        for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)
+            utn_req_table.addRow(
+            {("Reference Period "+to_string(cnt)).c_str(), "Time inside sector",
+             ref_periods_.period(cnt).str().c_str()}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Detection> req =

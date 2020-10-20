@@ -183,7 +183,7 @@ namespace EvaluationRequirement
 
             return make_shared<EvaluationRequirementResult::SingleDetection>(
                         "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                        eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods.print(true), details);
+                        eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods, details);
         }
 
 
@@ -258,7 +258,7 @@ namespace EvaluationRequirement
                                     +"), between ["+String::timeStringFromDouble(last_period_tod)+", "
                                     +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
 
-                            DetectionDetail detail{tod, {}, true,
+                            DetectionDetail detail{tod, d_tod, true,
                                                    pos_current, false,
                                                    sum_missed_uis, max_gap_uis, no_ref_uis,
                                                    comment};
@@ -283,7 +283,7 @@ namespace EvaluationRequirement
                             comment = "Previous period "+to_string(period_cnt)
                                     +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                            DetectionDetail detail{tod, {}, false,
+                            DetectionDetail detail{tod, d_tod, false,
                                                    pos_current, false,
                                                    sum_missed_uis, max_gap_uis, no_ref_uis,
                                                    comment};
@@ -453,7 +453,7 @@ namespace EvaluationRequirement
                             +"), between ["+String::timeStringFromDouble(last_period_tod)+", "
                             +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
 
-                    DetectionDetail detail{tod, {}, true,
+                    DetectionDetail detail{tod, d_tod, true,
                                            pos_current, false,
                                            sum_missed_uis, max_gap_uis, no_ref_uis,
                                            comment};
@@ -478,7 +478,7 @@ namespace EvaluationRequirement
                     comment = "Previous period "+to_string(period_cnt)
                             +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                    DetectionDetail detail{tod, {}, false,
+                    DetectionDetail detail{tod, d_tod, false,
                                            pos_current, false,
                                            sum_missed_uis, max_gap_uis, no_ref_uis,
                                            comment};
@@ -511,7 +511,7 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods.print(true), details);
+                    eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods, details);
     }
 
     bool Detection::isMiss (float d_tod)

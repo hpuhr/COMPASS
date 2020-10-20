@@ -54,7 +54,7 @@ public:
         return end_ - begin_;
     }
 
-    std::string print() const
+    std::string str() const
     {
         return "["+Utils::String::timeStringFromDouble(begin_)+","+Utils::String::timeStringFromDouble(end_)+"]";
     }
@@ -147,7 +147,7 @@ public:
                     tmp += ", ";
             }
 
-            tmp += period_it.print();
+            tmp += period_it.str();
         }
 
         return tmp;
