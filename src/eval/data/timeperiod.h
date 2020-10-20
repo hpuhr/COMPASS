@@ -109,6 +109,18 @@ public:
 
     unsigned int size() { return periods_.size(); }
 
+    float totalBegin()
+    {
+        assert (periods_.size());
+        return periods_.at(0).begin();
+    }
+
+    float totalEnd()
+    {
+        assert (periods_.size());
+        return periods_.rbegin()->end();
+    }
+
     TimePeriod& period (unsigned int index)
     {
         assert (index < periods_.size());

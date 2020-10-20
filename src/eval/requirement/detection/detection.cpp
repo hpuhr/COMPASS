@@ -144,6 +144,43 @@ namespace EvaluationRequirement
             sum_uis = ref_periods.getUIs(update_interval_s_);
             sum_missed_uis = sum_uis;
 
+            if (ref_periods.size())
+            {
+                last_tod = ref_periods.totalBegin();
+                tod = ref_periods.totalEnd();
+
+                d_tod = tod - last_tod;
+
+                if (isMiss(d_tod))
+                {
+                    sum_missed_uis += floor(d_tod/update_interval_s_);
+
+                    assert (target_data.hasRefPosForTime(tod));
+                    pos_current = target_data.refPosForTime(tod);
+
+                    logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+                           << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
+                           << floor(d_tod/update_interval_s_)
+                           << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
+                           << "] sum_missed_uis " << sum_missed_uis;
+
+                    string comment = "Miss detected (DToD > "
+                            +String::doubleToStringPrecision(missThreshold(), 2)
+                            +"), last was "+String::timeStringFromDouble(last_tod);
+
+                    DetectionDetail detail {
+                        tod, d_tod, true,
+                                pos_current, true,
+                                sum_missed_uis, max_gap_uis, no_ref_uis, comment};
+
+                    assert (target_data.hasRefPosForTime(last_tod));
+                    detail.pos_last = target_data.refPosForTime(last_tod);
+                    detail.has_last_position_ = true;
+
+                    details.push_back(detail);
+                }
+            }
+
             return make_shared<EvaluationRequirementResult::SingleDetection>(
                         "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                         eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods.print(true), details);
@@ -187,17 +224,22 @@ namespace EvaluationRequirement
                 {
                     if (!finished_periods.count(period_cnt)) // previous not finalized
                     {
-                        logdbg << "EvaluationRequirementDetection '" << name_
-                               << "': evaluate: utn " << target_data.utn_ << " finalizing period " << period_cnt;
-
                         float last_period_tod = ref_periods.period(period_cnt).begin();
+                        bool tst_time_found = false;
+                        float last_period_end = ref_periods.period(period_cnt).end();
 
                         if (period_last_tst_times.count(period_cnt))
+                        {
                             last_period_tod = period_last_tst_times.at(period_cnt);
+                            tst_time_found = true;
+                        }
 
-                        assert (ref_periods.period(period_cnt).end() >= last_period_tod);
+                        assert (last_period_end >= last_period_tod);
 
-                        d_tod = ref_periods.period(period_cnt).end() - last_period_tod;
+                        d_tod = last_period_end - last_period_tod;
+
+                        assert (target_data.hasRefPosForTime(last_period_end));
+                        pos_current = target_data.refPosForTime(last_period_end);
 
                         if (isMiss(d_tod))
                         {
@@ -212,22 +254,42 @@ namespace EvaluationRequirement
                                    << "] missed_uis " << sum_missed_uis;
 
                             comment = "Miss detected in previous period "+to_string(period_cnt)
-                                    +" (DToD > " +to_string(missThreshold())
+                                    +" (DToD > " +String::doubleToStringPrecision(missThreshold(), 2)
                                     +"), between ["+String::timeStringFromDouble(last_period_tod)+", "
                                     +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
 
+                            DetectionDetail detail{tod, {}, true,
+                                                   pos_current, false,
+                                                   sum_missed_uis, max_gap_uis, no_ref_uis,
+                                                   comment};
+
+                            if (tst_time_found)
+                            {
+                                assert (target_data.hasTstPosForTime(last_period_tod));
+                                detail.pos_last = target_data.tstPosForTime(last_period_tod);
+                                detail.has_last_position_ = true;
+                            }
+                            else
+                            {
+                                assert (target_data.hasRefPosForTime(last_period_tod));
+                                detail.pos_last = target_data.refPosForTime(last_period_tod);
+                                detail.has_last_position_ = true;
+                            }
+
+                            details.push_back(detail);
                         }
                         else
                         {
                             comment = "Previous period "+to_string(period_cnt)
-                                    +" OK (DToD <= "+to_string(update_interval_s_)+")\n";
-                        }
+                                    +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                        details.push_back(
-                        {tod, {}, false,
-                         pos_current, false,
-                         sum_missed_uis, max_gap_uis, no_ref_uis,
-                         comment});
+                            DetectionDetail detail{tod, {}, false,
+                                                   pos_current, false,
+                                                   sum_missed_uis, max_gap_uis, no_ref_uis,
+                                                   comment};
+
+                            details.push_back(detail);
+                        }
 
                         finished_periods.insert(period_cnt);
                     }
@@ -319,8 +381,7 @@ namespace EvaluationRequirement
                        << "] sum_missed_uis " << sum_missed_uis;
 
                 string comment = "Miss detected (DToD > "
-                        +String::doubleToStringPrecision(
-                            use_miss_tolerance_ ? update_interval_s_+miss_tolerance_s_ : update_interval_s_, 2)
+                        +String::doubleToStringPrecision(missThreshold(), 2)
                         +"), last was "+String::timeStringFromDouble(last_tod);
 
                 DetectionDetail detail {
@@ -342,7 +403,7 @@ namespace EvaluationRequirement
                 {tod, d_tod, false,
                  pos_current, true,
                  sum_missed_uis, max_gap_uis, no_ref_uis,
-                 "OK (DToD <= "+String::doubleToStringPrecision(update_interval_s_,2)+")"});
+                 "OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")"});
             }
 
 
@@ -359,13 +420,21 @@ namespace EvaluationRequirement
             if (!finished_periods.count(period_cnt)) // previous not finalized
             {
                 float last_period_tod = ref_periods.period(period_cnt).begin();
+                bool tst_time_found = false;
+                float last_period_end = ref_periods.period(period_cnt).end();
 
                 if (period_last_tst_times.count(period_cnt))
+                {
                     last_period_tod = period_last_tst_times.at(period_cnt);
+                    tst_time_found = true;
+                }
 
-                assert (ref_periods.period(period_cnt).end() >= last_period_tod);
+                assert (last_period_end >= last_period_tod);
 
-                d_tod = ref_periods.period(period_cnt).end() - last_period_tod;
+                d_tod = last_period_end - last_period_tod;
+
+                assert (target_data.hasRefPosForTime(last_period_end));
+                pos_current = target_data.refPosForTime(last_period_end);
 
                 if (isMiss(d_tod))
                 {
@@ -380,21 +449,42 @@ namespace EvaluationRequirement
                            << "] missed_uis " << sum_missed_uis;
 
                     comment = "Miss detected in previous period "+to_string(period_cnt)
-                            +" (DToD > " +to_string(missThreshold())
+                            +" (DToD > " +String::doubleToStringPrecision(missThreshold(), 2)
                             +"), between ["+String::timeStringFromDouble(last_period_tod)+", "
                             +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
+
+                    DetectionDetail detail{tod, {}, true,
+                                           pos_current, false,
+                                           sum_missed_uis, max_gap_uis, no_ref_uis,
+                                           comment};
+
+                    if (tst_time_found)
+                    {
+                        assert (target_data.hasTstPosForTime(last_period_tod));
+                        detail.pos_last = target_data.tstPosForTime(last_period_tod);
+                        detail.has_last_position_ = true;
+                    }
+                    else
+                    {
+                        assert (target_data.hasRefPosForTime(last_period_tod));
+                        detail.pos_last = target_data.refPosForTime(last_period_tod);
+                        detail.has_last_position_ = true;
+                    }
+
+                    details.push_back(detail);
                 }
                 else
                 {
                     comment = "Previous period "+to_string(period_cnt)
-                            +" OK (DToD <= "+to_string(update_interval_s_)+")\n";
-                }
+                            +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
-                details.push_back(
-                {tod, {}, false,
-                 pos_current, false,
-                 sum_missed_uis, max_gap_uis, no_ref_uis,
-                 comment});
+                    DetectionDetail detail{tod, {}, false,
+                                           pos_current, false,
+                                           sum_missed_uis, max_gap_uis, no_ref_uis,
+                                           comment};
+
+                    details.push_back(detail);
+                }
 
                 finished_periods.insert(period_cnt);
             }
