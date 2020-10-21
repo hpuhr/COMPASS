@@ -21,6 +21,7 @@
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
+#include "dbovariableorderedset.h"
 
 #include "json.hpp"
 
@@ -103,120 +104,76 @@ void EvaluationManager::loadData ()
 
     fil_man.disableAllFilters();
 
+    if (dbo_name_ref_ != dbo_name_tst_)
     {
-        DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
-        ref_filter->setActive(true);
-
-        for (auto& fil_ds_it : ref_filter->dataSources())
         {
-            assert (data_sources_ref_.count(fil_ds_it.first));
-            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
+            DataSourcesFilter* ref_filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+            ref_filter->setActive(true);
+
+            for (auto& fil_ds_it : ref_filter->dataSources())
+            {
+                assert (data_sources_ref_.count(fil_ds_it.first));
+                fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive());
+            }
+
+            ref_filter->widget()->update();
         }
 
-        ref_filter->widget()->update();
+        {
+            DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
+            tst_filter->setActive(true);
+
+            for (auto& fil_ds_it : tst_filter->dataSources())
+            {
+                assert (data_sources_tst_.count(fil_ds_it.first));
+                fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
+            }
+
+            tst_filter->widget()->update();
+        }
     }
-
+    else // same ref / tst dbo
     {
-        DataSourcesFilter* tst_filter = fil_man.getDataSourcesFilter(dbo_name_tst_);
-        tst_filter->setActive(true);
+        DataSourcesFilter* filter = fil_man.getDataSourcesFilter(dbo_name_ref_);
+        filter->setActive(true);
 
-        for (auto& fil_ds_it : tst_filter->dataSources())
+        for (auto& fil_ds_it : filter->dataSources())
         {
             assert (data_sources_tst_.count(fil_ds_it.first));
-            fil_ds_it.second.setActive(data_sources_tst_.at(fil_ds_it.first).isActive());
+            fil_ds_it.second.setActive(data_sources_ref_.at(fil_ds_it.first).isActive()
+                                       || data_sources_tst_.at(fil_ds_it.first).isActive());
         }
 
-        tst_filter->widget()->update();
+        filter->widget()->update();
     }
 
-    // TODO add required variables from standard requirements
+
     // reference data
     {
         assert (object_man.existsObject(dbo_name_ref_));
         DBObject& dbo_ref = object_man.object(dbo_name_ref_);
 
-        //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-
-        //        DBOVariableSet read_set;
-        //        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_ref_));
-
-        //        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_ref_));
-
-        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
-        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
-
         connect(&dbo_ref, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
         connect(&dbo_ref, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
-
-        //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_ref_);
-        //        string ds_fil_str;
-
-        //        for (auto& ds_it : data_sources_ref_)
-        //        {
-        //            if (!ds_fil_str.size())
-        //                ds_fil_str = to_string(ds_it.second.getNumber());
-        //            else
-        //                ds_fil_str += ","+to_string(ds_it.second.getNumber());
     }
-
-    //        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
-
-
-    //        dbo_ref.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
-    //                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
-
-    //    }
 
     // test data
 
+    if (dbo_name_ref_ != dbo_name_tst_) // otherwise already connected
     {
         assert (object_man.existsObject(dbo_name_tst_));
         DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-        //        //DBOVariableSet read_set = getReadSetFor(dbo_it.first);
-
-        //        DBOVariableSet read_set;
-        //        read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("tod").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name_tst_));
-        //        read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name_tst_));
-
-        //        read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name_tst_));
-
-        //        //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_tst_));
-        //        //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_tst_));
-
         connect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
         connect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
 
-        //        string ds_id_var_str = object_man.metaVariable("ds_id").getNameFor(dbo_name_tst_);
-        //        string ds_fil_str;
-
-        //        for (auto& ds_it : data_sources_tst_)
-        //        {
-        //            if (!ds_fil_str.size())
-        //                ds_fil_str = to_string(ds_it.second.getNumber());
-        //            else
-        //                ds_fil_str += ","+to_string(ds_it.second.getNumber());
-        //        }
-
-        //        string custom_filter_clause{ds_id_var_str + " in (" + ds_fil_str + ")"};
-
-
-        //        dbo_tst.load(read_set, custom_filter_clause, {&object_man.metaVariable("ds_id").getFor(dbo_name_ref_)}, false,
-        //                     &object_man.metaVariable("tod").getFor(dbo_name_ref_), false);
     }
 
+    needs_additional_variables_ = true;
+
     object_man.loadSlot();
+
+    needs_additional_variables_ = false;
 
     if (widget_)
         widget_->updateButtons();
@@ -248,8 +205,11 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
     {
         DBObject& dbo_tst = object_man.object(dbo_name_tst_);
 
-        disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
-        disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        if (dbo_name_ref_ != dbo_name_tst_) // otherwise already disconnected
+        {
+            disconnect(&dbo_tst, &DBObject::newDataSignal, this, &EvaluationManager::newDataSlot);
+            disconnect(&dbo_tst, &DBObject::loadingDoneSignal, this, &EvaluationManager::loadingDoneSlot);
+        }
 
         data_.addTestData(dbo_tst, object.data());
 
@@ -309,6 +269,32 @@ void EvaluationManager::generateReport ()
 void EvaluationManager::close()
 {
     initialized_ = false;
+}
+
+bool EvaluationManager::needsAdditionalVariables ()
+{
+    return needs_additional_variables_;
+}
+
+void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet& read_set)
+{
+    loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("tod").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name));
+    read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
+
+    // TODO add required variables from standard requirements
+
+    //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
+    //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
 }
 
 EvaluationManager::~EvaluationManager()
@@ -691,6 +677,18 @@ bool EvaluationManager::hasValidReferenceDBO ()
     return object.hasDataSources();
 }
 
+
+std::set<int> EvaluationManager::activeDataSourcesRef()
+{
+    set<int> active_sources;
+
+    for (auto& ds_it : data_sources_ref_)
+        if (ds_it.second.isActive())
+            active_sources.insert(ds_it.first);
+
+    return active_sources;
+}
+
 std::string EvaluationManager::dboNameTst() const
 {
     return dbo_name_tst_;
@@ -720,6 +718,18 @@ bool EvaluationManager::hasValidTestDBO ()
 
     return object.hasDataSources();
 }
+
+std::set<int> EvaluationManager::activeDataSourcesTst()
+{
+    set<int> active_sources;
+
+    for (auto& ds_it : data_sources_tst_)
+        if (ds_it.second.isActive())
+            active_sources.insert(ds_it.first);
+
+    return active_sources;
+}
+
 
 bool EvaluationManager::dataLoaded() const
 {

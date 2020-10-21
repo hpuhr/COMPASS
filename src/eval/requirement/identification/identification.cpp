@@ -154,17 +154,22 @@ namespace EvaluationRequirement
                         else
                         {
                             ++num_false_id;
-                            comment = "Not OK";
+                            comment = "Not OK:";
 
                             if (lower_nok)
-                                comment += " Reference at "+String::timeStringFromDouble(ref_lower)
-                                        + " has different identification '"+target_data.refCallsignForTime(ref_lower)
+                            {
+                                comment += " test id '"+target_data.tstCallsignForTime(tod)
+                                        +"' reference id at "+String::timeStringFromDouble(ref_lower)
+                                        + "  '"+target_data.refCallsignForTime(ref_lower)
                                         + "'";
-
-                            if (upper_nok)
-                                comment += " Reference at "+String::timeStringFromDouble(ref_upper)
-                                        + " has different identification '"+target_data.refCallsignForTime(ref_upper)
+                            }
+                            else
+                            {
+                                comment += " test id '"+target_data.tstCallsignForTime(tod)
+                                        +"' reference id at "+String::timeStringFromDouble(ref_lower)
+                                        + "  '"+target_data.refCallsignForTime(ref_lower)
                                         + "'";
+                            }
                         }
                     }
                     else

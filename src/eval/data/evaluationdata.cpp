@@ -1,5 +1,6 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
+#include "evaluationmanager.h"
 #include "dbobject.h"
 #include "buffer.h"
 #include "stringconv.h"
@@ -34,11 +35,16 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         return;
     }
 
+    set<int> active_srcs = eval_man_.activeDataSourcesRef();
+    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    unsigned int num_skipped {0};
+
     const DBOAssociationCollection& associations = object.associations();
 
     unsigned int buffer_size = buffer->size();
     NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
     NullableVector<float>& tods = buffer->get<float>("tod");
+    NullableVector<int>& ds_ids = buffer->get<int>("ds_id");
 
     unsigned int rec_num;
     float tod;
@@ -47,6 +53,14 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
+        assert (!ds_ids.isNull(cnt));
+
+        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
+
         assert (!rec_nums.isNull(cnt));
         assert (!tods.isNull(cnt));
 
@@ -81,7 +95,8 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
     }
 
     loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
-           << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_;
+           << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
+              << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -96,11 +111,16 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         return;
     }
 
+    set<int> active_srcs = eval_man_.activeDataSourcesTst();
+    bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
+    unsigned int num_skipped {0};
+
     const DBOAssociationCollection& associations = object.associations();
 
     unsigned int buffer_size = buffer->size();
     NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
     NullableVector<float>& tods = buffer->get<float>("tod");
+    NullableVector<int>& ds_ids = buffer->get<int>("ds_id");
 
     unsigned int rec_num;
     float tod;
@@ -109,6 +129,14 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
+        assert (!ds_ids.isNull(cnt));
+
+        if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
+        {
+            ++num_skipped;
+            continue;
+        }
+
         assert (!rec_nums.isNull(cnt));
         assert (!tods.isNull(cnt));
 
@@ -143,7 +171,8 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     }
 
     loginf << "EvaluationData: addTestData: num targets " << target_data_.size()
-           << " tst associated cnt " << associated_tst_cnt_ << " unassoc " << unassociated_tst_cnt_;
+           << " tst associated cnt " << associated_tst_cnt_ << " unassoc " << unassociated_tst_cnt_
+           << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::finalize ()

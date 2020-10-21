@@ -16,6 +16,7 @@
 class ATSDB;
 class EvaluationStandard;
 class DBObject;
+class DBOVariableSet;
 
 class QWidget;
 class QTabWidget;
@@ -46,6 +47,9 @@ public:
     void generateReport ();
 
     void close();
+
+    bool needsAdditionalVariables ();
+    void addVariables (const std::string dbo_name, DBOVariableSet& read_set);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -78,11 +82,13 @@ public:
     void dboNameRef(const std::string& name);
     bool hasValidReferenceDBO ();
     std::map<int, ActiveDataSource>& dataSourcesRef() { return data_sources_ref_; }
+    std::set<int> activeDataSourcesRef();
 
     std::string dboNameTst() const;
     void dboNameTst(const std::string& name);
     bool hasValidTestDBO ();
     std::map<int, ActiveDataSource>& dataSourcesTst() { return data_sources_tst_; }
+    std::set<int> activeDataSourcesTst();
 
     bool dataLoaded() const;
     bool evaluated() const;
@@ -141,6 +147,8 @@ protected:
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};
+
+    bool needs_additional_variables_ {false}; // indicates if variables should be added during loading
     bool data_loaded_ {false};
 
     bool reference_data_loaded_ {false};

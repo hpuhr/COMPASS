@@ -32,6 +32,7 @@
 #include "stringconv.h"
 #include "viewmanager.h"
 #include "jobmanager.h"
+#include "evaluationmanager.h"
 
 using namespace Utils::String;
 
@@ -370,12 +371,18 @@ void DBObjectManager::loadSlot()
 
     loginf << "DBObjectManager: loadSlot: starting loading";
 
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    ViewManager& view_man = ATSDB::instance().viewManager();
+
     for (auto& object : objects_)
     {
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
-            DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
+            DBOVariableSet read_set = view_man.getReadSet(object.first);
+
+            if (eval_man.needsAdditionalVariables())
+                eval_man.addVariables(object.first, read_set);
 
             if (read_set.getSize() == 0)
             {
