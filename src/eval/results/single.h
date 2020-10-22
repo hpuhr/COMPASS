@@ -36,6 +36,8 @@ namespace EvaluationRequirementResult
         bool result_usable_ {true}; // whether valid data exists, changed in subclass
 
         std::string getTargetSectionID ();
+
+        void addCommonDetails (EvaluationResultsReport::SectionContentTable& details_overview_table);
     };
 
 }

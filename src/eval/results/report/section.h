@@ -44,7 +44,8 @@ namespace EvaluationResultsReport
 
         bool hasTable (const std::string& name);
         SectionContentTable& getTable (const std::string& name);
-        void addTable (const std::string& name, unsigned int num_columns, vector<string> headings);
+        void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
+                       bool sortable=true);
 
     protected:
         string heading_; // name same as heading

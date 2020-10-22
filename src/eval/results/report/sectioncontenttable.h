@@ -38,7 +38,8 @@ namespace EvaluationResultsReport
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
-                            vector<string> headings, Section* parent_section, EvaluationManager& eval_man);
+                            vector<string> headings, Section* parent_section, EvaluationManager& eval_man,
+                            bool sortable=true);
 
         void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
                      QVariant annotation = {});
@@ -60,6 +61,8 @@ namespace EvaluationResultsReport
     protected:
         unsigned int num_columns_ {0};
         vector<string> headings_;
+
+        bool sortable_ {true};
 
         vector<vector<QVariant>> rows_;
         vector<EvaluationRequirementResult::Base*> result_ptrs_;

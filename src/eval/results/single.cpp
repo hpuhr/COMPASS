@@ -1,5 +1,6 @@
 #include "eval/results/single.h"
 #include "eval/requirement/base.h"
+#include "eval/results/report/sectioncontenttable.h"
 #include "evaluationtargetdata.h"
 #include "sectorlayer.h"
 
@@ -32,6 +33,18 @@ void Single::updateUseFromTarget ()
 std::string Single::getTargetSectionID ()
 {
     return "Targets:"+to_string(utn_)+":"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
+}
+
+void Single::addCommonDetails (EvaluationResultsReport::SectionContentTable& details_overview_table)
+{
+    details_overview_table.addRow({"UTN", "Unique Target Number", utn_}, this);
+    details_overview_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
+    details_overview_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
+    details_overview_table.addRow({"Callsign", "Mode S target identification(s)", target_->callsignsStr().c_str()}, this);
+    details_overview_table.addRow({"Target Addr.", "Mode S target adress(es)", target_->targetAddressesStr().c_str()}, this);
+    details_overview_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
+    details_overview_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
+    details_overview_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
 }
 
 }

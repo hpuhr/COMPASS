@@ -113,10 +113,12 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(utn_req_section_heading);
 
         if (!utn_req_section.hasTable("details_overview_table"))
-            utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"});
+            utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
         EvaluationResultsReport::SectionContentTable& utn_req_table =
                 utn_req_section.getTable("details_overview_table");
+
+        addCommonDetails(utn_req_table);
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);

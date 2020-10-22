@@ -115,10 +115,11 @@ namespace EvaluationResultsReport
     }
 
     void Section::addTable (const std::string& name, unsigned int num_columns,
-                            vector<string> headings)
+                            vector<string> headings, bool sortable)
     {
         assert (!hasTable(name));
-        content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_));
+        content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_,
+                                                            sortable));
         assert (hasTable(name));
     }
 

@@ -19,8 +19,9 @@ namespace EvaluationResultsReport
 
     SectionContentTable::SectionContentTable(const string& name, unsigned int num_columns,
                                              vector<string> headings, Section* parent_section,
-                                             EvaluationManager& eval_man)
-        : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings)
+                                             EvaluationManager& eval_man, bool sortable)
+        : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings),
+          sortable_(sortable)
     {
 
     }
@@ -64,8 +65,13 @@ namespace EvaluationResultsReport
 
         table_view_ = new QTableView();
         table_view_->setModel(proxy_model_);
-        table_view_->setSortingEnabled(true);
-        table_view_->sortByColumn(0, Qt::AscendingOrder);
+
+        if (sortable_)
+        {
+            table_view_->setSortingEnabled(true);
+            table_view_->sortByColumn(0, Qt::AscendingOrder);
+        }
+
         table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
         table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
         table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
