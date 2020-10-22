@@ -11,6 +11,7 @@
 #include "logger.h"
 #include "stringconv.h"
 
+#include <algorithm>
 #include <cassert>
 
 using namespace std;
@@ -45,12 +46,22 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
     if (!single_result->use())
         return;
 
+    unsigned int num_distance = num_pos_ok_+num_pos_nok_;
+    unsigned int other_num_distance = single_result->numPosOk()+single_result->numPosNOk();
+
     num_pos_ += single_result->numPos();
     num_no_ref_ += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
     num_pos_inside_ += single_result->numPosInside();
     num_pos_ok_ += single_result->numPosOk();
     num_pos_nok_ += single_result->numPosNOk();
+
+    error_min_ = min(error_min_, single_result->errorMin());
+    error_max_ = max(error_max_, single_result->errorMax());
+
+    if (num_distance+other_num_distance)
+        error_avg_ = (float)(error_avg_*num_distance + single_result->errorAvg()*other_num_distance)
+                /(float)(num_distance+other_num_distance);
 
     updatePMaxPos();
 }

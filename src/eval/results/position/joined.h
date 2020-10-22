@@ -39,6 +39,10 @@ namespace EvaluationRequirementResult
         int num_pos_ok_ {0};
         int num_pos_nok_ {0};
 
+        double error_min_ {0};
+        double error_max_ {0};
+        double error_avg_ {0};
+
         bool has_p_max_pos_ {false};
         float p_max_pos_{0};
 

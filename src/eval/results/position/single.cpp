@@ -24,10 +24,12 @@ namespace EvaluationRequirementResult
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_pos, int num_no_ref, int num_pos_outside, int num_pos_inside, int num_pos_ok, int num_pos_nok,
+            double error_min, double error_max, double error_avg,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details)
         : Single("SinglePositionMaxDistance", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
           num_pos_inside_(num_pos_inside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
+          error_min_(error_min), error_max_(error_max), error_avg_(error_avg),
           details_(details)
     {
         updatePMaxPos();
@@ -86,9 +88,9 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
-            tgt_overview_section.addTable("target_table", 12,
+            tgt_overview_section.addTable("target_table", 14,
             {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
-             "#PosInside", "#PosOK", "#PosNOK", "PNOsK"});
+             "#PosOK", "#PosNOK", "PNOK", "EMin", "EMax", "EAvg"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
@@ -103,7 +105,8 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), num_pos_inside_, num_pos_ok_, num_pos_nok_, pd_var}, this, {utn_});
+         target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+         error_min_, error_max_, error_avg_}, this, {utn_});
 
         // add requirement to targets->utn->requirements->group->req
 
@@ -123,6 +126,9 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
         utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
         utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
+        utn_req_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
+        utn_req_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
+        utn_req_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
@@ -229,6 +235,21 @@ namespace EvaluationRequirementResult
         assert (hasReference(table, annotation));
 
         return "Report:Results:"+getTargetSectionID();
+    }
+
+    double SinglePositionMaxDistance::errorMin() const
+    {
+        return error_min_;
+    }
+
+    double SinglePositionMaxDistance::errorMax() const
+    {
+        return error_max_;
+    }
+
+    double SinglePositionMaxDistance::errorAvg() const
+    {
+        return error_avg_;
     }
 
     int SinglePositionMaxDistance::numPosOutside() const

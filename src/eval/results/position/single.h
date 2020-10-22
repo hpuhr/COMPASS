@@ -15,6 +15,7 @@ public:
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_pos, int num_no_ref, int num_pos_outside, int num_pos_inside, int num_pos_ok, int num_pos_nok,
+            double error_min, double error_max, double error_avg,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details);
 
     virtual void print() override;
@@ -28,6 +29,10 @@ public:
     int numPosInside() const;
     int numPosOk() const;
     int numPosNOk() const;
+
+    double errorMin() const;
+    double errorMax() const;
+    double errorAvg() const;
 
     std::vector<EvaluationRequirement::PositionMaxDistanceDetail>& details();
 
@@ -49,6 +54,10 @@ protected:
     int num_pos_inside_ {0};
     int num_pos_ok_ {0};
     int num_pos_nok_ {0};
+
+    double error_min_ {0};
+    double error_max_ {0};
+    double error_avg_ {0};
 
     bool has_p_max_pos_ {false};
     float p_max_pos_{0};

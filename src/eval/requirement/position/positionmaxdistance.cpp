@@ -7,6 +7,8 @@
 
 #include <ogr_spatialref.h>
 
+#include <algorithm>
+
 using namespace std;
 using namespace Utils;
 
@@ -71,6 +73,9 @@ namespace EvaluationRequirement
         pair<EvaluationTargetPosition, bool> ret_pos;
         EvaluationTargetPosition ref_pos;
         bool ok;
+
+        unsigned int num_distances {0};
+        double error_min{0}, error_max{0}, error_sum{0};
 
         for (const auto& tst_id : tst_data)
         {
@@ -151,6 +156,20 @@ namespace EvaluationRequirement
 
             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
+            if (!num_distances)
+            {
+                error_min = distance;
+                error_max = distance;
+                error_sum = distance;
+            }
+            else
+            {
+                error_min = min(error_min, distance);
+                error_max = max(error_max, distance);
+                error_sum += distance;
+            }
+            ++num_distances;
+
             if (distance > max_distance_)
             {
                 details.push_back({tod, tst_pos,
@@ -177,18 +196,24 @@ namespace EvaluationRequirement
         loginf << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok;
+               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
+               << " num_distances " << num_distances;
 
+        assert (num_distances == num_pos_nok+num_pos_ok);
         assert (num_no_ref <= num_pos);
         assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
         assert (num_pos_inside == num_pos_ok + num_pos_nok);
 
         assert (details.size() == num_pos);
 
+        float error_avg {0};
+        if (num_distances)
+            error_avg = error_sum/(double)num_distances;
 
         return make_shared<EvaluationRequirementResult::SinglePositionMaxDistance>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_pos_ok, num_pos_nok, details);
+                    eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_pos_ok, num_pos_nok,
+                    error_min, error_max, error_avg, details);
     }
 
     float PositionMaxDistance::maxRefTimeDiff() const
