@@ -23,11 +23,10 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis, TimePeriodCollection ref_periods,
+            int sum_uis, int missed_uis, TimePeriodCollection ref_periods,
             std::vector<EvaluationRequirement::DetectionDetail> details)
         : Single("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man),
-          sum_uis_(sum_uis), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis), no_ref_uis_(no_ref_uis),
-          ref_periods_(ref_periods), details_(details)
+          sum_uis_(sum_uis), missed_uis_(missed_uis), ref_periods_(ref_periods), details_(details)
     {
         updatePD();
     }
@@ -40,10 +39,8 @@ namespace EvaluationRequirementResult
             loginf << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
                    << " sum_uis " << sum_uis_;
 
-            //assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
-
             assert (missed_uis_ <= sum_uis_);
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_)); //  - max_gap_uis_ - no_ref_uis_
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
             has_pd_ = true;
 
             result_usable_ = true;
@@ -85,9 +82,9 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
-            tgt_overview_section.addTable("target_table", 13,
+            tgt_overview_section.addTable("target_table", 11,
             {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
-             "EUIs", "MUIs", "MGUIs", "NRUIs", "PD"});
+             "EUIs", "MUIs", "PD"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
@@ -102,7 +99,7 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, max_gap_uis_, no_ref_uis_, pd_var}, this, {utn_});
+         target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, pd_var}, this, {utn_});
 
         // add requirement to targets->utn->requirements->group->req
 
@@ -117,8 +114,6 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
         utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
-        utn_req_table.addRow({"MGUIs [1]", "Max. Gap Update Intervals", max_gap_uis_}, this);
-        utn_req_table.addRow({"NRUIs [1]", "No Reference Update Intervals", no_ref_uis_}, this);
         utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
 
         for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)
@@ -145,8 +140,8 @@ namespace EvaluationRequirementResult
         // add further details
 
         if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 7,
-            {"ToD", "DToD", "Ref.", "MUI", "MGUI", "NRUI", "Comment"});
+            utn_req_section.addTable("details_table", 5,
+            {"ToD", "DToD", "Ref.", "MUI", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable("details_table");
@@ -159,15 +154,13 @@ namespace EvaluationRequirementResult
                 utn_req_details_table.addRow(
                 {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
                  String::timeStringFromDouble(rq_det_it.d_tod_.toFloat()).c_str(),
-                 rq_det_it.ref_exists_, rq_det_it.missed_uis_,
-                 rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_, rq_det_it.comment_.c_str()},
+                 rq_det_it.ref_exists_, rq_det_it.missed_uis_, rq_det_it.comment_.c_str()},
                             this, detail_cnt);
             else
                 utn_req_details_table.addRow(
                 {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
                  rq_det_it.d_tod_,
                  rq_det_it.ref_exists_, rq_det_it.missed_uis_,
-                 rq_det_it.max_gap_uis_, rq_det_it.no_ref_uis_,
                  rq_det_it.comment_.c_str()},
                             this, detail_cnt);
 
@@ -252,16 +245,6 @@ namespace EvaluationRequirementResult
     int SingleDetection::missedUIs() const
     {
         return missed_uis_;
-    }
-
-    int SingleDetection::maxGapUIs() const
-    {
-        return max_gap_uis_;
-    }
-
-    int SingleDetection::noRefUIs() const
-    {
-        return no_ref_uis_;
     }
 
     std::vector<EvaluationRequirement::DetectionDetail>& SingleDetection::details()

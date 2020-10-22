@@ -126,9 +126,9 @@ namespace EvaluationRequirement
         float d_tod{0};
 
         int sum_missed_uis {0};
-        int max_gap_uis {0};
+        //int max_gap_uis {0};
 
-        int no_ref_uis {0};
+        //int no_ref_uis {0};
 
         bool is_inside {false}, was_outside {false};
         pair<EvaluationTargetPosition, bool> ret_pos;
@@ -168,7 +168,7 @@ namespace EvaluationRequirement
                     DetectionDetail detail {
                         tod, d_tod, true,
                                 pos_current, true,
-                                sum_missed_uis, max_gap_uis, no_ref_uis, comment};
+                                sum_missed_uis, comment};
 
                     assert (target_data.hasRefPosForTime(last_tod));
                     detail.pos_last = target_data.refPosForTime(last_tod);
@@ -180,7 +180,7 @@ namespace EvaluationRequirement
 
             return make_shared<EvaluationRequirementResult::SingleDetection>(
                         "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                        eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods, details);
+                        eval_man_, sum_uis, sum_missed_uis, ref_periods, details);
         }
 
 
@@ -256,9 +256,8 @@ namespace EvaluationRequirement
                                     +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
 
                             DetectionDetail detail{tod, d_tod, true,
-                                                   pos_current, false,
-                                                   sum_missed_uis, max_gap_uis, no_ref_uis,
-                                                   comment};
+                                        pos_current, false,
+                                        sum_missed_uis, comment};
 
                             if (tst_time_found)
                             {
@@ -281,9 +280,8 @@ namespace EvaluationRequirement
                                     +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
                             DetectionDetail detail{tod, d_tod, false,
-                                                   pos_current, false,
-                                                   sum_missed_uis, max_gap_uis, no_ref_uis,
-                                                   comment};
+                                        pos_current, false,
+                                        sum_missed_uis, comment};
 
                             details.push_back(detail);
                         }
@@ -298,8 +296,7 @@ namespace EvaluationRequirement
                 details.push_back(
                 {tod, {}, false,
                  pos_current, is_inside_ref_time_period,
-                 sum_missed_uis, max_gap_uis, no_ref_uis,
-                 "Outside of reference time periods"});
+                 sum_missed_uis, "Outside of reference time periods"});
 
                 // TODO undetected previous miss possible
                 continue;
@@ -324,8 +321,7 @@ namespace EvaluationRequirement
                 details.push_back(
                 {tod, {}, false,
                  pos_current, is_inside_ref_time_period,
-                 sum_missed_uis, max_gap_uis, no_ref_uis,
-                 "Outside sector"});
+                 sum_missed_uis, "Outside sector"});
 
                 was_outside = true;
 
@@ -344,16 +340,14 @@ namespace EvaluationRequirement
                     details.push_back(
                     {tod, {}, false,
                      pos_current, is_inside_ref_time_period,
-                     sum_missed_uis, max_gap_uis, no_ref_uis,
-                     "First target report after outside sector"});
+                     sum_missed_uis, "First target report after outside sector"});
                 }
                 else // first in period
                 {
                     details.push_back(
                     {tod, {}, false,
                      pos_current, is_inside_ref_time_period,
-                     sum_missed_uis, max_gap_uis, no_ref_uis,
-                     "First target report in period "+to_string(period_index)});
+                     sum_missed_uis, "First target report in period "+to_string(period_index)});
 
                     // check if begin time in period is miss
 
@@ -377,9 +371,8 @@ namespace EvaluationRequirement
                                 +", "+String::timeStringFromDouble(tod)+"]\n";
 
                         DetectionDetail detail{tod, d_tod, true,
-                                               target_data.tstPosForTime(tod), is_inside_ref_time_period,
-                                               sum_missed_uis, max_gap_uis, no_ref_uis,
-                                               comment};
+                                    target_data.tstPosForTime(tod), is_inside_ref_time_period,
+                                    sum_missed_uis, comment};
 
                         assert (target_data.hasRefPosForTime(ref_periods.period(period_index).begin()));
                         detail.pos_last = target_data.refPosForTime(ref_periods.period(period_index).begin());
@@ -419,7 +412,7 @@ namespace EvaluationRequirement
                 DetectionDetail detail {
                     tod, d_tod, true,
                             pos_current, is_inside_ref_time_period,
-                            sum_missed_uis, max_gap_uis, no_ref_uis, comment};
+                            sum_missed_uis, comment};
 
                 detail.pos_last = target_data.tstPosForTime(last_tod);
                 detail.has_last_position_ = true;
@@ -434,8 +427,7 @@ namespace EvaluationRequirement
                 details.push_back(
                 {tod, d_tod, false,
                  pos_current, is_inside_ref_time_period,
-                 sum_missed_uis, max_gap_uis, no_ref_uis,
-                 "OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")"});
+                 sum_missed_uis, "OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")"});
             }
 
 
@@ -486,9 +478,8 @@ namespace EvaluationRequirement
                             +String::timeStringFromDouble(ref_periods.period(period_cnt).end())+"]\n";
 
                     DetectionDetail detail{tod, d_tod, true,
-                                           pos_current, false,
-                                           sum_missed_uis, max_gap_uis, no_ref_uis,
-                                           comment};
+                                pos_current, false,
+                                sum_missed_uis, comment};
 
                     if (tst_time_found)
                     {
@@ -511,9 +502,8 @@ namespace EvaluationRequirement
                             +" OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")\n";
 
                     DetectionDetail detail{tod, d_tod, false,
-                                           pos_current, false,
-                                           sum_missed_uis, max_gap_uis, no_ref_uis,
-                                           comment};
+                                pos_current, false,
+                                sum_missed_uis, comment};
 
                     details.push_back(detail);
                 }
@@ -523,8 +513,7 @@ namespace EvaluationRequirement
         }
 
         loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " sum_uis " << sum_uis << " max_gap_uis " << max_gap_uis << " no_ref_uis " << no_ref_uis
-               << " max_gap_uis+no_ref_uis " << max_gap_uis+no_ref_uis;
+               << " sum_uis " << sum_uis;
 
         if (sum_uis)
         {
@@ -542,7 +531,7 @@ namespace EvaluationRequirement
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, sum_uis, sum_missed_uis, max_gap_uis, no_ref_uis, ref_periods, details);
+                    eval_man_, sum_uis, sum_missed_uis, ref_periods, details);
     }
 
     bool Detection::isMiss (float d_tod)

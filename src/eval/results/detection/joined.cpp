@@ -47,8 +47,6 @@ namespace EvaluationRequirementResult
 
         sum_uis_ += single_result->sumUIs();
         missed_uis_ += single_result->missedUIs();
-        max_gap_uis_ += single_result->maxGapUIs();
-        no_ref_uis_ += single_result->noRefUIs();
 
         updatePD();
     }
@@ -57,14 +55,12 @@ namespace EvaluationRequirementResult
     {
         if (sum_uis_)
         {
-            //assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
-
-            loginf << "JoinedDetection: updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_
+            logdbg << "JoinedDetection: updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_
                    << " sum_uis " << sum_uis_;
 
             assert (missed_uis_ <= sum_uis_);
 
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_)); //  - max_gap_uis_ - no_ref_uis_
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
             has_pd_ = true;
         }
         else
@@ -124,7 +120,7 @@ namespace EvaluationRequirementResult
 
         // "Req.", "Group", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                         requirement_->groupName().c_str(), {sum_uis_-max_gap_uis_-no_ref_uis_},
+                         requirement_->groupName().c_str(), {sum_uis_},
                          pd_var, condition.c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }
@@ -164,7 +160,7 @@ namespace EvaluationRequirementResult
     void JoinedDetection::updatesToUseChanges()
     {
         loginf << "JoinedDetection: updatesToUseChanges: prev sum_uis " << sum_uis_
-               << " missed_uis " << missed_uis_ << " max_gap_uis " << max_gap_uis_ << " no_ref_uis " << no_ref_uis_;
+               << " missed_uis " << missed_uis_;
 
         if (has_pd_)
             loginf << "JoinedDetection: updatesToUseChanges: prev result " << result_id_
@@ -174,8 +170,6 @@ namespace EvaluationRequirementResult
 
         sum_uis_ = 0;
         missed_uis_ = 0;
-        max_gap_uis_ = 0;
-        no_ref_uis_ = 0;
 
         for (auto result_it : results_)
         {
@@ -187,7 +181,7 @@ namespace EvaluationRequirementResult
         }
 
         loginf << "JoinedDetection: updatesToUseChanges: updt sum_uis " << sum_uis_
-               << " missed_uis " << missed_uis_ << " max_gap_uis " << max_gap_uis_ << " no_ref_uis " << no_ref_uis_;
+               << " missed_uis " << missed_uis_;
 
         if (has_pd_)
             loginf << "JoinedDetection: updatesToUseChanges: updt result " << result_id_

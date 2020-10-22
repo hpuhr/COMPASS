@@ -15,7 +15,7 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            int sum_uis, int missed_uis, int max_gap_uis, int no_ref_uis, TimePeriodCollection ref_periods,
+            int sum_uis, int missed_uis, TimePeriodCollection ref_periods,
             std::vector<EvaluationRequirement::DetectionDetail> details);
 
     virtual void print() override;
@@ -25,8 +25,6 @@ public:
 
     int sumUIs() const;
     int missedUIs() const;
-    int maxGapUIs() const;
-    int noRefUIs() const;
 
     std::vector<EvaluationRequirement::DetectionDetail>& details();
 
@@ -43,8 +41,6 @@ public:
 protected:
     int sum_uis_ {0};
     int missed_uis_ {0};
-    int max_gap_uis_ {0};
-    int no_ref_uis_ {0};
 
     TimePeriodCollection ref_periods_;
 

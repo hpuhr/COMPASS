@@ -33,8 +33,6 @@ namespace EvaluationRequirementResult
     protected:
         int sum_uis_ {0};
         int missed_uis_ {0};
-        int max_gap_uis_ {0};
-        int no_ref_uis_ {0};
 
         bool has_pd_ {false};
         float pd_{0};

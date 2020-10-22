@@ -15,11 +15,10 @@ public:
     DetectionDetail(
             float tod, QVariant d_tod,
             bool miss_occurred, EvaluationTargetPosition pos_current,
-            bool ref_exists, int missed_uis, int max_gap_uis,
-            int no_ref_uis, const std::string& comment)
+            bool ref_exists, int missed_uis, const std::string& comment)
         : tod_(tod), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
-          ref_exists_(ref_exists), missed_uis_(missed_uis), max_gap_uis_(max_gap_uis),
-          no_ref_uis_(no_ref_uis), comment_(comment)
+          ref_exists_(ref_exists), missed_uis_(missed_uis),
+          comment_(comment)
     {
     }
 
