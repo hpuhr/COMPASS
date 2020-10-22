@@ -69,11 +69,12 @@ namespace EvaluationRequirement
 
         EvaluationTargetPosition ref_pos;
         float tod{0}, last_tod{0};
-        bool first {true};
+
         bool inside, was_inside;
 
         {
             const std::multimap<float, unsigned int>& ref_data = target_data.refData();
+            bool first {true};
 
             for (auto& ref_it : ref_data)
             {
@@ -116,7 +117,6 @@ namespace EvaluationRequirement
 
         tod = 0;
         last_tod = 0;
-        first = true;
 
         // evaluate test data
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -297,7 +297,7 @@ namespace EvaluationRequirement
             {
                 details.push_back(
                 {tod, {}, false,
-                 pos_current, false,
+                 pos_current, is_inside_ref_time_period,
                  sum_missed_uis, max_gap_uis, no_ref_uis,
                  "Outside of reference time periods"});
 
@@ -323,7 +323,7 @@ namespace EvaluationRequirement
 
                 details.push_back(
                 {tod, {}, false,
-                 pos_current, false,
+                 pos_current, is_inside_ref_time_period,
                  sum_missed_uis, max_gap_uis, no_ref_uis,
                  "Outside sector"});
 
@@ -335,24 +335,59 @@ namespace EvaluationRequirement
 
             if (!period_last_tst_times.count(period_index) || was_outside) // first in period or was outside
             {
-                first = false;
-
                 logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                        << " first in period " << period_index <<" (" << period_last_tst_times.count(period_index)
                        << ") or was_outside " << was_outside;
 
                 if (was_outside)
+                {
                     details.push_back(
                     {tod, {}, false,
-                     pos_current, target_data.hasRefDataForTime(tod, max_ref_time_diff_),
+                     pos_current, is_inside_ref_time_period,
                      sum_missed_uis, max_gap_uis, no_ref_uis,
                      "First target report after outside sector"});
-                else
+                }
+                else // first in period
+                {
                     details.push_back(
                     {tod, {}, false,
-                     pos_current, target_data.hasRefDataForTime(tod, max_ref_time_diff_),
+                     pos_current, is_inside_ref_time_period,
                      sum_missed_uis, max_gap_uis, no_ref_uis,
                      "First target report in period "+to_string(period_index)});
+
+                    // check if begin time in period is miss
+
+                    d_tod = tod - ref_periods.period(period_index).begin();
+
+                    if (isMiss(d_tod))
+                    {
+                        sum_missed_uis += floor(d_tod/update_interval_s_);
+
+                        logdbg << "EvaluationRequirementDetection '" << name_
+                               << "': evaluate: utn " << target_data.utn_
+                               << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
+                               << floor(d_tod/update_interval_s_)
+                               << " at [" << String::timeStringFromDouble(ref_periods.period(period_index).begin())
+                               << ","<< String::timeStringFromDouble(tod)
+                               << "] missed_uis " << sum_missed_uis;
+
+                        comment = "Miss detected in current period "+to_string(period_index)
+                                +" (DToD > " +String::doubleToStringPrecision(missThreshold(), 2)
+                                +"), between ["+String::timeStringFromDouble(ref_periods.period(period_index).begin())
+                                +", "+String::timeStringFromDouble(tod)+"]\n";
+
+                        DetectionDetail detail{tod, d_tod, true,
+                                               target_data.tstPosForTime(tod), is_inside_ref_time_period,
+                                               sum_missed_uis, max_gap_uis, no_ref_uis,
+                                               comment};
+
+                        assert (target_data.hasRefPosForTime(ref_periods.period(period_index).begin()));
+                        detail.pos_last = target_data.refPosForTime(ref_periods.period(period_index).begin());
+                        detail.has_last_position_ = true;
+
+                        details.push_back(detail);
+                    }
+                }
 
 
                 was_outside = false;
@@ -383,7 +418,7 @@ namespace EvaluationRequirement
 
                 DetectionDetail detail {
                     tod, d_tod, true,
-                            pos_current, true,
+                            pos_current, is_inside_ref_time_period,
                             sum_missed_uis, max_gap_uis, no_ref_uis, comment};
 
                 detail.pos_last = target_data.tstPosForTime(last_tod);
@@ -398,7 +433,7 @@ namespace EvaluationRequirement
 
                 details.push_back(
                 {tod, d_tod, false,
-                 pos_current, true,
+                 pos_current, is_inside_ref_time_period,
                  sum_missed_uis, max_gap_uis, no_ref_uis,
                  "OK (DToD <= "+String::doubleToStringPrecision(missThreshold(), 2)+")"});
             }
