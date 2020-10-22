@@ -897,7 +897,7 @@ void EvaluationTargetData::calculateTestDataMappings() const
     for (auto& tst_it : tst_data_)
         test_data_mappings_[tst_it.first] = calculateTestDataMapping(tst_it.first);
 
-    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done";
+    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done";
 }
 
 TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const

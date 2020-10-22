@@ -109,6 +109,11 @@ public:
 
     unsigned int size() { return periods_.size(); }
 
+    using TimePeriodIterator =
+    typename std::vector<TimePeriod>::iterator;
+    TimePeriodIterator begin() { return periods_.begin(); }
+    TimePeriodIterator end() { return periods_.end(); }
+
     float totalBegin()
     {
         assert (periods_.size());

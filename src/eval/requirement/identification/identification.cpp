@@ -134,6 +134,9 @@ namespace EvaluationRequirement
                         ref_exists = true;
                         callsign_ok = false;
 
+                        lower_nok = false;
+                        upper_nok = false;
+
                         if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
                         {
                             callsign_ok = target_data.refCallsignForTime(ref_lower) == callsign;

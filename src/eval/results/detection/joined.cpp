@@ -57,8 +57,14 @@ namespace EvaluationRequirementResult
     {
         if (sum_uis_)
         {
-            assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_ - max_gap_uis_ - no_ref_uis_));
+            //assert (sum_uis_ > max_gap_uis_ + no_ref_uis_);
+
+            loginf << "JoinedDetection: updatePD: result_id " << result_id_ << " missed_uis " << missed_uis_
+                   << " sum_uis " << sum_uis_;
+
+            assert (missed_uis_ <= sum_uis_);
+
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_)); //  - max_gap_uis_ - no_ref_uis_
             has_pd_ = true;
         }
         else

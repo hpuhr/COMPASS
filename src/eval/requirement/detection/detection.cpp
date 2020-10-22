@@ -121,7 +121,7 @@ namespace EvaluationRequirement
         // evaluate test data
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
-        float sum_uis {0};
+        int sum_uis = ref_periods.getUIs(update_interval_s_);
 
         float d_tod{0};
 
@@ -141,13 +141,10 @@ namespace EvaluationRequirement
 
         if (!tst_data_size)
         {
-            sum_uis = ref_periods.getUIs(update_interval_s_);
-            sum_missed_uis = sum_uis;
-
-            if (ref_periods.size())
+            for (auto& period_it : ref_periods)
             {
-                last_tod = ref_periods.totalBegin();
-                tod = ref_periods.totalEnd();
+                last_tod = period_it.begin();
+                tod = period_it.end();
 
                 d_tod = tod - last_tod;
 
@@ -490,15 +487,14 @@ namespace EvaluationRequirement
             }
         }
 
-        sum_uis += ref_periods.getUIs(update_interval_s_);
-
         loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " sum_uis " << sum_uis << " max_gap_uis " << max_gap_uis << " no_ref_uis " << no_ref_uis
                << " max_gap_uis+no_ref_uis " << max_gap_uis+no_ref_uis;
 
         if (sum_uis)
         {
-            assert (sum_uis >= max_gap_uis+no_ref_uis);
+            //assert (sum_uis >= max_gap_uis+no_ref_uis);
+            assert (sum_missed_uis <= sum_uis);
 
             float pd = 1.0 - ((float)sum_missed_uis/(float)(sum_uis)); // -max_gap_uis-no_ref_uis
 
