@@ -220,6 +220,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     emit eval_man_.resultsChangedSignal();
 
+    postprocess_dialog_.setLabelText("Generating Results");
+
+    postprocess_dialog_.setValue(num_req_evals);
+
     generateResultsReport();
 
     postprocess_dialog_.close();
