@@ -12,6 +12,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.h"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.h"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/pdfgenerator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/pdfgeneratordialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/treeitem.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/treemodel.cpp"
@@ -20,6 +22,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/pdfgenerator.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/pdfgeneratordialog.cpp"
     )
 
 

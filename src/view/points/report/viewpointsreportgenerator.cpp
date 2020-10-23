@@ -22,13 +22,13 @@
 #include "osgview.h"
 #endif
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include <QCoreApplication>
 #include <QApplication>
 #include <QMessageBox>
 #include <QUrl>
 #include <QDesktopServices>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace std;
 using namespace Utils;
