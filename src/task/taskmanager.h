@@ -40,10 +40,13 @@ class TaskManagerWidget;
 class ManageDataSourcesTask;
 class ManageSectorsTask;
 class CreateAssociationsTask;
+class MainWindow;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
 #endif
+
+class QMainWindow;
 
 class TaskManager : public QObject, public Configurable
 {
@@ -200,6 +203,7 @@ protected:
     std::map<std::string, Task*> tasks_;
 
     void addTask(const std::string& class_id, Task* task);
+    MainWindow* getMainWindow();
 };
 
 #endif  // TASKMANAGER_H

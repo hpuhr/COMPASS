@@ -58,6 +58,7 @@
 #include "evaluationmanager.h"
 #include "eval/results/report/pdfgenerator.h"
 #include "eval/results/report/pdfgeneratordialog.h"
+#include "mainwindow.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -67,6 +68,8 @@
 #include <cassert>
 
 #include <QCoreApplication>
+#include <QApplication>
+#include <QMainWindow>
 #include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -1087,6 +1090,8 @@ void TaskManager::performAutomaticTasks ()
         {
             loginf << "TaskManager: performAutomaticTasks: exporting view points report";
 
+            getMainWindow()->showViewPointsTab();
+
             ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
 
             ViewPointsReportGeneratorDialog& dialog = gen.dialog();
@@ -1118,6 +1123,8 @@ void TaskManager::performAutomaticTasks ()
         else
         {
             loginf << "TaskManager: performAutomaticTasks: exporting evaluation report";
+
+            getMainWindow()->showEvaluationTab();
 
             EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
 
@@ -1197,6 +1204,22 @@ void TaskManager::performAutomaticTasks ()
     }
     else
         loginf << "TaskManager: performAutomaticTasks: not quitting";
+}
+
+MainWindow* TaskManager::getMainWindow()
+{
+    for(QWidget* pWidget : QApplication::topLevelWidgets())
+    {
+        QMainWindow* qt_main_window = qobject_cast<QMainWindow*>(pWidget);
+
+        if (qt_main_window)
+        {
+            MainWindow* main_window = dynamic_cast<MainWindow*>(qt_main_window);
+            assert (main_window);
+            return main_window;
+        }
+    }
+    return nullptr;
 }
 
 

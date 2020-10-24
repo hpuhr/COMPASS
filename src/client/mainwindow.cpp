@@ -111,11 +111,27 @@ void MainWindow::disableConfigurationSaving()
     save_configuration_ = false;
 }
 
+void MainWindow::showEvaluationTab()
+{
+    assert (started_);
+    assert (tab_widget_->count() > 1);
+    tab_widget_->setCurrentIndex(1);
+}
+
+void MainWindow::showViewPointsTab()
+{
+    assert (started_);
+    assert (tab_widget_->count() > 2);
+    tab_widget_->setCurrentIndex(2);
+}
+
+
 void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
 
 void MainWindow::startSlot()
 {
     loginf << "MainWindow: startSlot";
+    assert (!started_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -162,6 +178,8 @@ void MainWindow::startSlot()
 //    delete msg_box;
 
     QApplication::restoreOverrideCursor();
+
+    started_ = true;
 }
 
 void MainWindow::quitRequestedSlot()
