@@ -224,16 +224,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     postprocess_dialog_.setValue(num_req_evals);
 
-    generateResultsReport();
+    generateResultsReportGUI();
 
     postprocess_dialog_.close();
 
     QApplication::restoreOverrideCursor();
 }
 
-void EvaluationResultsGenerator::generateResultsReport()
+void EvaluationResultsGenerator::generateResultsReportGUI()
 {
-    loginf << "EvaluationResultsGenerator: generateResultsReport";
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI";
 
     boost::posix_time::ptime loading_start_time;
     boost::posix_time::ptime loading_stop_time;
@@ -265,7 +265,13 @@ void EvaluationResultsGenerator::generateResultsReport()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf << "EvaluationResultsGenerator: generateResultsReport done " << String::timeStringFromDouble(load_time, true);
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
+           << String::timeStringFromDouble(load_time, true);
+}
+
+void EvaluationResultsGenerator::generateResultsReportPDF()
+{
+
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
@@ -306,5 +312,5 @@ void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
         }
     }
 
-    generateResultsReport();
+    generateResultsReportGUI();
 }

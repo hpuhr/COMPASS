@@ -90,7 +90,8 @@ public:
 
     void updateToUseChangeOf (unsigned int utn);
 
-    void generateResultsReport();
+    void generateResultsReportGUI();
+    void generateResultsReportPDF();
 
 protected:
     EvaluationManager& eval_man_;

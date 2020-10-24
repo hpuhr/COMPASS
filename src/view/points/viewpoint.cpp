@@ -110,7 +110,7 @@ void ViewPoint::print() const
 
 void ViewPoint::accept(LatexVisitor& v) const
 {
-    loginf << "ViewPoint: accept";
+    logdbg << "ViewPoint: accept";
     v.visit(this);
 }
 

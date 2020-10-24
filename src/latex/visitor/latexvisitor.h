@@ -10,6 +10,11 @@ class ListBoxView;
 class OSGView;
 class LatexDocument;
 
+namespace EvaluationResultsReport
+{
+    class Section;
+}
+
 class LatexVisitor
 {
 public:
@@ -21,6 +26,8 @@ public:
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
 #endif
+
+    virtual void visit(const EvaluationResultsReport::Section* e);
 
     void imagePrefix(const std::string& image_prefix);
 

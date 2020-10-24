@@ -9,6 +9,7 @@
 #include <vector>
 
 class EvaluationManager;
+class LatexVisitor;
 
 namespace EvaluationResultsReport
 {
@@ -46,6 +47,12 @@ namespace EvaluationResultsReport
         SectionContentTable& getTable (const std::string& name);
         void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
                        bool sortable=true);
+
+        unsigned int numSections(); // all sections contained
+        void addSectionsFlat (vector<shared_ptr<Section>>& result);
+
+        virtual void accept(LatexVisitor& v) const;
+
 
     protected:
         string heading_; // name same as heading

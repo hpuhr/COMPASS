@@ -2,6 +2,7 @@
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "latexvisitor.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -121,6 +122,31 @@ namespace EvaluationResultsReport
         content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_,
                                                             sortable));
         assert (hasTable(name));
+    }
+
+    unsigned int Section::numSections()
+    {
+        unsigned int num = 1; // me
+
+        for (auto& sec_it : sub_sections_)
+            num += sec_it->numSections();
+
+        return num;
+    }
+
+    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result)
+    {
+        for (auto& sec_it : sub_sections_)
+        {
+            result.push_back(sec_it);
+            sec_it->addSectionsFlat(result);
+        }
+    }
+
+    void Section::accept(LatexVisitor& v) const
+    {
+        loginf << "Section: accept";
+        v.visit(this);
     }
 
     Section* Section::findSubSection (const std::string& heading)

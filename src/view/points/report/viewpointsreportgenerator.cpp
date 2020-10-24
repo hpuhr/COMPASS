@@ -178,7 +178,6 @@ void ViewPointsReportGenerator::run ()
             QCoreApplication::processEvents();
 
         // do stuff
-
         view_point.accept(visitor);
         visitor.imagePrefix("vp_"+to_string(vp_id));
 

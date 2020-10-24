@@ -1,10 +1,6 @@
 #ifndef EVALUATIONMANAGER_H
 #define EVALUATIONMANAGER_H
 
-#include <QObject>
-
-#include "json.hpp"
-
 #include "configurable.h"
 #include "sectorlayer.h"
 #include "activedatasource.h"
@@ -12,6 +8,12 @@
 #include "evaluationresultsgenerator.h"
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
+#include "eval/results/report/pdfgenerator.h"
+#include "eval/results/report/pdfgeneratordialog.h"
+
+#include <QObject>
+
+#include "json.hpp"
 
 class ATSDB;
 class EvaluationStandard;
@@ -142,6 +144,8 @@ public:
     nlohmann::json::boolean_t& useRequirement(const std::string& standard_name, const std::string& group_name,
                                               const std::string& req_name);
 
+    EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
+
 protected:
     ATSDB& atsdb_;
 
@@ -176,6 +180,7 @@ protected:
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;
+    std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 

@@ -262,6 +262,9 @@ void EvaluationManager::generateReport ()
     assert (data_loaded_);
     assert (evaluated_);
 
+    assert (pdf_gen_);
+    pdf_gen_->dialog().exec();
+
     if (widget_)
         widget_->updateButtons();
 }
@@ -305,7 +308,7 @@ EvaluationManager::~EvaluationManager()
 void EvaluationManager::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationStandard") == 0)
+    if (class_id == "EvaluationStandard")
     {
         EvaluationStandard* standard = new EvaluationStandard(class_id, instance_id, *this);
         logdbg << "EvaluationManager: generateSubConfigurable: adding standard " << standard->name();
@@ -313,6 +316,12 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         assert(standards_.find(standard->name()) == standards_.end());
 
         standards_[standard->name()].reset(standard);
+    }
+    else if (class_id == "EvaluationResultsReportPDFGenerator")
+    {
+        assert (!pdf_gen_);
+        pdf_gen_.reset(new EvaluationResultsReport::PDFGenerator(class_id, instance_id, *this));
+        assert (pdf_gen_);
     }
     else
         throw std::runtime_error("EvaluationManager: generateSubConfigurable: unknown class_id " +
@@ -322,9 +331,7 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 EvaluationManagerWidget* EvaluationManager::widget()
 {
     if (!widget_)
-    {
         widget_.reset(new EvaluationManagerWidget(*this));
-    }
 
     assert(widget_);
     return widget_.get();
@@ -332,7 +339,10 @@ EvaluationManagerWidget* EvaluationManager::widget()
 
 void EvaluationManager::checkSubConfigurables()
 {
+    if (!pdf_gen_)
+        generateSubConfigurable("EvaluationResultsReportPDFGenerator", "EvaluationResultsReportPDFGenerator0");
 
+    assert (pdf_gen_);
 }
 
 bool EvaluationManager::hasSectorLayer (const std::string& layer_name)
@@ -1107,6 +1117,12 @@ json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_n
         use_requirement_[standard_name][group_name][req_name] = true;
 
     return use_requirement_[standard_name][group_name][req_name].get_ref<json::boolean_t&>();
+}
+
+EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator() const
+{
+    assert (pdf_gen_);
+    return *pdf_gen_;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()

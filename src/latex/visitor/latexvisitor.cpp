@@ -11,6 +11,7 @@
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
+#include "eval/results/report/section.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -36,7 +37,7 @@ void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: id " << e->id();
+    loginf << "LatexVisitor: visit: ViewPoint id " << e->id();
 
     const nlohmann::json& j_data = e->data();
 
@@ -114,11 +115,17 @@ void LatexVisitor::visit(const ViewPoint* e)
     }
 }
 
+void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
+}
+
 void LatexVisitor::visit(ListBoxView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: listboxview " << e->instanceId();
+    loginf << "LatexVisitor: visit: ListBoxView " << e->instanceId();
 
     AllBufferTableWidget* allbuf = e->getDataWidget()->getAllBufferTableWidget();
     assert (allbuf);
@@ -162,7 +169,7 @@ void LatexVisitor::visit(ListBoxView* e)
 void LatexVisitor::visit(OSGView* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: osgview " << e->instanceId();
+    loginf << "LatexVisitor: visit: OSGView " << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 

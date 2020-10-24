@@ -10,7 +10,12 @@
 #include "sqliteconnection.h"
 #include "mysqlppconnection.h"
 #include "latexdocument.h"
+#include "latexvisitor.h"
 #include "system.h"
+
+#include "eval/results/report/section.h"
+#include "eval/results/report/rootitem.h"
+#include "eval/results/evaluationresultsgenerator.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -37,24 +42,7 @@ namespace EvaluationResultsReport
         registerParameter("author", &author_, "");
         registerParameter("abstract", &abstract_, "");
 
-        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
-
-        if (sql_con)
-        {
-            report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/eval_report_"
-                    + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
-        }
-        else
-        {
-            MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
-            assert (mysql_con);
-            report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
-        }
-
         report_filename_ = "report.tex";
-
-        loginf << "EvaluationResultsReportPDFGenerator: constructor: report path '" << report_path_ << "'"
-               << " filename '"  << report_filename_ << "'";
 
         registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
 
@@ -84,6 +72,26 @@ namespace EvaluationResultsReport
 
     PDFGeneratorDialog& PDFGenerator::dialog()
     {
+        if (!report_path_.size())
+        {
+            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+
+            if (sql_con)
+            {
+                report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/eval_report_"
+                        + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
+            }
+            else
+            {
+                MySQLppConnection* mysql_con =
+                        dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+                assert (mysql_con);
+                report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
+            }
+            loginf << "PDFGenerator: dialog: report path '" << report_path_ << "'"
+                   << " filename '"  << report_filename_ << "'";
+        }
+
         if (!dialog_)
             dialog_.reset(new PDFGeneratorDialog(*this));
 
@@ -98,7 +106,7 @@ namespace EvaluationResultsReport
         dialog_->setRunning(true);
 
         LatexDocument doc (report_path_, report_filename_);
-        doc.title("ATSDB View Points Report");
+        doc.title("ATSDB Evaluation Report");
 
         if (author_.size())
             doc.author(author_);
@@ -106,7 +114,7 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
-        //LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, wait_on_map_loading_);
+        LatexVisitor visitor (doc, false, false, false, wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -118,6 +126,192 @@ namespace EvaluationResultsReport
         boost::posix_time::ptime stop_time;
         boost::posix_time::time_duration time_diff;
 
+        //boost::posix_time::ptime vp_start_time;
+
+        start_time = boost::posix_time::microsec_clock::local_time();
+
+        assert (eval_man_.hasResults());
+        std::shared_ptr<Section> root_section = eval_man_.resultsGenerator().resultsModel().rootItem()->rootSection();
+
+        string status_str, elapsed_time_str, remaining_time_str;
+
+        // create sections
+        vector<shared_ptr<Section>> sections;
+        sections.push_back(root_section);
+        root_section->addSectionsFlat(sections);
+
+        unsigned int num_sections = sections.size();
+
+        unsigned int vp_cnt = 0;
+        double ms;
+        double ms_per_sec;
+
+#if USE_EXPERIMENTAL_SOURCE == true
+        OSGView::instant_display_ = true;
+#endif
+
+        for (auto& sec_it : sections)
+        {
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
+
+            if (cancel_)
+            {
+                loginf << "EvaluationResultsReportPDFGenerator: run: cancel";
+                break;
+            }
+
+            //            view_manager_.setCurrentViewPoint(&view_point);
+
+            //            while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+            //                QCoreApplication::processEvents();
+
+            sec_it->accept(visitor);
+
+            //            visitor.imagePrefix("vp_"+to_string(vp_id));
+
+            //            // visit se views
+            //            for (auto& view_it : view_manager_.getViews())
+            //                view_it.second->accept(visitor);
+
+            // update status
+            stop_time = boost::posix_time::microsec_clock::local_time();
+
+            time_diff = stop_time - start_time;
+            ms = time_diff.total_milliseconds();
+            elapsed_time_str =
+                    String::timeStringFromDouble(ms / 1000.0, false);
+
+            status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(num_sections);
+
+            if (vp_cnt && ms > 0)
+            {
+                ms_per_sec = ms/(double)vp_cnt;
+
+                remaining_time_str = String::timeStringFromDouble((num_sections-vp_cnt) * ms_per_sec / 1000.0, false);
+
+                loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
+                       << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
+            }
+            else
+            {
+                loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
+                       << " done after " << elapsed_time_str;
+
+            }
+
+            dialog_->setElapsedTime(elapsed_time_str);
+            dialog_->setProgress(0, num_sections, vp_cnt);
+            dialog_->setStatus(status_str);
+            dialog_->setRemainingTime(remaining_time_str);
+
+            ++vp_cnt;
+        }
+
+        if (cancel_)
+        {
+            dialog_->setProgress(0, num_sections, 0);
+            dialog_->setStatus("Writing view points cancelled");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else // proceed
+        {
+            dialog_->setProgress(0, num_sections, num_sections);
+            dialog_->setStatus("Writing view points done");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+            doc.write();
+
+            if (run_pdflatex_)
+            {
+                std::string command_out;
+                std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
+                        +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
+
+                loginf << "ViewPointsReportGenerator: run: running pdflatex";
+                dialog_->setStatus("Running pdflatex");
+                dialog_->setRemainingTime("");
+
+                //while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
+
+                command_out = System::exec(command);
+
+                logdbg << "ViewPointsReportGenerator: run: cmd done";
+
+                // update status
+                stop_time = boost::posix_time::microsec_clock::local_time();
+
+                time_diff = stop_time - start_time;
+                ms = time_diff.total_milliseconds();
+                elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+                dialog_->setElapsedTime(elapsed_time_str);
+
+                while (command_out.find("Rerun to get outlines right") != std::string::npos
+                       || command_out.find("Rerun to get cross-references right") != std::string::npos)
+                {
+                    loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
+                    dialog_->setStatus("Re-running pdflatex");
+
+                    //                while (QCoreApplication::hasPendingEvents())
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                    command_out = System::exec(command);
+
+                    time_diff = stop_time - start_time;
+                    ms = time_diff.total_milliseconds();
+                    elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+                    dialog_->setElapsedTime(elapsed_time_str);
+
+                    logdbg << "ViewPointsReportGenerator: run: re-run done";
+                }
+
+                loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
+
+                if (!command_out.size()) // no warnings
+                {
+                    pdf_created_ = true;
+
+                    dialog_->setStatus("Running pdflatex done");
+
+                    if (open_created_pdf_)
+                    {
+                        std::string fullpath = report_path_+report_filename_;
+
+                        if (String::hasEnding(fullpath, ".tex"))
+                        {
+                            String::replace(fullpath, ".tex", ".pdf");
+
+                            loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+
+                            QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                        }
+                        else
+                            logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
+                    }
+                }
+                else // show warnings
+                {
+                    QMessageBox msgBox;
+                    msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
+                    msgBox.exec();
+                }
+            }
+        }
+        dialog_->setRunning(false);
+        dialog_->close();
+
+        QApplication::restoreOverrideCursor();
+
+        running_ = false;
     }
 
     void PDFGenerator::cancel ()
