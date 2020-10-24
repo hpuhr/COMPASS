@@ -23,7 +23,8 @@ namespace EvaluationResultsReport
     class Section : public TreeItem
     {
     public:
-        Section(string heading, TreeItem* parent_item, EvaluationManager& eval_man);
+        Section(const string& heading, const string& parent_heading, TreeItem* parent_item,
+                EvaluationManager& eval_man);
 
         virtual TreeItem *child(int row) override;
         virtual int childCount() const override;
@@ -32,6 +33,7 @@ namespace EvaluationResultsReport
         virtual int row() const override;
 
         string heading() const;
+        string compoundHeading() const; // "head1:head2" or "head1"
 
         bool hasSubSection (const std::string& heading);
         Section& getSubSection (const std::string& heading);
@@ -56,6 +58,7 @@ namespace EvaluationResultsReport
 
     protected:
         string heading_; // name same as heading
+        string parent_heading_; // e.g. "head1:head2" or ""
         EvaluationManager& eval_man_;
 
         vector<shared_ptr<SectionContent>> content_;

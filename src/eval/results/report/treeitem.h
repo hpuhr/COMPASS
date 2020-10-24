@@ -12,7 +12,7 @@ namespace EvaluationResultsReport
     class TreeItem
     {
     public:
-        TreeItem(const string name, TreeItem* parent_item);
+        TreeItem(const string& name, TreeItem* parent_item);
 
         virtual TreeItem *child(int row) = 0;
         virtual int childCount() const = 0;

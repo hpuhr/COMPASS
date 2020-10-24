@@ -119,6 +119,18 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
+
+    current_section_name_ = e->compoundHeading();
+
+    // ignore if top "Results"
+    if (current_section_name_ == "Results")
+        return;
+
+    // slightly hacky, remove "Results" from top
+    assert (current_section_name_.rfind("Results:", 0) == 0);
+    current_section_name_.erase(0,8);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
 }
 
 void LatexVisitor::visit(ListBoxView* e)

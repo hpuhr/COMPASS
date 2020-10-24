@@ -102,9 +102,9 @@ std::string LatexSection::toString()
     else if (level_ == LatexSectionLevel::SUBSUBSECTION)
         ss << R"(\subsubsection{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::PARAGRAPH)
-        ss << R"(\parapgraph{)" << heading_ << "}\n";
+        ss << R"(\paragraph{)" << heading_ << "}\n";
     else if (level_ == LatexSectionLevel::SUBPARAGRAPH)
-        ss << R"(\subparapgraph{)" << heading_ << "}\n";
+        ss << R"(\subparagraph{)" << heading_ << "}\n";
     else
         throw std::runtime_error ("LatexSection: toString: unkown section level");
 

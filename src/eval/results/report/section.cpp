@@ -10,8 +10,9 @@
 namespace EvaluationResultsReport
 {
 
-    Section::Section(string heading, TreeItem* parent_item, EvaluationManager& eval_man)
-        : TreeItem(heading, parent_item), heading_(heading), eval_man_(eval_man)
+    Section::Section(const string& heading, const string& parent_heading, TreeItem* parent_item,
+                     EvaluationManager& eval_man)
+        : TreeItem(heading, parent_item), heading_(heading), parent_heading_(parent_heading), eval_man_(eval_man)
     {
     }
 
@@ -50,6 +51,14 @@ namespace EvaluationResultsReport
         return heading_;
     }
 
+    string Section::compoundHeading() const
+    {
+        if (parent_heading_.size())
+            return parent_heading_+":"+heading_;
+        else
+            return heading_;
+    }
+
     bool Section::hasSubSection (const std::string& heading)
     {
         return findSubSection(heading) != nullptr;
@@ -69,7 +78,8 @@ namespace EvaluationResultsReport
         logdbg << "Section " << heading_ << ": addSubSection: adding " << heading;
 
         assert (!hasSubSection(heading));
-        sub_sections_.push_back(make_shared<Section>(heading, this, eval_man_));
+
+        sub_sections_.push_back(make_shared<Section>(heading, compoundHeading(), this, eval_man_));
         assert (hasSubSection(heading));
     }
 

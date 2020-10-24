@@ -115,6 +115,8 @@ LatexSection& LatexDocument::getSection (const std::string& id)
     std::vector<std::string> parts = String::split(id, ':');
     assert (parts.size());
 
+    loginf << "LatexDocument: getSection: id '"+id+"' parts " << parts.size();
+
     //std::string& top = parts.at(0);
 
     LatexSection* tmp;

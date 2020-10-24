@@ -12,7 +12,7 @@ namespace EvaluationResultsReport
     RootItem::RootItem(EvaluationManager& eval_man)
         : TreeItem("Report", nullptr), eval_man_(eval_man)
     {
-        root_section_ = make_shared<Section>("Results", this, eval_man_);
+        root_section_ = make_shared<Section>("Results", "", this, eval_man_);
     }
 
     RootItem::~RootItem()

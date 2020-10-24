@@ -3,7 +3,7 @@
 
 namespace EvaluationResultsReport
 {
-    TreeItem::TreeItem(const string name, TreeItem* parent_item)
+    TreeItem::TreeItem(const string& name, TreeItem* parent_item)
         : name_(name), parent_item_(parent_item)
     {
         if (parent_item_)
