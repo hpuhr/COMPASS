@@ -44,8 +44,11 @@ public:
 
     void init(QTabWidget* tab_widget);
 
+    bool canLoadData ();
     void loadData ();
+    bool canEvaluate ();
     void evaluate ();
+    bool canGenerateReport ();
     void generateReport ();
 
     void close();

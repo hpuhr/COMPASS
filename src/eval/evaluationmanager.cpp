@@ -71,6 +71,12 @@ void EvaluationManager::init(QTabWidget* tab_widget)
         widget()->setDisabled(true);
 }
 
+bool EvaluationManager::canLoadData ()
+{
+    assert (initialized_);
+    return ATSDB::instance().objectManager().hasAssociations() && hasCurrentStandard();
+}
+
 void EvaluationManager::loadData ()
 {
     loginf << "EvaluationManager: loadData";
@@ -179,6 +185,12 @@ void EvaluationManager::loadData ()
         widget_->updateButtons();
 }
 
+bool EvaluationManager::canEvaluate ()
+{
+    assert (initialized_);
+    return data_loaded_ && hasCurrentStandard();
+}
+
 void EvaluationManager::newDataSlot(DBObject& object)
 {
     loginf << "EvaluationManager: newDataSlot: obj " << object.name() << " buffer size " << object.data()->size();
@@ -216,11 +228,11 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
         test_data_loaded_ = true;
     }
 
-    data_loaded_ = reference_data_loaded_ && test_data_loaded_;
+    bool data_loaded_tmp = reference_data_loaded_ && test_data_loaded_;
 
     loginf << "EvaluationManager: loadingDoneSlot: data loaded " << data_loaded_;
 
-    if (data_loaded_)
+    if (data_loaded_tmp)
     {
         loginf << "EvaluationManager: loadingDoneSlot: finalizing";
 
@@ -233,6 +245,8 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
         loginf << "EvaluationManager: loadingDoneSlot: finalize done "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
     }
+
+    data_loaded_ = data_loaded_tmp;
 
     if (widget_)
         widget_->updateButtons();
@@ -252,6 +266,12 @@ void EvaluationManager::evaluate ()
 
     if (widget_)
         widget_->updateButtons();
+}
+
+bool EvaluationManager::canGenerateReport ()
+{
+    assert (initialized_);
+    return evaluated_;
 }
 
 void EvaluationManager::generateReport ()

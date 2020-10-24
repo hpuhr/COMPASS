@@ -125,6 +125,7 @@ class TaskManager : public QObject, public Configurable
 
     void loadData(bool value);
     void exportViewPointsReportFile(const std::string& filename);
+    void exportEvalReportFile(const std::string& filename);
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
@@ -164,8 +165,13 @@ protected:
 
     bool start_ {false};
     bool load_data_ {false};
+
     bool export_view_points_report_ {false};
     std::string export_view_points_report_filename_;
+
+    bool export_eval_report_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     // tasks
