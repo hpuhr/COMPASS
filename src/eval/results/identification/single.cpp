@@ -79,9 +79,16 @@ namespace EvaluationRequirementResult
         logdbg << "SingleIdentification " <<  requirement_->name() <<": addToReport";
 
         // add target to requirements->group->req
+        addTargetToOverviewTable(root_item);
 
-        logdbg << "SingleIdentification " <<  requirement_->name() << ": addToReport: adding single result";
+        // add requirement requirement to targets->utn->requirements->group->req
+        addTargetDetailsToReport(root_item);
 
+        // TODO add requirement description, methods
+    }
+
+    void SingleIdentification::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
@@ -104,10 +111,16 @@ namespace EvaluationRequirementResult
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
          num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
          pd_var}, this, {utn_});
+    }
 
-        // add requirement to targets->utn->requirements->group->req
+    void SingleIdentification::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
+        QVariant pd_var;
 
-        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(utn_req_section_heading);
+        if (has_pid_)
+            pd_var = roundf(pid_ * 10000.0) / 100.0;
+
+        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
             utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
@@ -149,8 +162,6 @@ namespace EvaluationRequirementResult
         // add further details
         if (eval_man_.generateReportDetails())
             reportDetails(utn_req_section);
-
-        // TODO add requirement description, methods
     }
 
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)

@@ -82,9 +82,16 @@ namespace EvaluationRequirementResult
         logdbg << "SinglePositionMaxDistance " <<  requirement_->name() <<": addToReport";
 
         // add target to requirements->group->req
+        addTargetToOverviewTable(root_item);
 
-        logdbg << "SinglePositionMaxDistance " <<  requirement_->name() << ": addToReport: adding single result";
+        // add requirement results to targets->utn->requirements->group->req
+        addTargetDetailsToReport(root_item);
 
+        // TODO add requirement description, methods
+    }
+
+    void SinglePositionMaxDistance::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (!tgt_overview_section.hasTable("target_table"))
@@ -107,10 +114,16 @@ namespace EvaluationRequirementResult
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
          target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
          error_min_, error_max_, error_avg_}, this, {utn_});
+    }
 
-        // add requirement to targets->utn->requirements->group->req
+    void SinglePositionMaxDistance::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
+        QVariant pd_var;
 
-        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(utn_req_section_heading);
+        if (has_p_max_pos_)
+            pd_var = roundf(p_max_pos_ * 10000.0) / 100.0;
+
+        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
             utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
@@ -151,8 +164,6 @@ namespace EvaluationRequirementResult
         // add further details
         if (eval_man_.generateReportDetails())
             reportDetails(utn_req_section);
-
-        // TODO add requirement description, methods
     }
 
     void SinglePositionMaxDistance::reportDetails(EvaluationResultsReport::Section& utn_req_section)

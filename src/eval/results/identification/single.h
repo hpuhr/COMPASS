@@ -61,6 +61,8 @@ protected:
     std::vector<EvaluationRequirement::IdentificationDetail> details_;
 
     void updatePID();
+    void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 };
 
