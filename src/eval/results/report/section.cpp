@@ -159,6 +159,11 @@ namespace EvaluationResultsReport
         v.visit(this);
     }
 
+    const vector<shared_ptr<SectionContent>>& Section::content() const
+    {
+        return content_;
+    }
+
     Section* Section::findSubSection (const std::string& heading)
     {
         for (auto& sec_it : sub_sections_)

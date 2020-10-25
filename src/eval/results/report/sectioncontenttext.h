@@ -17,6 +17,9 @@ namespace EvaluationResultsReport
         void addText (const string& text);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
+        virtual void accept(LatexVisitor& v) const override;
+
+        const vector<string>& texts() const;
 
     protected:
         vector<string> texts_;

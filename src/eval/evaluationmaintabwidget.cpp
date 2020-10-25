@@ -74,7 +74,7 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     details_check->setChecked(eval_man_.generateReportDetails());
     connect(details_check, &QCheckBox::clicked, this, &EvaluationMainTabWidget::toggleGenerateDetailsSlot);
 
-    cfg_layout->addRow("Generate Details in Report", details_check);
+    cfg_layout->addRow("Generate Per-Target-Report Requirement Details in Results", details_check);
 
     main_layout->addLayout(cfg_layout);
 

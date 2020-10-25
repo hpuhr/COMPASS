@@ -7,6 +7,7 @@ class EvaluationManager;
 
 class QWidget;
 class QVBoxLayout;
+class LatexVisitor;
 
 namespace EvaluationResultsReport
 {
@@ -22,6 +23,8 @@ namespace EvaluationResultsReport
         string name() const;
 
         virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
+
+        virtual void accept(LatexVisitor& v) const = 0;
 
     protected:
         string name_;

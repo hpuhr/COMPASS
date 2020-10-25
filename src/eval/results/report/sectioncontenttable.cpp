@@ -2,6 +2,7 @@
 #include "eval/results/base.h"
 #include "eval/results/single.h"
 #include "evaluationmanager.h"
+#include "latexvisitor.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -99,6 +100,12 @@ namespace EvaluationResultsReport
 
         //        layout->addWidget(label);
         //    }
+    }
+
+    void SectionContentTable::accept(LatexVisitor& v) const
+    {
+        loginf << "SectionContentTable: accept";
+        v.visit(this);
     }
 
     int SectionContentTable::rowCount(const QModelIndex& parent) const

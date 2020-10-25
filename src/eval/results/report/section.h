@@ -55,6 +55,7 @@ namespace EvaluationResultsReport
 
         virtual void accept(LatexVisitor& v) const;
 
+        const vector<shared_ptr<SectionContent>>& content() const;
 
     protected:
         string heading_; // name same as heading

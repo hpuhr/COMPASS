@@ -1,5 +1,7 @@
 #include "eval/results/report/sectioncontenttext.h"
 #include "evaluationmanager.h"
+#include "latexvisitor.h"
+#include "logger.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -30,6 +32,17 @@ void SectionContentText::addToLayout (QVBoxLayout* layout)
 
         layout->addWidget(label);
     }
+}
+
+void SectionContentText::accept(LatexVisitor& v) const
+{
+    loginf << "SectionContentText: accept";
+    v.visit(this);
+}
+
+const vector<string>& SectionContentText::texts() const
+{
+    return texts_;
 }
 
 }

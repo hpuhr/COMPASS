@@ -12,6 +12,8 @@
 #include "json.h"
 #include "files.h"
 #include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontenttext.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -130,7 +132,27 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
     assert (current_section_name_.rfind("Results:", 0) == 0);
     current_section_name_.erase(0,8);
 
-    LatexSection& sec = report_.getSection(current_section_name_);
+    for (const auto& cont_it : e->content())
+        cont_it->accept(*this);
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
+
+    LatexSection& section = report_.getSection(current_section_name_);
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentText" << e->name();
+
+    LatexSection& section = report_.getSection(current_section_name_);
+
+    for (const auto& txt_it : e->texts())
+        section.addText(txt_it);
 }
 
 void LatexVisitor::visit(ListBoxView* e)

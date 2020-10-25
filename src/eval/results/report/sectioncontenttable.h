@@ -49,6 +49,8 @@ namespace EvaluationResultsReport
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
+        virtual void accept(LatexVisitor& v) const override;
+
         QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
         QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
