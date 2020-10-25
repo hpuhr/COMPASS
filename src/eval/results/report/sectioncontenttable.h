@@ -60,6 +60,9 @@ namespace EvaluationResultsReport
 
         Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+        vector<string> headings() const;
+        std::vector<std::string> sortedRowStrings(unsigned int row) const;
+
     protected:
         unsigned int num_columns_ {0};
         vector<string> headings_;
@@ -74,9 +77,8 @@ namespace EvaluationResultsReport
         //vector<bool> use_; // indicated whether that data was used
         //vector<int> utns_; // only set for rows associated with a specific utn, else -1
 
-
-        QSortFilterProxyModel* proxy_model_ {nullptr};
-        QTableView* table_view_ {nullptr};
+        mutable QSortFilterProxyModel* proxy_model_ {nullptr};
+        QTableView* table_view_ {nullptr}; // for reset
     };
 
 }

@@ -142,6 +142,36 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
 
     LatexSection& section = report_.getSection(current_section_name_);
+
+    string table_name = e->name();
+    assert (!section.hasTable(table_name));
+
+    vector<string> headings = e->headings();
+    unsigned int num_cols = headings.size();
+
+//    const std::string& name, unsigned int num_columns,
+//                                 std::vector<std::string> headings, std::string heading_alignment,
+//                                 bool convert_to_latex
+//    if (!overview_sec.hasTable("ViewPoints Overview"))
+//        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+//                              "| l | l | l | l | X | l |", false);
+
+    section.addTable(table_name, num_cols, headings, "", true);
+    LatexTable& table = section.getTable(table_name);
+
+    if (headings.size() >= 9)
+        table.setWideTable(true);
+
+    unsigned int num_rows = e->rowCount();
+    vector<string> row_strings;
+
+    for (unsigned int row=0; row < num_rows; ++row)
+    {
+        row_strings = e->sortedRowStrings(row);
+        assert (row_strings.size() == num_cols);
+        table.addRow(move(row_strings));
+    }
+
 }
 
 void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)

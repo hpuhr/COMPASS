@@ -12,6 +12,7 @@
 #include <QMenu>
 
 #include <cassert>
+#include <type_traits>
 
 using namespace std;
 
@@ -24,7 +25,6 @@ namespace EvaluationResultsReport
         : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings),
           sortable_(sortable)
     {
-
     }
 
     void SectionContentTable::addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
@@ -61,8 +61,11 @@ namespace EvaluationResultsReport
     {
         assert (layout);
 
-        proxy_model_ = new QSortFilterProxyModel();
-        proxy_model_->setSourceModel(this);
+        if (!proxy_model_)
+        {
+            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_->setSourceModel(this);
+        }
 
         table_view_ = new QTableView();
         table_view_->setModel(proxy_model_);
@@ -208,6 +211,38 @@ namespace EvaluationResultsReport
         assert (index.column() < headings_.size());
 
         return QAbstractItemModel::flags(index);
+    }
+
+    vector<string> SectionContentTable::headings() const
+    {
+        return headings_;
+    }
+
+    std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row) const
+    {
+        if (!proxy_model_)
+        {
+            proxy_model_ = new QSortFilterProxyModel();
+            SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+            assert (tmp);
+            proxy_model_->setSourceModel(tmp);
+        }
+
+        logdbg << "SectionContentTable: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()
+               << " data rows " << rows_.size();
+        assert (row < proxy_model_->rowCount());
+        assert (row < rows_.size());
+
+        vector<string> result;
+
+        for (unsigned int col=0; col < num_columns_; ++col)
+        {
+            QModelIndex index = proxy_model_->index(row, col);
+            assert (index.isValid());
+            result.push_back(proxy_model_->data(index).toString().toStdString());
+        }
+
+        return result;
     }
 
     void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)

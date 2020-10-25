@@ -16,7 +16,7 @@ std::string LatexContent::toString()
     stringstream ss;
 
     for (auto& cont_it : content_)
-        ss << cont_it << "\\ \\\\\n";
+        ss << cont_it << R"(\ \\)" << "\n";
 
     for (auto& cont_it : sub_content_)
         ss << cont_it->toString() << "\n";
