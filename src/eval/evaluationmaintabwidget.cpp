@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QFormLayout>
+#include <QCheckBox>
 
 EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
                                                  EvaluationManagerWidget& man_widget)
@@ -66,6 +67,17 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
 
     main_layout->addLayout(sec_layout);
 
+    // additional config
+    QFormLayout* cfg_layout = new QFormLayout();
+
+    QCheckBox* details_check = new QCheckBox();
+    details_check->setChecked(eval_man_.generateReportDetails());
+    connect(details_check, &QCheckBox::clicked, this, &EvaluationMainTabWidget::toggleGenerateDetailsSlot);
+
+    cfg_layout->addRow("Generate Details in Report", details_check);
+
+    main_layout->addLayout(cfg_layout);
+
     main_layout->addStretch();
 
     // connections
@@ -110,4 +122,12 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
 
     assert (sector_widget_);
     sector_widget_->update();
+}
+
+void EvaluationMainTabWidget::toggleGenerateDetailsSlot()
+{
+    QCheckBox* check = static_cast<QCheckBox*> (QObject::sender());
+    assert (check);
+
+    eval_man_.generateReportDetails(check->checkState() == Qt::Checked);
 }

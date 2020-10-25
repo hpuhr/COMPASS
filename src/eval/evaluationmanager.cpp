@@ -50,6 +50,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
 
+    registerParameter("generate_details", &generate_details_, true);
+
     createSubConfigurables();
 }
 
@@ -1143,6 +1145,18 @@ EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator() const
 {
     assert (pdf_gen_);
     return *pdf_gen_;
+}
+
+bool EvaluationManager::generateReportDetails() const
+{
+    return generate_details_;
+}
+
+void EvaluationManager::generateReportDetails(bool value)
+{
+    loginf << "EvaluationManager: generateDetails: value " << value;
+
+    generate_details_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()

@@ -149,6 +149,9 @@ public:
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
 
+    bool generateReportDetails() const;
+    void generateReportDetails(bool value);
+
 protected:
     ATSDB& atsdb_;
 
@@ -180,6 +183,8 @@ protected:
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
+
+    bool generate_details_ {true};
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;

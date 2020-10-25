@@ -50,6 +50,7 @@ protected:
     float pd_{0};
 
     void updatePD();
+    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 };
 
 }

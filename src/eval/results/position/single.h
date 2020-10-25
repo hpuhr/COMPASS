@@ -65,6 +65,7 @@ protected:
     std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details_;
 
     void updatePMaxPos();
+    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 };
 
 }

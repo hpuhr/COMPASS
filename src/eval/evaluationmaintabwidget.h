@@ -22,6 +22,8 @@ private slots:
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 
+    void toggleGenerateDetailsSlot();
+
 public:
     EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
 

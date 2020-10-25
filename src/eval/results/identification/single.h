@@ -61,7 +61,7 @@ protected:
     std::vector<EvaluationRequirement::IdentificationDetail> details_;
 
     void updatePID();
-
+    void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 };
 
 }

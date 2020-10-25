@@ -147,7 +147,14 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
         // add further details
+        if (eval_man_.generateReportDetails())
+            reportDetails(utn_req_section);
 
+        // TODO add requirement description, methods
+    }
+
+    void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    {
         if (!utn_req_section.hasTable("details_table"))
             utn_req_section.addTable("details_table", 10,
             {"ToD", "Ref", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
@@ -168,7 +175,6 @@ namespace EvaluationRequirementResult
 
             ++detail_cnt;
         }
-        // TODO add requirement description, methods
     }
 
 
