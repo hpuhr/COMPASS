@@ -122,15 +122,14 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
 
-    current_section_name_ = e->compoundHeading();
+    current_section_name_ = e->compoundResultsHeading(); // slightly hacky, remove "Results" from top
 
     // ignore if top "Results"
-    if (current_section_name_ == "Results")
+    if (current_section_name_ == "")
         return;
 
-    // slightly hacky, remove "Results" from top
-    assert (current_section_name_.rfind("Results:", 0) == 0);
-    current_section_name_.erase(0,8);
+    LatexSection& section = report_.getSection(current_section_name_);
+    section.label("sec:"+e->compoundResultsHeading());
 
     for (const auto& cont_it : e->content())
         cont_it->accept(*this);
@@ -149,6 +148,11 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     vector<string> headings = e->headings();
     unsigned int num_cols = headings.size();
 
+    for (unsigned int cnt=0; cnt < num_cols; ++cnt) // latexify headings
+        headings[cnt] = String::latexString(headings[cnt]);
+
+    assert (num_cols);
+
 //    const std::string& name, unsigned int num_columns,
 //                                 std::vector<std::string> headings, std::string heading_alignment,
 //                                 bool convert_to_latex
@@ -156,7 +160,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 //        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
 //                              "| l | l | l | l | X | l |", false);
 
-    section.addTable(table_name, num_cols, headings, "", true);
+    section.addTable(table_name, num_cols, headings, "", false);
     LatexTable& table = section.getTable(table_name);
 
     if (headings.size() >= 9)
@@ -169,6 +173,10 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     {
         row_strings = e->sortedRowStrings(row);
         assert (row_strings.size() == num_cols);
+
+        if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
+            row_strings[0] = "\\hyperref[sec:"+e->reference(row)+"]{"+row_strings.at(0)+"}";
+
         table.addRow(move(row_strings));
     }
 

@@ -63,6 +63,9 @@ namespace EvaluationResultsReport
         vector<string> headings() const;
         std::vector<std::string> sortedRowStrings(unsigned int row) const;
 
+        bool hasReference (unsigned int row) const;
+        std::string reference (unsigned int row) const;
+
     protected:
         unsigned int num_columns_ {0};
         vector<string> headings_;

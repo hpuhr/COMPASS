@@ -59,6 +59,24 @@ namespace EvaluationResultsReport
             return heading_;
     }
 
+    string Section::compoundResultsHeading() const
+    {
+        string tmp;
+
+        if (parent_heading_.size())
+            tmp = parent_heading_+":"+heading_;
+        else
+            tmp = heading_;
+
+        if (tmp == "Results")
+            return "";
+
+        assert (tmp.rfind("Results:", 0) == 0);
+        tmp.erase(0,8);
+
+        return tmp;
+    }
+
     bool Section::hasSubSection (const std::string& heading)
     {
         return findSubSection(heading) != nullptr;

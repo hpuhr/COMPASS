@@ -33,7 +33,8 @@ namespace EvaluationResultsReport
         virtual int row() const override;
 
         string heading() const;
-        string compoundHeading() const; // "head1:head2" or "head1"
+        string compoundHeading() const; // "head1:head2" or "head1", starts with "Results"
+        string compoundResultsHeading() const; // without "Results", can be ""
 
         bool hasSubSection (const std::string& heading);
         Section& getSubSection (const std::string& heading);

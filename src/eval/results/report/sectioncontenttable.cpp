@@ -4,6 +4,7 @@
 #include "evaluationmanager.h"
 #include "latexvisitor.h"
 #include "logger.h"
+#include "stringconv.h"
 
 #include <QVBoxLayout>
 #include <QTableView>
@@ -15,6 +16,7 @@
 #include <type_traits>
 
 using namespace std;
+using namespace Utils;
 
 namespace EvaluationResultsReport
 {
@@ -239,11 +241,75 @@ namespace EvaluationResultsReport
         {
             QModelIndex index = proxy_model_->index(row, col);
             assert (index.isValid());
-            result.push_back(proxy_model_->data(index).toString().toStdString());
+            // get string can convert to latex
+            result.push_back(String::latexString(proxy_model_->data(index).toString().toStdString()));
         }
 
         return result;
     }
+
+    bool SectionContentTable::hasReference (unsigned int row) const
+    {
+        if (!proxy_model_)
+        {
+            proxy_model_ = new QSortFilterProxyModel();
+            SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+            assert (tmp);
+            proxy_model_->setSourceModel(tmp);
+        }
+
+        assert (row < proxy_model_->rowCount());
+        assert (row < rows_.size());
+
+        QModelIndex index = proxy_model_->index(row, 0);
+        assert (index.isValid());
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        unsigned int row_index = source_index.row();
+
+        return result_ptrs_.at(row_index)
+                && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index));
+    }
+
+    std::string SectionContentTable::reference (unsigned int row) const
+    {
+        if (!proxy_model_)
+        {
+            proxy_model_ = new QSortFilterProxyModel();
+            SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+            assert (tmp);
+            proxy_model_->setSourceModel(tmp);
+        }
+
+        assert (row < proxy_model_->rowCount());
+        assert (row < rows_.size());
+
+        QModelIndex index = proxy_model_->index(row, 0);
+        assert (index.isValid());
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        unsigned int row_index = source_index.row();
+
+        assert (result_ptrs_.at(row_index)
+                && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)));
+
+        string tmp = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
+        //e.g. "Report:Results:"+getRequirementSectionID();
+        assert (tmp.size() >= 14);
+
+        if (tmp == "Report:Results")
+            return "";
+
+        assert (tmp.rfind("Report:Results:", 0) == 0);
+        tmp.erase(0,15);
+
+        return tmp;;
+    }
+
 
     void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
     {
