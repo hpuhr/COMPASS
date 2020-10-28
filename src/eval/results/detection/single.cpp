@@ -90,7 +90,7 @@ namespace EvaluationRequirementResult
 
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 11,
-            {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
              "EUIs", "MUIs", "PD"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");

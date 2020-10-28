@@ -56,8 +56,17 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
     num_pos_ok_ += single_result->numPosOk();
     num_pos_nok_ += single_result->numPosNOk();
 
-    error_min_ = min(error_min_, single_result->errorMin());
-    error_max_ = max(error_max_, single_result->errorMax());
+    if (first_)
+    {
+        error_min_ = single_result->errorMin();
+        error_max_ = single_result->errorMax();
+        first_ = false;
+    }
+    else
+    {
+        error_min_ = min(error_min_, single_result->errorMin());
+        error_max_ = max(error_max_, single_result->errorMax());
+    }
 
     if (num_distance+other_num_distance)
         error_avg_ = (float)(error_avg_*num_distance + single_result->errorAvg()*other_num_distance)
@@ -188,6 +197,8 @@ void JoinedPositionMaxDistance::updatesToUseChanges()
     num_pos_inside_ = 0;
     num_pos_ok_ = 0;
     num_pos_nok_ = 0;
+
+    first_ = true;
 
     for (auto result_it : results_)
     {

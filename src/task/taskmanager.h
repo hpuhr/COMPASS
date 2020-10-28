@@ -133,6 +133,8 @@ class TaskManager : public QObject, public Configurable
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
 
+    void evaluate(bool evaluate);
+
 protected:
     bool expert_mode_{false};
 
@@ -172,6 +174,7 @@ protected:
     bool export_view_points_report_ {false};
     std::string export_view_points_report_filename_;
 
+    bool evaluate_ {false};
     bool export_eval_report_ {false};
     std::string export_eval_report_filename_;
 

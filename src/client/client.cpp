@@ -76,6 +76,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     bool start {false};
     bool load_data {false};
     std::string export_view_points_report_filename;
+    bool evaluate {false};
     std::string export_eval_report_filename;
     bool quit {false};
 
@@ -106,6 +107,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("load_data", po::bool_switch(&load_data), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
                 "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
                 "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
@@ -181,6 +183,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (export_view_points_report_filename.size())
             task_man.exportViewPointsReportFile(export_view_points_report_filename);
+
+    if (evaluate)
+        task_man.evaluate(true);
 
     if (export_eval_report_filename.size())
             task_man.exportEvalReportFile(export_eval_report_filename);

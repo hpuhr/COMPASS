@@ -10,6 +10,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "number.h"
 
 #include <cassert>
 
@@ -96,8 +97,8 @@ namespace EvaluationRequirementResult
 
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 14,
-            {"UTN", "Begin", "End", "Callsign", "Target Addr.", "Mode 3/A", "Mode C Min", "Mode C Max",
-             "#PosOK", "#PosNOK", "PNOK", "EMin", "EMax", "EAvg"});
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "#POK", "#PNOK", "PNOK", "EMin", "EMax", "EAvg"});
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
@@ -108,12 +109,21 @@ namespace EvaluationRequirementResult
 
         string utn_req_section_heading = getTargetSectionID();
 
-        target_table.addRow(
-        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-         error_min_, error_max_, error_avg_}, this, {utn_});
+        if (has_p_max_pos_)
+            target_table.addRow(
+            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+             Number::round(error_min_,2), Number::round(error_max_,2),
+             Number::round(error_avg_,2)}, this, {utn_});
+        else
+            target_table.addRow(
+            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+             {},{},{}}, this, {utn_});
     }
 
     void SinglePositionMaxDistance::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -138,8 +148,8 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#PosOK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
-        utn_req_table.addRow({"#PosNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
+        utn_req_table.addRow({"#POK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
+        utn_req_table.addRow({"#PNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
         utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
         utn_req_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
         utn_req_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);

@@ -181,6 +181,8 @@ void JoinedIdentification::updatesToUseChanges()
     num_updates_ = 0;
     num_no_ref_pos_ = 0;
     num_no_ref_id_ = 0;
+    num_pos_outside_ = 0;
+    num_pos_inside_ = 0;
     num_unknown_id_ = 0;
     num_correct_id_ = 0;
     num_false_id_ = 0;

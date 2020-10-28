@@ -364,15 +364,15 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 {
                     return target.timeEndStr().c_str();
                 }
-                else if (col_name == "# All")
+                else if (col_name == "#All")
                 {
                     return target.numUpdates();
                 }
-                else if (col_name == "# Ref")
+                else if (col_name == "#Ref")
                 {
                     return target.numRefUpdates();
                 }
-                else if (col_name == "# Tst")
+                else if (col_name == "#Tst")
                 {
                     return target.numTstUpdates();
                 }
@@ -380,19 +380,19 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 {
                     return target.callsignsStr().c_str();
                 }
-                else if (col_name == "Target Addr.")
+                else if (col_name == "TA")
                 {
                     return target.targetAddressesStr().c_str();
                 }
-                else if (col_name == "Mode 3/A")
+                else if (col_name == "M3/A")
                 {
                     return target.modeACodesStr().c_str();
                 }
-                else if (col_name == "Mode C Min")
+                else if (col_name == "MC Min")
                 {
                     return target.modeCMinStr().c_str();
                 }
-                else if (col_name == "Mode C Max")
+                else if (col_name == "MC Max")
                 {
                     return target.modeCMaxStr().c_str();
                 }

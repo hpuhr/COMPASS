@@ -267,7 +267,10 @@ void EvaluationManager::evaluate ()
     evaluated_ = true;
 
     if (widget_)
+    {
         widget_->updateButtons();
+        widget_->expandResults();
+    }
 }
 
 bool EvaluationManager::canGenerateReport ()

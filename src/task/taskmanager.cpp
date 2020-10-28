@@ -1114,15 +1114,15 @@ void TaskManager::performAutomaticTasks ()
         }
     }
 
-    if (export_eval_report_)
+    if (evaluate_ || export_eval_report_)
     {
         if (!started)
         {
-            logerr << "TaskManager: performAutomaticTasks: exporting evaluation report not possible since not started";
+            logerr << "TaskManager: performAutomaticTasks: evaluation not possible since not started";
         }
         else
         {
-            loginf << "TaskManager: performAutomaticTasks: exporting evaluation report";
+            loginf << "TaskManager: performAutomaticTasks: running evaluation";
 
             getMainWindow()->showEvaluationTab();
 
@@ -1156,43 +1156,48 @@ void TaskManager::performAutomaticTasks ()
 
                     assert (eval_man.evaluated());
 
-                    if (eval_man.canGenerateReport())
+                    loginf << "TaskManager: performAutomaticTasks: evaluation done";
+
+                    if (export_eval_report_)
                     {
-                        loginf << "TaskManager: performAutomaticTasks: generating report";
-
-                        EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
-
-                        EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
-                        dialog.show();
-
-                        QCoreApplication::processEvents();
-
-                        gen.reportPathAndFilename(export_eval_report_filename_);
-                        gen.showDone(false);
-
-                        gen.run();
-
-                        while (gen.isRunning()) // not sure if needed here but what the hell
+                        if (eval_man.canGenerateReport())
                         {
+                            loginf << "TaskManager: performAutomaticTasks: generating report";
+
+                            EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+
+                            EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+                            dialog.show();
+
                             QCoreApplication::processEvents();
-                            QThread::msleep(1);
+
+                            gen.reportPathAndFilename(export_eval_report_filename_);
+                            gen.showDone(false);
+
+                            gen.run();
+
+                            while (gen.isRunning()) // not sure if needed here but what the hell
+                            {
+                                QCoreApplication::processEvents();
+                                QThread::msleep(1);
+                            }
+
+                            gen.showDone(true);
+
+                            loginf << "TaskManager: performAutomaticTasks: generating evaluation report done";
                         }
-
-                        gen.showDone(true);
-
-                        loginf << "TaskManager: performAutomaticTasks: generating report done";
+                        else
+                            logerr << "TaskManager: performAutomaticTasks: "
+                                      "exporting evaluation report not possible since report can't be generated";
                     }
-                    else
-                        logerr << "TaskManager: performAutomaticTasks: "
-                                  "exporting evaluation report not possible since report can't be generated";
                 }
                 else
                     logerr << "TaskManager: performAutomaticTasks: "
-                              "exporting evaluation report not possible since evaluation can not be made";
+                              "evaluation not possible since evaluation can not be made";
             }
             else
                 logerr << "TaskManager: performAutomaticTasks: "
-                          "exporting evaluation report not possible since no data can be loaded";
+                          "evaluation not possible since no data can be loaded";
         }
     }
 
@@ -1204,6 +1209,12 @@ void TaskManager::performAutomaticTasks ()
     }
     else
         loginf << "TaskManager: performAutomaticTasks: not quitting";
+}
+
+void TaskManager::evaluate(bool evaluate)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_ = evaluate;
 }
 
 MainWindow* TaskManager::getMainWindow()

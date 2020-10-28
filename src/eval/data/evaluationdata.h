@@ -103,8 +103,8 @@ public:
 protected:
     EvaluationManager& eval_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Begin", "End", "# All", "# Ref", "# Tst", "Callsign", "Target Addr.",
-                                "Mode 3/A", "Mode C Min", "Mode C Max"};
+    QStringList table_columns_ {"Use", "UTN", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+                                "M3/A", "MC Min", "MC Max"};
 
     TargetCache target_data_;
     bool finalized_ {false};
