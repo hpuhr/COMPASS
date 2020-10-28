@@ -49,7 +49,7 @@ namespace EvaluationResultsReport
         bool hasTable (const std::string& name);
         SectionContentTable& getTable (const std::string& name);
         void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
-                       bool sortable=true);
+                       bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
 
         unsigned int numSections(); // all sections contained
         void addSectionsFlat (vector<shared_ptr<Section>>& result);

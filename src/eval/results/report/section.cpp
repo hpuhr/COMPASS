@@ -144,11 +144,11 @@ namespace EvaluationResultsReport
     }
 
     void Section::addTable (const std::string& name, unsigned int num_columns,
-                            vector<string> headings, bool sortable)
+                            vector<string> headings, bool sortable, unsigned int sort_column, Qt::SortOrder order)
     {
         assert (!hasTable(name));
         content_.push_back(make_shared<SectionContentTable>(name, num_columns, headings, this, eval_man_,
-                                                            sortable));
+                                                            sortable, sort_column, order));
         assert (hasTable(name));
     }
 

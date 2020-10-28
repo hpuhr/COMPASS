@@ -94,7 +94,7 @@ namespace EvaluationRequirementResult
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"});
+             "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 

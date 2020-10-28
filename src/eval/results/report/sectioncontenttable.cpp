@@ -23,9 +23,10 @@ namespace EvaluationResultsReport
 
     SectionContentTable::SectionContentTable(const string& name, unsigned int num_columns,
                                              vector<string> headings, Section* parent_section,
-                                             EvaluationManager& eval_man, bool sortable)
+                                             EvaluationManager& eval_man, bool sortable,
+                                             unsigned int sort_column, Qt::SortOrder order)
         : SectionContent(name, parent_section, eval_man), num_columns_(num_columns), headings_(headings),
-          sortable_(sortable)
+          sortable_(sortable), sort_column_(sort_column), order_(order)
     {
     }
 
@@ -69,29 +70,32 @@ namespace EvaluationResultsReport
             proxy_model_->setSourceModel(this);
         }
 
-        table_view_ = new QTableView();
-        table_view_->setModel(proxy_model_);
-
-        if (sortable_)
+        if (!table_view_)
         {
-            table_view_->setSortingEnabled(true);
-            table_view_->sortByColumn(0, Qt::AscendingOrder);
+            table_view_ = new QTableView();
+            table_view_->setModel(proxy_model_);
+
+            if (sortable_)
+            {
+                table_view_->setSortingEnabled(true);
+                table_view_->sortByColumn(sort_column_, order_);
+            }
+
+            table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
+            table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+            table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+            table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
+            table_view_->setWordWrap(true);
+            table_view_->reset();
+
+            connect(table_view_, &QTableView::customContextMenuRequested,
+                    this, &SectionContentTable::customContextMenuSlot);
+
+            connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                    this, &SectionContentTable::currentRowChangedSlot);
+            connect(table_view_, &QTableView::doubleClicked,
+                    this, &SectionContentTable::doubleClickedSlot);
         }
-
-        table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
-        table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
-        table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-        table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
-        table_view_->setWordWrap(true);
-        table_view_->reset();
-
-        connect(table_view_, &QTableView::customContextMenuRequested,
-                this, &SectionContentTable::customContextMenuSlot);
-
-        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &SectionContentTable::currentRowChangedSlot);
-        connect(table_view_, &QTableView::doubleClicked,
-                this, &SectionContentTable::doubleClickedSlot);
 
         table_view_->resizeColumnsToContents();
         table_view_->resizeRowsToContents();
@@ -228,6 +232,33 @@ namespace EvaluationResultsReport
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
+        }
+
+        if (!table_view_)
+        {
+            table_view_ = new QTableView();
+            table_view_->setModel(proxy_model_);
+
+            if (sortable_)
+            {
+                table_view_->setSortingEnabled(true);
+                table_view_->sortByColumn(sort_column_, order_);
+            }
+
+            table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
+            table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+            table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+            table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
+            table_view_->setWordWrap(true);
+            table_view_->reset();
+
+            connect(table_view_, &QTableView::customContextMenuRequested,
+                    this, &SectionContentTable::customContextMenuSlot);
+
+            connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+                    this, &SectionContentTable::currentRowChangedSlot);
+            connect(table_view_, &QTableView::doubleClicked,
+                    this, &SectionContentTable::doubleClickedSlot);
         }
 
         logdbg << "SectionContentTable: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()

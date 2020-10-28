@@ -99,7 +99,7 @@ namespace EvaluationRequirementResult
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#POK", "#PNOK", "PNOK", "EMin", "EMax", "EAvg"});
+             "#POK", "#PNOK", "PNOK", "EMin", "EMax", "EAvg"}, true, 10);
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 

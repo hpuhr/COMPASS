@@ -39,7 +39,7 @@ namespace EvaluationResultsReport
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man,
-                            bool sortable=true);
+                            bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
 
         void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
                      QVariant annotation = {});
@@ -71,6 +71,8 @@ namespace EvaluationResultsReport
         vector<string> headings_;
 
         bool sortable_ {true};
+        unsigned int sort_column_ {0};
+        Qt::SortOrder order_ {Qt::AscendingOrder};
 
         vector<vector<QVariant>> rows_;
         vector<EvaluationRequirementResult::Base*> result_ptrs_;
@@ -81,7 +83,7 @@ namespace EvaluationResultsReport
         //vector<int> utns_; // only set for rows associated with a specific utn, else -1
 
         mutable QSortFilterProxyModel* proxy_model_ {nullptr};
-        QTableView* table_view_ {nullptr}; // for reset
+        mutable QTableView* table_view_ {nullptr}; // for reset
     };
 
 }
