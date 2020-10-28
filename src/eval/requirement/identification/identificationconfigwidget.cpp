@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 
         // prob
         minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
-        minimum_prob_edit_->setValidator(new QDoubleValidator(0.01, 1.0, 2, this));
+        minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(minimum_prob_edit_, &QLineEdit::textEdited,
                 this, &IdentificationConfigWidget::minimumProbEditSlot);
 

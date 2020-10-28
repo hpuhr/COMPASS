@@ -16,7 +16,7 @@ namespace EvaluationRequirement
     {
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
         registerParameter("max_distance", &max_distance_, 50.0);
-        registerParameter("maximum_probability", &maximum_probability_, 0.10);
+        registerParameter("minimum_probability", &minimum_probability_, 0.9);
     }
 
     PositionMaxDistanceConfig::~PositionMaxDistanceConfig()
@@ -43,7 +43,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<PositionMaxDistance> req = make_shared<PositionMaxDistance>(
                     name_, short_name_, group_.name(), eval_man_,
-                    max_ref_time_diff_, max_distance_, maximum_probability_);
+                    max_ref_time_diff_, max_distance_, minimum_probability_);
 
         return req;
     }
@@ -53,9 +53,9 @@ namespace EvaluationRequirement
         return max_distance_;
     }
 
-    float PositionMaxDistanceConfig::maximumProbability() const
+    float PositionMaxDistanceConfig::minimumProbability() const
     {
-        return maximum_probability_;
+        return minimum_probability_;
     }
 
     void PositionMaxDistanceConfig::maxDistance(float value)
@@ -63,9 +63,9 @@ namespace EvaluationRequirement
         max_distance_ = value;
     }
 
-    void PositionMaxDistanceConfig::maximumProbability(float value)
+    void PositionMaxDistanceConfig::minimumProbability(float value)
     {
-        maximum_probability_ = value;
+        minimum_probability_ = value;
     }
     
     float PositionMaxDistanceConfig::maxRefTimeDiff() const

@@ -72,10 +72,10 @@ void JoinedPositionMaxDistance::addToValues (std::shared_ptr<SinglePositionMaxDi
         error_avg_ = (float)(error_avg_*num_distance + single_result->errorAvg()*other_num_distance)
                 /(float)(num_distance+other_num_distance);
 
-    updatePMaxPos();
+    updatePMinPos();
 }
 
-void JoinedPositionMaxDistance::updatePMaxPos()
+void JoinedPositionMaxDistance::updatePMinPos()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
@@ -84,13 +84,13 @@ void JoinedPositionMaxDistance::updatePMaxPos()
     if (num_pos_ - num_no_ref_ - num_pos_outside_)
     {
         assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
-        p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
-        has_p_max_pos_ = true;
+        p_min_pos_ = (float)num_pos_ok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
+        has_p_min_pos_ = true;
     }
     else
     {
-        p_max_pos_ = 0;
-        has_p_max_pos_ = false;
+        p_min_pos_ = 0;
+        has_p_min_pos_ = false;
     }
 }
 
@@ -102,8 +102,8 @@ void JoinedPositionMaxDistance::print()
 
     if (num_pos_)
         loginf << "JoinedPositionMaxDistance: print: req. name " << req->name()
-               << " pd " << String::percentToString(100.0 * p_max_pos_)
-               << " passed " << (p_max_pos_ <= req->maximumProbability());
+               << " pd " << String::percentToString(100.0 * p_min_pos_)
+               << " passed " << (p_min_pos_ >= req->minimumProbability());
     else
         loginf << "JoinedPositionMaxDistance: print: req. name " << req->name() << " has no data";
 }
@@ -128,18 +128,18 @@ void JoinedPositionMaxDistance::addToReport (
             std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
     assert (req);
 
-    string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
+    string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
     // pd
     QVariant pd_var;
 
     string result {"Unknown"};
 
-    if (has_p_max_pos_)
+    if (has_p_min_pos_)
     {
-        pd_var = String::percentToString(p_max_pos_ * 100.0).c_str();
+        pd_var = String::percentToString(p_min_pos_ * 100.0).c_str();
 
-        result = p_max_pos_ <= req->maximumProbability() ? "Passed" : "Failed";
+        result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
     }
 
     // "Req.", "Group", "Result", "Condition", "Result"
@@ -187,7 +187,7 @@ void JoinedPositionMaxDistance::updatesToUseChanges()
 
     if (num_pos_)
         loginf << "JoinedPositionMaxDistance: updatesToUseChanges: prev result " << result_id_
-               << " pd " << 100.0 * p_max_pos_;
+               << " pd " << 100.0 * p_min_pos_;
     else
         loginf << "JoinedPositionMaxDistance: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
@@ -214,7 +214,7 @@ void JoinedPositionMaxDistance::updatesToUseChanges()
 
     if (num_pos_)
         loginf << "JoinedPositionMaxDistance: updatesToUseChanges: updt result " << result_id_
-               << " pd " << 100.0 * p_max_pos_;
+               << " pd " << 100.0 * p_min_pos_;
     else
         loginf << "JoinedPositionMaxDistance: updatesToUseChanges: updt result " << result_id_ << " has no data";
 }

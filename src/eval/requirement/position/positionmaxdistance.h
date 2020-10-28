@@ -55,11 +55,11 @@ namespace EvaluationRequirement
         PositionMaxDistance(
                 const std::string& name, const std::string& short_name, const std::string& group_name,
                 EvaluationManager& eval_man,
-                float max_time_diff, float max_distance, float maximum_probability);
+                float max_time_diff, float max_distance, float minimum_probability);
 
         float maxRefTimeDiff() const;
         float maxDistance() const;
-        float maximumProbability() const;
+        float minimumProbability() const;
 
         virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
                 const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -69,7 +69,7 @@ namespace EvaluationRequirement
     protected:
         float max_ref_time_diff_ {0};
         float max_distance_ {0};
-        float maximum_probability_{0};
+        float minimum_probability_{0};
     };
 
 }

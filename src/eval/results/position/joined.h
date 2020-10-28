@@ -44,11 +44,11 @@ namespace EvaluationRequirementResult
         double error_max_ {0};
         double error_avg_ {0};
 
-        bool has_p_max_pos_ {false};
-        float p_max_pos_{0};
+        bool has_p_min_pos_ {false};
+        float p_min_pos_{0};
 
         void addToValues (std::shared_ptr<SinglePositionMaxDistance> single_result);
-        void updatePMaxPos();
+        void updatePMinPos();
     };
 
 }

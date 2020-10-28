@@ -34,11 +34,11 @@ namespace EvaluationRequirementResult
           error_min_(error_min), error_max_(error_max), error_avg_(error_avg),
           details_(details)
     {
-        updatePMaxPos();
+        updatePMinPos();
     }
 
 
-    void SinglePositionMaxDistance::updatePMaxPos()
+    void SinglePositionMaxDistance::updatePMinPos()
     {
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
@@ -47,15 +47,15 @@ namespace EvaluationRequirementResult
         if (num_pos_ - num_no_ref_ - num_pos_outside_)
         {
             assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
-            p_max_pos_ = (float)num_pos_nok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
-            has_p_max_pos_ = true;
+            p_min_pos_ = (float)num_pos_ok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
+            has_p_min_pos_ = true;
 
             result_usable_ = true;
         }
         else
         {
-            p_max_pos_ = 0;
-            has_p_max_pos_ = false;
+            p_min_pos_ = 0;
+            has_p_min_pos_ = false;
 
             result_usable_ = false;
         }
@@ -72,8 +72,8 @@ namespace EvaluationRequirementResult
         if (num_pos_)
             loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
                    << " utn " << utn_
-                   << " pd " << String::percentToString(100.0 * p_max_pos_)
-                   << " passed " << (p_max_pos_ <= req->maximumProbability());
+                   << " pd " << String::percentToString(100.0 * p_min_pos_)
+                   << " passed " << (p_min_pos_ >= req->minimumProbability());
         else
             loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
                    << " utn " << utn_ << " has no data";
@@ -99,18 +99,18 @@ namespace EvaluationRequirementResult
         if (!tgt_overview_section.hasTable("target_table"))
             tgt_overview_section.addTable("target_table", 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#POK", "#PNOK", "PNOK", "EMin", "EMax", "EAvg"}, true, 10);
+             "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
 
         EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
 
         QVariant pd_var;
 
-        if (has_p_max_pos_)
-            pd_var = roundf(p_max_pos_ * 10000.0) / 100.0;
+        if (has_p_min_pos_)
+            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
 
         string utn_req_section_heading = getTargetSectionID();
 
-        if (has_p_max_pos_)
+        if (has_p_min_pos_)
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
@@ -131,8 +131,8 @@ namespace EvaluationRequirementResult
     {
         QVariant pd_var;
 
-        if (has_p_max_pos_)
-            pd_var = roundf(p_max_pos_ * 10000.0) / 100.0;
+        if (has_p_min_pos_)
+            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
 
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetSectionID());
 
@@ -151,7 +151,7 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
         utn_req_table.addRow({"#POK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
         utn_req_table.addRow({"#PNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
-        utn_req_table.addRow({"PNOK [%]", "Probability of unacceptable position", pd_var}, this);
+        utn_req_table.addRow({"POK [%]", "Probability of acceptable position", pd_var}, this);
         utn_req_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
         utn_req_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
         utn_req_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
@@ -161,14 +161,14 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
         assert (req);
 
-        string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
+        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
         utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
 
         string result {"Unknown"};
 
-        if (has_p_max_pos_)
-            result = p_max_pos_ <= req->maximumProbability() ? "Passed" : "Failed";
+        if (has_p_min_pos_)
+            result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

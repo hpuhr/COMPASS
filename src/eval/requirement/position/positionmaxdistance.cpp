@@ -17,9 +17,9 @@ namespace EvaluationRequirement
 
     PositionMaxDistance::PositionMaxDistance(const std::string& name, const std::string& short_name, const std::string& group_name,
                                              EvaluationManager& eval_man,
-                                             float max_ref_time_diff, float max_distance, float maximum_probability)
+                                             float max_ref_time_diff, float max_distance, float minimum_probability)
         : Base(name, short_name, group_name, eval_man),
-          max_ref_time_diff_(max_ref_time_diff), max_distance_(max_distance), maximum_probability_(maximum_probability)
+          max_ref_time_diff_(max_ref_time_diff), max_distance_(max_distance), minimum_probability_(minimum_probability)
     {
 
     }
@@ -30,9 +30,9 @@ namespace EvaluationRequirement
     }
 
 
-    float PositionMaxDistance::maximumProbability() const
+    float PositionMaxDistance::minimumProbability() const
     {
-        return maximum_probability_;
+        return minimum_probability_;
     }
 
     std::shared_ptr<EvaluationRequirementResult::Single> PositionMaxDistance::evaluate (
@@ -40,7 +40,7 @@ namespace EvaluationRequirement
             const SectorLayer& sector_layer)
     {
         logdbg << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " max_distance " << max_distance_ << " maximum_probability " << maximum_probability_;
+               << " max_distance " << max_distance_ << " minimum_probability " << minimum_probability_;
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 

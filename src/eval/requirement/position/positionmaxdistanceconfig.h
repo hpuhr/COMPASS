@@ -27,8 +27,8 @@ public:
     float maxDistance() const;
     void maxDistance(float value);
 
-    float maximumProbability() const;
-    void maximumProbability(float value);
+    float minimumProbability() const;
+    void minimumProbability(float value);
 
     float maxRefTimeDiff() const;
     void maxRefTimeDiff(float value);
@@ -36,7 +36,7 @@ public:
 protected:
     float max_ref_time_diff_ {0};
     float max_distance_ {0};
-    float maximum_probability_{0};
+    float minimum_probability_{0};
 
     std::unique_ptr<PositionMaxDistanceConfigWidget> widget_;
 };

@@ -35,12 +35,12 @@ namespace EvaluationRequirement
         form_layout_->addRow("Maximum Distance [m]", max_distance_edit_);
 
         // prob
-        maximum_prob_edit_ = new QLineEdit(QString::number(config_.maximumProbability()));
-        maximum_prob_edit_->setValidator(new QDoubleValidator(0.01, 1.0, 2, this));
-        connect(maximum_prob_edit_, &QLineEdit::textEdited,
-                this, &PositionMaxDistanceConfigWidget::maximumProbEditSlot);
+        minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
+        minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
+        connect(minimum_prob_edit_, &QLineEdit::textEdited,
+                this, &PositionMaxDistanceConfigWidget::minimumProbEditSlot);
 
-        form_layout_->addRow("Maximum Probability [1]", maximum_prob_edit_);
+        form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 
         setLayout(form_layout_);
     }
@@ -72,7 +72,7 @@ namespace EvaluationRequirement
             loginf << "PositionMaxDistanceConfigWidget: maxDistanceEditSlot: invalid value";
     }
 
-    void PositionMaxDistanceConfigWidget::PositionMaxDistanceConfigWidget::maximumProbEditSlot(QString value)
+    void PositionMaxDistanceConfigWidget::PositionMaxDistanceConfigWidget::minimumProbEditSlot(QString value)
     {
         loginf << "PositionMaxDistanceConfigWidget: maximumProbEditSlot: value " << value.toStdString();
 
@@ -80,7 +80,7 @@ namespace EvaluationRequirement
         float val = value.toFloat(&ok);
 
         if (ok)
-            config_.maximumProbability(val);
+            config_.minimumProbability(val);
         else
             loginf << "PositionMaxDistanceConfigWidget: maximumProbEditSlot: invalid value";
     }
