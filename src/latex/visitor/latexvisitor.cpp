@@ -177,6 +177,14 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
             row_strings[0] = "\\hyperref[sec:"+e->reference(row)+"]{"+row_strings.at(0)+"}";
 
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (row_strings[cnt] == "true" || row_strings[cnt] == "Passed")
+                row_strings[cnt] = "\\textcolor{darkgreen}{"+row_strings[cnt]+"}";
+            else if (row_strings[cnt] == "false" || row_strings[cnt] == "Failed")
+                row_strings[cnt] = "\\textcolor{red}{"+row_strings[cnt]+"}";
+        }
+
         table.addRow(move(row_strings));
     }
 

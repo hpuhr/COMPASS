@@ -52,9 +52,9 @@ std::string LatexTable::toString()
     }
 
     if (wide_table_)
-        ss << R"(\begin{tabularx}{\linewidth}{)" << heading_alignment_ << " }\n";
+        ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
     else
-        ss << R"(\begin{tabularx}{\textwidth}{)" << heading_alignment_ << " }\n";
+        ss << R"(\begin{tabularx}{\textwidth}[H]{)" << heading_alignment_ << " }\n";
 
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);

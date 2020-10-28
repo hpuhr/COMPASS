@@ -96,20 +96,23 @@ std::string LatexSection::toString()
     stringstream ss;
 
     if (level_ == LatexSectionLevel::SECTION)
-        ss << R"(\section{)" << heading_ << "}\n";
+        ss << R"(\section{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBSECTION)
-        ss << R"(\subsection{)" << heading_ << "}\n";
+        ss << R"(\subsection{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBSUBSECTION)
-        ss << R"(\subsubsection{)" << heading_ << "}\n";
+        ss << R"(\subsubsection{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::PARAGRAPH)
-        ss << R"(\paragraph{)" << heading_ << "}\n";
+        ss << R"(\paragraph{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBPARAGRAPH)
-        ss << R"(\subparagraph{)" << heading_ << "}\n";
+        ss << R"(\subparagraph{)" << heading_ << "}";
     else
         throw std::runtime_error ("LatexSection: toString: unkown section level");
 
     if (label_.size())
-        ss << R"(\label{)" << label_ << "}\n";
+        ss << "\n" << R"(\label{)" << label_ << "}";
+
+    if (level_ == LatexSectionLevel::PARAGRAPH || level_ == LatexSectionLevel::SUBPARAGRAPH)
+        ss << R"(\ \\)"; // for correct placement after
 
     ss << "\n";
 
