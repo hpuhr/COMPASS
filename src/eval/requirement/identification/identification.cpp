@@ -81,7 +81,7 @@ namespace EvaluationRequirement
             if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
             {
                 details.push_back({tod, pos_current,
-                                   false, {}, // ref_exists, pos_inside,
+                                   false, {}, false, // ref_exists, pos_inside,
                                    num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
                                    num_unknown_id, num_correct_id, num_false_id, "No reference data"});
 
@@ -97,7 +97,7 @@ namespace EvaluationRequirement
             if (!ok)
             {
                 details.push_back({tod, pos_current,
-                                   false, {}, // ref_exists, pos_inside,
+                                   false, {}, false, // ref_exists, pos_inside,
                                    num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
                                    num_unknown_id, num_correct_id, num_false_id, "No reference position"});
 
@@ -111,7 +111,7 @@ namespace EvaluationRequirement
             if (!is_inside)
             {
                 details.push_back({tod, pos_current,
-                                   ref_exists, is_inside, // ref_exists, pos_inside,
+                                   ref_exists, is_inside, false, // ref_exists, pos_inside,
                                    num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
                                    num_unknown_id, num_correct_id, num_false_id, "Outside sector"});
 
@@ -194,7 +194,7 @@ namespace EvaluationRequirement
             }
 
             details.push_back({tod, pos_current,
-                               ref_exists, is_inside,
+                               ref_exists, is_inside, !callsign_ok,
                                num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
                                num_unknown_id, num_correct_id, num_false_id, comment});
         }

@@ -167,8 +167,8 @@ namespace EvaluationRequirementResult
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
         if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 10,
-            {"ToD", "Ref", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
+            utn_req_section.addTable("details_table", 11,
+            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable("details_table");
@@ -179,6 +179,7 @@ namespace EvaluationRequirementResult
         {
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
+             !rq_det_it.is_not_ok_,
              rq_det_it.num_updates_, rq_det_it.num_no_ref_,
              rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
              rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
@@ -207,7 +208,58 @@ namespace EvaluationRequirementResult
         assert (hasViewableData(table, annotation));
 
         if (table.name() == "target_table")
-            return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+        {
+            std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
+                        utn_, req_grp_id_, result_id_);
+
+            bool has_pos = false;
+            double lat_min, lat_max, lon_min, lon_max;
+
+            for (auto& detail_it : details_)
+            {
+                if (!detail_it.is_not_ok_)
+                    continue;
+
+                if (has_pos)
+                {
+                    lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
+                    lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+
+                    lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
+                    lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+                }
+                else // tst pos always set
+                {
+                    lat_min = detail_it.pos_tst_.latitude_;
+                    lat_max = detail_it.pos_tst_.latitude_;
+
+                    lon_min = detail_it.pos_tst_.longitude_;
+                    lon_max = detail_it.pos_tst_.longitude_;
+
+                    has_pos = true;
+                }
+            }
+
+            if (has_pos)
+            {
+                (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
+                (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+
+                double lat_w = (lat_max-lat_min)/2.0;
+                double lon_w = (lon_max-lon_min)/2.0;
+
+                if (lat_w < 0.02)
+                    lat_w = 0.02;
+
+                if (lon_w < 0.02)
+                    lon_w = 0.02;
+
+                (*viewable_ptr)["position_window_latitude"] = lat_w;
+                (*viewable_ptr)["position_window_longitude"] = lon_w;
+            }
+
+            return viewable_ptr;
+        }
         else if (table.name() == "details_table" && annotation.isValid())
         {
             unsigned int detail_cnt = annotation.toUInt();
