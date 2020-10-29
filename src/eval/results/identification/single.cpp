@@ -159,6 +159,18 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
+        if (has_pid_ && pid_ != 1.0)
+        {
+            utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
+                                      getTargetErrorsViewable());
+        }
+        else
+        {
+            utn_req_section.addText("target_errors_overview_no_figure");
+            utn_req_section.getText("target_errors_overview_no_figure").addText(
+                        "No target errors found, therefore no figure was generated.");
+        }
+
         // add further details
         if (eval_man_.generateReportDetails())
             reportDetails(utn_req_section);
@@ -209,56 +221,7 @@ namespace EvaluationRequirementResult
 
         if (table.name() == "target_table")
         {
-            std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
-                        utn_, req_grp_id_, result_id_);
-
-            bool has_pos = false;
-            double lat_min, lat_max, lon_min, lon_max;
-
-            for (auto& detail_it : details_)
-            {
-                if (!detail_it.is_not_ok_)
-                    continue;
-
-                if (has_pos)
-                {
-                    lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
-                    lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
-
-                    lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
-                    lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
-                }
-                else // tst pos always set
-                {
-                    lat_min = detail_it.pos_tst_.latitude_;
-                    lat_max = detail_it.pos_tst_.latitude_;
-
-                    lon_min = detail_it.pos_tst_.longitude_;
-                    lon_max = detail_it.pos_tst_.longitude_;
-
-                    has_pos = true;
-                }
-            }
-
-            if (has_pos)
-            {
-                (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
-                (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
-
-                double lat_w = (lat_max-lat_min)/2.0;
-                double lon_w = (lon_max-lon_min)/2.0;
-
-                if (lat_w < 0.02)
-                    lat_w = 0.02;
-
-                if (lon_w < 0.02)
-                    lon_w = 0.02;
-
-                (*viewable_ptr)["position_window_latitude"] = lat_w;
-                (*viewable_ptr)["position_window_longitude"] = lon_w;
-            }
-
-            return viewable_ptr;
+            return getTargetErrorsViewable();
         }
         else if (table.name() == "details_table" && annotation.isValid())
         {
@@ -285,6 +248,60 @@ namespace EvaluationRequirementResult
         }
         else
             return nullptr;
+    }
+
+    std::unique_ptr<nlohmann::json::object_t> SingleIdentification::getTargetErrorsViewable ()
+    {
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
+                    utn_, req_grp_id_, result_id_);
+
+        bool has_pos = false;
+        double lat_min, lat_max, lon_min, lon_max;
+
+        for (auto& detail_it : details_)
+        {
+            if (!detail_it.is_not_ok_)
+                continue;
+
+            if (has_pos)
+            {
+                lat_min = min(lat_min, detail_it.pos_tst_.latitude_);
+                lat_max = max(lat_max, detail_it.pos_tst_.latitude_);
+
+                lon_min = min(lon_min, detail_it.pos_tst_.longitude_);
+                lon_max = max(lon_max, detail_it.pos_tst_.longitude_);
+            }
+            else // tst pos always set
+            {
+                lat_min = detail_it.pos_tst_.latitude_;
+                lat_max = detail_it.pos_tst_.latitude_;
+
+                lon_min = detail_it.pos_tst_.longitude_;
+                lon_max = detail_it.pos_tst_.longitude_;
+
+                has_pos = true;
+            }
+        }
+
+        if (has_pos)
+        {
+            (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
+            (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+
+            double lat_w = (lat_max-lat_min)/2.0;
+            double lon_w = (lon_max-lon_min)/2.0;
+
+            if (lat_w < 0.02)
+                lat_w = 0.02;
+
+            if (lon_w < 0.02)
+                lon_w = 0.02;
+
+            (*viewable_ptr)["position_window_latitude"] = lat_w;
+            (*viewable_ptr)["position_window_longitude"] = lon_w;
+        }
+
+        return viewable_ptr;
     }
 
     bool SingleIdentification::hasReference (

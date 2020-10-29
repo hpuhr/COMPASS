@@ -40,7 +40,7 @@ void LatexTable::addRow (std::vector<std::string> row)
 
 std::string LatexTable::toString()
 {
-    assert (!content_.size());
+    //assert (!content_.size());
 
     stringstream ss;
 

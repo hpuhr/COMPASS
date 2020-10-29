@@ -201,9 +201,17 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
 
         // figure
-        if (has_p_min_pos_ && p_min_pos_ != 100.0)
+        if (has_p_min_pos_ && p_min_pos_ != 1.0)
+        {
             sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                      eval_man_.getViewableForEvaluation(req_grp_id_, result_id_));
+        }
+        else
+        {
+            sector_section.addText("sector_errors_overview_no_figure");
+            sector_section.getText("sector_errors_overview_no_figure").addText(
+                        "No target errors found, therefore no figure was generated.");
+        }
     }
 
     bool JoinedPositionMaxDistance::hasViewableData (

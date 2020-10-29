@@ -64,6 +64,8 @@ protected:
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
+
+    std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
 };
 
 }

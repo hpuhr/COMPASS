@@ -1,6 +1,7 @@
 #include "latexsection.h"
 #include "latextable.h"
 #include "lateximage.h"
+#include "latextext.h"
 
 #include <cassert>
 #include <sstream>
@@ -46,7 +47,7 @@ void LatexSection::addSubSection (const std::string& heading)
 
 void LatexSection::addText (const std::string& latex_str)
 {
-    content_.push_back(latex_str);
+    sub_content_.push_back(unique_ptr<LatexText>(new LatexText(latex_str)));
 }
 
 bool LatexSection::hasTable (const std::string& name)

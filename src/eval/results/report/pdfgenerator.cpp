@@ -161,18 +161,7 @@ namespace EvaluationResultsReport
                 break;
             }
 
-            //            view_manager_.setCurrentViewPoint(&view_point);
-
-            //            while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
-            //                QCoreApplication::processEvents();
-
             sec_it->accept(visitor);
-
-            //            visitor.imagePrefix("vp_"+to_string(vp_id));
-
-            //            // visit se views
-            //            for (auto& view_it : view_manager_.getViews())
-            //                view_it.second->accept(visitor);
 
             // update status
             stop_time = boost::posix_time::microsec_clock::local_time();
@@ -182,7 +171,7 @@ namespace EvaluationResultsReport
             elapsed_time_str =
                     String::timeStringFromDouble(ms / 1000.0, false);
 
-            status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(num_sections);
+            status_str = "Writing section "+to_string(vp_cnt+1)+"/"+to_string(num_sections);
 
             if (vp_cnt && ms > 0)
             {
@@ -211,7 +200,7 @@ namespace EvaluationResultsReport
         if (cancel_)
         {
             dialog_->setProgress(0, num_sections, 0);
-            dialog_->setStatus("Writing view points cancelled");
+            dialog_->setStatus("Writing section cancelled");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
             while (QCoreApplication::hasPendingEvents())
@@ -220,7 +209,7 @@ namespace EvaluationResultsReport
         else // proceed
         {
             dialog_->setProgress(0, num_sections, num_sections);
-            dialog_->setStatus("Writing view points done");
+            dialog_->setStatus("Writing sections done");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
             while (QCoreApplication::hasPendingEvents())

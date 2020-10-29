@@ -17,7 +17,7 @@ public:
     virtual std::string toString();
 
 protected:
-    std::vector<std::string> content_; // main content as latex strings
+    //std::vector<std::string> content_; // main content as latex strings
 
     std::vector<std::unique_ptr<LatexContent>> sub_content_;
 
