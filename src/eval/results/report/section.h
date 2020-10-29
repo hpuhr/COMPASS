@@ -56,7 +56,8 @@ namespace EvaluationResultsReport
 
         bool hasFigure (const std::string& name);
         SectionContentFigure& getFigure (const std::string& name);
-        void addFigure (const std::string& name, const string& caption, nlohmann::json::object_t viewable_data);
+        void addFigure (const std::string& name, const string& caption,
+                        std::unique_ptr<nlohmann::json::object_t> viewable_data);
 
         unsigned int numSections(); // all sections contained
         void addSectionsFlat (vector<shared_ptr<Section>>& result);

@@ -180,6 +180,11 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
         sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
         sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
+
+        // figure
+        if (has_pid_ && pid_ != 100.0)
+            sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
+                                     eval_man_.getViewableForEvaluation(req_grp_id_, result_id_));
     }
 
 

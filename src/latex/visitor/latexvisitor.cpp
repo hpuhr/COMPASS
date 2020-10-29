@@ -15,11 +15,18 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontentfigure.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
+#include "viewmanager.h"
+#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
 #include "osgviewdatawidget.h"
 #endif
+
+#include <QCoreApplication>
+#include <QApplication>
 
 #include <sstream>
 
@@ -154,12 +161,12 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 
     assert (num_cols);
 
-//    const std::string& name, unsigned int num_columns,
-//                                 std::vector<std::string> headings, std::string heading_alignment,
-//                                 bool convert_to_latex
-//    if (!overview_sec.hasTable("ViewPoints Overview"))
-//        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
-//                              "| l | l | l | l | X | l |", false);
+    //    const std::string& name, unsigned int num_columns,
+    //                                 std::vector<std::string> headings, std::string heading_alignment,
+    //                                 bool convert_to_latex
+    //    if (!overview_sec.hasTable("ViewPoints Overview"))
+    //        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+    //                              "| l | l | l | l | X | l |", false);
 
     section.addTable(table_name, num_cols, headings, "", false);
     LatexTable& table = section.getTable(table_name);
@@ -206,6 +213,32 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name();
+
+#if USE_EXPERIMENTAL_SOURCE == true
+
+    ignore_listbox_views_ = true;
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    ViewManager& view_man = ATSDB::instance().viewManager();
+
+    while (QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents();
+
+    e->view();
+
+    while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents();
+
+    image_prefix_ = e->getSubPath()+e->name();
+
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name()
+           << " prefix " << image_prefix_;
+
+    for (auto& view_it : view_man.getViews())
+        view_it.second->accept(*this);
+
+    ignore_listbox_views_ = false;
+#endif
 }
 
 void LatexVisitor::visit(ListBoxView* e)
@@ -213,6 +246,9 @@ void LatexVisitor::visit(ListBoxView* e)
     assert (e);
 
     loginf << "LatexVisitor: visit: ListBoxView " << e->instanceId();
+
+    if (ignore_listbox_views_)
+        return;
 
     AllBufferTableWidget* allbuf = e->getDataWidget()->getAllBufferTableWidget();
     assert (allbuf);
@@ -286,6 +322,7 @@ void LatexVisitor::visit(OSGView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
     bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 

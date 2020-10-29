@@ -45,6 +45,7 @@ protected:
     bool add_overview_screenshot_ {true};
     bool wait_on_map_loading_ {true};
 
+    bool ignore_listbox_views_ {false};
     bool screenshot_folder_created_ {false};
 
     std::string current_section_name_;

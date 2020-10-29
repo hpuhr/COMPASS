@@ -199,6 +199,11 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
         sec_det_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
         sec_det_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
+
+        // figure
+        if (has_p_min_pos_ && p_min_pos_ != 100.0)
+            sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
+                                     eval_man_.getViewableForEvaluation(req_grp_id_, result_id_));
     }
 
     bool JoinedPositionMaxDistance::hasViewableData (
