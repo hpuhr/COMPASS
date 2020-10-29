@@ -97,6 +97,11 @@ namespace EvaluationRequirementResult
 
         logdbg << "JoinedDetection " <<  requirement_->name() << ": addToReport: adding joined result";
 
+        addToOverviewTable(root_item);
+    }
+
+    void JoinedDetection::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
         // condition

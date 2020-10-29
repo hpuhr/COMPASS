@@ -1,8 +1,7 @@
-#ifndef SECTIONCONTENTTABLE_H
-#define SECTIONCONTENTTABLE_H
+#ifndef EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H
+#define EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H
 
 #include "eval/results/report/sectioncontent.h"
-#include "viewabledataconfig.h"
 
 #include <QVariant>
 #include <QAbstractItemModel>
@@ -43,9 +42,6 @@ namespace EvaluationResultsReport
 
         void addRow (vector<QVariant> row, EvaluationRequirementResult::Base* result_ptr,
                      QVariant annotation = {});
-                     //unique_ptr<nlohmann::json::object_t> viewable_data = nullptr,
-                     //const string& reference = "",
-                     //bool use = true, int utn=-1);
 
         virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -77,14 +73,10 @@ namespace EvaluationResultsReport
         vector<vector<QVariant>> rows_;
         vector<EvaluationRequirementResult::Base*> result_ptrs_;
         vector<QVariant> annotations_;
-        //vector<unique_ptr<nlohmann::json::object_t>> viewable_data_;
-        //vector<string> references_;
-        //vector<bool> use_; // indicated whether that data was used
-        //vector<int> utns_; // only set for rows associated with a specific utn, else -1
 
         mutable QSortFilterProxyModel* proxy_model_ {nullptr};
         mutable QTableView* table_view_ {nullptr}; // for reset
     };
 
 }
-#endif // SECTIONCONTENTTABLE_H
+#endif // EVALUATIONRESULTSREPORTSECTIONCONTENTTABLE_H

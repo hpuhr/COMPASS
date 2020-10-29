@@ -49,6 +49,7 @@ namespace EvaluationRequirementResult
 
         void addToValues (std::shared_ptr<SinglePositionMaxDistance> single_result);
         void updatePMinPos();
+        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 
 }

@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include "json.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -19,6 +21,7 @@ namespace EvaluationResultsReport
     class SectionContent;
     class SectionContentText;
     class SectionContentTable;
+    class SectionContentFigure;
 
     class Section : public TreeItem
     {
@@ -51,6 +54,10 @@ namespace EvaluationResultsReport
         void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
                        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
 
+        bool hasFigure (const std::string& name);
+        SectionContentFigure& getFigure (const std::string& name);
+        void addFigure (const std::string& name, const string& caption, nlohmann::json::object_t viewable_data);
+
         unsigned int numSections(); // all sections contained
         void addSectionsFlat (vector<shared_ptr<Section>>& result);
 
@@ -72,6 +79,7 @@ namespace EvaluationResultsReport
         Section* findSubSection (const std::string& heading); // nullptr if not found
         SectionContentText* findText (const std::string& name); // nullptr if not found
         SectionContentTable* findTable (const std::string& name); // nullptr if not found
+        SectionContentFigure* findFigure (const std::string& name); // nullptr if not found
 
         void createContentWidget();
     };

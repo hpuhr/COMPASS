@@ -39,6 +39,8 @@ namespace EvaluationRequirementResult
 
         void addToValues (std::shared_ptr<SingleDetection> single_result);
         void updatePD();
+
+        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 
 }

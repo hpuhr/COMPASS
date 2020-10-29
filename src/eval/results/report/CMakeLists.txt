@@ -12,6 +12,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.h"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.h"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontentfigure.h"
         "${CMAKE_CURRENT_LIST_DIR}/pdfgenerator.h"
         "${CMAKE_CURRENT_LIST_DIR}/pdfgeneratordialog.h"
     PRIVATE
@@ -22,6 +23,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontent.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttext.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontenttable.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/sectioncontentfigure.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/pdfgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/pdfgeneratordialog.cpp"
     )

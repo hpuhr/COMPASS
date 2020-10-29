@@ -45,6 +45,7 @@ namespace EvaluationRequirementResult
 
         void addToValues (std::shared_ptr<SingleIdentification> single_result);
         void updatePID();
+        void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 
 }

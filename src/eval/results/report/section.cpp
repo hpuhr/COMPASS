@@ -2,6 +2,7 @@
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontentfigure.h"
 #include "latexvisitor.h"
 #include "logger.h"
 
@@ -152,6 +153,26 @@ namespace EvaluationResultsReport
         assert (hasTable(name));
     }
 
+    bool Section::hasFigure (const std::string& name)
+    {
+        return findFigure(name) != nullptr;
+    }
+
+    SectionContentFigure& Section::getFigure (const std::string& name)
+    {
+        SectionContentFigure* tmp = findFigure (name);
+        assert (tmp);
+        return *tmp;
+    }
+
+    void Section::addFigure (const std::string& name, const string& caption,
+                             nlohmann::json::object_t viewable_data)
+    {
+        assert (!hasFigure(name));
+        content_.push_back(make_shared<SectionContentFigure>(name, caption, viewable_data, this, eval_man_));
+        assert (hasFigure(name));
+    }
+
     unsigned int Section::numSections()
     {
         unsigned int num = 1; // me
@@ -215,6 +236,21 @@ namespace EvaluationResultsReport
         for (auto& cont_it : content_)
         {
             tmp = dynamic_cast<SectionContentTable*>(cont_it.get());
+
+            if (tmp && tmp->name() == name)
+                return tmp;
+        }
+
+        return nullptr;
+    }
+
+    SectionContentFigure* Section::findFigure (const std::string& name)
+    {
+        SectionContentFigure* tmp;
+
+        for (auto& cont_it : content_)
+        {
+            tmp = dynamic_cast<SectionContentFigure*>(cont_it.get());
 
             if (tmp && tmp->name() == name)
                 return tmp;

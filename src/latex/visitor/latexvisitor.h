@@ -15,6 +15,7 @@ namespace EvaluationResultsReport
     class Section;
     class SectionContentTable;
     class SectionContentText;
+    class SectionContentFigure;
 }
 
 class LatexVisitor
@@ -32,6 +33,7 @@ public:
     virtual void visit(const EvaluationResultsReport::Section* e);
     virtual void visit(const EvaluationResultsReport::SectionContentTable* e);
     virtual void visit(const EvaluationResultsReport::SectionContentText* e);
+    virtual void visit(const EvaluationResultsReport::SectionContentFigure* e);
 
     void imagePrefix(const std::string& image_prefix);
 

@@ -14,6 +14,7 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontentfigure.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
@@ -199,6 +200,12 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
 
     for (const auto& txt_it : e->texts())
         section.addText(txt_it);
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name();
 }
 
 void LatexVisitor::visit(ListBoxView* e)
