@@ -25,8 +25,14 @@ public:
 
     virtual void updatesToUseChanges() = 0;
 
+    unsigned int numResults();
+    unsigned int numUsableResults();
+    unsigned int numUnusableResults();
+
 protected:
     std::vector<std::shared_ptr<Base>> results_;
+
+    void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
 };
 
 }

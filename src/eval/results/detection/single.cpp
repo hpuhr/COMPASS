@@ -86,14 +86,14 @@ namespace EvaluationRequirementResult
 
     void SingleDetection::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
+        EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
-        if (!tgt_overview_section.hasTable("target_table"))
-            tgt_overview_section.addTable("target_table", 11,
+        if (!sector_section.hasTable("target_table"))
+            sector_section.addTable("target_table", 11,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
              "EUIs", "MUIs", "PD"}, true, 10);
 
-        EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
+        EvaluationResultsReport::SectionContentTable& target_table = sector_section.getTable("target_table");
 
         QVariant pd_var;
 

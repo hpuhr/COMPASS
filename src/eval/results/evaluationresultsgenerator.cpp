@@ -179,13 +179,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 for (auto& result_it : results)
                 {
-                    //result->print();
-
-                    // add to results
-                    // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
-
-                    //result_id = "UTN:"+to_string(target_data_it.utn_);
-
                     results_[result_it->reqGrpId()][result_it->resultId()] = result_it;
                     results_vec_.push_back(result_it);
 
@@ -197,8 +190,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 if (result_sum)
                 {
-                    //result_sum->print();
-
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
@@ -254,8 +245,15 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     overview_text.addText("It has lovely lakes");
     overview_text.addText("Elk bytes\nline2");
 
+    // first add all joined
     for (auto& result_it : results_vec_)
-        result_it->addToReport(root_item);
+        if (result_it->isJoined())
+            result_it->addToReport(root_item);
+
+    // then all singles
+    for (auto& result_it : results_vec_)
+        if (result_it->isSingle())
+            result_it->addToReport(root_item);
 
     results_model_.endReset();
 

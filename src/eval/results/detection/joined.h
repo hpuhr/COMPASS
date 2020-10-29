@@ -41,6 +41,7 @@ namespace EvaluationRequirementResult
         void updatePD();
 
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+        void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 
 }

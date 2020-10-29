@@ -103,6 +103,7 @@ namespace EvaluationRequirementResult
         logdbg << "JoinedIdentification " <<  requirement_->name() << ": addToReport: adding joined result";
 
         addToOverviewTable(root_item);
+        addDetails(root_item);
     }
 
     void JoinedIdentification::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -132,6 +133,53 @@ namespace EvaluationRequirementResult
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
                          requirement_->groupName().c_str(), {num_correct_id_+num_false_id_},
                          pd_var, condition.c_str(), result.c_str()}, this, {});
+    }
+
+    void JoinedIdentification::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
+        EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
+
+        if (!sector_section.hasTable("sector_details_table"))
+            sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
+
+        EvaluationResultsReport::SectionContentTable& sec_det_table =
+                sector_section.getTable("sector_details_table");
+
+        addCommonDetails(sec_det_table);
+
+        sec_det_table.addRow({"#Updates", "Total number target reports", num_updates_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
+                                num_no_ref_pos_+num_no_ref_id_}, this);
+        sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
+        sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+        sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+        sec_det_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
+        sec_det_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
+        sec_det_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
+
+        // condition
+        std::shared_ptr<EvaluationRequirement::Identification> req =
+                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        assert (req);
+
+        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+        // pd
+        QVariant pd_var;
+
+        string result {"Unknown"};
+
+        if (has_pid_)
+        {
+            pd_var = String::percentToString(pid_ * 100.0).c_str();
+
+            result = pid_ >= req->minimumProbability() ? "Passed" : "Failed";
+        }
+
+        sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
+        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
     }
 
 

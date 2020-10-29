@@ -141,7 +141,7 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
         utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
         utn_req_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
-        utn_req_table.addRow({"PNOK [%]", "Probability of correct identificaiton", pd_var}, this);
+        utn_req_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Identification> req =

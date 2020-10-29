@@ -122,6 +122,7 @@ namespace EvaluationRequirementResult
         logdbg << "JoinedPositionMaxDistance " <<  requirement_->name() << ": addToReport: adding joined result";
 
         addToOverviewTable(root_item);
+        addDetails(root_item);
     }
 
     void JoinedPositionMaxDistance::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -151,6 +152,53 @@ namespace EvaluationRequirementResult
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
                          requirement_->groupName().c_str(), {num_pos_ok_+num_pos_nok_},
                          pd_var, condition.c_str(), result.c_str()}, this, {});
+    }
+
+    void JoinedPositionMaxDistance::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
+        EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
+
+        if (!sector_section.hasTable("sector_details_table"))
+            sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
+
+        EvaluationResultsReport::SectionContentTable& sec_det_table =
+                sector_section.getTable("sector_details_table");
+
+        addCommonDetails(sec_det_table);
+
+        // condition
+        std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
+                std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
+        assert (req);
+
+        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+        // pd
+        QVariant pd_var;
+
+        string result {"Unknown"};
+
+        if (has_p_min_pos_)
+        {
+            pd_var = String::percentToString(p_min_pos_ * 100.0).c_str();
+
+            result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
+        }
+
+        sec_det_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
+        sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+        sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+        sec_det_table.addRow({"#POK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
+        sec_det_table.addRow({"#PNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
+        sec_det_table.addRow({"POK [%]", "Probability of acceptable position", pd_var}, this);
+
+        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
+
+        sec_det_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
+        sec_det_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
+        sec_det_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
     }
 
     bool JoinedPositionMaxDistance::hasViewableData (
