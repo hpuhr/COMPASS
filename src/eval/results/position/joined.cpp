@@ -204,7 +204,7 @@ namespace EvaluationRequirementResult
         if (has_p_min_pos_ && p_min_pos_ != 1.0)
         {
             sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
-                                     eval_man_.getViewableForEvaluation(req_grp_id_, result_id_));
+                                     getErrorsViewable());
         }
         else
         {
@@ -227,7 +227,36 @@ namespace EvaluationRequirementResult
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasViewableData(table, annotation));
-        return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+
+        return getErrorsViewable();
+    }
+
+    std::unique_ptr<nlohmann::json::object_t> JoinedPositionMaxDistance::getErrorsViewable ()
+    {
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
+                eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+
+        double lat_min, lat_max, lon_min, lon_max;
+
+        tie(lat_min, lat_max) = sector_layer_.getMinMaxLatitude();
+        tie(lon_min, lon_max) = sector_layer_.getMinMaxLongitude();
+
+        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
+        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+
+        double lat_w = 1.1*(lat_max-lat_min)/2.0;
+        double lon_w = 1.1*(lon_max-lon_min)/2.0;
+
+        if (lat_w < 0.02)
+            lat_w = 0.02;
+
+        if (lon_w < 0.02)
+            lon_w = 0.02;
+
+        (*viewable_ptr)["position_window_latitude"] = lat_w;
+        (*viewable_ptr)["position_window_longitude"] = lon_w;
+
+        return viewable_ptr;
     }
 
     bool JoinedPositionMaxDistance::hasReference (

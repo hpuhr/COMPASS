@@ -42,6 +42,8 @@ namespace EvaluationRequirementResult
 
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
+        std::unique_ptr<nlohmann::json::object_t> getErrorsViewable ();
     };
 
 }

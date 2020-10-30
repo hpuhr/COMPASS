@@ -288,8 +288,8 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
             (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
 
-            double lat_w = (lat_max-lat_min)/2.0;
-            double lon_w = (lon_max-lon_min)/2.0;
+            double lat_w = 1.1*(lat_max-lat_min)/2.0;
+            double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
             if (lat_w < 0.02)
                 lat_w = 0.02;

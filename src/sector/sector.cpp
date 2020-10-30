@@ -237,6 +237,53 @@ bool Sector::isInside(const EvaluationTargetPosition& pos) const
     return ogr_polygon_->Contains(&ogr_pos);
 }
 
+
+std::pair<double, double> Sector::getMinMaxLatitude() const
+{
+    double min, max;
+    bool first = true;
+
+    for (auto& point_it : points_)
+    {
+        if (first)
+        {
+            min = point_it.first;
+            max = point_it.first;
+            first = false;
+        }
+        else
+        {
+            min = std::min(min, point_it.first);
+            max = std::max(max, point_it.first);
+        }
+    }
+
+    return {min, max};
+}
+
+std::pair<double, double> Sector::getMinMaxLongitude() const
+{
+    double min, max;
+    bool first = true;
+
+    for (auto& point_it : points_)
+    {
+        if (first)
+        {
+            min = point_it.second;
+            max = point_it.second;
+            first = false;
+        }
+        else
+        {
+            min = std::min(min, point_it.second);
+            max = std::max(max, point_it.second);
+        }
+    }
+
+    return {min, max};
+}
+
 void Sector::createPolygon()
 {
     ogr_polygon_.reset(new OGRPolygon());

@@ -50,6 +50,9 @@ public:
 
     bool isInside(const EvaluationTargetPosition& pos) const;
 
+    std::pair<double, double> getMinMaxLatitude() const;
+    std::pair<double, double> getMinMaxLongitude() const;
+
 protected:
     unsigned int id_;
     std::string name_;

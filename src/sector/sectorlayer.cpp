@@ -70,3 +70,55 @@ bool SectorLayer::isInside(const EvaluationTargetPosition& pos)  const
     logdbg << "SectorLayer " << name_ << ": isInside: false";
     return false;
 }
+
+std::pair<double, double> SectorLayer::getMinMaxLatitude() const
+{
+    double min, max;
+    double tmp_min, tmp_max;
+    bool first = true;
+
+    assert (sectors_.size());
+
+    for (auto& sec_it : sectors_)
+    {
+        if (first)
+        {
+            tie (min, max) = sec_it->getMinMaxLatitude();
+            first = false;
+        }
+        else
+        {
+            tie (tmp_min, tmp_max) = sec_it->getMinMaxLatitude();
+            min = std::min(min, tmp_min);
+            max = std::max(max, tmp_max);
+        }
+    }
+
+    return {min, max};
+}
+
+std::pair<double, double> SectorLayer::getMinMaxLongitude() const
+{
+    double min, max;
+    double tmp_min, tmp_max;
+    bool first = true;
+
+    assert (sectors_.size());
+
+    for (auto& sec_it : sectors_)
+    {
+        if (first)
+        {
+            tie (min, max) = sec_it->getMinMaxLongitude();
+            first = false;
+        }
+        else
+        {
+            tie (tmp_min, tmp_max) = sec_it->getMinMaxLongitude();
+            min = std::min(min, tmp_min);
+            max = std::max(max, tmp_max);
+        }
+    }
+
+    return {min, max};
+}
