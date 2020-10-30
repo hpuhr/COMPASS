@@ -35,9 +35,10 @@ namespace EvaluationRequirementResult
 
         bool result_usable_ {true}; // whether valid data exists, changed in subclass
 
-        std::string getTargetSectionID ();
+        std::string getTargetSectionID();
+        std::string getTargetRequirementSectionID();
 
-        void addCommonDetails (EvaluationResultsReport::SectionContentTable& details_overview_table);
+        void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 
 }

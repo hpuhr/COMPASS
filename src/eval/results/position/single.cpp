@@ -108,7 +108,7 @@ namespace EvaluationRequirementResult
         if (has_p_min_pos_)
             pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading = getTargetSectionID();
+        string utn_req_section_heading = getTargetRequirementSectionID();
 
         if (has_p_min_pos_)
             target_table.addRow(
@@ -134,7 +134,7 @@ namespace EvaluationRequirementResult
         if (has_p_min_pos_)
             pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
 
-        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetSectionID());
+        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
             utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
@@ -142,7 +142,7 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::SectionContentTable& utn_req_table =
                 utn_req_section.getTable("details_overview_table");
 
-        addCommonDetails(utn_req_table);
+        addCommonDetails(root_item);
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
@@ -340,7 +340,7 @@ namespace EvaluationRequirementResult
     {
         assert (hasReference(table, annotation));
 
-        return "Report:Results:"+getTargetSectionID();
+        return "Report:Results:"+getTargetRequirementSectionID();
     }
 
     double SinglePositionMaxDistance::errorMin() const

@@ -114,7 +114,7 @@ namespace EvaluationRequirementResult
         if (has_pd_)
             pd_var = roundf(pd_ * 10000.0) / 100.0;
 
-        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetSectionID());
+        EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
             utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
@@ -122,7 +122,7 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::SectionContentTable& utn_req_table =
                 utn_req_section.getTable("details_overview_table");
 
-        addCommonDetails(utn_req_table);
+        addCommonDetails(root_item);
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
@@ -133,6 +133,10 @@ namespace EvaluationRequirementResult
             utn_req_table.addRow(
             {("Reference Period "+to_string(cnt)).c_str(), "Time inside sector",
              ref_periods_.period(cnt).str().c_str()}, this);
+
+        if (!ref_periods_.size())
+            utn_req_table.addRow(
+            {"Reference Period", "Time inside sector", "None"}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Detection> req =
@@ -323,7 +327,7 @@ namespace EvaluationRequirementResult
     {
         assert (hasReference(table, annotation));
 
-        return "Report:Results:"+getTargetSectionID();
+        return "Report:Results:"+getTargetRequirementSectionID();
     }
 
     std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)
