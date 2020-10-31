@@ -3,7 +3,9 @@
 
 #include "json.hpp"
 
-#include "gdal_priv.h"
+#include <ogr_geometry.h>
+
+#include <memory>
 
 class DBInterface;
 class EvaluationTargetPosition;

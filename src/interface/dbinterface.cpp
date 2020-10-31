@@ -45,14 +45,14 @@
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
 
-#include <fstream>
-
 #include <QApplication>
 #include <QMessageBox>
 #include <QMutexLocker>
 #include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <fstream>
 
 using namespace Utils;
 using namespace std;
