@@ -27,7 +27,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "logger.h"

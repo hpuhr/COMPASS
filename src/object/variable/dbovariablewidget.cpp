@@ -27,7 +27,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -202,7 +202,7 @@ void DBOVariableWidget::createSchemaBoxes()
     loginf << "DBOVariableWidget: createSchemaBoxes";
 
     auto& meta_tables = variable_->dbObject().metaTables();
-    auto& schemas = ATSDB::instance().schemaManager().getSchemas();
+    auto& schemas = COMPASS::instance().schemaManager().getSchemas();
 
     assert(properties_layout_);
     schema_boxes_.clear();

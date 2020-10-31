@@ -16,7 +16,7 @@
  */
 
 #include "databaseopentaskwidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "databaseopentask.h"
 #include "dbconnection.h"
 #include "dbinterface.h"

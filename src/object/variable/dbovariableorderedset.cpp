@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -61,7 +61,7 @@ void DBOVariableOrderedSet::generateSubConfigurable(const std::string& class_id,
         DBOVariableOrderDefinition* definition =
             new DBOVariableOrderDefinition(class_id, instance_id, this);
 
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         if (definition->dboName() == META_OBJECT_NAME)
         {
@@ -288,7 +288,7 @@ DBOVariableSet DBOVariableOrderedSet::getFor(const std::string& dbo_name)
 {
     loginf << "DBOVariableOrderedSet: getFor: type " << dbo_name;
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
     DBOVariableSet type_set;
     std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
 
@@ -315,7 +315,7 @@ DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_
 {
     logdbg << "DBOVariableOrderedSet: getExistingInDBFor: type " << dbo_name;
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
     DBOVariableSet type_set;
     std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
 

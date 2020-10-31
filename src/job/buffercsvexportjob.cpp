@@ -20,7 +20,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -89,7 +89,7 @@ void BufferCSVExportJob::run()
         std::string dbo_name = buffer_->dboName();
         assert(dbo_name.size());
 
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         for (; row < buffer_size; ++row)
         {

@@ -22,7 +22,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbodatasource.h"
 #include "dbovariable.h"
@@ -36,7 +36,7 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
     : QWidget(parent, f),
       object_(object),
       definition_(definition),
-      schema_manager_(ATSDB::instance().schemaManager())
+      schema_manager_(COMPASS::instance().schemaManager())
 {
     setMinimumSize(QSize(800, 600));
 

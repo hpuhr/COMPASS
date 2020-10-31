@@ -25,7 +25,7 @@
 #include <QLabel>
 #include <cassert>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "dbschemaselectioncombobox.h"
@@ -107,7 +107,7 @@ class DBOAddSchemaMetaTableDialog : public QDialog
         while (meta_table_box_->count() > 0)
             meta_table_box_->removeItem(0);
 
-        auto metas = ATSDB::instance().schemaManager().getCurrentSchema().metaTables();
+        auto metas = COMPASS::instance().schemaManager().getCurrentSchema().metaTables();
 
         int index_cnt = -1;
         unsigned int cnt = 0;

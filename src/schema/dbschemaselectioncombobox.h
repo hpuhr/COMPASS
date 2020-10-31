@@ -20,7 +20,7 @@
 
 #include <QComboBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
 
@@ -47,7 +47,7 @@ class DBSchemaSelectionComboBox : public QComboBox
         while (count() > 0)
             removeItem(0);
 
-        for (auto& schema_it : ATSDB::instance().schemaManager().getSchemas())
+        for (auto& schema_it : COMPASS::instance().schemaManager().getSchemas())
             addItem(schema_it.first.c_str());
 
         if (selection.size())

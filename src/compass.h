@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ATSDB_H_
-#define ATSDB_H_
+#ifndef COMPASS_H_
+#define COMPASS_H_
 
 #include <map>
 #include <set>
@@ -35,11 +35,11 @@ class ViewManager;
 class SimpleConfig;
 class EvaluationManager;
 
-class ATSDB : public Configurable, public Singleton
+class COMPASS : public Configurable, public Singleton
 {
   public:
     ///@brief Destructor.
-    virtual ~ATSDB();
+    virtual ~COMPASS();
 
     // void initialize ();
 
@@ -77,15 +77,15 @@ class ATSDB : public Configurable, public Singleton
     virtual void checkSubConfigurables();
 
     ///@brief Constructor.
-    ATSDB();
+    COMPASS();
 
   public:
     ///@brief Instance access function for Singleton.
-    static ATSDB& instance()
+    static COMPASS& instance()
     {
-        static ATSDB instance;
+        static COMPASS instance;
         return instance;
     }
 };
 
-#endif /* ATSDB_H */
+#endif /* COMPASS_H_ */

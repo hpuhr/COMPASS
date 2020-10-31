@@ -22,7 +22,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 #include "postprocesstask.h"

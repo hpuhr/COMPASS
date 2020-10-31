@@ -16,7 +16,7 @@
  */
 
 #include "managesectorstask.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskwidget.h"
@@ -92,7 +92,7 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-bool ManageSectorsTask::checkPrerequisites() { return ATSDB::instance().interface().ready(); }
+bool ManageSectorsTask::checkPrerequisites() { return COMPASS::instance().interface().ready(); }
 
 void ManageSectorsTask::addFile(const std::string& filename)
 {
@@ -430,7 +430,7 @@ void ManageSectorsTask::addSector (const std::string& sector_name, const std::st
     loginf << "ManageSectorsTask: addSector: layer '" << layer_name << "' name '" << sector_name
            << "' num points " << points.size();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     string new_sector_name = sector_name;
 

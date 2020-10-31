@@ -18,7 +18,7 @@
 #include "eval/results/report/pdfgenerator.h"
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "logger.h"
@@ -91,7 +91,7 @@ namespace EvaluationResultsReport
     {
         if (!report_path_.size())
         {
-            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
 
             if (sql_con)
             {
@@ -101,7 +101,7 @@ namespace EvaluationResultsReport
             else
             {
                 MySQLppConnection* mysql_con =
-                        dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+                        dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
                 assert (mysql_con);
                 report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
             }

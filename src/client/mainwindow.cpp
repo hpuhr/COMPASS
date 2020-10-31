@@ -17,7 +17,7 @@
 
 #include "mainwindow.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -65,12 +65,12 @@ MainWindow::MainWindow()
     QSettings settings("ATSDB", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    assert(ATSDB::instance().config().existsId("version"));
-    std::string title = "ATSDB v" + ATSDB::instance().config().getString("version");
+    assert(COMPASS::instance().config().existsId("version"));
+    std::string title = "ATSDB v" + COMPASS::instance().config().getString("version");
 
-    if (ATSDB::instance().config().existsId("save_config_on_exit"))
+    if (COMPASS::instance().config().existsId("save_config_on_exit"))
     {
-        save_configuration_ = ATSDB::instance().config().getBool("save_config_on_exit");
+        save_configuration_ = COMPASS::instance().config().getBool("save_config_on_exit");
         loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
     }
 
@@ -78,7 +78,7 @@ MainWindow::MainWindow()
 
     tab_widget_ = new QTabWidget();
 
-    TaskManager& task_man = ATSDB::instance().taskManager();
+    TaskManager& task_man = COMPASS::instance().taskManager();
 
     task_manager_widget_ = task_man.widget();
     tab_widget_->addTab(task_manager_widget_, "Tasks");
@@ -93,7 +93,7 @@ MainWindow::MainWindow()
 
     tab_widget_->setCurrentIndex(0);
 
-    QObject::connect(this, &MainWindow::startedSignal, &ATSDB::instance().filterManager(),
+    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
                      &FilterManager::startedSlot);
 
 }
@@ -154,7 +154,7 @@ void MainWindow::startSlot()
     tab_widget_->removeTab(0);
 
     // close any opened dbobject widgets
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
         obj_it.second->closeWidget();
 
     assert(management_widget_);
@@ -167,8 +167,8 @@ void MainWindow::startSlot()
 //        QThread::msleep(1);
 //    }
 
-    ATSDB::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
+    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
 
@@ -204,14 +204,14 @@ void MainWindow::shutdown()
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
-    ATSDB::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
+    COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
 
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
         loginf << "MainWindow: closeEvent: configuration not saved";
 
-    ATSDB::instance().shutdown();
+    COMPASS::instance().shutdown();
 
     if (tab_widget_)
     {

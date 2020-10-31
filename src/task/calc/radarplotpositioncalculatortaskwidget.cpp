@@ -23,7 +23,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectcombobox.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -126,8 +126,8 @@ void RadarPlotPositionCalculatorTaskWidget::update()
         object_box_->setObjectName(object_name);
         setDBOBject(object_name);
 
-        assert(ATSDB::instance().objectManager().existsObject(object_name));
-        DBObject& object = ATSDB::instance().objectManager().object(object_name);
+        assert(COMPASS::instance().objectManager().existsObject(object_name));
+        DBObject& object = COMPASS::instance().objectManager().object(object_name);
 
         assert(key_box_);
         if (task_.keyVarStr().size() && object.hasVariable(task_.keyVarStr()))

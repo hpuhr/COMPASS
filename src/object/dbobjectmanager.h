@@ -26,7 +26,7 @@
 #include "global.h"
 #include "singleton.h"
 
-class ATSDB;
+class COMPASS;
 class DBObject;
 class DBObjectManagerWidget;
 class DBObjectManagerLoadWidget;
@@ -60,7 +60,7 @@ class DBObjectManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
 
     /// @brief Returns if an object of type exists
     bool existsObject(const std::string& dbo_name);
@@ -139,7 +139,7 @@ class DBObjectManager : public QObject, public Configurable
     bool loadInProgress() const;
 
   protected:
-    ATSDB& atsdb_;
+    COMPASS& atsdb_;
     bool use_filters_{false};
 
     bool use_order_{false};

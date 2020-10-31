@@ -16,7 +16,7 @@
  */
 
 #include "dbinterface.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
@@ -62,7 +62,7 @@ using namespace nlohmann;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
  * count_), creates write_table_names_,
  */
-DBInterface::DBInterface(string class_id, string instance_id, ATSDB* atsdb)
+DBInterface::DBInterface(string class_id, string instance_id, COMPASS* atsdb)
     : Configurable(class_id, instance_id, atsdb), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
@@ -131,7 +131,7 @@ void DBInterface::databaseContentChanged()
     if (!existsSectorsTable())
         createSectorsTable();
 
-    ATSDB::instance().evaluationManager().loadSectors(); // init done in mainwindow
+    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     emit databaseContentChangedSignal();
 }
@@ -338,7 +338,7 @@ bool DBInterface::hasDataSourceTables(DBObject& object)
         return false;
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         return false;
@@ -368,7 +368,7 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     shared_ptr<Buffer> buffer{new Buffer()};
 
     const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds_def.metaTableName()));
 
     MetaDBTable& meta = schema.metaTable(ds_def.metaTableName());
@@ -612,7 +612,7 @@ map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds.metaTableName()));
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());

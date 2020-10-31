@@ -19,7 +19,7 @@
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
@@ -36,7 +36,7 @@
  * current_schema exists (if defined).
  */
 DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id,
-                                 ATSDB* atsdb, DBInterface& db_interface)
+                                 COMPASS* atsdb, DBInterface& db_interface)
     : Configurable(class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
 {
     registerParameter("current_schema", &current_schema_, (std::string) "");
@@ -170,7 +170,7 @@ void DBSchemaManager::deleteCurrentSchema()
     assert(current_schema_.size() != 0);
     assert(hasCurrentSchema());
 
-    ATSDB::instance().objectManager().removeDependenciesForSchema(current_schema_);
+    COMPASS::instance().objectManager().removeDependenciesForSchema(current_schema_);
 
     delete schemas_.at(current_schema_);
     schemas_.erase(current_schema_);

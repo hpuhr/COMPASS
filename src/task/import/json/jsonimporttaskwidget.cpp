@@ -17,7 +17,7 @@
 
 #include "jsonimporttaskwidget.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectcombobox.h"
 #include "dbobjectmanager.h"

@@ -16,7 +16,7 @@
  */
 
 #include "datasourcesfilterwidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "filtermanager.h"

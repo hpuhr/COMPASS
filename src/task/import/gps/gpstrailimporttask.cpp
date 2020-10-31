@@ -17,7 +17,7 @@
 
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskwidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "savedfile.h"
 #include "stringconv.h"
@@ -208,16 +208,16 @@ void GPSTrailImportTask::currentFilename(const std::string& filename)
 
 bool GPSTrailImportTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (!ATSDB::instance().objectManager().existsObject("RefTraj"))
+    if (!COMPASS::instance().objectManager().existsObject("RefTraj"))
         return false;
 
-    if (!ATSDB::instance().objectManager().object("RefTraj").hasCurrentMetaTable())
+    if (!COMPASS::instance().objectManager().object("RefTraj").hasCurrentMetaTable())
         return false;
 
     return true;
@@ -520,7 +520,7 @@ void GPSTrailImportTask::run()
     assert (gps_fixes_.size());
     assert (!buffer_);
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     assert (obj_man.existsObject("RefTraj"));
 
@@ -618,7 +618,7 @@ void GPSTrailImportTask::run()
 
     // config data source
     {
-        ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
 
         if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
         {
@@ -724,11 +724,11 @@ void GPSTrailImportTask::insertDoneSlot(DBObject& object)
     task_manager_.appendSuccess("GPSTrailImportTask: imported " + to_string(gps_fixes_.size())
                                 +" GPS fixes");
 
-    ATSDB::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+    COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
-    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-    ATSDB::instance().interface().databaseContentChanged();
+    COMPASS::instance().interface().databaseContentChanged();
     object.updateToDatabaseContent();
 
     QMessageBox msg_box;

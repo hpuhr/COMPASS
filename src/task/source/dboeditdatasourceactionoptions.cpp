@@ -17,7 +17,7 @@
 
 #include "dboeditdatasourceactionoptions.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbodatasource.h"
 #include "dboeditdatasourceactionoptionswidget.h"
@@ -110,7 +110,7 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB(DBObject& object, const DBOD
     bool found_equivalent = false;
 
     const std::map<unsigned int, StoredDBODataSource>& stored_data_sources =
-        ATSDB::instance().taskManager().manageDataSourcesTask().storedDataSources(object.name());
+        COMPASS::instance().taskManager().manageDataSourcesTask().storedDataSources(object.name());
 
     for (auto& ds_it : stored_data_sources)
     {

@@ -17,7 +17,7 @@
 
 #include "jsondatamapping.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -238,7 +238,7 @@ void JSONDataMapping::initialize()
 
     assert(!initialized_);
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
         logwrn << "JSONDataMapping: initialize: dbobject '" << db_object_name_

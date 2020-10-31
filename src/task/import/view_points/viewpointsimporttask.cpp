@@ -18,7 +18,7 @@
 #include "viewpointsimporttask.h"
 #include "viewpointsimporttaskwidget.h"
 #include "taskmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -111,10 +111,10 @@ void ViewPointsImportTask::generateSubConfigurable(const std::string& class_id,
 
 bool ViewPointsImportTask::checkPrerequisites()
 {
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    return ATSDB::instance().interface().ready();  // must be connected
+    return COMPASS::instance().interface().ready();  // must be connected
 }
 
 bool ViewPointsImportTask::isRecommended()
@@ -122,7 +122,7 @@ bool ViewPointsImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (ATSDB::instance().objectManager().hasData())
+    if (COMPASS::instance().objectManager().hasData())
         return false; // not recommended if already has data
 
     return canImport();
@@ -372,7 +372,7 @@ void ViewPointsImportTask::import ()
     json& view_points = current_data_.at("view_points");
     assert (view_points.size());
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
 
     // check and clear existing ones
     if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
@@ -470,7 +470,7 @@ void ViewPointsImportTask::import ()
                 ASTERIXOverrideWidget* asterix_override_widget = asterix_import_task_widget->overrideWidget();
                 assert (asterix_override_widget);
 
-                ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+                ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
 
                 // set data source info
                 if (ds_it.contains("ds_name") && ds_it.contains("ds_sac") && ds_it.contains("ds_sic"))
@@ -584,7 +584,7 @@ void ViewPointsImportTask::import ()
 
             task_manager_.appendSuccess("ViewPointsImportTask: import of ASTERIX files done");
 
-            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             emit doneSignal(name_);
         }

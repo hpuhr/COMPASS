@@ -17,7 +17,7 @@
 
 #include "databaseopentask.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "databaseopentaskwidget.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
@@ -35,7 +35,7 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
 
 void DatabaseOpenTask::useConnection(const std::string& connection_type)
 {
-    ATSDB::instance().interface().useConnection(connection_type);
+    COMPASS::instance().interface().useConnection(connection_type);
 
     if (widget_)
         widget_->updateUsedConnection();
@@ -45,7 +45,7 @@ TaskWidget* DatabaseOpenTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new DatabaseOpenTaskWidget(*this, ATSDB::instance().interface()));
+        widget_.reset(new DatabaseOpenTaskWidget(*this, COMPASS::instance().interface()));
 
         connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal, this,
                 &DatabaseOpenTask::databaseOpenedSlot);
@@ -67,7 +67,7 @@ void DatabaseOpenTask::generateSubConfigurable(const std::string& class_id,
 
 bool DatabaseOpenTask::checkPrerequisites()
 {
-    return !ATSDB::instance().interface().ready();  // only usable if not already connected
+    return !COMPASS::instance().interface().ready();  // only usable if not already connected
 }
 
 bool DatabaseOpenTask::isRecommended()
@@ -92,8 +92,8 @@ void DatabaseOpenTask::databaseOpenedSlot()
     done_ = true;
 
     task_manager_.appendSuccess(
-        "DatabaseOpenTask: database '" + ATSDB::instance().interface().connection().type() + ":" +
-        ATSDB::instance().interface().connection().identifier() + "' opened");
+        "DatabaseOpenTask: database '" + COMPASS::instance().interface().connection().type() + ":" +
+        COMPASS::instance().interface().connection().identifier() + "' opened");
 
     emit doneSignal(name_);
 }

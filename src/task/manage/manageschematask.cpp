@@ -16,7 +16,7 @@
  */
 
 #include "manageschematask.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "manageschemataskwidget.h"
 #include "taskmanager.h"
@@ -53,4 +53,4 @@ void ManageSchemaTask::generateSubConfigurable(const std::string& class_id,
                              class_id);
 }
 
-bool ManageSchemaTask::checkPrerequisites() { return ATSDB::instance().interface().ready(); }
+bool ManageSchemaTask::checkPrerequisites() { return COMPASS::instance().interface().ready(); }

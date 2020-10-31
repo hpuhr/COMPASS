@@ -22,7 +22,7 @@
 #include <QTabWidget>
 
 #include "allbuffertablewidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "buffertablewidget.h"
 #include "dbobject.h"
@@ -41,7 +41,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
     tab_widget_ = new QTabWidget();
     layout->addWidget(tab_widget_);
 
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
     {
         if (obj_it.second->hasData())
         {

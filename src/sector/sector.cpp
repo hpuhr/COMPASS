@@ -16,7 +16,7 @@
  */
 
 #include "sector.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "evaluationmanager.h"
 #include "evaluationtargetposition.h"
 
@@ -225,7 +225,7 @@ void Sector::layerName(const std::string& layer_name)
 {
     loginf << "Sector: layerName: '" << layer_name << "'";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     string old_layer_name = layer_name_;
     layer_name_ = layer_name;
@@ -235,7 +235,7 @@ void Sector::layerName(const std::string& layer_name)
 
 void Sector::save()
 {
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     eval_man.saveSector(id_);
 }

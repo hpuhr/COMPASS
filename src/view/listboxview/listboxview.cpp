@@ -19,7 +19,7 @@
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
@@ -38,7 +38,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = ATSDB::instance().objectManager().hasAssociations();
+    can_show_associations_ = COMPASS::instance().objectManager().hasAssociations();
 
     if (!can_show_associations_)
         show_associations_ = false;
@@ -71,7 +71,7 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
     connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
 
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -85,7 +85,7 @@ bool ListBoxView::init()
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
     connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-            &ATSDB::instance().objectManager(), &DBObjectManager::loadSlot);
+            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &ListBoxViewConfigWidget::loadingStartedSlot);
 

@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
@@ -166,16 +166,16 @@ void MySQLDBImportTask::currentFilename(const std::string& filename)
 
 bool MySQLDBImportTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (ATSDB::instance().interface().connection().type() != MYSQL_IDENTIFIER)
+    if (COMPASS::instance().interface().connection().type() != MYSQL_IDENTIFIER)
         return false;
 
-    return !ATSDB::instance().objectManager().hasData();  // can not run if data exists
+    return !COMPASS::instance().objectManager().hasData();  // can not run if data exists
 }
 
 bool MySQLDBImportTask::isRecommended() { return checkPrerequisites(); }
@@ -216,7 +216,7 @@ void MySQLDBImportTask::run()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     MySQLppConnection* connection =
-        dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+        dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
     assert(connection);
 
     QString tmp = current_filename_.c_str();
@@ -287,7 +287,7 @@ void MySQLDBImportTask::importDoneSlot()
 
     done_ = true;
 
-    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     emit doneSignal(name_);
 }
 

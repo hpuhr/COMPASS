@@ -50,8 +50,8 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // tracker data source
         grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
 
-        assert(ATSDB::instance().objectManager().existsObject("Tracker"));
-        DBObject& dbo_tracker = ATSDB::instance().objectManager().object("Tracker");
+        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
+        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
 
         ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
         connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
@@ -238,7 +238,7 @@ void CreateARTASAssociationsTaskWidget::update()
     if (ds_combo_->getDSName() != task_.currentDataSourceName())
         task_.currentDataSourceName(ds_combo_->getDSName());
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     DBObject& track_object = object_man.object("Tracker");
 

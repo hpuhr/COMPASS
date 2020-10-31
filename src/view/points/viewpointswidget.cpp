@@ -20,7 +20,7 @@
 #include "viewpoint.h"
 #include "logger.h"
 #include "viewpointstablemodel.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
@@ -116,7 +116,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBObjectManager& dbo_man = ATSDB::instance().objectManager();
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
 
     connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
     connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);

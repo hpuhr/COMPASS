@@ -32,7 +32,7 @@
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontentfigure.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "viewmanager.h"
 #include "files.h"
@@ -235,8 +235,8 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     ignore_listbox_views_ = true;
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
-    ViewManager& view_man = ATSDB::instance().viewManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    ViewManager& view_man = COMPASS::instance().viewManager();
 
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents();

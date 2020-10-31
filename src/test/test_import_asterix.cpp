@@ -21,7 +21,7 @@
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "catch.hpp"
 #include "client.h"
 #include "databaseopentask.h"
@@ -83,14 +83,14 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
 
     REQUIRE(!Files::fileExists(db_filename));
 
-    TaskManager& task_manager = ATSDB::instance().taskManager();
+    TaskManager& task_manager = COMPASS::instance().taskManager();
     TaskManagerWidget* task_manager_widget = task_manager.widget();
 
     DatabaseOpenTask& db_open_task = task_manager.databaseOpenTask();
     db_open_task.useConnection("SQLite Connection");
 
     SQLiteConnectionWidget* connection_widget =
-        dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
     REQUIRE(connection_widget);
 
     connection_widget->addFile(db_filename);
@@ -189,7 +189,7 @@ TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
 
     QThread::msleep(100);  // delay
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
     object_manager.loadSlot();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())

@@ -19,7 +19,7 @@
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "buffercsvexportjob.h"
 #include "buffertablewidget.h"
@@ -172,7 +172,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 1)
             {
-                DBObjectManager& manager = ATSDB::instance().objectManager();
+                DBObjectManager& manager = COMPASS::instance().objectManager();
 
                 std::string dbo_name = buffer_->dboName();
                 assert(dbo_name.size());

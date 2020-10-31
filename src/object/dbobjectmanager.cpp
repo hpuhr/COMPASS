@@ -19,7 +19,7 @@
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -40,7 +40,7 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
-                                 ATSDB* atsdb)
+                                 COMPASS* atsdb)
     : Configurable(class_id, instance_id, atsdb, "db_object.json"), atsdb_(*atsdb)
 {
     logdbg << "DBObjectManager: constructor: creating subconfigurables";
@@ -371,8 +371,8 @@ void DBObjectManager::loadSlot()
 
     loginf << "DBObjectManager: loadSlot: starting loading";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
-    ViewManager& view_man = ATSDB::instance().viewManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+    ViewManager& view_man = COMPASS::instance().viewManager();
 
     for (auto& object : objects_)
     {
@@ -438,15 +438,15 @@ void DBObjectManager::databaseContentChangedSlot()
 
     loginf << "DBObjectManager: databaseContentChangedSlot";
 
-    if (ATSDB::instance().interface().hasProperty("associations_generated"))
+    if (COMPASS::instance().interface().hasProperty("associations_generated"))
     {
-        assert(ATSDB::instance().interface().hasProperty("associations_dbo"));
-        assert(ATSDB::instance().interface().hasProperty("associations_ds"));
+        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
+        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
         has_associations_ =
-            ATSDB::instance().interface().getProperty("associations_generated") == "1";
-        associations_dbo_ = ATSDB::instance().interface().getProperty("associations_dbo");
-        associations_ds_ = ATSDB::instance().interface().getProperty("associations_ds");
+            COMPASS::instance().interface().getProperty("associations_generated") == "1";
+        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
+        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
     }
     else
     {
@@ -493,7 +493,7 @@ void DBObjectManager::finishLoading()
     loginf << "DBObjectManager: loadingDoneSlot: all done";
     load_in_progress_ = false;
 
-    ATSDB::instance().viewManager().doViewPointAfterLoad();
+    COMPASS::instance().viewManager().doViewPointAfterLoad();
 
     emit allLoadingDoneSignal();
 
@@ -555,9 +555,9 @@ bool DBObjectManager::hasAssociations() const { return has_associations_; }
 
 void DBObjectManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
 {
-    ATSDB::instance().interface().setProperty("associations_generated", "1");
-    ATSDB::instance().interface().setProperty("associations_dbo", dbo);
-    ATSDB::instance().interface().setProperty("associations_ds", data_source_name);
+    COMPASS::instance().interface().setProperty("associations_generated", "1");
+    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
+    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
 
     has_associations_ = true;
     associations_dbo_ = dbo;
@@ -570,9 +570,9 @@ void DBObjectManager::setAssociationsDataSource(const std::string& dbo, const st
 
 void DBObjectManager::setAssociationsByAll()
 {
-    ATSDB::instance().interface().setProperty("associations_generated", "1");
-    ATSDB::instance().interface().setProperty("associations_dbo", "");
-    ATSDB::instance().interface().setProperty("associations_ds", "");
+    COMPASS::instance().interface().setProperty("associations_generated", "1");
+    COMPASS::instance().interface().setProperty("associations_dbo", "");
+    COMPASS::instance().interface().setProperty("associations_ds", "");
 
     has_associations_ = true;
     associations_dbo_ = "";
@@ -584,9 +584,9 @@ void DBObjectManager::setAssociationsByAll()
 
 void DBObjectManager::removeAssociations()
 {
-    ATSDB::instance().interface().setProperty("associations_generated", "0");
-    ATSDB::instance().interface().setProperty("associations_dbo", "");
-    ATSDB::instance().interface().setProperty("associations_ds", "");
+    COMPASS::instance().interface().setProperty("associations_generated", "0");
+    COMPASS::instance().interface().setProperty("associations_dbo", "");
+    COMPASS::instance().interface().setProperty("associations_ds", "");
 
     has_associations_ = false;
     associations_dbo_ = "";

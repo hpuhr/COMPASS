@@ -23,7 +23,7 @@
 #include "configurable.h"
 #include "dbovariableset.h"
 
-class ATSDB;
+class COMPASS;
 class Buffer;
 class ViewContainer;
 class ViewContainerWidget;
@@ -49,7 +49,7 @@ class ViewManager : public QObject, public Configurable
     void selectionChangedSlot();
 
   public:
-    ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
@@ -88,7 +88,7 @@ class ViewManager : public QObject, public Configurable
     void selectTimeWindow(float time_min, float time_max);
 
 protected:
-    ATSDB& atsdb_;
+    COMPASS& atsdb_;
 
     ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};

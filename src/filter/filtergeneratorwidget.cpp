@@ -27,7 +27,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
@@ -261,7 +261,7 @@ void FilterGeneratorWidget::accept()
     std::string filter_name = filter_name_->text().toStdString();
 
     Configuration& configuration =
-        ATSDB::instance().filterManager().addNewSubConfiguration("DBFilter", filter_name);
+        COMPASS::instance().filterManager().addNewSubConfiguration("DBFilter", filter_name);
 
     for (unsigned int cnt = 0; cnt < data_conditions_.size(); cnt++)
     {
@@ -288,7 +288,7 @@ void FilterGeneratorWidget::accept()
         // condition_config_name);
     }
 
-    ATSDB::instance().filterManager().generateSubConfigurable("DBFilter", filter_name);
+    COMPASS::instance().filterManager().generateSubConfigurable("DBFilter", filter_name);
 
     emit filterWidgetAction(true);
 }

@@ -36,7 +36,7 @@ static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
 static const std::string TABLE_NAME_SECTORS = "atsdb_sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 
-class ATSDB;
+class COMPASS;
 class Buffer;
 class BufferWriter;
 class DBConnection;
@@ -74,7 +74,7 @@ class DBInterface : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBInterface(std::string class_id, std::string instance_id, ATSDB* atsdb);
+    DBInterface(std::string class_id, std::string instance_id, COMPASS* atsdb);
     /// @brief Destructor
     virtual ~DBInterface();
 

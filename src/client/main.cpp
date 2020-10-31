@@ -19,7 +19,7 @@
 
 #include "client.h"
 #include "mainwindow.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "taskmanager.h"
 
 #include <QThread>
@@ -37,14 +37,14 @@ int main(int argc, char** argv)
 
         client.mainWindow().show();
 
-        if (ATSDB::instance().taskManager().automaticTasksDefined())
+        if (COMPASS::instance().taskManager().automaticTasksDefined())
         {
             QThread::msleep(10);
 
             while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents();
 
-            ATSDB::instance().taskManager().performAutomaticTasks();
+            COMPASS::instance().taskManager().performAutomaticTasks();
         }
 
         return client.exec();

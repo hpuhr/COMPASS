@@ -20,7 +20,7 @@
 
 #include <QComboBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "global.h"
@@ -41,11 +41,11 @@ class DBObjectComboBox : public QComboBox
     DBObjectComboBox(bool allow_meta, QWidget* parent = 0)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
-        assert(ATSDB::instance().objectManager().size());
+        assert(COMPASS::instance().objectManager().size());
         if (allow_meta_)
             addItem(META_OBJECT_NAME.c_str());
 
-        for (auto& obj_it : ATSDB::instance().objectManager())
+        for (auto& obj_it : COMPASS::instance().objectManager())
         {
             addItem(obj_it.first.c_str());
         }

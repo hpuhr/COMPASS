@@ -23,7 +23,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "files.h"
@@ -113,7 +113,7 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     menu_.clear();
 
     QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-    for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
+    for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
     {
         QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
 
@@ -123,7 +123,7 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
         action->setData(QVariant(vmap));
     }
 
-    for (auto& object_it : ATSDB::instance().objectManager())
+    for (auto& object_it : COMPASS::instance().objectManager())
     {
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
@@ -149,7 +149,7 @@ void DBOVariableOrderedSetWidget::triggerSlot(QAction* action)
     std::string var_name = vmap.begin().key().toStdString();
     std::string obj_name = vmap.begin().value().toString().toStdString();
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
 
     if (obj_name == META_OBJECT_NAME)
     {
@@ -220,7 +220,7 @@ void DBOVariableOrderedSetWidget::updateVariableListSlot()
     const std::map<unsigned int, DBOVariableOrderDefinition*>& variables = set_.definitions();
     std::map<unsigned int, DBOVariableOrderDefinition*>::const_iterator it;
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
     DBOVariableOrderDefinition* def = nullptr;
 
     for (it = variables.begin(); it != variables.end(); it++)

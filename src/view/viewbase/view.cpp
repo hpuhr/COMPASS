@@ -22,7 +22,7 @@
 #include "viewmodel.h"
 #include "viewwidget.h"
 #include "viewpoint.h"
-#include "atsdb.h"
+#include "compass.h"
 
 #include <QVBoxLayout>
 #include <QWidget>

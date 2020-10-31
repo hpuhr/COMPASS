@@ -22,7 +22,7 @@
 #include "evaluationstandardwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/config.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -53,7 +53,7 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
-EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb)
     : Configurable(class_id, instance_id, atsdb, "eval.json"), atsdb_(*atsdb), data_(*this), results_gen_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
@@ -86,14 +86,14 @@ void EvaluationManager::init(QTabWidget* tab_widget)
 
     tab_widget->addTab(widget(), "Evaluation");
 
-    if (!ATSDB::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().objectManager().hasAssociations())
         widget()->setDisabled(true);
 }
 
 bool EvaluationManager::canLoadData ()
 {
     assert (initialized_);
-    return ATSDB::instance().objectManager().hasAssociations() && hasCurrentStandard();
+    return COMPASS::instance().objectManager().hasAssociations() && hasCurrentStandard();
 }
 
 void EvaluationManager::loadData ()
@@ -108,7 +108,7 @@ void EvaluationManager::loadData ()
 
     evaluated_ = false;
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     // set use filters
     object_man.useFilters(true);
@@ -125,7 +125,7 @@ void EvaluationManager::loadData ()
     }
 
     // set ref data sources filters
-    FilterManager& fil_man = ATSDB::instance().filterManager();
+    FilterManager& fil_man = COMPASS::instance().filterManager();
 
     fil_man.disableAllFilters();
 
@@ -218,7 +218,7 @@ void EvaluationManager::loadingDoneSlot(DBObject& object)
 {
     loginf << "EvaluationManager: loadingDoneSlot: obj " << object.name() << " buffer size " << object.data()->size();
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     if (object.name() == dbo_name_ref_)
     {
@@ -325,7 +325,7 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
     read_set.add(object_man.metaVariable("ds_id").getFor(dbo_name));
@@ -420,7 +420,7 @@ void EvaluationManager::loadSectors()
 
     assert (!sectors_loaded_);
 
-    sector_layers_ = ATSDB::instance().interface().loadSectors();
+    sector_layers_ = COMPASS::instance().interface().loadSectors();
 
     sectors_loaded_ = true;
 }
@@ -553,7 +553,7 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
 {
     assert (sectors_loaded_);
     assert (hasSector(sector->name(), sector->layerName()));
-    ATSDB::instance().interface().saveSector(sector);
+    COMPASS::instance().interface().saveSector(sector);
 
     emit sectorsChangedSignal();
 }
@@ -579,7 +579,7 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
         sector_layers_.erase(iter);
     }
 
-    ATSDB::instance().interface().deleteSector(sector);
+    COMPASS::instance().interface().deleteSector(sector);
 
     emit sectorsChangedSignal();
 }
@@ -589,7 +589,7 @@ void EvaluationManager::deleteAllSectors()
     assert (sectors_loaded_);
     sector_layers_.clear();
 
-    ATSDB::instance().interface().deleteAllSectors();
+    COMPASS::instance().interface().deleteAllSectors();
 
     emit sectorsChangedSignal();
 }
@@ -602,7 +602,7 @@ void EvaluationManager::importSectors (const std::string& filename)
     assert (sectors_loaded_);
 
     sector_layers_.clear();
-    ATSDB::instance().interface().clearSectorsTable();
+    COMPASS::instance().interface().clearSectorsTable();
 
     std::ifstream input_file(filename, std::ifstream::in);
 
@@ -718,10 +718,10 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!dbo_name_ref_.size())
         return false;
 
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name_ref_))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name_ref_))
         return false;
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
     if (!object.hasCurrentDataSourceDefinition())
         return false;
@@ -760,10 +760,10 @@ bool EvaluationManager::hasValidTestDBO ()
     if (!dbo_name_tst_.size())
         return false;
 
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name_tst_))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name_tst_))
         return false;
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     if (!object.hasCurrentDataSourceDefinition())
         return false;
@@ -903,7 +903,7 @@ void EvaluationManager::updateReferenceDBO()
     if (!hasValidReferenceDBO())
         return;
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
     if (object.hasDataSources())
         updateReferenceDataSources();
@@ -918,7 +918,7 @@ void EvaluationManager::updateReferenceDataSources()
 
     assert (hasValidReferenceDBO());
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
     for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
     {
@@ -944,7 +944,7 @@ void EvaluationManager::updateReferenceDataSourcesActive()
 
     assert (hasValidReferenceDBO());
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_ref_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
     assert (object.hasActiveDataSourcesInfo());
 
@@ -975,7 +975,7 @@ void EvaluationManager::updateTestDBO()
     if (!hasValidTestDBO())
         return;
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     if (object.hasDataSources())
         updateTestDataSources();
@@ -990,7 +990,7 @@ void EvaluationManager::updateTestDataSources()
 
     assert (hasValidTestDBO());
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
     {
@@ -1016,7 +1016,7 @@ void EvaluationManager::updateTestDataSourcesActive()
 
     assert (hasValidTestDBO());
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name_tst_);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     assert (object.hasActiveDataSourcesInfo());
 
@@ -1041,13 +1041,13 @@ void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& d
 {
     if (viewable_data_cfg_)
     {
-        ATSDB::instance().viewManager().unsetCurrentViewPoint();
+        COMPASS::instance().viewManager().unsetCurrentViewPoint();
         viewable_data_cfg_ = nullptr;
     }
 
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
-    ATSDB::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
 void EvaluationManager::showUTN (unsigned int utn)

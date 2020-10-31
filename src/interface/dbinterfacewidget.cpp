@@ -29,7 +29,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
 #include "global.h"

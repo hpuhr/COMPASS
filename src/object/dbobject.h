@@ -32,7 +32,7 @@
 #include "dbovariableset.h"
 #include "global.h"
 
-class ATSDB;
+class COMPASS;
 class PropertyList;
 class MetaDBTable;
 
@@ -114,7 +114,7 @@ class DBObject : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id,
+    DBObject(COMPASS& atsdb, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
@@ -267,7 +267,7 @@ class DBObject : public QObject, public Configurable
     void updateToDatabaseContent();
 
   protected:
-    ATSDB& atsdb_;
+    COMPASS& atsdb_;
     DBObjectManager& manager_;
     /// DBO name
     std::string name_;

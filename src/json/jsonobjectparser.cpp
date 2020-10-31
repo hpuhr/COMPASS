@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "configuration.h"
 #include "dbobject.h"
@@ -145,7 +145,7 @@ void JSONObjectParser::initialize()
 {
     assert(!db_object_);
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
         logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_

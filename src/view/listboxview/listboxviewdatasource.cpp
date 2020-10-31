@@ -19,7 +19,7 @@
 
 #include <QMessageBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -44,10 +44,10 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 {
     // registerParameter ("use_selection", &use_selection_, true);
 
-    connect(&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
+    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
             SLOT(loadingStartedSlot()));
 
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
     {
         connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this,
                 SLOT(newDataSlot(DBObject&)));
@@ -92,7 +92,7 @@ void ListBoxViewDataSource::checkSubConfigurables()
         generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
         assert(set_);
 
-        DBObjectManager& obj_man = ATSDB::instance().objectManager();
+        DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
@@ -186,7 +186,7 @@ void ListBoxViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -225,7 +225,7 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 //    assert (el != temporary_added_variables_.end());
 //    temporary_added_variables_.erase(el);
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)
     {

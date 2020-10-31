@@ -26,7 +26,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -203,7 +203,7 @@ void DBSchemaManagerWidget::updateSchemas()
     else
         schema_wrong = true;
 
-    if (schema_wrong && ATSDB::instance().interface().ready())
+    if (schema_wrong && COMPASS::instance().interface().ready())
         schema_select_->setStyleSheet(
             "QComboBox { background: rgb(255, 100, 100); selection-background-color:"
             " rgb(255, 200, 200); }");

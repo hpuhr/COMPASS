@@ -17,7 +17,7 @@
 
 #include "createartasassociationstask.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "createartasassociationsstatusdialog.h"
 #include "createartasassociationstaskwidget.h"
 #include "dbinterface.h"
@@ -113,35 +113,35 @@ void CreateARTASAssociationsTask::deleteWidget() { widget_.reset(nullptr); }
 bool CreateARTASAssociationsTask::checkPrerequisites()
 {
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: ready "
-           << ATSDB::instance().interface().ready();
+           << COMPASS::instance().interface().ready();
 
-    if (!ATSDB::instance().interface().ready())
+    if (!COMPASS::instance().interface().ready())
         return false;
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "
-           << ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME);
+           << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!canRun())
         return false;
 
     // check if was post-processed
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
-           << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (!ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
         return false;
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
-           << ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (ATSDB::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
         return false;
 
     // check if hash var exists in all data
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: tracker hashes";
     assert (object_man.existsObject("Tracker"));
@@ -184,7 +184,7 @@ bool CreateARTASAssociationsTask::isRecommended()
 
 bool CreateARTASAssociationsTask::canRun()
 {
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     // ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME)
 
@@ -289,7 +289,7 @@ void CreateARTASAssociationsTask::run()
     checkAndSetMetaVariable(hash_var_str_, &hash_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -375,7 +375,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
 
         std::map<std::string, std::shared_ptr<Buffer>> buffers;
 
-        DBObjectManager& object_man = ATSDB::instance().objectManager();
+        DBObjectManager& object_man = COMPASS::instance().objectManager();
 
         for (auto& dbo_it : object_man)
         {
@@ -384,7 +384,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot(DBObject& object)
         }
 
         create_job_ = std::make_shared<CreateARTASAssociationsJob>(
-            *this, ATSDB::instance().interface(), buffers);
+            *this, COMPASS::instance().interface(), buffers);
 
         connect(create_job_.get(), &CreateARTASAssociationsJob::doneSignal, this,
                 &CreateARTASAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -430,7 +430,7 @@ void CreateARTASAssociationsTask::createDoneSlot()
 
     if (save_associations_)
     {
-        ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
         task_manager_.appendSuccess("CreateARTASAssociationsTask: done after " + time_str);
         done_ = true;
@@ -677,7 +677,7 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
 
 void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBOVariable** var)
 {
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
     DBObject& object = object_man.object("Tracker");
 
     if (!object.hasVariable(name_str))
@@ -699,7 +699,7 @@ void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBO
 void CreateARTASAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                           MetaDBOVariable** var)
 {
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     if (!object_man.existsMetaVariable(name_str))
     {

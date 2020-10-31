@@ -22,7 +22,7 @@
 #include "json.h"
 #include "stringconv.h"
 #include "files.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
 
@@ -40,9 +40,9 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     table_columns_ = default_table_columns_;
 
     // load view points
-    if (ATSDB::instance().interface().existsViewPointsTable())
+    if (COMPASS::instance().interface().existsViewPointsTable())
     {
-        for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
+        for (const auto& vp_it : COMPASS::instance().interface().viewPoints())
         {
             //assert (!view_points_.count(vp_it.first));
             assert (!hasViewPoint(vp_it.first));
@@ -440,7 +440,7 @@ void ViewPointsTableModel::deleteAllViewPoints ()
     beginRemoveRows(QModelIndex(), 0, view_points_.size()-1); // TODO
 
     view_points_.clear();
-    ATSDB::instance().interface().deleteAllViewPoints();
+    COMPASS::instance().interface().deleteAllViewPoints();
 
     endRemoveRows();
 }

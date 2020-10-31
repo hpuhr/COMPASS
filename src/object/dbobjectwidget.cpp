@@ -29,7 +29,7 @@
 #include <QVBoxLayout>
 #include <boost/algorithm/string.hpp>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dboadddatasourcedialog.h"
@@ -661,7 +661,7 @@ void DBObjectWidget::updateDBOVarsGridSlot()
     unsigned int row = 0;
 
     auto& meta_tables = object_->metaTables();
-    auto& schemas = ATSDB::instance().schemaManager().getSchemas();
+    auto& schemas = COMPASS::instance().schemaManager().getSchemas();
     std::string schema_name;
 
     QLabel* name_label = new QLabel("Name");

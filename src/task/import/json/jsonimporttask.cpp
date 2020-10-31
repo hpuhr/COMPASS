@@ -16,7 +16,7 @@
  */
 
 #include "jsonimporttask.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "createartasassociationstask.h"
 #include "dbinterface.h"
@@ -278,11 +278,11 @@ void JSONImportTask::currentSchemaName(const std::string& current_schema)
 
 bool JSONImportTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     loginf << "JSONImportTask: checkPrerequisites: done " << done_;
 
@@ -294,7 +294,7 @@ bool JSONImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (ATSDB::instance().objectManager().hasData())
+    if (COMPASS::instance().objectManager().hasData())
         return false;
 
     return true;
@@ -639,7 +639,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
     bool has_sac_sic = false;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     for (auto& buf_it : job_buffers)
     {
@@ -783,7 +783,7 @@ void JSONImportTask::checkAllDone()
         QApplication::restoreOverrideCursor();
 
         if (!test_)
-            emit ATSDB::instance().interface().databaseContentChangedSignal();
+            emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         if (widget_)
             widget_->runDone();
@@ -802,12 +802,12 @@ void JSONImportTask::checkAllDone()
             done_ = true;
 
             // in case data was imported, clear other task done properties
-            ATSDB::instance().interface().setProperty(
+            COMPASS::instance().interface().setProperty(
                         RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
-            ATSDB::instance().interface().setProperty(
+            COMPASS::instance().interface().setProperty(
                         CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
-            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             emit doneSignal(name_);
         }

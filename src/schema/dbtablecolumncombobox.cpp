@@ -17,7 +17,7 @@
 
 #include "dbtablecolumncombobox.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbovariable.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -31,8 +31,8 @@ DBTableColumnComboBox::DBTableColumnComboBox(const std::string& schema,
 {
     logdbg << "DBTableColumnComboBox: DBTableColumnComboBox";
 
-    assert(ATSDB::instance().schemaManager().hasSchema(schema_));
-    DBSchema& dbschema = ATSDB::instance().schemaManager().getSchema(schema_);
+    assert(COMPASS::instance().schemaManager().hasSchema(schema_));
+    DBSchema& dbschema = COMPASS::instance().schemaManager().getSchema(schema_);
 
     assert(dbschema.hasMetaTable(meta_table));
     const MetaDBTable& meta = dbschema.metaTable(meta_table);

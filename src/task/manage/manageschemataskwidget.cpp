@@ -17,7 +17,7 @@
 
 #include "manageschemataskwidget.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 #include "manageschematask.h"
@@ -31,7 +31,7 @@ ManageSchemaTaskWidget::ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* 
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    DBSchemaManagerWidget* dbschema_manager_widget = ATSDB::instance().schemaManager().widget();
+    DBSchemaManagerWidget* dbschema_manager_widget = COMPASS::instance().schemaManager().widget();
     connect(dbschema_manager_widget, &DBSchemaManagerWidget::schemaLockedSignal, this,
             &ManageSchemaTaskWidget::schemaLockedSlot);
     main_layout->addWidget(dbschema_manager_widget);

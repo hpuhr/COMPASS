@@ -26,7 +26,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -46,7 +46,7 @@
 using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
-    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
+    : object_manager_(object_manager), schema_manager_(COMPASS::instance().schemaManager())
 {
     // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);

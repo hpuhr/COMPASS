@@ -25,7 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "dbobjectmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "sqliteconnection.h"
@@ -57,7 +57,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     registerParameter("author", &author_, "");
     registerParameter("abstract", &abstract_, "");
 
-    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
 
     if (sql_con)
     {
@@ -66,7 +66,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     }
     else
     {
-        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
         assert (mysql_con);
         report_path_ = HOME_PATH+"/report_"+mysql_con->usedDatabase() + "/";
     }
@@ -163,7 +163,7 @@ void ViewPointsReportGenerator::run ()
         vp_ids = vp_widget->viewedViewPoints();
 
     string status_str, elapsed_time_str, remaining_time_str;
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     unsigned int vp_cnt = 0;
     unsigned int vp_size = vp_ids.size();

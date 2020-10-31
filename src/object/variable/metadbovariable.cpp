@@ -19,7 +19,7 @@
 
 #include "metadbovariable.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -288,7 +288,7 @@ void MetaDBOVariable::removeOutdatedVariables()
 
     bool delete_var;
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     for (auto var_it = definitions_.begin(); var_it != definitions_.end();)
     {

@@ -17,7 +17,7 @@
 
 #include "datasourcesfilter.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "datasourcesfilterwidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -36,11 +36,11 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
     registerParameter("dbo_name", &dbo_name_, "");
     registerParameter("active_sources", &active_sources_, json::object());
 
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
 
-    object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+    object_ = &COMPASS::instance().objectManager().object(dbo_name_);
 
     if (!object_->hasCurrentDataSourceDefinition())
     {

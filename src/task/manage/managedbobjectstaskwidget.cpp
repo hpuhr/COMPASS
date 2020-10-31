@@ -21,7 +21,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerwidget.h"
 
@@ -30,7 +30,7 @@ ManageDBObjectsTaskWidget::ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, 
 {
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    object_manager_widget_ = ATSDB::instance().objectManager().widget();
+    object_manager_widget_ = COMPASS::instance().objectManager().widget();
     main_layout_->addWidget(object_manager_widget_);
 
     expertModeChangedSlot();

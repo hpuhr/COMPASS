@@ -30,9 +30,9 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/atsdb.h"
+    "${CMAKE_CURRENT_LIST_DIR}/compass.h"
     PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/atsdb.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/compass.cpp"
 )
 
 

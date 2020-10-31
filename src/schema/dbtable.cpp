@@ -17,7 +17,7 @@
 
 #include "dbtable.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschema.h"
 #include "dbtablecolumn.h"
@@ -97,8 +97,8 @@ void DBTable::populate()
 {
     loginf << "DBTable: populate: table " << name_;
 
-    assert(ATSDB::instance().ready());
-    for (auto it : ATSDB::instance().interface().tableInfo().at(name_).columns())
+    assert(COMPASS::instance().ready());
+    for (auto it : COMPASS::instance().interface().tableInfo().at(name_).columns())
     {
         if (columns_.count(it.first) == 0)
         {
@@ -116,12 +116,12 @@ void DBTable::populate()
 
 void DBTable::update()
 {
-    assert(ATSDB::instance().ready());
+    assert(COMPASS::instance().ready());
 
     loginf << "DBTable: update: table " << name_;
 
     const std::map<std::string, DBTableColumnInfo> db_table_columns =
-        ATSDB::instance().interface().tableInfo().at(name_).columns();
+        COMPASS::instance().interface().tableInfo().at(name_).columns();
 
     std::vector<std::string> cols_to_be_removed;
 

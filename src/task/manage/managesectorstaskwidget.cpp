@@ -18,7 +18,7 @@
 #include "managesectorstaskwidget.h"
 #include "managesectorstask.h"
 #include "logger.h"
-#include "atsdb.h"
+#include "compass.h"
 //#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "sector.h"
@@ -184,7 +184,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
     sector_table_->blockSignals(true);
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man.sectorsLayers();
 
@@ -447,7 +447,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot: sector_id " << sector_id
            << " col_name " << col_name << " text '" << text << "'";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -505,7 +505,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -538,7 +538,7 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -553,7 +553,7 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: exportSectorsSlot";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -580,7 +580,7 @@ void ManageSectorsTaskWidget::clearSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: clearSectorsSlot";
 
-    ATSDB::instance().evaluationManager().deleteAllSectors();
+    COMPASS::instance().evaluationManager().deleteAllSectors();
 
     updateSectorTable();
 }
@@ -606,7 +606,7 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
     assert (Files::fileExists(filename));
 
-    ATSDB::instance().evaluationManager().importSectors(filename);
+    COMPASS::instance().evaluationManager().importSectors(filename);
 
     updateSectorTable();
 }

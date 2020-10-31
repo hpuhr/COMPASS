@@ -17,7 +17,7 @@
 
 #include "client.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
 #include "files.h"
@@ -144,7 +144,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     loginf << "ATSDBClient: started with " << std::thread::hardware_concurrency() << " threads";
 
-    TaskManager& task_man = ATSDB::instance().taskManager();
+    TaskManager& task_man = COMPASS::instance().taskManager();
 
     if (create_new_sqlite3_db_filename.size())
         task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);

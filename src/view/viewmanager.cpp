@@ -16,7 +16,7 @@
  */
 
 #include "viewmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -50,7 +50,7 @@
 using namespace Utils;
 using namespace nlohmann;
 
-ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb)
     : Configurable(class_id, instance_id, atsdb, "views.json"), atsdb_(*atsdb)
 {
     logdbg << "ViewManager: constructor";
@@ -76,7 +76,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
 
-    FilterManager& filter_man = ATSDB::instance().filterManager();
+    FilterManager& filter_man = COMPASS::instance().filterManager();
 
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
@@ -249,7 +249,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    ATSDB::instance().objectManager().loadSlot();
+    COMPASS::instance().objectManager().loadSlot();
 }
 
 
@@ -315,7 +315,7 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod") ||
             !object_manager.existsMetaVariable("pos_lat_deg") ||
@@ -410,7 +410,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod"))
     {

@@ -22,7 +22,7 @@
 #include <QLabel>
 #include <QTextEdit>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
 #include "logger.h"

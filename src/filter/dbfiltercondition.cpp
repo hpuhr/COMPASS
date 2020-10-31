@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbfilter.h"
 #include "dbfiltercondition.h"
 #include "dbobject.h"
@@ -62,10 +62,10 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
-        if (!ATSDB::instance().objectManager().existsMetaVariable(variable_name_))
+        if (!COMPASS::instance().objectManager().existsMetaVariable(variable_name_))
             throw std::runtime_error("DBFilterCondition: constructor: meta dbo variable '" +
                                      variable_name_ + "' does not exist");
-        meta_variable_ = &ATSDB::instance().objectManager().metaVariable(variable_name_);
+        meta_variable_ = &COMPASS::instance().objectManager().metaVariable(variable_name_);
         assert(meta_variable_);
 
         if (!meta_variable_->existsInDB())
@@ -73,8 +73,8 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     }
     else
     {
-        if (!ATSDB::instance().objectManager().existsObject(variable_dbo_name_) ||
-            !ATSDB::instance()
+        if (!COMPASS::instance().objectManager().existsObject(variable_dbo_name_) ||
+            !COMPASS::instance()
                  .objectManager()
                  .object(variable_dbo_name_)
                  .hasVariable(variable_name_))
@@ -82,7 +82,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
                                      variable_name_ + "' does not exist");
 
         variable_ =
-            &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
+            &COMPASS::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
 
         assert(variable_);
 

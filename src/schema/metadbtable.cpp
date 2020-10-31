@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschema.h"
 #include "dbtable.h"

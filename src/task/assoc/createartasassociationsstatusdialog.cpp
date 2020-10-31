@@ -17,7 +17,7 @@
 
 #include "createartasassociationsstatusdialog.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "createartasassociationstask.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -340,7 +340,7 @@ void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid()
         dbo_associated_grid_->addWidget(percent_label, row, 3);
     }
 
-    for (auto& dbo_it : ATSDB::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().objectManager())
     {
         if (dbo_it.first == "Tracker")
             continue;

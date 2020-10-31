@@ -22,7 +22,7 @@
 
 #include "configurable.h"
 
-class ATSDB;
+class COMPASS;
 class DBSchema;
 class DBSchemaManagerWidget;
 class DBInterface;
@@ -47,7 +47,7 @@ class DBSchemaManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb,
+    DBSchemaManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb,
                     DBInterface& db_interface);
 
     /// @brief Destructor

@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <string>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
@@ -190,7 +190,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
     assert(object.hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         throw std::invalid_argument(

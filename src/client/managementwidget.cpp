@@ -22,7 +22,7 @@
 #include <QResizeEvent>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbobjectmanager.h"
@@ -47,26 +47,26 @@ ManagementWidget::ManagementWidget() : QWidget()
 
     QVBoxLayout* left_layout = new QVBoxLayout();
 
-    DBInterfaceInfoWidget* interface_widget = ATSDB::instance().interface().infoWidget();
+    DBInterfaceInfoWidget* interface_widget = COMPASS::instance().interface().infoWidget();
     interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     interface_widget->setLineWidth(frame_width);
     left_layout->addWidget(interface_widget);
 
-    DBObjectManagerLoadWidget* objman_widget = ATSDB::instance().objectManager().loadWidget();
+    DBObjectManagerLoadWidget* objman_widget = COMPASS::instance().objectManager().loadWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
     left_layout->addWidget(objman_widget);
 
     hlayout->addLayout(left_layout, 1);
 
-    FilterManagerWidget* filman_widget = ATSDB::instance().filterManager().widget();
+    FilterManagerWidget* filman_widget = COMPASS::instance().filterManager().widget();
     filman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     filman_widget->setLineWidth(frame_width);
     hlayout->addWidget(filman_widget, 1);
 
     QVBoxLayout* right_layout = new QVBoxLayout();
 
-    ViewManagerWidget* viewman_widget = ATSDB::instance().viewManager().widget();
+    ViewManagerWidget* viewman_widget = COMPASS::instance().viewManager().widget();
     viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     viewman_widget->setLineWidth(frame_width);
     right_layout->addWidget(viewman_widget);

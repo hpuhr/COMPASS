@@ -25,7 +25,7 @@
 #include "singleton.h"
 #include "task.h"
 
-class ATSDB;
+class COMPASS;
 class DatabaseOpenTask;
 class ManageSchemaTask;
 class ManageDBObjectsTask;
@@ -66,7 +66,7 @@ class TaskManager : public QObject, public Configurable
     void schemaChangedSlot();
 
   public:
-    TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
 
     virtual ~TaskManager();
 

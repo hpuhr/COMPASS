@@ -24,7 +24,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -168,7 +168,7 @@ void MetaDBOVariableWidget::updateSlot()
     selection_widgets_.clear();
 
     unsigned int row = 0;
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
     {
         grid_layout_->addWidget(new QLabel(obj_it.first.c_str()), row, 0);
 

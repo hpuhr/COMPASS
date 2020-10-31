@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "atsdb.h"
+#include "compass.h"
 
 #include <qobject.h>
 
@@ -41,7 +41,7 @@ using namespace std;
 /**
  * Sets init state, creates members, starts the thread using go.
  */
-ATSDB::ATSDB() : Configurable("ATSDB", "ATSDB0", 0, "atsdb.json")
+COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "ATSDB: constructor: start";
 
@@ -92,7 +92,7 @@ ATSDB::ATSDB() : Configurable("ATSDB", "ATSDB0", 0, "atsdb.json")
 /**
  * Deletes members.
  */
-ATSDB::~ATSDB()
+COMPASS::~COMPASS()
 {
     logdbg << "ATSDB: destructor: start";
 
@@ -115,7 +115,7 @@ ATSDB::~ATSDB()
     logdbg << "ATSDB: destructor: end";
 }
 
-void ATSDB::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
+void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
     logdbg << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
@@ -166,7 +166,7 @@ void ATSDB::generateSubConfigurable(const std::string& class_id, const std::stri
         throw std::runtime_error("ATSDB: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-void ATSDB::checkSubConfigurables()
+void COMPASS::checkSubConfigurables()
 {
     if (!db_interface_)
     {
@@ -213,62 +213,62 @@ void ATSDB::checkSubConfigurables()
     }
 }
 
-DBInterface& ATSDB::interface()
+DBInterface& COMPASS::interface()
 {
     assert(db_interface_);
     // assert (initialized_);
     return *db_interface_;
 }
 
-DBSchemaManager& ATSDB::schemaManager()
+DBSchemaManager& COMPASS::schemaManager()
 {
     assert(db_schema_manager_);
     // assert (initialized_);
     return *db_schema_manager_;
 }
 
-DBObjectManager& ATSDB::objectManager()
+DBObjectManager& COMPASS::objectManager()
 {
     assert(dbo_manager_);
     // assert (initialized_);
     return *dbo_manager_;
 }
 
-FilterManager& ATSDB::filterManager()
+FilterManager& COMPASS::filterManager()
 {
     assert(filter_manager_);
     // assert (initialized_);
     return *filter_manager_;
 }
 
-TaskManager& ATSDB::taskManager()
+TaskManager& COMPASS::taskManager()
 {
     assert(task_manager_);
     // assert (initialized_);
     return *task_manager_;
 }
 
-ViewManager& ATSDB::viewManager()
+ViewManager& COMPASS::viewManager()
 {
     assert(view_manager_);
     // assert (initialized_);
     return *view_manager_;
 }
 
-SimpleConfig& ATSDB::config()
+SimpleConfig& COMPASS::config()
 {
     // assert (initialized_);
     assert(simple_config_);
     return *simple_config_;
 }
 
-EvaluationManager& ATSDB::evaluationManager()
+EvaluationManager& COMPASS::evaluationManager()
 {
     assert(eval_manager_);
     return *eval_manager_;
 }
 
-bool ATSDB::ready()
+bool COMPASS::ready()
 {
     if (!db_interface_)  // || !initialized_)
         return false;
@@ -280,7 +280,7 @@ bool ATSDB::ready()
 // * Calls stop. If data was written uning the StructureReader, this process is finished correctly.
 // * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
 // */
-void ATSDB::shutdown()
+void COMPASS::shutdown()
 {
     loginf << "ATSDB: database shutdown";
 

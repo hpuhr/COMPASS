@@ -20,7 +20,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dboassociationcollection.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -94,7 +94,7 @@ void AllBufferCSVExportJob::run()
         output_file << ss.str() << "\n";
 
         // write the data
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         for (auto& row_index_it : row_indexes_)
         {

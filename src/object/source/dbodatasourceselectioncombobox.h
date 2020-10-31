@@ -20,7 +20,7 @@
 
 #include <QComboBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbodatasource.h"

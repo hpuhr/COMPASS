@@ -17,7 +17,7 @@
 
 #include "viewpointsimporttaskwidget.h"
 #include "viewpointsimporttask.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "global.h"
 #include "logger.h"
 #include "stringconv.h"

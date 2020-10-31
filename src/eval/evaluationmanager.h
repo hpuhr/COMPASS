@@ -32,7 +32,7 @@
 
 #include "json.hpp"
 
-class ATSDB;
+class COMPASS;
 class EvaluationStandard;
 class DBObject;
 class DBOVariableSet;
@@ -56,7 +56,7 @@ public slots:
     void loadingDoneSlot(DBObject& object);
 
 public:
-    EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
     virtual ~EvaluationManager();
 
     void init(QTabWidget* tab_widget);
@@ -170,7 +170,7 @@ public:
     void generateReportDetails(bool value);
 
 protected:
-    ATSDB& atsdb_;
+    COMPASS& atsdb_;
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};

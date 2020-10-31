@@ -28,7 +28,7 @@
 
 class DBFilter;
 class DataSourcesFilter;
-class ATSDB;
+class COMPASS;
 class FilterManagerWidget;
 class DBOVariable;
 class ViewableDataConfig;
@@ -57,7 +57,7 @@ class FilterManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
     /// @brief Destructor
     virtual ~FilterManager();
 

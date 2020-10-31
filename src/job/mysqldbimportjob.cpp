@@ -23,7 +23,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "files.h"
 #include "logger.h"
@@ -138,7 +138,7 @@ void MySQLDBImportJob::importSQLFile()
     }
 
     sql_file.close();
-    ATSDB::instance().interface().databaseContentChanged();
+    COMPASS::instance().interface().databaseContentChanged();
 }
 
 void MySQLDBImportJob::importSQLArchiveFile()
@@ -304,5 +304,5 @@ void MySQLDBImportJob::importSQLArchiveFile()
             "MySQLppConnection: importSQLArchiveFile: archive read free error: " +
             std::string(archive_error_string(a)));
 
-    ATSDB::instance().interface().databaseContentChanged();
+    COMPASS::instance().interface().databaseContentChanged();
 }

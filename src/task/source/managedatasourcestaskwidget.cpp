@@ -23,7 +23,7 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dboeditdatasourceswidget.h"
@@ -41,7 +41,7 @@ ManageDataSourcesTaskWidget::ManageDataSourcesTaskWidget(ManageDataSourcesTask& 
     tab_widget_ = new QTabWidget();
     main_layout_->addWidget(tab_widget_);
 
-    for (auto& dbo_it : ATSDB::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().objectManager())
     {
         tab_widget_->addTab(task_.editDataSourcesWidget(dbo_it.first), dbo_it.first.c_str());
         connect(task_.editDataSourcesWidget(dbo_it.first),

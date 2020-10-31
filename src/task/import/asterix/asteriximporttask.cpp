@@ -31,7 +31,7 @@
 #include "asterixcategoryconfig.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixstatusdialog.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "configurable.h"
 #include "createartasassociationstask.h"
@@ -491,11 +491,11 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
 
 bool ASTERIXImportTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     return true;
 }
@@ -505,7 +505,7 @@ bool ASTERIXImportTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (ATSDB::instance().objectManager().hasData())
+    if (COMPASS::instance().objectManager().hasData())
         return false;
 
     return true;
@@ -1006,7 +1006,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
     assert(schema_);
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     for (auto& buf_it : job_buffers)
     {
@@ -1170,7 +1170,7 @@ void ASTERIXImportTask::checkAllDone()
         widget_->runDone();
 
         if (!create_mapping_stubs_ && !test_)
-            emit ATSDB::instance().interface().databaseContentChangedSignal();
+            emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         task_manager_.appendInfo("ASTERIXImportTask: inserted " +
                                  std::to_string(status_widget_->numRecordsInserted()) +
@@ -1197,14 +1197,14 @@ void ASTERIXImportTask::checkAllDone()
 
             // in case data was imported, clear other task done properties
             if (status_widget_->dboInsertedCounts().count("Radar"))
-                ATSDB::instance().interface().setProperty(
+                COMPASS::instance().interface().setProperty(
                     RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
 
-            ATSDB::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-            ATSDB::instance().interface().setProperty(
+            COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+            COMPASS::instance().interface().setProperty(
                 CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
-            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             if (!was_done)  // only emit if first time done
                 emit doneSignal(name_);

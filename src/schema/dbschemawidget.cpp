@@ -29,7 +29,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "configuration.h"
 #include "configurationmanager.h"
@@ -159,7 +159,7 @@ void DBSchemaWidget::lock()
 void DBSchemaWidget::addTableSlot()
 {
     const std::map<std::string, DBTableInfo>& table_info =
-        ATSDB::instance().interface().tableInfo();
+        COMPASS::instance().interface().tableInfo();
 
     QStringList items;
     for (auto it : table_info)
@@ -193,7 +193,7 @@ void DBSchemaWidget::addTableSlot()
 void DBSchemaWidget::addAllTablesSlot()
 {
     const std::map<std::string, DBTableInfo>& table_info =
-        ATSDB::instance().interface().tableInfo();
+        COMPASS::instance().interface().tableInfo();
 
     for (auto it : table_info)
     {

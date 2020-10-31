@@ -17,7 +17,7 @@
 
 #include "dboeditdatasourceaction.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "logger.h"
 #include "managedatasourcestask.h"
@@ -56,7 +56,7 @@ void DBOEditDataSourceAction::perform(DBObject& object, const std::string& sourc
 
     assert(action_ != "None");
 
-    ManageDataSourcesTask& manage_ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+    ManageDataSourcesTask& manage_ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
 
     std::string dbo_name = object.name();
 

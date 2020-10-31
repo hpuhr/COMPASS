@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
@@ -394,10 +394,10 @@ bool DBOVariable::hasCurrentDBColumn() const
     logdbg << "DBOVariable: hasCurrentDBColumn: meta " << meta_tablename << " variable id "
            << meta_table_varid;
 
-    assert(ATSDB::instance().schemaManager().hasCurrentSchema());
-    assert(ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_tablename));
+    assert(COMPASS::instance().schemaManager().hasCurrentSchema());
+    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_tablename));
 
-    return ATSDB::instance()
+    return COMPASS::instance()
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
@@ -414,7 +414,7 @@ const DBTableColumn& DBOVariable::currentDBColumn() const
     logdbg << "DBOVariable: currentDBColumn: meta " << meta_tablename << " variable id "
            << meta_table_varid;
 
-    return ATSDB::instance()
+    return COMPASS::instance()
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
@@ -425,7 +425,7 @@ bool DBOVariable::isKey() { return hasCurrentDBColumn() && currentDBColumn().isK
 
 bool DBOVariable::hasCurrentSchema() const
 {
-    return hasSchema(ATSDB::instance().schemaManager().getCurrentSchemaName());
+    return hasSchema(COMPASS::instance().schemaManager().getCurrentSchemaName());
 }
 
 const std::string& DBOVariable::currentMetaTableString() const
@@ -445,7 +445,7 @@ const MetaDBTable& DBOVariable::currentMetaTable() const
 const std::string& DBOVariable::currentVariableIdentifier() const
 {
     assert(hasCurrentSchema());
-    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
+    std::string schema = COMPASS::instance().schemaManager().getCurrentSchemaName();
     assert(schema_variables_.find(schema) != schema_variables_.end());
     return schema_variables_.at(schema)->getVariableIdentifier();
 }
@@ -466,7 +466,7 @@ void DBOVariable::setMinMax()
     else
     {
         std::pair<std::string, std::string> min_max =
-            ATSDB::instance().interface().getMinMaxString(*this);
+            COMPASS::instance().interface().getMinMaxString(*this);
 
         min_ = min_max.first;
         max_ = min_max.second;

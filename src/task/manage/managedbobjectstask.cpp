@@ -17,7 +17,7 @@
 
 #include "managedbobjectstask.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschemamanager.h"
 #include "managedbobjectstaskwidget.h"
@@ -57,8 +57,8 @@ void ManageDBObjectsTask::generateSubConfigurable(const std::string& class_id,
 
 bool ManageDBObjectsTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())
+    if (!COMPASS::instance().interface().ready())
         return false;
 
-    return ATSDB::instance().schemaManager().isLocked();
+    return COMPASS::instance().schemaManager().isLocked();
 }

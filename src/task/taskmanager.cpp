@@ -17,7 +17,7 @@
 
 #include "taskmanager.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
 #include "databaseopentask.h"
@@ -76,7 +76,7 @@
 
 using namespace Utils;
 
-TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb)
     : Configurable(class_id, instance_id, atsdb, "task.json")
 {
     registerParameter("expert_mode", &expert_mode_, false);
@@ -666,7 +666,7 @@ void TaskManager::performAutomaticTasks ()
 
     database_open_task_->useConnection("SQLite Connection");
     SQLiteConnectionWidget* connection_widget =
-            dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+            dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
 
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -1066,7 +1066,7 @@ void TaskManager::performAutomaticTasks ()
 
             loginf << "TaskManager: performAutomaticTasks: loading data";
 
-            DBObjectManager& obj_man = ATSDB::instance().objectManager();
+            DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
             obj_man.loadSlot();
 
@@ -1092,7 +1092,7 @@ void TaskManager::performAutomaticTasks ()
 
             getMainWindow()->showViewPointsTab();
 
-            ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
+            ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
 
             ViewPointsReportGeneratorDialog& dialog = gen.dialog();
             dialog.show();
@@ -1126,7 +1126,7 @@ void TaskManager::performAutomaticTasks ()
 
             getMainWindow()->showEvaluationTab();
 
-            EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+            EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
             if (eval_man.canLoadData())
             {

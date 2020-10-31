@@ -21,7 +21,7 @@
 
 #include "allbuffercsvexportjob.h"
 #include "allbuffertablewidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -178,7 +178,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBObjectManager& manager = ATSDB::instance().objectManager();
+                DBObjectManager& manager = COMPASS::instance().objectManager();
                 const DBOAssociationCollection& associations =
                     manager.object(dbo_name).associations();
 
@@ -208,7 +208,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         // check if data & variables exist
         if (variable_dbo_name == META_OBJECT_NAME)
@@ -511,7 +511,7 @@ void AllBufferTableModel::updateTimeIndexes()
             logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
-            DBObjectManager& object_manager = ATSDB::instance().objectManager();
+            DBObjectManager& object_manager = COMPASS::instance().objectManager();
             const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());

@@ -19,7 +19,7 @@
 #include "viewmanager.h"
 #include "logger.h"
 #include "json.hpp"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "latexvisitor.h"
 
@@ -135,6 +135,6 @@ void ViewPoint::save()
 {
     loginf << "ViewPoint: save: id " << id_;
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.setViewPoint(id_, data_.dump());
 }

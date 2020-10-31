@@ -16,7 +16,7 @@
  */
 
 #include "createassociationsjob.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "createassociationstask.h"
 #include "dbinterface.h"
@@ -49,7 +49,7 @@ void CreateAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     object_man.removeAssociations();
 
@@ -92,7 +92,7 @@ void CreateAssociationsJob::createUTNS()
     assert (meta_tod_var);
     assert (meta_ta_var);
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
