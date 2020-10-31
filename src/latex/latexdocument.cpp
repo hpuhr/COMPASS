@@ -53,8 +53,9 @@ std::string LatexDocument::toString()
           \usepackage{ltablex}
           \usepackage{pdflscape}
 
-          \usepackage{color}
+          \usepackage{xcolor}
           \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+          \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.13}
 
           \lstset{
             basicstyle=\ttfamily,
@@ -114,6 +115,8 @@ LatexSection& LatexDocument::getSection (const std::string& id)
     assert (id.size());
     std::vector<std::string> parts = String::split(id, ':');
     assert (parts.size());
+
+    loginf << "LatexDocument: getSection: id '"+id+"' parts " << parts.size();
 
     //std::string& top = parts.at(0);
 

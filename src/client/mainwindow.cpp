@@ -33,6 +33,7 @@
 #include "taskmanagerwidget.h"
 #include "viewmanager.h"
 #include "viewpointswidget.h"
+#include "evaluationmanager.h"
 
 #include <QApplication>
 #include <QCloseEvent>
@@ -110,11 +111,27 @@ void MainWindow::disableConfigurationSaving()
     save_configuration_ = false;
 }
 
+void MainWindow::showEvaluationTab()
+{
+    assert (started_);
+    assert (tab_widget_->count() > 1);
+    tab_widget_->setCurrentIndex(1);
+}
+
+void MainWindow::showViewPointsTab()
+{
+    assert (started_);
+    assert (tab_widget_->count() > 2);
+    tab_widget_->setCurrentIndex(2);
+}
+
+
 void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
 
 void MainWindow::startSlot()
 {
     loginf << "MainWindow: startSlot";
+    assert (!started_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -150,6 +167,7 @@ void MainWindow::startSlot()
 //        QThread::msleep(1);
 //    }
 
+    ATSDB::instance().evaluationManager().init(tab_widget_); // adds eval widget
     ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
@@ -160,6 +178,8 @@ void MainWindow::startSlot()
 //    delete msg_box;
 
     QApplication::restoreOverrideCursor();
+
+    started_ = true;
 }
 
 void MainWindow::quitRequestedSlot()

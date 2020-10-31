@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/activedatasource.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasource.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinition.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.h"

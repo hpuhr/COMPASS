@@ -6,6 +6,7 @@
 #include <memory>
 
 class Sector;
+class EvaluationTargetPosition;
 
 class SectorLayer
 {
@@ -22,6 +23,12 @@ public:
     unsigned int size () { return sectors_.size(); };
 
     std::vector<std::shared_ptr<Sector>>& sectors() { return sectors_; }
+
+    bool isInside(const EvaluationTargetPosition& pos) const;
+
+    std::pair<double, double> getMinMaxLatitude() const;
+    std::pair<double, double> getMinMaxLongitude() const;
+
 protected:
     const std::string name_;
 

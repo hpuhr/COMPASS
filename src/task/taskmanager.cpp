@@ -55,7 +55,10 @@
 #include "viewmanager.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
-
+#include "evaluationmanager.h"
+#include "eval/results/report/pdfgenerator.h"
+#include "eval/results/report/pdfgeneratordialog.h"
+#include "mainwindow.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -65,6 +68,8 @@
 #include <cassert>
 
 #include <QCoreApplication>
+#include <QApplication>
+#include <QMainWindow>
 #include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -175,7 +180,7 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
     {
         assert(!radar_plot_position_calculator_task_);
         radar_plot_position_calculator_task_.reset(
-            new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
+                    new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
         assert(radar_plot_position_calculator_task_);
         addTask(class_id, radar_plot_position_calculator_task_.get());
     }
@@ -183,7 +188,7 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
     {
         assert(!create_artas_associations_task_);
         create_artas_associations_task_.reset(
-            new CreateARTASAssociationsTask(class_id, instance_id, *this));
+                    new CreateARTASAssociationsTask(class_id, instance_id, *this));
         assert(create_artas_associations_task_);
         addTask(class_id, create_artas_associations_task_.get());
     }
@@ -191,7 +196,7 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
     {
         assert(!create_associations_task_);
         create_associations_task_.reset(
-            new CreateAssociationsTask(class_id, instance_id, *this));
+                    new CreateAssociationsTask(class_id, instance_id, *this));
         assert(create_associations_task_);
         addTask(class_id, create_associations_task_.get());
     }
@@ -630,6 +635,12 @@ void TaskManager::exportViewPointsReportFile(const std::string& filename)
     export_view_points_report_filename_ = filename;
 }
 
+void TaskManager::exportEvalReportFile(const std::string& filename)
+{
+    automatic_tasks_defined_ = true;
+    export_eval_report_ = true;
+    export_eval_report_filename_ = filename;
+}
 
 bool TaskManager::automaticTasksDefined() const
 {
@@ -655,7 +666,7 @@ void TaskManager::performAutomaticTasks ()
 
     database_open_task_->useConnection("SQLite Connection");
     SQLiteConnectionWidget* connection_widget =
-        dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+            dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
 
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -729,7 +740,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         ViewPointsImportTaskWidget* view_points_import_task_widget =
-            dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
+                dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
         assert(view_points_import_task_widget);
 
         view_points_import_task_widget->addFile(view_points_import_filename_);
@@ -747,7 +758,7 @@ void TaskManager::performAutomaticTasks ()
         }
     }
 
-    #if USE_JASTERIX
+#if USE_JASTERIX
     if (asterix_import_file_)
     {
         loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
@@ -769,7 +780,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         ASTERIXImportTaskWidget* asterix_import_task_widget =
-            dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
+                dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
         assert(asterix_import_task_widget);
 
         asterix_import_task_widget->addFile(asterix_import_filename_);
@@ -786,7 +797,7 @@ void TaskManager::performAutomaticTasks ()
             QThread::msleep(1);
         }
     }
-    #endif
+#endif
 
     if (json_import_file_)
     {
@@ -818,7 +829,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         JSONImportTaskWidget* json_import_task_widget =
-            dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
         assert(json_import_task_widget);
 
         json_import_task_widget->addFile(json_import_filename_);
@@ -860,7 +871,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         GPSTrailImportTaskWidget* gps_import_task_widget =
-            dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
+                dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
         assert(gps_import_task_widget);
 
         gps_import_task_widget->addFile(gps_trail_import_filename_);
@@ -899,7 +910,7 @@ void TaskManager::performAutomaticTasks ()
         }
 
         ManageSectorsTaskWidget* manage_sectors_task_widget =
-            dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
+                dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
         assert(manage_sectors_task_widget);
 
         manage_sectors_task_->showDoneSummary(false);
@@ -907,11 +918,11 @@ void TaskManager::performAutomaticTasks ()
 
         //widget_->runTask(*manage_sectors_task_);
 
-//        while (!manage_sectors_task_->done())
-//        {
-//            QCoreApplication::processEvents();
-//            QThread::msleep(1);
-//        }
+        //        while (!manage_sectors_task_->done())
+        //        {
+        //            QCoreApplication::processEvents();
+        //            QThread::msleep(1);
+        //        }
     }
 
     start_time = boost::posix_time::microsec_clock::local_time();
@@ -1025,7 +1036,9 @@ void TaskManager::performAutomaticTasks ()
             logerr << "TaskManager: performAutomaticTasks: associate data task can not be run";
     }
 
-    loginf << "TaskManager: performAutomaticTasks: done";
+    loginf << "TaskManager: performAutomaticTasks: done with startup tasks";
+
+    bool started = false;
 
     if (start_)
     {
@@ -1035,6 +1048,8 @@ void TaskManager::performAutomaticTasks ()
         {
             widget_->startSlot();
             QCoreApplication::processEvents();
+
+            started = true;
         }
         else
             loginf << "TaskManager: performAutomaticTasks: start not possible";
@@ -1042,16 +1057,24 @@ void TaskManager::performAutomaticTasks ()
 
     if (load_data_)
     {
-        loginf << "TaskManager: performAutomaticTasks: loading data";
-
-        DBObjectManager& obj_man = ATSDB::instance().objectManager();
-
-        obj_man.loadSlot();
-
-        while (obj_man.loadInProgress())
+        if (!started)
         {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
+            logerr << "TaskManager: performAutomaticTasks: loading data not possible since not started";
+        }
+        else
+        {
+
+            loginf << "TaskManager: performAutomaticTasks: loading data";
+
+            DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+            obj_man.loadSlot();
+
+            while (obj_man.loadInProgress())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
         }
     }
     else
@@ -1059,27 +1082,123 @@ void TaskManager::performAutomaticTasks ()
 
     if (export_view_points_report_)
     {
-        loginf << "TaskManager: performAutomaticTasks: exporting view points report";
-
-        ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
-
-        ViewPointsReportGeneratorDialog& dialog = gen.dialog();
-        dialog.show();
-
-        QCoreApplication::processEvents();
-
-        gen.reportPathAndFilename(export_view_points_report_filename_);
-        gen.showDone(false);
-
-        gen.run();
-
-        while (gen.isRunning()) // not sure if needed here but what the hell
+        if (!started)
         {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
+            logerr << "TaskManager: performAutomaticTasks: exporting view points report not possible since not started";
         }
+        else
+        {
+            loginf << "TaskManager: performAutomaticTasks: exporting view points report";
 
-        gen.showDone(true);
+            getMainWindow()->showViewPointsTab();
+
+            ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
+
+            ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+            dialog.show();
+
+            QCoreApplication::processEvents();
+
+            gen.reportPathAndFilename(export_view_points_report_filename_);
+            gen.showDone(false);
+
+            gen.run();
+
+            while (gen.isRunning()) // not sure if needed here but what the hell
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
+
+            gen.showDone(true);
+        }
+    }
+
+    if (evaluate_ || export_eval_report_)
+    {
+        if (!started)
+        {
+            logerr << "TaskManager: performAutomaticTasks: evaluation not possible since not started";
+        }
+        else
+        {
+            loginf << "TaskManager: performAutomaticTasks: running evaluation";
+
+            getMainWindow()->showEvaluationTab();
+
+            EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+
+            if (eval_man.canLoadData())
+            {
+                loginf << "TaskManager: performAutomaticTasks: loading evaluation data";
+
+                eval_man.loadData();
+
+                while (!eval_man.dataLoaded())
+                {
+                    QCoreApplication::processEvents();
+                    QThread::msleep(1);
+                }
+
+                assert (eval_man.dataLoaded());
+
+                if (eval_man.canEvaluate())
+                {
+                    loginf << "TaskManager: performAutomaticTasks: doing evaluation";
+
+                    eval_man.evaluate();
+
+                    while (!eval_man.evaluated())
+                    {
+                        QCoreApplication::processEvents();
+                        QThread::msleep(1);
+                    }
+
+                    assert (eval_man.evaluated());
+
+                    loginf << "TaskManager: performAutomaticTasks: evaluation done";
+
+                    if (export_eval_report_)
+                    {
+                        if (eval_man.canGenerateReport())
+                        {
+                            loginf << "TaskManager: performAutomaticTasks: generating report";
+
+                            EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+
+                            EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+                            dialog.show();
+
+                            QCoreApplication::processEvents();
+
+                            gen.reportPathAndFilename(export_eval_report_filename_);
+                            gen.showDone(false);
+
+                            gen.run();
+
+                            while (gen.isRunning()) // not sure if needed here but what the hell
+                            {
+                                QCoreApplication::processEvents();
+                                QThread::msleep(1);
+                            }
+
+                            gen.showDone(true);
+
+                            loginf << "TaskManager: performAutomaticTasks: generating evaluation report done";
+                        }
+                        else
+                            logerr << "TaskManager: performAutomaticTasks: "
+                                      "exporting evaluation report not possible since report can't be generated";
+                    }
+                }
+                else
+                    logerr << "TaskManager: performAutomaticTasks: "
+                              "evaluation not possible since evaluation can not be made";
+            }
+            else
+                logerr << "TaskManager: performAutomaticTasks: "
+                          "evaluation not possible since no data can be loaded";
+        }
     }
 
     if (quit_)
@@ -1090,6 +1209,28 @@ void TaskManager::performAutomaticTasks ()
     }
     else
         loginf << "TaskManager: performAutomaticTasks: not quitting";
+}
+
+void TaskManager::evaluate(bool evaluate)
+{
+    automatic_tasks_defined_ = true;
+    evaluate_ = evaluate;
+}
+
+MainWindow* TaskManager::getMainWindow()
+{
+    for(QWidget* pWidget : QApplication::topLevelWidgets())
+    {
+        QMainWindow* qt_main_window = qobject_cast<QMainWindow*>(pWidget);
+
+        if (qt_main_window)
+        {
+            MainWindow* main_window = dynamic_cast<MainWindow*>(qt_main_window);
+            assert (main_window);
+            return main_window;
+        }
+    }
+    return nullptr;
 }
 
 

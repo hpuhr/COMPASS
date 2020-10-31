@@ -11,11 +11,22 @@
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontentfigure.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
+#include "viewmanager.h"
+#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "osgview.h"
 #include "osgviewdatawidget.h"
 #endif
+
+#include <QCoreApplication>
+#include <QApplication>
 
 #include <sstream>
 
@@ -36,7 +47,7 @@ void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: id " << e->id();
+    loginf << "LatexVisitor: visit: ViewPoint id " << e->id();
 
     const nlohmann::json& j_data = e->data();
 
@@ -114,11 +125,130 @@ void LatexVisitor::visit(const ViewPoint* e)
     }
 }
 
+void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
+
+    current_section_name_ = e->compoundResultsHeading(); // slightly hacky, remove "Results" from top
+
+    // ignore if top "Results"
+    if (current_section_name_ == "")
+        return;
+
+    LatexSection& section = report_.getSection(current_section_name_);
+    section.label("sec:"+e->compoundResultsHeading());
+
+    for (const auto& cont_it : e->content())
+        cont_it->accept(*this);
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
+
+    LatexSection& section = report_.getSection(current_section_name_);
+
+    string table_name = e->name();
+    assert (!section.hasTable(table_name));
+
+    vector<string> headings = e->headings();
+    unsigned int num_cols = headings.size();
+
+    for (unsigned int cnt=0; cnt < num_cols; ++cnt) // latexify headings
+        headings[cnt] = String::latexString(headings[cnt]);
+
+    assert (num_cols);
+
+    //    const std::string& name, unsigned int num_columns,
+    //                                 std::vector<std::string> headings, std::string heading_alignment,
+    //                                 bool convert_to_latex
+    //    if (!overview_sec.hasTable("ViewPoints Overview"))
+    //        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
+    //                              "| l | l | l | l | X | l |", false);
+
+    section.addTable(table_name, num_cols, headings, "", false);
+    LatexTable& table = section.getTable(table_name);
+
+    if (headings.size() >= 9)
+        table.setWideTable(true);
+
+    unsigned int num_rows = e->rowCount();
+    vector<string> row_strings;
+
+    for (unsigned int row=0; row < num_rows; ++row)
+    {
+        row_strings = e->sortedRowStrings(row);
+        assert (row_strings.size() == num_cols);
+
+        if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
+            row_strings[0] = "\\hyperref[sec:"+e->reference(row)+"]{"+row_strings.at(0)+"}";
+
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (row_strings[cnt] == "true" || row_strings[cnt] == "Passed")
+                row_strings[cnt] = "\\textcolor{darkgreen}{"+row_strings[cnt]+"}";
+            else if (row_strings[cnt] == "false" || row_strings[cnt] == "Failed")
+                row_strings[cnt] = "\\textcolor{red}{"+row_strings[cnt]+"}";
+        }
+
+        table.addRow(move(row_strings));
+    }
+
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentText" << e->name();
+
+    LatexSection& section = report_.getSection(current_section_name_);
+
+    for (const auto& txt_it : e->texts())
+        section.addText(txt_it);
+}
+
+void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
+{
+    assert (e);
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name();
+
+#if USE_EXPERIMENTAL_SOURCE == true
+
+    ignore_listbox_views_ = true;
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    ViewManager& view_man = ATSDB::instance().viewManager();
+
+    while (QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents();
+
+    e->view();
+
+    while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents();
+
+    image_prefix_ = e->getSubPath()+e->name();
+
+    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure" << e->name()
+           << " prefix " << image_prefix_;
+
+    for (auto& view_it : view_man.getViews())
+        view_it.second->accept(*this);
+
+    ignore_listbox_views_ = false;
+#endif
+}
+
 void LatexVisitor::visit(ListBoxView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: listboxview " << e->instanceId();
+    loginf << "LatexVisitor: visit: ListBoxView " << e->instanceId();
+
+    if (ignore_listbox_views_)
+        return;
 
     AllBufferTableWidget* allbuf = e->getDataWidget()->getAllBufferTableWidget();
     assert (allbuf);
@@ -162,7 +292,7 @@ void LatexVisitor::visit(ListBoxView* e)
 void LatexVisitor::visit(OSGView* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: osgview " << e->instanceId();
+    loginf << "LatexVisitor: visit: OSGView " << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
@@ -192,6 +322,7 @@ void LatexVisitor::visit(OSGView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
     bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 

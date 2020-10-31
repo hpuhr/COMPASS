@@ -16,17 +16,18 @@
  */
 
 #include "view.h"
-
-#include <QVBoxLayout>
-#include <QWidget>
-#include <cassert>
-
 #include "logger.h"
 #include "viewcontainer.h"
 #include "viewmanager.h"
 #include "viewmodel.h"
 #include "viewwidget.h"
 #include "viewpoint.h"
+#include "atsdb.h"
+
+#include <QVBoxLayout>
+#include <QWidget>
+
+#include <cassert>
 
 unsigned int View::cnt_ = 0;
 
@@ -52,6 +53,7 @@ View::View(const std::string& class_id, const std::string& instance_id, ViewCont
     connect(this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
 
     connect(&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
+
     connect(&view_manager_, &ViewManager::unshowViewPointSignal, this, &View::unshowViewPointSlot);
     connect(&view_manager_, &ViewManager::showViewPointSignal, this, &View::showViewPointSlot);
 }

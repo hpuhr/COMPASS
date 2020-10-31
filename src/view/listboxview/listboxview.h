@@ -44,8 +44,8 @@ class ListBoxView : public View
     //    void selectionChanged();
     //    /// @brief Is executed when selection is to be cleared. Does nothing.
     //    void selectionToBeCleared();
-    virtual void unshowViewPointSlot (const ViewPoint* vp) override;
-    virtual void showViewPointSlot (const ViewPoint* vp) override;
+    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
+    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
     void allLoadingDoneSlot();
 
   signals:

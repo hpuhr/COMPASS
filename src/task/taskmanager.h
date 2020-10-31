@@ -40,10 +40,13 @@ class TaskManagerWidget;
 class ManageDataSourcesTask;
 class ManageSectorsTask;
 class CreateAssociationsTask;
+class MainWindow;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
 #endif
+
+class QMainWindow;
 
 class TaskManager : public QObject, public Configurable
 {
@@ -125,9 +128,12 @@ class TaskManager : public QObject, public Configurable
 
     void loadData(bool value);
     void exportViewPointsReportFile(const std::string& filename);
+    void exportEvalReportFile(const std::string& filename);
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
+
+    void evaluate(bool evaluate);
 
 protected:
     bool expert_mode_{false};
@@ -164,8 +170,14 @@ protected:
 
     bool start_ {false};
     bool load_data_ {false};
+
     bool export_view_points_report_ {false};
     std::string export_view_points_report_filename_;
+
+    bool evaluate_ {false};
+    bool export_eval_report_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     // tasks
@@ -194,6 +206,7 @@ protected:
     std::map<std::string, Task*> tasks_;
 
     void addTask(const std::string& class_id, Task* task);
+    MainWindow* getMainWindow();
 };
 
 #endif  // TASKMANAGER_H

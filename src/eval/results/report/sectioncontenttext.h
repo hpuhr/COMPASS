@@ -1,0 +1,31 @@
+#ifndef EVALUATIONRESULTSREPORTSECTIONCONTENTTEXT_H
+#define EVALUATIONRESULTSREPORTSECTIONCONTENTTEXT_H
+
+#include "eval/results/report/sectioncontent.h"
+
+#include <vector>
+
+namespace EvaluationResultsReport
+{
+    using namespace std;
+
+    class SectionContentText : public SectionContent
+    {
+    public:
+        SectionContentText(const string& name, Section* parent_section, EvaluationManager& eval_man);
+
+        void addText (const string& text);
+
+        virtual void addToLayout (QVBoxLayout* layout) override;
+        virtual void accept(LatexVisitor& v) const override;
+
+        const vector<string>& texts() const;
+
+    protected:
+        vector<string> texts_;
+
+    };
+
+
+}
+#endif // EVALUATIONRESULTSREPORTSECTIONCONTENTTEXT_H

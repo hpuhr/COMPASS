@@ -224,6 +224,9 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
 
         for (auto& dbo_it : object_man)
         {
+            if (!dbo_it.second->hasData())
+                continue;
+
             buffers[dbo_it.first] = dbo_it.second->data();
 
             loginf << "CreateAssociationsTask: loadingDoneSlot: object " << object.name()

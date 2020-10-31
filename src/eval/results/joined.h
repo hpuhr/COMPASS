@@ -1,0 +1,39 @@
+#ifndef JOINEDEVALUATIONREQUIREMENTRESULT_H
+#define JOINEDEVALUATIONREQUIREMENTRESULT_H
+
+#include "eval/results/base.h"
+
+namespace EvaluationRequirementResult
+{
+
+class Joined : public Base
+{
+public:
+    Joined(const std::string& type, const std::string& result_id,
+           std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
+           EvaluationManager& eval_man);
+
+    virtual bool isSingle() const override { return false; }
+    virtual bool isJoined() const override { return true; }
+
+    virtual void join(std::shared_ptr<Base> other);
+
+    virtual void print() = 0;
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+
+    std::vector<std::shared_ptr<Base>>& results() { return results_; }
+
+    virtual void updatesToUseChanges() = 0;
+
+    unsigned int numResults();
+    unsigned int numUsableResults();
+    unsigned int numUnusableResults();
+
+protected:
+    std::vector<std::shared_ptr<Base>> results_;
+
+    void addCommonDetails (EvaluationResultsReport::SectionContentTable& sector_details_table);
+};
+
+}
+#endif // JOINEDEVALUATIONREQUIREMENTRESULT_H

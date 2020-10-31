@@ -334,6 +334,9 @@ inline std::string latexString(std::string str)
 //    \} 	}
     boost::replace_all(str, "}", R"(\})");
 
+    boost::replace_all(str, "<", R"(\textless)");
+    boost::replace_all(str, ">", R"(\textgreater)");
+
     return str;
 }
 

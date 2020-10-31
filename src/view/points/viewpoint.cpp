@@ -9,10 +9,8 @@
 using namespace nlohmann;
 
 ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, ViewManager& view_manager, bool needs_save)
-    : id_(id), view_manager_(view_manager)
+    : ViewableDataConfig(data), id_(id), view_manager_(view_manager)
 {
-    data_ = data;
-
     assert (data_.contains("id"));
     assert (data_.at("id") == id_);
 
@@ -76,10 +74,8 @@ ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, View
 }
 
 ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& view_manager, bool needs_save)
-    : id_(id), view_manager_(view_manager)
+    : ViewableDataConfig(json_str), id_(id), view_manager_(view_manager)
 {
-    data_ = json::parse(json_str);
-
     assert (data_.contains("id"));
     assert (data_.at("id") == id_);
 
@@ -94,8 +90,6 @@ ViewPoint::ViewPoint(unsigned int id, const std::string& json_str, ViewManager& 
 }
 
 unsigned int ViewPoint::id() const { return id_; }
-
-const nlohmann::json& ViewPoint::data() const { return data_; }
 
 void ViewPoint::setStatus (const std::string& status)
 {
@@ -116,7 +110,7 @@ void ViewPoint::print() const
 
 void ViewPoint::accept(LatexVisitor& v) const
 {
-    loginf << "ViewPoint: accept";
+    logdbg << "ViewPoint: accept";
     v.visit(this);
 }
 

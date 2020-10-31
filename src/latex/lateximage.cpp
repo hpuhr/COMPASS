@@ -12,7 +12,7 @@ LatexImage::LatexImage(const std::string& filename, const std::string& caption)
 
 std::string LatexImage::toString()
 {
-    assert (!content_.size());
+    //assert (!content_.size());
 
     stringstream ss;
 

@@ -452,7 +452,7 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
     loginf << "ViewPointsWidget: currentRowChanged: current id " << id;
     restore_focus_ = true;
 
-    view_manager_.setCurrentViewPoint(id);
+    view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
 }
 
 void ViewPointsWidget::loadingStartedSlot()

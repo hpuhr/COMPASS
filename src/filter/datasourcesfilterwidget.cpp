@@ -16,15 +16,14 @@
  */
 
 #include "datasourcesfilterwidget.h"
-
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QPushButton>
-
 #include "atsdb.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "filtermanager.h"
+
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QPushButton>
 
 /**
  * Initializes members, creates GUI elements.
@@ -73,7 +72,7 @@ void DataSourcesFilterWidget::selectSensorsAll()
     logdbg << "DataSourcesFilterWidget: selectSensorsAll";
 
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(true);
+        it.second.setActive(true);
 
     filter_.setChanged(true);
 
@@ -87,7 +86,7 @@ void DataSourcesFilterWidget::selectSensorsNone()
     logdbg << "DataSourcesFilterWidget: selectSensorsNone";
 
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(false);
+        it.second.setActive(false);
 
     filter_.setChanged(true);
 
@@ -108,13 +107,15 @@ void DataSourcesFilterWidget::updateCheckboxesChecked()
 {
     logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked";
 
+    DBFilterWidget::update();
+
     for (auto& checkit : data_sources_checkboxes_)
     {
         assert(data_sources_.find(checkit.second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(checkit.second);
-        checkit.first->setChecked(src.isActiveInFilter());
+        ActiveDataSource& src = data_sources_.at(checkit.second);
+        checkit.first->setChecked(src.isActive());
         logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked: name " << src.getName()
-               << " active " << src.isActiveInFilter();
+               << " active " << src.isActive();
     }
 }
 
@@ -127,7 +128,7 @@ void DataSourcesFilterWidget::updateCheckboxesDisabled()
     for (auto& checkit : data_sources_checkboxes_)
     {
         assert(data_sources_.find(checkit.second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(checkit.second);
+        ActiveDataSource& src = data_sources_.at(checkit.second);
         checkit.first->setEnabled(src.isActiveInData());
         logdbg << "DataSourcesFilterWidget: updateCheckboxesDisabled: src " << src.getName()
                << " active " << src.isActiveInData();
@@ -142,7 +143,7 @@ void DataSourcesFilterWidget::toggleDataSource()
     int number = data_sources_checkboxes_[check];
 
     assert(data_sources_.find(number) != data_sources_.end());
-    data_sources_.at(number).setActiveInFilter(check->checkState() == Qt::Checked);
+    data_sources_.at(number).setActive(check->checkState() == Qt::Checked);
 
     filter_.setChanged(true);
 

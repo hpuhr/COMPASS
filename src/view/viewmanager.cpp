@@ -235,23 +235,19 @@ ViewPointsReportGenerator& ViewManager::viewPointsGenerator()
     return *view_points_report_gen_;
 }
 
-void ViewManager::setCurrentViewPoint (unsigned int id)
+void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 {
-    if (current_view_point_set_)
+    if (current_viewable_)
         unsetCurrentViewPoint();
 
-    assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->hasViewPoint(id));
-
-    current_view_point_set_ = true;
-    current_view_point_ = id;
+    current_viewable_ = viewable;
 
     view_point_data_selected_ = false;
 
-    loginf << "ViewManager: setCurrentViewPoint: setting id " << id; // << " data: '"
-           //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
+    loginf << "ViewManager: setCurrentViewPoint: setting current view point"; // << " data: '"
+    //<< view_points_widget_->tableModel()->viewPoint(current_view_point_).data().dump(4) << "'";
 
-    emit showViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
+    emit showViewPointSignal(current_viewable_);
 
     ATSDB::instance().objectManager().loadSlot();
 }
@@ -259,15 +255,11 @@ void ViewManager::setCurrentViewPoint (unsigned int id)
 
 void ViewManager::unsetCurrentViewPoint ()
 {
-    if (current_view_point_set_)
+    if (current_viewable_)
     {
-        assert (view_points_widget_);
-        assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
+        emit unshowViewPointSignal(current_viewable_);
 
-        emit unshowViewPointSignal(&view_points_widget_->tableModel()->viewPoint(current_view_point_));
-
-        current_view_point_set_ = false;
-        current_view_point_ = 0;
+        current_viewable_ = nullptr;
 
         view_point_data_selected_ = false;
     }
@@ -277,17 +269,23 @@ void ViewManager::doViewPointAfterLoad ()
 {
     loginf << "ViewManager: doViewPointAfterLoad";
 
-    if (!current_view_point_set_)
+    if (!current_viewable_)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: no viewable";
         return; // nothing to do
+    }
 
     if (view_point_data_selected_)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: data already selected";
         return; // already done, this is a re-load
+    }
 
     assert (view_points_widget_);
-    assert (view_points_widget_->tableModel()->hasViewPoint(current_view_point_));
-    const ViewPoint& vp = view_points_widget_->tableModel()->viewPoint(current_view_point_);
 
-    const json& data = vp.data();
+    const json& data = current_viewable_->data();
+
+    logdbg << "ViewManager: doViewPointAfterLoad: data '" << data.dump(4) << "'";
 
     bool contains_time = data.contains("time");
     float time;
@@ -295,11 +293,16 @@ void ViewManager::doViewPointAfterLoad ()
     float time_window, time_min, time_max;
 
     if (!contains_time)
+    {
+        loginf << "ViewManager: doViewPointAfterLoad: no time given";
         return; // nothing to do
+    }
     else
     {
         assert (data.at("time").is_number());
         time = data.at("time");
+
+        loginf << "ViewManager: doViewPointAfterLoad: time " << time;
     }
 
     if (contains_time_window)
@@ -315,8 +318,8 @@ void ViewManager::doViewPointAfterLoad ()
     DBObjectManager& object_manager = ATSDB::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod") ||
-        !object_manager.existsMetaVariable("pos_lat_deg") ||
-        !object_manager.existsMetaVariable("pos_long_deg"))
+            !object_manager.existsMetaVariable("pos_lat_deg") ||
+            !object_manager.existsMetaVariable("pos_long_deg"))
     {
         logerr << "ViewManager: doViewPointAfterLoad: required variables missing, quitting";
         return;
@@ -328,8 +331,8 @@ void ViewManager::doViewPointAfterLoad ()
         std::string dbo_name = dbo_it.first;
 
         if (!object_manager.metaVariable("tod").existsIn(dbo_name) ||
-            !object_manager.metaVariable("pos_lat_deg").existsIn(dbo_name) ||
-            !object_manager.metaVariable("pos_long_deg").existsIn(dbo_name))
+                !object_manager.metaVariable("pos_lat_deg").existsIn(dbo_name) ||
+                !object_manager.metaVariable("pos_long_deg").existsIn(dbo_name))
         {
             logerr << "ViewManager: doViewPointAfterLoad: required variables missing for " << dbo_name;
             continue;
@@ -337,9 +340,9 @@ void ViewManager::doViewPointAfterLoad ()
 
         const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
         const DBOVariable& latitude_var =
-            object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
+                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
         const DBOVariable& longitude_var =
-            object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
+                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
 
         if (!tod_var.existsInDB() || !latitude_var.existsInDB() || !longitude_var.existsInDB())
         {
@@ -356,10 +359,10 @@ void ViewManager::doViewPointAfterLoad ()
 
             assert(buffer->has<float>(tod_var.name()));
             NullableVector<float>& tods = buffer->get<float>(tod_var.name());
-            assert(buffer->has<double>(latitude_var.name()));
-            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
-            assert(buffer->has<double>(longitude_var.name()));
-            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
+//            assert(buffer->has<double>(latitude_var.name()));
+//            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
+//            assert(buffer->has<double>(longitude_var.name()));
+//            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
 
             unsigned int buffer_size = buffer->size();
 
@@ -383,13 +386,12 @@ void ViewManager::doViewPointAfterLoad ()
                         selection_changed = true;
 
                         logdbg << "ViewManager: doViewPointAfterLoad: time " << tod << " selected ";
-
                     }
-                    else if (tod == time)// only time set
-                    {
-                        selected_vec.set(cnt, true);
-                        selection_changed = true;
-                    }
+                }
+                else if (contains_time && tod == time)
+                {
+                    selected_vec.set(cnt, true);
+                    selection_changed = true;
                 }
             }
         }
@@ -400,6 +402,82 @@ void ViewManager::doViewPointAfterLoad ()
     if (selection_changed)
     {
         loginf << "ViewManager: doViewPointAfterLoad: selection changed";
+        emit selectionChangedSignal();
+    }
+}
+
+void ViewManager::selectTimeWindow(float time_min, float time_max)
+{
+    loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
+
+    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+
+    if (!object_manager.existsMetaVariable("tod"))
+    {
+        logerr << "ViewManager: selectTimeWindow: required variables missing, quitting";
+        return;
+    }
+
+    bool selection_changed = false;
+    for (auto& dbo_it : object_manager)
+    {
+        std::string dbo_name = dbo_it.first;
+
+        if (!object_manager.metaVariable("tod").existsIn(dbo_name))
+        {
+            logerr << "ViewManager: selectTimeWindow: required variables missing for " << dbo_name;
+            continue;
+        }
+
+        const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
+
+        if (!tod_var.existsInDB())
+        {
+            logdbg << "ViewManager: selectTimeWindow: required variables not in db for " << dbo_name;
+            continue;
+        }
+
+        std::shared_ptr<Buffer> buffer = dbo_it.second->data();
+
+        if (buffer)
+        {
+            assert(buffer->has<bool>("selected"));
+            NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+
+            assert(buffer->has<float>(tod_var.name()));
+            NullableVector<float>& tods = buffer->get<float>(tod_var.name());
+
+            unsigned int buffer_size = buffer->size();
+
+            bool tod_null;
+            float tod;
+
+            for (unsigned int cnt =0; cnt < buffer_size; ++cnt)
+            {
+                tod_null = tods.isNull(cnt);
+
+                if (tod_null)
+                    continue; // nothing to do
+
+                tod = tods.get(cnt);
+
+                if (tod >= time_min && tod <= time_max)
+                {
+                    selected_vec.set(cnt, true);
+                    selection_changed = true;
+
+                    logdbg << "ViewManager: selectTimeWindow: time " << tod << " selected ";
+
+                }
+            }
+        }
+    }
+
+    view_point_data_selected_ = true;
+
+    if (selection_changed)
+    {
+        loginf << "ViewManager: selectTimeWindow: selection changed";
         emit selectionChangedSignal();
     }
 }

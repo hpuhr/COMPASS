@@ -67,8 +67,11 @@ class MainWindow : public QMainWindow
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
+    void showEvaluationTab();
+    void showViewPointsTab();
 
-  protected:
+protected:
+    bool started_ {false};
     /// Widget stack for startup to usage switch
     QTabWidget* tab_widget_{nullptr};
 

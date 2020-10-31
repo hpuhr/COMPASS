@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "viewpoint.h"
 #include "dbospecificvaluesdbfilter.h"
+#include "utnfilter.h"
 
 #include "json.hpp"
 
@@ -143,6 +144,35 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
+    else if (class_id == "UTNFilter")
+    {
+        try
+        {
+            if (hasSubConfigurable(class_id, instance_id))
+            {
+                logerr << "FilterManager: generateSubConfigurable: utn filter "
+                       << instance_id << " already present";
+                return;
+            }
+
+            UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
+//            if (filter->disabled())
+//            {
+//                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
+//                          "filter for object "
+//                       << filter->dbObjectName();
+//                delete filter;
+//            }
+//            else
+            filters_.push_back(filter);
+        }
+        catch (const std::exception& e)
+        {
+            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
+                   << e.what() << "', deleting";
+            configuration().removeSubConfiguration(class_id, instance_id);
+        }
+    }
     else
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -220,6 +250,17 @@ void FilterManager::checkSubConfigurables()
         ds_filter_configuration.addParameterString("dbo_name", obj_it.first);
         generateSubConfigurable("DataSourcesFilter", instance_id);
     }
+
+    // check for UTN filter
+
+    string utn_classid = "UTNFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&utn_classid](const DBFilter* x) { return x->classId() == utn_classid;}) == filters_.end())
+    { // not UTN filter
+        addNewSubConfiguration(utn_classid, utn_classid+"0");
+        generateSubConfigurable(utn_classid, utn_classid+"0");
+    }
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
@@ -281,13 +322,13 @@ void FilterManager::deleteFilterSlot(DBFilter* filter)
     emit changedFiltersSignal();
 }
 
-void FilterManager::unshowViewPointSlot (const ViewPoint* vp)
+void FilterManager::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: unshowViewPointSlot";
     assert (vp);
 }
 
-void FilterManager::showViewPointSlot (const ViewPoint* vp)
+void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: showViewPointSlot";
     assert (vp);
@@ -412,4 +453,18 @@ void FilterManager::disableAllFilters ()
 {
     for (auto fil_it : filters_)
         fil_it->setActive(false);
+}
+
+DataSourcesFilter* FilterManager::getDataSourcesFilter (const std::string& dbo_name)
+{
+    for (auto fil_it : filters_)
+    {
+        DataSourcesFilter* ds_fil = dynamic_cast<DataSourcesFilter*>(fil_it);
+
+        if (ds_fil && ds_fil->dbObjectName() == dbo_name)
+            return ds_fil;
+    }
+
+    logerr << "FilterManager: getDataSourcesFilter: data source filter not found for " << dbo_name;
+    throw std::runtime_error ("FilterManager: getDataSourcesFilter: data source filter not found for " + dbo_name);
 }

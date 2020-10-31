@@ -90,6 +90,7 @@ add_library(atsdb "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
 
+include(lib/CMakeLists.txt)
 include(src/CMakeLists.txt)
 
 set (EXPERIMENTAL_SRC true)

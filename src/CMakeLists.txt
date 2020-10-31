@@ -21,6 +21,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/struct/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/task/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/view/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/unit/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/eval/CMakeLists.txt")
 
 include("${CMAKE_CURRENT_LIST_DIR}/test/CMakeLists.txt")
 

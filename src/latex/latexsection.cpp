@@ -1,6 +1,7 @@
 #include "latexsection.h"
 #include "latextable.h"
 #include "lateximage.h"
+#include "latextext.h"
 
 #include <cassert>
 #include <sstream>
@@ -46,7 +47,7 @@ void LatexSection::addSubSection (const std::string& heading)
 
 void LatexSection::addText (const std::string& latex_str)
 {
-    content_.push_back(latex_str);
+    sub_content_.push_back(unique_ptr<LatexText>(new LatexText(latex_str)));
 }
 
 bool LatexSection::hasTable (const std::string& name)
@@ -96,20 +97,23 @@ std::string LatexSection::toString()
     stringstream ss;
 
     if (level_ == LatexSectionLevel::SECTION)
-        ss << R"(\section{)" << heading_ << "}\n";
+        ss << R"(\section{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBSECTION)
-        ss << R"(\subsection{)" << heading_ << "}\n";
+        ss << R"(\subsection{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBSUBSECTION)
-        ss << R"(\subsubsection{)" << heading_ << "}\n";
+        ss << R"(\subsubsection{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::PARAGRAPH)
-        ss << R"(\parapgraph{)" << heading_ << "}\n";
+        ss << R"(\paragraph{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBPARAGRAPH)
-        ss << R"(\subparapgraph{)" << heading_ << "}\n";
+        ss << R"(\subparagraph{)" << heading_ << "}";
     else
         throw std::runtime_error ("LatexSection: toString: unkown section level");
 
     if (label_.size())
-        ss << R"(\label{)" << label_ << "}\n";
+        ss << "\n" << R"(\label{)" << label_ << "}";
+
+    if (level_ == LatexSectionLevel::PARAGRAPH || level_ == LatexSectionLevel::SUBPARAGRAPH)
+        ss << R"(\ \\)"; // for correct placement after
 
     ss << "\n";
 

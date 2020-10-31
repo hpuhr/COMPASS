@@ -33,6 +33,7 @@ class FilterManager;
 class TaskManager;
 class ViewManager;
 class SimpleConfig;
+class EvaluationManager;
 
 /**
  * @mainpage  ATSDB Main Page
@@ -101,6 +102,7 @@ class ATSDB : public Configurable, public Singleton
     TaskManager& taskManager();
     ViewManager& viewManager();
     SimpleConfig& config();
+    EvaluationManager& evaluationManager();
 
     bool ready();
 
@@ -119,6 +121,7 @@ class ATSDB : public Configurable, public Singleton
     std::unique_ptr<FilterManager> filter_manager_;
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;
+    std::unique_ptr<EvaluationManager> eval_manager_;
 
     virtual void checkSubConfigurables();
 

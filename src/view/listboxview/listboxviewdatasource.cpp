@@ -133,7 +133,7 @@ void ListBoxViewDataSource::checkSubConfigurables()
     }
 }
 
-void ListBoxViewDataSource::unshowViewPoint (const ViewPoint* vp)
+void ListBoxViewDataSource::unshowViewPoint (const ViewableDataConfig* vp)
 {
     for (auto& var_it : temporary_added_variables_)
     {
@@ -145,7 +145,7 @@ void ListBoxViewDataSource::unshowViewPoint (const ViewPoint* vp)
     temporary_added_variables_.clear();
 }
 
-void ListBoxViewDataSource::showViewPoint (const ViewPoint* vp)
+void ListBoxViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 {
     assert (vp);
     const json& data = vp->data();

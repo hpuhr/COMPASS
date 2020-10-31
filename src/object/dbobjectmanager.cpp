@@ -31,6 +31,8 @@
 #include "metadbovariable.h"
 #include "stringconv.h"
 #include "viewmanager.h"
+#include "jobmanager.h"
+#include "evaluationmanager.h"
 
 using namespace Utils::String;
 
@@ -349,17 +351,38 @@ void DBObjectManager::loadSlot()
 
     bool load_job_created = false;
 
+    loginf << "DBObjectManager: loadSlot: loading associations";
+
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
 
         if (object.second->loadable())
             object.second->loadAssociationsIfRequired();
+    }
 
+    while (JobManager::instance().hasDBJobs())
+    {
+        logdbg << "DBObjectManager: loadSlot: waiting on association loading";
+
+        QCoreApplication::processEvents();
+        QThread::msleep(5);
+    }
+
+    loginf << "DBObjectManager: loadSlot: starting loading";
+
+    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    ViewManager& view_man = ATSDB::instance().viewManager();
+
+    for (auto& object : objects_)
+    {
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
-            DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
+            DBOVariableSet read_set = view_man.getReadSet(object.first);
+
+            if (eval_man.needsAdditionalVariables())
+                eval_man.addVariables(object.first, read_set);
 
             if (read_set.getSize() == 0)
             {
@@ -392,10 +415,7 @@ void DBObjectManager::loadSlot()
     emit loadingStartedSignal();
 
     if (!load_job_created)
-    {
-        if (load_widget_)
-            load_widget_->loadingDone();
-    }
+        finishLoading();
 }
 
 void DBObjectManager::quitLoading()
@@ -453,28 +473,32 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
     bool done = true;
 
     for (auto& object_it : objects_)
+    {
         if (object_it.second->isLoading())
         {
             logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";
             done = false;
             break;
         }
+    }
 
     if (done)
-    {
-        loginf << "DBObjectManager: loadingDoneSlot: all done";
-        load_in_progress_ = false;
-
-        ATSDB::instance().viewManager().doViewPointAfterLoad();
-
-        emit allLoadingDoneSignal();
-
-        if (load_widget_)
-            load_widget_->loadingDone();
-
-    }
+        finishLoading();
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";
+}
+
+void DBObjectManager::finishLoading()
+{
+    loginf << "DBObjectManager: loadingDoneSlot: all done";
+    load_in_progress_ = false;
+
+    ATSDB::instance().viewManager().doViewPointAfterLoad();
+
+    emit allLoadingDoneSignal();
+
+    if (load_widget_)
+        load_widget_->loadingDone();
 }
 
 void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)

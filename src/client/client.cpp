@@ -17,14 +17,6 @@
 
 #include "client.h"
 
-#include <locale.h>
-
-#include <QApplication>
-#include <QMessageBox>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-#include <string>
-
 #include "atsdb.h"
 #include "config.h"
 #include "configurationmanager.h"
@@ -34,6 +26,18 @@
 #include "mainwindow.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+
+#include <QApplication>
+#include <QMessageBox>
+
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+
+#include <string>
+#include <locale.h>
+#include <thread>
+
+#include <tbb/tbb.h>
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
@@ -53,6 +57,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
 
+    tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
+
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;
     std::string import_view_points_filename;
@@ -70,6 +76,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     bool start {false};
     bool load_data {false};
     std::string export_view_points_report_filename;
+    bool evaluate {false};
+    std::string export_eval_report_filename;
     bool quit {false};
 
     po::options_description desc("Allowed options");
@@ -99,6 +107,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("load_data", po::bool_switch(&load_data), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
                 "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+            ("evaluate", po::bool_switch(&evaluate), "run evaluation")
+            ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
+                "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -130,6 +141,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         loginf << "ATSDBClient: schema name must be set for JSON import";
         return;
     }
+
+    loginf << "ATSDBClient: started with " << std::thread::hardware_concurrency() << " threads";
 
     TaskManager& task_man = ATSDB::instance().taskManager();
 
@@ -170,6 +183,12 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (export_view_points_report_filename.size())
             task_man.exportViewPointsReportFile(export_view_points_report_filename);
+
+    if (evaluate)
+        task_man.evaluate(true);
+
+    if (export_eval_report_filename.size())
+            task_man.exportEvalReportFile(export_eval_report_filename);
 
     if (quit)
         task_man.quit(quit);

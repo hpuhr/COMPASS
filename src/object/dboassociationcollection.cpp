@@ -48,3 +48,16 @@ std::string DBOAssociationCollection::getUTNsStringFor(unsigned int rec_num) con
 
     return ss.str();
 }
+
+std::vector<unsigned int> DBOAssociationCollection::getRecNumsForUTN(unsigned int utn) const
+{
+    std::vector<unsigned int> result;
+
+    for (auto& entry : entries_)
+    {
+        if (entry.second.utn_ == utn)
+            result.push_back(entry.first);
+    }
+
+    return result;
+}

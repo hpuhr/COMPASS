@@ -15,15 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QWidget>
-#include <boost/algorithm/string/join.hpp>
-#include <cassert>
-#include <sstream>
-//#include <boost/algorithm/string.hpp>
-
 #include "atsdb.h"
 #include "dbfilter.h"
 #include "dbfiltercondition.h"
@@ -39,6 +30,15 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QWidget>
+#include <boost/algorithm/string/join.hpp>
+#include <cassert>
+#include <sstream>
+//#include <boost/algorithm/string.hpp>
 
 using namespace Utils;
 

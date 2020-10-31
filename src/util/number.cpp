@@ -33,6 +33,11 @@ float randomNumber(float min, float max)
 
 float roundToNearest(float num) { return (num > 0.0) ? floor(num + 0.5) : ceil(num - 0.5); }
 
+double round(float num, unsigned int precision)
+{
+    return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
+}
+
 double calculateAngle(double degrees, double minutes, double seconds)
 {
     return degrees + minutes / 60.0 + seconds / 3600.0;

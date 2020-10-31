@@ -10,6 +10,14 @@ class ListBoxView;
 class OSGView;
 class LatexDocument;
 
+namespace EvaluationResultsReport
+{
+    class Section;
+    class SectionContentTable;
+    class SectionContentText;
+    class SectionContentFigure;
+}
+
 class LatexVisitor
 {
 public:
@@ -22,6 +30,11 @@ public:
     virtual void visit(OSGView* e);
 #endif
 
+    virtual void visit(const EvaluationResultsReport::Section* e);
+    virtual void visit(const EvaluationResultsReport::SectionContentTable* e);
+    virtual void visit(const EvaluationResultsReport::SectionContentText* e);
+    virtual void visit(const EvaluationResultsReport::SectionContentFigure* e);
+
     void imagePrefix(const std::string& image_prefix);
 
 protected:
@@ -32,6 +45,7 @@ protected:
     bool add_overview_screenshot_ {true};
     bool wait_on_map_loading_ {true};
 
+    bool ignore_listbox_views_ {false};
     bool screenshot_folder_created_ {false};
 
     std::string current_section_name_;
