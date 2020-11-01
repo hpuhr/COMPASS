@@ -76,8 +76,8 @@
 
 using namespace Utils;
 
-TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "task.json")
+TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "task.json")
 {
     registerParameter("expert_mode", &expert_mode_, false);
 

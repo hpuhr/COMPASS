@@ -22,11 +22,11 @@
 
 #include "global.h"
 
-static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/atsdb/");
+static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/compass/");
 
 static const std::string HOME_PATH = QDir::homePath().toStdString();
 
-static const std::string HOME_SUBDIRECTORY = HOME_PATH + "/.atsdb/";
+static const std::string HOME_SUBDIRECTORY = HOME_PATH + "/.compass/";
 static const std::string CONF_SUBDIRECTORY = "conf/";
 static const std::string DATA_SUBDIRECTORY = "data/";
 

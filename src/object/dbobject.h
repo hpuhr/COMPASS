@@ -114,7 +114,7 @@ class DBObject : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObject(COMPASS& atsdb, const std::string& class_id, const std::string& instance_id,
+    DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
@@ -267,7 +267,7 @@ class DBObject : public QObject, public Configurable
     void updateToDatabaseContent();
 
   protected:
-    COMPASS& atsdb_;
+    COMPASS& compass_;
     DBObjectManager& manager_;
     /// DBO name
     std::string name_;

@@ -38,8 +38,8 @@ using namespace std;
 using namespace nlohmann;
 
 FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id,
-                             COMPASS* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "filter.json")
+                             COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "filter.json")
 {
     logdbg << "FilterManager: constructor";
 

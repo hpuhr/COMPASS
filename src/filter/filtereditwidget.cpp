@@ -163,31 +163,6 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
 
 FilterEditWidget::~FilterEditWidget() { logdbg << "FilterEditWidget: destructor"; }
 
-// void FilterEditWidget::loadMin ()
-//{
-//    assert (condition_variable_widget_);
-//    DBOVariable *var = condition_variable_widget_->selectedVariable();
-
-//    // FIX REPRESENTATION
-//    assert (false);
-
-//    //  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString
-//    (var));
-//    //  condition_value_->setText (tr(min.c_str()));
-//}
-// void FilterEditWidget::loadMax ()
-//{
-//    assert (condition_variable_widget_);
-//    DBOVariable *var = condition_variable_widget_->getSelectedVariable();
-
-//    // FIX REPRESENTATION
-//    assert (false);
-
-//    //  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString
-//    (var));
-//    //  condition_value_->setText (tr(max.c_str()));
-//}
-
 void FilterEditWidget::addCondition()
 {
     assert(filter_);

@@ -40,8 +40,8 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
-                                 COMPASS* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "db_object.json"), atsdb_(*atsdb)
+                                 COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "db_object.json"), compass_(*compass)
 {
     logdbg << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -96,7 +96,7 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
            << instance_id;
     if (class_id.compare("DBObject") == 0)
     {
-        DBObject* object = new DBObject(atsdb_, class_id, instance_id, this);
+        DBObject* object = new DBObject(compass_, class_id, instance_id, this);
         logdbg << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert(objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair<std::string, DBObject*>(object->name(), object));

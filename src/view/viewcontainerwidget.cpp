@@ -49,10 +49,10 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 
-    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
+    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
     setWindowIcon(atsdb_icon);  // for the glory of the empire
 
-    std::string title = "ATSDB v" + COMPASS::instance().config().getString("version") + " " + name_;
+    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version") + " " + name_;
     QWidget::setWindowTitle(title.c_str());
 
     QHBoxLayout* layout = new QHBoxLayout(this);

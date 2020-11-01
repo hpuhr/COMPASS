@@ -41,7 +41,7 @@ DBTableWidget::DBTableWidget(DBTable& table, QWidget* parent, Qt::WindowFlags f)
 {
     setMinimumSize(QSize(800, 600));
 
-    QSettings settings("ATSDB", "DBTableWidget");
+    QSettings settings("COMPASS", "DBTableWidget");
     restoreGeometry(settings.value("DBTableWidget/geometry").toByteArray());
 
     unsigned int frame_width = 1;
@@ -100,7 +100,7 @@ DBTableWidget::DBTableWidget(DBTable& table, QWidget* parent, Qt::WindowFlags f)
 
 DBTableWidget::~DBTableWidget()
 {
-    QSettings settings("ATSDB", "DBTableWidget");
+    QSettings settings("COMPASS", "DBTableWidget");
     settings.setValue("DBTableWidget/geometry", saveGeometry());
 
     column_unit_selection_widgets_.clear();

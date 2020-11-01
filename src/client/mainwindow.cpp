@@ -59,14 +59,14 @@ MainWindow::MainWindow()
 
     setMinimumSize(QSize(1200, 900));
 
-    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
+    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
     setWindowIcon(atsdb_icon);  // for the glory of the empire
 
-    QSettings settings("ATSDB", "Client");
+    QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
     assert(COMPASS::instance().config().existsId("version"));
-    std::string title = "ATSDB v" + COMPASS::instance().config().getString("version");
+    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
 
     if (COMPASS::instance().config().existsId("save_config_on_exit"))
     {
@@ -201,7 +201,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::shutdown()
 {
-    QSettings settings("ATSDB", "Client");
+    QSettings settings("COMPASS", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
     COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff

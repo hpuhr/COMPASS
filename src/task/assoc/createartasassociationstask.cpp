@@ -186,8 +186,6 @@ bool CreateARTASAssociationsTask::canRun()
 {
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    // ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME)
-
     logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
 
     if (!object_man.existsObject("Tracker"))

@@ -38,7 +38,7 @@
 MetaDBTableWidget::MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), meta_table_(meta_table)
 {
-    QSettings settings("ATSDB", "MetaDBTableWidget");
+    QSettings settings("COMPASS", "MetaDBTableWidget");
     restoreGeometry(settings.value("MetaDBTableWidget/geometry").toByteArray());
 
     setMinimumSize(QSize(800, 600));
@@ -158,7 +158,7 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent, Q
 
 MetaDBTableWidget::~MetaDBTableWidget()
 {
-    QSettings settings("ATSDB", "MetaDBTableWidget");
+    QSettings settings("COMPASS", "MetaDBTableWidget");
     settings.setValue("MetaDBTableWidget/geometry", saveGeometry());
 }
 

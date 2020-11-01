@@ -64,7 +64,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget* parent)
 
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    QSettings settings("ATSDB", "TaskManagerWidget");
+    QSettings settings("COMPASS", "TaskManagerWidget");
 
     //setAutoFillBackground(true);
 
@@ -136,7 +136,7 @@ TaskManagerWidget::~TaskManagerWidget()
 {
     logdbg << "TaskManagerWidget: destructor";
 
-    QSettings settings("ATSDB", "TaskManagerWidget");
+    QSettings settings("COMPASS", "TaskManagerWidget");
     settings.setValue("topSplitterSizes", top_splitter_->saveState());
     settings.setValue("mainSplitterSizes", main_splitter_->saveState());
 }

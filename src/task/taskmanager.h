@@ -66,7 +66,7 @@ class TaskManager : public QObject, public Configurable
     void schemaChangedSlot();
 
   public:
-    TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
+    TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
     virtual ~TaskManager();
 

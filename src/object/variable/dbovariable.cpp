@@ -294,7 +294,7 @@ void DBOVariable::checkSubConfigurables()
 {
     //    if (!hasCurrentSchema())
     //    {
-    //        std::string schema_name = ATSDB::instance().schemaManager().getCurrentSchemaName();
+    //        std::string schema_name = COMPASS::instance().schemaManager().getCurrentSchemaName();
     //        std::string instance = schema_name+"0";
     //        std::string meta_table_name = dbo_parent_.name();
 

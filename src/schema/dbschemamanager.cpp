@@ -36,8 +36,8 @@
  * current_schema exists (if defined).
  */
 DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id,
-                                 COMPASS* atsdb, DBInterface& db_interface)
-    : Configurable(class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
+                                 COMPASS* compass, DBInterface& db_interface)
+    : Configurable(class_id, instance_id, compass, "db_schema.json"), db_interface_(db_interface)
 {
     registerParameter("current_schema", &current_schema_, (std::string) "");
 

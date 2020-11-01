@@ -50,8 +50,8 @@
 using namespace Utils;
 using namespace nlohmann;
 
-ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "views.json"), atsdb_(*atsdb)
+ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "views.json"), compass_(*compass)
 {
     logdbg << "ViewManager: constructor";
 

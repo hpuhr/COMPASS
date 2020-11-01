@@ -56,7 +56,7 @@ public slots:
     void loadingDoneSlot(DBObject& object);
 
 public:
-    EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
+    EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
     void init(QTabWidget* tab_widget);
@@ -170,7 +170,7 @@ public:
     void generateReportDetails(bool value);
 
 protected:
-    COMPASS& atsdb_;
+    COMPASS& compass_;
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};

@@ -123,7 +123,7 @@ namespace EvaluationResultsReport
         dialog_->setRunning(true);
 
         LatexDocument doc (report_path_, report_filename_);
-        doc.title("ATSDB Evaluation Report");
+        doc.title("COMPASS Evaluation Report");
 
         if (author_.size())
             doc.author(author_);

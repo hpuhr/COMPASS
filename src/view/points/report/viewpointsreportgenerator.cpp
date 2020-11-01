@@ -126,7 +126,7 @@ void ViewPointsReportGenerator::run ()
     dialog_->setRunning(true);
 
     LatexDocument doc (report_path_, report_filename_);
-    doc.title("ATSDB View Points Report");
+    doc.title("OpenATS COMPASS View Points Report");
 
     if (author_.size())
         doc.author(author_);

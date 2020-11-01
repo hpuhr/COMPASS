@@ -47,7 +47,7 @@ class DBSchemaManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBSchemaManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb,
+    DBSchemaManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass,
                     DBInterface& db_interface);
 
     /// @brief Destructor

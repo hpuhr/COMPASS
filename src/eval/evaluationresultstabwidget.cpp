@@ -84,7 +84,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
 
     splitter_->setStretchFactor(1, 1);
 
-    QSettings settings("ATSDB", "EvalManagerResultsWidget");
+    QSettings settings("COMPASS", "EvalManagerResultsWidget");
     splitter_->restoreState(settings.value("splitterSizes").toByteArray());
 
     main_layout->addWidget(splitter_);
@@ -99,7 +99,7 @@ EvaluationResultsTabWidget::~EvaluationResultsTabWidget()
 {
     assert (splitter_);
 
-    QSettings settings("ATSDB", "EvalManagerResultsWidget");
+    QSettings settings("COMPASS", "EvalManagerResultsWidget");
     settings.setValue("splitterSizes", splitter_->saveState());
 }
 

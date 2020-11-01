@@ -57,7 +57,7 @@ class FilterManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
+    FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     /// @brief Destructor
     virtual ~FilterManager();
 

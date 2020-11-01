@@ -45,7 +45,7 @@ using namespace Utils;
 std::string data_path;
 std::string filename;
 
-TEST_CASE("ATSDB Import ASTERIX", "[ATSDB]")
+TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
 {
     int argc = 1;
     char* argv[1];

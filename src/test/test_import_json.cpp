@@ -47,7 +47,7 @@ std::string data_path;
 std::string filename;
 std::string schema_name;
 
-TEST_CASE("ATSDB Import JSON", "[ATSDB]")
+TEST_CASE("COMPASS Import JSON", "[COMPASS]")
 {
     int argc = 1;
     char* argv[1];

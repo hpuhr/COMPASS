@@ -42,7 +42,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::str
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Horizontal);
 
-    QSettings settings("ATSDB", instanceId().c_str());
+    QSettings settings("COMPASS", instanceId().c_str());
 
     {  // data widget
         data_widget_ = new ListBoxViewDataWidget(getView(), view->getDataSource());
@@ -80,7 +80,7 @@ ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::str
  */
 ListBoxViewWidget::~ListBoxViewWidget()
 {
-    QSettings settings("ATSDB", instanceId().c_str());
+    QSettings settings("COMPASS", instanceId().c_str());
     settings.setValue("mainSplitterSizes", main_splitter_->saveState());
 }
 

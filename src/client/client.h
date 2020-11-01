@@ -23,9 +23,6 @@
 
 class MainWindow;
 
-// namespace ATSDB
-//{
-
 /**
  * @brief Main Class
  *

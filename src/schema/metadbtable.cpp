@@ -212,7 +212,7 @@ void MetaDBTable::updateOnDatabase()
 
 //    std::vector <SubTableDefinition *>::iterator it;
 
-//    DBSchema &current_schema = ATSDB::getInstance().getCurrentSchema ();
+//    DBSchema &current_schema = COMPASS::getInstance().getCurrentSchema ();
 
 //    for (it = sub_table_definitions_.begin(); it != sub_table_definitions_.end(); it++)
 //    {

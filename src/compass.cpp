@@ -43,7 +43,7 @@ using namespace std;
  */
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
-    logdbg << "ATSDB: constructor: start";
+    logdbg << "COMPASS: constructor: start";
 
     simple_config_.reset(new SimpleConfig("config.json"));
 
@@ -79,10 +79,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     dbo_manager_->updateSchemaInformationSlot();
 
-    logdbg << "ATSDB: constructor: end";
+    logdbg << "COMPASS: constructor: end";
 }
 
-// void ATSDB::initialize()
+// void COMPASS::initialize()
 //{
 //    assert (!initialized_);
 //    initialized_=true;
@@ -94,11 +94,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
  */
 COMPASS::~COMPASS()
 {
-    logdbg << "ATSDB: destructor: start";
+    logdbg << "COMPASS: destructor: start";
 
     if (!shut_down_)
     {
-        logerr << "ATSDB: destructor: not shut down";
+        logerr << "COMPASS: destructor: not shut down";
         shutdown();
     }
 
@@ -112,12 +112,12 @@ COMPASS::~COMPASS()
     assert(!view_manager_);
     assert (!eval_manager_);
 
-    logdbg << "ATSDB: destructor: end";
+    logdbg << "COMPASS: destructor: end";
 }
 
 void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "COMPASS: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
     if (class_id == "DBInterface")
     {
@@ -163,7 +163,7 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         assert(eval_manager_);
     }
     else
-        throw std::runtime_error("ATSDB: generateSubConfigurable: unknown class_id " + class_id);
+        throw std::runtime_error("COMPASS: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void COMPASS::checkSubConfigurables()
@@ -282,11 +282,11 @@ bool COMPASS::ready()
 // */
 void COMPASS::shutdown()
 {
-    loginf << "ATSDB: database shutdown";
+    loginf << "COMPASS: database shutdown";
 
     if (shut_down_)
     {
-        logerr << "ATSDB: already shut down";
+        logerr << "COMPASS: already shut down";
         return;
     }
 
@@ -322,5 +322,5 @@ void COMPASS::shutdown()
 
     shut_down_ = true;
 
-    loginf << "ATSDB: shutdown: end";
+    loginf << "COMPASS: shutdown: end";
 }

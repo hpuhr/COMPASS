@@ -50,9 +50,6 @@ using namespace Utils;
 
 namespace po = boost::program_options;
 
-// namespace ATSDB
-//{
-
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
@@ -127,7 +124,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     }
     catch (exception& e)
     {
-        throw runtime_error("ATSDBClient: unable to parse command line parameters: " +
+        throw runtime_error("COMPASSClient: unable to parse command line parameters: " +
                             string(e.what()));
     }
 
@@ -138,11 +135,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (import_json_filename.size() && !import_json_schema.size())
     {
-        loginf << "ATSDBClient: schema name must be set for JSON import";
+        loginf << "COMPASSClient: schema name must be set for JSON import";
         return;
     }
 
-    loginf << "ATSDBClient: started with " << std::thread::hardware_concurrency() << " threads";
+    loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
 
     TaskManager& task_man = COMPASS::instance().taskManager();
 
@@ -217,14 +214,14 @@ bool Client::notify(QObject* receiver, QEvent* event)
     }
     catch (exception& e)
     {
-        logerr << "ATSDBClient: Exception thrown: " << e.what();
+        logerr << "COMPASSClient: Exception thrown: " << e.what();
         // assert (false);
-        QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", QString(e.what()));
+        QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", QString(e.what()));
     }
     catch (...)
     {
         // assert (false);
-        QMessageBox::critical(nullptr, "ATSDBClient: notify: exception", "Unknown exception");
+        QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", "Unknown exception");
     }
     return false;
 }
@@ -236,22 +233,22 @@ void Client::checkAndSetupConfig()
     // check if basic configuration works
     try
     {
-        cout << "ATSDBClient: setting directory paths" << endl;
+        cout << "COMPASSClient: setting directory paths" << endl;
 
         system_install_path_ = SYSTEM_INSTALL_PATH;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        cout << "ATSDBClient: includes experimental features" << endl;
+        cout << "COMPASSClient: includes experimental features" << endl;
 
         const char* appdir = getenv("APPDIR");
         if (appdir)
         {
-            cout << "ATSDBClient: assuming fuse environment in " << appdir << endl;
+            cout << "COMPASSClient: assuming fuse environment in " << appdir << endl;
             assert(appdir);
 
-            system_install_path_ = string(appdir) + "/appdir/atsdb/";
+            system_install_path_ = string(appdir) + "/appdir/compass/";
 
-            cout << "ATSDBClient: set install path to '" << system_install_path_ << "'" << endl;
+            cout << "COMPASSClient: set install path to '" << system_install_path_ << "'" << endl;
             assert(Files::directoryExists(system_install_path_));
 
             osgDB::FilePathList path_list;
@@ -262,7 +259,7 @@ void Client::checkAndSetupConfig()
 
             osgDB::Registry::instance()->setLibraryFilePathList(string(appdir) + "/appdir/lib");
 
-            string gdal_path = string(appdir) + "/appdir/atsdb/data/gdal";
+            string gdal_path = string(appdir) + "/appdir/compass/data/gdal";
             CPLSetConfigOption("GDAL_DATA", gdal_path.c_str());
         }
 #endif
@@ -271,7 +268,7 @@ void Client::checkAndSetupConfig()
 
         performNeededActions();
 
-        cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY + "main.conf'"
+        cout << "COMPASSClient: opening simple config file at '" << HOME_CONF_DIRECTORY + "main.conf'"
              << endl;
 
         SimpleConfig config("config.json");
@@ -283,24 +280,24 @@ void Client::checkAndSetupConfig()
 
         CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY + config.getString("configuration_path") + "/";
 
-        cout << "ATSDBClient: current configuration path is '" << CURRENT_CONF_DIRECTORY + "'"
+        cout << "COMPASSClient: current configuration path is '" << CURRENT_CONF_DIRECTORY + "'"
              << endl;
 
         string log_config_path = HOME_CONF_DIRECTORY + config.getString("log_properties_file");
         Files::verifyFileExists(log_config_path);
 
-        cout << "ATSDBClient: initializing logger using '" << log_config_path << "'" << endl;
+        cout << "COMPASSClient: initializing logger using '" << log_config_path << "'" << endl;
         Logger::getInstance().init(log_config_path);
 
-        loginf << "ATSDBClient: startup version " << VERSION;
+        loginf << "COMPASSClient: startup version " << VERSION;
         string config_version = config.getString("version");
-        loginf << "ATSDBClient: configuration version " << config_version;
+        loginf << "COMPASSClient: configuration version " << config_version;
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
     }
     catch (exception& ex)
     {
-        logerr << "ATSDBClient: Caught Exception '" << ex.what() << "'";
+        logerr << "COMPASSClient: Caught Exception '" << ex.what() << "'";
         logerr.flush();
         // assert (false);
 
@@ -309,7 +306,7 @@ void Client::checkAndSetupConfig()
     }
     catch (...)
     {
-        logerr << "ATSDBClient: Caught Exception";
+        logerr << "COMPASSClient: Caught Exception";
         logerr.flush();
         // assert (false);
 
@@ -320,7 +317,7 @@ void Client::checkAndSetupConfig()
 
 void Client::checkNeededActions()
 {
-    cout << "ATSDBClient: checking if local configuration exists ... ";
+    cout << "COMPASSClient: checking if local configuration exists ... ";
 
     config_and_data_exists_ = Files::directoryExists(HOME_SUBDIRECTORY);
 
@@ -331,7 +328,7 @@ void Client::checkNeededActions()
 
     if (!Files::fileExists(HOME_CONF_DIRECTORY + "config.json"))
     {
-        cout << "ATSDBClient: config.json does not exist, delete and upgrade required" << endl;
+        cout << "COMPASSClient: config.json does not exist, delete and upgrade required" << endl;
         config_and_data_deletion_wanted_ = true;
         upgrade_needed_ = true;
         return;
@@ -352,7 +349,7 @@ void Client::checkNeededActions()
             // 0 if same, -1 if v1 > v2, 1 if v1 < v2
             bool app_version_newer = String::compareVersions(VERSION, config_version) == -1;
 
-            cout << "ATSDBClient: configuration mismatch detected, local version '"
+            cout << "COMPASSClient: configuration mismatch detected, local version '"
                  << config_version << "'" << (app_version_newer ? " newer" : " older")
                  << " application version '" << VERSION << "'" << endl;
 
@@ -365,7 +362,7 @@ void Client::checkNeededActions()
                     (String::compareVersions(VERSION, config_version) == 1);
         }
         else
-            cout << "ATSDBClient: same configuration version '" << config_version << "' found"
+            cout << "COMPASSClient: same configuration version '" << config_version << "' found"
                  << endl;
     }
 }
@@ -374,7 +371,7 @@ void Client::performNeededActions()
 {
     if (!config_and_data_exists_)  // simple copy of nothing exists
     {
-        cout << "ATSDBClient: no previous installation, copying new information and data" << endl;
+        cout << "COMPASSClient: no previous installation, copying new information and data" << endl;
 
         copyConfigurationAndData();
         config_and_data_copied_ = true;
@@ -390,12 +387,12 @@ void Client::performNeededActions()
             reply = QMessageBox::question(
                 nullptr, "Delete Previous Configuration & Data",
                 "Deletion of the existing configuration and data is required. This will delete"
-                " the folders ~/.atsdb/conf and ~/.atsdb/data. Do you want to continue?",
+                " the folders ~/.compass/conf and ~/.compass/data. Do you want to continue?",
                 QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes)
             {
-                cout << "ATSDBClient: config & data delete confirmed" << endl;
+                cout << "COMPASSClient: config & data delete confirmed" << endl;
 
                 deleteConfigurationAndData();
                 copyConfigurationAndData();
@@ -403,7 +400,7 @@ void Client::performNeededActions()
             }
             else
             {
-                cout << "ATSDBClient: required config & data delete denied" << endl;
+                cout << "COMPASSClient: required config & data delete denied" << endl;
                 quit_requested_ = true;
                 return;
             }
@@ -418,12 +415,12 @@ void Client::performNeededActions()
 
         if (reply == QMessageBox::Yes)
         {
-            cout << "ATSDBClient: config & data upgrade confirmed" << endl;
+            cout << "COMPASSClient: config & data upgrade confirmed" << endl;
             copyConfigurationAndData();
         }
         else
         {
-            cout << "ATSDBClient: config & data upgrade denied" << endl;
+            cout << "COMPASSClient: config & data upgrade denied" << endl;
             quit_requested_ = true;
             return;
         }
@@ -433,11 +430,11 @@ void Client::performNeededActions()
 void Client::deleteConfigurationAndData()
 {
     if (!Files::directoryExists(HOME_CONF_DIRECTORY))
-        throw runtime_error("ATSDBClient: unable to delete conf files at '" + HOME_CONF_DIRECTORY +
+        throw runtime_error("COMPASSClient: unable to delete conf files at '" + HOME_CONF_DIRECTORY +
                             "'");
 
     if (!Files::directoryExists(HOME_DATA_DIRECTORY))
-        throw runtime_error("ATSDBClient: unable to delete data files at '" + HOME_DATA_DIRECTORY +
+        throw runtime_error("COMPASSClient: unable to delete data files at '" + HOME_DATA_DIRECTORY +
                             "'");
 
     Files::deleteFolder(HOME_CONF_DIRECTORY);
@@ -450,14 +447,14 @@ void Client::deleteConfigurationAndData()
 void Client::copyConfigurationAndData()
 {
     if (!Files::directoryExists(system_install_path_))
-        throw runtime_error("ATSDBClient: unable to locate system installation files at '" +
+        throw runtime_error("COMPASSClient: unable to locate system installation files at '" +
                             system_install_path_ + "'");
 
-    cout << "ATSDBClient: copying files from system installation from '" << system_install_path_
+    cout << "COMPASSClient: copying files from system installation from '" << system_install_path_
          << "' to '" << HOME_SUBDIRECTORY << "' ... ";
 
     if (!Files::copyRecursively(system_install_path_, HOME_SUBDIRECTORY))
-        throw runtime_error("ATSDBClient: copying files from system installation from '" +
+        throw runtime_error("COMPASSClient: copying files from system installation from '" +
                             system_install_path_ + "' to '" + HOME_SUBDIRECTORY + " failed");
 
     cout << " done" << endl;
@@ -468,14 +465,14 @@ void Client::copyConfiguration()
     string system_conf_path = system_install_path_ + "conf/";
     string home_conf_path = HOME_SUBDIRECTORY + "conf/";
 
-    cout << "ATSDBClient: reset config from from '" << system_conf_path << "' to '"
+    cout << "COMPASSClient: reset config from from '" << system_conf_path << "' to '"
          << home_conf_path << "' ... ";
 
     if (!Files::copyRecursively(system_conf_path, home_conf_path))
-        throw runtime_error("ATSDBClient: reset config from from '" + system_conf_path + "' to '" +
+        throw runtime_error("COMPASSClient: reset config from from '" + system_conf_path + "' to '" +
                             home_conf_path + "' failed");
 
     cout << " done" << endl;
 }
 
-//}
+

@@ -49,7 +49,7 @@ class ViewManager : public QObject, public Configurable
     void selectionChangedSlot();
 
   public:
-    ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
+    ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
@@ -88,7 +88,7 @@ class ViewManager : public QObject, public Configurable
     void selectTimeWindow(float time_min, float time_max);
 
 protected:
-    COMPASS& atsdb_;
+    COMPASS& compass_;
 
     ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};

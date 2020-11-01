@@ -74,7 +74,7 @@ class DBInterface : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBInterface(std::string class_id, std::string instance_id, COMPASS* atsdb);
+    DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);
     /// @brief Destructor
     virtual ~DBInterface();
 

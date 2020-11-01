@@ -62,8 +62,8 @@ using namespace nlohmann;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
  * count_), creates write_table_names_,
  */
-DBInterface::DBInterface(string class_id, string instance_id, COMPASS* atsdb)
-    : Configurable(class_id, instance_id, atsdb), sql_generator_(*this)
+DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -1970,81 +1970,4 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
     return associations;
 }
 
-// void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string filter)
-//{
-//    assert (sql_generator_);
 
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    scoped_lock l(mutex_);
-//    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(),
-//    value, filter));
-//}
-
-// void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string new_value,
-// string filter)
-//{
-//    assert (sql_generator_);
-
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(),
-//    value, new_value,
-// filter));
-//}
-
-// void DBInterface::testReading ()
-//{
-//    loginf << "DBInterface: testReading";
-
-//    boost::posix_time::ptime start_time;
-//    boost::posix_time::ptime stop_time;
-
-//    DBObject &object = ATSDB::instance().objectManager().object("MLAT");
-//    DBOVariableSet read_list;
-
-//    loginf << "DBInterface: testReading: adding all variables";
-//    for (auto variable_it : object.variables())
-//        read_list.add(variable_it.second);
-
-//    loginf << "DBInterface: testReading: preparing reading";
-//    prepareRead (object, read_list); //, string custom_filter_clause="", DBOVariable
-//    *order=0);
-
-//    start_time = boost::posix_time::microsec_clock::local_time();
-
-//    loginf << "DBInterface: testReading: starting reading";
-//    vector<shared_ptr <Buffer>> buffer_vector;
-
-//    unsigned int num_rows=0;
-
-//    while (!getReadingDone(object))
-//    {
-//        shared_ptr <Buffer> buffer = readDataChunk (object, false);
-//        buffer_vector.push_back(buffer);
-
-//        stop_time = boost::posix_time::microsec_clock::local_time();
-//        boost::posix_time::time_duration diff = stop_time - start_time;
-
-//        num_rows += buffer->size();
-//        if (diff.total_seconds() > 0)
-//            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " <<
-//            num_rows
-//<< " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
-//    }
-
-//    boost::posix_time::time_duration diff = stop_time - start_time;
-//    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff <<
-//    " #el/sec "
-//<< num_rows/diff.total_seconds();
-//    finalizeReadStatement (object);
-
-//    loginf << "DBInterface: testReading: clearing buffers";
-//    buffer_vector.clear();
-
-//    loginf << "DBInterface: testReading: done";
-//}

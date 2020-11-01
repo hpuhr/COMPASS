@@ -60,7 +60,7 @@ class DBObjectManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* atsdb);
+    DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
     /// @brief Returns if an object of type exists
     bool existsObject(const std::string& dbo_name);
@@ -139,7 +139,7 @@ class DBObjectManager : public QObject, public Configurable
     bool loadInProgress() const;
 
   protected:
-    COMPASS& atsdb_;
+    COMPASS& compass_;
     bool use_filters_{false};
 
     bool use_order_{false};
