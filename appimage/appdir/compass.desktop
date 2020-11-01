@@ -1,12 +1,11 @@
 [Desktop Entry]
 #Version=0.9
 Type=Application
-Name=ATSDB
-Comment=Air Traffic Surveillance DataBase
+Name=COMPASS
+Comment=OpenATS Compliance Assessment
 #TryExec=atsdb-client
-Exec=bin/atsdb_client -f
-#Icon=/usr/local/atsdb/data/icons/atsdb.png
-Icon=atsdb
+Exec=bin/compass_client -f
+Icon=ats
 Categories=Science;NumericalAnalysis;DataVisualization;
 #MimeType=image/x-foo;
 #Actions=Gallery;Create;

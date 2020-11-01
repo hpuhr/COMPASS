@@ -129,7 +129,7 @@ namespace EvaluationRequirement
         }
         ref_periods.removeSmallPeriods(1);
 
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " periods '" << ref_periods.print() << "'";
 
         tod = 0;
@@ -539,11 +539,11 @@ namespace EvaluationRequirement
 
             float pd = 1.0 - ((float)sum_missed_uis/(float)(sum_uis)); // -max_gap_uis-no_ref_uis
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
         }
         else
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " no data for pd";
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(

@@ -216,7 +216,7 @@ namespace EvaluationRequirement
                                num_unknown_id, num_correct_id, num_false_id, comment});
         }
 
-        loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
                << " num_no_ref_id " << num_no_ref_id
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
@@ -232,11 +232,11 @@ namespace EvaluationRequirement
         {
             float pid = (float)num_correct_id/(float)(num_correct_id+num_false_id);
 
-            loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " pid " << String::percentToString(100.0 * pid) << " passed " << (pid >= minimum_probability_);
         }
         else
-            loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " no data for pid";
 
         return make_shared<EvaluationRequirementResult::SingleIdentification>(
