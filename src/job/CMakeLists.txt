@@ -3,7 +3,7 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
@@ -58,7 +58,7 @@ target_sources(atsdb
 IF (jASTERIX_FOUND)
 	MESSAGE(STATUS "Including ASTERIX jobs")
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"

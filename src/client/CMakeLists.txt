@@ -3,7 +3,7 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/client.h"
         "${CMAKE_CURRENT_LIST_DIR}/mainwindow.h"
@@ -14,7 +14,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/managementwidget.cpp"
 )
 
-add_executable ( atsdb_client "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
-target_link_libraries ( atsdb_client atsdb)
+add_executable ( compass_client "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
+target_link_libraries ( compass_client compass)
 
 

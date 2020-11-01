@@ -1,5 +1,5 @@
-set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
-message("  Path: ${ATSDB_PATH}")
+set(COMPASS_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+message("  Path: ${COMPASS_PATH}")
 
 cmake_minimum_required(VERSION 3.1)
 
@@ -40,7 +40,7 @@ find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${ATSDB_PATH}/cmake_modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${COMPASS_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};/usr/local/lib/cmake/;/usr/lib/x86_64-linux-gnu/)
 message("  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
@@ -86,7 +86,7 @@ message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(NemaTode REQUIRED CONFIG)
 
-add_library(atsdb "")
+add_library(compass "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
 
@@ -145,11 +145,11 @@ link_directories(
     ${jASTERIX_LIBRARIES}
     )
 
-target_link_libraries ( atsdb optimized
+target_link_libraries ( compass optimized
     ${jASTERIX_LIBRARIES})
 ENDIF()
 
-target_link_libraries ( atsdb optimized
+target_link_libraries ( compass optimized
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL
@@ -171,13 +171,13 @@ target_link_libraries ( atsdb optimized
 # installation stuff
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
-install(DIRECTORY "conf" DESTINATION atsdb)
-install(DIRECTORY "data" DESTINATION atsdb)
+install(DIRECTORY "conf" DESTINATION compass)
+install(DIRECTORY "data" DESTINATION compass)
 
-install (TARGETS atsdb DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/atsdb)
+install (TARGETS compass DESTINATION lib
+    PUBLIC_HEADER DESTINATION include/compass)
 
-install (TARGETS atsdb_client DESTINATION bin)
+install (TARGETS compass_client DESTINATION bin)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

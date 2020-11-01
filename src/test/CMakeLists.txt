@@ -7,11 +7,11 @@ set ( TEST_DATA_PATH "/home/sk/data/test/" )
 
 IF (jASTERIX_FOUND)
     add_executable ( test_import_asterix "${CMAKE_CURRENT_LIST_DIR}/test_import_asterix.cpp")
-    target_link_libraries ( test_import_asterix atsdb)
+    target_link_libraries ( test_import_asterix compass)
 ENDIF()
 
 add_executable ( test_import_json "${CMAKE_CURRENT_LIST_DIR}/test_import_json.cpp")
-target_link_libraries ( test_import_json atsdb)
+target_link_libraries ( test_import_json compass)
 
 enable_testing()
 
