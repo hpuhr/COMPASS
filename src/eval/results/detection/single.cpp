@@ -53,7 +53,7 @@ namespace EvaluationRequirementResult
     {
         if (sum_uis_)
         {
-            loginf << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
+            logdbg << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
                    << " sum_uis " << sum_uis_;
 
             assert (missed_uis_ <= sum_uis_);

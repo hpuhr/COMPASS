@@ -529,7 +529,7 @@ namespace EvaluationRequirement
             }
         }
 
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " sum_uis " << sum_uis;
 
         if (sum_uis)
