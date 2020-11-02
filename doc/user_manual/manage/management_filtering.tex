@@ -153,6 +153,18 @@ Multiple of these filters can exist, depending on which DBObjects exist in the d
 
 When active, each of these filters forces loading of data only from the selected data sources. \\
 
+\subsection{UTN Filter}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/filter_utn.png}
+  \caption{UTN filter}
+\end{figure}
+
+This filter is only available if target report associations have been generated (see \nameref{sec:task_associate_tr}). \\
+
+When active, this filter forces loading of data with the given unique target numbers (UTNs), so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Target reports without an associated UTN will not be loaded. \\
+
 \subsection{Adding a New Filter}
 When clicking the 'Add filter' button, a dialog is opened.
 
