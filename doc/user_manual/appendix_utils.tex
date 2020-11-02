@@ -212,7 +212,7 @@ JSON output can be obtained in several ways:
 \item zip-ubjson: JSON output is generated and written as UBJSON to a ZIP archive file, for which a filename must be set
 \end{itemize}
 
-For parsing in ATSDB, only the 'text' or 'zip-text' mode are currently supported. Use the first only for smaller dataset, the latter provides good compression. The resulting ZIP file will be about twice the size of the original ASTERIX file.
+For parsing in COMPASS, only the 'text' or 'zip-text' mode are currently supported. Use the first only for smaller dataset, the latter provides good compression. The resulting ZIP file will be about twice the size of the original ASTERIX file.
 
 To decode and write a JSON zip-text file 'test\_json.zip', use:
 \begin{lstlisting}
@@ -243,10 +243,10 @@ To decode and write a JSON zip-text file 'test\_json.zip', use:
 
 For the used example file, this will result in a 420 MB ZIP file, which contains a text file with 7GB of JSON text. This ZIP archive can then be used in ATSB, according to the procedure described in \nameref{sec:json_import}
 
-\section{Appendix: Extending ATSDB}
-\label{sec:extending_atsdb}
+\section{Appendix: Extending COMPASS}
+\label{sec:extending_compass}
 
-The ATSDB interface can be extended beyond the two database systems provided by default. \\
+The COMPASS interface can be extended beyond the two database systems provided by default. \\
 
 Taking advantage of the schema inherited from SASS-C, simpler formats like comma separated values (CSV) can be used. \\
 
@@ -290,7 +290,7 @@ If extra fields are required those have to be defined taking into account the ex
 
 The names defined in the schema must be maintained. The coding of each field must also be maintained.
 
-\subsection{Installing ATSDB utils}
+\subsection{Installing COMPASS utils}
 
 The csv2atsdb is a perl script and has no dependency on other perl modules although requiring two other scripts and one tool:
 \begin{itemize}
@@ -312,13 +312,13 @@ $ sudo pip install sqlparse
 
 For more information on how to install python packages refer to \url{https://packaging.python.org/tutorials/installing-packages/}.
 
-To install the ATSDB utils run the 'setup.sh' script found in the utils directory. \\
+To install the COMPASS utils run the 'setup.sh' script found in the utils directory. \\
 
 After installation, in your home folder a bin subfolder was created with the scripts, and has been added to your path (using .bashrc), but only for new terminal sessions.
 
-\subsection{Importing CSV files exported by ATSDB}
+\subsection{Importing CSV files exported by COMPASS}
 
-ATSDB can export CSV files (refer to section \nameref{sec:exporting}), those files can be loaded back into ATSDB with the help of the script \textbf{csv2atsdb}. \\
+COMPASS can export CSV files (refer to section \nameref{sec:exporting}), those files can be loaded back into COMPASS with the help of the script \textbf{csv2atsdb}. \\
 
 The script expects a mandatory CSV file name and at least the datasource type, which can be one of:
 \label{sec:datasrc_type}
@@ -353,7 +353,7 @@ $ csv2atsdb -f Radar.csv -t R
 $ csv2atsdb -f Tracker.csv -t T
 \end{lstlisting}
 
-It is also possible to combine several datasources and import them into ATSDB by using the option \textbf{-l}. This option requires a file where each row holds a datasource definition. \\
+It is also possible to combine several datasources and import them into COMPASS by using the option \textbf{-l}. This option requires a file where each row holds a datasource definition. \\
 
 Each datasource is defined by three fields, separated by semicolons ';' :
 \begin{itemize}
@@ -419,7 +419,7 @@ usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
 
 By default and after converting the CSV file(s) an SQLite3 file container is created in the current working directory with the same name as the CSV file and extension '.db'. \\
 
-This file can be loaded into ATSDB by \nameref{sec:sqlite_open}.
+This file can be loaded into COMPASS by \nameref{sec:sqlite_open}.
 
 \subsection{ADS-B exchange}
 
@@ -438,6 +438,6 @@ $ wget http://history.adsbexchange.com/Aircraftlist.json/2016-06-20.zip
 
 The time taken to get the file depends on the user's internet provider. The files are usually around 8G bytes.
 
-To create a file loadable in ATSDB, and after installing the ATSDB utils, the user can run the 'test.sh' script found in the utils directory. \\
+To create a file loadable in COMPASS, and after installing the COMPASS utils, the user can run the 'test.sh' script found in the utils directory. \\
 
-The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into ATSDB containing the traffic between 08Z and 09Z of the given day.
+The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into COMPASS containing the traffic between 08Z and 09Z of the given day.

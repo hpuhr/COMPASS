@@ -1,5 +1,5 @@
 \section{Building from Source Code}
-Currently, ATSDB can be installed as source code and compiled by the user. Any recent Linux installation with a C++11 capable compiler should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
+Currently, COMPASS can be installed as source code and compiled by the user. Any recent Linux installation with a C++11 capable compiler should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
 
 The following software has to be installed on the workstation:
 
@@ -29,14 +29,14 @@ The following software has to be installed on the workstation:
 
 To build the source code with the ASTERIX decoder jASTERIX, follow the instruction in \url{https://github.com/hpuhr/jASTERIX} (Installation with Building). \\
 
-To install the ATSDB source code, either download the latest released version from \\ \url{https://github.com/hpuhr/ATSDB/releases} \\
+To install the COMPASS source code, either download the latest released version from \\ \url{https://github.com/hpuhr/COMPASS/releases} \\
 or use the following command (git required) to clone the current repository:
 
 \begin{lstlisting}
-git clone https://github.com/hpuhr/ATSDB.git
+git clone https://github.com/hpuhr/COMPASS.git
 \end{lstlisting}
 
-Enter the ATSDB source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
+Enter the COMPASS source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
 
 \begin{lstlisting}
 cmake ..
@@ -44,8 +44,8 @@ cmake ..
 
 The output should look like this:
 \begin{lstlisting}
-sk@golem:~/test/ATSDB$ cmake .
-  Path: /home/sk/test/ATSDB
+sk@golem:~/test/COMPASS$ cmake .
+  Path: /home/sk/test/COMPASS
 -- The C compiler identification is GNU 7.2.0
 -- The CXX compiler identification is GNU 7.2.0
 -- Check for working C compiler: /usr/bin/cc
@@ -61,7 +61,7 @@ sk@golem:~/test/ATSDB$ cmake .
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
   System: Linux-4.13.0-16-generic
-  Install Path: /home/sk/test/ATSDB/dist
+  Install Path: /home/sk/test/COMPASS/dist
   Platform: Linux
 -- Looking for pthread.h
 -- Looking for pthread.h - found
@@ -82,11 +82,11 @@ sk@golem:~/test/ATSDB$ cmake .
 --   atomic
   Boost_INCLUDE_DIR: /usr/include
   Boost_LIBRARY_DIR: 
-  CMAKE_MODULE_PATH: /home/sk/test/ATSDB/cmake_modules
+  CMAKE_MODULE_PATH: /home/sk/test/COMPASS/cmake_modules
 ...
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/sk/test/ATSDB
+-- Build files have been written to: /home/sk/test/COMPASS
 \end{lstlisting}
 
 Then, compile the source by executing:
@@ -98,43 +98,43 @@ make
 The output should look like this:
 
 \begin{lstlisting}
-Scanning dependencies of target atsdb_autogen
-[  1%] Automatic MOC for target atsdb
+Scanning dependencies of target compass_autogen
+[  1%] Automatic MOC for target compass
 Generating MOC predefs moc_predefs.h
 Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
 ...
 Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
 Generating MOC compilation mocs_compilation.cpp
-[  1%] Built target atsdb_autogen
-Scanning dependencies of target atsdb
-[  2%] Building CXX object CMakeFiles/atsdb.dir/src/atsdb.cpp.o
-[  2%] Building CXX object CMakeFiles/atsdb.dir/src/buffer/arraylist.cpp.o
+[  1%] Built target compass_autogen
+Scanning dependencies of target compass
+[  2%] Building CXX object CMakeFiles/compass.dir/src/compass.cpp.o
+[  2%] Building CXX object CMakeFiles/compass.dir/src/buffer/arraylist.cpp.o
 ...
-[ 93%] Linking CXX shared library dist/lib/libatsdb.so
-[ 93%] Built target atsdb
-Scanning dependencies of target atsdb_client_autogen
-[ 94%] Automatic MOC for target atsdb_client
+[ 93%] Linking CXX shared library dist/lib/libcompass.so
+[ 93%] Built target compass
+Scanning dependencies of target compass_client_autogen
+[ 94%] Automatic MOC for target compass_client
 Generating MOC predefs moc_predefs.h
 Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
 ...
 Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
 Generating MOC compilation mocs_compilation.cpp
-[ 94%] Built target atsdb_client_autogen
-Scanning dependencies of target atsdb_client
+[ 94%] Built target compass_client_autogen
+Scanning dependencies of target compass_client
 ...
-[100%] Linking CXX executable atsdb_client
-[100%] Built target atsdb_client
+[100%] Linking CXX executable compass_client
+[100%] Built target compass_client
 \end{lstlisting}
 
-To install the ATSDB client, execute the following command in the build folder:
+To install the COMPASS client, execute the following command in the build folder:
 
 \begin{lstlisting}
 sudo make install
 \end{lstlisting}
 
-This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/atsdb/' (or similiar, depending on you Linux distribution.
+This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/compass/' (or similiar, depending on you Linux distribution.
 
-To start the ATSDB client run:
+To start the COMPASS client run:
 \begin{lstlisting}
-atsdb_client
+compass_client
 \end{lstlisting}  

@@ -9,25 +9,25 @@ After an \nameref{sec:installation}, simply run the application.
 
 For an AppImage, use e.g.:
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage
+./COMPASS-release_x86_64.AppImage
 \end{lstlisting}
 
 For a self-built application, use e.g.:
 \begin{lstlisting}
-./build/bin/atsdb_client
+./build/bin/compass_client
 \end{lstlisting}
 
 It is recommended to run the application from a console terminal (for issue analysis of the log text), but that is not mandatory.
 
 \section{Configuration Upgrade}
 
-If a previous version of ATSDB has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of ATSDB is quite sensitive on being run with the latest configuration an upgrade must be performed. \\
+If a previous version of COMPASS has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of COMPASS is quite sensitive on being run with the latest configuration an upgrade must be performed. \\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that this means that the previous configuration will be overwritten, which will unfortunately clear any previous changes made by the user. \\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that of the previous configuration is older than from v0.5.0 (or newer than the current one), the previous configuration and data folders have to be deleted, clearing any previous changes made by the user. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that with ATSDB version 0.5 (or later) stored configuration data sources can be exported (see \nameref{sec:config_ds_export} and imported again after the upgrade. \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that with COMPASS version 0.5 (or later) stored configuration data sources can be exported (see \nameref{sec:config_ds_export} and imported again after the upgrade. \\
 
 If an outdated configuration is detected, one of the following dialogs will be shown.
 
@@ -70,6 +70,7 @@ The following tasks exist:
  \item Manage Sectors
  \item Calculate Radar Plot Positions
  \item Post-Process
+ \item Associate Target Reports
  \item Associate ARTAS TRIs
 \end{itemize}
 \  \\
@@ -119,6 +120,7 @@ Depending on the use-case, some tasks are required, e.g. the Post-Process task. 
 
 \subfile{task_postprocess}
 
+\subfile{task_associate_tr}
 \subfile{task_associate_artas_tris}
 
 \subfile{task_starting}

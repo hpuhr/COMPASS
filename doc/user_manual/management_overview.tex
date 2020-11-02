@@ -116,7 +116,7 @@ For more information about filtering, please refer to Section \nameref{sec:filte
 
 This element allows generation and management of all active Views and windows. Each View is contained
 in a tab within a parent window.  At startup, only the main window exists ('MainWindow'), which also holds
-the management tab. If the main window is closed, the ATSDB client shuts down. New Views can be added using the 'Add View' button, which opens a pull-down menu. Each View can either be added to the main window ('MainWindow') or into a new window. When added, a new tab exists in the containing window, and controlling elements are added for any new
+the management tab. If the main window is closed, the COMPASS client shuts down. New Views can be added using the 'Add View' button, which opens a pull-down menu. Each View can either be added to the main window ('MainWindow') or into a new window. When added, a new tab exists in the containing window, and controlling elements are added for any new
 windows or views. \\
 
 New Views can be added either to currently existing windows as new tabs, or to a newly opened window. A window can be closed either by the close button in the window decoration, which discards all contained Views within the window.  To delete a single View, one can use the close button in the GUI, which frees up all its allocated resources. Each View adds its required variables to the loading list for the database.  During a loading process, the loading status  of a View is shown in the management tab.\\
@@ -130,7 +130,7 @@ Currently, the following Views exist:
 
 \subsection{Jobs}
 
-The ATSDB framework supports multi-threading. A number of processing steps ('Jobs') can be exectuted on a number of parallel threads. Since multi-threading on a database creates limited benefit, only one thread is used specifically for database jobs. All non-database jobs are exectuted on a dynamic number of other threads, which are increased/decreased in number depending on the application's needs. 
+The COMPASS framework supports multi-threading. A number of processing steps ('Jobs') can be exectuted on a number of parallel threads. Since multi-threading on a database creates limited benefit, only one thread is used specifically for database jobs. All non-database jobs are exectuted on a dynamic number of other threads, which are increased/decreased in number depending on the application's needs. 
 
 \begin{figure}[H]
   \center
