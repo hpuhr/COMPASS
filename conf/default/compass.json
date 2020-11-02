@@ -12,6 +12,11 @@
             "path": "db_schema.json"
         },
         {
+            "class_id": "EvaluationManager",
+            "instance_id": "EvaluationManager0",
+            "path": "eval.json"
+        },
+        {
             "class_id": "FilterManager",
             "instance_id": "FilterManager0",
             "path": "filter.json"
