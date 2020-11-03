@@ -57,6 +57,12 @@ namespace EvaluationResultsReport
         : Configurable(class_id, instance_id, &eval_manager), eval_man_(eval_manager)
     {
         registerParameter("author", &author_, "");
+
+        if (!author_.size())
+            author_ = System::getUserName();
+        if (!author_.size())
+            author_ = "User";
+
         registerParameter("abstract", &abstract_, "");
 
         report_filename_ = "report.tex";

@@ -32,22 +32,25 @@ Since the task only makes use of the Mode S address, non-Mode S data is not eval
 
 \subsection{Sector Altitude Filtering}
 
-If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports "show up" in all sectors (as long as inside the defined polygons). \\
+If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all sectors when inside the defined 2D polygons. \\
 
-The 'inside-sector' is always performed on the reference data only, therefore it is of importance to only use reference data with existing Mode C code data.
+The 'inside-sector' check is always performed on the reference data only, therefore it is of importance to only use reference data with existing Mode C code data.
 
 \subsection{Reference Data}
 
-The assumption used in the tool is that the reference data is always correct. Therefore, sub-optimal reference data will show up attributed to errors in the test data. \\
+The assumption used in the tool is that the reference data is always correct. Therefore, sub-optimal reference data can cause errors, which will be attributed to the test data in the evaluation. \\
 
 To give a few examples what this could mean:
 \begin{itemize}  
+\item Wrong 'inside-sector' check results: This might remove valid test data from the evaluation and/or attribute errors to the wrong sector
 \item Missing target data in reference: This will remove the test data from evaluation for the time-period of the missing reference data
-\item Wrong position in reference: This will cause wrong 'inside sector' check results, and/or cause wrong horizontal position accuracy results
-\item Wrong/missing Mode C code in reference: This will cause wrong 'inside sector' check results and might remove the test data from evaluation or associate the results to the wrong sector
+\item Wrong position in reference: This will cause wrong 'inside-sector' check results and/or cause wrong horizontal position accuracy results
+\item Wrong/missing Mode C code in reference: This will cause wrong 'inside-sector' check results
 \item Wrong/missing identification in reference: This will cause wrong results in identification requirements
 \end{itemize}
 \ \\
+
+Also, since target secondary attributes (currently only Mode S address) are also used in the 'Target Report Association' task, errors in these attributes might also lead to imperfect data association. This would result in wrong evaluation results in almost all requirements.
 
 \section{Overview}
 \label{sec:eval_overview} 
@@ -109,8 +112,8 @@ As noted before, usage of appropriate reference data is of paramount importance.
 
 Since 'any' type of data can be selected for evaluation, this allows for the following use-cases:
 \begin{itemize}  
-\item Tracker as reference, Sensor as test data: Evaluation of sensor
-\item Tracker as reference, Tracker as test data: Evaluation/comparison of different trackers/tracker runs
+\item Tracker as reference, sensor as test data: Evaluation of sensor
+\item Tracker as reference, tracker as test data: Evaluation/comparison of different trackers/tracker runs
 \end{itemize}
 \ \\
 
@@ -149,7 +152,7 @@ Please note that it is possible to first generate the per-target-report details,
   \caption{Evaluation Targets tab}
 \end{figure}
 
-Before the data is loaded, the table is empty. Each target (defined by the UTN) is shown in a dedicated row. \\
+Before the data was loaded, the table is empty. Each target (defined by the UTN) is shown in a dedicated row. \\
 
 The following columns exist:
 
@@ -240,9 +243,9 @@ Each requirement has the following common attributes:
 
 Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
 
-As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (MUI). \\
+As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (\#EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (\#MUI). \\
 
-The ratio of MUI and EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must be higher than the defined 'Minimum Probability' for the requirement to pass.
+The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must be higher than the defined 'Minimum Probability' for the requirement to pass.
 
 \subsubsection{Identification Requirement}
 
@@ -281,11 +284,21 @@ The ratio of \#POK and \#PNOK+\#POK gives the Probability of Acceptable Position
   \caption{Evaluation Results tab}
 \end{figure}
 
+Before the data was evaluated, the results are empty.\\
+
+There are several levels of detail for the results, and each sub-result is shown in a tree-view on the left side, grouped into sections. Using this tree-view, the results can be "navigated", and the currently selected results contents are shown on the right side. \\
+
+More details will be described in the following section \nameref{sec:eval_inspect}.
 
 \section{Running}
 \label{sec:eval_run} 
 
-loading
+\subsection{Load Data}
+\label{sec:eval_run_load} 
+
+After the wanted configuration (in the Main tab) has been set, the 'Load Data' button can be clicked. This results in the reference/test data being loaded, after which a post-processing will be performed. \\
+
+Please note that the post-processing step uses all available cores on the CPU.
 
 \begin{figure}[H]
   \centering 
@@ -293,13 +306,30 @@ loading
   \caption{Evaluation: Post-processing after loading}
 \end{figure}
 
+The post-processing pre-calculates only which reference target reports can be used for direct comparison for specific test target reports. \\
+
+Therefore, please note that re-loading the data is only required when changes to the reference/test data settings in the Main tab have been made. Changing requirements or removing targets from evaluation does not require re-loading. \\
+
+After the loading and the post-processing have been performed, all targets are shown in the Targets tab.
+
 \begin{figure}[H]
   \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/eval_targets.png}
   \caption{Evaluation Targets tab after loading}
 \end{figure}
 
-eval
+The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. \\
+
+Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
+
+\subsection{Evaluation}
+\label{sec:eval_run_eval} 
+
+After the data was loaded, the configuration relating to current standard, requirements and sector/requirement group usage can be adapted. After that, the evaluation can be (re-)run using the 'Evaluate' button. \\
+
+This will trigger evaluation of the requirements in all sectors (as configured). The requirement values will be calculated for each target (whether to be used or not). Then, for each requirement and sector, the results are summed-up as per-sector average (if target should be used). \\
+
+Please note that the post-processing step uses all available cores on the CPU.
 
 \begin{figure}[H]
   \centering 
@@ -307,8 +337,85 @@ eval
   \caption{Evaluation: Running evaluation status}
 \end{figure}
 
-\section{Inspection \& Analysis}
-\label{sec:eval_inspect} 
+The results are then shown in the Results tab.
+
+\section{Results Inspection \& Analysis}
+\label{sec:eval_inspect}
+
+As described before, there are several levels of detail in which sub-results can be inspected.\\
+
+The uppermost is the 'Requirements$\rightarrow$Overview', giving the sector sums for all requirements. \\
+
+The next level of detail are the sector sum details, located in 'Sectors$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
+
+The lowest level are the per-target details, located in 'Targets$\rightarrow$UTN' and the respective per-target results located in 'Targets$\rightarrow$UTN$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
+
+By default, when single-clicking a row in a table the respective results are shown in the existing Views. When double-clicking, a step into the next level of detail is performed (if available). \\
+
+Navigation can be made more efficient by returning to the last sub-result by using the 'Back' button on the top-left.
+
+\subsection{Overview}
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_overview.png}
+  \caption{Evaluation results: Overview}
+\end{figure}
+
+When single-clicking a row, the respective result error are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_sum_osgview.png}
+  \caption{Evaluation results: Sector PD errors in OSGView}
+\end{figure}
+
+When double-clicking a row, a step into the respective sector sum details is performed.
+
+\subsection{Sector Details}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_sec_det_example.png}
+  \caption{Evaluation results: Sector Detail Example}
+\end{figure}
+
+On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results in the respective sector layer and requirement. \\
+
+At the bottom, further result details are listed per-target, sorted in this example by the Probability of Detection (PD). \\
+
+When single-clicking a row, the respective target data and result errors are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_osgview.png}
+  \caption{Evaluation results: Target PD Errors in OSGView}
+\end{figure}
+
+In the current example, the target was not detected in the test data at all, therefore the "miss" connection line is drawn from the first to last reference position (in the sector).
+
+When double-clicking a row, a step into the respective target details is performed.
+
+\subsection{Per-Target Details}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_target_det_example.png}
+  \caption{Evaluation results: Per-Target PD Detail Example}
+\end{figure}
+
+On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\
+
+\paragraph{If 'Generate Per-Target-Report Requirement Details in Results' is set:}
+At the bottom, further result details are listed per-target-report, sorted in this example by time. \\
+
+When single-clicking a row, the respective target data and the respective single result error are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_tr_osgview.png}
+  \caption{Evaluation results: Target Single PD Error in OSGView}
+\end{figure}
+
 
 \section{Generate Report}
 \label{sec:eval_report}

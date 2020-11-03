@@ -160,8 +160,8 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
-        sec_det_table.addRow({"#Updates/EUIs [1]", "Total number update intervals", sum_uis_}, this);
-        sec_det_table.addRow({"MUIs [1]", "Number of missed update intervals", missed_uis_}, this);
+        sec_det_table.addRow({"#Updates/#EUIs [1]", "Total number update intervals", sum_uis_}, this);
+        sec_det_table.addRow({"#MUIs [1]", "Number of missed update intervals", missed_uis_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Detection> req =

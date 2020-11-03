@@ -108,7 +108,7 @@ namespace EvaluationRequirementResult
         if (!sector_section.hasTable("target_table"))
             sector_section.addTable("target_table", 11,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "EUIs", "MUIs", "PD"}, true, 10);
+             "#EUIs", "#MUIs", "PD"}, true, 10);
 
         EvaluationResultsReport::SectionContentTable& target_table = sector_section.getTable("target_table");
 
@@ -142,8 +142,8 @@ namespace EvaluationRequirementResult
         addCommonDetails(root_item);
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
-        utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
-        utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
+        utn_req_table.addRow({"#EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
+        utn_req_table.addRow({"#MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
         utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
 
         for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)

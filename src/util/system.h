@@ -31,6 +31,8 @@ extern float getFreeRAMinGB();
 
 extern std::string exec(const std::string& cmd);
 
+extern std::string getUserName();
+
 }  // namespace System
 }  // namespace Utils
 

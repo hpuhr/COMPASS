@@ -117,6 +117,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     {
         const string& sector_layer_name = sec_it->name();
 
+        loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name;
+
         for (auto& req_group_it : standard)
         {
             const string& requirement_group_name = req_group_it.first;
@@ -124,11 +126,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
+            loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                   << " group " << req_group_it.first;
 
             for (auto& req_cfg_it : *req_group_it.second)
             {
-                loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
+                loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                       << " group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "'";
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
