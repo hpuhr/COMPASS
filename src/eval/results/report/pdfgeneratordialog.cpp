@@ -101,6 +101,26 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         connect(abstract_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
 
+        // target details
+        ++row;
+        config_grid->addWidget(new QLabel("Include Per-Target Details"), row, 0);
+
+        include_target_details_check_ = new QCheckBox();
+        include_target_details_check_->setChecked(generator_.includeTargetDetails());
+        connect(include_target_details_check_, &QCheckBox::clicked, this,
+                &PDFGeneratorDialog::includeTargetDetailsEditedSlot);
+        config_grid->addWidget(include_target_details_check_, row, 1);
+
+        // target details
+        ++row;
+        config_grid->addWidget(new QLabel("Include Per-Target Target Report Details"), row, 0);
+
+        include_target_tr_details_check_ = new QCheckBox();
+        include_target_tr_details_check_->setChecked(generator_.includeTargetTRDetails());
+        connect(include_target_tr_details_check_, &QCheckBox::clicked, this,
+                &PDFGeneratorDialog::includeTargetTRDetailsEditedSlot);
+        config_grid->addWidget(include_target_tr_details_check_, row, 1);
+
         // wait
         ++row;
         config_grid->addWidget(new QLabel("Wait On Map Loading"), row, 0);
@@ -247,6 +267,15 @@ void PDFGeneratorDialog::abstractEditedSlot(const QString& text)
 void PDFGeneratorDialog::waitOnMapLoadingEditedSlot(bool checked)
 {
     generator_.waitOnMapLoading(checked);
+}
+
+void PDFGeneratorDialog::includeTargetDetailsEditedSlot(bool checked)
+{
+    generator_.includeTargetDetails(checked);
+}
+void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
+{
+    generator_.includeTargetTRDetails(checked);
 }
 
 void PDFGeneratorDialog::runPDFLatexChangedSlot (bool checked)

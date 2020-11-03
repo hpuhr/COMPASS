@@ -70,6 +70,12 @@ namespace EvaluationResultsReport
         bool waitOnMapLoading() const;
         void waitOnMapLoading(bool value);
 
+        bool includeTargetDetails() const;
+        void includeTargetDetails(bool value);
+
+        bool includeTargetTRDetails() const;
+        void includeTargetTRDetails(bool value);
+
     protected:
         EvaluationManager& eval_man_;
 

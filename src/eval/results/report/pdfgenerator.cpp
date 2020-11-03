@@ -442,5 +442,24 @@ namespace EvaluationResultsReport
     {
         wait_on_map_loading_ = value;
     }
-
+    
+    bool PDFGenerator::includeTargetDetails() const
+    {
+        return include_target_details_;
+    }
+    
+    void PDFGenerator::includeTargetDetails(bool value)
+    {
+        include_target_details_ = value;
+    }
+    
+    bool PDFGenerator::includeTargetTRDetails() const
+    {
+        return include_target_tr_details_;
+    }
+    
+    void PDFGenerator::includeTargetTRDetails(bool value)
+    {
+        include_target_tr_details_ = value;
+    }
 }

@@ -45,6 +45,8 @@ namespace EvaluationResultsReport
         void abstractEditedSlot(const QString& text);
 
         void waitOnMapLoadingEditedSlot(bool checked);
+        void includeTargetDetailsEditedSlot(bool checked);
+        void includeTargetTRDetailsEditedSlot(bool checked);
 
         void runPDFLatexChangedSlot (bool checked);
         void openPDFChangedSlot (bool checked);
@@ -75,6 +77,9 @@ namespace EvaluationResultsReport
 
         QLineEdit* author_edit_ {nullptr};
         QLineEdit* abstract_edit_ {nullptr};
+
+        QCheckBox* include_target_details_check_ {nullptr};
+        QCheckBox* include_target_tr_details_check_ {nullptr};
 
         QCheckBox* wait_on_map_loading_check_ {nullptr};
 
