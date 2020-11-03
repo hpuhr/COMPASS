@@ -82,11 +82,11 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - readme.md: This file
 
 ## Newsletter
-If you are interested in our newsletter, please send a mail to atsdb@openats.at with the subject "Register".
+If you are interested in our newsletter, please send a mail to compass@openats.at with the subject "Register".
 
 ## Author
 Helmut Puhr
-Contact: atsdb@openats.at
+Contact: compass@openats.at
 
 ## Licenses
 The source code is released under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
