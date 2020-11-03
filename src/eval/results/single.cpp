@@ -25,6 +25,7 @@
 
 namespace EvaluationRequirementResult
 {
+    const std::string Single::tr_details_table_name_ {"tr_details_table"};
 
     Single::Single(
             const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,

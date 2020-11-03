@@ -189,18 +189,17 @@ namespace EvaluationRequirementResult
         }
 
         // add further details
-        if (eval_man_.generateReportDetails())
-            reportDetails(utn_req_section);
+        reportDetails(utn_req_section);
     }
 
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 11,
+        if (!utn_req_section.hasTable(tr_details_table_name_))
+            utn_req_section.addTable(tr_details_table_name_, 11,
             {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable("details_table");
+                utn_req_section.getTable(tr_details_table_name_);
 
         unsigned int detail_cnt = 0;
 
@@ -224,7 +223,7 @@ namespace EvaluationRequirementResult
     {
         if (table.name() == "target_table" && annotation.toUInt() == utn_)
             return true;
-        else if (table.name() == "details_table" && annotation.isValid() && annotation.toUInt() < details_.size())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
             return true;
         else
             return false;
@@ -240,7 +239,7 @@ namespace EvaluationRequirementResult
         {
             return getTargetErrorsViewable();
         }
-        else if (table.name() == "details_table" && annotation.isValid())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid())
         {
             unsigned int detail_cnt = annotation.toUInt();
 

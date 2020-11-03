@@ -141,7 +141,7 @@ void ViewPointsReportGenerator::run ()
         doc.abstract(abstract_);
 
     LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, false,
-                          wait_on_map_loading_);
+                          false, wait_on_map_loading_);
 
     cancel_ = false;
     running_ = true;

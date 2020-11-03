@@ -85,15 +85,9 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     main_layout->addLayout(sec_layout);
 
     // additional config
-    QFormLayout* cfg_layout = new QFormLayout();
+//    QFormLayout* cfg_layout = new QFormLayout();
 
-    QCheckBox* details_check = new QCheckBox();
-    details_check->setChecked(eval_man_.generateReportDetails());
-    connect(details_check, &QCheckBox::clicked, this, &EvaluationMainTabWidget::toggleGenerateDetailsSlot);
-
-    cfg_layout->addRow("Generate Per-Target-Report Requirement Details in Results", details_check);
-
-    main_layout->addLayout(cfg_layout);
+//    main_layout->addLayout(cfg_layout);
 
     main_layout->addStretch();
 
@@ -141,10 +135,3 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
     sector_widget_->update();
 }
 
-void EvaluationMainTabWidget::toggleGenerateDetailsSlot()
-{
-    QCheckBox* check = static_cast<QCheckBox*> (QObject::sender());
-    assert (check);
-
-    eval_man_.generateReportDetails(check->checkState() == Qt::Checked);
-}

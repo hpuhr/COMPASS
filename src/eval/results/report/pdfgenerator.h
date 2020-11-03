@@ -82,6 +82,7 @@ namespace EvaluationResultsReport
         std::string abstract_;
 
         bool include_target_details_ {false};
+        bool include_target_tr_details_ {false};
 
         bool wait_on_map_loading_ {true};
 

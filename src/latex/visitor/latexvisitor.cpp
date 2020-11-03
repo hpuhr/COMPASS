@@ -28,6 +28,7 @@
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
+#include "eval/results/single.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -53,10 +54,11 @@ using namespace std;
 using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot, bool include_target_details, bool wait_on_map_loading)
+                           bool add_overview_screenshot, bool include_target_details,
+                           bool include_target_tr_details, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
       add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
-      wait_on_map_loading_(wait_on_map_loading)
+      include_target_tr_details_(include_target_tr_details), wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -165,6 +167,9 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
+
+    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
+        return; // do not generate this table
 
     LatexSection& section = report_.getSection(current_section_name_);
 

@@ -138,7 +138,8 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
-        LatexVisitor visitor (doc, false, false, false, include_target_details_, wait_on_map_loading_);
+        LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
+                              wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
