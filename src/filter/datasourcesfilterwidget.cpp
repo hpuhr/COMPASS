@@ -1,30 +1,29 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "datasourcesfilterwidget.h"
+#include "compass.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "filtermanager.h"
 
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QPushButton>
-
-#include "atsdb.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "filtermanager.h"
 
 /**
  * Initializes members, creates GUI elements.
@@ -73,7 +72,7 @@ void DataSourcesFilterWidget::selectSensorsAll()
     logdbg << "DataSourcesFilterWidget: selectSensorsAll";
 
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(true);
+        it.second.setActive(true);
 
     filter_.setChanged(true);
 
@@ -87,7 +86,7 @@ void DataSourcesFilterWidget::selectSensorsNone()
     logdbg << "DataSourcesFilterWidget: selectSensorsNone";
 
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(false);
+        it.second.setActive(false);
 
     filter_.setChanged(true);
 
@@ -108,13 +107,15 @@ void DataSourcesFilterWidget::updateCheckboxesChecked()
 {
     logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked";
 
+    DBFilterWidget::update();
+
     for (auto& checkit : data_sources_checkboxes_)
     {
         assert(data_sources_.find(checkit.second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(checkit.second);
-        checkit.first->setChecked(src.isActiveInFilter());
+        ActiveDataSource& src = data_sources_.at(checkit.second);
+        checkit.first->setChecked(src.isActive());
         logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked: name " << src.getName()
-               << " active " << src.isActiveInFilter();
+               << " active " << src.isActive();
     }
 }
 
@@ -127,7 +128,7 @@ void DataSourcesFilterWidget::updateCheckboxesDisabled()
     for (auto& checkit : data_sources_checkboxes_)
     {
         assert(data_sources_.find(checkit.second) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(checkit.second);
+        ActiveDataSource& src = data_sources_.at(checkit.second);
         checkit.first->setEnabled(src.isActiveInData());
         logdbg << "DataSourcesFilterWidget: updateCheckboxesDisabled: src " << src.getName()
                << " active " << src.isActiveInData();
@@ -142,7 +143,7 @@ void DataSourcesFilterWidget::toggleDataSource()
     int number = data_sources_checkboxes_[check];
 
     assert(data_sources_.find(number) != data_sources_.end());
-    data_sources_.at(number).setActiveInFilter(check->checkState() == Qt::Checked);
+    data_sources_.at(number).setActive(check->checkState() == Qt::Checked);
 
     filter_.setChanged(true);
 

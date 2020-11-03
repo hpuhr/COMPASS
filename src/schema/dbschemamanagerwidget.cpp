@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbschemamanagerwidget.h"
@@ -26,7 +26,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -203,7 +203,7 @@ void DBSchemaManagerWidget::updateSchemas()
     else
         schema_wrong = true;
 
-    if (schema_wrong && ATSDB::instance().interface().ready())
+    if (schema_wrong && COMPASS::instance().interface().ready())
         schema_select_->setStyleSheet(
             "QComboBox { background: rgb(255, 100, 100); selection-background-color:"
             " rgb(255, 200, 200); }");

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef DBOASSOCIATIONCOLLECTION_H
 #define DBOASSOCIATIONCOLLECTION_H
 
@@ -9,14 +26,15 @@ class DBOAssociationEntry
   public:
     // unsigned int assoc_id, unsigned int rec_num,
     // assoc_id_(assoc_id), rec_num_(rec_num),
-    DBOAssociationEntry(unsigned int utn, unsigned int src_rec_num)
-        : utn_(utn), src_rec_num_(src_rec_num)
+    DBOAssociationEntry(unsigned int utn, bool has_src, unsigned int src_rec_num)
+        : utn_(utn), has_src_(has_src), src_rec_num_(src_rec_num)
     {
     }
 
     // unsigned int assoc_id_;
     // unsigned int rec_num_;
     unsigned int utn_;
+    bool has_src_;
     unsigned int src_rec_num_;
 };
 
@@ -49,9 +67,11 @@ class DBOAssociationCollection
     std::vector<unsigned int> getUTNsFor(unsigned int rec_num) const;
     std::string getUTNsStringFor(unsigned int rec_num) const;
 
+    std::vector<unsigned int> getRecNumsForUTN(unsigned int utn) const;
+
   protected:
     // rec_num -> assoc entry
-    std::multimap<unsigned int, DBOAssociationEntry> entries_;
+    std::multimap<unsigned int, DBOAssociationEntry> entries_; // rec_num -> entry
 };
 
 #endif  // DBOASSOCIATIONCOLLECTION_H

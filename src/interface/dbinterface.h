@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DBINTERFACE_H_
@@ -23,7 +23,6 @@
 #include "dbovariableset.h"
 #include "propertylist.h"
 #include "sqlgenerator.h"
-#include "sectorlayer.h"
 
 #include <qobject.h>
 
@@ -37,7 +36,7 @@ static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
 static const std::string TABLE_NAME_SECTORS = "atsdb_sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 
-class ATSDB;
+class COMPASS;
 class Buffer;
 class BufferWriter;
 class DBConnection;
@@ -52,6 +51,8 @@ class DBTableInfo;
 class DBInterfaceInfoWidget;
 class Job;
 class BufferWriter;
+class Sector;
+class SectorLayer;
 
 class SQLGenerator;
 class QWidget;
@@ -70,11 +71,10 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
   signals:
     void databaseContentChangedSignal();
-    void sectorsChangedSignal();
 
   public:
     /// @brief Constructor
-    DBInterface(std::string class_id, std::string instance_id, ATSDB* atsdb);
+    DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);
     /// @brief Destructor
     virtual ~DBInterface();
 
@@ -173,24 +173,11 @@ class DBInterface : public QObject, public Configurable
 
     bool existsSectorsTable();
     void createSectorsTable();
-    bool hasSectorLayer (const std::string& layer_name);
-    //void renameSectorLayer (const std::string& name, const std::string& new_name);
-    std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
-
-    void createNewSector (const std::string& name, const std::string& layer_name,
-                          std::vector<std::pair<double,double>> points);
-    bool hasSector (const std::string& name, const std::string& layer_name);
-    bool hasSector (unsigned int id);
-    std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
-    std::shared_ptr<Sector> sector (unsigned int id);
-    void moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name); // moves sector to new layer, saves
+    std::vector<std::shared_ptr<SectorLayer>> loadSectors ();
+    void clearSectorsTable();
     void saveSector(std::shared_ptr<Sector> sector); // write to db and add
-    void saveSector(unsigned int id); // write to db and add
-    std::vector<std::shared_ptr<SectorLayer>>& sectorsLayers();
     void deleteSector(std::shared_ptr<Sector> sector);
     void deleteAllSectors();
-    void importSectors (const std::string& filename);
-    void exportSectors (const std::string& filename);
 
     /// @brief Deletes table content for given table name
     void clearTableContent(const std::string& table_name);
@@ -233,8 +220,6 @@ protected:
 
     std::map<std::string, std::string> properties_;
 
-    std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
-
     virtual void checkSubConfigurables();
 
     void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int row);
@@ -246,8 +231,6 @@ protected:
     void loadProperties();
     void saveProperties();
 
-    void loadSectors();
-    unsigned int getMaxSectorId ();
 };
 
 #endif /* DBINTERFACE_H_ */

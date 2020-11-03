@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "datasourcesfilter.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "datasourcesfilterwidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -36,11 +36,11 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
     registerParameter("dbo_name", &dbo_name_, "");
     registerParameter("active_sources", &active_sources_, json::object());
 
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
 
-    object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+    object_ = &COMPASS::instance().objectManager().object(dbo_name_);
 
     if (!object_->hasCurrentDataSourceDefinition())
     {
@@ -121,11 +121,11 @@ std::string DataSourcesFilter::getConditionString(const std::string& dbo_name, b
 
             std::stringstream values;
 
-            std::map<int, DataSourcesFilterDataSource>::iterator it;
+            std::map<int, ActiveDataSource>::iterator it;
 
             for (auto& it : data_sources_)
             {
-                if (it.second.isActiveInFilter())  // in selection
+                if (it.second.isActive())  // in selection
                 {
                     if (values.str().size() > 0)
                         values << ",";
@@ -204,14 +204,14 @@ void DataSourcesFilter::updateDataSourcesActive()
     for (auto& it : object_->getActiveDataSources())
     {
         assert(data_sources_.find(it) != data_sources_.end());
-        DataSourcesFilterDataSource& src = data_sources_.at(it);
+        ActiveDataSource& src = data_sources_.at(it);
         src.setActiveInData(true);
     }
 
     for (auto& srcit : data_sources_)
     {
         if (!srcit.second.isActiveInData())
-            srcit.second.setActiveInFilter(false);
+            srcit.second.setActive(false);
     }
 }
 
@@ -254,7 +254,7 @@ void DataSourcesFilter::checkSubConfigurables()
 void DataSourcesFilter::reset()
 {
     for (auto& it : data_sources_)
-        it.second.setActiveInFilter(true);
+        it.second.setActive(true);
 
     widget_->update();
 }
@@ -274,7 +274,7 @@ void DataSourcesFilter::saveViewPointConditions (nlohmann::json& filters)
 
     for (auto& ds_it : data_sources_)
     {
-        if (ds_it.second.isActiveInFilter())
+        if (ds_it.second.isActive())
         {
             values[cnt] = ds_it.second.getNumber();
             ++cnt;
@@ -296,7 +296,7 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
 
     // disable all sources
     for (auto& ds_it : data_sources_)
-        ds_it.second.setActiveInFilter(false);
+        ds_it.second.setActive(false);
 
     // set active sources
     for (auto& ds_it : active_sources.get<json::array_t>())
@@ -304,7 +304,7 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
         int number = ds_it;
 
         if (data_sources_.count(number))
-            data_sources_.at(number).setActiveInFilter(true);
+            data_sources_.at(number).setActive(true);
         else
             logwrn << "DataSourcesFilter: loadViewPointConditions: source " << number << " not found";
     }

@@ -9,9 +9,8 @@ Several command line options have been added to allow for semi-automated running
 
 To get a list of available command line options use e.g.:
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --help
+./COMPASS-release_x86_64.AppImage --help
 \end{lstlisting}
-
 
 \begin{lstlisting}
 Allowed options:
@@ -21,12 +20,17 @@ Allowed options:
   --open_sqlite3_db arg           opens existing SQLite3 database with given filename, e.g. '/data/file1.db'
   --import_view_points arg        imports view points JSON file with given filename, e.g. '/data/file1.json'
   --import_asterix arg            imports ASTERIX file with given filename, e.g. '/data/file1.ff'
+  --import_json arg               imports JSON file with given filename, e.g. '/data/file1.json'
+  --json_schema arg               JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'
   --import_gps_trail arg          imports gps trail NMEA with given filename, e.g. '/data/file2.txt'
   --import_sectors_json arg       imports exported sectors JSON with given filename, e.g. '/data/sectors.json'
   --auto_process                  start automatic processing of imported data
+  --associate_data                associate target reports
   --start                         start after finishing previous steps
   --load_data                     load data after start
   --export_view_points_report arg export view points report after start with given filename, e.g. '/data/db2/report.tex
+  --evaluate                      run evaluation
+  --export_eval_report arg        export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex
   --quit                          quit after finishing all previous steps
 
 \end{lstlisting}
@@ -102,6 +106,14 @@ After a data was imported, automatically starts the following tasks:
  \item \nameref{sec:task_associate_artas_tris}* (If ARTAS data with TRIs was imported)
 \end{itemize}
 
+\subsection{--associate\_data}
+
+After a post-processed database exists, create target report associations using the following tasks:
+
+\begin{itemize}
+ \item \nameref{sec:task_associate_tr}
+\end{itemize}
+
 \subsection{--start}
 
 After the other tasks were run, automatically starts the application into the management window.
@@ -120,8 +132,27 @@ After starting the application into the management window, a export View Points 
 \end{itemize}
 \ \\
 
-The given argument filename definesd the report filename, with the report directory as the parent directory of the given filename.
+The given argument filename defines the report filename, with the report directory as the parent directory of the given filename.
 
+\subsection{--evaluate}
+
+After starting the application into the management window, a pre-configured evaluation run is triggered:
+
+\begin{itemize}
+ \item \nameref{sec:eval}
+\end{itemize}
+\ \\
+
+\subsection{--export\_eval\_report}
+
+After starting the application into the management window, a pre-configured evaluation run is triggered:
+
+\begin{itemize}
+ \item \nameref{sec:eval}
+\end{itemize}
+\ \\
+
+The given argument filename defines the report filename, with the report directory as the parent directory of the given filename.
 
 \subsection{--quit}
 
@@ -136,7 +167,7 @@ In this section, a few possible use cases are given.
 This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
+./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -145,7 +176,7 @@ This command creates a new database, imports ASTERIX data, processess the data a
 This command opens an existing database and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
+./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -154,8 +185,8 @@ This command opens an existing database and starts the management window.
 This commands create a new database, imports multiple ASTERIX data files, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --quit
-./ATSDB-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --start
+./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --quit
+./COMPASS-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -164,7 +195,7 @@ This commands create a new database, imports multiple ASTERIX data files, proces
 This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start
+./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start
 \end{lstlisting}
 \ \\
 
@@ -173,6 +204,6 @@ This command creates a new database, imports ASTERIX data, processess the data a
 This command creates a new database, imports ASTERIX data, processess the data, starts the management window and exports the View Points as PDF, and then quits.
 
 \begin{lstlisting}
-./ATSDB-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start --export_view_points_report /data/test.db/report.tex --quit
+./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start --export_view_points_report /data/test.db/report.tex --quit
 \end{lstlisting}
 \ \\

@@ -3,7 +3,7 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
@@ -21,6 +21,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingstubsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.h"
     #        src/job/dbovariabledistinctstatisticsdbjob.h
@@ -44,6 +45,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingstubsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.cpp"
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
@@ -56,7 +58,7 @@ target_sources(atsdb
 IF (jASTERIX_FOUND)
 	MESSAGE(STATUS "Including ASTERIX jobs")
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"

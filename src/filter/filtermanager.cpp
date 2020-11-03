@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "filtermanager.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "datasourcesfilter.h"
 #include "dbconnection.h"
@@ -30,6 +30,7 @@
 #include "logger.h"
 #include "viewpoint.h"
 #include "dbospecificvaluesdbfilter.h"
+#include "utnfilter.h"
 
 #include "json.hpp"
 
@@ -37,8 +38,8 @@ using namespace std;
 using namespace nlohmann;
 
 FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id,
-                             ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "filter.json")
+                             COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "filter.json")
 {
     logdbg << "FilterManager: constructor";
 
@@ -143,6 +144,35 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
+    else if (class_id == "UTNFilter")
+    {
+        try
+        {
+            if (hasSubConfigurable(class_id, instance_id))
+            {
+                logerr << "FilterManager: generateSubConfigurable: utn filter "
+                       << instance_id << " already present";
+                return;
+            }
+
+            UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
+//            if (filter->disabled())
+//            {
+//                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
+//                          "filter for object "
+//                       << filter->dbObjectName();
+//                delete filter;
+//            }
+//            else
+            filters_.push_back(filter);
+        }
+        catch (const std::exception& e)
+        {
+            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
+                   << e.what() << "', deleting";
+            configuration().removeSubConfiguration(class_id, instance_id);
+        }
+    }
     else
         throw std::runtime_error("FilterManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -150,13 +180,13 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
 
 bool FilterManager::checkDBObject (const std::string& dbo_name)
 {
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name))
     {
         loginf << "FilterManager: checkDBObject: failed because of non-existing dbobject '" << dbo_name << "'";
         return false;
     }
 
-    DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
+    DBObject& object = COMPASS::instance().objectManager().object(dbo_name);
 
     if (!object.hasCurrentDataSourceDefinition())
     {
@@ -183,7 +213,7 @@ bool FilterManager::checkDBObject (const std::string& dbo_name)
 void FilterManager::checkSubConfigurables()
 {
     // watch those sensors
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
     {
         if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources() ||
             !obj_it.second->existsInDB())
@@ -220,12 +250,23 @@ void FilterManager::checkSubConfigurables()
         ds_filter_configuration.addParameterString("dbo_name", obj_it.first);
         generateSubConfigurable("DataSourcesFilter", instance_id);
     }
+
+    // check for UTN filter
+
+    string utn_classid = "UTNFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&utn_classid](const DBFilter* x) { return x->classId() == utn_classid;}) == filters_.end())
+    { // not UTN filter
+        addNewSubConfiguration(utn_classid, utn_classid+"0");
+        generateSubConfigurable(utn_classid, utn_classid+"0");
+    }
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbo_name,
                                            std::vector<DBOVariable*>& filtered_variables)
 {
-    assert(ATSDB::instance().objectManager().object(dbo_name).loadable());
+    assert(COMPASS::instance().objectManager().object(dbo_name).loadable());
 
     std::stringstream ss;
 
@@ -281,20 +322,20 @@ void FilterManager::deleteFilterSlot(DBFilter* filter)
     emit changedFiltersSignal();
 }
 
-void FilterManager::unshowViewPointSlot (const ViewPoint* vp)
+void FilterManager::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: unshowViewPointSlot";
     assert (vp);
 }
 
-void FilterManager::showViewPointSlot (const ViewPoint* vp)
+void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "FilterManager: showViewPointSlot";
     assert (vp);
 
     const json& data = vp->data();
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     // add all db objects that need loading
     if (data.contains("db_objects")) // the listed ones should be loaded
@@ -343,7 +384,7 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
 {
     loginf << "FilterManager: setConfigInViewPoint";
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     data["db_objects"] = json::array();
     json& db_objects = data["db_objects"];
@@ -392,7 +433,7 @@ void FilterManager::startedSlot()
     loginf << "FilterManager: startedSlot";
     createSubConfigurables();
 
-    std::string tmpstr = ATSDB::instance().interface().connection().identifier();
+    std::string tmpstr = COMPASS::instance().interface().connection().identifier();
     replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
 
     if (db_id_.compare(tmpstr) != 0)
@@ -412,4 +453,18 @@ void FilterManager::disableAllFilters ()
 {
     for (auto fil_it : filters_)
         fil_it->setActive(false);
+}
+
+DataSourcesFilter* FilterManager::getDataSourcesFilter (const std::string& dbo_name)
+{
+    for (auto fil_it : filters_)
+    {
+        DataSourcesFilter* ds_fil = dynamic_cast<DataSourcesFilter*>(fil_it);
+
+        if (ds_fil && ds_fil->dbObjectName() == dbo_name)
+            return ds_fil;
+    }
+
+    logerr << "FilterManager: getDataSourcesFilter: data source filter not found for " << dbo_name;
+    throw std::runtime_error ("FilterManager: getDataSourcesFilter: data source filter not found for " + dbo_name);
 }

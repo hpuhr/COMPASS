@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "radarplotpositioncalculatortask.h"
@@ -21,7 +21,7 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -92,8 +92,8 @@ void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string& db_object_s
 
     db_object_str_ = db_object_str;
 
-    assert(ATSDB::instance().objectManager().existsObject(db_object_str_));
-    db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+    assert(COMPASS::instance().objectManager().existsObject(db_object_str_));
+    db_object_ = &COMPASS::instance().objectManager().object(db_object_str_);
 
     emit statusChangedSignal(name_);
 }
@@ -236,17 +236,17 @@ void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitu
 
 bool RadarPlotPositionCalculatorTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())
+    if (!COMPASS::instance().interface().ready())
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ =
-            ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
+            COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";  // set done flag
 
-    if (!ATSDB::instance().objectManager().existsObject("Radar"))
+    if (!COMPASS::instance().objectManager().existsObject("Radar"))
         return false;
 
-    return ATSDB::instance().objectManager().object("Radar").hasData();
+    return COMPASS::instance().objectManager().object("Radar").hasData();
 }
 
 bool RadarPlotPositionCalculatorTask::isRecommended()
@@ -293,10 +293,10 @@ bool RadarPlotPositionCalculatorTask::canRun()
     if (!db_object_str_.size())
         return false;
 
-    if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+    if (!COMPASS::instance().objectManager().existsObject(db_object_str_))
         return false;
 
-    DBObject& object = ATSDB::instance().objectManager().object(db_object_str_);
+    DBObject& object = COMPASS::instance().objectManager().object(db_object_str_);
 
     if (!object.loadable())
         return false;
@@ -337,7 +337,7 @@ void RadarPlotPositionCalculatorTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     calculating_ = true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -355,7 +355,7 @@ void RadarPlotPositionCalculatorTask::run()
     num_loaded_ = 0;
 
     assert(obj_man.existsObject(db_object_str_));
-    db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+    db_object_ = &COMPASS::instance().objectManager().object(db_object_str_);
     assert(db_object_);
 
     if (key_var_str_.size())
@@ -769,7 +769,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBObject& object)
         String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
     done_ = true;
-    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
     task_manager_.appendSuccess("RadarPlotPositionCalculatorTask: done after " + elapsed_time_str);
 

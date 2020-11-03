@@ -4,8 +4,9 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/viewabledataconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpoint.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpointswidget.h"

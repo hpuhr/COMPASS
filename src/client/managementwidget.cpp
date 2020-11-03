@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "managementwidget.h"
@@ -22,7 +22,7 @@
 #include <QResizeEvent>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbobjectmanager.h"
@@ -47,26 +47,26 @@ ManagementWidget::ManagementWidget() : QWidget()
 
     QVBoxLayout* left_layout = new QVBoxLayout();
 
-    DBInterfaceInfoWidget* interface_widget = ATSDB::instance().interface().infoWidget();
+    DBInterfaceInfoWidget* interface_widget = COMPASS::instance().interface().infoWidget();
     interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     interface_widget->setLineWidth(frame_width);
     left_layout->addWidget(interface_widget);
 
-    DBObjectManagerLoadWidget* objman_widget = ATSDB::instance().objectManager().loadWidget();
+    DBObjectManagerLoadWidget* objman_widget = COMPASS::instance().objectManager().loadWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
     left_layout->addWidget(objman_widget);
 
     hlayout->addLayout(left_layout, 1);
 
-    FilterManagerWidget* filman_widget = ATSDB::instance().filterManager().widget();
+    FilterManagerWidget* filman_widget = COMPASS::instance().filterManager().widget();
     filman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     filman_widget->setLineWidth(frame_width);
     hlayout->addWidget(filman_widget, 1);
 
     QVBoxLayout* right_layout = new QVBoxLayout();
 
-    ViewManagerWidget* viewman_widget = ATSDB::instance().viewManager().widget();
+    ViewManagerWidget* viewman_widget = COMPASS::instance().viewManager().widget();
     viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     viewman_widget->setLineWidth(frame_width);
     right_layout->addWidget(viewman_widget);

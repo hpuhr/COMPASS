@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef VIEWMANAGER_H_
@@ -23,13 +23,13 @@
 #include "configurable.h"
 #include "dbovariableset.h"
 
-class ATSDB;
+class COMPASS;
 class Buffer;
 class ViewContainer;
 class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
-class ViewPoint;
+class ViewableDataConfig;
 class ViewPointsWidget;
 class ViewPointsReportGenerator;
 
@@ -42,14 +42,14 @@ class ViewManager : public QObject, public Configurable
 
   signals:
     void selectionChangedSignal();
-    void unshowViewPointSignal (const ViewPoint* vp);
-    void showViewPointSignal (const ViewPoint* vp);
+    void unshowViewPointSignal (const ViewableDataConfig* vp);
+    void showViewPointSignal (const ViewableDataConfig* vp);
 
   public slots:
     void selectionChangedSlot();
 
   public:
-    ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
     void init(QTabWidget* tab_widget);
@@ -81,13 +81,14 @@ class ViewManager : public QObject, public Configurable
 
     ViewPointsReportGenerator& viewPointsGenerator();
 
-    void setCurrentViewPoint (unsigned int id);
+    void setCurrentViewPoint (const ViewableDataConfig* viewable);
     void unsetCurrentViewPoint ();
 
     void doViewPointAfterLoad ();
+    void selectTimeWindow(float time_min, float time_max);
 
 protected:
-    ATSDB& atsdb_;
+    COMPASS& compass_;
 
     ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
@@ -102,8 +103,7 @@ protected:
 
     std::unique_ptr<ViewPointsReportGenerator> view_points_report_gen_;
 
-    bool current_view_point_set_ {false};
-    unsigned int current_view_point_ {0};
+    const ViewableDataConfig* current_viewable_ {nullptr};
     bool view_point_data_selected_ {false};
 
     unsigned int container_count_{0};

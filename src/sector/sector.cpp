@@ -1,6 +1,24 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "sector.h"
-#include "atsdb.h"
-#include "dbinterface.h"
+#include "compass.h"
+#include "evaluationmanager.h"
+#include "evaluationtargetposition.h"
 
 #include <cassert>
 
@@ -14,6 +32,8 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
     : id_(id), name_(name), layer_name_(layer_name), points_(points)
 {
     color_str_ = default_color;
+
+    createPolygon();
 }
 
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
@@ -54,6 +74,8 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
         color_str_ = default_color;
     else
         color_str_ = j.at("color_str");
+
+    createPolygon();
 }
 
 std::string Sector::name() const
@@ -203,19 +225,91 @@ void Sector::layerName(const std::string& layer_name)
 {
     loginf << "Sector: layerName: '" << layer_name << "'";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     string old_layer_name = layer_name_;
     layer_name_ = layer_name;
 
-    db_interface.moveSector(id_, old_layer_name, layer_name); // moves and saves
+    eval_man.moveSector(id_, old_layer_name, layer_name); // moves and saves
 }
 
 void Sector::save()
 {
-    DBInterface& db_interface = ATSDB::instance().interface();
-    assert (db_interface.ready());
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    db_interface.saveSector(id_);
+    eval_man.saveSector(id_);
 }
+
+bool Sector::isInside(const EvaluationTargetPosition& pos) const
+{
+    if (pos.has_altitude_)
+    {
+        if (has_min_altitude_ && pos.altitude_ < min_altitude_)
+            return false;
+        else if (has_max_altitude_ && pos.altitude_ > max_altitude_)
+            return false;
+    }
+
+    OGRPoint ogr_pos (pos.latitude_, pos.longitude_);
+    return ogr_polygon_->Contains(&ogr_pos);
+}
+
+
+std::pair<double, double> Sector::getMinMaxLatitude() const
+{
+    double min, max;
+    bool first = true;
+
+    for (auto& point_it : points_)
+    {
+        if (first)
+        {
+            min = point_it.first;
+            max = point_it.first;
+            first = false;
+        }
+        else
+        {
+            min = std::min(min, point_it.first);
+            max = std::max(max, point_it.first);
+        }
+    }
+
+    return {min, max};
+}
+
+std::pair<double, double> Sector::getMinMaxLongitude() const
+{
+    double min, max;
+    bool first = true;
+
+    for (auto& point_it : points_)
+    {
+        if (first)
+        {
+            min = point_it.second;
+            max = point_it.second;
+            first = false;
+        }
+        else
+        {
+            min = std::min(min, point_it.second);
+            max = std::max(max, point_it.second);
+        }
+    }
+
+    return {min, max};
+}
+
+void Sector::createPolygon()
+{
+    ogr_polygon_.reset(new OGRPolygon());
+    //ogr_polygon_->addRingDirectly()
+    OGRLinearRing* ring = new OGRLinearRing();
+
+    for (auto& point_it : points_)
+        ring->addPoint(point_it.first, point_it.second);
+
+    ogr_polygon_->addRingDirectly(ring);
+}
+

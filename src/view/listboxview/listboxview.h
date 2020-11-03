@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef LISTBOXVIEW_H_
@@ -44,8 +44,8 @@ class ListBoxView : public View
     //    void selectionChanged();
     //    /// @brief Is executed when selection is to be cleared. Does nothing.
     //    void selectionToBeCleared();
-    virtual void unshowViewPointSlot (const ViewPoint* vp) override;
-    virtual void showViewPointSlot (const ViewPoint* vp) override;
+    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
+    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
     void allLoadingDoneSlot();
 
   signals:

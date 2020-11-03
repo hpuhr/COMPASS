@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "latextable.h"
 #include "stringconv.h"
 
@@ -40,21 +57,21 @@ void LatexTable::addRow (std::vector<std::string> row)
 
 std::string LatexTable::toString()
 {
-    assert (!content_.size());
+    //assert (!content_.size());
 
     stringstream ss;
 
     if (wide_table_)
     {
-        ss << R"(\newgeometry{margin=1cm})" << "\n";
+        //ss << R"(\newgeometry{margin=1cm})" << "\n";
         ss << R"(\begin{landscape})" << "\n";
         ss << R"(\thispagestyle{empty})" << "\n";
     }
 
     if (wide_table_)
-        ss << R"(\begin{tabularx}{\linewidth}{)" << heading_alignment_ << " }\n";
+        ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
     else
-        ss << R"(\begin{tabularx}{\textwidth}{)" << heading_alignment_ << " }\n";
+        ss << R"(\begin{tabularx}{\textwidth}[H]{)" << heading_alignment_ << " }\n";
 
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);
@@ -69,7 +86,7 @@ std::string LatexTable::toString()
     if (wide_table_)
     {
         ss << R"(\end{landscape})" << "\n";
-        ss << R"(\restoregeometry)" << "\n";
+        //ss << R"(\restoregeometry)" << "\n";
     }
 
     return ss.str();

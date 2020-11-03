@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "allbuffertablemodel.h"
@@ -21,7 +21,7 @@
 
 #include "allbuffercsvexportjob.h"
 #include "allbuffertablewidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -178,7 +178,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         {
             if (col == 2)
             {
-                DBObjectManager& manager = ATSDB::instance().objectManager();
+                DBObjectManager& manager = COMPASS::instance().objectManager();
                 const DBOAssociationCollection& associations =
                     manager.object(dbo_name).associations();
 
@@ -208,7 +208,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
 
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         // check if data & variables exist
         if (variable_dbo_name == META_OBJECT_NAME)
@@ -511,7 +511,7 @@ void AllBufferTableModel::updateTimeIndexes()
             logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
-            DBObjectManager& object_manager = ATSDB::instance().objectManager();
+            DBObjectManager& object_manager = COMPASS::instance().objectManager();
             const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
             assert(buf_it.second->has<float>(tod_var.name()));
             NullableVector<float>& tods = buf_it.second->get<float>(tod_var.name());

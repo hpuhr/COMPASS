@@ -1,25 +1,25 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbschemamanager.h"
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
@@ -36,8 +36,8 @@
  * current_schema exists (if defined).
  */
 DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id,
-                                 ATSDB* atsdb, DBInterface& db_interface)
-    : Configurable(class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
+                                 COMPASS* compass, DBInterface& db_interface)
+    : Configurable(class_id, instance_id, compass, "db_schema.json"), db_interface_(db_interface)
 {
     registerParameter("current_schema", &current_schema_, (std::string) "");
 
@@ -170,7 +170,7 @@ void DBSchemaManager::deleteCurrentSchema()
     assert(current_schema_.size() != 0);
     assert(hasCurrentSchema());
 
-    ATSDB::instance().objectManager().removeDependenciesForSchema(current_schema_);
+    COMPASS::instance().objectManager().removeDependenciesForSchema(current_schema_);
 
     delete schemas_.at(current_schema_);
     schemas_.erase(current_schema_);

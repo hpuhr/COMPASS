@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DBOBJECT_H_
@@ -32,7 +32,7 @@
 #include "dbovariableset.h"
 #include "global.h"
 
-class ATSDB;
+class COMPASS;
 class PropertyList;
 class MetaDBTable;
 
@@ -114,7 +114,7 @@ class DBObject : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id,
+    DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
@@ -259,7 +259,7 @@ class DBObject : public QObject, public Configurable
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
     bool hasAssociations();
-    void addAssociation(unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
+    void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }
     void clearAssociations();
     void saveAssociations();
@@ -267,7 +267,7 @@ class DBObject : public QObject, public Configurable
     void updateToDatabaseContent();
 
   protected:
-    ATSDB& atsdb_;
+    COMPASS& compass_;
     DBObjectManager& manager_;
     /// DBO name
     std::string name_;

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "viewmanager.h"
@@ -8,7 +25,7 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "dbobjectmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "sqliteconnection.h"
@@ -22,13 +39,13 @@
 #include "osgview.h"
 #endif
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include <QCoreApplication>
 #include <QApplication>
 #include <QMessageBox>
 #include <QUrl>
 #include <QDesktopServices>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace std;
 using namespace Utils;
@@ -38,9 +55,15 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     : Configurable(class_id, instance_id, &view_manager), view_manager_(view_manager)
 {
     registerParameter("author", &author_, "");
+
+    if (!author_.size())
+        author_ = System::getUserName();
+    if (!author_.size())
+        author_ = "User";
+
     registerParameter("abstract", &abstract_, "");
 
-    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
 
     if (sql_con)
     {
@@ -49,7 +72,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     }
     else
     {
-        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
         assert (mysql_con);
         report_path_ = HOME_PATH+"/report_"+mysql_con->usedDatabase() + "/";
     }
@@ -109,7 +132,7 @@ void ViewPointsReportGenerator::run ()
     dialog_->setRunning(true);
 
     LatexDocument doc (report_path_, report_filename_);
-    doc.title("ATSDB View Points Report");
+    doc.title("OpenATS COMPASS View Points Report");
 
     if (author_.size())
         doc.author(author_);
@@ -117,7 +140,8 @@ void ViewPointsReportGenerator::run ()
     if (abstract_.size())
         doc.abstract(abstract_);
 
-    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, wait_on_map_loading_);
+    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, false,
+                          false, wait_on_map_loading_);
 
     cancel_ = false;
     running_ = true;
@@ -146,7 +170,7 @@ void ViewPointsReportGenerator::run ()
         vp_ids = vp_widget->viewedViewPoints();
 
     string status_str, elapsed_time_str, remaining_time_str;
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     unsigned int vp_cnt = 0;
     unsigned int vp_size = vp_ids.size();
@@ -168,16 +192,16 @@ void ViewPointsReportGenerator::run ()
             break;
         }
 
+        assert (table_model->hasViewPoint(vp_id));
+        const ViewPoint& view_point = table_model->viewPoint(vp_id);
+
         loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
-        view_manager_.setCurrentViewPoint(vp_id);
+        view_manager_.setCurrentViewPoint(&view_point);
 
         while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents();
 
         // do stuff
-        assert (table_model->hasViewPoint(vp_id));
-        const ViewPoint& view_point = table_model->viewPoint(vp_id);
-
         view_point.accept(visitor);
         visitor.imagePrefix("vp_"+to_string(vp_id));
 

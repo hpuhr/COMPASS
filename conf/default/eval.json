@@ -1,0 +1,77 @@
+{
+    "parameters": {
+        "active_sources_ref": {},
+        "active_sources_tst": {},
+        "current_standard": "",
+        "dbo_name_ref": "RefTraj",
+        "dbo_name_tst": "Tracker",
+        "generate_details": true,
+        "use_grp_in_sector": {},
+        "use_requirement": {}
+    },
+    "sub_configs": {
+        "EvaluationResultsReportPDFGenerator": {
+            "EvaluationResultsReportPDFGenerator0": {
+                "parameters": {
+                    "abstract": "",
+                    "author": "",
+                    "open_created_pdf": false,
+                    "run_pdflatex": true,
+                    "wait_on_map_loading": true
+                }
+            }
+        },
+        "EvaluationStandard": {
+            "EvaluationStandardtest0": {
+                "parameters": {
+                    "name": "test"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupMandatory0": {
+                            "parameters": {
+                                "name": "Mandatory"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Detection0": {
+                                        "parameters": {
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.949999988079071,
+                                            "miss_tolerance": 0.9990000128746033,
+                                            "name": "Probability of Detection",
+                                            "short_name": "PD",
+                                            "update_interval": 2.0,
+                                            "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationConfig": {
+                                    "EvaluationRequirementIdentificationConfigProbability of Correct Identification0": {
+                                        "parameters": {
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.9900000095367432,
+                                            "name": "Probability of Correct Identification",
+                                            "short_name": "PCID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionMaxDistanceConfig": {
+                                    "EvaluationRequirementPositionMaxDistanceConfigHorizontal Position Accuracy0": {
+                                        "parameters": {
+                                            "max_distance": 140.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Horizontal Position Accuracy",
+                                            "short_name": "HPA"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

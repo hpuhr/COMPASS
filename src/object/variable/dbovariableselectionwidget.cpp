@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbovariableselectionwidget.h"
@@ -21,7 +21,7 @@
 #include <QLabel>
 #include <QPushButton>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -102,9 +102,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
     if (show_dbo_only_)
     {
-        assert(ATSDB::instance().objectManager().existsObject(only_dbo_name_));
+        assert(COMPASS::instance().objectManager().existsObject(only_dbo_name_));
 
-        for (auto& var_it : ATSDB::instance().objectManager().object(only_dbo_name_))
+        for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_))
         {
             if (show_existing_in_db_only_ && !var_it.second.existsInDB())
                 continue;
@@ -122,7 +122,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_)
         {
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-            for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
+            for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
             {
                 if (show_existing_in_db_only_ && !meta_it.second->existsInDB())
                     continue;
@@ -139,7 +139,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_only_)
             return;
 
-        for (auto& object_it : ATSDB::instance().objectManager())
+        for (auto& object_it : COMPASS::instance().objectManager())
         {
             QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
@@ -188,7 +188,7 @@ void DBOVariableSelectionWidget::triggerSlot(QAction* action)
         }
         else
         {
-            assert(ATSDB::instance().objectManager().object(obj_name).hasVariable(var_name));
+            assert(COMPASS::instance().objectManager().object(obj_name).hasVariable(var_name));
 
             meta_variable_selected_ = false;
             variable_selected_ = true;
@@ -227,9 +227,9 @@ DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
 
-    assert(ATSDB::instance().objectManager().object(obj_name).hasVariable(var_name));
+    assert(COMPASS::instance().objectManager().object(obj_name).hasVariable(var_name));
 
-    return ATSDB::instance().objectManager().object(obj_name).variable(var_name);
+    return COMPASS::instance().objectManager().object(obj_name).variable(var_name);
 }
 
 void DBOVariableSelectionWidget::selectedMetaVariable(MetaDBOVariable& variable)
@@ -256,9 +256,9 @@ MetaDBOVariable& DBOVariableSelectionWidget::selectedMetaVariable() const
     std::string var_name = variable_label_->text().toStdString();
 
     assert(obj_name == META_OBJECT_NAME);
-    assert(ATSDB::instance().objectManager().existsMetaVariable(var_name));
+    assert(COMPASS::instance().objectManager().existsMetaVariable(var_name));
 
-    return ATSDB::instance().objectManager().metaVariable(var_name);
+    return COMPASS::instance().objectManager().metaVariable(var_name);
 }
 
 void DBOVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)

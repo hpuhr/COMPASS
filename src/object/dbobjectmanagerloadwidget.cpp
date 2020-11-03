@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbobjectmanagerloadwidget.h"
@@ -25,7 +25,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectinfowidget.h"
 #include "dbobjectmanager.h"
@@ -238,7 +238,7 @@ void DBObjectManagerLoadWidget::loadButtonSlot()
 {
     loginf << "DBObjectManagerLoadWidget: loadButtonSlot";
 
-    if (ATSDB::instance().viewManager().getViews().size() == 0)
+    if (COMPASS::instance().viewManager().getViews().size() == 0)
     {
         QMessageBox m_warning(QMessageBox::Warning, "Loading Not Possible",
                               "There are no Views active, so loading is not possible.",
@@ -292,9 +292,14 @@ void DBObjectManagerLoadWidget::updateSlot()
     assert(associations_label_);
     if (object_manager_.hasAssociations())
     {
-        std::string tmp = "From " + object_manager_.associationsDBObject() + ":" +
-                          object_manager_.associationsDataSourceName();
-        associations_label_->setText(tmp.c_str());
+        if (object_manager_.hasAssociationsDataSource())
+        {
+            std::string tmp = "From " + object_manager_.associationsDBObject() + ":" +
+                              object_manager_.associationsDataSourceName();
+            associations_label_->setText(tmp.c_str());
+        }
+        else
+            associations_label_->setText("All");
     }
     else
         associations_label_->setText("None");

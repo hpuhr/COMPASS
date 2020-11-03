@@ -1,25 +1,25 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbobjectmanager.h"
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -31,6 +31,8 @@
 #include "metadbovariable.h"
 #include "stringconv.h"
 #include "viewmanager.h"
+#include "jobmanager.h"
+#include "evaluationmanager.h"
 
 using namespace Utils::String;
 
@@ -38,8 +40,8 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
-                                 ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "db_object.json"), atsdb_(*atsdb)
+                                 COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "db_object.json"), compass_(*compass)
 {
     logdbg << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -94,7 +96,7 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
            << instance_id;
     if (class_id.compare("DBObject") == 0)
     {
-        DBObject* object = new DBObject(atsdb_, class_id, instance_id, this);
+        DBObject* object = new DBObject(compass_, class_id, instance_id, this);
         logdbg << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert(objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair<std::string, DBObject*>(object->name(), object));
@@ -349,17 +351,38 @@ void DBObjectManager::loadSlot()
 
     bool load_job_created = false;
 
+    loginf << "DBObjectManager: loadSlot: loading associations";
+
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
 
         if (object.second->loadable())
             object.second->loadAssociationsIfRequired();
+    }
 
+    while (JobManager::instance().hasDBJobs())
+    {
+        logdbg << "DBObjectManager: loadSlot: waiting on association loading";
+
+        QCoreApplication::processEvents();
+        QThread::msleep(5);
+    }
+
+    loginf << "DBObjectManager: loadSlot: starting loading";
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+    ViewManager& view_man = COMPASS::instance().viewManager();
+
+    for (auto& object : objects_)
+    {
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
-            DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
+            DBOVariableSet read_set = view_man.getReadSet(object.first);
+
+            if (eval_man.needsAdditionalVariables())
+                eval_man.addVariables(object.first, read_set);
 
             if (read_set.getSize() == 0)
             {
@@ -392,10 +415,7 @@ void DBObjectManager::loadSlot()
     emit loadingStartedSignal();
 
     if (!load_job_created)
-    {
-        if (load_widget_)
-            load_widget_->loadingDone();
-    }
+        finishLoading();
 }
 
 void DBObjectManager::quitLoading()
@@ -418,15 +438,15 @@ void DBObjectManager::databaseContentChangedSlot()
 
     loginf << "DBObjectManager: databaseContentChangedSlot";
 
-    if (ATSDB::instance().interface().hasProperty("associations_generated"))
+    if (COMPASS::instance().interface().hasProperty("associations_generated"))
     {
-        assert(ATSDB::instance().interface().hasProperty("associations_dbo"));
-        assert(ATSDB::instance().interface().hasProperty("associations_ds"));
+        assert(COMPASS::instance().interface().hasProperty("associations_dbo"));
+        assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
         has_associations_ =
-            ATSDB::instance().interface().getProperty("associations_generated") == "1";
-        associations_dbo_ = ATSDB::instance().interface().getProperty("associations_dbo");
-        associations_ds_ = ATSDB::instance().interface().getProperty("associations_ds");
+            COMPASS::instance().interface().getProperty("associations_generated") == "1";
+        associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
+        associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
     }
     else
     {
@@ -453,28 +473,32 @@ void DBObjectManager::loadingDoneSlot(DBObject& object)
     bool done = true;
 
     for (auto& object_it : objects_)
+    {
         if (object_it.second->isLoading())
         {
             logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";
             done = false;
             break;
         }
+    }
 
     if (done)
-    {
-        loginf << "DBObjectManager: loadingDoneSlot: all done";
-        load_in_progress_ = false;
-
-        ATSDB::instance().viewManager().doViewPointAfterLoad();
-
-        emit allLoadingDoneSignal();
-
-        if (load_widget_)
-            load_widget_->loadingDone();
-
-    }
+        finishLoading();
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";
+}
+
+void DBObjectManager::finishLoading()
+{
+    loginf << "DBObjectManager: loadingDoneSlot: all done";
+    load_in_progress_ = false;
+
+    COMPASS::instance().viewManager().doViewPointAfterLoad();
+
+    emit allLoadingDoneSignal();
+
+    if (load_widget_)
+        load_widget_->loadingDone();
 }
 
 void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)
@@ -529,11 +553,11 @@ void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name
 
 bool DBObjectManager::hasAssociations() const { return has_associations_; }
 
-void DBObjectManager::setAssociations(const std::string& dbo, const std::string& data_source_name)
+void DBObjectManager::setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name)
 {
-    ATSDB::instance().interface().setProperty("associations_generated", "1");
-    ATSDB::instance().interface().setProperty("associations_dbo", dbo);
-    ATSDB::instance().interface().setProperty("associations_ds", data_source_name);
+    COMPASS::instance().interface().setProperty("associations_generated", "1");
+    COMPASS::instance().interface().setProperty("associations_dbo", dbo);
+    COMPASS::instance().interface().setProperty("associations_ds", data_source_name);
 
     has_associations_ = true;
     associations_dbo_ = dbo;
@@ -544,11 +568,25 @@ void DBObjectManager::setAssociations(const std::string& dbo, const std::string&
         loadWidget()->updateSlot();
 }
 
+void DBObjectManager::setAssociationsByAll()
+{
+    COMPASS::instance().interface().setProperty("associations_generated", "1");
+    COMPASS::instance().interface().setProperty("associations_dbo", "");
+    COMPASS::instance().interface().setProperty("associations_ds", "");
+
+    has_associations_ = true;
+    associations_dbo_ = "";
+    associations_ds_ = "";
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
+}
+
 void DBObjectManager::removeAssociations()
 {
-    ATSDB::instance().interface().setProperty("associations_generated", "0");
-    ATSDB::instance().interface().setProperty("associations_dbo", "");
-    ATSDB::instance().interface().setProperty("associations_ds", "");
+    COMPASS::instance().interface().setProperty("associations_generated", "0");
+    COMPASS::instance().interface().setProperty("associations_dbo", "");
+    COMPASS::instance().interface().setProperty("associations_ds", "");
 
     has_associations_ = false;
     associations_dbo_ = "";
@@ -559,6 +597,11 @@ void DBObjectManager::removeAssociations()
 
     if (load_widget_)
         loadWidget()->updateSlot();
+}
+
+bool DBObjectManager::hasAssociationsDataSource() const
+{
+    return associations_dbo_.size() && associations_ds_.size();
 }
 
 std::string DBObjectManager::associationsDBObject() const { return associations_dbo_; }

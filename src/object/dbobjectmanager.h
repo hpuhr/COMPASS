@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DBOBJECTMANAGER_H_
@@ -26,7 +26,7 @@
 #include "global.h"
 #include "singleton.h"
 
-class ATSDB;
+class COMPASS;
 class DBObject;
 class DBObjectManagerWidget;
 class DBObjectManagerLoadWidget;
@@ -60,7 +60,7 @@ class DBObjectManager : public QObject, public Configurable
 
   public:
     /// @brief Constructor
-    DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
     /// @brief Returns if an object of type exists
     bool existsObject(const std::string& dbo_name);
@@ -126,9 +126,11 @@ class DBObjectManager : public QObject, public Configurable
     void removeDependenciesForSchema(const std::string& schema_name);
 
     bool hasAssociations() const;
-    void setAssociations(const std::string& dbo, const std::string& data_source_name);
+    void setAssociationsDataSource(const std::string& dbo, const std::string& data_source_name);
+    void setAssociationsByAll();
     void removeAssociations();
 
+    bool hasAssociationsDataSource() const;
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 
@@ -137,7 +139,7 @@ class DBObjectManager : public QObject, public Configurable
     bool loadInProgress() const;
 
   protected:
-    ATSDB& atsdb_;
+    COMPASS& compass_;
     bool use_filters_{false};
 
     bool use_order_{false};
@@ -165,6 +167,7 @@ class DBObjectManager : public QObject, public Configurable
     DBObjectManagerLoadWidget* load_widget_{nullptr};
 
     virtual void checkSubConfigurables();
+    void finishLoading();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

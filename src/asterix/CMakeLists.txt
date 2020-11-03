@@ -7,7 +7,7 @@ IF (jASTERIX_FOUND)
 
 MESSAGE(STATUS "Including ASTERIX code")
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixoverridewidget.h"
@@ -25,7 +25,7 @@ target_sources(atsdb
 
 ENDIF()
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixpostprocess.h"
     PRIVATE

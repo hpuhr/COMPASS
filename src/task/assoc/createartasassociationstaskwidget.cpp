@@ -1,29 +1,21 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "createartasassociationstaskwidget.h"
-
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QVBoxLayout>
 
 #include "createartasassociationstask.h"
 #include "dbodatasourceselectioncombobox.h"
@@ -33,8 +25,17 @@
 #include "metadbovariable.h"
 #include "taskmanager.h"
 
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+
+
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
-    CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
+        CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget(parent, f), task_(task)
 {
     QFont font_bold;
@@ -49,8 +50,8 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         // tracker data source
         grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
 
-        assert(ATSDB::instance().objectManager().existsObject("Tracker"));
-        DBObject& dbo_tracker = ATSDB::instance().objectManager().object("Tracker");
+        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
+        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
 
         ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
         connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
@@ -139,7 +140,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         row_cnt++;
         grid->addWidget(new QLabel("Association Time Future (s)"), row_cnt, 0);
         association_time_future_edit_ =
-            new QLineEdit(QString::number(task.associationTimeFuture()));
+                new QLineEdit(QString::number(task.associationTimeFuture()));
         association_time_future_edit_->setValidator(new QDoubleValidator(0, 600, 2, this));
         connect(association_time_future_edit_, &QLineEdit::textEdited, this,
                 &CreateARTASAssociationsTaskWidget::associationTimeFutureEditSlot);
@@ -156,9 +157,9 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         row_cnt++;
         grid->addWidget(new QLabel("Dubious Association Distant Time (s)"), row_cnt, 0);
         associations_dubious_distant_time_edit_ =
-            new QLineEdit(QString::number(task.associationsDubiousDistantTime()));
+                new QLineEdit(QString::number(task.associationsDubiousDistantTime()));
         associations_dubious_distant_time_edit_->setValidator(
-            new QDoubleValidator(0, 600, 2, this));
+                    new QDoubleValidator(0, 600, 2, this));
         connect(associations_dubious_distant_time_edit_, &QLineEdit::textEdited, this,
                 &CreateARTASAssociationsTaskWidget::associationsDubiousDistantTimeEditSlot);
         grid->addWidget(associations_dubious_distant_time_edit_, row_cnt, 1);
@@ -166,9 +167,9 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         row_cnt++;
         grid->addWidget(new QLabel("Dubious Association Close Time Past (s)"), row_cnt, 0);
         association_dubious_close_time_past_edit_ =
-            new QLineEdit(QString::number(task.associationDubiousCloseTimePast()));
+                new QLineEdit(QString::number(task.associationDubiousCloseTimePast()));
         association_dubious_close_time_past_edit_->setValidator(
-            new QDoubleValidator(0, 600, 2, this));
+                    new QDoubleValidator(0, 600, 2, this));
         connect(association_dubious_close_time_past_edit_, &QLineEdit::textEdited, this,
                 &CreateARTASAssociationsTaskWidget::associationDubiousCloseTimePastEditSlot);
         grid->addWidget(association_dubious_close_time_past_edit_, row_cnt, 1);
@@ -176,9 +177,9 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         row_cnt++;
         grid->addWidget(new QLabel("Dubious Association Close Time Future (s)"), row_cnt, 0);
         association_dubious_close_time_future_edit_ =
-            new QLineEdit(QString::number(task.associationDubiousCloseTimeFuture()));
+                new QLineEdit(QString::number(task.associationDubiousCloseTimeFuture()));
         association_dubious_close_time_future_edit_->setValidator(
-            new QDoubleValidator(0, 600, 2, this));
+                    new QDoubleValidator(0, 600, 2, this));
         connect(association_dubious_close_time_future_edit_, &QLineEdit::textEdited, this,
                 &CreateARTASAssociationsTaskWidget::associationDubiousCloseTimeFutureEditSlot);
         grid->addWidget(association_dubious_close_time_future_edit_, row_cnt, 1);
@@ -194,7 +195,7 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
     main_layout->addWidget(ignore_track_end_associations_check_);
 
     mark_track_end_associations_dubious_check_ =
-        new QCheckBox("Mark Track End Associations Dubious");
+            new QCheckBox("Mark Track End Associations Dubious");
     mark_track_end_associations_dubious_check_->setChecked(task_.markTrackEndAssociationsDubious());
     connect(mark_track_end_associations_dubious_check_, &QCheckBox::clicked, this,
             &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
@@ -207,9 +208,9 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
     main_layout->addWidget(ignore_track_coasting_associations_check_);
 
     mark_track_coasting_associations_dubious_check_ =
-        new QCheckBox("Mark Track Costing Associations Dubious");
+            new QCheckBox("Mark Track Costing Associations Dubious");
     mark_track_coasting_associations_dubious_check_->setChecked(
-        task_.markTrackCoastingAssociationsDubious());
+                task_.markTrackCoastingAssociationsDubious());
     connect(mark_track_coasting_associations_dubious_check_, &QCheckBox::clicked, this,
             &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
     main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
@@ -231,13 +232,13 @@ void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
 void CreateARTASAssociationsTaskWidget::update()
 {
     if (task_.currentDataSourceName().size() &&
-        ds_combo_->hasDataSource(task_.currentDataSourceName()))
+            ds_combo_->hasDataSource(task_.currentDataSourceName()))
         ds_combo_->setDataSource(task_.currentDataSourceName());
 
     if (ds_combo_->getDSName() != task_.currentDataSourceName())
         task_.currentDataSourceName(ds_combo_->getDSName());
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     DBObject& track_object = object_man.object("Tracker");
 
@@ -248,24 +249,24 @@ void CreateARTASAssociationsTaskWidget::update()
 
     assert(track_num_box_);
     if (task_.trackerTrackNumVarStr().size() &&
-        track_object.hasVariable(task_.trackerTrackNumVarStr()))
+            track_object.hasVariable(task_.trackerTrackNumVarStr()))
         track_num_box_->selectedVariable(track_object.variable(task_.trackerTrackNumVarStr()));
 
     assert(track_begin_box_);
     if (task_.trackerTrackBeginVarStr().size() &&
-        track_object.hasVariable(task_.trackerTrackBeginVarStr()))
+            track_object.hasVariable(task_.trackerTrackBeginVarStr()))
         track_begin_box_->selectedVariable(track_object.variable(task_.trackerTrackBeginVarStr()));
 
     assert(track_end_box_);
     if (task_.trackerTrackEndVarStr().size() &&
-        track_object.hasVariable(task_.trackerTrackEndVarStr()))
+            track_object.hasVariable(task_.trackerTrackEndVarStr()))
         track_end_box_->selectedVariable(track_object.variable(task_.trackerTrackEndVarStr()));
 
     assert(track_coasting_box_);
     if (task_.trackerTrackCoastingVarStr().size() &&
-        track_object.hasVariable(task_.trackerTrackCoastingVarStr()))
+            track_object.hasVariable(task_.trackerTrackCoastingVarStr()))
         track_coasting_box_->selectedVariable(
-            track_object.variable(task_.trackerTrackCoastingVarStr()));
+                    track_object.variable(task_.trackerTrackCoastingVarStr()));
 
     // meta vars
     assert(key_box_);
@@ -396,27 +397,27 @@ void CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot()
 {
     assert(ignore_track_end_associations_check_);
     if ((ignore_track_end_associations_check_->checkState() == Qt::Checked) !=
-        task_.ignoreTrackEndAssociations())
+            task_.ignoreTrackEndAssociations())
         task_.ignoreTrackEndAssociations(ignore_track_end_associations_check_->checkState() ==
                                          Qt::Checked);
 
     assert(mark_track_end_associations_dubious_check_);
     if ((mark_track_end_associations_dubious_check_->checkState() == Qt::Checked) !=
-        task_.markTrackEndAssociationsDubious())
+            task_.markTrackEndAssociationsDubious())
         task_.markTrackEndAssociationsDubious(
-            mark_track_end_associations_dubious_check_->checkState() == Qt::Checked);
+                    mark_track_end_associations_dubious_check_->checkState() == Qt::Checked);
 
     assert(ignore_track_coasting_associations_check_);
     if ((ignore_track_coasting_associations_check_->checkState() == Qt::Checked) !=
-        task_.ignoreTrackCoastingAssociations())
+            task_.ignoreTrackCoastingAssociations())
         task_.ignoreTrackCoastingAssociations(
-            ignore_track_coasting_associations_check_->checkState() == Qt::Checked);
+                    ignore_track_coasting_associations_check_->checkState() == Qt::Checked);
 
     assert(mark_track_coasting_associations_dubious_check_);
     if ((mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked) !=
-        task_.markTrackCoastingAssociationsDubious())
+            task_.markTrackCoastingAssociationsDubious())
         task_.markTrackCoastingAssociationsDubious(
-            mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
+                    mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
 }
 
 void CreateARTASAssociationsTaskWidget::expertModeChangedSlot()

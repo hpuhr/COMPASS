@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "mysqlppconnectionwidget.h"
@@ -27,7 +27,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
@@ -158,113 +158,6 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 
     emit databaseOpenedSignal();
 }
-
-// void MySQLppConnectionWidget::showImportMenuSlot ()
-//{
-//    logdbg << "MySQLppConnectionWidget: showImportMenuSlot";
-//    import_menu_.exec(QCursor::pos());
-//}
-
-// void MySQLppConnectionWidget::importSQLTextSlot()
-//{
-//    logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
-
-//    bool any_data=false;
-
-//    for (auto obj_it : ATSDB::instance().objectManager())
-//        if (obj_it.second->hasData())
-//            any_data=true;
-
-//    if (any_data)
-//    {
-//        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the
-//        database. Please "
-//                                                               " confirm with 'Yes' to continue,
-//                                                               cancel with 'No'" " to abort
-//                                                               import.",
-//                                      QMessageBox::Yes|QMessageBox::No);
-
-//        if (reply == QMessageBox::No)
-//            return;
-//    }
-
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::ExistingFile);
-//    dialog.setNameFilter(tr("SQL (*.sql)"));
-//    dialog.setViewMode(QFileDialog::Detail);
-
-//    QStringList filenames;
-//    if (dialog.exec())
-//    {
-//        filenames = dialog.selectedFiles();
-
-//        if (filenames.size() > 1)
-//        {
-//            QMessageBox msgBox;
-//            msgBox.setText("Only one file can be selected.");
-//            msgBox.exec();
-//            return;
-//        }
-
-//        std::string filename = filenames.at(0).toStdString();
-
-//        loginf << "MySQLppConnectionWidget: importSQLTextSlot: file '" << filename << "'";
-
-//        connection_.importSQLFile(filename);
-//    }
-//}
-
-// void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
-//{
-//    logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
-
-//    bool any_data=false;
-
-//    for (auto obj_it : ATSDB::instance().objectManager())
-//        if (obj_it.second->hasData())
-//            any_data=true;
-
-//    if (any_data)
-//    {
-//        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in
-//        the database. Please "
-//                                                               " confirm with 'Yes' to continue,
-//                                                               cancel with 'No'" " to abort
-//                                                               import.",
-//                                      QMessageBox::Yes|QMessageBox::No);
-
-//        if (reply == QMessageBox::No)
-//            return;
-//    }
-
-//    QFileDialog dialog(this);
-//    dialog.setFileMode(QFileDialog::ExistingFile);
-//    dialog.setNameFilter(tr("Archives (*.tar.gz *.gz *.tar *.zip *.tgz *.rar)"));
-//    dialog.setViewMode(QFileDialog::Detail);
-
-//    QStringList filenames;
-//    if (dialog.exec())
-//    {
-//        filenames = dialog.selectedFiles();
-
-//        if (filenames.size() > 1)
-//        {
-//            QMessageBox msgBox;
-//            msgBox.setText("Only one file can be selected.");
-//            msgBox.exec();
-//            return;
-//        }
-
-//        std::string filename = filenames.at(0).toStdString();
-
-//        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename <<
-//        "'";
-
-//        connection_.importSQLArchiveFile(filename);
-//    }
-//}
 
 void MySQLppConnectionWidget::updateServers()
 {

@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "viewcontainerwidget.h"
@@ -22,7 +22,7 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "config.h"
 #include "files.h"
 #include "logger.h"
@@ -49,10 +49,10 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     name_ = "Window" + std::to_string(String::getAppendedInt(instanceId()));
 
-    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
+    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
     setWindowIcon(atsdb_icon);  // for the glory of the empire
 
-    std::string title = "ATSDB v" + ATSDB::instance().config().getString("version") + " " + name_;
+    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version") + " " + name_;
     QWidget::setWindowTitle(title.c_str());
 
     QHBoxLayout* layout = new QHBoxLayout(this);

@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "managedatasourcestask.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -93,7 +93,7 @@ bool ManageDataSourcesTask::checkPrerequisites()
     for (auto& widget_it : edit_ds_widgets_)
         widget_it.second->update();
 
-    if (!ATSDB::instance().interface().ready())
+    if (!COMPASS::instance().interface().ready())
         return false;
 
     return true;
@@ -101,7 +101,7 @@ bool ManageDataSourcesTask::checkPrerequisites()
 
 bool ManageDataSourcesTask::isRecommended()
 {
-    for (auto& dbo_it : ATSDB::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().objectManager())
     {
         for (auto& ds_it : dbo_it.second->dataSources())
         {
@@ -194,17 +194,17 @@ DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFr
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(ATSDB::instance().objectManager().existsObject(dbo_name));
+    assert(COMPASS::instance().objectManager().existsObject(dbo_name));
 
     const std::map<int, DBODataSource>& db_data_sources =
-        ATSDB::instance().objectManager().object(dbo_name).dataSources();
+        COMPASS::instance().objectManager().object(dbo_name).dataSources();
 
     for (auto& ds_it : db_data_sources)
     {
         assert(ds_it.first >= 0);  // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection[id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB(
-            ATSDB::instance().objectManager().object(dbo_name), ds_it.second);
+            COMPASS::instance().objectManager().object(dbo_name), ds_it.second);
     }
 
     return options_collection;
@@ -215,14 +215,14 @@ DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFr
 {
     DBOEditDataSourceActionOptionsCollection options_collection;
 
-    assert(ATSDB::instance().objectManager().existsObject(dbo_name));
+    assert(COMPASS::instance().objectManager().existsObject(dbo_name));
 
     for (auto& ds_it : stored_data_sources_[dbo_name])
     {
         assert(ds_it.first >= 0);  // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection[id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg(
-            ATSDB::instance().objectManager().object(dbo_name), ds_it.second);
+            COMPASS::instance().objectManager().object(dbo_name), ds_it.second);
     }
 
     return options_collection;
@@ -232,10 +232,10 @@ DBOEditDataSourcesWidget* ManageDataSourcesTask::editDataSourcesWidget(const std
 {
     if (!edit_ds_widgets_[dbo_name])
     {
-        assert(ATSDB::instance().objectManager().existsObject(dbo_name));
+        assert(COMPASS::instance().objectManager().existsObject(dbo_name));
 
         edit_ds_widgets_[dbo_name].reset(new DBOEditDataSourcesWidget(
-            *this, ATSDB::instance().objectManager().object(dbo_name)));
+            *this, COMPASS::instance().objectManager().object(dbo_name)));
     }
 
     return edit_ds_widgets_[dbo_name].get();

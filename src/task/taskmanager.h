@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TASKMANAGER_H
@@ -25,7 +25,7 @@
 #include "singleton.h"
 #include "task.h"
 
-class ATSDB;
+class COMPASS;
 class DatabaseOpenTask;
 class ManageSchemaTask;
 class ManageDBObjectsTask;
@@ -39,10 +39,14 @@ class PostProcessTask;
 class TaskManagerWidget;
 class ManageDataSourcesTask;
 class ManageSectorsTask;
+class CreateAssociationsTask;
+class MainWindow;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
 #endif
+
+class QMainWindow;
 
 class TaskManager : public QObject, public Configurable
 {
@@ -62,7 +66,7 @@ class TaskManager : public QObject, public Configurable
     void schemaChangedSlot();
 
   public:
-    TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
     virtual ~TaskManager();
 
@@ -102,6 +106,7 @@ class TaskManager : public QObject, public Configurable
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     PostProcessTask& postProcessTask() const;
+    CreateAssociationsTask& createAssociationsTask() const;
 
     void createAndOpenNewSqlite3DB(const std::string& filename);
     void openSqlite3DB(const std::string& filename);
@@ -116,14 +121,19 @@ class TaskManager : public QObject, public Configurable
 
     void autoProcess(bool value);
 
+    void associateData(bool value);
+
     void quit(bool value);
     void start(bool value);
 
     void loadData(bool value);
     void exportViewPointsReportFile(const std::string& filename);
+    void exportEvalReportFile(const std::string& filename);
 
     bool automaticTasksDefined() const;
     void performAutomaticTasks ();
+
+    void evaluate(bool evaluate);
 
 protected:
     bool expert_mode_{false};
@@ -155,10 +165,19 @@ protected:
     std::string sectors_import_filename_;
 
     bool auto_process_ {false};
+
+    bool associate_data_ {false};
+
     bool start_ {false};
     bool load_data_ {false};
+
     bool export_view_points_report_ {false};
     std::string export_view_points_report_filename_;
+
+    bool evaluate_ {false};
+    bool export_eval_report_ {false};
+    std::string export_eval_report_filename_;
+
     bool quit_ {false};
 
     // tasks
@@ -175,8 +194,9 @@ protected:
     std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
-    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<PostProcessTask> post_process_task_;
+    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
+    std::unique_ptr<CreateAssociationsTask> create_associations_task_;
 
     std::unique_ptr<TaskManagerWidget> widget_;
 
@@ -186,6 +206,7 @@ protected:
     std::map<std::string, Task*> tasks_;
 
     void addTask(const std::string& class_id, Task* task);
+    MainWindow* getMainWindow();
 };
 
 #endif  // TASKMANAGER_H

@@ -1,11 +1,22 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "createartasassociationsjob.h"
-
-#include <math.h>
-
-#include <QThread>
-#include <algorithm>
-
-#include "atsdb.h"
+#include "compass.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "createartasassociationstask.h"
@@ -15,6 +26,11 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "stringconv.h"
+
+#include <math.h>
+
+#include <QThread>
+#include <algorithm>
 
 using namespace Utils;
 
@@ -51,7 +67,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     object_man.removeAssociations();
 
@@ -108,7 +124,7 @@ void CreateARTASAssociationsJob::run()
         dbo_it.second->saveAssociations();
     }
 
-    object_man.setAssociations(tracker_dbo_name_, task_.currentDataSourceName());
+    object_man.setAssociationsDataSource(tracker_dbo_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -344,12 +360,12 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 {
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
     DBObject& tracker_object = object_man.object(tracker_dbo_name_);
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
         for (auto& assoc_it : ut_it.second.rec_nums_tris_)  // rec_num -> tri
-            tracker_object.addAssociation(assoc_it.first, ut_it.first, assoc_it.first);
+            tracker_object.addAssociation(assoc_it.first, ut_it.first, true, assoc_it.first);
 }
 
 void CreateARTASAssociationsJob::createSensorAssociations()
@@ -357,7 +373,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     loginf << "CreateARTASAssociationsJob: createSensorAssociations";
     // for each rec_num + tri, find sensor hash + rec_num
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : object_man)
     {
@@ -499,7 +515,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     }
 
                     object_man.object(best_match_dbo_name)
-                        .addAssociation(best_match_rec_num, ut_it.first, assoc_it.first);
+                        .addAssociation(best_match_rec_num, ut_it.first, true, assoc_it.first);
                     ++found_hashes_cnt_;
                 }
                 else

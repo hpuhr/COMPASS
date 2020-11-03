@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbobjectmanagerwidget.h"
@@ -26,7 +26,7 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -46,7 +46,7 @@
 using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
-    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
+    : object_manager_(object_manager), schema_manager_(COMPASS::instance().schemaManager())
 {
     // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);

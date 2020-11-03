@@ -1,0 +1,453 @@
+\chapter{Evaluation}
+\label{sec:eval} 
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/evaluation.png}
+  \caption{Evaluation tab}
+\end{figure}
+
+The 'Evaluation' tab allows adapting/defining requirement-based standards  and compliance assessment of said standards. \\
+
+\section{Pre-Requisites \& Limitations}
+\label{sec:eval_prereq} 
+
+\begin{itemize}  
+\item Target report associations must be set (using \nameref{sec:task_associate_tr})
+\item At least 1 sector has to be defined (using \nameref{sec:task_manage_sectors})
+\item Usable reference data must exist
+\item Usable test data must exist
+\end{itemize}
+\ \\
+
+While it is possible to manually remove single targets from the evaluation, the usage of correct reference data is paramount for the significance of the evaluation results. \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature is currently severly limited and under heavy development, and should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
+
+There will be improvements in the next releases, and further verification of the results by the author and other users.
+
+\subsection{Target Report Associations}
+
+Since the task only makes use of the Mode S address, non-Mode S data is not evaluated and may even show up as gaps/misses in detection.
+
+\subsection{Sector Altitude Filtering}
+
+If sectors with altitude limits are used, please be aware that target reports without a Mode C code can not be filtered by the set limit. Therefore such target reports are assumed to be inside in all sectors when inside the defined 2D polygons. \\
+
+The 'inside-sector' check is always performed on the reference data only, therefore it is of importance to only use reference data with existing Mode C code data.
+
+\subsection{Reference Data}
+
+The assumption used in the tool is that the reference data is always correct. Therefore, sub-optimal reference data can cause errors, which will be attributed to the test data in the evaluation. \\
+
+To give a few examples what this could mean:
+\begin{itemize}  
+\item Wrong 'inside-sector' check results: This might remove valid test data from the evaluation and/or attribute errors to the wrong sector
+\item Missing target data in reference: This will remove the test data from evaluation for the time-period of the missing reference data
+\item Wrong position in reference: This will cause wrong 'inside-sector' check results and/or cause wrong horizontal position accuracy results
+\item Wrong/missing Mode C code in reference: This will cause wrong 'inside-sector' check results
+\item Wrong/missing identification in reference: This will cause wrong results in identification requirements
+\end{itemize}
+\ \\
+
+Also, since target secondary attributes (currently only Mode S address) are also used in the 'Target Report Association' task, errors in these attributes might also lead to imperfect data association. This would result in wrong evaluation results in almost all requirements.
+
+\section{Overview}
+\label{sec:eval_overview} 
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_overview.png}
+  \caption{Evaluation overview}
+\end{figure}
+
+At the top, 4 tabs exist:
+\begin{itemize}  
+\item Main: Main configuration
+\item Targets: Table of existing targets (filled after data was loaded)
+\item Standard: Definition of standards, selection of current standard, configuration of requirements to be checked
+\item Results: Evaluation results (created after data was evaluated)
+\end{itemize}
+\ \\
+
+Below 3 buttons exist:
+\begin{itemize}  
+\item Load Data: Loads the reference/test data
+\item Evaluate: Runs the evaluation of the current standard (available after data was loaded)
+\item Generate Report: Generates a report PDF (available after data was evaluated)
+\end{itemize}
+\ \\
+
+\section{Configuration}
+\label{sec:eval_config} 
+
+\subsection{Main Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_main.png}
+  \caption{Evaluation Main tab}
+\end{figure}
+
+In the main tab, the main configuration settings can be set. \\
+
+\subsubsection{Data Selection}
+
+At the top, the 'Data Selection' can be performed, by selecting:
+\begin{itemize}  
+\item Reference Data:
+\begin{itemize}  
+\item DBObject: Any DBObject existing in the database
+\item Data source checkboxes: Which data sources to use
+\end{itemize}
+\item Test Data:
+\begin{itemize}  
+\item DBObject: Any DBObject existing in the database
+\item Data source checkboxes: Which data sources to use
+\end{itemize}
+\end{itemize}
+\ \\
+
+As noted before, usage of appropriate reference data is of paramount importance. \\
+
+Since 'any' type of data can be selected for evaluation, this allows for the following use-cases:
+\begin{itemize}  
+\item Tracker as reference, sensor as test data: Evaluation of sensor
+\item Tracker as reference, tracker as test data: Evaluation/comparison of different trackers/tracker runs
+\end{itemize}
+\ \\
+
+Of course it is also possible to use e.g. an imported GPS trail as reference (see \nameref{sec:task_import_gps}), although this is currently not tested for lack of test data. If you might be able to provide such test data, please contact the author. \\
+
+\subsubsection{Standard}
+In the center, using the 'Standard' drop-down menu, the current standard can be selected. To create/configure the standard please use the 'Standard' tab.
+
+\subsubsection{Sector Layer/Requirement Mapping}
+
+Below that, the 'Sector Layers: Requirement Groups Usage' allows to define which requirements should be verified for which sector layer. \\
+
+On the left, all existing sector layers are listed, in the show example:
+\begin{itemize}  
+\item All: DOI without altitude limitation
+\item Lower: Same DOI with altitude limitation, i.e. everything below a certain flight level
+\item Upper: Same DOI with altitude limitation, i.e. everything above a certain flight level
+\end{itemize}
+\ \\
+
+For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in all 3 sector layers.
+
+\subsection{Targets Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_empty.png}
+  \caption{Evaluation Targets tab}
+\end{figure}
+
+Before the data was loaded, the table is empty. Each target (defined by the UTN) is shown in a dedicated row. \\
+
+The following columns exist:
+
+\begin{itemize}  
+\item Use: Checkbox defining if the target should be used in the evaluation
+\item UTN: Unique Target Number
+\item Begin: First timestamp of UTN
+\item End: Last timestamp of UTN
+\item \#All: Sum number of target reports
+\item \#Ref: Number of target reports in reference data
+\item \#Tst: Number of target reports in test data
+\item Callsign: Target identification(s)
+\item TA: Target address (hexadecimal)
+\item M3/A: Mode 3/A code(s) (octal)
+\item MC Min: Mode C code minimum [ft]
+\item MC Max: Mode C code maximum [ft]
+\end{itemize}
+\ \\
+
+Unless otherwise specified, the column content reflects the values from both reference and test data.
+
+\subsection{Standard Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_standard.png}
+  \caption{Evaluation Standard tab}
+\end{figure}
+
+In the Standard tab, at the top the current standard can be selected. \\
+
+Below, the following buttons exist:
+\begin{itemize}  
+\item Add: Add a new standard with a unique name
+\item Rename: Rename the current standard (currently disabled)
+\item Copy: Copy the current standart to a new one (currently disabled)
+\item Remove: Delete current standard
+\end{itemize}
+\ \\
+
+\subsubsection{Current Standard}
+
+Below that, the current standard is shown. On the left side, a tree-view exists showing:
+\begin{itemize}  
+\item Standard name
+\begin{itemize}  
+\item Requirement Group(s)
+\begin{itemize}  
+\item Requirement(s)
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\ \\
+
+When clicking on the standard name, a menu is shown allowing adding new requirement groups ('Add Group'). \\
+
+When clicking on a requirement group, a menu is shown allowing the following functions:
+\begin{itemize}  
+\item Delete Group: Delete the clicked requirement group
+\item Add Requirement:
+\begin{itemize}  
+\item Detection
+\item Identification
+\item Position
+\end{itemize}
+\end{itemize}
+\ \\
+
+If a requirement is clicked, it's configuration widget is shown on the right hand side. \\
+
+Each requirement has the following common attributes:
+\begin{itemize}  
+\item Name: Name of the requirement
+\item Short Name: Abbreviated name of the requirement
+\end{itemize}
+\ \\
+
+\subsubsection{Detection Requirement}
+
+\begin{itemize}  
+\item Update Interval [s]: Update interval of the test data
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Minimum Probability [1]: Minimum probability of detection
+\item Use Miss Tolerance: Checkbox if miss tolerance should be used
+\item Miss Tolerance [s]: Acceptable time delta for miss detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (\#EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (\#MUI). \\
+
+The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must be higher than the defined 'Minimum Probability' for the requirement to pass.
+
+\subsubsection{Identification Requirement}
+
+\begin{itemize}  
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Minimum Probability [1]: Minimum probability of detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to check each target report's Mode S Target Identification (TI). A TI is incorrect if set in both reference and test data and different, resulting in the number of false TIs (\#FID) and correct TIs (\#CID). \\
+
+The ratio of \#CID and \#FID+\#CID gives the Probability of Correct Identification (PID). The PID must be higher than the defined 'Minimum Probability' for the requirement to pass.
+
+\subsubsection{Position Requirement}
+
+\begin{itemize}  
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Maximum Distance [m]: Maximum allowed distance from test target report to reference
+\item Minimum Probability [1]: Minimum probability of detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to check each test target report's position. The position is incorrect if the reference position exists and the distance (to the reference position at the same time as the test target report, using linear interpolation) is larger than the defined threshold. This results in the number of incorrect positions (\#PNOK) and correct positions (\#POK). \\
+
+The ratio of \#POK and \#PNOK+\#POK gives the Probability of Acceptable Position (POK). The POK must be higher than the defined 'Minimum Probability' for the requirement to pass.
+
+\subsection{Results Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_empty.png}
+  \caption{Evaluation Results tab}
+\end{figure}
+
+Before the data was evaluated, the results are empty.\\
+
+There are several levels of detail for the results, and each sub-result is shown in a tree-view on the left side, grouped into sections. Using this tree-view, the results can be "navigated", and the currently selected results contents are shown on the right side. \\
+
+More details will be described in the following section \nameref{sec:eval_inspect}.
+
+\section{Running}
+\label{sec:eval_run} 
+
+\subsection{Load Data}
+\label{sec:eval_run_load} 
+
+After the wanted configuration (in the Main tab) has been set, the 'Load Data' button can be clicked. This results in the reference/test data being loaded, after which a post-processing will be performed. \\
+
+Please note that the post-processing step uses all available cores on the CPU.
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=8cm]{../screenshots/eval_post.png}
+  \caption{Evaluation: Post-processing after loading}
+\end{figure}
+
+The post-processing pre-calculates only which reference target reports can be used for direct comparison for specific test target reports. \\
+
+Therefore, please note that re-loading the data is only required when changes to the reference/test data settings in the Main tab have been made. Changing requirements or removing targets from evaluation does not require re-loading. \\
+
+After the loading and the post-processing have been performed, all targets are shown in the Targets tab.
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_targets.png}
+  \caption{Evaluation Targets tab after loading}
+\end{figure}
+
+The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. \\
+
+Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
+
+\subsection{Evaluation}
+\label{sec:eval_run_eval} 
+
+After the data was loaded, the configuration relating to current standard, requirements and sector/requirement group usage can be adapted. After that, the evaluation can be (re-)run using the 'Evaluate' button. \\
+
+This will trigger evaluation of the requirements in all sectors (as configured). The requirement values will be calculated for each target (whether to be used or not). Then, for each requirement and sector, the results are summed-up as per-sector average (if target should be used). \\
+
+Please note that the post-processing step uses all available cores on the CPU.
+
+\begin{figure}[H]
+  \centering 
+    \includegraphics[width=10cm]{../screenshots/eval_eval_status.png}
+  \caption{Evaluation: Running evaluation status}
+\end{figure}
+
+The results are then shown in the Results tab.
+
+\section{Results Inspection \& Analysis}
+\label{sec:eval_inspect}
+
+As described before, there are several levels of detail in which sub-results can be inspected.\\
+
+The uppermost is the 'Requirements$\rightarrow$Overview', giving the sector sums for all requirements. \\
+
+The next level of detail are the sector sum details, located in 'Sectors$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
+
+The lowest level are the per-target details, located in 'Targets$\rightarrow$UTN' and the respective per-target results located in 'Targets$\rightarrow$UTN$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
+
+By default, when single-clicking a row in a table the respective results are shown in the existing Views. When double-clicking, a step into the next level of detail is performed (if available). \\
+
+Navigation can be made more efficient by returning to the last sub-result by using the 'Back' button on the top-left.
+
+\subsection{Overview}
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_overview.png}
+  \caption{Evaluation results: Overview}
+\end{figure}
+
+When single-clicking a row, the respective result error are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_sum_osgview.png}
+  \caption{Evaluation results: Sector PD errors in OSGView}
+\end{figure}
+
+When double-clicking a row, a step into the respective sector sum details is performed.
+
+\subsection{Sector Details}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_sec_det_example.png}
+  \caption{Evaluation results: Sector Detail Example}
+\end{figure}
+
+On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results in the respective sector layer and requirement. \\
+
+At the bottom, further result details are listed per-target, sorted in this example by the Probability of Detection (PD). \\
+
+When single-clicking a row, the respective target data and result errors are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_osgview.png}
+  \caption{Evaluation results: Target PD Errors in OSGView}
+\end{figure}
+
+In the current example, the target was not detected in the test data at all, therefore the "miss" connection line is drawn from the first to last reference position (in the sector).
+
+When double-clicking a row, a step into the respective target details is performed.
+
+\subsection{Per-Target Details}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_target_det_example.png}
+  \caption{Evaluation results: Per-Target PD Detail Example}
+\end{figure}
+
+On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\
+
+At the bottom, further result details are listed per-target-report, sorted in this example by time. \\
+
+When single-clicking a row, the respective target data and the respective single result error are shown in the existing OSGViews.
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_tr_osgview.png}
+  \caption{Evaluation results: Target Single PD Error in OSGView}
+\end{figure}
+
+
+\section{Generate Report}
+\label{sec:eval_report}
+
+Using the "Export PDF" button, a PDF can be generated.
+
+\begin{figure}[H]
+    \includegraphics[width=14cm]{../screenshots/eval_report.png}
+  \caption{Evaluation results: Generate report dialog}
+\end{figure}
+
+At the top, the following configuration options exist:
+
+\begin{itemize}  
+\item Report Path: Directory to which the report will be written.
+\item Report Filename: Filename of the report, to be created in the report path. File extension must be '.tex'.
+\item Change Location: Button to set the report path and filename.
+\item Author: Author string, is added to the first page of the report.
+\item Abstract: Abstract string, is added to the first page of the report.
+\item Include Per-Target Details: Whether to include the per-target details.
+\item Include Per-Target Target Report Details: Whether to include the per-target target report details.
+\item Wait on Map Loading: When OSGView screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
+\item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
+\item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
+\end{itemize}
+\ \\
+
+Please \textbf{note} that the two 'Include ... Details' options can produce very large PDF reports (10.000+ pages), and may even overload the Latex sub-system (will result in 'TeX capacity exceeded, sorry' error). It is therefore recommended to only activate these options for small datasets with very few sector layers. \\
+
+The 'Run' button startes the export process. At the bottom, status information and a cancel button exists. \\
+
+To run the export process, click the 'Run' button.
+
+\begin{figure}[H]
+    \includegraphics[width=14cm]{../screenshots/eval_report_status.png}
+  \caption{Evaluation results: Generate report in progress}
+\end{figure}
+
+If the export process was sucessful, the dialog is closed automatically. The report Latex file was written into the report directory, with screenshots in the 'screenshots' subfolder. If the respective options were set, a PDF was automatically generated and is opened using the default PDF application. \\
+
+If a Latex error ocurred, a message box with the error message is shown. If the 'TeX capacity exceeded, sorry' error is shown, disable one or both of the 'Include ... Details' options.\\
+
+Please note that the generated report can of course be edited by the user and re-generated using pdflatex, which allows for better customization options (adding e.g. details, corporate identity etc.).
+

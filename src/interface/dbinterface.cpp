@@ -1,22 +1,22 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbinterface.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
@@ -42,10 +42,8 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "sector.h"
-
-#include "json.hpp"
-
-#include <fstream>
+#include "sectorlayer.h"
+#include "evaluationmanager.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -53,6 +51,8 @@
 #include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <fstream>
 
 using namespace Utils;
 using namespace std;
@@ -62,8 +62,8 @@ using namespace nlohmann;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
  * count_), creates write_table_names_,
  */
-DBInterface::DBInterface(string class_id, string instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb), sql_generator_(*this)
+DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -131,7 +131,7 @@ void DBInterface::databaseContentChanged()
     if (!existsSectorsTable())
         createSectorsTable();
 
-    loadSectors();
+    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     emit databaseContentChangedSignal();
 }
@@ -338,7 +338,7 @@ bool DBInterface::hasDataSourceTables(DBObject& object)
         return false;
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         return false;
@@ -368,7 +368,7 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     shared_ptr<Buffer> buffer{new Buffer()};
 
     const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds_def.metaTableName()));
 
     MetaDBTable& meta = schema.metaTable(ds_def.metaTableName());
@@ -612,7 +612,7 @@ map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds.metaTableName()));
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
@@ -1024,7 +1024,7 @@ void DBInterface::saveProperties()
     loginf << "DBInterface: saveProperties: done";
 }
 
-void DBInterface::loadSectors()
+std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 {
     loginf << "DBInterface: loadSectors";
 
@@ -1062,6 +1062,8 @@ void DBInterface::loadSectors()
     string layer_name;
     string json_str;
 
+    std::vector<std::shared_ptr<SectorLayer>> sector_layers;
+
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
         assert(!id_vec.isNull(cnt));
@@ -1074,23 +1076,29 @@ void DBInterface::loadSectors()
         layer_name = layer_name_vec.get(cnt);
         json_str = json_vec.get(cnt);
 
-        assert (!hasSector(name, layer_name));
+        auto lay_it = std::find_if(sector_layers.begin(), sector_layers.end(),
+                                   [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+
+        if (lay_it == sector_layers.end())
+        {
+            sector_layers.push_back(make_shared<SectorLayer>(layer_name));
+
+            lay_it = std::find_if(
+                        sector_layers.begin(), sector_layers.end(),
+                        [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+        }
 
         shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, json_str);
         string layer_name = new_sector->layerName();
 
-        if (!hasSectorLayer(layer_name))
-            sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-        assert (hasSectorLayer(layer_name));
-
-        sectorLayer(layer_name)->addSector(new_sector);
-
-        assert (hasSector(name, layer_name));
+        (*lay_it)->addSector(new_sector);
+        assert ((*lay_it)->hasSector(name));
 
         loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
-               << layer_name << "' num points " << sector(name, layer_name)->size();
+               << layer_name << "' num points " << (*lay_it)->sector(name)->size();
     }
+
+    return sector_layers;
 }
 
 void DBInterface::insertMinMax(const string& id, const string& object_name,
@@ -1319,138 +1327,12 @@ void DBInterface::createSectorsTable()
     updateTableInfo();
 }
 
-bool DBInterface::hasSectorLayer (const std::string& layer_name)
-{
-    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
 
-    return iter != sector_layers_.end();
+void DBInterface::clearSectorsTable()
+{
+    clearTableContent(TABLE_NAME_SECTORS);
 }
 
-//void DBInterface::renameSectorLayer (const std::string& name, const std::string& new_name)
-//{
-//    // TODO
-//}
-
-std::shared_ptr<SectorLayer> DBInterface::sectorLayer (const std::string& layer_name)
-{
-    assert (hasSectorLayer(layer_name));
-
-    auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                             [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
-    assert (iter != sector_layers_.end());
-
-    return *iter;
-}
-
-unsigned int DBInterface::getMaxSectorId ()
-{
-    unsigned int id = 0;
-    for (auto& sec_lay_it : sector_layers_)
-        for (auto& sec_it : sec_lay_it->sectors())
-            if (sec_it->id() > id)
-                id = sec_it->id();
-
-    return id;
-}
-
-void DBInterface::createNewSector (const std::string& name, const std::string& layer_name,
-                                   std::vector<std::pair<double,double>> points)
-{
-    loginf << "DBInterface: createNewSector: name " << name << " layer_name " << layer_name
-           << " num points " << points.size();
-
-    assert (!hasSector(name, layer_name));
-
-    unsigned int id = getMaxSectorId()+1;
-
-    shared_ptr<Sector> sector = make_shared<Sector> (id, name, layer_name, points);
-
-    // add to existing sectors
-    if (!hasSectorLayer(layer_name))
-        sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-    assert (hasSectorLayer(layer_name));
-
-    sectorLayer(layer_name)->addSector(sector);
-
-    assert (hasSector(name, layer_name));
-    sector->save();
-}
-
-bool DBInterface::hasSector (const string& name, const string& layer_name)
-{
-    if (!hasSectorLayer(layer_name))
-        return false;
-
-    return sectorLayer(layer_name)->hasSector(name);
-}
-
-bool DBInterface::hasSector (unsigned int id)
-{
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        auto& sectors = sec_lay_it->sectors();
-        auto iter = std::find_if(sectors.begin(), sectors.end(),
-                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
-        if (iter != sectors.end())
-            return true;
-    }
-    return false;
-}
-
-std::shared_ptr<Sector> DBInterface::sector (const string& name, const string& layer_name)
-{
-    assert (hasSector(name, layer_name));
-    return sectorLayer(layer_name)->sector(name);
-}
-
-std::shared_ptr<Sector> DBInterface::sector (unsigned int id)
-{
-    assert (hasSector(id));
-
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        auto& sectors = sec_lay_it->sectors();
-        auto iter = std::find_if(sectors.begin(), sectors.end(),
-                                 [id](const shared_ptr<Sector>& x) { return x->id() == id;});
-        if (iter != sectors.end())
-            return *iter;
-    }
-
-    logerr << "DBInterface: sector: id " << id << " not found";
-    assert (false);
-}
-
-void DBInterface::moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name)
-{
-    assert (hasSector(id));
-
-    shared_ptr<Sector> tmp_sector = sector(id);
-
-    assert (hasSectorLayer(old_layer_name));
-    sectorLayer(old_layer_name)->removeSector(tmp_sector);
-
-    if (!hasSectorLayer(new_layer_name))
-        sector_layers_.push_back(make_shared<SectorLayer>(new_layer_name));
-
-    assert (hasSectorLayer(new_layer_name));
-    sectorLayer(new_layer_name)->addSector(tmp_sector);
-
-    assert (hasSector(tmp_sector->name(), new_layer_name));
-    tmp_sector->save();
-}
-
-std::vector<std::shared_ptr<SectorLayer>>& DBInterface::sectorsLayers()
-{
-    return sector_layers_;
-}
-
-void DBInterface::saveSector(unsigned int id)
-{
-    assert (hasSector(id));
-    saveSector(sector(id));
-}
 
 void DBInterface::saveSector(shared_ptr<Sector> sector)
 {
@@ -1465,8 +1347,6 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
 
     assert(current_connection_);
 
-    assert (hasSector(sector->name(), sector->layerName()));
-
     if (!existsSectorsTable())
         createSectorsTable();
 
@@ -1480,149 +1360,25 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
         current_connection_->executeSQL(str);
     }
 
-    emit sectorsChangedSignal();
+
 }
 
 void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
-    assert (hasSector(sector->name(), sector->layerName()));
-
     unsigned int sector_id = sector->id();
 
-    string layer_name = sector->layerName();
+    QMutexLocker locker(&connection_mutex_);
+    string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
 
-    assert (hasSectorLayer(layer_name));
-
-    sectorLayer(layer_name)->removeSector(sector);
-
-    // remove sector layer if empty
-    if (!sectorLayer(layer_name)->size())
-    {
-        auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
-                                 [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
-
-        assert (iter != sector_layers_.end());
-        sector_layers_.erase(iter);
-    }
-
-    {
-        QMutexLocker locker(&connection_mutex_);
-        string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
-
-        //loginf << "UGA '" << cmd << "'";
-        current_connection_->executeSQL(cmd);
-    }
-
-    emit sectorsChangedSignal();
+    //loginf << "UGA '" << cmd << "'";
+    current_connection_->executeSQL(cmd);
 }
 
 void DBInterface::deleteAllSectors()
 {
-    sector_layers_.clear();
     clearTableContent(TABLE_NAME_SECTORS);
-
-    emit sectorsChangedSignal();
 }
 
-void DBInterface::importSectors (const std::string& filename)
-{
-    loginf << "DBInterface: importSectors: filename '" << filename << "'";
-
-    sector_layers_.clear();
-    clearTableContent(TABLE_NAME_SECTORS);
-
-    std::ifstream input_file(filename, std::ifstream::in);
-
-    try
-    {
-        json j = json::parse(input_file);
-
-        if (!j.contains("sectors"))
-        {
-            logerr << "DBInterface: importSectors: file does not contain sectors";
-            return;
-        }
-
-        json& sectors = j["sectors"];
-
-        if (!sectors.is_array())
-        {
-            logerr << "DBInterface: importSectors: file sectors is not an array";
-            return;
-        }
-
-        unsigned int id;
-        string name;
-        string layer_name;
-        string json_str;
-
-        for (auto& j_sec_it : sectors.get<json::array_t>())
-        {
-            if (!j_sec_it.contains("id")
-                    || !j_sec_it.contains("name")
-                    || !j_sec_it.contains("layer_name")
-                    || !j_sec_it.contains("points"))
-            {
-                logerr << "DBInterface: importSectors: ill-defined sectors skipped, json '" << j_sec_it.dump(4)
-                       << "'";
-                continue;
-            }
-
-            id = j_sec_it.at("id");
-            name = j_sec_it.at("name");
-            layer_name = j_sec_it.at("layer_name");
-
-            shared_ptr<Sector> new_sector = make_shared<Sector>(id, name, layer_name, j_sec_it.dump());
-
-            if (!hasSectorLayer(layer_name))
-                sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
-
-            sectorLayer(layer_name)->addSector(new_sector);
-
-            assert (hasSector(name, layer_name));
-
-            new_sector->save();
-
-            loginf << "DBInterface: importSectors: loaded sector '" << name << "' in layer '"
-                   << layer_name << "' num points " << sector(name, layer_name)->size();
-        }
-    }
-    catch (json::exception& e)
-    {
-        logerr << "DBInterface: importSectors: could not load file '"
-               << filename << "'";
-        throw e;
-    }
-
-    emit sectorsChangedSignal();
-}
-
-void DBInterface::exportSectors (const std::string& filename)
-{
-    loginf << "DBInterface: exportSectors: filename '" << filename << "'";
-
-    json j;
-
-    j["sectors"] = json::array();
-    json& sectors = j["sectors"];
-
-    unsigned int cnt = 0;
-
-    for (auto& sec_lay_it : sector_layers_)
-    {
-        for (auto& sec_it : sec_lay_it->sectors())
-        {
-            sectors[cnt] = sec_it->jsonData();
-            ++cnt;
-        }
-    }
-
-    std::ofstream output_file;
-    output_file.open(filename, std::ios_base::out);
-
-    output_file << j.dump(4);
-
-}
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {
@@ -2192,14 +1948,21 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
             NullableVector<int>& utns = buffer->get<int>("utn");
             NullableVector<int>& src_rec_nums = buffer->get<int>("src_rec_num");
 
+            bool has_src;
+
             for (size_t cnt = 0; cnt < num_associations; ++cnt)
             {
                 assert(!rec_nums.isNull(cnt));
                 assert(!utns.isNull(cnt));
-                assert(!src_rec_nums.isNull(cnt));
 
-                associations.add(rec_nums.get(cnt),
-                                 DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
+                has_src = !src_rec_nums.isNull(cnt);
+
+                if (has_src)
+                    associations.add(rec_nums.get(cnt),
+                                     DBOAssociationEntry(utns.get(cnt), true, src_rec_nums.get(cnt)));
+                else
+                    associations.add(rec_nums.get(cnt),
+                                     DBOAssociationEntry(utns.get(cnt), false, 0));
             }
         }
     }
@@ -2207,81 +1970,4 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
     return associations;
 }
 
-// void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string filter)
-//{
-//    assert (sql_generator_);
 
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    scoped_lock l(mutex_);
-//    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(),
-//    value, filter));
-//}
-
-// void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string new_value,
-// string filter)
-//{
-//    assert (sql_generator_);
-
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(),
-//    value, new_value,
-// filter));
-//}
-
-// void DBInterface::testReading ()
-//{
-//    loginf << "DBInterface: testReading";
-
-//    boost::posix_time::ptime start_time;
-//    boost::posix_time::ptime stop_time;
-
-//    DBObject &object = ATSDB::instance().objectManager().object("MLAT");
-//    DBOVariableSet read_list;
-
-//    loginf << "DBInterface: testReading: adding all variables";
-//    for (auto variable_it : object.variables())
-//        read_list.add(variable_it.second);
-
-//    loginf << "DBInterface: testReading: preparing reading";
-//    prepareRead (object, read_list); //, string custom_filter_clause="", DBOVariable
-//    *order=0);
-
-//    start_time = boost::posix_time::microsec_clock::local_time();
-
-//    loginf << "DBInterface: testReading: starting reading";
-//    vector<shared_ptr <Buffer>> buffer_vector;
-
-//    unsigned int num_rows=0;
-
-//    while (!getReadingDone(object))
-//    {
-//        shared_ptr <Buffer> buffer = readDataChunk (object, false);
-//        buffer_vector.push_back(buffer);
-
-//        stop_time = boost::posix_time::microsec_clock::local_time();
-//        boost::posix_time::time_duration diff = stop_time - start_time;
-
-//        num_rows += buffer->size();
-//        if (diff.total_seconds() > 0)
-//            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " <<
-//            num_rows
-//<< " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
-//    }
-
-//    boost::posix_time::time_duration diff = stop_time - start_time;
-//    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff <<
-//    " #el/sec "
-//<< num_rows/diff.total_seconds();
-//    finalizeReadStatement (object);
-
-//    loginf << "DBInterface: testReading: clearing buffers";
-//    buffer_vector.clear();
-
-//    loginf << "DBInterface: testReading: done";
-//}
