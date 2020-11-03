@@ -1,0 +1,64 @@
+\section{Key Concepts}
+\label{sec:key_concepts}
+
+In this section, a few key concepts are introduced to give a somewhat deeper understanding of COMPASS and to allow the reader to understand some main design choices made by the author. This should also give indications about the strengths and draw-backs of the chosen approach.
+
+\subsection*{Database Systems}
+A database allows for storage, retrieval and filtering of the data of interest. While SQL has some definitive drawbacks, it was chosen since support of the SASS-C database SCDB was wanted.\\
+Currently  two  database  systems  are  supported: MySQL and SQLite3. \\
+MySQL  relies on an independent background service or remote server, which holds several databases and can also be accessed over a network connection.\\
+SQLite3 encapsulates a database in a single file container, which is read from a storage medium (e.g. hard drive).
+
+\subsection*{Configuration}
+At startup, numerous configuration files are loaded, and at shutdown the current configuration state of COMPASS is saved.\\
+The configuration is not just a matter of storing simple parameters of components, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are created.  The same holds for the filters, or the database interface/schema. \\
+This way, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using have a completely configurable database schema or filter configuration. \\
+This allows for a high degree of flexibility, but somewhat complicates software development.
+
+\subsection*{Flexible Database Interface}
+Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.\\
+To summarize, several database schemas can be stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (\textbf{DBObjects}). In each database system, any database schema can be used.
+
+\subsection*{Database Objects}
+A Database Object (\textbf{DBObject}) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBObject is present, it can be loaded and displayed.\\
+
+To allow displaying data from different DBObjects in the same system, so-called meta-variables were introduced, which hold variables that are present in some or all DBObjects (with a possibly different name or unit).  For example, there meta-variable 'tod', which is a collection of sub-variables for each existing DBObject and the respective 'Time of Day' variable.
+
+\subsection*{Unique Target Numbers}
+A \textbf{U}nique \textbf{T}arget \textbf{N}umber (UTN) groups together system track updates and/or sensor target reports.
+Currently is (only) created based on ARTAS information (one UTN for each ARTAS track), grouping together ARTAS tracks and associated sensor target reports.
+
+\subsection*{ASTERIX Data Import}
+If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded using the jASTERIX library. This library allows adding new framings, categories and editions based on configuration only. The resulting JSON data is then mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
+
+\subsection*{JSON Data Import}
+If surveillance data is given in the JSON format, it can be mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
+
+\subsection*{Data Loading}
+In COMPASS, a unified data loading process was chosen, meaning that only exactly one common dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
+This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it does not allow several independent datasets (e.g. with different filters) to be loaded.
+
+\subsection*{Generating a Verif Database}
+\label{sec:generation}
+
+A SASS-C Verif database has to be generated before it can be opened with COMPASS.  This section describes how such
+a process can be performed, however it is by no means a complete guide. \\
+
+A complete treatment of how to generate a database using the highly sophisticated SASS-C Verif frame work  is  out  of  the  scope  of  this  document.   However, a short summary of the necessary steps will be presented here.\\
+
+\begin{itemize}  
+\item Import a previous evaluation job
+\item Set data recording path, e.g. 'somelocation/\%iffile.if'
+\item Run IRIS command
+\item Run OTR command
+\item Run CMP command with all but RA
+\item Run CMP command with just RA
+\end{itemize}
+
+After  these  steps,  a  database  was  generated  and  filled  with  data.   The  name  of  the  database  (which
+will  be  needed  during  the  opening  process)  is  equivalent  to  the  job  name,  e.g.   'job\_v7\_mainsacso\_0005', 'HelloWorld' etc. \\
+
+Please \textbf{note} that the SASS-C MySQL database name is not case sensitive ('job\_v7\_mainsacso\_0005' is the same as 'JOB\_V7\_MAINSACSO\_0005'). \\
+ 
+This database can either be used directly (by connecting to it) or exported in Verif (to be imported using COMPASS). Please note that using COMPASS on a MySQL database still in use by Verif is not recommended.
+ 

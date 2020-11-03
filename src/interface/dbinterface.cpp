@@ -1,22 +1,22 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbinterface.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "config.h"
 #include "dbcommand.h"
@@ -62,8 +62,8 @@ using namespace nlohmann;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
  * count_), creates write_table_names_,
  */
-DBInterface::DBInterface(string class_id, string instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb), sql_generator_(*this)
+DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -131,7 +131,7 @@ void DBInterface::databaseContentChanged()
     if (!existsSectorsTable())
         createSectorsTable();
 
-    ATSDB::instance().evaluationManager().loadSectors(); // init done in mainwindow
+    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     emit databaseContentChangedSignal();
 }
@@ -338,7 +338,7 @@ bool DBInterface::hasDataSourceTables(DBObject& object)
         return false;
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         return false;
@@ -368,7 +368,7 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     shared_ptr<Buffer> buffer{new Buffer()};
 
     const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds_def.metaTableName()));
 
     MetaDBTable& meta = schema.metaTable(ds_def.metaTableName());
@@ -612,7 +612,7 @@ map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
     logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(ds.metaTableName()));
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
@@ -1970,81 +1970,4 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
     return associations;
 }
 
-// void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string filter)
-//{
-//    assert (sql_generator_);
 
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    scoped_lock l(mutex_);
-//    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(),
-//    value, filter));
-//}
-
-// void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, string value,
-// string new_value,
-// string filter)
-//{
-//    assert (sql_generator_);
-
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(),
-//    value, new_value,
-// filter));
-//}
-
-// void DBInterface::testReading ()
-//{
-//    loginf << "DBInterface: testReading";
-
-//    boost::posix_time::ptime start_time;
-//    boost::posix_time::ptime stop_time;
-
-//    DBObject &object = ATSDB::instance().objectManager().object("MLAT");
-//    DBOVariableSet read_list;
-
-//    loginf << "DBInterface: testReading: adding all variables";
-//    for (auto variable_it : object.variables())
-//        read_list.add(variable_it.second);
-
-//    loginf << "DBInterface: testReading: preparing reading";
-//    prepareRead (object, read_list); //, string custom_filter_clause="", DBOVariable
-//    *order=0);
-
-//    start_time = boost::posix_time::microsec_clock::local_time();
-
-//    loginf << "DBInterface: testReading: starting reading";
-//    vector<shared_ptr <Buffer>> buffer_vector;
-
-//    unsigned int num_rows=0;
-
-//    while (!getReadingDone(object))
-//    {
-//        shared_ptr <Buffer> buffer = readDataChunk (object, false);
-//        buffer_vector.push_back(buffer);
-
-//        stop_time = boost::posix_time::microsec_clock::local_time();
-//        boost::posix_time::time_duration diff = stop_time - start_time;
-
-//        num_rows += buffer->size();
-//        if (diff.total_seconds() > 0)
-//            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " <<
-//            num_rows
-//<< " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
-//    }
-
-//    boost::posix_time::time_duration diff = stop_time - start_time;
-//    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff <<
-//    " #el/sec "
-//<< num_rows/diff.total_seconds();
-//    finalizeReadStatement (object);
-
-//    loginf << "DBInterface: testReading: clearing buffers";
-//    buffer_vector.clear();
-
-//    loginf << "DBInterface: testReading: done";
-//}

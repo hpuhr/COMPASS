@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DBOOBJECTCOMBOBOX_H
@@ -20,7 +20,7 @@
 
 #include <QComboBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "global.h"
@@ -41,11 +41,11 @@ class DBObjectComboBox : public QComboBox
     DBObjectComboBox(bool allow_meta, QWidget* parent = 0)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
-        assert(ATSDB::instance().objectManager().size());
+        assert(COMPASS::instance().objectManager().size());
         if (allow_meta_)
             addItem(META_OBJECT_NAME.c_str());
 
-        for (auto& obj_it : ATSDB::instance().objectManager())
+        for (auto& obj_it : COMPASS::instance().objectManager())
         {
             addItem(obj_it.first.c_str());
         }

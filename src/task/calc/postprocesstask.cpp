@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "postprocesstask.h"
@@ -21,7 +21,7 @@
 #include <QMessageBox>
 #include <QProgressDialog>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dboactivedatasourcesdbjob.h"
 #include "dbobject.h"
@@ -70,13 +70,13 @@ void PostProcessTask::generateSubConfigurable(const std::string& class_id,
 
 bool PostProcessTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())
+    if (!COMPASS::instance().interface().ready())
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    return ATSDB::instance().objectManager().hasData();
+    return COMPASS::instance().objectManager().hasData();
 }
 
 bool PostProcessTask::isRecommended()
@@ -84,13 +84,13 @@ bool PostProcessTask::isRecommended()
     if (!checkPrerequisites())
         return false;
 
-    if (!ATSDB::instance().objectManager().hasData())
+    if (!COMPASS::instance().objectManager().hasData())
         return false;
 
     return !done_;
 }
 
-bool PostProcessTask::canRun() { return ATSDB::instance().objectManager().hasData(); }
+bool PostProcessTask::canRun() { return COMPASS::instance().objectManager().hasData(); }
 
 void PostProcessTask::run()
 {
@@ -102,15 +102,15 @@ void PostProcessTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
 
     loginf << "PostProcessTask: postProcess: creating jobs";
 
-    assert(ATSDB::instance().objectManager().hasData());
+    assert(COMPASS::instance().objectManager().hasData());
 
     unsigned int dbos_with_data = 0;
 
-    for (auto obj_it : ATSDB::instance().objectManager())
+    for (auto obj_it : COMPASS::instance().objectManager())
         if (obj_it.second->hasData())
             ++dbos_with_data;
 
@@ -129,14 +129,14 @@ void PostProcessTask::run()
     else
         db_interface.clearTableContent(TABLE_NAME_MINMAX);
 
-    for (auto obj_it : ATSDB::instance().objectManager())
+    for (auto obj_it : COMPASS::instance().objectManager())
     {
         if (!obj_it.second->hasData())
             continue;
 
         {
             DBOActiveDataSourcesDBJob* job =
-                new DBOActiveDataSourcesDBJob(ATSDB::instance().interface(), *obj_it.second);
+                new DBOActiveDataSourcesDBJob(COMPASS::instance().interface(), *obj_it.second);
 
             std::shared_ptr<Job> shared_job = std::shared_ptr<Job>(job);
             connect(job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()),
@@ -145,7 +145,7 @@ void PostProcessTask::run()
             postprocess_jobs_.push_back(shared_job);
         }
         {
-            DBOMinMaxDBJob* job = new DBOMinMaxDBJob(ATSDB::instance().interface(), *obj_it.second);
+            DBOMinMaxDBJob* job = new DBOMinMaxDBJob(COMPASS::instance().interface(), *obj_it.second);
             std::shared_ptr<Job> shared_job = std::shared_ptr<Job>(job);
             connect(job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()),
                     Qt::QueuedConnection);
@@ -192,7 +192,7 @@ void PostProcessTask::postProcessingJobDoneSlot()
         std::string time_str =
             String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
-        ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
         delete postprocess_dialog_;
         postprocess_dialog_ = nullptr;

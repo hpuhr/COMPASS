@@ -1,9 +1,26 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "viewpointswidget.h"
 #include "viewmanager.h"
 #include "viewpoint.h"
 #include "logger.h"
 #include "viewpointstablemodel.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
@@ -99,7 +116,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBObjectManager& dbo_man = ATSDB::instance().objectManager();
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
 
     connect (&dbo_man, &DBObjectManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
     connect (&dbo_man, &DBObjectManager::allLoadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);

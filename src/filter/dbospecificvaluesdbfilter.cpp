@@ -1,6 +1,23 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "dbospecificvaluesdbfilter.h"
 #include "dbospecificvaluesdbfilterwidget.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
@@ -23,11 +40,11 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
     registerParameter("condition_operator", &condition_operator_, "");
 
     // dbobject
-    if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
+    if (!COMPASS::instance().objectManager().existsObject(dbo_name_))
         throw std::invalid_argument("DataSourcesFilter: DataSourcesFilter: instance " +
                                     instance_id + " has non-existing object " + dbo_name_);
 
-    object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+    object_ = &COMPASS::instance().objectManager().object(dbo_name_);
     assert (object_);
 
     if (!object_->hasCurrentDataSourceDefinition())

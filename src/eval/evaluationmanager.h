@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef EVALUATIONMANAGER_H
 #define EVALUATIONMANAGER_H
 
@@ -15,7 +32,7 @@
 
 #include "json.hpp"
 
-class ATSDB;
+class COMPASS;
 class EvaluationStandard;
 class DBObject;
 class DBOVariableSet;
@@ -39,7 +56,7 @@ public slots:
     void loadingDoneSlot(DBObject& object);
 
 public:
-    EvaluationManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
     void init(QTabWidget* tab_widget);
@@ -149,11 +166,8 @@ public:
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
 
-    bool generateReportDetails() const;
-    void generateReportDetails(bool value);
-
 protected:
-    ATSDB& atsdb_;
+    COMPASS& compass_;
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};
@@ -183,8 +197,6 @@ protected:
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
-
-    bool generate_details_ {true};
 
     EvaluationData data_;
     EvaluationResultsGenerator results_gen_;

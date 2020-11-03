@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mysqldbimportjob.h"
 
 #include <archive.h>
@@ -6,7 +23,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "files.h"
 #include "logger.h"
@@ -121,7 +138,7 @@ void MySQLDBImportJob::importSQLFile()
     }
 
     sql_file.close();
-    ATSDB::instance().interface().databaseContentChanged();
+    COMPASS::instance().interface().databaseContentChanged();
 }
 
 void MySQLDBImportJob::importSQLArchiveFile()
@@ -287,5 +304,5 @@ void MySQLDBImportJob::importSQLArchiveFile()
             "MySQLppConnection: importSQLArchiveFile: archive read free error: " +
             std::string(archive_error_string(a)));
 
-    ATSDB::instance().interface().databaseContentChanged();
+    COMPASS::instance().interface().databaseContentChanged();
 }

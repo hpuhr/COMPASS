@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "sqlgenerator.h"
@@ -21,7 +21,7 @@
 #include <iomanip>
 #include <string>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
@@ -190,7 +190,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& o
     assert(object.hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
         throw std::invalid_argument(
@@ -411,164 +411,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand(const std:
     return command;
 }
 
-// DBCommand *SQLGenerator::getCountStatement (const std::string &dbo_type, unsigned int
-// sensor_number)
-//{
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
-//    DBObject *object = ATSDB::getInstance().getDBObject(dbo_type);
-//    assert (object);
-//    assert (object->hasCurrentDataSource());
-
-//    std::string data_source_key = object->getCurrentDataSource()->getLocalKey();
-
-//    std::string table_name = object->getCurrentMetaTable()->getTableDBName();
-
-//    PropertyList list;
-//    list.addProperty ("count", PropertyDataType::UINT);
-
-//    DBCommand *command = new DBCommand ();
-//    command->setPropertyList(list);
-//    command->setCommandString("SELECT COUNT(*) FROM " + table_name + " WHERE
-//    "+data_source_key+"="+String::intToString(sensor_number));
-
-//    return command;
-//}
-
-// DBCommand *SQLGenerator::getDistinctStatistics (const std::string &dbo_type, DBOVariable
-// *variable, unsigned int sensor_number)
-//{
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
-//    DBObject *object = ATSDB::getInstance().getDBObject(dbo_type);
-//    assert (object);
-//    assert (object->hasCurrentDataSource());
-
-//    assert (variable->existsIn(dbo_type));
-
-//    DBOVariable *typevar = variable->getFor(dbo_type);
-
-//    assert (ATSDB::getInstance().getDBObject(DBO_UNDEFINED)->hasVariable("frame_time"));
-//    DBOVariable *metatimevar =
-//    ATSDB::getInstance().getDBObject(DBO_UNDEFINED)->getVariable("frame_time"); assert
-//    (metatimevar->existsIn(type)); DBOVariable *timevar = metatimevar->getFor(type);
-
-//    std::string data_source_key = object->getCurrentDataSource()->getLocalKey();
-
-//    std::string table_name = object->getCurrentMetaTable()->getTableDBName();
-
-//    std::string distinctvarname = typevar->getCurrentVariableName();
-//    std::string timevarname = timevar->getCurrentVariableName();
-
-//    PropertyList list;
-//    list.addProperty ("element", typevar->getDataType());
-//    list.addProperty ("count", PropertyDataType::UINT);
-//    list.addProperty ("time_min", typevar->getDataType());
-//    list.addProperty ("time_max", typevar->getDataType());
-
-//    DBCommand *command = new DBCommand ();
-////    command->setPropertyList(list);
-////    command->setCommandString("SELECT "+distinctvarname+",COUNT(*), MIN("+timevarname+"),
-/// MAX("+timevarname+")" /            " FROM " + table_name + " WHERE
-///"+data_source_key+"="+intToString(sensor_number)+ " GROUP BY "+distinctvarname);
-
-//    return command;
-//}
-
-// DBCommand *SQLGenerator::getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned
-// int> ids,
-//        DBOVariableSet read_list, bool use_filters,
-//        std::string order_by_variable, bool ascending, unsigned int limit_min, unsigned int
-//        limit_max)
-//{
-//    assert (ATSDB::getInstance().existsDBObject (DBO_UNDEFINED));
-//    assert (ATSDB::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
-
-//    DBOVariable *idvar = ATSDB::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
-//    assert (idvar->existsIn (type));
-
-//    assert (ATSDB::getInstance().existsDBObject(type));
-//    MetaDBTable *table = ATSDB::getInstance().getDBObject(type)->getCurrentMetaTable ();
-//    std::vector <std::string> filtered_variable_names;
-
-//    std::stringstream filter;
-
-//    if (ids.size() != 0)
-//    {
-//        filter << "(";
-
-//        std::vector<unsigned int>::iterator it;
-//        for ( it = ids.begin(); it != ids.end(); it++)
-//        {
-//            if (it != ids.begin())
-//                filter << " OR ";
-
-//            filter <<  table->getTableDBName()<< "." <<
-//            idvar->getFor(type)->id_+"='"+intToString(*it)+"'";
-//        }
-
-//        filter << ")";
-//    }
-
-//    if (use_filters)
-//    {
-//        std::string filter_condition = FilterManager::getInstance().getSQLCondition(type,
-//        filtered_variable_names);
-
-//        if (filter_condition.size() != 0)
-//        {
-//            if (ids.size() != 0)
-//                filter << " AND ";
-
-//            filter << filter_condition;
-//        }
-//    }
-
-//    std::string order;
-//    if (order_by_variable.size() != 0)
-//    {
-//        order = order_by_variable;
-//        if (ascending)
-//            order += " ASC";
-//        else
-//            order += " DESC";
-//    }
-
-//    std::string limit;
-//    if (limit_min != limit_max)
-//    {
-//        assert (limit_min < limit_max);
-//        limit = " LIMIT " + intToString(limit_min)+", "+ intToString(limit_max);
-//    }
-
-//    DBCommand *command = getSelectCommand (read_list.getPropertyList(type), table,
-//    filtered_variable_names, filter.str(), order, limit, false, true);
-
-//    logdbg  << "SQLGenerator: getSelectInfoCommand: type " <<
-//    ATSDB::getInstance().getDBObject(type)->getName() << " sql '" << command->getCommandString()
-//    << "'";
-//}
-
-// std::string SQLGenerator::getContainsStatement (std::string table_name)
-//{
-//    if (!db_type_set_)
-//    {
-//        db_type_=db_interface_->getDBInfo()->getType();
-//        db_type_set_=true;
-//    }
-
-////    if (db_type_ == DB_TYPE_SQLITE)
-////        return "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table_name +
-///"';"; /    else  || db_type_ == DB_TYPE_MYSQLCon
-//    if (db_type_ == DB_TYPE_MYSQLpp)
-//    {
-//        //return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema =
-//        '"+db_interface_->getDatabaseName()+"' AND table_name ='" + table_name + "';"; return
-//        "SHOW TABLES LIKE '"+table_name+"';";
-//    }
-//    else
-//        throw std::runtime_error ("SQLGenerator: getContainsStatement: unknown db type");
-
-//}
-
 std::string SQLGenerator::getCountStatement(const std::string& table)
 {
     return "SELECT COUNT(*) FROM " + table + ";";
@@ -617,44 +459,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(con
 
     return command;
 }
-
-// DBCommand *SQLGenerator::getColumnSelectMinMaxStatement (DBTableColumn *column, std::string
-// table_name)
-//{
-//    stringstream ss;
-
-//    DBCommand *command = new DBCommand ();
-//    assert (command);
-
-//    PropertyList command_list;
-
-//    ss << "SELECT ";
-
-//    //DBTableColumn *column;
-//    //bool first=true;
-//    std::string column_name = column->getName();
-
-//    ss << "MIN("<< column_name <<"),MAX("<< column_name <<")";
-
-//    command_list.addProperty(column_name+"MIN", PropertyDataType::STRING);
-//    command_list.addProperty(column_name+"MAX", PropertyDataType::STRING);
-
-//    ss << " FROM " <<
-//    DBSchemaManager::getInstance().getCurrentSchema()->getTable(table_name)->getDBName();
-
-//    if (column->hasSpecialNull())
-//        ss << " WHERE " << column_name << " != " << column->getSpecialNull();
-
-//    command->setCommandString (ss.str());
-//    command->setPropertyList(command_list);
-
-//    //delete list;
-
-//    loginf  << "SQLGenerator: getMainTableSelectMinMaxStatement: sql '" << ss.str() << "'";
-
-//    return command;
-
-//}
 
 std::string SQLGenerator::getInsertPropertyStatement(const std::string& id,
                                                      const std::string& value)
@@ -761,74 +565,6 @@ std::string SQLGenerator::getTableViewPointsCreateStatement()
     return table_view_points_create_statement_;
 }
 
-// std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string tablename)
-//{
-//    assert (buffer);
-//    assert (tablename.size() > 0);
-
-//    const PropertyList &list = buffer->properties();
-
-//    unsigned int size = list.size();
-//    logdbg  << "SQLGenerator: createDBInsertStringBind: creating db string";
-//    std::stringstream ss;//create a stringstream
-
-//    ss << "INSERT INTO " << tablename;
-
-//    if (!db_type_set_)
-//    {
-//        db_type_=db_interface_->getDBInfo()->getType();
-//        db_type_set_=true;
-//    }
-
-//    if (db_type_ == DB_TYPE_MYSQLpp) // || db_type_ == DB_TYPE_MYSQLCon
-//    {
-//        //const std::vector <Property> &properties = list.getProperties();
-//        ss << "(";
-//        for (unsigned int cnt=0; cnt < size; cnt++)
-//        {
-//            ss << list.at(cnt).getId();
-
-//            if (cnt != size-1)
-//            {
-//                ss << ", ";
-//            }
-//        }
-//        ss << ")";
-//    }
-
-////    if (db_type_ == DB_TYPE_SQLITE)
-////        ss << " VALUES (@VAR0, ";
-////    else   || db_type_ == DB_TYPE_MYSQLCon
-//    if (db_type_ == DB_TYPE_MYSQLpp)
-//        ss << " VALUES (";
-//    else
-//        throw std::runtime_error ("SQLGenerator: createDBCreateString: unknown db type");
-
-//    for (unsigned int cnt=0; cnt < size; cnt++)
-//    {
-////        if (db_type_ == DB_TYPE_SQLITE)
-////            ss << "@VAR"+String::intToString(cnt+1);
-////        else
-//        if (db_type_ == DB_TYPE_MYSQLpp)
-//            ss << "%"+String::intToString(cnt);
-////        else if (db_type_ == DB_TYPE_MYSQLCon)
-////            ss << "?";
-//        else
-//            throw std::runtime_error ("SQLGenerator: createDBInsertStringBind: unknown database
-//            type");
-
-//        if (cnt != size-1)
-//        {
-//            ss << ", ";
-//        }
-//    }
-//    ss << ");";
-
-//    logdbg  << "SQLGenerator: createDBInsertStringBind: tablename " << tablename << " bind str '"
-//    << ss.str() << "'";
-
-//    return ss.str();
-//}
 
 std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
                                                    std::string tablename)
@@ -958,127 +694,6 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
     return ss.str();
 }
 
-// std::string SQLGenerator::createDBCreateString (Buffer *buffer, std::string tablename)
-//{
-//    assert (buffer);
-//    assert (tablename.size() > 0);
-
-//    const PropertyList &list = buffer->properties();
-
-//    unsigned int size =	list.size();
-
-//    std::stringstream ss;//create a stringstream
-//    ss << "CREATE TABLE IF NOT EXISTS "<< tablename << " (" << "id INTEGER PRIMARY KEY ";
-
-//    if (!db_type_set_)
-//    {
-//        db_type_=db_interface_->getDBInfo()->getType();
-//        db_type_set_=true;
-//    }
-
-////    if (db_type_ == DB_TYPE_SQLITE)
-////        ss << "AUTOINCREMENT, ";
-////    else  || db_type_ == DB_TYPE_MYSQLCon
-//    if (db_type_ == DB_TYPE_MYSQLpp)
-//        ss << "AUTO_INCREMENT, ";
-//    else
-//        throw std::runtime_error ("SQLGenerator: createDBCreateString: unknown db type");
-
-//    for (unsigned int cnt=0; cnt < size; cnt++)
-//    {
-//        const Property &prop = list.at(cnt);
-
-//        ss << prop.getId() << " ";
-
-//        PropertyDataType type = prop.getDataType();
-
-//        switch (type)
-//        {
-//        case PropertyDataType::BOOL:
-//            ss << "BOOLEAN";
-//            break;
-//        case PropertyDataType::UCHAR:
-//        case PropertyDataType::CHAR:
-//            ss << "TINYINT";
-//            break;
-//        case PropertyDataType::INT:
-//        case PropertyDataType::UINT:
-//            ss << "INT";
-//            break;
-//        case PropertyDataType::STRING:
-//            ss << "VARCHAR(MAX)"; //TODO should work, verify (was String::intToString(prop.))
-//            break;
-//        case PropertyDataType::FLOAT:
-//            ss << "FLOAT";
-//            break;
-//        case PropertyDataType::DOUBLE:
-//            ss << "DOUBLE";
-//            break;
-//        default:
-//            throw std::runtime_error("SQLGenerator: createDBCreateString: unspecified data type
-//            "+prop.asDataTypeString());
-//        }
-
-//        if (cnt != size-1)
-//            ss << ", ";
-//    }
-
-//    ss << ");";
-
-//    logdbg  << "SQLGenerator: createDBCreateString: tablename " << tablename << " create str '" <<
-//    ss.str() << "'";
-
-//    return ss.str();
-
-//}
-
-// std::string SQLGenerator::getMinMaxSelectStatement (std::string variable, std::string table,
-// std::string condition)
-//{
-//    std::stringstream ss;
-
-//    assert (variable.size() > 0);
-//    assert (table.size() > 0);
-
-//    ss << "SELECT MIN("<< variable << "),MAX(" << variable << ") FROM " << table;
-
-//    if (condition.size() != 0)
-//      ss << " WHERE " << condition;
-
-//    ss << ";";
-
-//    return ss.str();
-//}
-
-// std::string SQLGenerator::getMinMaxSelectStatements (std::vector <std::string> variables,
-// std::string table)
-//{
-//    std::stringstream ss;
-
-//    assert (table.size() > 0);
-//    assert (variables.size() > 0);
-
-//    ss << "SELECT";
-
-//    for (unsigned int cnt=0; cnt < variables.size(); cnt++)
-//    {
-//        if (cnt != 0)
-//            ss << ",";
-//        ss << " MIN("<< variables.at(cnt) << "),MAX(" << variables.at(cnt) << ")";
-//    }
-//    ss  << "FROM " << table << " WHERE ";
-
-//    //  for (unsigned int cnt=0; cnt < variables.size(); cnt++)
-//    //  {
-//    //    if (cnt != 0)
-//    //      ss << " AND";
-//    //    ss << " " << variables.at(cnt) << " IS NOT NULL";
-//    //  }
-
-//    ss << ";";
-
-//    return ss.str();
-//}
 
 std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
         const MetaDBTable& meta_table, DBOVariableSet read_list, const std::string& filter,
@@ -1397,31 +1012,4 @@ std::string SQLGenerator::getDeleteStatement (const std::string& table, const st
     return "DELETE FROM "+table+" WHERE "+filter+";";
 }
 
-// std::string SQLGenerator::getUpdateStatement (DBTableColumn *column, std::string value,
-// std::string new_value, std::string filter)
-//{
-//    assert (column);
-//    // update students set first_name=’Suba’ where rec_id=678;
-//    return "UPDATE "+column->getDBTableName()+" SET "+column->getName()+"="+new_value+" WHERE
-//    "+column->getName()+"="+value+" AND "+filter+";";
-//}
 
-// std::string SQLGenerator::getDistinctSelectStatement (DBTableColumn *column, std::string
-// filter_condition)
-//{
-//    assert (column);
-//     std::stringstream ss;
-//     ss << "SELECT DISTINCT("+column->getName() << ") FROM " << column->getDBTableName();
-
-//     if (filter_condition.size() != 0)
-//      ss << " WHERE " << filter_condition;
-
-//     ss << ";";
-
-//     return ss.str();
-//}
-
-// std::string SQLGenerator::getShowDatabasesStatement ()
-//{
-//    return "SHOW DATABASES LIKE 'job%';"; // wow so hard so many dabes
-//}

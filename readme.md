@@ -30,8 +30,16 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
   - Configurable data layering and styling for detailed analysis
   - Relatively low memory footprint (e.g. 16 million target reports in ~8 GB RAM)
 - Cross-view data selection and inspection
-- Command line options for automated processing
-- View points for efficient inspection
+  - Command line options for automated processing
+  - View points for efficient inspection
+  - Standard compliance evaluation (under construction)
+  - Definition of standards based on configurable requirements
+  - Generalized comparison of test data vs. reference data
+  - Calculation of requirements/performance indicators
+  - Investigation/display of results on several levels of detail
+  - Manual removal of specific targets possible
+  - Export of results as report PDF
+
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
@@ -74,11 +82,11 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - readme.md: This file
 
 ## Newsletter
-If you are interested in our newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
+If you are interested in our newsletter, please send a mail to atsdb@openats.at with the subject "Register".
 
 ## Author
 Helmut Puhr
-Contact: atsdb@gmx.at
+Contact: atsdb@openats.at
 
 ## Licenses
 The source code is released under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)

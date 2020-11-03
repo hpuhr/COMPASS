@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "eval/results/report/pdfgenerator.h"
 #include "textfielddoublevalidator.h"
@@ -83,6 +100,26 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         abstract_edit_->setText(generator_.abstract().c_str());
         connect(abstract_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::abstractEditedSlot);
         config_grid->addWidget(abstract_edit_, row, 1);
+
+        // target details
+        ++row;
+        config_grid->addWidget(new QLabel("Include Per-Target Details"), row, 0);
+
+        include_target_details_check_ = new QCheckBox();
+        include_target_details_check_->setChecked(generator_.includeTargetDetails());
+        connect(include_target_details_check_, &QCheckBox::clicked, this,
+                &PDFGeneratorDialog::includeTargetDetailsEditedSlot);
+        config_grid->addWidget(include_target_details_check_, row, 1);
+
+        // target details
+        ++row;
+        config_grid->addWidget(new QLabel("Include Per-Target Target Report Details"), row, 0);
+
+        include_target_tr_details_check_ = new QCheckBox();
+        include_target_tr_details_check_->setChecked(generator_.includeTargetTRDetails());
+        connect(include_target_tr_details_check_, &QCheckBox::clicked, this,
+                &PDFGeneratorDialog::includeTargetTRDetailsEditedSlot);
+        config_grid->addWidget(include_target_tr_details_check_, row, 1);
 
         // wait
         ++row;
@@ -230,6 +267,15 @@ void PDFGeneratorDialog::abstractEditedSlot(const QString& text)
 void PDFGeneratorDialog::waitOnMapLoadingEditedSlot(bool checked)
 {
     generator_.waitOnMapLoading(checked);
+}
+
+void PDFGeneratorDialog::includeTargetDetailsEditedSlot(bool checked)
+{
+    generator_.includeTargetDetails(checked);
+}
+void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
+{
+    generator_.includeTargetTRDetails(checked);
 }
 
 void PDFGeneratorDialog::runPDFLatexChangedSlot (bool checked)

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/detection/single.h"
 #include "eval/results/detection/joined.h"
 #include "eval/requirement/base.h"
@@ -36,7 +53,7 @@ namespace EvaluationRequirementResult
     {
         if (sum_uis_)
         {
-            loginf << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
+            logdbg << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_
                    << " sum_uis " << sum_uis_;
 
             assert (missed_uis_ <= sum_uis_);
@@ -91,7 +108,7 @@ namespace EvaluationRequirementResult
         if (!sector_section.hasTable("target_table"))
             sector_section.addTable("target_table", 11,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "EUIs", "MUIs", "PD"}, true, 10);
+             "#EUIs", "#MUIs", "PD"}, true, 10);
 
         EvaluationResultsReport::SectionContentTable& target_table = sector_section.getTable("target_table");
 
@@ -125,8 +142,8 @@ namespace EvaluationRequirementResult
         addCommonDetails(root_item);
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
-        utn_req_table.addRow({"EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
-        utn_req_table.addRow({"MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
+        utn_req_table.addRow({"#EUIs [1]", "Expected Update Intervals", sum_uis_}, this);
+        utn_req_table.addRow({"#MUIs [1]", "Missed Update Intervals", missed_uis_}, this);
         utn_req_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
 
         for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)
@@ -168,18 +185,17 @@ namespace EvaluationRequirementResult
         }
 
         // add further details
-        if (eval_man_.generateReportDetails())
-            reportDetails(utn_req_section);
+        reportDetails(utn_req_section);
     }
 
     void SingleDetection::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 5,
+        if (!utn_req_section.hasTable(tr_details_table_name_))
+            utn_req_section.addTable(tr_details_table_name_, 5,
             {"ToD", "DToD", "Ref.", "MUI", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable("details_table");
+                utn_req_section.getTable(tr_details_table_name_);
 
         unsigned int detail_cnt = 0;
 
@@ -208,7 +224,7 @@ namespace EvaluationRequirementResult
     {
         if (table.name() == "target_table" && annotation.toUInt() == utn_)
             return true;
-        else if (table.name() == "details_table" && annotation.isValid() && annotation.toUInt() < details_.size())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
             return true;
         else
             return false;
@@ -223,7 +239,7 @@ namespace EvaluationRequirementResult
         {
             return getTargetErrorsViewable();
         }
-        else if (table.name() == "details_table" && annotation.isValid())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid())
         {
             unsigned int detail_cnt = annotation.toUInt();
 

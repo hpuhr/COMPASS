@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "filtergeneratorwidget.h"
@@ -27,7 +27,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
@@ -261,7 +261,7 @@ void FilterGeneratorWidget::accept()
     std::string filter_name = filter_name_->text().toStdString();
 
     Configuration& configuration =
-        ATSDB::instance().filterManager().addNewSubConfiguration("DBFilter", filter_name);
+        COMPASS::instance().filterManager().addNewSubConfiguration("DBFilter", filter_name);
 
     for (unsigned int cnt = 0; cnt < data_conditions_.size(); cnt++)
     {
@@ -288,7 +288,7 @@ void FilterGeneratorWidget::accept()
         // condition_config_name);
     }
 
-    ATSDB::instance().filterManager().generateSubConfigurable("DBFilter", filter_name);
+    COMPASS::instance().filterManager().generateSubConfigurable("DBFilter", filter_name);
 
     emit filterWidgetAction(true);
 }

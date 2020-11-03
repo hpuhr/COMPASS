@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbobject.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbobjectinfowidget.h"
@@ -52,11 +52,11 @@ using namespace Utils;
 /**
  * Registers parameters, creates sub configurables
  */
-DBObject::DBObject(ATSDB& atsdb, const std::string& class_id, const std::string& instance_id,
+DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
                    DBObjectManager* manager)
     : Configurable(class_id, instance_id, manager,
                    "db_object_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
-      atsdb_(atsdb),
+      compass_(compass),
       manager_(*manager)
 {
     registerParameter("name", &name_, "Undefined");
@@ -235,18 +235,18 @@ void DBObject::deleteMetaTable(const std::string& schema)
  */
 bool DBObject::hasCurrentDataSourceDefinition() const
 {
-    if (!ATSDB::instance().schemaManager().hasCurrentSchema())
+    if (!COMPASS::instance().schemaManager().hasCurrentSchema())
         return false;
 
     return (data_source_definitions_.find(
-                ATSDB::instance().schemaManager().getCurrentSchema().name()) !=
+                COMPASS::instance().schemaManager().getCurrentSchema().name()) !=
             data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition& DBObject::currentDataSourceDefinition() const
 {
     assert(hasCurrentDataSourceDefinition());
-    return data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
+    return data_source_definitions_.at(COMPASS::instance().schemaManager().getCurrentSchema().name());
 }
 
 void DBObject::deleteDataSourceDefinition(const std::string& schema)
@@ -287,7 +287,7 @@ void DBObject::buildDataSources()
         return;
     }
 
-    if (!ATSDB::instance().interface().hasDataSourceTables(*this))
+    if (!COMPASS::instance().interface().hasDataSourceTables(*this))
     {
         logwrn << "DBObject: buildDataSources: object " << name_
                << " has data sources but no respective tables";
@@ -298,12 +298,12 @@ void DBObject::buildDataSources()
 
     try
     {
-        data_sources_ = ATSDB::instance().interface().getDataSources(*this);
+        data_sources_ = COMPASS::instance().interface().getDataSources(*this);
     }
     catch (std::exception& e)
     {
         logerr << "DBObject: buildDataSources: failed with '" << e.what() << "', deleting entry";
-        deleteDataSourceDefinition(ATSDB::instance().schemaManager().getCurrentSchema().name());
+        deleteDataSourceDefinition(COMPASS::instance().schemaManager().getCurrentSchema().name());
         assert(!hasCurrentDataSourceDefinition());
     }
 
@@ -396,7 +396,7 @@ void DBObject::addDataSource(int key_value, const std::string& name)
     std::string key_col_name = mos_def.foreignKey();
     std::string name_col_name = mos_def.nameColumn();
 
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(meta_table_name));
 
     const MetaDBTable& meta = schema.metaTable(meta_table_name);
@@ -415,11 +415,11 @@ void DBObject::addDataSource(int key_value, const std::string& name)
     buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
     buffer_ptr->get<std::string>(name_col.name()).set(0, name);
 
-    assert(ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
+    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
     MetaDBTable& meta_table =
-        ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
+        COMPASS::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
 
     logdbg << "DBObject: addDataSources: emitting signal";
@@ -444,7 +444,7 @@ void DBObject::addDataSources(std::map<int, std::pair<int, int>>& sources)
     std::string longitude_col_name = mos_def.longitudeColumn();
     std::string altitude_col_name = mos_def.altitudeColumn();
 
-    const DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
     assert(schema.hasMetaTable(meta_table_name));
 
     const MetaDBTable& meta = schema.metaTable(meta_table_name);
@@ -490,7 +490,7 @@ void DBObject::addDataSources(std::map<int, std::pair<int, int>>& sources)
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer>(new Buffer(list, name_));
 
-    ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+    ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
     const std::map<unsigned int, StoredDBODataSource>& stored_data_sources =
         ds_task.storedDataSources(name_);
 
@@ -611,11 +611,11 @@ void DBObject::addDataSources(std::map<int, std::pair<int, int>>& sources)
         cnt++;
     }
 
-    assert(ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
+    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
     MetaDBTable& meta_table =
-        ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
+        COMPASS::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
     db_interface.updateTableInfo();
 
@@ -635,7 +635,7 @@ DBODataSource& DBObject::getDataSource(int id)
 void DBObject::updateDataSource(int id)
 {
     assert(hasDataSource(id));
-    ATSDB::instance().interface().updateDataSource(getDataSource(id));
+    COMPASS::instance().interface().updateDataSource(getDataSource(id));
 }
 
 const std::string& DBObject::getNameOfSensor(int id)
@@ -647,12 +647,12 @@ const std::string& DBObject::getNameOfSensor(int id)
 
 bool DBObject::hasActiveDataSourcesInfo()
 {
-    return ATSDB::instance().interface().hasActiveDataSources(*this);
+    return COMPASS::instance().interface().hasActiveDataSources(*this);
 }
 
 const std::set<int> DBObject::getActiveDataSources()
 {
-    return ATSDB::instance().interface().getActiveDataSources(*this);
+    return COMPASS::instance().interface().getActiveDataSources(*this);
 }
 
 std::string DBObject::status()
@@ -679,7 +679,7 @@ DBObjectWidget* DBObject::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new DBObjectWidget(this, ATSDB::instance().schemaManager()));
+        widget_.reset(new DBObjectWidget(this, COMPASS::instance().schemaManager()));
         assert(widget_);
     }
 
@@ -709,9 +709,9 @@ void DBObject::schemaChangedSlot()
 {
     loginf << "DBObject: schemaChangedSlot";
 
-    if (atsdb_.schemaManager().hasCurrentSchema())
+    if (compass_.schemaManager().hasCurrentSchema())
     {
-        DBSchema& schema = atsdb_.schemaManager().getCurrentSchema();
+        DBSchema& schema = compass_.schemaManager().getCurrentSchema();
 
         if (!hasMetaTable(schema.name()))
         {
@@ -759,7 +759,7 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
     if (use_filters)
     {
         custom_filter_clause =
-            ATSDB::instance().filterManager().getSQLCondition(name_, filtered_variables);
+            COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
     }
 
     for (auto& var_it : filtered_variables)
@@ -804,7 +804,7 @@ void DBObject::load(DBOVariableSet& read_set, std::string custom_filter_clause,
     //    custom_filter_clause, DBOVariable *order, const std::string &limit_str
 
     read_job_ = std::shared_ptr<DBOReadDBJob>(new DBOReadDBJob(
-        ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
+        COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
         use_order, order_variable, use_order_ascending, limit_str));
 
     connect(read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this,
@@ -849,7 +849,7 @@ void DBObject::insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, 
 
     buffer->transformVariables(list, false);  // back again
 
-    insert_job_ = std::make_shared<InsertBufferDBJob>(ATSDB::instance().interface(), *this, buffer,
+    insert_job_ = std::make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
                                                       emit_change);
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
@@ -880,12 +880,12 @@ void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
 
     assert(existsInDB());
     assert(key_var.existsInDB());
-    assert(ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
+    assert(COMPASS::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
 
     buffer->transformVariables(list, false);  // back again
 
     update_job_ =
-        std::make_shared<UpdateBufferDBJob>(ATSDB::instance().interface(), *this, key_var, buffer);
+        std::make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
 
     connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot,
             Qt::QueuedConnection);
@@ -938,7 +938,7 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
 
     db_interface.prepareRead(*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
     std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
@@ -1118,10 +1118,10 @@ void DBObject::updateToDatabaseContent()
     associations_table_name_ = table_name + "_assoc";
 
     is_loadable_ = current_meta_table_->existsInDB() &&
-                   ATSDB::instance().interface().tableInfo().count(table_name) > 0;
+                   COMPASS::instance().interface().tableInfo().count(table_name) > 0;
 
     if (is_loadable_)
-        count_ = ATSDB::instance().interface().count(table_name);
+        count_ = COMPASS::instance().interface().count(table_name);
 
     logdbg << "DBObject: " << name_ << " updateToDatabaseContent: exists in db "
            << current_meta_table_->existsInDB() << " count " << count_;
@@ -1261,7 +1261,7 @@ void DBObject::loadAssociations()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
 
     assert(associations_table_name_.size());
 
@@ -1300,7 +1300,7 @@ void DBObject::saveAssociations()
 {
     loginf << "DBObject " << name_ << ": saveAssociations";
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
 
     assert(associations_table_name_.size());
 

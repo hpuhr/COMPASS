@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "databaseopentask.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "databaseopentaskwidget.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
@@ -35,7 +35,7 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
 
 void DatabaseOpenTask::useConnection(const std::string& connection_type)
 {
-    ATSDB::instance().interface().useConnection(connection_type);
+    COMPASS::instance().interface().useConnection(connection_type);
 
     if (widget_)
         widget_->updateUsedConnection();
@@ -45,7 +45,7 @@ TaskWidget* DatabaseOpenTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new DatabaseOpenTaskWidget(*this, ATSDB::instance().interface()));
+        widget_.reset(new DatabaseOpenTaskWidget(*this, COMPASS::instance().interface()));
 
         connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal, this,
                 &DatabaseOpenTask::databaseOpenedSlot);
@@ -67,7 +67,7 @@ void DatabaseOpenTask::generateSubConfigurable(const std::string& class_id,
 
 bool DatabaseOpenTask::checkPrerequisites()
 {
-    return !ATSDB::instance().interface().ready();  // only usable if not already connected
+    return !COMPASS::instance().interface().ready();  // only usable if not already connected
 }
 
 bool DatabaseOpenTask::isRecommended()
@@ -92,8 +92,8 @@ void DatabaseOpenTask::databaseOpenedSlot()
     done_ = true;
 
     task_manager_.appendSuccess(
-        "DatabaseOpenTask: database '" + ATSDB::instance().interface().connection().type() + ":" +
-        ATSDB::instance().interface().connection().identifier() + "' opened");
+        "DatabaseOpenTask: database '" + COMPASS::instance().interface().connection().type() + ":" +
+        COMPASS::instance().interface().connection().identifier() + "' opened");
 
     emit doneSignal(name_);
 }

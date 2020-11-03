@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/identification/single.h"
 #include "eval/results/identification/joined.h"
 #include "eval/requirement/base.h"
@@ -172,18 +189,17 @@ namespace EvaluationRequirementResult
         }
 
         // add further details
-        if (eval_man_.generateReportDetails())
-            reportDetails(utn_req_section);
+        reportDetails(utn_req_section);
     }
 
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        if (!utn_req_section.hasTable("details_table"))
-            utn_req_section.addTable("details_table", 11,
+        if (!utn_req_section.hasTable(tr_details_table_name_))
+            utn_req_section.addTable(tr_details_table_name_, 11,
             {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable("details_table");
+                utn_req_section.getTable(tr_details_table_name_);
 
         unsigned int detail_cnt = 0;
 
@@ -207,7 +223,7 @@ namespace EvaluationRequirementResult
     {
         if (table.name() == "target_table" && annotation.toUInt() == utn_)
             return true;
-        else if (table.name() == "details_table" && annotation.isValid() && annotation.toUInt() < details_.size())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
             return true;
         else
             return false;
@@ -223,7 +239,7 @@ namespace EvaluationRequirementResult
         {
             return getTargetErrorsViewable();
         }
-        else if (table.name() == "details_table" && annotation.isValid())
+        else if (table.name() == tr_details_table_name_ && annotation.isValid())
         {
             unsigned int detail_cnt = annotation.toUInt();
 

@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbtable.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "dbschema.h"
 #include "dbtablecolumn.h"
@@ -97,8 +97,8 @@ void DBTable::populate()
 {
     loginf << "DBTable: populate: table " << name_;
 
-    assert(ATSDB::instance().ready());
-    for (auto it : ATSDB::instance().interface().tableInfo().at(name_).columns())
+    assert(COMPASS::instance().ready());
+    for (auto it : COMPASS::instance().interface().tableInfo().at(name_).columns())
     {
         if (columns_.count(it.first) == 0)
         {
@@ -116,12 +116,12 @@ void DBTable::populate()
 
 void DBTable::update()
 {
-    assert(ATSDB::instance().ready());
+    assert(COMPASS::instance().ready());
 
     loginf << "DBTable: update: table " << name_;
 
     const std::map<std::string, DBTableColumnInfo> db_table_columns =
-        ATSDB::instance().interface().tableInfo().at(name_).columns();
+        COMPASS::instance().interface().tableInfo().at(name_).columns();
 
     std::vector<std::string> cols_to_be_removed;
 

@@ -1,5 +1,22 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "managesectorstask.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskwidget.h"
@@ -75,7 +92,7 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
-bool ManageSectorsTask::checkPrerequisites() { return ATSDB::instance().interface().ready(); }
+bool ManageSectorsTask::checkPrerequisites() { return COMPASS::instance().interface().ready(); }
 
 void ManageSectorsTask::addFile(const std::string& filename)
 {
@@ -413,7 +430,7 @@ void ManageSectorsTask::addSector (const std::string& sector_name, const std::st
     loginf << "ManageSectorsTask: addSector: layer '" << layer_name << "' name '" << sector_name
            << "' num points " << points.size();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     string new_sector_name = sector_name;
 

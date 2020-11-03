@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "latexvisitor.h"
 #include "latexdocument.h"
 #include "latexsection.h"
@@ -11,11 +28,12 @@
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
+#include "eval/results/single.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontentfigure.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "viewmanager.h"
 #include "files.h"
@@ -36,9 +54,11 @@ using namespace std;
 using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot, bool wait_on_map_loading)
+                           bool add_overview_screenshot, bool include_target_details,
+                           bool include_target_tr_details, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
-      add_overview_screenshot_(add_overview_screenshot), wait_on_map_loading_(wait_on_map_loading)
+      add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
+      include_target_tr_details_(include_target_tr_details), wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -148,6 +168,9 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
 
+    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
+        return; // do not generate this table
+
     LatexSection& section = report_.getSection(current_section_name_);
 
     string table_name = e->name();
@@ -176,6 +199,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 
     unsigned int num_rows = e->rowCount();
     vector<string> row_strings;
+    string ref;
 
     for (unsigned int row=0; row < num_rows; ++row)
     {
@@ -183,7 +207,13 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         assert (row_strings.size() == num_cols);
 
         if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
-            row_strings[0] = "\\hyperref[sec:"+e->reference(row)+"]{"+row_strings.at(0)+"}";
+        {
+            ref = e->reference(row);
+            if (!include_target_details_ && (ref.rfind("Targets", 0) == 0)) // reference to details
+                ; // do not do hyperref
+            else
+                row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
+        }
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
         {
@@ -218,8 +248,8 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
 
     ignore_listbox_views_ = true;
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
-    ViewManager& view_man = ATSDB::instance().viewManager();
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+    ViewManager& view_man = COMPASS::instance().viewManager();
 
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents();

@@ -1,8 +1,25 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "viewpoint.h"
 #include "viewmanager.h"
 #include "logger.h"
 #include "json.hpp"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "latexvisitor.h"
 
@@ -118,6 +135,6 @@ void ViewPoint::save()
 {
     loginf << "ViewPoint: save: id " << id_;
 
-    DBInterface& db_interface = ATSDB::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().interface();
     db_interface.setViewPoint(id_, data_.dump());
 }

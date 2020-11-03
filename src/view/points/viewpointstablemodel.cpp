@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "viewpointstablemodel.h"
 #include "viewmanager.h"
 #include "viewpoint.h"
@@ -5,7 +22,7 @@
 #include "json.h"
 #include "stringconv.h"
 #include "files.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbinterface.h"
 #include "viewpointswidget.h"
 
@@ -23,9 +40,9 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
     table_columns_ = default_table_columns_;
 
     // load view points
-    if (ATSDB::instance().interface().existsViewPointsTable())
+    if (COMPASS::instance().interface().existsViewPointsTable())
     {
-        for (const auto& vp_it : ATSDB::instance().interface().viewPoints())
+        for (const auto& vp_it : COMPASS::instance().interface().viewPoints())
         {
             //assert (!view_points_.count(vp_it.first));
             assert (!hasViewPoint(vp_it.first));
@@ -423,7 +440,7 @@ void ViewPointsTableModel::deleteAllViewPoints ()
     beginRemoveRows(QModelIndex(), 0, view_points_.size()-1); // TODO
 
     view_points_.clear();
-    ATSDB::instance().interface().deleteAllViewPoints();
+    COMPASS::instance().interface().deleteAllViewPoints();
 
     endRemoveRows();
 }

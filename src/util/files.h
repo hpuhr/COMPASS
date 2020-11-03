@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef FILES_H
 #define FILES_H
 
@@ -5,11 +22,11 @@
 
 #include "global.h"
 
-static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/atsdb/");
+static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/compass/");
 
 static const std::string HOME_PATH = QDir::homePath().toStdString();
 
-static const std::string HOME_SUBDIRECTORY = HOME_PATH + "/.atsdb/";
+static const std::string HOME_SUBDIRECTORY = HOME_PATH + "/.compass/";
 static const std::string CONF_SUBDIRECTORY = "conf/";
 static const std::string DATA_SUBDIRECTORY = "data/";
 

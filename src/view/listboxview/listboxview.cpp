@@ -1,25 +1,25 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "listboxview.h"
 
 #include <QApplication>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 #include "listboxviewconfigwidget.h"
 #include "listboxviewdatasource.h"
@@ -38,7 +38,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter("overwrite_csv", &overwrite_csv_, true);
     registerParameter("show_associations", &show_associations_, false);
 
-    can_show_associations_ = ATSDB::instance().objectManager().hasAssociations();
+    can_show_associations_ = COMPASS::instance().objectManager().hasAssociations();
 
     if (!can_show_associations_)
         show_associations_ = false;
@@ -71,7 +71,7 @@ bool ListBoxView::init()
 
     assert(data_source_);
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
     connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
 
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
@@ -85,7 +85,7 @@ bool ListBoxView::init()
             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
     connect(widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
-            &ATSDB::instance().objectManager(), &DBObjectManager::loadSlot);
+            &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &ListBoxViewConfigWidget::loadingStartedSlot);
 

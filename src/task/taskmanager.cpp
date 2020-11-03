@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "taskmanager.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
 #include "databaseopentask.h"
@@ -76,8 +76,8 @@
 
 using namespace Utils;
 
-TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "task.json")
+TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "task.json")
 {
     registerParameter("expert_mode", &expert_mode_, false);
 
@@ -666,7 +666,7 @@ void TaskManager::performAutomaticTasks ()
 
     database_open_task_->useConnection("SQLite Connection");
     SQLiteConnectionWidget* connection_widget =
-            dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+            dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
 
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -1066,7 +1066,7 @@ void TaskManager::performAutomaticTasks ()
 
             loginf << "TaskManager: performAutomaticTasks: loading data";
 
-            DBObjectManager& obj_man = ATSDB::instance().objectManager();
+            DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
             obj_man.loadSlot();
 
@@ -1092,7 +1092,7 @@ void TaskManager::performAutomaticTasks ()
 
             getMainWindow()->showViewPointsTab();
 
-            ViewPointsReportGenerator& gen = ATSDB::instance().viewManager().viewPointsGenerator();
+            ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
 
             ViewPointsReportGeneratorDialog& dialog = gen.dialog();
             dialog.show();
@@ -1126,7 +1126,7 @@ void TaskManager::performAutomaticTasks ()
 
             getMainWindow()->showEvaluationTab();
 
-            EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+            EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
             if (eval_man.canLoadData())
             {

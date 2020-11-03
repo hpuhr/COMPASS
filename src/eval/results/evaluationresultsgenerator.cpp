@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "evaluationresultsgenerator.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
@@ -100,6 +117,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     {
         const string& sector_layer_name = sec_it->name();
 
+        loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name;
+
         for (auto& req_group_it : standard)
         {
             const string& requirement_group_name = req_group_it.first;
@@ -107,11 +126,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first;
+            loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                   << " group " << req_group_it.first;
 
             for (auto& req_cfg_it : *req_group_it.second)
             {
-                loginf << "EvaluationResultsGenerator: evaluate: group " << req_group_it.first
+                loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                       << " group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "'";
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();

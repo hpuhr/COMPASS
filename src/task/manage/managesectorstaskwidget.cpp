@@ -1,7 +1,24 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "managesectorstaskwidget.h"
 #include "managesectorstask.h"
 #include "logger.h"
-#include "atsdb.h"
+#include "compass.h"
 //#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "sector.h"
@@ -167,7 +184,7 @@ void ManageSectorsTaskWidget::updateSectorTable()
 
     sector_table_->blockSignals(true);
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man.sectorsLayers();
 
@@ -430,7 +447,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot: sector_id " << sector_id
            << " col_name " << col_name << " text '" << text << "'";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -488,7 +505,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -521,7 +538,7 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
     unsigned int sector_id = sector_id_var.toUInt();
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     assert (eval_man.hasSector(sector_id));
 
@@ -536,7 +553,7 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: exportSectorsSlot";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -563,7 +580,7 @@ void ManageSectorsTaskWidget::clearSectorsSlot ()
 {
     loginf << "ManageSectorsTaskWidget: clearSectorsSlot";
 
-    ATSDB::instance().evaluationManager().deleteAllSectors();
+    COMPASS::instance().evaluationManager().deleteAllSectors();
 
     updateSectorTable();
 }
@@ -589,7 +606,7 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
     assert (Files::fileExists(filename));
 
-    ATSDB::instance().evaluationManager().importSectors(filename);
+    COMPASS::instance().evaluationManager().importSectors(filename);
 
     updateSectorTable();
 }

@@ -17,7 +17,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/projection/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/property/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/schema/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/sector/CMakeLists.txt")
-include("${CMAKE_CURRENT_LIST_DIR}/struct/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/task/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/view/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/unit/CMakeLists.txt")
@@ -29,11 +28,11 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/atsdb.h"
+    "${CMAKE_CURRENT_LIST_DIR}/compass.h"
     PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/atsdb.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/compass.cpp"
 )
 
 

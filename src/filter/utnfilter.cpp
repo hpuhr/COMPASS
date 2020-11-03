@@ -1,5 +1,22 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "utnfilter.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "utnfilterwidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -19,7 +36,7 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
     name_ = "UTNs";
 
-    if (!ATSDB::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().objectManager().hasAssociations())
     {
         loginf << "UTNFilter: contructor: disabled since no associations";
 
@@ -36,7 +53,7 @@ UTNFilter::~UTNFilter() {}
 
 bool UTNFilter::filters(const std::string& dbo_type)
 {
-    if (!ATSDB::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().objectManager().hasAssociations())
         return false;
 
     return true;
@@ -47,14 +64,14 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
 {
     loginf << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
-    if (!ATSDB::instance().objectManager().hasAssociations())
+    if (!COMPASS::instance().objectManager().hasAssociations())
         return "";
 
     stringstream ss;
 
     if (active_)
     {
-        DBObjectManager& obj_man = ATSDB::instance().objectManager();
+        DBObjectManager& obj_man = COMPASS::instance().objectManager();
         assert (obj_man.existsObject(dbo_name));
 
         DBObject& object = obj_man.object(dbo_name);
@@ -120,7 +137,7 @@ void UTNFilter::generateSubConfigurable(const std::string& class_id,
         assert(!widget_);
         widget_ = new UTNFilterWidget(*this, class_id, instance_id);
 
-        if (!ATSDB::instance().objectManager().hasAssociations())
+        if (!COMPASS::instance().objectManager().hasAssociations())
         {
             widget_->setDisabled(true);
             widget_->setInvisible();
@@ -140,7 +157,7 @@ void UTNFilter::checkSubConfigurables()
         logdbg << "UTNFilter: checkSubConfigurables: generating my filter widget";
         widget_ = new UTNFilterWidget(*this, "UTNFilterWidget", instanceId() + "Widget0");
 
-        if (!ATSDB::instance().objectManager().hasAssociations())
+        if (!COMPASS::instance().objectManager().hasAssociations())
         {
             widget_->setDisabled(true);
             widget_->setInvisible();

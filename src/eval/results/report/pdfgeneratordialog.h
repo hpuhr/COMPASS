@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
 #define EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
 
@@ -28,6 +45,8 @@ namespace EvaluationResultsReport
         void abstractEditedSlot(const QString& text);
 
         void waitOnMapLoadingEditedSlot(bool checked);
+        void includeTargetDetailsEditedSlot(bool checked);
+        void includeTargetTRDetailsEditedSlot(bool checked);
 
         void runPDFLatexChangedSlot (bool checked);
         void openPDFChangedSlot (bool checked);
@@ -58,6 +77,9 @@ namespace EvaluationResultsReport
 
         QLineEdit* author_edit_ {nullptr};
         QLineEdit* abstract_edit_ {nullptr};
+
+        QCheckBox* include_target_details_check_ {nullptr};
+        QCheckBox* include_target_tr_details_check_ {nullptr};
 
         QCheckBox* wait_on_map_loading_check_ {nullptr};
 

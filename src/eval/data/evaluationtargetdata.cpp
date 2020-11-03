@@ -1,10 +1,27 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "evaluationtargetdata.h"
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "dbovariable.h"
 #include "metadbovariable.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "dbobjectmanager.h"
 
 #include <ogr_spatialref.h>
@@ -32,7 +49,7 @@ void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
     assert (!ref_buffer_);
     ref_buffer_ = buffer;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     string dbo_name = ref_buffer_->dboName();
 
@@ -58,7 +75,7 @@ void EvaluationTargetData::setTstBuffer (std::shared_ptr<Buffer> buffer)
     assert (!tst_buffer_);
     tst_buffer_ = buffer;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     string dbo_name = tst_buffer_->dboName();
 
@@ -829,7 +846,7 @@ void EvaluationTargetData::updateModeCMinMax() const
 
     has_mode_c_ = false;
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     if (ref_data_.size())
     {

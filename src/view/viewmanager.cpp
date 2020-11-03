@@ -1,22 +1,22 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "viewmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -50,8 +50,8 @@
 using namespace Utils;
 using namespace nlohmann;
 
-ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-    : Configurable(class_id, instance_id, atsdb, "views.json"), atsdb_(*atsdb)
+ViewManager::ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
+    : Configurable(class_id, instance_id, compass, "views.json"), compass_(*compass)
 {
     logdbg << "ViewManager: constructor";
 
@@ -76,7 +76,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     assert(view_points_widget_);
     tab_widget->addTab(view_points_widget_, "View Points");
 
-    FilterManager& filter_man = ATSDB::instance().filterManager();
+    FilterManager& filter_man = COMPASS::instance().filterManager();
 
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
@@ -249,7 +249,7 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    ATSDB::instance().objectManager().loadSlot();
+    COMPASS::instance().objectManager().loadSlot();
 }
 
 
@@ -315,7 +315,7 @@ void ViewManager::doViewPointAfterLoad ()
         loginf << "ViewManager: doViewPointAfterLoad: time window min " << time_min << " max " << time_max;
     }
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod") ||
             !object_manager.existsMetaVariable("pos_lat_deg") ||
@@ -410,7 +410,7 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
 {
     loginf << "ViewManager: selectTimeWindow: time_min " << time_min << " time_max " << time_max;
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
 
     if (!object_manager.existsMetaVariable("tod"))
     {

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/requirement/position/positionmaxdistance.h"
 #include "eval/results/position/single.h"
 #include "evaluationdata.h"
@@ -193,7 +210,7 @@ namespace EvaluationRequirement
 
         }
 
-        loginf << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementPositionMaxDistance '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok

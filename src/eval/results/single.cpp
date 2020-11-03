@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/single.h"
 #include "eval/requirement/base.h"
 #include "eval/results/report/rootitem.h"
@@ -8,6 +25,7 @@
 
 namespace EvaluationRequirementResult
 {
+    const std::string Single::tr_details_table_name_ {"tr_details_table"};
 
     Single::Single(
             const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
@@ -34,7 +52,7 @@ namespace EvaluationRequirementResult
 
     std::string Single::getTargetSectionID()
     {
-        return "Targets:"+to_string(utn_);
+        return "Targets:UTN "+to_string(utn_);
     }
 
     std::string Single::getTargetRequirementSectionID ()
@@ -57,7 +75,7 @@ namespace EvaluationRequirementResult
             utn_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
             utn_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
             utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->callsignsStr().c_str()}, this);
-            utn_table.addRow({"Target Addr.", "Mode S target adress(es)", target_->targetAddressesStr().c_str()}, this);
+            utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->targetAddressesStr().c_str()}, this);
             utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
             utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
             utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);

@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "mainwindow.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "config.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -59,18 +59,18 @@ MainWindow::MainWindow()
 
     setMinimumSize(QSize(1200, 900));
 
-    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
+    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
     setWindowIcon(atsdb_icon);  // for the glory of the empire
 
-    QSettings settings("ATSDB", "Client");
+    QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    assert(ATSDB::instance().config().existsId("version"));
-    std::string title = "ATSDB v" + ATSDB::instance().config().getString("version");
+    assert(COMPASS::instance().config().existsId("version"));
+    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
 
-    if (ATSDB::instance().config().existsId("save_config_on_exit"))
+    if (COMPASS::instance().config().existsId("save_config_on_exit"))
     {
-        save_configuration_ = ATSDB::instance().config().getBool("save_config_on_exit");
+        save_configuration_ = COMPASS::instance().config().getBool("save_config_on_exit");
         loginf << "MainWindow: constructor: save configuration on exit " << save_configuration_;
     }
 
@@ -78,7 +78,7 @@ MainWindow::MainWindow()
 
     tab_widget_ = new QTabWidget();
 
-    TaskManager& task_man = ATSDB::instance().taskManager();
+    TaskManager& task_man = COMPASS::instance().taskManager();
 
     task_manager_widget_ = task_man.widget();
     tab_widget_->addTab(task_manager_widget_, "Tasks");
@@ -93,7 +93,7 @@ MainWindow::MainWindow()
 
     tab_widget_->setCurrentIndex(0);
 
-    QObject::connect(this, &MainWindow::startedSignal, &ATSDB::instance().filterManager(),
+    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
                      &FilterManager::startedSlot);
 
 }
@@ -154,7 +154,7 @@ void MainWindow::startSlot()
     tab_widget_->removeTab(0);
 
     // close any opened dbobject widgets
-    for (auto& obj_it : ATSDB::instance().objectManager())
+    for (auto& obj_it : COMPASS::instance().objectManager())
         obj_it.second->closeWidget();
 
     assert(management_widget_);
@@ -167,8 +167,8 @@ void MainWindow::startSlot()
 //        QThread::msleep(1);
 //    }
 
-    ATSDB::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    ATSDB::instance().viewManager().init(tab_widget_); // adds view points widget
+    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget
 
     tab_widget_->setCurrentIndex(0);
 
@@ -201,17 +201,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::shutdown()
 {
-    QSettings settings("ATSDB", "Client");
+    QSettings settings("COMPASS", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
 
-    ATSDB::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
+    COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
 
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
         loginf << "MainWindow: closeEvent: configuration not saved";
 
-    ATSDB::instance().shutdown();
+    COMPASS::instance().shutdown();
 
     if (tab_widget_)
     {

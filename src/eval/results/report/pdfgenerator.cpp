@@ -1,7 +1,24 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/report/pdfgenerator.h"
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationmanager.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "logger.h"
@@ -40,6 +57,12 @@ namespace EvaluationResultsReport
         : Configurable(class_id, instance_id, &eval_manager), eval_man_(eval_manager)
     {
         registerParameter("author", &author_, "");
+
+        if (!author_.size())
+            author_ = System::getUserName();
+        if (!author_.size())
+            author_ = "User";
+
         registerParameter("abstract", &abstract_, "");
 
         report_filename_ = "report.tex";
@@ -47,6 +70,7 @@ namespace EvaluationResultsReport
         registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
 
         registerParameter("run_pdflatex", &run_pdflatex_, true);
+
         registerParameter("open_created_pdf", &open_created_pdf_, false);
 
         pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
@@ -74,7 +98,7 @@ namespace EvaluationResultsReport
     {
         if (!report_path_.size())
         {
-            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&ATSDB::instance().interface().connection());
+            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
 
             if (sql_con)
             {
@@ -84,7 +108,7 @@ namespace EvaluationResultsReport
             else
             {
                 MySQLppConnection* mysql_con =
-                        dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+                        dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
                 assert (mysql_con);
                 report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
             }
@@ -106,7 +130,7 @@ namespace EvaluationResultsReport
         dialog_->setRunning(true);
 
         LatexDocument doc (report_path_, report_filename_);
-        doc.title("ATSDB Evaluation Report");
+        doc.title("OpenATS COMPASS Evaluation Report");
 
         if (author_.size())
             doc.author(author_);
@@ -114,7 +138,8 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
-        LatexVisitor visitor (doc, false, false, false, wait_on_map_loading_);
+        LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
+                              wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -138,7 +163,7 @@ namespace EvaluationResultsReport
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections);
+        root_section->addSectionsFlat(sections, include_target_details_);
 
         unsigned int num_sections = sections.size();
 
@@ -417,5 +442,24 @@ namespace EvaluationResultsReport
     {
         wait_on_map_loading_ = value;
     }
-
+    
+    bool PDFGenerator::includeTargetDetails() const
+    {
+        return include_target_details_;
+    }
+    
+    void PDFGenerator::includeTargetDetails(bool value)
+    {
+        include_target_details_ = value;
+    }
+    
+    bool PDFGenerator::includeTargetTRDetails() const
+    {
+        return include_target_tr_details_;
+    }
+    
+    void PDFGenerator::includeTargetTRDetails(bool value)
+    {
+        include_target_tr_details_ = value;
+    }
 }

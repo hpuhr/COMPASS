@@ -1,5 +1,22 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "sector.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "evaluationmanager.h"
 #include "evaluationtargetposition.h"
 
@@ -208,7 +225,7 @@ void Sector::layerName(const std::string& layer_name)
 {
     loginf << "Sector: layerName: '" << layer_name << "'";
 
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     string old_layer_name = layer_name_;
     layer_name_ = layer_name;
@@ -218,7 +235,7 @@ void Sector::layerName(const std::string& layer_name)
 
 void Sector::save()
 {
-    EvaluationManager& eval_man = ATSDB::instance().evaluationManager();
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
     eval_man.saveSector(id_);
 }

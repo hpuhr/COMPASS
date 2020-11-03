@@ -1,18 +1,18 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "mysqldbimporttask.h"
@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "dbconnection.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
@@ -166,16 +166,16 @@ void MySQLDBImportTask::currentFilename(const std::string& filename)
 
 bool MySQLDBImportTask::checkPrerequisites()
 {
-    if (!ATSDB::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().interface().ready())  // must be connected
         return false;
 
-    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    if (ATSDB::instance().interface().connection().type() != MYSQL_IDENTIFIER)
+    if (COMPASS::instance().interface().connection().type() != MYSQL_IDENTIFIER)
         return false;
 
-    return !ATSDB::instance().objectManager().hasData();  // can not run if data exists
+    return !COMPASS::instance().objectManager().hasData();  // can not run if data exists
 }
 
 bool MySQLDBImportTask::isRecommended() { return checkPrerequisites(); }
@@ -216,7 +216,7 @@ void MySQLDBImportTask::run()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     MySQLppConnection* connection =
-        dynamic_cast<MySQLppConnection*>(&ATSDB::instance().interface().connection());
+        dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
     assert(connection);
 
     QString tmp = current_filename_.c_str();
@@ -287,7 +287,7 @@ void MySQLDBImportTask::importDoneSlot()
 
     done_ = true;
 
-    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
     emit doneSignal(name_);
 }
 

@@ -1,23 +1,23 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "createartasassociationsstatusdialog.h"
 
-#include "atsdb.h"
+#include "compass.h"
 #include "createartasassociationstask.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -340,7 +340,7 @@ void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid()
         dbo_associated_grid_->addWidget(percent_label, row, 3);
     }
 
-    for (auto& dbo_it : ATSDB::instance().objectManager())
+    for (auto& dbo_it : COMPASS::instance().objectManager())
     {
         if (dbo_it.first == "Tracker")
             continue;

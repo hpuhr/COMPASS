@@ -1,8 +1,25 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #define CATCH_CONFIG_RUNNER
 #include <QThread>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "catch.hpp"
 #include "client.h"
 #include "databaseopentask.h"
@@ -30,7 +47,7 @@ std::string data_path;
 std::string filename;
 std::string schema_name;
 
-TEST_CASE("ATSDB Import JSON", "[ATSDB]")
+TEST_CASE("COMPASS Import JSON", "[COMPASS]")
 {
     int argc = 1;
     char* argv[1];
@@ -68,14 +85,14 @@ TEST_CASE("ATSDB Import JSON", "[ATSDB]")
 
     REQUIRE(!Files::fileExists(db_filename));
 
-    TaskManager& task_manager = ATSDB::instance().taskManager();
+    TaskManager& task_manager = COMPASS::instance().taskManager();
     TaskManagerWidget* task_manager_widget = task_manager.widget();
 
     DatabaseOpenTask& db_open_task = task_manager.databaseOpenTask();
     db_open_task.useConnection("SQLite Connection");
 
     SQLiteConnectionWidget* connection_widget =
-        dynamic_cast<SQLiteConnectionWidget*>(ATSDB::instance().interface().connectionWidget());
+        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
     REQUIRE(connection_widget);
 
     connection_widget->addFile(db_filename);
@@ -171,7 +188,7 @@ TEST_CASE("ATSDB Import JSON", "[ATSDB]")
 
     QThread::msleep(100);  // delay
 
-    DBObjectManager& object_manager = ATSDB::instance().objectManager();
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
     object_manager.loadSlot();
 
     while (client.hasPendingEvents() || object_manager.loadInProgress())

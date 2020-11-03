@@ -3,7 +3,7 @@ include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
 
-target_sources(atsdb
+target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandard.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandardwidget.h"

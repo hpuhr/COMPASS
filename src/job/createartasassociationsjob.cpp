@@ -1,5 +1,22 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "createartasassociationsjob.h"
-#include "atsdb.h"
+#include "compass.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "buffer.h"
 #include "createartasassociationstask.h"
@@ -50,7 +67,7 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     object_man.removeAssociations();
 
@@ -343,7 +360,7 @@ void CreateARTASAssociationsJob::createARTASAssociations()
 {
     loginf << "CreateARTASAssociationsJob: createARTASAssociations";
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
     DBObject& tracker_object = object_man.object(tracker_dbo_name_);
 
     for (auto& ut_it : finished_tracks_)                    // utn -> UAT
@@ -356,7 +373,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     loginf << "CreateARTASAssociationsJob: createSensorAssociations";
     // for each rec_num + tri, find sensor hash + rec_num
 
-    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : object_man)
     {

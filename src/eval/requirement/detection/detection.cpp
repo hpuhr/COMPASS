@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/requirement/detection/detection.h"
 #include "eval/results/detection/single.h"
 #include "evaluationdata.h"
@@ -112,7 +129,7 @@ namespace EvaluationRequirement
         }
         ref_periods.removeSmallPeriods(1);
 
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " periods '" << ref_periods.print() << "'";
 
         tod = 0;
@@ -512,7 +529,7 @@ namespace EvaluationRequirement
             }
         }
 
-        loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " sum_uis " << sum_uis;
 
         if (sum_uis)
@@ -522,11 +539,11 @@ namespace EvaluationRequirement
 
             float pd = 1.0 - ((float)sum_missed_uis/(float)(sum_uis)); // -max_gap_uis-no_ref_uis
 
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " pd " << String::percentToString(100.0 * pd) << " passed " << (pd >= minimum_probability_);
         }
         else
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " no data for pd";
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(

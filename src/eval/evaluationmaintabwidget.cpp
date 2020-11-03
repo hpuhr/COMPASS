@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "evaluationmaintabwidget.h"
 #include "evaluationmanagerwidget.h"
 #include "evaluationdatasourcewidget.h"
@@ -68,15 +85,9 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
     main_layout->addLayout(sec_layout);
 
     // additional config
-    QFormLayout* cfg_layout = new QFormLayout();
+//    QFormLayout* cfg_layout = new QFormLayout();
 
-    QCheckBox* details_check = new QCheckBox();
-    details_check->setChecked(eval_man_.generateReportDetails());
-    connect(details_check, &QCheckBox::clicked, this, &EvaluationMainTabWidget::toggleGenerateDetailsSlot);
-
-    cfg_layout->addRow("Generate Per-Target-Report Requirement Details in Results", details_check);
-
-    main_layout->addLayout(cfg_layout);
+//    main_layout->addLayout(cfg_layout);
 
     main_layout->addStretch();
 
@@ -124,10 +135,3 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
     sector_widget_->update();
 }
 
-void EvaluationMainTabWidget::toggleGenerateDetailsSlot()
-{
-    QCheckBox* check = static_cast<QCheckBox*> (QObject::sender());
-    assert (check);
-
-    eval_man_.generateReportDetails(check->checkState() == Qt::Checked);
-}

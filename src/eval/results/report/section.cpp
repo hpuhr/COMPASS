@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontent.h"
 #include "eval/results/report/sectioncontenttext.h"
@@ -183,12 +200,18 @@ namespace EvaluationResultsReport
         return num;
     }
 
-    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result)
+    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details)
     {
+        if (!include_target_details && compoundHeading() == "Results:Targets")
+            return;
+
         for (auto& sec_it : sub_sections_)
         {
+            if (!include_target_details && sec_it->compoundHeading() == "Results:Targets")
+                continue;
+
             result.push_back(sec_it);
-            sec_it->addSectionsFlat(result);
+            sec_it->addSectionsFlat(result, include_target_details);
         }
     }
 

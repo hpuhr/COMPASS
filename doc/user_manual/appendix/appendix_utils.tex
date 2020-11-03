@@ -1,0 +1,443 @@
+\section{Appendix: Utilities}
+\label{sec:appendix_utils}
+
+\subsection{jASTERIX}
+\label{sec:jasterix}
+
+For usage of the jASTERIX library/tool please refer to \href{https://github.com/hpuhr/jASTERIX}{jASTERIX}.
+
+\subsection{SDDL}
+\label{sec:sddl}
+
+The SDDL tool is a open-source ASTERIX decoder and lister, please refer to \href{https://github.com/kobelbauer/sddl/}{SDDL} for more information. This text only aims at provding a short usage guide.\\
+
+While it is possible to download and build from the source code, this usage guide recommends downloading the a release AppImage from \href{https://github.com/kobelbauer/sddl/releases}{Releases}. Please make sure that at least version 1.1.0 with included JSON functions is used.
+
+After downloading, set the executable flag on the file: 
+
+\begin{lstlisting}
+$ chmod +x SDDL-json-x86_64.AppImage
+\end{lstlisting}
+
+After this, the file can be executed. The help text can be obtained with the following command:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the 
+ Free Software Foundation, either version 3 of the License, 
+ or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ for more details
+
+...
+
+The 'Surveillance Data Decoder and Lister' utility may be used as follows:
+
+ sddl { option } [ input_path [ list_path ] ]
+
+where the following options are supported:
+ -ah=xxx		use value (in FL) as assumed height
+ -all			list all levels
+ -cat			list ASTERIX category
+ -cat=xxx		only this ASTERIX category to be listed
+ -categories		print list of supported ASTERIX categories
+ -f			forced overwrite for list file
+ -fd			checking frame against data time
+ -fl=nn			frame limit (only first nn frames are listed)
+ -formats		print list of recording and data formats
+ -gv			list ground vector (for radar and system tracks)
+ -help			print some help info (and abort)
+ -hex			list hex dump
+ -if=pathname		path name of input file
+ -l=nn			list level (1/2=verbose, 3=one message per line)
+ -lf=pathname		path name of list file
+ -json-type=type	output type of json file to be written, possible types: 
+                none,test,print,text,cbor,msgpack,ubjson,
+                zip-text,zip-cbor,zip-msgpack,zip-ubjson
+ -json-file=pathname	path name of json file to be written
+...
+ -utc			UTC time of day in list file (default)
+ -wgs84			list WGS-84 position
+
+'input_path' and 'list_path' are the (local or full)
+ path names of the respective files.
+
+For comments or questions our e-mail address is: sddl@gmx.at
+Thank you for using this software.
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{lstlisting}
+
+To print the list of supported ASTERIX categories and editions, use:
+\begin{lstlisting}
+ ./SDDL-json-x86_64.AppImage -categories
+...
+The 'sddl' utility at the moment supports the following ASTERIX categories:
+ ASTERIX category 000	n.a.	April 1998
+ ASTERIX category 001	1.1 	August 2002
+ ASTERIX category 002	1.0 	November 1997
+ ASTERIX category 003	n.a.	April 1998
+ ASTERIX category 004	1.2 	March 2007
+ ASTERIX category 007	----	not supported
+ ASTERIX category 008	1.0 	November 1997
+ ASTERIX category 009	----	not supported
+ ASTERIX category 010	1.1 	March 2007
+  option -vsn010=0.24s	0.24*	Sensis (Heathrow MDS modifications)
+ ASTERIX category 011	0.17	December 2001
+  option -vsn011=0.14	0.14	October 2000
+  option -vsn011=0.14i	0.14*	Sensis (Inn valley modification)
+ ASTERIX category 016	    	unknown
+ ASTERIX category 017	0.5	February 1999
+ ASTERIX category 018	----	not supported
+ ASTERIX category 019	1.1	March 2007
+ ASTERIX category 020	1.5	April 2008
+  option -vsn020=1.0	1.0	November 2005
+  option -vsn020=1.2	1.2	April 2007
+  option -vsn020=1.5	1.5	April 2008
+ ASTERIX category 021	2.1	May 2011
+  option -vsn021=0.12	0.12	February 2001
+  option -vsn021=0.13	0.13	June 2001
+  option -vsn021=0.20	0.20	December 2002
+  option -vsn021=0.23	0.23	November 2003
+  option -vsn021=1.0P	1.0P	April 2008
+  option -vsn021=1.4	1.4	July 2009
+  option -vsn021=2.1	2.1	May 2011
+  option -vsn021=2.4	2.4	15 June 2015
+ ASTERIX category 023	1.2	March 2009
+  option -vsn023=0.11	0.11	December 2002
+  option -vsn023=1.0P	1.0P	April 2008
+  option -vsn023=1.1	1.1	September 2008
+  option -vsn023=1.2	1.2	March 2009
+ ASTERIX category 030	2.8.1	26 February 1999
+ ASTERIX category 031	2.8.1	26 February 1999
+ ASTERIX category 032	2.8.1	26 February 1999
+ ASTERIX category 034	1.27	May 2007
+ ASTERIX category 048	1.15	April 2007
+  option -vsn048=1.14	1.14	November 2000
+  option -vsn048=1.15	1.15	April 2007
+  option -vsn048=1.16	1.16	March 2009
+ ASTERIX category 062	1.3	April 2005
+ ASTERIX category 063	1.0	March 2004
+ ASTERIX category 065	0.12	March 2003
+  option -vsn065=0.12	0.12	March 2003
+  option -vsn065=1.3	1.3	April 2007
+ ASTERIX category 221	?	?
+ ASTERIX category 247	1.2	February 2008
+ ASTERIX category 252	2.8.1	26 February 1999
+\end{lstlisting}
+
+To list the supported framing formats, use:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage -formats
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+...
+
+The 'sddl' utility at the moment supports the following recording formats:
+
+ -asf     (ASTERIX in) IOSS Final Format recording
+ -ioss    SASS-C IOSS (Final) recording (default)
+ -net     Binary 'netto' recording
+ -rec     Sequence of records
+ -rff     Comsoft (TM) RFF recording
+
+Our 'sddl' utility at the moment supports the following data formats:
+
+ -asf     ASTERIX (in IOSS Final Format recording)
+ -asx     ASTERIX data format (default)
+ -zzz     Unknown data format - ignore
+
+Please be aware that NOT EVERY combination of recording and data formats
+ is reasonable.
+
+Thank you for using our software.
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{lstlisting}
+
+To list an existing ASTERIX recording 'test.rff' with RFF framing, use:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage -rff test.rff
+\end{lstlisting}
+
+This will output the contained ASTERIX data with one line per target report/status message. To limit parsing to the first 10000 bytes (for testing), use:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage -rff test.rff -ll=10000
+\end{lstlisting}
+
+To limit text output (for testing/benchmarking) with enable progress, use:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+...
+
+-> List level set to 0
+-> Show progress indication
+-> Using ASTERIX as default data format ...
+-> Input file 'test.rff' opened ...
+-> 100 KB of input data read and processed
+...
+-> 220 MB of input data read and processed
+; end of input file
+; length=227970515 byte(s)
+-> End of input file reached
+
+-> Processed 227970515 bytes in 12.819 seconds (about 16.960 MB/sec;
+163279 frames/sec)
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{lstlisting}
+
+JSON output can be obtained in several ways:
+\begin{itemize}
+\item none: No JSON output, default mode
+\item test: JSON output is generated, but not printed or written
+\item print: JSON output is generated and printed to console
+\item text: JSON output is generated and written as text to a file, for which a filename must be set
+\item cbor: JSON output is generated and written as CBOR to a file, for which a filename must be set
+\item msgpack: JSON output is generated and written as MSGPack to a file, for which a filename must be set
+\item ubjson: JSON output is generated and written as UBJSON to a file, for which a filename must be set
+\item zip-text: JSON output is generated and written as text to a ZIP archive file, for which a filename must be set
+\item zip-cbor: JSON output is generated and written as CBOR to a ZIP archive file, for which a filename must be set
+\item zip-msgpack: JSON output is generated and written as MSGPack to a ZIP archive file, for which a filename must be set
+\item zip-ubjson: JSON output is generated and written as UBJSON to a ZIP archive file, for which a filename must be set
+\end{itemize}
+
+For parsing in COMPASS, only the 'text' or 'zip-text' mode are currently supported. Use the first only for smaller dataset, the latter provides good compression. The resulting ZIP file will be about twice the size of the original ASTERIX file.
+
+To decode and write a JSON zip-text file 'test\_json.zip', use:
+\begin{lstlisting}
+./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress -json-type=zip-text 
+-json-file=test_json.zip
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+...
+
+-> List level set to 0
+-> Show progress indication
+-> Output JSON type 'zip-text'
+-> Export JSON to filename 'test_json.zip'
+-> Using ASTERIX as default data format ...
+-> Input file 'test.rff' opened ...
+-> 100 KB of input data read and processed
+...
+-> 220 MB of input data read and processed
+; end of input file
+; length=227970515 byte(s)
+-> End of input file reached
+
+-> Processed 227970515 bytes in 106.411 seconds (about 2.043 MB/sec; 19669 frames/sec)
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{lstlisting}
+
+For the used example file, this will result in a 420 MB ZIP file, which contains a text file with 7GB of JSON text. This ZIP archive can then be used in ATSB, according to the procedure described in \nameref{sec:json_import}
+
+\section{Appendix: Extending COMPASS}
+\label{sec:extending_compass}
+
+The COMPASS interface can be extended beyond the two database systems provided by default. \\
+
+Taking advantage of the schema inherited from SASS-C, simpler formats like comma separated values (CSV) can be used. \\
+
+To be able to use the OSGView a minimal subset of fields needs to be present. The required minimal subset of fields is defined by default and loaded as meta variables in the table (ListBox) view. \\
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Field Name} & \textbf{Description} & \textbf{Coding} \\ \hline
+    pos\_lat\_deg & Latitude & decimal degrees \\ \hline
+    pos\_long\_deg & Longitude & decimal degrees \\ \hline
+    tod & Time Of Day & [0, 24) hours in 1/128 of a second \\ \hline
+    modec\_code\_ft & Mode-C & decimal (feet) \\ \hline
+    track\_num & Track Number & decimal \\ \hline
+    mode3a\_code & Mode-A & decimal \\ \hline
+    target\_addr & 24 bit address & decimal \\ \hline
+    callsign & Callsign & 1 to 8 characters \\ \hline
+  \end{tabular}
+  \caption{Required fields for a CSV file}
+\end{table}
+
+The strictly minimal subset of fields for OSGview is the following:
+\begin{itemize}
+\item for 2D display: \textbf{pos\_lat\_deg}, \textbf{pos\_long\_deg} and \textbf{tod}
+\item for 3D display: the same as for 2D and \textbf{modec\_code\_ft}
+\\
+\end{itemize}
+
+The remaining fields are useful to qualify the reports and enable trajectories. \\
+
+\newpage
+Two fields need not be present in the CSV file because they are strongly related to the internal behaviour of SASS-C. The script creates the required values automatically.
+\begin{itemize}
+\item \textit{rec\_num}
+\item \textit{ds\_id}
+\\
+\end{itemize}
+
+If extra fields are required those have to be defined taking into account the existing fields in the schema for each kind of surveillance datasource, i.e. Radar, MLAT, ADS-B and Tracker. \\
+
+The names defined in the schema must be maintained. The coding of each field must also be maintained.
+
+\subsection{Installing COMPASS utils}
+
+The csv2atsdb is a perl script and has no dependency on other perl modules although requiring two other scripts and one tool:
+\begin{itemize}
+\item \textbf{termsql}: Convert text from a file or from stdin into SQL table and query it instantly. Uses sqlite as backend. The idea is to make SQL into a tool on the command line or in scripts. (\url{https://github.com/tobimensch/termsql}). \textit{termsql} is a python script.
+\item \textbf{mysql2sqlite}: Converts MySQL dump to SQLite3 compatible dump (\url{https://github.com/dumblob/mysql2sqlite}). \textit{mysql2sqlite} is an awk script.
+\item \textbf{sqlite3}: SQLite is a C library that implements an SQL database engine. Programs that link with the SQLite library can have SQL database access without running a separate RDBMS process. (\url{http://www.sqlite.org/index.html})
+\\
+\end{itemize}
+
+It is assumed that a perl, python and awk interpreters are present and accessible in the user's PATH.
+
+It is also assumed that \textbf{bash} is being used as the shell. \\
+
+Please note that the termsql script expects a python package 'sqlparse' with a version greater than 0.1.14. To install, commonly a command like the following can be used:
+
+\begin{lstlisting}
+$ sudo pip install sqlparse
+\end{lstlisting}
+
+For more information on how to install python packages refer to \url{https://packaging.python.org/tutorials/installing-packages/}.
+
+To install the COMPASS utils run the 'setup.sh' script found in the utils directory. \\
+
+After installation, in your home folder a bin subfolder was created with the scripts, and has been added to your path (using .bashrc), but only for new terminal sessions.
+
+\subsection{Importing CSV files exported by COMPASS}
+
+COMPASS can export CSV files (refer to section \nameref{sec:exporting}), those files can be loaded back into COMPASS with the help of the script \textbf{csv2atsdb}. \\
+
+The script expects a mandatory CSV file name and at least the datasource type, which can be one of:
+\label{sec:datasrc_type}
+\begin{itemize}
+\item \textbf{A}: the CSV files contains data from an ADS-B ground station
+\item \textbf{W}: the CSV files contains data from an MLAT/WAM sensor
+\item \textbf{R}: the CSV files contains data from a radar
+\item \textbf{T}: the CSV files contains data from a tracker
+\\
+\end{itemize}
+
+The following are examples of the four accepted datasources.
+
+\begin{lstlisting}
+# loading an ADS-B file
+
+$ csv2atsdb -f ADS-B.csv -t A
+
+
+# loading an MLAT/WAM file
+
+$ csv2atsdb -f MLAT.csv -t W
+
+
+# loading a Radar file
+
+$ csv2atsdb -f Radar.csv -t R
+
+
+# loading a Tracker file
+
+$ csv2atsdb -f Tracker.csv -t T
+\end{lstlisting}
+
+It is also possible to combine several datasources and import them into COMPASS by using the option \textbf{-l}. This option requires a file where each row holds a datasource definition. \\
+
+Each datasource is defined by three fields, separated by semicolons ';' :
+\begin{itemize}
+\item \textbf{type}: the datasource type (one of 'A', 'W', 'R' or 'T'), this field is \textbf{mandatory}
+\item \textbf{name}: the name of the datasource, this field is \textbf{optional}
+\item \textbf{CSV file}: the CSV file name, this field is \textbf{mandatory}
+\\
+\end{itemize}
+
+If a row is not correctly defined its contents shall be discarded. Comments can be made after the CSV file name. A semicolon after the CSV file name marks the start of comments. \\
+
+The following is an example of loading a list of datasources. \\
+Please note that an \textit{output file name} \textbf{must} be specified.
+
+\begin{lstlisting}
+$ cat ImportList
+A;ADS-B;ads-b_only.csv; This is a comment
+R;RAD;radar_only.csv
+W;WAM;wam_only.csv; COMMENT number 2
+T;ARTAS;tracker_only.csv
+
+$ csv2atsdb -l ImportList -o mixing_datasources.db
+\end{lstlisting}
+
+The option \textbf{-h} or the lack of parameters prints a summary of the switches one can use with the script csv2atsdb.
+
+\begin{lstlisting}
+$ csv2atsdb
+usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
+                                 [ -n <name> ] [ -t <type> ] [ -keep ]
+                                 [ -d <delimiter> ] [ -s <schema> ] 
+                                 [ -b <lines> ] [-h]
+
+       -f <file> ::= file name of the surveillance CSV file
+       -l <file list> ::= file name of a surveillance CSV file list
+            each line has the form:
+            <type>;[<name>];<filename>;comment
+            example:
+               A;;ADS-B.csv; this datasource has no name
+               A;adsb1;ads-b1.csv
+
+       -o <file> ::= file name of the output surveillance sqlite DB file
+            (default: same basename as the CSV input file with extension '.db')
+
+       -n <name> ::= sensor name
+
+       -t <type> ::= { 'T' ::= tracker, 'W' ::= WAM, 'A' ::= ADS-B, 
+                       'R' ::= radar }
+
+       -d <delimiter> ::= CSV delimiter (default: semicolon ';')
+
+       -s <schema> ::= filename containig schema to be used instead
+                       of the default schema
+
+       -b <lines> ::= split the CSV file into chunks of 'lines' each
+            a qualifier (multiplier factor) can be used
+            { 'M' ::= 10^6; 'G' ::= 10^9 }
+
+       -keep ::= keep the existing database and append new data to it
+
+       -h ::= this help
+\end{lstlisting}
+
+By default and after converting the CSV file(s) an SQLite3 file container is created in the current working directory with the same name as the CSV file and extension '.db'. \\
+
+This file can be loaded into COMPASS by \nameref{sec:sqlite_open}.
+
+\subsection{ADS-B exchange}
+
+For information about ADS-B exchange please refer to section \nameref{sec:adsbex}. \\
+
+It is usually possible to obtain a dataset from any day prior to the current one, covering the whole world. \\
+
+The data contents is coded in JSON and is described in \url{https://www.adsbexchange.com/datafields/}. \\
+
+Please be aware that using the produced data for commercial purposes (without a specific agreement) would violate the ADSB exchange terms \& conditions. Please refer to \url{https://www.adsbexchange.com/legal-and-privacy/} for additional information.\\
+
+The user could try to obtain a day with:
+\begin{lstlisting}
+$ wget http://history.adsbexchange.com/Aircraftlist.json/2016-06-20.zip
+\end{lstlisting}
+
+The time taken to get the file depends on the user's internet provider. The files are usually around 8G bytes.
+
+To create a file loadable in COMPASS, and after installing the COMPASS utils, the user can run the 'test.sh' script found in the utils directory. \\
+
+The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into COMPASS containing the traffic between 08Z and 09Z of the given day.

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/results/detection/joined.h"
 #include "eval/results/detection/single.h"
 #include "eval/requirement/base.h"
@@ -143,8 +160,8 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
-        sec_det_table.addRow({"#Updates/EUIs [1]", "Total number update intervals", sum_uis_}, this);
-        sec_det_table.addRow({"MUIs [1]", "Number of missed update intervals", missed_uis_}, this);
+        sec_det_table.addRow({"#Updates/#EUIs [1]", "Total number update intervals", sum_uis_}, this);
+        sec_det_table.addRow({"#MUIs [1]", "Number of missed update intervals", missed_uis_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Detection> req =

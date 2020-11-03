@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "eval/requirement/identification/identification.h"
 #include "eval/results/identification/single.h"
 #include "evaluationdata.h"
@@ -199,7 +216,7 @@ namespace EvaluationRequirement
                                num_unknown_id, num_correct_id, num_false_id, comment});
         }
 
-        loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
                << " num_no_ref_id " << num_no_ref_id
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
@@ -215,11 +232,11 @@ namespace EvaluationRequirement
         {
             float pid = (float)num_correct_id/(float)(num_correct_id+num_false_id);
 
-            loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " pid " << String::percentToString(100.0 * pid) << " passed " << (pid >= minimum_probability_);
         }
         else
-            loginf << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " no data for pid";
 
         return make_shared<EvaluationRequirementResult::SingleIdentification>(

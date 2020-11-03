@@ -1,25 +1,25 @@
 /*
- * This file is part of ATSDB.
+ * This file is part of OpenATS COMPASS.
  *
- * ATSDB is free software: you can redistribute it and/or modify
+ * COMPASS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ATSDB is distributed in the hope that it will be useful,
+ * COMPASS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
- * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "dbovariableorderedset.h"
 
 #include <algorithm>
 
-#include "atsdb.h"
+#include "compass.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -61,7 +61,7 @@ void DBOVariableOrderedSet::generateSubConfigurable(const std::string& class_id,
         DBOVariableOrderDefinition* definition =
             new DBOVariableOrderDefinition(class_id, instance_id, this);
 
-        DBObjectManager& manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = COMPASS::instance().objectManager();
 
         if (definition->dboName() == META_OBJECT_NAME)
         {
@@ -288,7 +288,7 @@ DBOVariableSet DBOVariableOrderedSet::getFor(const std::string& dbo_name)
 {
     loginf << "DBOVariableOrderedSet: getFor: type " << dbo_name;
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
     DBOVariableSet type_set;
     std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
 
@@ -315,7 +315,7 @@ DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_
 {
     logdbg << "DBOVariableOrderedSet: getExistingInDBFor: type " << dbo_name;
 
-    DBObjectManager& manager = ATSDB::instance().objectManager();
+    DBObjectManager& manager = COMPASS::instance().objectManager();
     DBOVariableSet type_set;
     std::map<unsigned int, DBOVariableOrderDefinition*>::iterator it;
 
