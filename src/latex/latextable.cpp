@@ -63,7 +63,7 @@ std::string LatexTable::toString()
 
     if (wide_table_)
     {
-        ss << R"(\newgeometry{margin=1cm})" << "\n";
+        //ss << R"(\newgeometry{margin=1cm})" << "\n";
         ss << R"(\begin{landscape})" << "\n";
         ss << R"(\thispagestyle{empty})" << "\n";
     }
@@ -86,7 +86,7 @@ std::string LatexTable::toString()
     if (wide_table_)
     {
         ss << R"(\end{landscape})" << "\n";
-        ss << R"(\restoregeometry)" << "\n";
+        //ss << R"(\restoregeometry)" << "\n";
     }
 
     return ss.str();

@@ -53,9 +53,10 @@ using namespace std;
 using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot, bool wait_on_map_loading)
+                           bool add_overview_screenshot, bool include_target_details, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
-      add_overview_screenshot_(add_overview_screenshot), wait_on_map_loading_(wait_on_map_loading)
+      add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
+      wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -193,6 +194,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 
     unsigned int num_rows = e->rowCount();
     vector<string> row_strings;
+    string ref;
 
     for (unsigned int row=0; row < num_rows; ++row)
     {
@@ -200,7 +202,13 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         assert (row_strings.size() == num_cols);
 
         if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
-            row_strings[0] = "\\hyperref[sec:"+e->reference(row)+"]{"+row_strings.at(0)+"}";
+        {
+            ref = e->reference(row);
+            if (!include_target_details_ && (ref.rfind("Targets", 0) == 0)) // reference to details
+                ; // do not do hyperref
+            else
+                row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
+        }
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
         {

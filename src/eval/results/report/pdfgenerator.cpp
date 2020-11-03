@@ -70,6 +70,7 @@ namespace EvaluationResultsReport
         registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
 
         registerParameter("run_pdflatex", &run_pdflatex_, true);
+
         registerParameter("open_created_pdf", &open_created_pdf_, false);
 
         pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
@@ -137,7 +138,7 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
-        LatexVisitor visitor (doc, false, false, false, wait_on_map_loading_);
+        LatexVisitor visitor (doc, false, false, false, include_target_details_, wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -161,7 +162,7 @@ namespace EvaluationResultsReport
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections);
+        root_section->addSectionsFlat(sections, include_target_details_);
 
         unsigned int num_sections = sections.size();
 

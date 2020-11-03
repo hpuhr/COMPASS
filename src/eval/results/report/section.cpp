@@ -200,12 +200,18 @@ namespace EvaluationResultsReport
         return num;
     }
 
-    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result)
+    void Section::addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details)
     {
+        if (!include_target_details && compoundHeading() == "Results:Targets")
+            return;
+
         for (auto& sec_it : sub_sections_)
         {
+            if (!include_target_details && sec_it->compoundHeading() == "Results:Targets")
+                continue;
+
             result.push_back(sec_it);
-            sec_it->addSectionsFlat(result);
+            sec_it->addSectionsFlat(result, include_target_details);
         }
     }
 

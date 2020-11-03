@@ -81,6 +81,8 @@ namespace EvaluationResultsReport
         std::string author_;
         std::string abstract_;
 
+        bool include_target_details_ {false};
+
         bool wait_on_map_loading_ {true};
 
         bool run_pdflatex_ {true};

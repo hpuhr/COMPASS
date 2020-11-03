@@ -77,7 +77,7 @@ namespace EvaluationResultsReport
                         std::unique_ptr<nlohmann::json::object_t> viewable_data);
 
         unsigned int numSections(); // all sections contained
-        void addSectionsFlat (vector<shared_ptr<Section>>& result);
+        void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details);
 
         virtual void accept(LatexVisitor& v) const;
 
