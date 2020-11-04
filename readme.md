@@ -1,5 +1,8 @@
+## New Project Name
+Please note that the previous project name was ATSDB. OpenATS COMPASS is a direct successor, with the same functionality, licenses and scope.
+
 ## Description
-Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retrieved and inspected.
+Based on a dynamic database schema, recorded air traffic surveillance data can be imported into database, analysed, inspected and evaluated.
 
 - Support of multiple database systems, e.g. Sqlite3, MySQL
 - Support of multiple, configurable database schemas, e.g. SCDB
@@ -32,7 +35,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - Cross-view data selection and inspection
   - Command line options for automated processing
   - View points for efficient inspection
-  - Standard compliance evaluation (under construction)
+- Standard compliance evaluation (under construction)
   - Definition of standards based on configurable requirements
   - Generalized comparison of test data vs. reference data
   - Calculation of requirements/performance indicators
@@ -43,18 +46,25 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental Version v0.5.5-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.5.5-beta/ATSDB-v0.5.5.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.5.5-beta/user_manual_v0.5.5.pdf)
-- [Improved Offline Map](https://github.com/hpuhr/ATSDB/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
+## Released Experimental COMPASS Version v0.5.6-alpha
+- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/COMPASS-v0.5.6-alpha.AppImage)
+- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/user_manual_v0.5.6.pdf)
+- [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
+
+## Released ATSDB Version v0.5.5-beta
+- [Previous Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/ATSDB-v0.5.5.AppImage)
+- [Previous User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/user_manual_v0.5.5.pdf)
+
 
 ## Screenshots
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss1.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss1.png)
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss3.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss3.png)
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/app_ss2.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss2.png)
+
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss4.png)
 
 ## YouTube Videos
 ### v0.5.0
@@ -82,11 +92,11 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - readme.md: This file
 
 ## Newsletter
-If you are interested in our newsletter, please send a mail to atsdb@openats.at with the subject "Register".
+If you are interested in our newsletter, please send a mail to compass@openats.at with the subject "Register".
 
 ## Author
 Helmut Puhr
-Contact: atsdb@openats.at
+Contact: compass@openats.at
 
 ## Licenses
 The source code is released under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
