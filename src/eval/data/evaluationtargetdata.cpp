@@ -857,10 +857,10 @@ void EvaluationTargetData::updateModeCMinMax() const
 
         for (auto ind_it : ref_indexes_)
         {
-            assert (ind_it < modec_codes_ft.size());
-
             if (!modec_codes_ft.isNull(ind_it))
             {
+                assert (ind_it < modec_codes_ft.size());
+
                 if (!has_mode_c_)
                 {
                     has_mode_c_ = true;
@@ -885,10 +885,10 @@ void EvaluationTargetData::updateModeCMinMax() const
 
         for (auto ind_it : tst_indexes_)
         {
-            assert (ind_it < modec_codes_ft.size());
-
             if (!modec_codes_ft.isNull(ind_it))
             {
+                assert (ind_it < modec_codes_ft.size());
+
                 if (!has_mode_c_)
                 {
                     has_mode_c_ = true;

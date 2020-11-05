@@ -14,5 +14,5 @@ zip -r ../toe_cfg.zip .
 #zip -r ../analyze.zip . -x ".*" -x "__*" -x "*/__*"
 
 
-cd /app/workspace/atsdb/docker
+cd /app/workspace/compass/docker
 

@@ -125,4 +125,4 @@ RUN ldconfig -v /usr/lib64/
 RUN updatedb
 
 USER sk
-WORKDIR /app/workspace/atsdb/docker
+WORKDIR /app/workspace/compass/docker
