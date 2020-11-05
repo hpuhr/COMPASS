@@ -52,8 +52,15 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
             "Allows creation of UTNs and target report association based on Mode S Addresses.";
 
     registerParameter("key_var_str", &key_var_str_, "rec_num");
+    registerParameter("ds_id_var_str", &ds_id_var_str_, "ds_id");
     registerParameter("tod_var_str", &tod_var_str_, "tod");
     registerParameter("target_addr_var_str", &target_addr_var_str_, "target_addr");
+    registerParameter("target_id_var_str", &target_id_var_str_, "callsign");
+    registerParameter("track_num_var_str", &track_num_var_str_, "track_num");
+    registerParameter("mode_3a_var_str", &mode_3a_var_str_, "mode3a_code");
+    registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
+    registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
+    registerParameter("longitude_var_str", &longitude_var_str_, "pos_long_deg");
 }
 
 CreateAssociationsTask::~CreateAssociationsTask() {}
@@ -121,10 +128,10 @@ bool CreateAssociationsTask::checkPrerequisites()
 
 bool CreateAssociationsTask::isRecommended()
 {
-//    if (!checkPrerequisites())
-//        return false;
+    //    if (!checkPrerequisites())
+    //        return false;
 
-//    return !done_;
+    //    return !done_;
 
     return false;
 }
@@ -137,21 +144,45 @@ bool CreateAssociationsTask::canRun()
 
     // meta var stuff
     logdbg << "CreateAssociationsTask: canRun: meta vars";
-    if (!key_var_str_.size() || !target_addr_var_str_.size() || !tod_var_str_.size())
+    if (!key_var_str_.size()
+            || !ds_id_var_str_.size()
+            || !tod_var_str_.size()
+            || !target_addr_var_str_.size()
+            || !target_id_var_str_.size()
+            || !track_num_var_str_.size()
+            || !mode_3a_var_str_.size()
+            || !mode_c_var_str_.size()
+            || !latitude_var_str_.size()
+            || !longitude_var_str_.size())
         return false;
 
     logdbg << "CreateAssociationsTask: canRun: metas ";
-    if (!object_man.existsMetaVariable(key_var_str_) ||
-            !object_man.existsMetaVariable(target_addr_var_str_) ||
-            !object_man.existsMetaVariable(tod_var_str_))
+    if (!object_man.existsMetaVariable(key_var_str_)
+            || !object_man.existsMetaVariable(ds_id_var_str_)
+            || !object_man.existsMetaVariable(tod_var_str_)
+            || !object_man.existsMetaVariable(target_addr_var_str_)
+            || !object_man.existsMetaVariable(target_id_var_str_)
+            || !object_man.existsMetaVariable(track_num_var_str_)
+            || !object_man.existsMetaVariable(mode_3a_var_str_)
+            || !object_man.existsMetaVariable(mode_c_var_str_)
+            || !object_man.existsMetaVariable(latitude_var_str_)
+            || !object_man.existsMetaVariable(longitude_var_str_))
         return false;
 
     logdbg << "CreateAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : object_man)
     {
-        if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first))
+        if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(ds_id_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(target_id_var_str_).existsIn(dbo_it.first)
+                //|| !object_man.metaVariable(track_num_var_str_).existsIn(dbo_it.first) // not in adsb
+                || !object_man.metaVariable(mode_3a_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(mode_c_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(latitude_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(longitude_var_str_).existsIn(dbo_it.first)
+                )
             return false;
     }
 
@@ -178,8 +209,15 @@ void CreateAssociationsTask::run()
     status_dialog_->markStartTime();
 
     checkAndSetMetaVariable(key_var_str_, &key_var_);
+    checkAndSetMetaVariable(ds_id_var_str_, &ds_id_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
     checkAndSetMetaVariable(target_addr_var_str_, &target_addr_var_);
+    checkAndSetMetaVariable(target_id_var_str_, &target_id_var_);
+    checkAndSetMetaVariable(track_num_var_str_, &track_num_var_);
+    checkAndSetMetaVariable(mode_3a_var_str_, &mode_3a_var_);
+    checkAndSetMetaVariable(mode_c_var_str_, &mode_c_var_);
+    checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
+    checkAndSetMetaVariable(longitude_var_str_, &longitude_var_);
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
@@ -251,7 +289,7 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
         }
 
         create_job_ = std::make_shared<CreateAssociationsJob>(
-            *this, COMPASS::instance().interface(), buffers);
+                    *this, COMPASS::instance().interface(), buffers);
 
         connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
                 &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -259,9 +297,9 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
                 &CreateAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
         connect(create_job_.get(), &CreateAssociationsJob::statusSignal, this,
                 &CreateAssociationsTask::associationStatusSlot, Qt::QueuedConnection);
-//        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
-//                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
-//                Qt::QueuedConnection);
+        //        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
+        //                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
+        //                Qt::QueuedConnection);
 
         JobManager::instance().addDBJob(create_job_);
 
@@ -276,11 +314,11 @@ void CreateAssociationsTask::createDoneSlot()
     create_job_done_ = true;
 
     status_dialog_->setAssociationStatus("Done");
-//    status_dialog_->setFoundHashes(create_job_->foundHashes());
-//    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
-//    status_dialog_->setMissingHashes(create_job_->missingHashes());
-//    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
-//    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
+    //    status_dialog_->setFoundHashes(create_job_->foundHashes());
+    //    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
+    //    status_dialog_->setMissingHashes(create_job_->missingHashes());
+    //    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
+    //    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
 
     status_dialog_->setDone();
 
@@ -323,39 +361,119 @@ void CreateAssociationsTask::closeStatusDialogSlot()
     status_dialog_ = nullptr;
 }
 
-std::string CreateAssociationsTask::keyVarStr() const { return key_var_str_; }
+//std::string CreateAssociationsTask::keyVarStr() const { return key_var_str_; }
 
-void CreateAssociationsTask::keyVarStr(const std::string& var_str)
+//void CreateAssociationsTask::keyVarStr(const std::string& var_str)
+//{
+//    loginf << "CreateAssociationsTask: keyVarStr: '" << var_str << "'";
+
+//    key_var_str_ = var_str;
+//}
+
+//std::string CreateAssociationsTask::dsIdVarStr() const { return ds_id_var_str_; }
+
+//std::string CreateAssociationsTask::targetAddrVarStr() const { return target_addr_var_str_; }
+
+//void CreateAssociationsTask::targetAddrVarStr(const std::string& var_str)
+//{
+//    loginf << "CreateAssociationsTask: targetAddrVarStr: '" << var_str << "'";
+
+//    target_addr_var_str_ = var_str;
+//}
+
+//std::string CreateAssociationsTask::todVarStr() const { return tod_var_str_; }
+
+//void CreateAssociationsTask::todVarStr(const std::string& var_str)
+//{
+//    loginf << "CreateAssociationsTask: todVarStr: '" << var_str << "'";
+
+//    tod_var_str_ = var_str;
+//}
+
+//std::string CreateAssociationsTask::targetIdVarStr() const
+//{
+//    return target_id_var_str_;
+//}
+
+//std::string CreateAssociationsTask::mode3AVarStr() const
+//{
+//    return mode_3a_var_str_;
+//}
+
+//std::string CreateAssociationsTask::modeCVarStr() const
+//{
+//    return mode_c_var_str_;
+//}
+
+//std::string CreateAssociationsTask::latitudeVarStr() const
+//{
+//    return latitude_var_str_;
+//}
+
+//std::string CreateAssociationsTask::longitudeVarStr() const
+//{
+//    return longitude_var_str_;
+//}
+
+MetaDBOVariable* CreateAssociationsTask::keyVar() const
 {
-    loginf << "CreateAssociationsTask: keyVarStr: '" << var_str << "'";
-
-    key_var_str_ = var_str;
+    assert (key_var_);
+    return key_var_;
 }
 
-std::string CreateAssociationsTask::targetAddrVarStr() const { return target_addr_var_str_; }
-
-void CreateAssociationsTask::targetAddrVarStr(const std::string& var_str)
+MetaDBOVariable* CreateAssociationsTask::dsIdVar() const
 {
-    loginf << "CreateAssociationsTask: targetAddrVarStr: '" << var_str << "'";
-
-    target_addr_var_str_ = var_str;
+    assert (key_var_);
+    return ds_id_var_;
 }
 
-std::string CreateAssociationsTask::todVarStr() const { return tod_var_str_; }
-
-void CreateAssociationsTask::todVarStr(const std::string& var_str)
+MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const
 {
-    loginf << "CreateAssociationsTask: todVarStr: '" << var_str << "'";
-
-    tod_var_str_ = var_str;
+    assert (target_addr_var_);
+    return target_addr_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::keyVar() const { return key_var_; }
+MetaDBOVariable* CreateAssociationsTask::todVar() const
+{
+    assert (tod_var_);
+    return tod_var_;
+}
 
-MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const { return target_addr_var_; }
+MetaDBOVariable* CreateAssociationsTask::targetIdVar() const
+{
+    assert (target_id_var_);
+    return target_id_var_;
+}
 
-MetaDBOVariable* CreateAssociationsTask::todVar() const { return tod_var_; }
+MetaDBOVariable* CreateAssociationsTask::trackNumVar() const
+{
+    assert (track_num_var_);
+    return track_num_var_;
+}
 
+MetaDBOVariable* CreateAssociationsTask::mode3AVar() const
+{
+    assert (mode_3a_var_);
+    return mode_3a_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::modeCVar() const
+{
+    assert (mode_c_var_);
+    return mode_c_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::latitudeVar() const
+{
+    assert (latitude_var_);
+    return latitude_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::longitudeVar() const
+{
+    assert (longitude_var_);
+    return longitude_var_;
+}
 
 void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                      MetaDBOVariable** var)
@@ -386,6 +504,10 @@ DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name
     assert(key_var_->existsIn(dbo_name));
     read_set.add(key_var_->getFor(dbo_name));
 
+    assert(ds_id_var_);
+    assert(ds_id_var_->existsIn(dbo_name));
+    read_set.add(ds_id_var_->getFor(dbo_name));
+
     assert(tod_var_);
     assert(tod_var_->existsIn(dbo_name));
     read_set.add(tod_var_->getFor(dbo_name));
@@ -393,6 +515,30 @@ DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name
     assert(target_addr_var_);
     assert(target_addr_var_->existsIn(dbo_name));
     read_set.add(target_addr_var_->getFor(dbo_name));
+
+    assert(target_id_var_);
+    assert(target_id_var_->existsIn(dbo_name));
+    read_set.add(target_id_var_->getFor(dbo_name));
+
+    assert(track_num_var_);
+    if(track_num_var_->existsIn(dbo_name))
+        read_set.add(track_num_var_->getFor(dbo_name));
+
+    assert(mode_3a_var_);
+    assert(mode_3a_var_->existsIn(dbo_name));
+    read_set.add(mode_3a_var_->getFor(dbo_name));
+
+    assert(mode_c_var_);
+    assert(mode_c_var_->existsIn(dbo_name));
+    read_set.add(mode_c_var_->getFor(dbo_name));
+
+    assert(latitude_var_);
+    assert(latitude_var_->existsIn(dbo_name));
+    read_set.add(latitude_var_->getFor(dbo_name));
+
+    assert(longitude_var_);
+    assert(longitude_var_->existsIn(dbo_name));
+    read_set.add(longitude_var_->getFor(dbo_name));
 
     return read_set;
 }

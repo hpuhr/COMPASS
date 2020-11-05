@@ -19,6 +19,7 @@
 #define CREATEASSOCIATIONSJOB_H
 
 #include "job.h"
+#include "assoc/targetreport.h"
 
 class CreateAssociationsTask;
 class DBInterface;
@@ -45,9 +46,13 @@ protected:
     DBInterface& db_interface_;
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
+    std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
+    //dbo name->ds_id->trs
+
     std::map<unsigned int, unsigned int> ta_2_utn_;
     unsigned int utn_cnt_ {0};
 
+    void createTargetReports();
     void createUTNS();
 };
 

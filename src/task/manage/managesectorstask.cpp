@@ -284,7 +284,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         {
             feature = layer->GetFeature(feature_cnt);
 
-            if (!feature)
+            if (!feature) // TODO solve this
             {
                 logwrn << "ManageSectorsTask: parseCurrentFile: non-feature at cnt " << feature_cnt;
                 continue;
