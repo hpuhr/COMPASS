@@ -24,6 +24,7 @@
 #include "dbobjectmanager.h"
 #include "metadbovariable.h"
 #include "dbovariable.h"
+#include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
@@ -57,9 +58,17 @@ void CreateAssociationsJob::run()
     emit statusSignal("Creating Target Reports");
     createTargetReports();
 
-    // create utns
-    emit statusSignal("Creating UTNs");
-    createUTNS();
+    // create tracker utns
+    emit statusSignal("Creating Tracker UTNs");
+    createTrackerUTNS();
+
+    // create non-tracker utns
+    emit statusSignal("Creating non-Tracker UTNS");
+    createNonTrackerUTNS();
+
+    // create associations
+    emit statusSignal("Creating Associations");
+    createAssociations();
 
     // save associations
     emit statusSignal("Saving Associations");
@@ -112,6 +121,8 @@ void CreateAssociationsJob::createTargetReports()
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+    Association::TargetReport tr;
+
     for (auto& buf_it : buffers_) // dbo name, buffer
     {
         string dbo_name = buf_it.first;
@@ -137,7 +148,7 @@ void CreateAssociationsJob::createTargetReports()
 
         DBOVariable* tn_var {nullptr}; // not in ads-b
         if (meta_tn_var->existsIn(dbo_name))
-                tn_var = &meta_tn_var->getFor(dbo_name);
+            tn_var = &meta_tn_var->getFor(dbo_name);
 
         assert (meta_mode_3a_var->existsIn(dbo_name));
         DBOVariable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
@@ -189,75 +200,359 @@ void CreateAssociationsJob::createTargetReports()
         for (size_t cnt = 0; cnt < buffer_size; ++cnt)
         {
             assert (!rec_nums.isNull(cnt));
+            assert (!ds_ids.isNull(cnt));
+
+            tr.dbo_name_ = dbo_name;
+            tr.rec_num_ = rec_nums.get(cnt);
+            tr.ds_id_ = ds_ids.get(cnt);
+
+            if (tods.isNull(cnt))
+            {
+                logwrn << "CreateAssociationsJob: createTargetReports: target report w/o time: dbo "
+                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                continue;
+            }
+
+            if (tods.isNull(cnt))
+            {
+                logwrn << "CreateAssociationsJob: createTargetReports: target report w/o time: dbo "
+                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                continue;
+            }
+
+            if (lats.isNull(cnt))
+            {
+                logwrn << "CreateAssociationsJob: createTargetReports: target report w/o latitude: dbo "
+                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                continue;
+            }
+            if (longs.isNull(cnt))
+            {
+                logwrn << "CreateAssociationsJob: createTargetReports: target report w/o longitude: dbo "
+                       << dbo_name << " rec_num " << tr.rec_num_  << " ds_id " << tr.ds_id_;
+                continue;
+            }
+
+            tr.tod_ = tods.get(cnt);
+
+            tr.has_ta_ = !tas.isNull(cnt);
+            tr.ta_ = tr.has_ta_ ? tas.get(cnt) : 0;
+
+            tr.has_ti_ = !tis.isNull(cnt);
+            tr.ti_ = tr.has_ti_ ? tis.get(cnt) : "";
+
+            tr.has_tn_ = tns && !tns->isNull(cnt);
+            tr.tn_ = tr.has_tn_ ? tns->get(cnt) : 0;
+
+            tr.has_ma_ = !m3as.isNull(cnt);
+            tr.ma_ = tr.has_ma_ ? m3as.get(cnt) : 0;
+
+            tr.has_ma_v_ = false; // TODO
+            tr.has_ma_g_ = false; // TODO
+
+            tr.has_mc_ = !mcs.isNull(cnt);
+            tr.mc_ = tr.has_mc_ ? mcs.get(cnt) : 0;
+
+            tr.has_mc_v_ = false; // TODO
+
+            tr.latitude_ = lats.get(cnt);
+            tr.longitude_ = longs.get(cnt);
+
+            target_reports_[dbo_name][tr.ds_id_].push_back(tr);
         }
     }
 }
 
-void CreateAssociationsJob::createUTNS()
+void CreateAssociationsJob::createTrackerUTNS()
 {
-    loginf << "CreateAssociationsJob: createUTNS";
+    loginf << "CreateAssociationsJob: createTrackerUTNS";
 
-    MetaDBOVariable* meta_key_var = task_.keyVar();
-    MetaDBOVariable* meta_tod_var = task_.todVar();
-    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
+    if (target_reports_.count("Tracker"))
+    {
+        std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at("Tracker");
 
-    assert (meta_key_var);
-    assert (meta_tod_var);
-    assert (meta_ta_var);
+        unsigned int utn;
+
+        map<unsigned int, Association::Target> tracker_targets;
+        map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
+
+        // create utn for all tracks
+        for (auto& ds_it : ds_id_trs) // ds_id->trs
+        {
+            loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first;
+
+            tracker_targets.clear();
+            tn2utn.clear();
+
+            unsigned int tmp_utn_cnt {0};
+
+            for (auto& tr_it : ds_it.second)
+            {
+                if (tr_it.has_tn_)
+                {
+                    if (!tn2utn.count(tr_it.tn_)) // first track update exists
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: creating new tmp utn " << tmp_utn_cnt
+                               << " for tn " << tr_it.tn_;
+
+                        tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                        ++tmp_utn_cnt;
+                    }
+
+                    if (tn2utn.at(tr_it.tn_).second > tr_it.tod_)
+                    {
+                        logwrn << "CreateAssociationsJob: createTrackerUTNS: tod backjump -"
+                               << String::timeStringFromDouble(tn2utn.at(tr_it.tn_).second-tr_it.tod_)
+                               << " tmp utn " << tmp_utn_cnt << " at tr " << tr_it.asStr();
+                    }
+                    assert (tn2utn.at(tr_it.tn_).second <= tr_it.tod_);
+
+                    if (tr_it.tod_ - tn2utn.at(tr_it.tn_).second > 60.0) // gap, new track
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: creating new tmp utn " << tmp_utn_cnt
+                               << " for tn " << tr_it.tn_ << " because of gap "
+                               << String::timeStringFromDouble(tr_it.tod_ - tn2utn.at(tr_it.tn_).second);
+
+                        tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                        ++tmp_utn_cnt;
+                    }
+
+                    assert (tn2utn.count(tr_it.tn_));
+                    utn = tn2utn.at(tr_it.tn_).first;
+                    tn2utn.at(tr_it.tn_).second = tr_it.tod_;
+
+                    if (!tracker_targets.count(utn)) // add new target if not existing
+                        tracker_targets.emplace(
+                                    std::piecewise_construct,
+                                    std::forward_as_tuple(utn),   // args for key
+                                    std::forward_as_tuple(utn, true));  // args for mapped value
+
+                    tracker_targets.at(utn).addAssociated(&tr_it);
+                }
+                else
+                {
+                    logwrn << "CreateAssociationsJob: createTrackerUTNS: tracker target report w/o track num in ds_id "
+                           << tr_it.ds_id_ << " at tod " << String::timeStringFromDouble(tr_it.tod_);
+                }
+            }
+
+            if (!tracker_targets.size())
+            {
+                logwrn << "CreateAssociationsJob: createTrackerUTNS: tracker ds_id " << ds_it.first
+                       << " created no utns";
+                continue;
+            }
+
+            loginf << "CreateAssociationsJob: createTrackerUTNS: creating utns for ds_id " << ds_it.first;
+
+            // tracker_targets exist, tie them together by mode s address
+
+            int tmp_utn;
+
+            while (tracker_targets.size())
+            {
+                auto tmp_target = tracker_targets.begin();
+                assert (tmp_target != tracker_targets.end());
+
+                loginf << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
+
+                tmp_utn = findUTNForTarget(tmp_target->second);
+
+                if (tmp_utn == -1) // none found, create new target
+                    addTarget(tmp_target->second);
+                else // attach to existing target
+                {
+                    assert (targets_.count(tmp_utn));
+                    targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
+                }
+
+                tracker_targets.erase(tmp_target);
+            }
+
+            loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first << " done";
+        }
+    }
+    else
+        loginf << "CreateAssociationsJob: createTrackerUTNS: no tracker data";
+
+}
+
+void CreateAssociationsJob::createNonTrackerUTNS()
+{
+    loginf << "CreateAssociationsJob: createNonTrackerUTNS";
+
+    int tmp_utn;
+
+    for (auto& dbo_it : target_reports_)
+    {
+        if (dbo_it.first == "Tracker") // already associated
+            continue;
+
+        for (auto& ds_it : dbo_it.second) // ds_id -> trs
+        {
+            for (auto& tr_it : ds_it.second)
+            {
+                tmp_utn = findUTNForTargetReport(tr_it);
+
+                if (tmp_utn != -1) // existing target found
+                {
+                    assert (targets_.count(tmp_utn));
+                    targets_.at(tmp_utn).addAssociated(&tr_it);
+                }
+                else if (tr_it.has_ta_)
+                {
+                    addTargetByTargetReport(tr_it);
+                }
+                else
+                    ; // nothing can be done at the momemt
+            }
+        }
+    }
+}
+
+void CreateAssociationsJob::createAssociations()
+{
+    loginf << "CreateAssociationsJob: createAssociations";
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    for (auto& buf_it : buffers_) // dbo name, buffer
+    for (auto& dbo_it : target_reports_)
     {
-        string dbo_name = buf_it.first;
-        DBObject& dbo = object_man.object(dbo_name);
+        assert (object_man.existsObject(dbo_it.first));
+        DBObject& dbo = object_man.object(dbo_it.first);
 
-        shared_ptr<Buffer> buffer = buf_it.second;
-        size_t buffer_size = buffer->size();
-
-        assert (meta_key_var->existsIn(dbo_name));
-        DBOVariable& key_var = meta_key_var->getFor(dbo_name);
-
-        assert (meta_tod_var->existsIn(dbo_name));
-        DBOVariable& tod_var = meta_tod_var->getFor(dbo_name);
-
-        assert (meta_ta_var->existsIn(dbo_name));
-        DBOVariable& ta_var = meta_ta_var->getFor(dbo_name);
-
-        assert (buffer->has<int>(key_var.name()));
-        assert (buffer->has<float>(tod_var.name()));
-        assert (buffer->has<int>(ta_var.name()));
-
-        NullableVector<int>& rec_nums = buffer->get<int>(key_var.name());
-        NullableVector<float>& tods = buffer->get<float>(tod_var.name());
-        NullableVector<int>& tas = buffer->get<int>(ta_var.name());
-
-        unsigned int rec_num;
-        unsigned int target_addr;
-        unsigned int utn;
-
-        for (size_t cnt = 0; cnt < buffer_size; ++cnt)
+        for (auto& ds_it : dbo_it.second) // ds_id -> trs
         {
-            assert (!rec_nums.isNull(cnt));
-
-            if (tas.isNull(cnt))
-                continue;
-
-            rec_num = rec_nums.get(cnt);
-            target_addr = tas.get(cnt);
-
-            if (ta_2_utn_.count(target_addr) == 0)
+            for (auto& tr_it : ds_it.second)
             {
-                ta_2_utn_[target_addr] = utn_cnt_;
-                ++utn_cnt_;
+                for (auto utn_ptr_it : tr_it.assoc_targets_)
+                    dbo.addAssociation(tr_it.rec_num_, utn_ptr_it->utn_, false, 0);
             }
-
-            utn = ta_2_utn_[target_addr];
-
-            dbo.addAssociation(rec_num, utn, false, 0);
         }
+    }
+}
 
-        dbo.saveAssociations();
+int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
+// tries to find existing utn for target, -1 if failed
+{
+    if (target.has_ta_ && ta_2_utn_.count(target.ta_))
+        return ta_2_utn_.at(target.ta_);
+    else
+        return -1;
+}
+
+int CreateAssociationsJob::findUTNForTargetReport (const Association::TargetReport& tr)
+{
+    if (tr.has_ta_ && ta_2_utn_.count(tr.ta_))
+        return ta_2_utn_.at(tr.ta_);
+    else
+        return -1;
+}
+
+
+void CreateAssociationsJob::addTarget (const Association::Target& target) // creates new utn, adds to targets_
+{
+    if (target.has_ta_)
+    {
+        assert (!ta_2_utn_.count(target.ta_));
+        ta_2_utn_[target.ta_] = utn_cnt_;
     }
 
+    //targets_[utn_cnt_] = {utn_cnt_};
+
+    targets_.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(utn_cnt_),   // args for key
+                std::forward_as_tuple(utn_cnt_, false));  // args for mapped value
+
+    targets_.at(utn_cnt_).addAssociated(target.assoc_trs_);
+
+    ++utn_cnt_;
 }
+
+void CreateAssociationsJob::addTargetByTargetReport (Association::TargetReport& tr)
+{
+    if (tr.has_ta_)
+    {
+        assert (!ta_2_utn_.count(tr.ta_));
+        ta_2_utn_[tr.ta_] = utn_cnt_;
+    }
+
+    //targets_[utn_cnt_] = {utn_cnt_};
+    targets_.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(utn_cnt_),   // args for key
+                std::forward_as_tuple(utn_cnt_, false));  // args for mapped value
+
+    targets_.at(utn_cnt_).addAssociated(&tr);
+
+    ++utn_cnt_;
+}
+
+//void CreateAssociationsJob::createUTNS()
+//{
+//    loginf << "CreateAssociationsJob: createUTNS";
+
+//    MetaDBOVariable* meta_key_var = task_.keyVar();
+//    MetaDBOVariable* meta_tod_var = task_.todVar();
+//    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
+
+//    assert (meta_key_var);
+//    assert (meta_tod_var);
+//    assert (meta_ta_var);
+
+//    DBObjectManager& object_man = COMPASS::instance().objectManager();
+
+//    for (auto& buf_it : buffers_) // dbo name, buffer
+//    {
+//        string dbo_name = buf_it.first;
+//        DBObject& dbo = object_man.object(dbo_name);
+
+//        shared_ptr<Buffer> buffer = buf_it.second;
+//        size_t buffer_size = buffer->size();
+
+//        assert (meta_key_var->existsIn(dbo_name));
+//        DBOVariable& key_var = meta_key_var->getFor(dbo_name);
+
+//        assert (meta_tod_var->existsIn(dbo_name));
+//        DBOVariable& tod_var = meta_tod_var->getFor(dbo_name);
+
+//        assert (meta_ta_var->existsIn(dbo_name));
+//        DBOVariable& ta_var = meta_ta_var->getFor(dbo_name);
+
+//        assert (buffer->has<int>(key_var.name()));
+//        assert (buffer->has<float>(tod_var.name()));
+//        assert (buffer->has<int>(ta_var.name()));
+
+//        NullableVector<int>& rec_nums = buffer->get<int>(key_var.name());
+//        NullableVector<float>& tods = buffer->get<float>(tod_var.name());
+//        NullableVector<int>& tas = buffer->get<int>(ta_var.name());
+
+//        unsigned int rec_num;
+//        unsigned int target_addr;
+//        unsigned int utn;
+
+//        for (size_t cnt = 0; cnt < buffer_size; ++cnt)
+//        {
+//            assert (!rec_nums.isNull(cnt));
+
+//            if (tas.isNull(cnt))
+//                continue;
+
+//            rec_num = rec_nums.get(cnt);
+//            target_addr = tas.get(cnt);
+
+//            if (ta_2_utn_.count(target_addr) == 0)
+//            {
+//                ta_2_utn_[target_addr] = utn_cnt_;
+//                ++utn_cnt_;
+//            }
+
+//            utn = ta_2_utn_[target_addr];
+
+//            dbo.addAssociation(rec_num, utn, false, 0);
+//        }
+
+//        dbo.saveAssociations();
+//    }
+//}

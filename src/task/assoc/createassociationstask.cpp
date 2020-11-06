@@ -232,7 +232,7 @@ void CreateAssociationsTask::run()
         connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
                 &CreateAssociationsTask::loadingDoneSlot);
 
-        dbo_it.second->load(read_set, false, false, nullptr, false);
+        dbo_it.second->load(read_set, false, true, &tod_var_->getFor(dbo_it.first), true);
 
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
@@ -314,11 +314,6 @@ void CreateAssociationsTask::createDoneSlot()
     create_job_done_ = true;
 
     status_dialog_->setAssociationStatus("Done");
-    //    status_dialog_->setFoundHashes(create_job_->foundHashes());
-    //    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
-    //    status_dialog_->setMissingHashes(create_job_->missingHashes());
-    //    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
-    //    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
 
     status_dialog_->setDone();
 

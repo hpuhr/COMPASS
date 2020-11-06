@@ -13,11 +13,11 @@ namespace Association
     class TargetReport
     {
     public:
-        TargetReport(string dbo_name, unsigned int rec_num, unsigned int ds_id, float tod);
+        TargetReport();
 
         string dbo_name_;
-        unsigned int rec_num_{0};
         unsigned int ds_id_{0};
+        unsigned int rec_num_{0};
         float tod_{0};
 
         // mode s
@@ -26,6 +26,10 @@ namespace Association
 
         bool has_ti_{false};
         string ti_;
+
+        // track num
+        bool has_tn_{false};
+        unsigned int tn_{0};
 
         // mode 3/a
         bool has_ma_{false};
@@ -44,8 +48,16 @@ namespace Association
         bool has_mc_v_{false};
         bool mc_v_{false};
 
+        double latitude_{0};
+        double longitude_{0};
+
         vector<Target*> assoc_targets_;
-        vector<Target*> potential_targets_;
+        //vector<Target*> potential_targets_;
+
+        void addAssociated (Target* tr);
+        void removeAssociated (Target* tr);
+
+        std::string asStr();
     };
 
 }
