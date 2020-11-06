@@ -84,6 +84,8 @@ namespace EvaluationRequirement
 
 
     protected:
+        static bool in_appimage_;
+
         float max_ref_time_diff_ {0};
         float max_distance_ {0};
         float minimum_probability_{0};

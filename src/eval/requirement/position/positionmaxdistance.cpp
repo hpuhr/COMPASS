@@ -31,6 +31,8 @@ using namespace Utils;
 
 namespace EvaluationRequirement
 {
+    bool PositionMaxDistance::in_appimage_ {getenv("APPDIR")};
+
 
     PositionMaxDistance::PositionMaxDistance(const std::string& name, const std::string& short_name, const std::string& group_name,
                                              EvaluationManager& eval_man,
@@ -83,7 +85,6 @@ namespace EvaluationRequirement
         EvaluationTargetPosition tst_pos;
 
         double x_pos, y_pos;
-        bool ret;
         double distance;
 
         bool is_inside;
@@ -148,7 +149,7 @@ namespace EvaluationRequirement
 
             ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-            if (getenv("APPDIR")) // inside appimage
+            if (in_appimage_) // inside appimage
             {
                 x_pos = tst_pos.longitude_;
                 y_pos = tst_pos.latitude_;
@@ -159,8 +160,8 @@ namespace EvaluationRequirement
                 y_pos = tst_pos.longitude_;
             }
 
-            ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-            if (!ret)
+            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+            if (!ok)
             {
                 details.push_back({tod, tst_pos,
                                    false, {},

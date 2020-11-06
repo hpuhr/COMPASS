@@ -43,6 +43,8 @@ public:
     virtual void run();
 
 protected:
+    static bool in_appimage_;
+
     CreateAssociationsTask& task_;
     DBInterface& db_interface_;
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;

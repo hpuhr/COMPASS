@@ -938,7 +938,6 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
 
         if (lb_it != ref_data_.end()) // upper tod found
         {
-
             assert (lb_it->first >= tod);
 
             // save upper value
