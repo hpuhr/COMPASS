@@ -28,6 +28,8 @@
 
 #include <ogr_spatialref.h>
 
+#include <tbb/tbb.h>
+
 using namespace std;
 using namespace Utils;
 
@@ -294,6 +296,8 @@ void CreateAssociationsJob::createTrackerUTNS()
         map<unsigned int, Association::Target> tracker_targets;
         map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
+        DBObjectManager& object_man = COMPASS::instance().objectManager();
+
         // create utn for all tracks
         for (auto& ds_it : ds_id_trs) // ds_id->trs
         {
@@ -301,6 +305,8 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             tracker_targets.clear();
             tn2utn.clear();
+
+            string ds_name = object_man.object("Tracker").dataSources().at(ds_it.first).name();
 
             unsigned int tmp_utn_cnt {0};
 
@@ -367,8 +373,18 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             int tmp_utn;
 
+            float done_ratio;
+            unsigned int targets_size = tracker_targets.size();
+            unsigned int target_cnt = 0;
+
             while (tracker_targets.size())
             {
+                done_ratio = (float)target_cnt / (float)targets_size;
+                emit statusSignal(("Creating Tracker UTNs DS "
+                                   +ds_name+" ("+String::percentToString(100.0*done_ratio)+"%)").c_str());
+
+                ++target_cnt;
+
                 auto tmp_target = tracker_targets.begin();
                 assert (tmp_target != tracker_targets.end());
 
@@ -459,51 +475,51 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     {
         logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_;
 
-        vector<float> unknown;
-        vector<float> same;
-        vector<float> different;
-
-        vector<pair<float, double>> same_distances;
-        double distances_sum;
-
         OGRSpatialReference wgs84;
         wgs84.SetWellKnownGeogCS("WGS84");
 
-        OGRSpatialReference local;
-
-        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
-        EvaluationTargetPosition tst_pos;
-
-        double x_pos, y_pos;
-        double distance;
-
-        EvaluationTargetPosition ref_pos;
-        bool ok;
-
-        for (auto& other_it : targets_)
+        //for (auto& other_it : targets_)
+        tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
         {
-            logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
-                   << " other " << other_it.second.utn_;
+            Association::Target& other = targets_.at(cnt);
 
-            if (target.timeOverlaps(other_it.second))
+            logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
+                   << " other " << other.utn_;
+
+            if (target.timeOverlaps(other))
             {
-                tie (unknown, same, different) = target.compareModeACodes(other_it.second);
+                vector<float> unknown;
+                vector<float> same;
+                vector<float> different;
+
+                tie (unknown, same, different) = target.compareModeACodes(other);
 
                 logdbg << "CreateAssociationsJob: findUTNForTarget: unknown "
                        << unknown.size() << " same " << same.size() << " different " << different.size();
 
                 if (same.size() > different.size())
                 {
-                    same_distances.clear();
-                    distances_sum = 0;
+                    vector<pair<float, double>> same_distances;
+                    double distances_sum {0};
+
+                    OGRSpatialReference local;
+
+                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+
+                    EvaluationTargetPosition tst_pos;
+
+                    double x_pos, y_pos;
+                    double distance;
+
+                    EvaluationTargetPosition ref_pos;
+                    bool ok;
 
                     for (auto tod_it : same)
                     {
                         assert (target.hasDataForExactTime(tod_it));
                         tst_pos = target.posForExactTime(tod_it);
 
-                        tie(ref_pos, ok) = other_it.second.interpolatedPosForTime(tod_it, 15.0);
+                        tie(ref_pos, ok) = other.interpolatedPosForTime(tod_it, 15.0);
 
                         if (!ok)
                             continue;
@@ -530,6 +546,12 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                         distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
+                        if (distance > 50000)
+                        {
+                            same_distances.clear();
+                            break;
+                        }
+
                         //loginf << "\tdist " << distance;
 
                         same_distances.push_back({tod_it, distance});
@@ -540,15 +562,15 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                     {
                         double distance_avg = distances_sum / (float) same_distances.size();
 
-                        if (distance_avg < 25000)
-                            loginf << "\ttarget " << target.utn_ << " other " << other_it.second.utn_
+                        if (distance_avg < 10000)
+                            loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                                    << " dist avg " << distance_avg << " num " << same_distances.size();
                     }
                 }
             }
-//            else
-//                loginf << "\tno overlap";
-        }
+            //            else
+            //                loginf << "\tno overlap";
+        });
 
         return -1;
     }
@@ -601,71 +623,3 @@ void CreateAssociationsJob::addTargetByTargetReport (Association::TargetReport& 
 
     ++utn_cnt_;
 }
-
-//void CreateAssociationsJob::createUTNS()
-//{
-//    loginf << "CreateAssociationsJob: createUTNS";
-
-//    MetaDBOVariable* meta_key_var = task_.keyVar();
-//    MetaDBOVariable* meta_tod_var = task_.todVar();
-//    MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
-
-//    assert (meta_key_var);
-//    assert (meta_tod_var);
-//    assert (meta_ta_var);
-
-//    DBObjectManager& object_man = COMPASS::instance().objectManager();
-
-//    for (auto& buf_it : buffers_) // dbo name, buffer
-//    {
-//        string dbo_name = buf_it.first;
-//        DBObject& dbo = object_man.object(dbo_name);
-
-//        shared_ptr<Buffer> buffer = buf_it.second;
-//        size_t buffer_size = buffer->size();
-
-//        assert (meta_key_var->existsIn(dbo_name));
-//        DBOVariable& key_var = meta_key_var->getFor(dbo_name);
-
-//        assert (meta_tod_var->existsIn(dbo_name));
-//        DBOVariable& tod_var = meta_tod_var->getFor(dbo_name);
-
-//        assert (meta_ta_var->existsIn(dbo_name));
-//        DBOVariable& ta_var = meta_ta_var->getFor(dbo_name);
-
-//        assert (buffer->has<int>(key_var.name()));
-//        assert (buffer->has<float>(tod_var.name()));
-//        assert (buffer->has<int>(ta_var.name()));
-
-//        NullableVector<int>& rec_nums = buffer->get<int>(key_var.name());
-//        NullableVector<float>& tods = buffer->get<float>(tod_var.name());
-//        NullableVector<int>& tas = buffer->get<int>(ta_var.name());
-
-//        unsigned int rec_num;
-//        unsigned int target_addr;
-//        unsigned int utn;
-
-//        for (size_t cnt = 0; cnt < buffer_size; ++cnt)
-//        {
-//            assert (!rec_nums.isNull(cnt));
-
-//            if (tas.isNull(cnt))
-//                continue;
-
-//            rec_num = rec_nums.get(cnt);
-//            target_addr = tas.get(cnt);
-
-//            if (ta_2_utn_.count(target_addr) == 0)
-//            {
-//                ta_2_utn_[target_addr] = utn_cnt_;
-//                ++utn_cnt_;
-//            }
-
-//            utn = ta_2_utn_[target_addr];
-
-//            dbo.addAssociation(rec_num, utn, false, 0);
-//        }
-
-//        dbo.saveAssociations();
-//    }
-//}
