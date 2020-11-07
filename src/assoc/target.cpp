@@ -130,7 +130,7 @@ namespace Association
                 if (first)
                     ss << String::hexStringFromInt(ta_it, 6, '0');
                 else
-                    ss << ", " <<String::hexStringFromInt(ta_it, 6, '0');
+                    ss << ", " << String::hexStringFromInt(ta_it, 6, '0');
 
                 first = false;
             }
