@@ -14,6 +14,8 @@ using namespace Utils;
 namespace Association
 {
     bool Target::in_appimage_ {getenv("APPDIR")};
+    double Target::max_time_diff_ {15.0};
+    double Target::max_altitude_diff_ {300.0};
 
     Target::Target(unsigned int utn, bool tmp)
         : utn_(utn), tmp_(tmp)
@@ -23,8 +25,10 @@ namespace Association
     Target::~Target()
     {
         if (!tmp_)
+        {
             for (auto& tr_it : assoc_trs_)
                 tr_it->removeAssociated(this);
+        }
     }
 
     void Target::addAssociated (TargetReport* tr)
@@ -42,22 +46,27 @@ namespace Association
             tod_min_ = min(tod_min_, tr->tod_);
             tod_max_ = max(tod_max_, tr->tod_);
         }
+        has_tod_ = true;
 
         if (!ds_ids_.count(tr->ds_id_))
             ds_ids_.insert(tr->ds_id_);
 
+        if (tr->has_tn_ && !track_nums_.count({tr->ds_id_, tr->tn_}))
+            track_nums_.insert({tr->ds_id_, tr->tn_});
+
         timed_indexes_[tr->tod_] = assoc_trs_.size();
         assoc_trs_.push_back(tr);
 
-        if (!has_ta_ && tr->has_ta_)
+        if (tr->has_ta_)
         {
-            has_ta_ = true;
-            ta_ = tr->ta_;
-        }
-        else if (has_ta_ && tr->has_ta_ && ta_ != tr->ta_)
-        {
-            logwrn << "Target: addAssociated: ta mismatch, target " << asStr()
-                   << " tr " << tr->asStr();
+            if (tas_.size() && !tas_.count(tr->ta_))
+            {
+                logwrn << "Target: addAssociated: ta mismatch, target " << asStr()
+                       << " tr " << tr->asStr();
+            }
+
+            if (!tas_.count(tr->ta_))
+                tas_.insert(tr->ta_);
         }
 
         if (!tmp_)
@@ -70,14 +79,80 @@ namespace Association
             addAssociated(tr_it);
     }
 
+    bool Target::hasTA () const
+    {
+        return tas_.size();
+    }
+
+    bool Target::hasTA (unsigned int ta) const
+    {
+        return tas_.count(ta);
+    }
+
+    bool Target::hasAllOfTAs (std::set<unsigned int> tas) const
+    {
+        assert (hasTA() && tas.size());
+
+        for (auto other_ta : tas)
+        {
+            if (!tas_.count(other_ta))
+                return false;
+        }
+
+        return true;
+    }
+
+    bool Target::hasAnyOfTAs (std::set<unsigned int> tas) const
+    {
+        assert (hasTA() && tas.size());
+
+        for (auto other_ta : tas)
+        {
+            if (tas_.count(other_ta))
+                return true;
+        }
+        return false;
+    }
+
     std::string Target::asStr()
     {
         stringstream ss;
 
         ss << "utn " << utn_ << " tmp " << tmp_;
 
-        if (has_ta_)
-            ss << " ta " << String::hexStringFromInt(ta_, 6, '0');
+        if (tas_.size())
+        {
+            ss << " tas '";
+
+            bool first {true};
+            for (auto ta_it : tas_)
+            {
+                if (first)
+                    ss << String::hexStringFromInt(ta_it, 6, '0');
+                else
+                    ss << ", " <<String::hexStringFromInt(ta_it, 6, '0');
+
+                first = false;
+            }
+
+            ss << "'";
+        }
+
+        if (track_nums_.size())
+        {
+            ss << " tns ";
+
+            bool first {true};
+            for (auto tn_it : track_nums_)
+            {
+                if (first)
+                    ss << "(" << tn_it.first << "," << tn_it.second << ")";
+                else
+                    ss << ", " << "(" << tn_it.first << "," << tn_it.second << ")";
+
+                first = false;
+            }
+        }
 
         return ss.str();
     }
@@ -329,13 +404,46 @@ namespace Association
         return pos;
     }
 
+    float Target::duration () const
+    {
+        if (!has_tod_)
+            return 0;
+
+        return tod_max_ - tod_min_;
+    }
+
     bool Target::timeOverlaps (Target& other) const
     {
         if (!assoc_trs_.size() || !other.assoc_trs_.size())
             return false;
 
+        assert (has_tod_);
+
         //a.start < b.end && b.start < a.end;
         return tod_min_ < other.tod_max_ && other.tod_min_ < tod_max_;
+    }
+
+    float Target::probTimeOverlaps (Target& other) const
+    {
+        if (!has_tod_)
+            return 0.0;
+
+        float overlap_begin = max(tod_min_, other.tod_min_);
+        float overlap_end = min(tod_max_, other.tod_max_);
+
+        if (overlap_begin >= overlap_end)
+            return 0.0;
+
+        float overlap_duration = overlap_end-overlap_begin;
+
+        float targets_min_duration = min(duration(), other.duration());
+
+        assert (overlap_duration <= targets_min_duration);
+
+        if (targets_min_duration == 0)
+            return 0.0;
+
+        return overlap_duration / targets_min_duration;
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (Target& other) const
@@ -352,13 +460,13 @@ namespace Association
         {
             tod = tr_it->tod_;
 
-            if (!other.hasDataForTime(tod, 15.0))
+            if (!other.hasDataForTime(tod, max_time_diff_))
             {
                 unknown.push_back(tod);
                 continue;
             }
 
-            tie(lower, upper) = other.timesFor(tod, 15.0);
+            tie(lower, upper) = other.timesFor(tod, max_time_diff_);
 
             if (lower == -1 && upper == -1)
             {
@@ -401,7 +509,7 @@ namespace Association
                 else
                     different.push_back(tod);
 
-               continue;
+                continue;
             }
 
             // both set
@@ -449,4 +557,119 @@ namespace Association
         return {unknown, same, different};
     }
 
+    std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
+            Target& other, const std::vector<float>& timestamps) const
+    {
+        vector<float> unknown;
+        vector<float> same;
+        vector<float> different;
+
+        float lower, upper;
+
+        float tod;
+
+        TargetReport* tr;
+
+        for (auto ts_it : timestamps)
+        {
+            tod = ts_it;
+            assert (hasDataForExactTime(tod));
+            tr = &dataForExactTime (tod);
+
+            if (!other.hasDataForTime(tod, max_time_diff_))
+            {
+                unknown.push_back(tod);
+                continue;
+            }
+
+            tie(lower, upper) = other.timesFor(tod, max_time_diff_);
+
+            if (lower == -1 && upper == -1)
+            {
+                unknown.push_back(tod);
+                continue;
+            }
+
+            if ((lower == -1 && upper != -1)
+                    || (lower != -1 && upper == -1)) // only 1
+            {
+                TargetReport& ref1 = (lower != -1) ? other.dataForExactTime(lower)
+                                                   : other.dataForExactTime(upper);
+
+                if (!tr->has_mc_)
+                {
+                    if (!ref1.has_mc_ ) // both have no mode c
+                    {
+                        same.push_back(tod);
+                        continue;
+                    }
+                    else
+                    {
+                        different.push_back(tod); // no mode c here, but in other
+                        continue;
+                    }
+                }
+
+                // mode c exists
+                if (!ref1.has_mc_)
+                {
+                    different.push_back(tod); // mode c here, but none in other
+                    continue;
+                }
+
+                if ((ref1.has_mc_ && fabs(ref1.mc_ == tr->mc_) < max_altitude_diff_)) // is same
+                {
+                    same.push_back(tod);
+                    continue;
+                }
+                else
+                    different.push_back(tod);
+
+                continue;
+            }
+
+            // both set
+            assert (lower != -1);
+            assert (other.hasDataForExactTime(lower));
+            TargetReport& ref1 = other.dataForExactTime(lower);
+
+            assert (upper != -1);
+            assert (other.hasDataForExactTime(upper));
+            TargetReport& ref2 = other.dataForExactTime(upper);
+
+            if (!tr->has_mc_)
+            {
+                if (!ref1.has_mc_ || !ref2.has_mc_) // both have no mode c
+                {
+                    same.push_back(tod);
+                    continue;
+                }
+                else
+                {
+                    different.push_back(tod); // no mode c here, but in other
+                    continue;
+                }
+            }
+
+            // mode c exists
+            if (!ref1.has_mc_ && !ref2.has_mc_)
+            {
+                different.push_back(tod); // mode c here, but none in other
+                continue;
+            }
+
+            if ((ref1.has_mc_ && fabs(ref1.mc_ == tr->mc_) < max_altitude_diff_)
+                    || (ref2.has_mc_ && fabs(ref2.mc_ == tr->mc_) < max_altitude_diff_)) // one of them is same
+            {
+                same.push_back(tod);
+                continue;
+            }
+            else
+                different.push_back(tod);
+        }
+
+        assert (timestamps.size() == unknown.size()+same.size()+different.size());
+
+        return {unknown, same, different};
+    }
 }

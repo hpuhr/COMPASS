@@ -151,6 +151,8 @@ void CreateAssociationsStatusDialog::setAssociationStatus(const std::string& sta
 
     assert(association_status_label_);
     association_status_label_->setText(association_status_.c_str());
+
+    updateTime();
 }
 
 void CreateAssociationsStatusDialog::updateTime()

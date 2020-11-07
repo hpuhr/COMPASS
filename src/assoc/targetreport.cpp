@@ -44,10 +44,10 @@ std::string TargetReport::asStr()
         ss << " ti '" << ti_ << "'";
 
     if (has_tn_)
-        ss << " tn '" << tn_ << "'";
+        ss << " tn " << tn_;
 
     if (has_ma_)
-        ss << " m3a '" << String::octStringFromInt(ma_, 4, '0');
+        ss << " m3a " << String::octStringFromInt(ma_, 4, '0');
 
     return ss.str();
 }

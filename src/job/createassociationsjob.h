@@ -21,6 +21,7 @@
 #include "job.h"
 #include "assoc/targetreport.h"
 #include "assoc/target.h"
+#include "global.h"
 
 class CreateAssociationsTask;
 class DBInterface;
@@ -53,8 +54,15 @@ protected:
     //dbo name->ds_id->trs
 
     std::map<unsigned int, Association::Target> targets_;
-    std::map<unsigned int, unsigned int> ta_2_utn_;
+    //std::map<unsigned int, unsigned int> ta_2_utn_;
     unsigned int utn_cnt_ {0};
+
+    double max_time_diff_ {15.0};
+    double max_distance_quit_ {10*NM2M};
+    double max_distance_acceptable_ {NM2M};
+    double max_altitude_diff_ {300.0};
+    double prob_min_time_overlap_ {0.5};
+    unsigned int min_updates_ {2};
 
     void createTargetReports();
     void createTrackerUTNS();
@@ -63,6 +71,9 @@ protected:
 
     int findUTNForTarget (const Association::Target& target);
     // tries to find existing utn for target, -1 if failed
+    int findUTNForTargetByTA (const Association::Target& target);
+    int findUTNForTargetByTA (unsigned int ta);
+    // tries to find existing utn for target by target address, -1 if failed
     int findUTNForTargetReport (const Association::TargetReport& tr);
     // tries to find existing utn for target report, -1 if failed
     void addTarget (const Association::Target& target);
