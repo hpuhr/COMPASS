@@ -170,8 +170,17 @@ namespace Association
         return ss.str();
     }
 
+    bool Target::isTimeInside (float tod) const
+    {
+        assert (has_tod_);
+        return tod >= tod_min_ && tod <= tod_max_;
+    }
+
     bool Target::hasDataForTime (float tod, float d_max) const
     {
+        if (!isTimeInside(tod))
+            return false;
+
         if (timed_indexes_.count(tod))
             return true; // contains exact value
 
@@ -465,109 +474,92 @@ namespace Association
         vector<float> same;
         vector<float> different;
 
-        float lower, upper;
-
         float tod;
+        CompareResult cmp_res;
 
         for (auto tr_it : assoc_trs_)
         {
             tod = tr_it->tod_;
 
-            if (!other.hasDataForTime(tod, max_time_diff_))
-            {
+            cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod);
+
+            if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
-                continue;
-            }
-
-            tie(lower, upper) = other.timesFor(tod, max_time_diff_);
-
-            if (lower == -1 && upper == -1)
-            {
-                unknown.push_back(tod);
-                continue;
-            }
-
-            if ((lower == -1 && upper != -1)
-                    || (lower != -1 && upper == -1)) // only 1
-            {
-                TargetReport& ref1 = (lower != -1) ? other.dataForExactTime(lower)
-                                                   : other.dataForExactTime(upper);
-
-                if (!tr_it->has_ma_)
-                {
-                    if (!ref1.has_ma_ ) // both have no mode a
-                    {
-                        same.push_back(tod);
-                        continue;
-                    }
-                    else
-                    {
-                        different.push_back(tod); // no mode a here, but in other
-                        continue;
-                    }
-                }
-
-                // mode a exists
-                if (!ref1.has_ma_)
-                {
-                    different.push_back(tod); // mode a here, but none in other
-                    continue;
-                }
-
-                if ((ref1.has_ma_ && ref1.ma_ == tr_it->ma_)) // is same
-                {
-                    same.push_back(tod);
-                    continue;
-                }
-                else
-                    different.push_back(tod);
-
-                continue;
-            }
-
-            // both set
-            assert (lower != -1);
-            assert (other.hasDataForExactTime(lower));
-            TargetReport& ref1 = other.dataForExactTime(lower);
-
-            assert (upper != -1);
-            assert (other.hasDataForExactTime(upper));
-            TargetReport& ref2 = other.dataForExactTime(upper);
-
-            if (!tr_it->has_ma_)
-            {
-                if (!ref1.has_ma_ || !ref2.has_ma_) // both have no mode a
-                {
-                    same.push_back(tod);
-                    continue;
-                }
-                else
-                {
-                    different.push_back(tod); // no mode a here, but in other
-                    continue;
-                }
-            }
-
-            // mode a exists
-            if (!ref1.has_ma_ && !ref2.has_ma_)
-            {
-                different.push_back(tod); // mode a here, but none in other
-                continue;
-            }
-
-            if ((ref1.has_ma_ && ref1.ma_ == tr_it->ma_)
-                    || (ref2.has_ma_ && ref2.ma_ == tr_it->ma_)) // one of them is same
-            {
+            else if (cmp_res == CompareResult::SAME)
                 same.push_back(tod);
-                continue;
-            }
-            else
+            else if (cmp_res == CompareResult::DIFFERENT)
                 different.push_back(tod);
         }
 
         assert (assoc_trs_.size() == unknown.size()+same.size()+different.size());
 
         return {unknown, same, different};
+    }
+
+    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod)
+    {
+        if (!hasDataForTime(tod, max_time_diff_))
+            return CompareResult::UNKNOWN;
+
+        float lower, upper;
+
+        tie(lower, upper) = timesFor(tod, max_time_diff_);
+
+        if (lower == -1 && upper == -1)
+            return CompareResult::UNKNOWN;
+
+        if ((lower == -1 && upper != -1)
+                || (lower != -1 && upper == -1)) // only 1
+        {
+            TargetReport& ref1 = (lower != -1) ? dataForExactTime(lower)
+                                               : dataForExactTime(upper);
+
+            if (!has_ma)
+            {
+                if (!ref1.has_ma_ ) // both have no mode a
+                    return CompareResult::SAME;
+                else
+                    return CompareResult::DIFFERENT;
+            }
+
+            // mode a exists
+            if (!ref1.has_ma_)
+                return CompareResult::DIFFERENT;  // mode a here, but none in other
+
+            if ((ref1.has_ma_ && ref1.ma_ == ma)) // is same
+                return CompareResult::SAME;
+            else
+                return CompareResult::DIFFERENT;
+        }
+
+        // both set
+        assert (lower != -1);
+        assert (hasDataForExactTime(lower));
+        TargetReport& ref1 = dataForExactTime(lower);
+
+        assert (upper != -1);
+        assert (hasDataForExactTime(upper));
+        TargetReport& ref2 = dataForExactTime(upper);
+
+        if (!has_ma)
+        {
+            if (!ref1.has_ma_ || !ref2.has_ma_) // both have no mode a
+                return CompareResult::SAME;
+            else
+                return CompareResult::DIFFERENT; // no mode a here, but in other
+        }
+
+        // mode a exists
+        if (!ref1.has_ma_ && !ref2.has_ma_)
+            return CompareResult::DIFFERENT; // mode a here, but none in other
+
+        if ((ref1.has_ma_ && ref1.ma_ == ma)
+                || (ref2.has_ma_ && ref2.ma_ == ma)) // one of them is same
+        {
+            return CompareResult::SAME;
+        }
+        else
+            return CompareResult::DIFFERENT;
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
@@ -577,112 +569,95 @@ namespace Association
         vector<float> same;
         vector<float> different;
 
-        float lower, upper;
-
         float tod;
+        CompareResult cmp_res;
 
         TargetReport* tr;
 
         for (auto ts_it : timestamps)
         {
-            tod = ts_it;
             assert (hasDataForExactTime(tod));
             tr = &dataForExactTime (tod);
+            tod = ts_it;
 
-            if (!other.hasDataForTime(tod, max_time_diff_))
-            {
+            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod);
+
+            if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
-                continue;
-            }
-
-            tie(lower, upper) = other.timesFor(tod, max_time_diff_);
-
-            if (lower == -1 && upper == -1)
-            {
-                unknown.push_back(tod);
-                continue;
-            }
-
-            if ((lower == -1 && upper != -1)
-                    || (lower != -1 && upper == -1)) // only 1
-            {
-                TargetReport& ref1 = (lower != -1) ? other.dataForExactTime(lower)
-                                                   : other.dataForExactTime(upper);
-
-                if (!tr->has_mc_)
-                {
-                    if (!ref1.has_mc_ ) // both have no mode c
-                    {
-                        same.push_back(tod);
-                        continue;
-                    }
-                    else
-                    {
-                        different.push_back(tod); // no mode c here, but in other
-                        continue;
-                    }
-                }
-
-                // mode c exists
-                if (!ref1.has_mc_)
-                {
-                    different.push_back(tod); // mode c here, but none in other
-                    continue;
-                }
-
-                if ((ref1.has_mc_ && fabs(ref1.mc_ == tr->mc_) < max_altitude_diff_)) // is same
-                {
-                    same.push_back(tod);
-                    continue;
-                }
-                else
-                    different.push_back(tod);
-
-                continue;
-            }
-
-            // both set
-            assert (lower != -1);
-            assert (other.hasDataForExactTime(lower));
-            TargetReport& ref1 = other.dataForExactTime(lower);
-
-            assert (upper != -1);
-            assert (other.hasDataForExactTime(upper));
-            TargetReport& ref2 = other.dataForExactTime(upper);
-
-            if (!tr->has_mc_)
-            {
-                if (!ref1.has_mc_ || !ref2.has_mc_) // both have no mode c
-                {
-                    same.push_back(tod);
-                    continue;
-                }
-                else
-                {
-                    different.push_back(tod); // no mode c here, but in other
-                    continue;
-                }
-            }
-
-            // mode c exists
-            if (!ref1.has_mc_ && !ref2.has_mc_)
-            {
-                different.push_back(tod); // mode c here, but none in other
-                continue;
-            }
-
-            if ((ref1.has_mc_ && fabs(ref1.mc_ == tr->mc_) < max_altitude_diff_)
-                    || (ref2.has_mc_ && fabs(ref2.mc_ == tr->mc_) < max_altitude_diff_)) // one of them is same
-            {
+            else if (cmp_res == CompareResult::SAME)
                 same.push_back(tod);
-                continue;
-            }
-            else
+            else if (cmp_res == CompareResult::DIFFERENT)
                 different.push_back(tod);
         }
 
         assert (timestamps.size() == unknown.size()+same.size()+different.size());
 
         return {unknown, same, different};
+    }
+
+    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod)
+    {
+        if (!hasDataForTime(tod, max_time_diff_))
+            return CompareResult::UNKNOWN;
+
+        float lower, upper;
+
+        tie(lower, upper) = timesFor(tod, max_time_diff_);
+
+        if (lower == -1 && upper == -1)
+            return CompareResult::UNKNOWN;
+
+        if ((lower == -1 && upper != -1)
+                || (lower != -1 && upper == -1)) // only 1
+        {
+            TargetReport& ref1 = (lower != -1) ? dataForExactTime(lower)
+                                               : dataForExactTime(upper);
+
+            if (!has_mc)
+            {
+                if (!ref1.has_mc_ ) // both have no mode c
+                    return CompareResult::SAME;
+                else
+                    return CompareResult::DIFFERENT;
+            }
+
+            // mode c exists
+            if (!ref1.has_mc_)
+                return CompareResult::DIFFERENT;  // mode c here, but none in other
+
+            if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)) // is same
+                return CompareResult::SAME;
+            else
+                return CompareResult::DIFFERENT;
+        }
+
+        // both set
+        assert (lower != -1);
+        assert (hasDataForExactTime(lower));
+        TargetReport& ref1 = dataForExactTime(lower);
+
+        assert (upper != -1);
+        assert (hasDataForExactTime(upper));
+        TargetReport& ref2 = dataForExactTime(upper);
+
+        if (!has_mc)
+        {
+            if (!ref1.has_mc_ || !ref2.has_mc_) // both have no mode c
+                return CompareResult::SAME;
+            else
+                return CompareResult::DIFFERENT; // no mode c here, but in other
+        }
+
+        // mode a exists
+        if (!ref1.has_mc_ && !ref2.has_mc_)
+            return CompareResult::DIFFERENT; // mode c here, but none in other
+
+        if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)
+                || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_altitude_diff_)) // one of them is same
+        {
+            return CompareResult::SAME;
+        }
+        else
+            return CompareResult::DIFFERENT;
     }
 }

@@ -484,6 +484,15 @@ void CreateAssociationsJob::createNonTrackerUTNS()
     unsigned int tr_cnt = 0;
     float done_ratio;
 
+    OGRSpatialReference wgs84;
+    wgs84.SetWellKnownGeogCS("WGS84");
+
+    float tod;
+    vector<tuple<bool, unsigned int, double>> results;
+    // usable, utn, distance
+
+    vector<pair<unsigned int, Association::TargetReport*>> association_todos;
+
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "Tracker") // already associated
@@ -507,7 +516,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 if (tmp_utn != -1) // existing target found
                 {
                     assert (targets_.count(tmp_utn));
-                    targets_.at(tmp_utn).addAssociated(&tr_it);
+                    //targets_.at(tmp_utn).addAssociated(&tr_it);
+                    association_todos.push_back({tmp_utn, &tr_it});
                     continue;
                 }
 
@@ -518,9 +528,183 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 }
 
                 // tr non mode s
+                results.resize(utn_cnt_);
+
+                tod = tr_it.tod_;
+
+                tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+                {
+                    Association::Target& other = targets_.at(cnt);
+
+                    results[cnt] = {false, other.utn_, 0};
+
+                    if (!(tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
+                    {
+                        //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                        //                        logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
+                        //                               << " other " << other.utn_
+                        //                               << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
+
+                        if (other.isTimeInside(tod))
+                        {
+                            //                            vector<float> ma_unknown;
+                            //                            vector<float> ma_same;
+                            //                            vector<float> ma_different;
+
+                            Association::CompareResult ma_res = other.compareModeACode(
+                                        tr_it.has_ma_, tr_it.ma_, tod);
+
+                            //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                            //                            logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
+                            //                                   << " other " << other.utn_
+                            //                                   << " ma same " << ma_same.size() << " diff " << ma_different.size();
+
+                            if (ma_res == Association::CompareResult::SAME)
+                            {
+                                // check mode c codes
+
+                                //                                vector<float> mc_unknown;
+                                //                                vector<float> mc_same;
+                                //                                vector<float> mc_different;
+
+                                //                                tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(other, ma_same);
+
+                                Association::CompareResult mc_res = other.compareModeCCode(
+                                            tr_it.has_mc_, tr_it.mc_, tod);
+
+                                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                                //                                logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
+                                //                                       << " other " << other.utn_
+                                //                                       << " ma same " << ma_same.size() << " diff " << ma_different.size()
+                                //                                       << " mc same " << mc_same.size() << " diff " << mc_different.size();
+
+                                if (mc_res == Association::CompareResult::SAME)
+                                {
+                                    // check positions
+
+                                    //vector<pair<float, double>> same_distances;
+                                    //double distances_sum {0};
+
+                                    OGRSpatialReference local;
+
+                                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+
+                                    EvaluationTargetPosition tst_pos;
+
+                                    tst_pos.latitude_ = tr_it.latitude_;
+                                    tst_pos.longitude_ = tr_it.longitude_;
+                                    tst_pos.has_altitude_ = tr_it.has_mc_;
+                                    tst_pos.altitude_ = tr_it.mc_;
+
+                                    double x_pos, y_pos;
+                                    double distance;
+
+                                    EvaluationTargetPosition ref_pos;
+                                    bool ok;
+
+                                    //                                    for (auto tod_it : mc_same)
+                                    //                                    {
+                                    //                                        assert (target.hasDataForExactTime(tod_it));
+                                    //                                        tst_pos = target.posForExactTime(tod_it);
+
+                                    tie(ref_pos, ok) = other.interpolatedPosForTime(tod, max_time_diff_);
+
+                                    if (ok)
+                                    {
+
+                                        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+
+                                        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+
+                                        if (in_appimage_) // inside appimage
+                                        {
+                                            x_pos = tst_pos.longitude_;
+                                            y_pos = tst_pos.latitude_;
+                                        }
+                                        else
+                                        {
+                                            x_pos = tst_pos.latitude_;
+                                            y_pos = tst_pos.longitude_;
+                                        }
+
+                                        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+                                        if (ok)
+                                        {
+                                            distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                                            if (distance <= max_distance_quit_) // only if ok
+                                            {
+                                                if (distance < max_distance_acceptable_)
+                                                {
+                                                    results[cnt] = {true, other.utn_, distance};
+                                                }
+                                            }
+
+                                            //loginf << "\tdist " << distance;
+
+                                            //                                            same_distances.push_back({tod_it, distance});
+                                            //                                            distances_sum += distance;
+                                        }
+
+                                        //                                        if (same_distances.size() >= min_updates_)
+                                        //                                        {
+                                        //                                            double distance_avg = distances_sum / (float) same_distances.size();
+
+                                        //                                            if (distance_avg < max_distance_acceptable_)
+                                        //                                            {
+                                        //                                                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                                        //                                                logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
+                                        //                                                       << " next utn " << utn_cnt_ << " dist avg " << distance_avg
+                                        //                                                       << " num " << same_distances.size();
+                                        //                                                results[cnt] = {true, other.utn_, same_distances.size(), distance_avg};
+                                        //                                            }
+                                        //                                        }
+                                    }
+                                }
+                                //}
+                                //                                }
+                            }
+                        }
+                    }
+                });
+
+                // find best match
+                bool usable;
+                unsigned int other_utn;
+                double distance;
+
+                bool first = true;
+                unsigned int best_other_utn;
+                double best_distance;
+
+                for (auto& res_it : results) // usable, other utn, num updates, avg distance
+                {
+                    tie(usable, other_utn, distance) = res_it;
+
+                    if (!usable)
+                        continue;
+
+                    if (first || distance < best_distance)
+                    {
+                        best_other_utn = other_utn;
+                        best_distance = distance;
+
+                        first = false;
+                    }
+                }
+
+                if (!first)
+                {
+                    //targets_.at(best_other_utn).addAssociated(&tr_it);
+                    association_todos.push_back({best_other_utn, &tr_it});
+                }
             }
         }
     }
+
+    for (auto& assoc_it : association_todos)
+        targets_.at(assoc_it.first).addAssociated(assoc_it.second);
 }
 
 void CreateAssociationsJob::createAssociations()
@@ -564,7 +748,6 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     // usable, other utn, num updates, avg distance
     results.resize(utn_cnt_);
 
-    //for (auto& other_it : targets_)
     tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
     {
         Association::Target& other = targets_.at(cnt);

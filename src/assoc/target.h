@@ -14,6 +14,13 @@ namespace Association
 
     class TargetReport;
 
+    enum class CompareResult
+    {
+        UNKNOWN,
+        SAME,
+        DIFFERENT
+    };
+
     class Target
     {
     public:
@@ -53,6 +60,7 @@ namespace Association
 
         std::string asStr();
 
+        bool isTimeInside (float tod) const;
         bool hasDataForTime (float tod, float d_max) const;
         std::pair<float, float> timesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
         std::pair<EvaluationTargetPosition, bool> interpolatedPosForTime (float tod, float d_max) const;
@@ -65,8 +73,11 @@ namespace Association
         bool timeOverlaps (Target& other) const;
         float probTimeOverlaps (Target& other) const; // ratio of overlap, measured by shortest target
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (Target& other) const;
+        // unknown, same, different
+        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod);
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
                 Target& other, const std::vector<float>& timestamps) const;
+        CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod);
         // unknown, same, different timestamps from this
     };
 
