@@ -54,6 +54,9 @@ namespace Association
         if (tr->has_tn_ && !track_nums_.count({tr->ds_id_, tr->tn_}))
             track_nums_.insert({tr->ds_id_, tr->tn_});
 
+        if (tr->has_ma_ && !mas_.count(tr->ma_))
+            mas_.insert(tr->ma_);
+
         timed_indexes_[tr->tod_] = assoc_trs_.size();
         assoc_trs_.push_back(tr);
 
@@ -112,6 +115,16 @@ namespace Association
                 return true;
         }
         return false;
+    }
+
+    bool Target::hasMA () const
+    {
+        return mas_.size();
+    }
+
+    bool Target::hasMA (unsigned int ma)  const
+    {
+        return mas_.count(ma);
     }
 
     std::string Target::asStr()

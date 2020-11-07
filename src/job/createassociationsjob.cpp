@@ -86,9 +86,23 @@ void CreateAssociationsJob::run()
            << " multiple " << multiple_associated << " single " << single_associated;
 
     // create non-tracker utns
-    //    emit statusSignal("Creating non-Tracker UTNS");
-    //    createNonTrackerUTNS();
-    // TODO
+
+    // prepare lookup map
+    ta_2_utn_.clear();
+    for (auto& target_it : targets_)
+    {
+        if (!target_it.second.hasTA())
+            continue;
+
+        assert (target_it.second.tas_.size() == 1);
+
+        assert (!ta_2_utn_.count(*target_it.second.tas_.begin()));
+
+        ta_2_utn_[*target_it.second.tas_.begin()] = target_it.second.utn_;
+    }
+
+    emit statusSignal("Creating non-Tracker UTNS");
+    createNonTrackerUTNS();
 
     // create associations
     emit statusSignal("Creating Associations");
@@ -337,7 +351,7 @@ void CreateAssociationsJob::createTrackerUTNS()
                         if (tr_it.has_ta_ && existing_target.hasTA() // new target part if ta change
                                 && !existing_target.hasTA(tr_it.ta_))
                         {
-                            loginf << "CreateAssociationsJob: createTrackerUTNS: registering new tmp target "
+                            logdbg << "CreateAssociationsJob: createTrackerUTNS: registering new tmp target "
                                    << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of ta switch "
                                    << " at " << String::timeStringFromDouble(tr_it.tod_)
                                    << " existing " << existing_target.asStr()
@@ -456,6 +470,20 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
     int tmp_utn;
 
+    unsigned int num_trs = 0;
+
+    for (auto& dbo_it : target_reports_)
+    {
+        if (dbo_it.first == "Tracker") // already associated
+            continue;
+
+        for (auto& ds_it : dbo_it.second) // ds_id -> trs
+            num_trs += ds_it.second.size();
+    }
+
+    unsigned int tr_cnt = 0;
+    float done_ratio;
+
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "Tracker") // already associated
@@ -465,19 +493,31 @@ void CreateAssociationsJob::createNonTrackerUTNS()
         {
             for (auto& tr_it : ds_it.second)
             {
+                if (tr_cnt % 50000 == 0)
+                {
+                    done_ratio = (float)tr_cnt / (float)num_trs;
+                    emit statusSignal(("Creating non-Tracker UTNS ("
+                                       +String::percentToString(100.0*done_ratio)+"%)").c_str());
+                }
+
+                ++tr_cnt;
+
                 tmp_utn = findUTNForTargetReport(tr_it);
 
                 if (tmp_utn != -1) // existing target found
                 {
                     assert (targets_.count(tmp_utn));
                     targets_.at(tmp_utn).addAssociated(&tr_it);
+                    continue;
                 }
-                else if (tr_it.has_ta_)
+
+                if (tr_it.has_ta_)
                 {
                     addTargetByTargetReport(tr_it);
+                    continue;
                 }
-                else
-                    ; // nothing can be done at the momemt
+
+                // tr non mode s
             }
         }
     }
@@ -508,191 +548,201 @@ void CreateAssociationsJob::createAssociations()
 int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 // tries to find existing utn for target, -1 if failed
 {
-    //    if (target.has_ta_ && ta_2_utn_.count(target.ta_))
-    //        return ta_2_utn_.at(target.ta_);
     int tmp_utn = findUTNForTargetByTA(target);
 
     if (tmp_utn != -1) // either mode s, so
         return tmp_utn;
 
     // try to find by m a/c/pos
+    //if (target.hasMA() && target.hasMA(3599))
+    logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
+
+    OGRSpatialReference wgs84;
+    wgs84.SetWellKnownGeogCS("WGS84");
+
+    vector<tuple<bool, unsigned int, unsigned int, double>> results;
+    // usable, other utn, num updates, avg distance
+    results.resize(utn_cnt_);
+
+    //for (auto& other_it : targets_)
+    tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
     {
-        logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
+        Association::Target& other = targets_.at(cnt);
 
-        OGRSpatialReference wgs84;
-        wgs84.SetWellKnownGeogCS("WGS84");
+        results[cnt] = {false, other.utn_, 0, 0};
 
-        vector<tuple<bool, unsigned int, unsigned int, double>> results;
-        // usable, other utn, num updates, avg distance
-        results.resize(utn_cnt_);
-
-        //for (auto& other_it : targets_)
-        tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+        if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {
-            Association::Target& other = targets_.at(cnt);
+            //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+            logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
+                   << " other " << other.utn_
+                   << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
 
-            results[cnt] = {false, other.utn_, 0, 0};
-
-            if (!target.hasTA() && other.hasTA()) // only try if not moth mode s
+            if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_)
             {
-                logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
-                       << " other " << other.utn_;
+                vector<float> ma_unknown;
+                vector<float> ma_same;
+                vector<float> ma_different;
 
-                if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_)
+                tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other);
+
+                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
+                       << " other " << other.utn_
+                       << " ma same " << ma_same.size() << " diff " << ma_different.size();
+
+                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_)
                 {
-                    vector<float> ma_unknown;
-                    vector<float> ma_same;
-                    vector<float> ma_different;
+                    // check mode c codes
 
-                    tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other);
+                    vector<float> mc_unknown;
+                    vector<float> mc_same;
+                    vector<float> mc_different;
 
-                    if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_)
+                    tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(other, ma_same);
+
+                    //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                    logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
+                           << " other " << other.utn_
+                           << " ma same " << ma_same.size() << " diff " << ma_different.size()
+                           << " mc same " << mc_same.size() << " diff " << mc_different.size();
+
+                    if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_)
                     {
-                        // check mode c codes
+                        // check positions
 
-                        vector<float> mc_unknown;
-                        vector<float> mc_same;
-                        vector<float> mc_different;
+                        vector<pair<float, double>> same_distances;
+                        double distances_sum {0};
 
-                        tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(other, ma_same);
+                        OGRSpatialReference local;
 
-                        //                    if (mc_same.size())
-                        //                        loginf << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
-                        //                               << " other " << other.utn_
-                        //                               << " ma same " << ma_same.size() << " diff " << ma_different.size()
-                        //                               << " mc same " << mc_same.size() << " diff " << mc_different.size();
+                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-                        if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_)
+                        EvaluationTargetPosition tst_pos;
+
+                        double x_pos, y_pos;
+                        double distance;
+
+                        EvaluationTargetPosition ref_pos;
+                        bool ok;
+
+                        for (auto tod_it : mc_same)
                         {
-                            // check positions
+                            assert (target.hasDataForExactTime(tod_it));
+                            tst_pos = target.posForExactTime(tod_it);
 
-                            vector<pair<float, double>> same_distances;
-                            double distances_sum {0};
+                            tie(ref_pos, ok) = other.interpolatedPosForTime(tod_it, max_time_diff_);
 
-                            OGRSpatialReference local;
+                            if (!ok)
+                                continue;
 
-                            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
-                            EvaluationTargetPosition tst_pos;
+                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-                            double x_pos, y_pos;
-                            double distance;
-
-                            EvaluationTargetPosition ref_pos;
-                            bool ok;
-
-                            for (auto tod_it : mc_same)
+                            if (in_appimage_) // inside appimage
                             {
-                                assert (target.hasDataForExactTime(tod_it));
-                                tst_pos = target.posForExactTime(tod_it);
-
-                                tie(ref_pos, ok) = other.interpolatedPosForTime(tod_it, max_time_diff_);
-
-                                if (!ok)
-                                    continue;
-
-                                local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
-
-                                ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-                                if (in_appimage_) // inside appimage
-                                {
-                                    x_pos = tst_pos.longitude_;
-                                    y_pos = tst_pos.latitude_;
-                                }
-                                else
-                                {
-                                    x_pos = tst_pos.latitude_;
-                                    y_pos = tst_pos.longitude_;
-                                }
-
-                                ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-
-                                if (!ok)
-                                    continue;
-
-                                distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-
-                                if (distance > max_distance_quit_) // too far, quit
-                                {
-                                    same_distances.clear();
-                                    break;
-                                }
-
-                                //loginf << "\tdist " << distance;
-
-                                same_distances.push_back({tod_it, distance});
-                                distances_sum += distance;
+                                x_pos = tst_pos.longitude_;
+                                y_pos = tst_pos.latitude_;
+                            }
+                            else
+                            {
+                                x_pos = tst_pos.latitude_;
+                                y_pos = tst_pos.longitude_;
                             }
 
-                            if (same_distances.size() >= min_updates_)
-                            {
-                                double distance_avg = distances_sum / (float) same_distances.size();
+                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
 
-                                if (distance_avg < max_distance_acceptable_)
-                                {
-                                    //                                loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                    //                                       << " next utn " << utn_cnt_ << " dist avg " << distance_avg
-                                    //                                       << " num " << same_distances.size();
-                                    results[cnt] = {true, other.utn_, same_distances.size(), distance_avg};
-                                }
+                            if (!ok)
+                                continue;
+
+                            distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+                            if (distance > max_distance_quit_) // too far, quit
+                            {
+                                same_distances.clear();
+                                break;
+                            }
+
+                            //loginf << "\tdist " << distance;
+
+                            same_distances.push_back({tod_it, distance});
+                            distances_sum += distance;
+                        }
+
+                        if (same_distances.size() >= min_updates_)
+                        {
+                            double distance_avg = distances_sum / (float) same_distances.size();
+
+                            if (distance_avg < max_distance_acceptable_)
+                            {
+                                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                                logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
+                                       << " next utn " << utn_cnt_ << " dist avg " << distance_avg
+                                       << " num " << same_distances.size();
+                                results[cnt] = {true, other.utn_, same_distances.size(), distance_avg};
                             }
                         }
                     }
                 }
-                //            else
-                //                loginf << "\tno overlap";
             }
-        });
-
-        // find best match
-        bool usable;
-        unsigned int other_utn;
-        unsigned int num_updates;
-        double distance_avg;
-        double score;
-
-        bool first = true;
-        unsigned int best_other_utn;
-        unsigned int best_num_updates;
-        double best_distance_avg;
-        double best_score;
-
-        for (auto& res_it : results) // usable, other utn, num updates, avg distance
-        {
-            tie(usable, other_utn, num_updates, distance_avg) = res_it;
-
-            if (!usable)
-                continue;
-
-            score = (double)num_updates*(max_distance_acceptable_-distance_avg);
-
-            if (first || score > best_score)
+            else
             {
-                best_other_utn = other_utn;
-                best_num_updates = num_updates;
-                best_distance_avg = distance_avg;
-                best_score = score;
-
-                first = false;
+                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                //    logdbg << "\tno overlap";
             }
         }
+    });
 
-        if (first)
-        {
-            logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
-                   << " no match found";
-            return -1;
-        }
-        else
-        {
-            loginf << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
-                   << " best other " << best_other_utn
-                   << " best score " << fixed << best_score << " dist avg " << best_distance_avg
-                   << " num " << best_num_updates;
+    // find best match
+    bool usable;
+    unsigned int other_utn;
+    unsigned int num_updates;
+    double distance_avg;
+    double score;
 
-            return best_other_utn;
+    bool first = true;
+    unsigned int best_other_utn;
+    unsigned int best_num_updates;
+    double best_distance_avg;
+    double best_score;
+
+    for (auto& res_it : results) // usable, other utn, num updates, avg distance
+    {
+        tie(usable, other_utn, num_updates, distance_avg) = res_it;
+
+        if (!usable)
+            continue;
+
+        score = (double)num_updates*(max_distance_acceptable_-distance_avg);
+
+        if (first || score > best_score)
+        {
+            best_other_utn = other_utn;
+            best_num_updates = num_updates;
+            best_distance_avg = distance_avg;
+            best_score = score;
+
+            first = false;
         }
+    }
+
+    if (first)
+    {
+        //if (target.hasMA() && target.hasMA(3599))
+        logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
+               << " no match found";
+        return -1;
+    }
+    else
+    {
+        //if (target.hasMA() && target.hasMA(3599))
+        logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
+               << " best other " << best_other_utn
+               << " best score " << fixed << best_score << " dist avg " << best_distance_avg
+               << " num " << best_num_updates;
+
+        return best_other_utn;
     }
 }
 
@@ -713,33 +763,12 @@ int CreateAssociationsJob::findUTNForTargetByTA (const Association::Target& targ
     return -1;
 }
 
-int CreateAssociationsJob::findUTNForTargetByTA (unsigned int ta)
-{
-    for (auto& target_it : targets_)
-    {
-        if (!target_it.second.hasTA()) // cant be checked
-            continue;
-
-        if (target_it.second.hasTA(ta))
-            return target_it.first;
-    }
-
-    return -1;
-}
-
 int CreateAssociationsJob::findUTNForTargetReport (const Association::TargetReport& tr)
 {
-    //    if (tr.has_ta_ && ta_2_utn_.count(tr.ta_))
-    //        return ta_2_utn_.at(tr.ta_);
+    // check in ta lookup map
+    if (tr.has_ta_ && ta_2_utn_.count(tr.ta_))
+        return ta_2_utn_.at(tr.ta_);
 
-
-    if (tr.has_ta_)
-    {
-        int tmp_utn = findUTNForTargetByTA(tr.ta_);
-
-        if (tmp_utn != 1)
-            return tmp_utn;
-    }
 
     return -1;
 }
@@ -747,14 +776,7 @@ int CreateAssociationsJob::findUTNForTargetReport (const Association::TargetRepo
 
 void CreateAssociationsJob::addTarget (const Association::Target& target) // creates new utn, adds to targets_
 {
-    //    if (target.has_ta_)
-    //    {
-    //        assert (!ta_2_utn_.count(target.ta_));
-    //        ta_2_utn_[target.ta_] = utn_cnt_;
-    //    }
     assert (findUTNForTargetByTA(target) == -1); // should have been added
-
-    //targets_[utn_cnt_] = {utn_cnt_};
 
     targets_.emplace(
                 std::piecewise_construct,
@@ -768,19 +790,13 @@ void CreateAssociationsJob::addTarget (const Association::Target& target) // cre
 
 void CreateAssociationsJob::addTargetByTargetReport (Association::TargetReport& tr)
 {
-    //    if (tr.has_ta_)
-    //    {
-    //        assert (!ta_2_utn_.count(tr.ta_));
-    //        ta_2_utn_[tr.ta_] = utn_cnt_;
-    //    }
-
-    //assert (findUTNForTargetByTA(target) == -1); // should have been added
-
-    //targets_[utn_cnt_] = {utn_cnt_};
     targets_.emplace(
                 std::piecewise_construct,
                 std::forward_as_tuple(utn_cnt_),   // args for key
                 std::forward_as_tuple(utn_cnt_, false));  // args for mapped value
+
+    if (tr.has_ta_)
+        ta_2_utn_[tr.ta_] = {utn_cnt_};
 
     targets_.at(utn_cnt_).addAssociated(&tr);
 

@@ -54,7 +54,7 @@ protected:
     //dbo name->ds_id->trs
 
     std::map<unsigned int, Association::Target> targets_;
-    //std::map<unsigned int, unsigned int> ta_2_utn_;
+    std::map<unsigned int, unsigned int> ta_2_utn_;
     unsigned int utn_cnt_ {0};
 
     double max_time_diff_ {15.0};
@@ -72,7 +72,6 @@ protected:
     int findUTNForTarget (const Association::Target& target);
     // tries to find existing utn for target, -1 if failed
     int findUTNForTargetByTA (const Association::Target& target);
-    int findUTNForTargetByTA (unsigned int ta);
     // tries to find existing utn for target by target address, -1 if failed
     int findUTNForTargetReport (const Association::TargetReport& tr);
     // tries to find existing utn for target report, -1 if failed

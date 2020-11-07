@@ -29,6 +29,7 @@ namespace Association
 
         //bool has_ta_ {false};
         std::set<unsigned int> tas_;
+        std::set<unsigned int> mas_;
 
         bool has_tod_ {false};
         float tod_min_ {0};
@@ -46,6 +47,9 @@ namespace Association
         bool hasTA (unsigned int ta)  const;
         bool hasAllOfTAs (std::set<unsigned int> tas) const;
         bool hasAnyOfTAs (std::set<unsigned int> tas) const;
+
+        bool hasMA () const;
+        bool hasMA (unsigned int ma)  const;
 
         std::string asStr();
 
