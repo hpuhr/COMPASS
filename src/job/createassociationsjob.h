@@ -58,13 +58,14 @@ protected:
     unsigned int utn_cnt_ {0};
 
     double max_time_diff_ {15.0};
-    double max_distance_quit_ {10*NM2M};
-    double max_wgs_distance_quit_ {max_distance_quit_/50}; // 2*100km/deg to be safe
+    double max_distance_quit_ {10*NM2M}; //10nm in meters
     double max_distance_acceptable_ {NM2M};
+    double max_distance_acceptable_sensors_ {2*NM2M};
+    double max_distance_acceptable_sensors_wgs_ {max_distance_acceptable_sensors_/50000}; // 2*100 000m/deg to be safe
     double max_altitude_diff_ {300.0};
     double prob_min_time_overlap_ {0.5};
     unsigned int min_updates_ {2};
-    bool associate_ac_non_trackers_ {false};
+    bool associate_ac_non_trackers_ {true};
 
     void createTargetReports();
     void createTrackerUTNS();

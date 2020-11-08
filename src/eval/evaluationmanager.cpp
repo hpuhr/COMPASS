@@ -1122,6 +1122,87 @@ void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
     }
 }
 
+void EvaluationManager::showFullUTN (unsigned int utn)
+{
+    nlohmann::json::object_t data;
+    data["filters"]["UTNs"]["utns"] = to_string(utn);
+
+    setViewableDataConfig(data);
+}
+
+void EvaluationManager::showSurroundingData (unsigned int utn)
+{
+    nlohmann::json::object_t data;
+
+    assert (data_.hasTargetData(utn));
+
+    const EvaluationTargetData& target_data = data_.targetData(utn);
+
+    float time_begin = target_data.timeBegin();
+    time_begin -= 60.0;
+
+    if (time_begin < 0)
+        time_begin = 0;
+
+    float time_end = target_data.timeEnd();
+    time_end += 60.0;
+
+    if (time_end > 24*60*60)
+        time_end = 24*60*60;
+
+//    "Time of Day": {
+//    "Time of Day Maximum": "05:56:32.297",
+//    "Time of Day Minimum": "05:44:58.445"
+//    },
+
+    data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
+    data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
+
+//    "Target Address": {
+//    "Target Address Values": "FEFE10"
+//    },
+    if (target_data.targetAddresses().size())
+        data["filters"]["Target Address"]["Target Address Values"] = target_data.targetAddressesStr()+",NULL";
+
+//    "Mode 3/A Code": {
+//    "Mode 3/A Code Values": "7000"
+//    }
+
+    if (target_data.modeACodes().size())
+        data["filters"]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
+
+//    "filters": {
+//    "Barometric Altitude": {
+//    "Barometric Altitude Maxmimum": "43000",
+//    "Barometric Altitude Minimum": "500"
+//    },
+
+//    if (target_data.hasModeC())
+//    {
+//        float alt_min = target_data.modeCMin();
+//        alt_min -= 300;
+//        float alt_max = target_data.modeCMax();
+//        alt_max += 300;
+//    }
+
+//    "Position": {
+//    "Latitude Maximum": "50.78493920733",
+//    "Latitude Minimum": "44.31547147615",
+//    "Longitude Maximum": "20.76559892354",
+//    "Longitude Minimum": "8.5801592186"
+//    }
+
+    if (target_data.hasPos())
+    {
+        data["filters"]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
+        data["filters"]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
+        data["filters"]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
+        data["filters"]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
+    }
+
+    setViewableDataConfig(data);
+}
+
 json::boolean_t& EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_name,
                                                           const std::string& group_name)
 {

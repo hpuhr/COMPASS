@@ -436,7 +436,7 @@ namespace Association
         assert (d_t2 >= 0);
 
         double int_lat = pos1.latitude_ + v_lat * d_t2;
-        double int_long = pos2.latitude_ + v_long * d_t2;
+        double int_long = pos1.longitude_ + v_long * d_t2;
 
         logdbg << "Target: interpolatedPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
 

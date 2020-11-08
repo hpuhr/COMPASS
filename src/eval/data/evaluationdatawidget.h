@@ -31,6 +31,9 @@ class EvaluationDataWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void customContextMenuSlot(const QPoint& p);
+    void showFullUTNSlot ();
+    void showSurroundingDataSlot ();
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
 public:

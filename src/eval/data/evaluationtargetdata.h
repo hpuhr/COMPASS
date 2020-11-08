@@ -116,6 +116,13 @@ public:
 
     // nullptr if none
 
+    double latitudeMin() const;
+    double latitudeMax() const;
+    double longitudeMin() const;
+    double longitudeMax() const;
+
+    bool hasPos() const;
+
 protected:
     static bool in_appimage_;
 
@@ -148,12 +155,20 @@ protected:
     mutable int mode_c_min_ {0};
     mutable int mode_c_max_ {0};
 
+    mutable bool has_pos_ {false};
+    mutable double latitude_min_ {0};
+    mutable double latitude_max_ {0};
+
+    mutable double longitude_min_ {0};
+    mutable double longitude_max_ {0};
+
     mutable std::map<float, TstDataMapping> test_data_mappings_;
 
     void updateCallsigns() const;
     void updateTargetAddresses() const;
     void updateModeACodes() const;
     void updateModeCMinMax() const;
+    void updatePositionMinMax() const;
 
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(float tod) const; // test tod

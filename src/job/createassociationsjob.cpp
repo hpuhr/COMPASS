@@ -104,6 +104,20 @@ void CreateAssociationsJob::run()
     emit statusSignal("Creating non-Tracker UTNS");
     createNonTrackerUTNS();
 
+    multiple_associated = 0;
+    single_associated = 0;
+
+    for (auto& target_it : targets_)
+    {
+        if (target_it.second.ds_ids_.size() > 1)
+            ++multiple_associated;
+        else
+            ++single_associated;
+    }
+
+    loginf << "CreateARTASAssociationsJob: run: after non-tracker targets " << targets_.size()
+           << " multiple " << multiple_associated << " single " << single_associated;
+
     // create associations
     emit statusSignal("Creating Associations");
     createAssociations();
@@ -522,7 +536,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                     time_diff = elapsed_time - start_time;
                     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    time_per_eval = elapsed_time_s/50000.0;
+                    time_per_eval = elapsed_time_s/tr_cnt;
                     remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
 
                     done_ratio = (float)tr_cnt / (float)num_trs;
@@ -530,7 +544,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                                        +String::percentToString(100.0*done_ratio)+"%)"
                                        +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
 
-                    start_time = boost::posix_time::microsec_clock::local_time();
+                    //start_time = boost::posix_time::microsec_clock::local_time();
                 }
 
                 ++tr_cnt;
@@ -560,6 +574,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                 tod = tr_it.tod_;
 
+                //loginf << "UGA: checking tr a/c/pos";
+
                 tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
                 {
                     Association::Target& other = targets_.at(cnt);
@@ -576,6 +592,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                             if (ma_res == Association::CompareResult::SAME)
                             {
+                                //loginf << "UGA3 same mode a";
+
                                 // check mode c code
 
                                 Association::CompareResult mc_res = other.compareModeCCode(
@@ -583,6 +601,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                                 if (mc_res == Association::CompareResult::SAME)
                                 {
+                                    //loginf << "UGA3 same mode c";
+
                                     // check positions
 
                                     OGRSpatialReference local;
@@ -604,13 +624,13 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                                     tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_);
 
-//                                    double wgs_dist = sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-//                                                           +pow(ref_pos.longitude_-tst_pos.longitude_, 2));
+                                    //     double wgs_dist = sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
+                                    //          +pow(ref_pos.longitude_-tst_pos.longitude_, 2));
 
                                     if (ok &&
                                             (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
                                                   +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
-                                             <= max_wgs_distance_quit_))
+                                             <= max_distance_acceptable_sensors_wgs_))
                                     {
                                         local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
@@ -633,12 +653,11 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                                         {
                                             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                                            if (distance <= max_distance_quit_) // only if ok
+                                            //loginf << "UGA3 distance " << distance;
+
+                                            if (distance < max_distance_acceptable_sensors_)
                                             {
-                                                if (distance < max_distance_acceptable_)
-                                                {
-                                                    results[cnt] = {true, other.utn_, distance};
-                                                }
+                                                results[cnt] = {true, other.utn_, distance};
                                             }
                                         }
                                     }

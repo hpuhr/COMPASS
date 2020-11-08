@@ -112,17 +112,17 @@
                     }
                 }
             },
-            "Mode 3A Codes": {
+            "Mode 3/A Codes": {
                 "parameters": {
                     "active": false,
                     "changed": true,
-                    "name": "Mode 3A Codes",
+                    "name": "Mode 3/A Codes",
                     "op_and_": true,
                     "visible": false
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "Mode 3A Code Values": {
+                        "Mode 3/A Codes Values": {
                             "parameters": {
                                 "absolute_value": false,
                                 "display_instance_id": false,

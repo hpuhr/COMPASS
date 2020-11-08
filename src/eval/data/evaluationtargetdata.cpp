@@ -121,6 +121,7 @@ void EvaluationTargetData::finalize () const
     updateTargetAddresses();
     updateModeACodes();
     updateModeCMinMax();
+    updatePositionMinMax();
 
     calculateTestDataMappings();
 }
@@ -689,6 +690,35 @@ std::string EvaluationTargetData::tstCallsignForTime (float tod) const
     return callsign_vec.get(index);
 }
 
+double EvaluationTargetData::latitudeMin() const
+{
+    assert (has_pos_);
+    return latitude_min_;
+}
+
+double EvaluationTargetData::latitudeMax() const
+{
+    assert (has_pos_);
+    return latitude_max_;
+}
+
+double EvaluationTargetData::longitudeMin() const
+{
+    assert (has_pos_);
+    return longitude_min_;
+}
+
+double EvaluationTargetData::longitudeMax() const
+{
+    assert (has_pos_);
+    return longitude_max_;
+}
+
+bool EvaluationTargetData::hasPos() const
+{
+    return has_pos_;
+}
+
 std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
 {
     return ref_buffer_;
@@ -900,6 +930,81 @@ void EvaluationTargetData::updateModeCMinMax() const
                     mode_c_min_ = min(mode_c_min_, modec_codes_ft.get(ind_it));
                     mode_c_max_ = max(mode_c_max_, modec_codes_ft.get(ind_it));
                 }
+            }
+        }
+    }
+}
+
+void EvaluationTargetData::updatePositionMinMax() const
+{
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
+
+    has_pos_ = false;
+
+    if (ref_data_.size())
+    {
+        string lat_name = object_man.metaVariable("pos_lat_deg").getFor(ref_buffer_->dboName()).name();
+        string long_name = object_man.metaVariable("pos_long_deg").getFor(ref_buffer_->dboName()).name();
+
+        assert (ref_buffer_->has<double>(lat_name));
+        assert (ref_buffer_->has<double>(long_name));
+
+        NullableVector<double>& lats = ref_buffer_->get<double>(lat_name);
+        NullableVector<double>& longs = ref_buffer_->get<double>(long_name);
+
+        for (auto ind_it : ref_indexes_)
+        {
+            assert (!lats.isNull(ind_it));
+            assert (!longs.isNull(ind_it));
+
+            if (!has_pos_)
+            {
+                has_pos_ = true;
+                latitude_min_ = lats.get(ind_it);
+                latitude_max_ = lats.get(ind_it);
+                longitude_min_ = longs.get(ind_it);
+                longitude_max_ = longs.get(ind_it);
+            }
+            else
+            {
+                latitude_min_ = min(latitude_min_, lats.get(ind_it));
+                latitude_max_ = max(latitude_max_, lats.get(ind_it));
+                longitude_min_ = min(longitude_min_, longs.get(ind_it));
+                longitude_max_ = max(longitude_max_, longs.get(ind_it));
+            }
+        }
+    }
+
+    if (tst_data_.size())
+    {
+        string lat_name = object_man.metaVariable("pos_lat_deg").getFor(tst_buffer_->dboName()).name();
+        string long_name = object_man.metaVariable("pos_long_deg").getFor(tst_buffer_->dboName()).name();
+
+        assert (tst_buffer_->has<double>(lat_name));
+        assert (tst_buffer_->has<double>(long_name));
+
+        NullableVector<double>& lats = tst_buffer_->get<double>(lat_name);
+        NullableVector<double>& longs = tst_buffer_->get<double>(long_name);
+
+        for (auto ind_it : tst_indexes_)
+        {
+            assert (!lats.isNull(ind_it));
+            assert (!longs.isNull(ind_it));
+
+            if (!has_pos_)
+            {
+                has_pos_ = true;
+                latitude_min_ = lats.get(ind_it);
+                latitude_max_ = lats.get(ind_it);
+                longitude_min_ = longs.get(ind_it);
+                longitude_max_ = longs.get(ind_it);
+            }
+            else
+            {
+                latitude_min_ = min(latitude_min_, lats.get(ind_it));
+                latitude_max_ = max(latitude_max_, lats.get(ind_it));
+                longitude_min_ = min(longitude_min_, longs.get(ind_it));
+                longitude_max_ = max(longitude_max_, longs.get(ind_it));
             }
         }
     }
@@ -1165,7 +1270,7 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
                 assert (d_t2 >= 0);
 
                 double int_lat = pos1.latitude_ + v_lat * d_t2;
-                double int_long = pos2.latitude_ + v_long * d_t2;
+                double int_long = pos1.longitude_ + v_long * d_t2;
 
                 logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: interpolated lat " << int_lat
                        << " long " << int_long;
