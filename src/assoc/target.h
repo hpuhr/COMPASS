@@ -64,6 +64,7 @@ namespace Association
         bool hasDataForTime (float tod, float d_max) const;
         std::pair<float, float> timesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
         std::pair<EvaluationTargetPosition, bool> interpolatedPosForTime (float tod, float d_max) const;
+        std::pair<EvaluationTargetPosition, bool> interpolatedPosForTimeFast (float tod, float d_max) const;
 
         bool hasDataForExactTime (float tod) const;
         TargetReport& dataForExactTime (float tod) const;

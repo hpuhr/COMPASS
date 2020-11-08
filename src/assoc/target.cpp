@@ -398,6 +398,77 @@ namespace Association
             return {{x_pos, y_pos, has_altitude, altitude}, true};
     }
 
+    std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (float tod, float d_max) const
+    {
+        float lower, upper;
+
+        tie(lower, upper) = timesFor(tod, d_max);
+
+        if (lower == -1 || upper == -1)
+            return {{}, false};
+
+        EvaluationTargetPosition pos1 = posForExactTime(lower);
+        EvaluationTargetPosition pos2 = posForExactTime(upper);
+        float d_t = upper - lower;
+
+        logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
+
+        assert (d_t >= 0);
+
+        if (pos1.latitude_ == pos2.latitude_
+                && pos1.longitude_ == pos2.longitude_) // same pos
+            return {pos1, true};
+
+        if (lower == upper) // same time
+        {
+            logwrn << "Target: interpolatedPosForTimeFast: ref has same time twice";
+            return {{}, false};
+        }
+
+
+        double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
+        double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+        logdbg << "Target: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+
+        float d_t2 = tod - lower;
+        logdbg << "Target: interpolatedPosForTimeFast: d_t2 " << d_t2;
+
+        assert (d_t2 >= 0);
+
+        double int_lat = pos1.latitude_ + v_lat * d_t2;
+        double int_long = pos2.latitude_ + v_long * d_t2;
+
+        logdbg << "Target: interpolatedPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+
+        // calculate altitude
+        bool has_altitude = false;
+        float altitude = 0.0;
+
+        if (pos1.has_altitude_ && !pos2.has_altitude_)
+        {
+            has_altitude = true;
+            altitude = pos1.altitude_;
+        }
+        else if (!pos1.has_altitude_ && pos2.has_altitude_)
+        {
+            has_altitude = true;
+            altitude = pos2.altitude_;
+        }
+        else if (pos1.has_altitude_ && pos2.has_altitude_)
+        {
+            float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+            has_altitude = true;
+            altitude = pos1.altitude_ + v_alt*d_t2;
+        }
+
+        logdbg << "Target: interpolatedPosForTimeFast: pos1 has alt "
+               << pos1.has_altitude_ << " alt " << pos1.altitude_
+               << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+               << " interpolated has alt " << has_altitude << " alt " << altitude;
+
+        return {{int_lat, int_long, has_altitude, altitude}, true};
+    }
+
     bool Target::hasDataForExactTime (float tod) const
     {
         return timed_indexes_.count(tod);

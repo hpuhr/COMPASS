@@ -158,6 +158,7 @@ protected:
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(float tod) const; // test tod
     void addRefPositiosToMapping (TstDataMapping& mapping) const;
+    void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
 };
 
 #endif // EVALUATIONTARGETDATA_H

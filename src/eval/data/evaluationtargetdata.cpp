@@ -257,43 +257,43 @@ const std::multimap<float, unsigned int>& EvaluationTargetData::tstData() const
 
 bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
 {
-//    if (ref_data_.count(tod))
-//        return true; // contains exact value
+    //    if (ref_data_.count(tod))
+    //        return true; // contains exact value
 
-//    //    Return iterator to lower bound
-//    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-//    //    before k (i.e., either it is equivalent or goes after).
+    //    //    Return iterator to lower bound
+    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    //    before k (i.e., either it is equivalent or goes after).
 
-//    auto lb_it = ref_data_.lower_bound(tod);
+    //    auto lb_it = ref_data_.lower_bound(tod);
 
-//    if (lb_it == ref_data_.end())
-//        return false;
+    //    if (lb_it == ref_data_.end())
+    //        return false;
 
-//    assert (lb_it->first >= tod);
+    //    assert (lb_it->first >= tod);
 
-//    if (lb_it->first - tod > d_max)
-//        return false; // too much time difference
+    //    if (lb_it->first - tod > d_max)
+    //        return false; // too much time difference
 
-//    // save value
-//    float upper = lb_it->first;
+    //    // save value
+    //    float upper = lb_it->first;
 
-//    lb_it--;
+    //    lb_it--;
 
-//    if (lb_it == ref_data_.end())
-//        return false;
+    //    if (lb_it == ref_data_.end())
+    //        return false;
 
-//    assert (tod >= lb_it->first);
+    //    assert (tod >= lb_it->first);
 
-//    if (tod - lb_it->first > d_max)
-//        return false; // too much time difference
+    //    if (tod - lb_it->first > d_max)
+    //        return false; // too much time difference
 
-//    float lower = lb_it->first;
+    //    float lower = lb_it->first;
 
-//    logdbg << "EvaluationTargetData: hasRefDataForTime: found " << String::timeStringFromDouble(lower)
-//           << " <= " << String::timeStringFromDouble(tod)
-//           << " <= " << String::timeStringFromDouble(upper);
+    //    logdbg << "EvaluationTargetData: hasRefDataForTime: found " << String::timeStringFromDouble(lower)
+    //           << " <= " << String::timeStringFromDouble(tod)
+    //           << " <= " << String::timeStringFromDouble(upper);
 
-//    return true;
+    //    return true;
     assert (test_data_mappings_.count(tod));
     TstDataMapping& mapping = test_data_mappings_.at(tod);
 
@@ -325,39 +325,39 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
 
 std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_max)  const
 {
-//    if (ref_data_.count(tod))
-//        return {tod, -1}; // contains exact value
+    //    if (ref_data_.count(tod))
+    //        return {tod, -1}; // contains exact value
 
-//    //    Return iterator to lower bound
-//    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-//    //    before k (i.e., either it is equivalent or goes after).
+    //    //    Return iterator to lower bound
+    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    //    before k (i.e., either it is equivalent or goes after).
 
-//    auto lb_it = ref_data_.lower_bound(tod);
+    //    auto lb_it = ref_data_.lower_bound(tod);
 
-//    if (lb_it == ref_data_.end())
-//        return {-1, -1};
+    //    if (lb_it == ref_data_.end())
+    //        return {-1, -1};
 
-//    assert (lb_it->first >= tod);
+    //    assert (lb_it->first >= tod);
 
-//    if (lb_it->first - tod > d_max)
-//        return {-1, -1}; // too much time difference
+    //    if (lb_it->first - tod > d_max)
+    //        return {-1, -1}; // too much time difference
 
-//    // save value
-//    float upper = lb_it->first;
+    //    // save value
+    //    float upper = lb_it->first;
 
-//    lb_it--;
+    //    lb_it--;
 
-//    if (lb_it == ref_data_.end())
-//        return {-1, upper};
+    //    if (lb_it == ref_data_.end())
+    //        return {-1, upper};
 
-//    assert (tod >= lb_it->first);
+    //    assert (tod >= lb_it->first);
 
-//    if (tod - lb_it->first > d_max)
-//        return {-1, upper}; // too much time difference
+    //    if (tod - lb_it->first > d_max)
+    //        return {-1, upper}; // too much time difference
 
-//    float lower = lb_it->first;
+    //    float lower = lb_it->first;
 
-//    return {lower, upper};
+    //    return {lower, upper};
 
     assert (test_data_mappings_.count(tod));
     TstDataMapping& mapping = test_data_mappings_.at(tod);
@@ -391,139 +391,139 @@ std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_ma
 std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
         float tod, float d_max) const
 {
-//    if (ref_data_.count(tod)) // contains exact value
-//        return {refPosForTime(tod), true};
+    //    if (ref_data_.count(tod)) // contains exact value
+    //        return {refPosForTime(tod), true};
 
-//    //    Return iterator to lower bound
-//    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-//    //    before k (i.e., either it is equivalent or goes after).
+    //    //    Return iterator to lower bound
+    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    //    before k (i.e., either it is equivalent or goes after).
 
-//    auto lb_it = ref_data_.lower_bound(tod);
+    //    auto lb_it = ref_data_.lower_bound(tod);
 
-//    assert (lb_it != ref_data_.end());
-//    assert (lb_it->first >= tod); // too much time difference
+    //    assert (lb_it != ref_data_.end());
+    //    assert (lb_it->first >= tod); // too much time difference
 
-//    assert (lb_it->first - tod <= d_max); // too much time difference
+    //    assert (lb_it->first - tod <= d_max); // too much time difference
 
-//    // save value
-//    float upper = lb_it->first;
+    //    // save value
+    //    float upper = lb_it->first;
 
-//    lb_it--;
+    //    lb_it--;
 
-//    assert (lb_it != ref_data_.end());
+    //    assert (lb_it != ref_data_.end());
 
-//    assert (tod >= lb_it->first);
+    //    assert (tod >= lb_it->first);
 
-//    assert (tod - lb_it->first <= d_max); // too much time difference
+    //    assert (tod - lb_it->first <= d_max); // too much time difference
 
-//    float lower = lb_it->first;
+    //    float lower = lb_it->first;
 
-//    EvaluationTargetPosition pos1 = refPosForTime(lower);
-//    EvaluationTargetPosition pos2 = refPosForTime(upper);
-//    float d_t = upper - lower;
+    //    EvaluationTargetPosition pos1 = refPosForTime(lower);
+    //    EvaluationTargetPosition pos2 = refPosForTime(upper);
+    //    float d_t = upper - lower;
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
 
-//    assert (d_t >= 0);
+    //    assert (d_t >= 0);
 
-//    if (pos1.latitude_ == pos2.latitude_
-//            && pos1.longitude_ == pos2.longitude_) // same pos
-//        return {pos1, true};
+    //    if (pos1.latitude_ == pos2.latitude_
+    //            && pos1.longitude_ == pos2.longitude_) // same pos
+    //        return {pos1, true};
 
-//    if (lower == upper) // same time
-//    {
-//        logwrn << "EvaluationTargetData: interpolatedRefPosForTime: ref has same time twice";
-//        return {{}, false};
-//    }
+    //    if (lower == upper) // same time
+    //    {
+    //        logwrn << "EvaluationTargetData: interpolatedRefPosForTime: ref has same time twice";
+    //        return {{}, false};
+    //    }
 
-//    OGRSpatialReference wgs84;
-//    wgs84.SetWellKnownGeogCS("WGS84");
-//    OGRSpatialReference local;
-//    local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+    //    OGRSpatialReference wgs84;
+    //    wgs84.SetWellKnownGeogCS("WGS84");
+    //    OGRSpatialReference local;
+    //    local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
-//    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-//    assert (ogr_geo2cart);
-//    std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-//    assert (ogr_cart2geo);
+    //    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+    //    assert (ogr_geo2cart);
+    //    std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
+    //    assert (ogr_cart2geo);
 
-//    double x_pos, y_pos;
+    //    double x_pos, y_pos;
 
-//    if (in_appimage_) // inside appimage
-//    {
-//        x_pos = pos2.longitude_;
-//        y_pos = pos2.latitude_;
-//    }
-//    else
-//    {
-//        x_pos = pos2.latitude_;
-//        y_pos = pos2.longitude_;
-//    }
+    //    if (in_appimage_) // inside appimage
+    //    {
+    //        x_pos = pos2.longitude_;
+    //        y_pos = pos2.latitude_;
+    //    }
+    //    else
+    //    {
+    //        x_pos = pos2.latitude_;
+    //        y_pos = pos2.longitude_;
+    //    }
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
-//    bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-//    if (!ret)
-//    {
-//        logerr << "EvaluationTargetData: interpolatedRefPosForTime: error with latitude " << pos2.latitude_
-//               << " longitude " << pos2.longitude_;
-//        return {{}, false};
-//    }
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
+    //    bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+    //    if (!ret)
+    //    {
+    //        logerr << "EvaluationTargetData: interpolatedRefPosForTime: error with latitude " << pos2.latitude_
+    //               << " longitude " << pos2.longitude_;
+    //        return {{}, false};
+    //    }
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << fixed << x_pos
-//           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << fixed << x_pos
+    //           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-//    double v_x = x_pos/d_t;
-//    double v_y = y_pos/d_t;
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
+    //    double v_x = x_pos/d_t;
+    //    double v_y = y_pos/d_t;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
 
-//    float d_t2 = tod - lower;
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
+    //    float d_t2 = tod - lower;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
 
-//    assert (d_t2 >= 0);
+    //    assert (d_t2 >= 0);
 
-//    x_pos = v_x * d_t2;
-//    y_pos = v_y * d_t2;
+    //    x_pos = v_x * d_t2;
+    //    y_pos = v_y * d_t2;
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
 
-//    ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+    //    ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
 
-//    // x_pos long, y_pos lat
+    //    // x_pos long, y_pos lat
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
 
-//    // calculate altitude
-//    bool has_altitude = false;
-//    float altitude = 0.0;
+    //    // calculate altitude
+    //    bool has_altitude = false;
+    //    float altitude = 0.0;
 
-//    if (pos1.has_altitude_ && !pos2.has_altitude_)
-//    {
-//        has_altitude = true;
-//        altitude = pos1.altitude_;
-//    }
-//    else if (!pos1.has_altitude_ && pos2.has_altitude_)
-//    {
-//        has_altitude = true;
-//        altitude = pos2.altitude_;
-//    }
-//    else if (pos1.has_altitude_ && pos2.has_altitude_)
-//    {
-//        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-//        has_altitude = true;
-//        altitude = pos1.altitude_ + v_alt*d_t2;
-//    }
+    //    if (pos1.has_altitude_ && !pos2.has_altitude_)
+    //    {
+    //        has_altitude = true;
+    //        altitude = pos1.altitude_;
+    //    }
+    //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
+    //    {
+    //        has_altitude = true;
+    //        altitude = pos2.altitude_;
+    //    }
+    //    else if (pos1.has_altitude_ && pos2.has_altitude_)
+    //    {
+    //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+    //        has_altitude = true;
+    //        altitude = pos1.altitude_ + v_alt*d_t2;
+    //    }
 
-//    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 has alt "
-//           << pos1.has_altitude_ << " alt " << pos1.altitude_
-//           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-//           << " interpolated has alt " << has_altitude << " alt " << altitude;
+    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 has alt "
+    //           << pos1.has_altitude_ << " alt " << pos1.altitude_
+    //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+    //           << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-//    if (in_appimage_) // inside appimage
-//        return {{y_pos, x_pos, has_altitude, altitude}, true};
-//    else
-//        return {{x_pos, y_pos, has_altitude, altitude}, true};
+    //    if (in_appimage_) // inside appimage
+    //        return {{y_pos, x_pos, has_altitude, altitude}, true};
+    //    else
+    //        return {{x_pos, y_pos, has_altitude, altitude}, true};
 
     assert (test_data_mappings_.count(tod));
     TstDataMapping& mapping = test_data_mappings_.at(tod);
@@ -974,7 +974,7 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
         }
     }
 
-    addRefPositiosToMapping(ret);
+    addRefPositiosToMappingFast(ret);
 
     return ret;
 }
@@ -1112,6 +1112,93 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     else
                         mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, altitude);
                 }
+            }
+        }
+    }
+    // else do nothing
+}
+
+void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping) const
+{
+    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact first time
+    {
+        mapping.has_ref_pos_ = hasRefPosForTime(mapping.tod_ref1_);
+
+        if (mapping.has_ref_pos_)
+            mapping.pos_ref_ = refPosForTime(mapping.tod_ref1_);
+    }
+    else if (mapping.has_ref1_  && hasRefPosForTime(mapping.tod_ref1_)
+             && mapping.has_ref2_ && hasRefPosForTime(mapping.tod_ref2_)) // two positions which can be interpolated
+    {
+        float lower = mapping.tod_ref1_;
+        float upper = mapping.tod_ref2_;
+
+        EvaluationTargetPosition pos1 = refPosForTime(lower);
+        EvaluationTargetPosition pos2 = refPosForTime(upper);
+        float d_t = upper - lower;
+
+        logdbg << "EvaluationTargetData: addRefPositiosToMappingFast: d_t " << d_t;
+
+        assert (d_t >= 0);
+
+        if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
+        {
+            mapping.has_ref_pos_ = true;
+            mapping.pos_ref_ = pos1;
+        }
+        else
+        {
+
+            if (lower == upper) // same time
+            {
+                logwrn << "EvaluationTargetData: addRefPositiosToMappingFast: ref has same time twice";
+            }
+            else
+            {
+                double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
+                double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+
+                float d_t2 = mapping.tod_  - lower;
+                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: d_t2 " << d_t2;
+
+                assert (d_t2 >= 0);
+
+                double int_lat = pos1.latitude_ + v_lat * d_t2;
+                double int_long = pos2.latitude_ + v_long * d_t2;
+
+                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: interpolated lat " << int_lat
+                       << " long " << int_long;
+
+                // calculate altitude
+                bool has_altitude = false;
+                float altitude = 0.0;
+
+                if (pos1.has_altitude_ && !pos2.has_altitude_)
+                {
+                    has_altitude = true;
+                    altitude = pos1.altitude_;
+                }
+                else if (!pos1.has_altitude_ && pos2.has_altitude_)
+                {
+                    has_altitude = true;
+                    altitude = pos2.altitude_;
+                }
+                else if (pos1.has_altitude_ && pos2.has_altitude_)
+                {
+                    float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
+                    has_altitude = true;
+                    altitude = pos1.altitude_ + v_alt*d_t2;
+                }
+
+                logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: pos1 has alt "
+                       << pos1.has_altitude_ << " alt " << pos1.altitude_
+                       << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
+                       << " interpolated has alt " << has_altitude << " alt " << altitude;
+
+                mapping.has_ref_pos_ = true;
+
+                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, altitude);
             }
         }
     }
