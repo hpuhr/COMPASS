@@ -564,7 +564,7 @@ namespace Association
 
         assert (assoc_trs_.size() == unknown.size()+same.size()+different.size());
 
-        return {unknown, same, different};
+        return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
     CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod)
@@ -663,7 +663,7 @@ namespace Association
 
         assert (timestamps.size() == unknown.size()+same.size()+different.size());
 
-        return {unknown, same, different};
+        return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
     CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod)

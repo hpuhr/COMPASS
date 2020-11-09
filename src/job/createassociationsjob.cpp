@@ -621,7 +621,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 {
                     Association::Target& other = targets_.at(cnt);
 
-                    results[cnt] = {false, other.utn_, 0};
+                    results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
                     if (!(tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
                     {
@@ -698,7 +698,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                                             if (distance < max_distance_acceptable_sensors_)
                                             {
-                                                results[cnt] = {true, other.utn_, distance};
+                                                results[cnt] = tuple<bool, unsigned int, double>(
+                                                            true, other.utn_, distance);
                                             }
                                         }
                                     }
@@ -793,7 +794,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     {
         Association::Target& other = targets_.at(cnt);
 
-        results[cnt] = {false, other.utn_, 0, 0};
+        results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {
@@ -910,7 +911,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                                 logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
                                        << " next utn " << utn_cnt_ << " dist avg " << distance_avg
                                        << " num " << same_distances.size();
-                                results[cnt] = {true, other.utn_, same_distances.size(), distance_avg};
+                                results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
+                                            true, other.utn_, same_distances.size(), distance_avg);
                             }
                         }
                     }
