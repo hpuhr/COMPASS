@@ -42,6 +42,11 @@ namespace Association
         float tod_min_ {0};
         float tod_max_ {0};
 
+        bool has_speed_ {false};
+        double speed_min_ {0};
+        double speed_avg_ {0};
+        double speed_max_ {0};
+
         vector<TargetReport*> assoc_trs_;
         std::map<float, unsigned int> timed_indexes_;
         std::set <unsigned int> ds_ids_;
@@ -80,6 +85,9 @@ namespace Association
                 Target& other, const std::vector<float>& timestamps) const;
         CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod);
         // unknown, same, different timestamps from this
+
+        void calculateSpeeds();
+        void removeNonModeSTRs();
     };
 
 }

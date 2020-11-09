@@ -68,6 +68,7 @@ protected:
     double prob_min_time_overlap_ {0.5}; //kb 0.7
     unsigned int min_updates_ {2}; // kb 3!!!
     bool associate_ac_non_trackers_ {true};
+    double max_speed_kts_ {100000};
     // target id? kb: nope
     // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
     // kb: split tracker/sensor parameters

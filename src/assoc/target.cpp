@@ -731,4 +731,130 @@ namespace Association
         else
             return CompareResult::DIFFERENT;
     }
+
+    void Target::calculateSpeeds()
+    {
+        has_speed_ = false;
+
+        float tod;
+        double latitude {0};
+        double longitude {0};
+        TargetReport* tr;
+
+        float tod_prev;
+        double latitude_prev {0};
+        double longitude_prev {0};
+
+        OGRSpatialReference wgs84;
+        wgs84.SetWellKnownGeogCS("WGS84");
+        OGRSpatialReference local;
+
+        double x_pos, y_pos;
+        bool ok;
+
+        float d_t;
+        double v_x, v_y;
+        double spd;
+        double spd_sum {0};
+        unsigned int num_spd {0};
+
+        bool first = true;
+        for (auto& time_it : timed_indexes_)
+        {
+            tod_prev = tod;
+            latitude_prev = latitude;
+            longitude_prev = longitude;
+
+            tod = time_it.first;
+
+            assert (time_it.second < assoc_trs_.size());
+            tr = assoc_trs_.at(time_it.second);
+
+            latitude = tr->latitude_;
+            longitude = tr->longitude_;
+
+            if (first)
+            {
+                first = false;
+                continue;
+            }
+
+            d_t = tod - tod_prev;
+            assert (d_t >= 0);
+
+            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
+
+            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+            assert (ogr_geo2cart);
+
+            if (in_appimage_) // inside appimage
+            {
+                x_pos = longitude_prev;
+                y_pos = latitude_prev;
+            }
+            else
+            {
+                x_pos = latitude_prev;
+                y_pos = longitude_prev;
+            }
+
+            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+            if (!ok)
+                continue;
+
+            v_x = x_pos/d_t;
+            v_y = y_pos/d_t;
+
+            spd = sqrt(pow(v_x,2)+pow(v_y,2)) * M_S2KNOTS;
+
+            if (!has_speed_)
+            {
+                has_speed_ = true;
+
+                speed_min_ = spd;
+                speed_max_ = spd;
+            }
+            else
+            {
+                speed_min_ = min(speed_min_, spd);
+                speed_max_ = max(speed_max_, spd);
+            }
+
+            spd_sum += spd;
+            ++num_spd;
+        }
+
+        if (num_spd)
+        {
+            speed_avg_ = spd_sum/(float)num_spd;
+        }
+    }
+
+    void Target::removeNonModeSTRs()
+    {
+        vector<TargetReport*> tmp_trs = assoc_trs_;
+
+        if (!tmp_)
+        {
+            for (auto tr_it : tmp_trs)
+                tr_it->removeAssociated(this);
+        }
+
+        assoc_trs_.clear();
+
+        tas_.clear();
+        mas_.clear();
+        has_tod_ = false;
+        has_speed_ = false;
+        timed_indexes_.clear();
+        ds_ids_.clear();
+        track_nums_.clear();
+
+        for (auto tr_it : tmp_trs)
+        {
+            if (tr_it->has_ta_)
+                addAssociated(tr_it);
+        }
+    }
 }

@@ -471,6 +471,47 @@ void CreateAssociationsJob::createTrackerUTNS()
             }
 
             loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first << " done";
+
+            emit statusSignal(("Checking "+ds_name+" UTNs").c_str());
+
+            tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+            {
+                targets_.at(cnt).calculateSpeeds();
+            });
+
+            vector <unsigned int> still_dubious;
+
+            for (auto& target_it : targets_)
+            {
+                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                {
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
+                           << target_it.second.utn_ << ": calculateSpeeds: min "
+                           << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                           << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                           << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
+                    target_it.second.removeNonModeSTRs();
+                    target_it.second.calculateSpeeds();
+
+                    if (target_it.second.has_speed_)
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned target "
+                               << target_it.second.utn_ << ": calculateSpeeds: min "
+                               << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                               << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+
+                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                        still_dubious.push_back(target_it.second.utn_);
+                }
+            }
+
+            for (unsigned int utn : still_dubious)
+                loginf << "CreateAssociationsJob: createTrackerUTNS: target " << utn << " still dubious"
+                       <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
+                        << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
+                        << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
         }
     }
     else
