@@ -478,7 +478,6 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
         assert (index.row() >= 0);
@@ -511,6 +510,7 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         auto it = target_data_.begin()+index.row();
         eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
         //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
+        return true;
     }
 
     return false;
@@ -608,6 +608,29 @@ void EvaluationData::setUseTargetData (unsigned int utn, bool value)
     setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
 }
 
+void EvaluationData::setUseAllTargetData (bool value)
+{
+    loginf << "EvaluationData: setUseAllTargetData: value " << value;
+
+    beginResetModel();
+
+    for (const auto& target_it : target_data_)
+        eval_man_.useUTN(target_it.utn_, value, false);
+
+    endResetModel();
+}
+
+void EvaluationData::setUseByFilter ()
+{
+    loginf << "EvaluationData: setUseByFilter";
+
+    beginResetModel();
+
+    eval_man_.filterUTNs();
+
+    endResetModel();
+}
+
 void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
 {
     loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
@@ -632,4 +655,12 @@ EvaluationDataWidget* EvaluationData::widget()
         widget_.reset(new EvaluationDataWidget(*this, eval_man_));
 
     return widget_.get();
+}
+
+EvaluationDataFilterDialog& EvaluationData::dialog()
+{
+    if (!dialog_)
+        dialog_.reset(new EvaluationDataFilterDialog(*this, eval_man_));
+
+    return *dialog_;
 }

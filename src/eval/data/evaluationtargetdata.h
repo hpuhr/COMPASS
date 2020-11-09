@@ -73,6 +73,7 @@ public:
     std::string timeBeginStr() const;
     float timeEnd() const;
     std::string timeEndStr() const;
+    float timeDuration() const;
 
     std::vector<std::string> callsigns() const;
     std::string callsignsStr() const;

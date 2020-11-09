@@ -182,6 +182,14 @@ std::string EvaluationTargetData::timeEndStr() const
         return "";
 }
 
+float EvaluationTargetData::timeDuration() const
+{
+    if (hasData())
+        return timeEnd() - timeBegin();
+    else
+        return 0;
+}
+
 std::vector<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();

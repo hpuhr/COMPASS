@@ -25,12 +25,27 @@
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
+#include <QToolBar>
 
 EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man)
     : QWidget(), eval_data_(eval_data), eval_man_(eval_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
+    // toolbar
+    toolbar_ = new QToolBar("Tools");
+
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    toolbar_->addWidget(spacer);
+
+    toolbar_->addAction("Filter");
+
+    connect(toolbar_, &QToolBar::actionTriggered, this, &EvaluationDataWidget::actionTriggeredSlot);
+
+    main_layout->addWidget(toolbar_);
+
+    // table
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(&eval_data_);
 
@@ -66,6 +81,41 @@ void EvaluationDataWidget::resizeColumnsToContents()
     loginf << "EvaluationDataWidget: resizeColumnsToContents";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
+}
+
+void EvaluationDataWidget::actionTriggeredSlot(QAction* action)
+{
+    QMenu menu;
+
+    QAction* all_action = new QAction("Use All", this);
+    connect (all_action, &QAction::triggered, this, &EvaluationDataWidget::useAllSlot);
+    menu.addAction(all_action);
+
+    QAction* none_action = new QAction("Use None", this);
+    connect (none_action, &QAction::triggered, this, &EvaluationDataWidget::useNoneSlot);
+    menu.addAction(none_action);
+
+    QAction* filter_action = new QAction("Filter", this);
+    connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
+    menu.addAction(filter_action);
+
+    menu.exec(QCursor::pos());
+}
+
+void EvaluationDataWidget::useAllSlot()
+{
+    eval_data_.setUseAllTargetData(true);
+}
+
+void EvaluationDataWidget::useNoneSlot()
+{
+    eval_data_.setUseAllTargetData(false);
+}
+
+void EvaluationDataWidget::filterSlot()
+{
+    EvaluationDataFilterDialog& dialog = eval_data_.dialog();
+    dialog.show();
 }
 
 void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)

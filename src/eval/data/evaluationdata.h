@@ -20,6 +20,7 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
+#include "evaluationdatafilterdialog.h"
 
 #include <QAbstractItemModel>
 
@@ -80,6 +81,7 @@ protected:
     std::vector<bool>& done_flags_;
 };
 
+
 class EvaluationData : public QAbstractItemModel
 {
     Q_OBJECT
@@ -113,10 +115,16 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
+
     void setUseTargetData (unsigned int utn, bool value);
+    void setUseAllTargetData (bool value);
+    void setUseByFilter ();
+
     void setTargetDataComment (unsigned int utn, std::string comment);
 
+
     EvaluationDataWidget* widget();
+    EvaluationDataFilterDialog& dialog();
 
 protected:
     EvaluationManager& eval_man_;
@@ -128,6 +136,7 @@ protected:
     bool finalized_ {false};
 
     std::unique_ptr<EvaluationDataWidget> widget_;
+    std::unique_ptr<EvaluationDataFilterDialog> dialog_;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};

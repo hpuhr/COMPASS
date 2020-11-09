@@ -70,6 +70,12 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
 
+    registerParameter("remove_short_targets", &remove_short_targets_, true);
+    registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10);
+    registerParameter("remove_short_targets_min_duration", &remove_short_targets_min_duration_, 60.0);
+
+    registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
+
     createSubConfigurables();
 }
 
@@ -1265,10 +1271,10 @@ bool EvaluationManager::useUTN (unsigned int utn)
         return configs_[current_config_name_]["utns"][utn_str]["use"];
 }
 
-void EvaluationManager::useUTN (unsigned int utn, bool value, bool update)
+void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bool update_res)
 {
-    loginf << "EvaluationManager: useUTN: utn " << utn << " value " << value
-           << " update " << update;
+    logdbg << "EvaluationManager: useUTN: utn " << utn << " value " << value
+           << " update_td " << update_td;
 
     if (!current_config_name_.size())
         current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
@@ -1276,10 +1282,55 @@ void EvaluationManager::useUTN (unsigned int utn, bool value, bool update)
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["use"] = value;
 
-    if (update)
+    if (update_td)
         data_.setUseTargetData(utn, value);
 
-    updateResultsToUseChangeOf(utn);
+    if (update_res)
+        updateResultsToUseChangeOf(utn);
+}
+
+void EvaluationManager::filterUTNs ()
+{
+    loginf << "EvaluationManager: filterUTNs";
+
+    bool use;
+    string comment;
+
+    for (auto& target_it : data_)
+    {
+        if (!target_it.use())
+            continue;
+
+        use = true; // must be true here
+        comment = "";
+
+        if (remove_short_targets_
+                && (target_it.numUpdates() < remove_short_targets_min_updates_
+                    || target_it.timeDuration() < remove_short_targets_min_duration_))
+        {
+            use = false;
+            comment = "Short track";
+        }
+
+        if (use && remove_psr_only_targets_)
+        {
+            if (!target_it.callsigns().size()
+                    && !target_it.targetAddresses().size()
+                    && !target_it.modeACodes().size()
+                    && !target_it.hasModeC())
+            {
+                use = false;
+                comment = "Primary only";
+            }
+        }
+
+        if (!use)
+        {
+            logdbg << "EvaluationManager: filterUTNs: removing " << target_it.utn_ << " comment '" << comment << "'";
+            useUTN (target_it.utn_, use, false);
+            utnComment(target_it.utn_, comment, false);
+        }
+    }
 }
 
 std::string EvaluationManager::utnComment (unsigned int utn)
@@ -1298,10 +1349,10 @@ std::string EvaluationManager::utnComment (unsigned int utn)
         return configs_[current_config_name_]["utns"][utn_str]["comment"];
 }
 
-void EvaluationManager::utnComment (unsigned int utn, std::string value, bool update)
+void EvaluationManager::utnComment (unsigned int utn, std::string value, bool update_td)
 {
-    loginf << "EvaluationManager: utnComment: utn " << utn << " value '" << value << "'"
-           << " update " << update;
+    logdbg << "EvaluationManager: utnComment: utn " << utn << " value '" << value << "'"
+           << " update_td " << update_td;
 
     if (!current_config_name_.size())
         current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
@@ -1309,8 +1360,56 @@ void EvaluationManager::utnComment (unsigned int utn, std::string value, bool up
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["comment"] = value;
 
-    if (update)
+    if (update_td)
         data_.setTargetDataComment(utn, value);
+}
+
+bool EvaluationManager::removeShortTargets() const
+{
+    return remove_short_targets_;
+}
+
+void EvaluationManager::removeShortTargets(bool value)
+{
+    loginf << "EvaluationManager: removeShortTargets: value " << value;
+
+    remove_short_targets_ = value;
+}
+
+unsigned int EvaluationManager::removeShortTargetsMinUpdates() const
+{
+    return remove_short_targets_min_updates_;
+}
+
+void EvaluationManager::removeShortTargetsMinUpdates(unsigned int value)
+{
+    loginf << "EvaluationManager: removeShortTargetsMinUpdates: value " << value;
+
+    remove_short_targets_min_updates_ = value;
+}
+
+double EvaluationManager::removeShortTargetsMinDuration() const
+{
+    return remove_short_targets_min_duration_;
+}
+
+void EvaluationManager::removeShortTargetsMinDuration(double value)
+{
+    loginf << "EvaluationManager: removeShortTargetsMinDuration: value " << value;
+
+    remove_short_targets_min_duration_ = value;
+}
+
+bool EvaluationManager::removePsrOnlyTargets() const
+{
+    return remove_psr_only_targets_;
+}
+
+void EvaluationManager::removePsrOnlyTargets(bool value)
+{
+    loginf << "EvaluationManager: removePsrOnlyTargets: value " << value;
+
+    remove_psr_only_targets_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()

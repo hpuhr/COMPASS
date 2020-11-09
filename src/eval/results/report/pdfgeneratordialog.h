@@ -20,7 +20,6 @@
 
 #include <QDialog>
 
-
 class QPushButton;
 class QLabel;
 class QProgressBar;
@@ -30,7 +29,6 @@ class QCheckBox;
 namespace EvaluationResultsReport
 {
     class PDFGenerator;
-
 
     class PDFGeneratorDialog : public QDialog
     {

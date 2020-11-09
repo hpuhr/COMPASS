@@ -169,10 +169,23 @@ public:
     EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
 
     bool useUTN (unsigned int utn);
-    void useUTN (unsigned int utn, bool value, bool update); // update target data
+    void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
+    void filterUTNs ();
 
     std::string utnComment (unsigned int utn);
-    void utnComment (unsigned int utn, std::string value, bool update); // update target data
+    void utnComment (unsigned int utn, std::string value, bool update_td); // update target data
+
+    bool removeShortTargets() const;
+    void removeShortTargets(bool value);
+
+    unsigned int removeShortTargetsMinUpdates() const;
+    void removeShortTargetsMinUpdates(unsigned int value);
+
+    double removeShortTargetsMinDuration() const;
+    void removeShortTargetsMinDuration(double value);
+
+    bool removePsrOnlyTargets() const;
+    void removePsrOnlyTargets(bool value);
 
 protected:
     COMPASS& compass_;
@@ -199,6 +212,12 @@ protected:
     std::string current_standard_;
     nlohmann::json configs_;
     std::string current_config_name_;
+
+    bool remove_short_targets_ {true};
+    unsigned int remove_short_targets_min_updates_ {10};
+    double remove_short_targets_min_duration_ {60.0};
+
+    bool remove_psr_only_targets_ {true};
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
