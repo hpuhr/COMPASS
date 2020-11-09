@@ -41,6 +41,7 @@
 //#include <boost/algorithm/string.hpp>
 
 using namespace Utils;
+using namespace std;
 
 /**
  * Initializes members, registers parameters, create GUI elements.
@@ -74,15 +75,15 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     else
     {
         if (!COMPASS::instance().objectManager().existsObject(variable_dbo_name_) ||
-            !COMPASS::instance()
-                 .objectManager()
-                 .object(variable_dbo_name_)
-                 .hasVariable(variable_name_))
+                !COMPASS::instance()
+                .objectManager()
+                .object(variable_dbo_name_)
+                .hasVariable(variable_name_))
             throw std::runtime_error("DBFilterCondition: constructor: dbo variable '" +
                                      variable_name_ + "' does not exist");
 
         variable_ =
-            &COMPASS::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
+                &COMPASS::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
 
         assert(variable_);
 
@@ -204,15 +205,38 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
     }
     first = false;
 
-    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " "
-       << operator_ << " " << getTransformedValue(value_, variable);
+    string val_str;
+    bool null_contained;
+
+    tie(val_str, null_contained) = getTransformedValue(value_, variable);
+
+    if (null_contained)
+    {
+        ss << "(";
+
+        if (val_str.size())
+        {
+            ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+            ss << " " << operator_ << val_str << " OR ";
+        }
+
+        ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+        ss << " IS NULL";
+
+        ss << ")";
+    }
+    else
+    {
+        ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+        ss << " " << operator_ << val_str;
+    }
 
     if (find(filtered_variables.begin(), filtered_variables.end(), variable) ==
-        filtered_variables.end())
+            filtered_variables.end())
         filtered_variables.push_back(variable);
 
-    if (ss.str().size() > 0)
-        logdbg << "DBFilterCondition " << instanceId() << ": getConditionString: '" << ss.str()
+    if (ss.str().size())
+        loginf << "DBFilterCondition " << instanceId() << ": getConditionString: '" << ss.str()
                << "'";
 
     return ss.str();
@@ -245,12 +269,12 @@ void DBFilterCondition::valueChanged()
 
     if (value_invalid_)
         edit_->setStyleSheet(
-            "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
-            " rgb(255, 200, 200); }");
+                    "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
+                    " rgb(255, 200, 200); }");
     else
         edit_->setStyleSheet(
-            "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
-            " rgb(200, 200, 200); }");
+                    "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
+                    " rgb(200, 200, 200); }");
 }
 
 /**
@@ -369,8 +393,11 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
     {
         for (auto var_it : variables)
         {
-            std::string transformed_value = getTransformedValue(new_value, var_it);
-            logdbg << "DBFilterCondition: valueChanged: transformed value " << transformed_value;
+            std::string transformed_value;
+            bool null_contained;
+            tie(transformed_value, null_contained) = getTransformedValue(new_value, var_it);
+            logdbg << "DBFilterCondition: valueChanged: transformed value " << transformed_value
+                   << " null " << null_contained;
         }
         invalid = false;
     }
@@ -385,8 +412,8 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
     return invalid;
 }
 
-std::string DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
-                                                   DBOVariable* variable)
+std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
+                                                                    DBOVariable* variable)
 {
     assert(variable);
     const DBTableColumn& column = variable->currentDBColumn();
@@ -407,13 +434,18 @@ std::string DBFilterCondition::getTransformedValue(const std::string& untransfor
     logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
            << boost::algorithm::join(value_strings, ",") << "'";
 
+    bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
+
+    if (null_set) // remove null value
+        value_strings.erase(find(value_strings.begin(), value_strings.end(), "NULL"));
+
     for (auto value_it : value_strings)
     {
         std::string value_str = value_it;
 
         if (variable->representation() != DBOVariable::Representation::STANDARD)
             value_str =
-                variable->getValueStringFromRepresentation(value_str);  // fix representation
+                    variable->getValueStringFromRepresentation(value_str);  // fix representation
 
         logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
 
@@ -428,8 +460,8 @@ std::string DBFilterCondition::getTransformedValue(const std::string& untransfor
                 logerr << "DBFilterCondition: getTransformedValue: unknown dimension '"
                        << variable->dimension() << "'";
                 throw std::runtime_error(
-                    "DBFilterCondition: getTransformedValue: unknown dimension '" +
-                    variable->dimension() + "'");
+                            "DBFilterCondition: getTransformedValue: unknown dimension '" +
+                            variable->dimension() + "'");
             }
 
             const Dimension& dimension = UnitManager::instance().dimension(variable->dimension());
@@ -480,13 +512,18 @@ std::string DBFilterCondition::getTransformedValue(const std::string& untransfor
             transformed_value_strings.push_back(value_str);
     }
 
-    assert(transformed_value_strings.size());
+    string value_str;
 
-    if (operator_ != "IN")
+    if (transformed_value_strings.size()) // can be empty if only NULL
     {
-        assert(transformed_value_strings.size() == 1);
-        return transformed_value_strings.at(0);
+        if (operator_ != "IN")
+        {
+            assert(transformed_value_strings.size() == 1);
+            value_str = transformed_value_strings.at(0);
+        }
+        else
+            value_str = "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
     }
-    else
-        return "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
+
+    return {value_str, null_set};
 }

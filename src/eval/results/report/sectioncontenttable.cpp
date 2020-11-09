@@ -445,6 +445,16 @@ namespace EvaluationResultsReport
                 menu.addAction(action);
             }
 
+            QAction* action = new QAction("Show Full UTN", this);
+            connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
+            action->setData(utn);
+            menu.addAction(action);
+
+            QAction* action2 = new QAction("Show Surrounding Data", this);
+            connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
+            action2->setData(utn);
+            menu.addAction(action2);
+
             menu.exec(table_view_->viewport()->mapToGlobal(p));
         }
         else
@@ -473,6 +483,30 @@ namespace EvaluationResultsReport
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
         eval_man_.setUseTargetData(utn, false);
+    }
+
+    void SectionContentTable::showFullUTNSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
+
+        eval_man_.showFullUTN(utn);
+    }
+
+    void SectionContentTable::showSurroundingDataSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
+
+        eval_man_.showSurroundingData(utn);
     }
 
 }

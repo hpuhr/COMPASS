@@ -17,8 +17,6 @@
 
 #include "dbobjectmanager.h"
 
-#include <QApplication>
-
 #include "compass.h"
 #include "configurationmanager.h"
 #include "dbinterface.h"
@@ -33,6 +31,9 @@
 #include "viewmanager.h"
 #include "jobmanager.h"
 #include "evaluationmanager.h"
+
+#include <QApplication>
+#include <QMessageBox>
 
 using namespace Utils::String;
 
@@ -353,6 +354,13 @@ void DBObjectManager::loadSlot()
 
     loginf << "DBObjectManager: loadSlot: loading associations";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    QMessageBox* msg_box = new QMessageBox();
+    msg_box->setWindowTitle("Loading Associations");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->show();
+
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
@@ -360,6 +368,12 @@ void DBObjectManager::loadSlot()
         if (object.second->loadable())
             object.second->loadAssociationsIfRequired();
     }
+
+    msg_box->close();
+    delete msg_box;
+
+    QApplication::restoreOverrideCursor();
+
 
     while (JobManager::instance().hasDBJobs())
     {

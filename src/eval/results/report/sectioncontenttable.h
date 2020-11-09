@@ -51,6 +51,8 @@ namespace EvaluationResultsReport
         void customContextMenuSlot(const QPoint& p);
         void addUTNSlot ();
         void removeUTNSlot ();
+        void showFullUTNSlot ();
+        void showSurroundingDataSlot ();
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,

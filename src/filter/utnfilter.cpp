@@ -62,7 +62,7 @@ bool UTNFilter::filters(const std::string& dbo_type)
 std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& first,
                                           std::vector<DBOVariable*>& filtered_variables)
 {
-    loginf << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
+    logdbg << "UTNFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
     if (!COMPASS::instance().objectManager().hasAssociations())
         return "";
@@ -78,7 +78,7 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
 
         if (!object.hasAssociations())
         {
-            loginf << "UTNFilter: getConditionString: no associations";
+            logdbg << "UTNFilter: getConditionString: no associations";
             return "";
         }
 
@@ -89,17 +89,17 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
         {
             vector<unsigned int> rec_nums_utn = assocations.getRecNumsForUTN(utn);
 
-            loginf << "UTNFilter: getConditionString: utn " << utn << " num rec_nums " << rec_nums_utn.size();
+            logdbg << "UTNFilter: getConditionString: utn " << utn << " num rec_nums " << rec_nums_utn.size();
 
             rec_nums.insert(rec_nums.end(), rec_nums_utn.begin(), rec_nums_utn.end());
         }
 
-        loginf << "UTNFilter: getConditionString got " << rec_nums.size() << " rec_nums for dbo " << dbo_name;;
+        logdbg << "UTNFilter: getConditionString got " << rec_nums.size() << " rec_nums for dbo " << dbo_name;;
 
         filtered_variables.push_back(&object.variable("rec_num"));
 
         if (!rec_nums.size())
-            loginf << "UTNFilter: getConditionString: no rec_nums";
+            logdbg << "UTNFilter: getConditionString: no rec_nums";
 
 
         if (!first)
@@ -122,7 +122,7 @@ std::string UTNFilter::getConditionString(const std::string& dbo_name, bool& fir
         first = false;
     }
 
-    loginf << "UTNFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "UTNFilter: getConditionString: here '" << ss.str() << "'";
 
     return ss.str();
 }

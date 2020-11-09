@@ -283,6 +283,13 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         for (int feature_cnt=0; feature_cnt < layer->GetFeatureCount(); ++feature_cnt) // OGRFeature
         {
             feature = layer->GetFeature(feature_cnt);
+
+            if (!feature) // TODO solve this
+            {
+                logwrn << "ManageSectorsTask: parseCurrentFile: non-feature at cnt " << feature_cnt;
+                continue;
+            }
+
             assert (feature);
 
             loginf << "ManageSectorsTask: parseCurrentFile: found feature '"

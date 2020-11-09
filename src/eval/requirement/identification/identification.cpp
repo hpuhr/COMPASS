@@ -185,9 +185,10 @@ namespace EvaluationRequirement
                             }
                             else
                             {
+                                assert (upper_nok);
                                 comment += " test id '"+target_data.tstCallsignForTime(tod)
-                                        +"' reference id at "+String::timeStringFromDouble(ref_lower)
-                                        + "  '"+target_data.refCallsignForTime(ref_lower)
+                                        +"' reference id at "+String::timeStringFromDouble(ref_upper)
+                                        + "  '"+target_data.refCallsignForTime(ref_upper)
                                         + "'";
                             }
                         }

@@ -154,7 +154,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 postprocess_dialog_.setLabelText(
                             ("Sector Layer "+sector_layer_name
-                             +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
+                             +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
 
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "'";
@@ -184,8 +184,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     postprocess_dialog_.setLabelText(
                                 ("Sector Layer "+sector_layer_name
-                                 +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()
-                                 +"\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                                 +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()
+                                 +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
                                  +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
                                  +" (estimated)").c_str());
 

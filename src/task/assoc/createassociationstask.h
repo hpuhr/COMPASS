@@ -59,18 +59,43 @@ public:
     TaskWidget* widget();
     virtual void deleteWidget();
 
-    std::string keyVarStr() const;
-    void keyVarStr(const std::string& var_str);
+    //std::string keyVarStr() const;
+    //void keyVarStr(const std::string& var_str);
 
-    std::string todVarStr() const;
-    void todVarStr(const std::string& var_str);
+    //std::string dsIdVarStr() const;
+    //void dsIdVarStr(const std::string& var_str);
 
-    std::string targetAddrVarStr() const;
-    void targetAddrVarStr(const std::string& var_str);
+    //std::string todVarStr() const;
+    //void todVarStr(const std::string& var_str);
+
+    //std::string targetAddrVarStr() const;
+    //void targetAddrVarStr(const std::string& var_str);
+
+    //std::string targetIdVarStr() const;
+    //void targetIdVarStr(const std::string& var_str);
+
+    //std::string mode3AVarStr() const;
+    //void mode3AVarStr(const std::string& var_str);
+
+    //std::string modeCVarStr() const;
+    //void modeCVarStr(const std::string& var_str);
+
+    //std::string latitudeVarStr() const;
+    //void latitudeVarStr(const std::string& var_str);
+
+    //std::string longitudeVarStr() const;
+    //void longitudeVarStr(const std::string& var_str);
 
     MetaDBOVariable* keyVar() const;
+    MetaDBOVariable* dsIdVar() const;
     MetaDBOVariable* todVar() const;
     MetaDBOVariable* targetAddrVar() const;
+    MetaDBOVariable* targetIdVar() const;
+    MetaDBOVariable* trackNumVar() const;
+    MetaDBOVariable* mode3AVar() const;
+    MetaDBOVariable* modeCVar() const;
+    MetaDBOVariable* latitudeVar() const;
+    MetaDBOVariable* longitudeVar() const;
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended();
@@ -85,11 +110,32 @@ protected:
     std::string key_var_str_;
     MetaDBOVariable* key_var_{nullptr};
 
+    std::string ds_id_var_str_;
+    MetaDBOVariable* ds_id_var_{nullptr};
+
     std::string tod_var_str_;
     MetaDBOVariable* tod_var_{nullptr};
 
     std::string target_addr_var_str_;
     MetaDBOVariable* target_addr_var_{nullptr};
+
+    std::string target_id_var_str_;
+    MetaDBOVariable* target_id_var_{nullptr};
+
+    std::string track_num_var_str_;
+    MetaDBOVariable* track_num_var_{nullptr};
+
+    std::string mode_3a_var_str_;
+    MetaDBOVariable* mode_3a_var_{nullptr};
+
+    std::string mode_c_var_str_;
+    MetaDBOVariable* mode_c_var_{nullptr};
+
+    std::string latitude_var_str_;
+    MetaDBOVariable* latitude_var_{nullptr};
+
+    std::string longitude_var_str_;
+    MetaDBOVariable* longitude_var_{nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

@@ -156,6 +156,8 @@ public:
 
     void setUseTargetData (unsigned int utn, bool value);
     void updateResultsToUseChangeOf (unsigned int utn);
+    void showFullUTN (unsigned int utn);
+    void showSurroundingData (unsigned int utn);
 
     nlohmann::json::boolean_t& useGroupInSectorLayer(const std::string& sector_layer_name,
                                                      const std::string& group_name);

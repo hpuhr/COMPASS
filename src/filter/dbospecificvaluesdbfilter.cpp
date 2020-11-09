@@ -169,7 +169,7 @@ std::string DBOSpecificValuesDBFilter::getConditionString(const std::string& dbo
                     filtered_variables.push_back(&object_->variable(ds_column_name_));
 
                 condition_set = true;
-
+                first = false;
             }
 
             ss << ")"; // there be conditions
