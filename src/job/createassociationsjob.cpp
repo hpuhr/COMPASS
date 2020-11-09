@@ -344,6 +344,7 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             loginf << "CreateAssociationsJob: createTrackerUTNS: creating tmp targets for ds_id " << ds_it.first;
 
+            // create temporary targets
             for (auto& tr_it : ds_it.second)
             {
                 if (tr_it.has_tn_)
@@ -387,7 +388,7 @@ void CreateAssociationsJob::createTrackerUTNS()
 
                     //loginf << "UGA3";
 
-                    if (tr_it.tod_ - tn2utn.at(tr_it.tn_).second > 60.0) // gap, new track
+                    if (tr_it.tod_ - tn2utn.at(tr_it.tn_).second > 60.0) // gap, new track // TODO parameter
                     {
                         logdbg << "CreateAssociationsJob: createTrackerUTNS: registering new tmp target "
                                << tmp_utn_cnt << " for tn " << tr_it.tn_ << " because of gap "
@@ -470,7 +471,6 @@ void CreateAssociationsJob::createTrackerUTNS()
             }
 
             loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first << " done";
-            //break; // TODO
         }
     }
     else
@@ -797,6 +797,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                         vector<pair<float, double>> same_distances;
                         double distances_sum {0};
 
+                        unsigned int pos_dubious_cnt {0};
+
                         OGRSpatialReference local;
 
                         std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
@@ -841,7 +843,11 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                            if (distance > max_distance_quit_) // too far, quit
+                            if (distance > max_distance_dubious_)
+                                ++pos_dubious_cnt;
+
+                            if (distance > max_distance_quit_ || pos_dubious_cnt > max_positions_dubious_)
+                                // too far or dubious, quit
                             {
                                 same_distances.clear();
                                 break;
@@ -857,7 +863,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                         {
                             double distance_avg = distances_sum / (float) same_distances.size();
 
-                            if (distance_avg < max_distance_acceptable_)
+                            if (distance_avg < max_distance_acceptable_trackers_)
                             {
                                 //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                                 logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
@@ -897,7 +903,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
         if (!usable)
             continue;
 
-        score = (double)num_updates*(max_distance_acceptable_-distance_avg);
+        score = (double)num_updates*(max_distance_acceptable_trackers_-distance_avg);
 
         if (first || score > best_score)
         {
