@@ -470,7 +470,7 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: addUTNSlot: utn " << utn;
 
-        eval_man_.setUseTargetData(utn, true);
+        eval_man_.useUTN(utn, true, true);
     }
 
     void SectionContentTable::removeUTNSlot ()
@@ -482,7 +482,7 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
-        eval_man_.setUseTargetData(utn, false);
+        eval_man_.useUTN(utn, false, true);
     }
 
     void SectionContentTable::showFullUTNSlot ()

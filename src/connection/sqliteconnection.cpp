@@ -32,6 +32,9 @@
 #include "sqliteconnectioninfowidget.h"
 #include "sqliteconnectionwidget.h"
 #include "stringconv.h"
+#include "files.h"
+
+using namespace Utils;
 
 SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::string& instance_id,
                                    DBInterface* interface)
@@ -692,6 +695,13 @@ std::string SQLiteConnection::identifier() const
     assert(connection_ready_);
 
     return last_filename_;
+}
+
+std::string SQLiteConnection::shortIdentifier() const
+{
+    assert(connection_ready_);
+
+    return Files::getFilenameFromPath(last_filename_);
 }
 
 void SQLiteConnection::addFile(const std::string& filename)

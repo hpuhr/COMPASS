@@ -23,6 +23,7 @@
 #include "metadbovariable.h"
 #include "compass.h"
 #include "dbobjectmanager.h"
+#include "evaluationmanager.h"
 
 #include <ogr_spatialref.h>
 
@@ -34,9 +35,10 @@ using namespace Utils;
 
 bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
 
-EvaluationTargetData::EvaluationTargetData(unsigned int utn)
-    : utn_(utn)
+EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationManager& eval_man)
+    : utn_(utn), eval_man_(eval_man)
 {
+    use_ = eval_man_.useUTN(utn_);
 }
 
 bool EvaluationTargetData::hasRefBuffer () const

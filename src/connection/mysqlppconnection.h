@@ -94,6 +94,7 @@ class MySQLppConnection : public DBConnection
     QWidget* infoWidget() override;
     std::string status() const override;
     std::string identifier() const override;
+    std::string shortIdentifier() const override;
     std::string type() const override { return MYSQL_IDENTIFIER; }
 
     const std::map<std::string, MySQLServer*>& servers() const { return servers_; }

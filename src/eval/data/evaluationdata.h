@@ -114,13 +114,14 @@ public:
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
     void setUseTargetData (unsigned int utn, bool value);
+    void setTargetDataComment (unsigned int utn, std::string comment);
 
     EvaluationDataWidget* widget();
 
 protected:
     EvaluationManager& eval_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
 
     TargetCache target_data_;

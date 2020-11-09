@@ -39,6 +39,7 @@
 #include "viewmanager.h"
 #include "stringconv.h"
 #include "dbovariableorderedset.h"
+#include "dbconnection.h"
 
 #include "json.hpp"
 
@@ -63,6 +64,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("active_sources_tst", &active_sources_tst_, json::object());
 
     registerParameter("current_standard", &current_standard_, "");
+
+    registerParameter("configs", &configs_, json::object());
 
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
@@ -1100,13 +1103,13 @@ void EvaluationManager::showResultId (const std::string& id)
     widget_->showResultId(id);
 }
 
-void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
-{
-    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
+//void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
+//{
+//    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
 
-    data_.setUseTargetData(utn, value);
-    updateResultsToUseChangeOf(utn);
-}
+//    data_.setUseTargetData(utn, value);
+//    updateResultsToUseChangeOf(utn);
+//}
 
 void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
 {
@@ -1244,6 +1247,70 @@ EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator() const
 {
     assert (pdf_gen_);
     return *pdf_gen_;
+}
+
+bool EvaluationManager::useUTN (unsigned int utn)
+{
+    logdbg << "EvaluationManager: useUTN: utn " << utn;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+
+    if (!configs_[current_config_name_]["utns"].contains(utn_str)
+            || !configs_[current_config_name_]["utns"].at(utn_str).contains("use"))
+        return true;
+    else
+        return configs_[current_config_name_]["utns"][utn_str]["use"];
+}
+
+void EvaluationManager::useUTN (unsigned int utn, bool value, bool update)
+{
+    loginf << "EvaluationManager: useUTN: utn " << utn << " value " << value
+           << " update " << update;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+    configs_[current_config_name_]["utns"][utn_str]["use"] = value;
+
+    if (update)
+        data_.setUseTargetData(utn, value);
+
+    updateResultsToUseChangeOf(utn);
+}
+
+std::string EvaluationManager::utnComment (unsigned int utn)
+{
+    logdbg << "EvaluationManager: utnComment: utn " << utn;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+
+    if (!configs_[current_config_name_]["utns"].contains(utn_str)
+            || !configs_[current_config_name_]["utns"].at(utn_str).contains("comment"))
+        return "";
+    else
+        return configs_[current_config_name_]["utns"][utn_str]["comment"];
+}
+
+void EvaluationManager::utnComment (unsigned int utn, std::string value, bool update)
+{
+    loginf << "EvaluationManager: utnComment: utn " << utn << " value '" << value << "'"
+           << " update " << update;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+    configs_[current_config_name_]["utns"][utn_str]["comment"] = value;
+
+    if (update)
+        data_.setTargetDataComment(utn, value);
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()

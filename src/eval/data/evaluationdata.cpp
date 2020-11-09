@@ -95,7 +95,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it});
+                target_data_.push_back({utn_it, eval_man_});
 
             assert (hasTargetData(utn_it));
 
@@ -171,7 +171,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it});
+                target_data_.push_back({utn_it, eval_man_});
 
             assert (hasTargetData(utn_it));
 
@@ -342,7 +342,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                     const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    if (target.use())
+                    if (eval_man_.useUTN(target.utn_))
                         return Qt::Checked;
                     else
                         return Qt::Unchecked;
@@ -372,6 +372,10 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 else if (col_name == "UTN")
                 {
                     return target.utn_;
+                }
+                else if (col_name == "Comment")
+                {
+                    return eval_man_.utnComment(target.utn_).c_str();
                 }
                 else if (col_name == "Begin")
                 {
@@ -453,6 +457,14 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                     const EvaluationTargetData& target = target_data_.at(index.row());
                     return target.utn_;
                 }
+                else if (index.column() == 2) // comment
+                {
+                    assert (index.row() >= 0);
+                    assert (index.row() < target_data_.size());
+
+                    const EvaluationTargetData& target = target_data_.at(index.row());
+                    return ("comment_"+to_string(target.utn_)).c_str();
+                }
             }
         default:
             {
@@ -478,6 +490,7 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         {
             loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << true;
 
+            eval_man_.useUTN(it->utn_, true, false);
             target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(true); });
             return true;
         }
@@ -485,9 +498,19 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
         {
             loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << false;
 
+            eval_man_.useUTN(it->utn_, false, false);
             target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
             return true;
         }
+    }
+    else if (role == Qt::EditRole && index.column() == 2) // comment
+    {
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
+
+        auto it = target_data_.begin()+index.row();
+        eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
+        //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
     }
 
     return false;
@@ -546,6 +569,10 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
         //        flags |= Qt::ItemIsEditable;
         // flags |= Qt::ItemIsSelectable;
     }
+    else if (index.column() == 2)
+    {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
     else
         return QAbstractItemModel::flags(index);
 }
@@ -579,6 +606,24 @@ void EvaluationData::setUseTargetData (unsigned int utn, bool value)
     assert (items.size() == 1);
 
     setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+}
+
+void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
+{
+    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+
+    assert (hasTargetData(utn));
+
+    QModelIndexList items = match(
+                        index(0, 0),
+                        Qt::UserRole,
+                        QVariant(("comment_"+to_string(utn)).c_str()),
+                        1, // look *
+                        Qt::MatchExactly); // look *
+
+    assert (items.size() == 1);
+
+    setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
 }
 
 EvaluationDataWidget* EvaluationData::widget()

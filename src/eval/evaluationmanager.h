@@ -154,7 +154,7 @@ public:
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
     const { return results_gen_.results(); } ;
 
-    void setUseTargetData (unsigned int utn, bool value);
+    //void setUseTargetData (unsigned int utn, bool value);
     void updateResultsToUseChangeOf (unsigned int utn);
     void showFullUTN (unsigned int utn);
     void showSurroundingData (unsigned int utn);
@@ -167,6 +167,12 @@ public:
                                               const std::string& req_name);
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
+
+    bool useUTN (unsigned int utn);
+    void useUTN (unsigned int utn, bool value, bool update); // update target data
+
+    std::string utnComment (unsigned int utn);
+    void utnComment (unsigned int utn, std::string value, bool update); // update target data
 
 protected:
     COMPASS& compass_;
@@ -191,6 +197,8 @@ protected:
     nlohmann::json active_sources_tst_;
 
     std::string current_standard_;
+    nlohmann::json configs_;
+    std::string current_config_name_;
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

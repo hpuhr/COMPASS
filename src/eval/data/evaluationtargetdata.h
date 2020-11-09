@@ -25,6 +25,7 @@
 #include <vector>
 
 class Buffer;
+class EvaluationManager;
 
 class TstDataMapping // mapping to respective ref data
 {
@@ -44,7 +45,7 @@ public:
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData(unsigned int utn);
+    EvaluationTargetData(unsigned int utn, EvaluationManager& eval_man);
 
     bool hasRefBuffer () const;
     void setRefBuffer (std::shared_ptr<Buffer> buffer);
@@ -125,6 +126,8 @@ public:
 
 protected:
     static bool in_appimage_;
+
+    EvaluationManager& eval_man_;
 
     bool use_ {true};
 
