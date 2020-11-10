@@ -105,10 +105,9 @@ public:
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results ()
     const { return results_; } ;
 
-    void updateToUseChangeOf (unsigned int utn);
+    void updateToChanges();
 
     void generateResultsReportGUI();
-    void generateResultsReportPDF();
 
 protected:
     EvaluationManager& eval_man_;

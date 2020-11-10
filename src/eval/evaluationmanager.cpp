@@ -70,11 +70,22 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
 
+    // remove utn stuff
+    // shorts
     registerParameter("remove_short_targets", &remove_short_targets_, true);
     registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10);
     registerParameter("remove_short_targets_min_duration", &remove_short_targets_min_duration_, 60.0);
-
+    // psr
     registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
+    // ma
+    registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
+    registerParameter("remove_mode_a_codes", &remove_mode_a_codes_, false);
+    registerParameter("remove_mode_a_code_values", &remove_mode_a_code_values_, "7000,7777");
+    // ta
+    registerParameter("remove_mode_target_addresses", &remove_target_addresses_, false);
+    registerParameter("remove_target_address_vales", &remove_target_address_values_, "");
+    // dbo
+    registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, json::object());
 
     createSubConfigurables();
 }
@@ -1117,11 +1128,11 @@ void EvaluationManager::showResultId (const std::string& id)
 //    updateResultsToUseChangeOf(utn);
 //}
 
-void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
+void EvaluationManager::updateResultsToChanges ()
 {
     if (evaluated_)
     {
-        results_gen_.updateToUseChangeOf(utn);
+        results_gen_.updateToChanges();
 
         if (widget_)
         {
@@ -1159,47 +1170,47 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     if (time_end > 24*60*60)
         time_end = 24*60*60;
 
-//    "Time of Day": {
-//    "Time of Day Maximum": "05:56:32.297",
-//    "Time of Day Minimum": "05:44:58.445"
-//    },
+    //    "Time of Day": {
+    //    "Time of Day Maximum": "05:56:32.297",
+    //    "Time of Day Minimum": "05:44:58.445"
+    //    },
 
     data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
     data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
 
-//    "Target Address": {
-//    "Target Address Values": "FEFE10"
-//    },
+    //    "Target Address": {
+    //    "Target Address Values": "FEFE10"
+    //    },
     if (target_data.targetAddresses().size())
         data["filters"]["Target Address"]["Target Address Values"] = target_data.targetAddressesStr()+",NULL";
 
-//    "Mode 3/A Code": {
-//    "Mode 3/A Code Values": "7000"
-//    }
+    //    "Mode 3/A Code": {
+    //    "Mode 3/A Code Values": "7000"
+    //    }
 
     if (target_data.modeACodes().size())
         data["filters"]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
 
-//    "filters": {
-//    "Barometric Altitude": {
-//    "Barometric Altitude Maxmimum": "43000",
-//    "Barometric Altitude Minimum": "500"
-//    },
+    //    "filters": {
+    //    "Barometric Altitude": {
+    //    "Barometric Altitude Maxmimum": "43000",
+    //    "Barometric Altitude Minimum": "500"
+    //    },
 
-//    if (target_data.hasModeC())
-//    {
-//        float alt_min = target_data.modeCMin();
-//        alt_min -= 300;
-//        float alt_max = target_data.modeCMax();
-//        alt_max += 300;
-//    }
+    //    if (target_data.hasModeC())
+    //    {
+    //        float alt_min = target_data.modeCMin();
+    //        alt_min -= 300;
+    //        float alt_max = target_data.modeCMax();
+    //        alt_max += 300;
+    //    }
 
-//    "Position": {
-//    "Latitude Maximum": "50.78493920733",
-//    "Latitude Minimum": "44.31547147615",
-//    "Longitude Maximum": "20.76559892354",
-//    "Longitude Minimum": "8.5801592186"
-//    }
+    //    "Position": {
+    //    "Latitude Maximum": "50.78493920733",
+    //    "Latitude Minimum": "44.31547147615",
+    //    "Longitude Maximum": "20.76559892354",
+    //    "Longitude Minimum": "8.5801592186"
+    //    }
 
     if (target_data.hasPos())
     {
@@ -1285,16 +1296,32 @@ void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bo
     if (update_td)
         data_.setUseTargetData(utn, value);
 
-    if (update_res)
-        updateResultsToUseChangeOf(utn);
+    if (update_res && update_results_)
+        updateResultsToChanges();
+}
+
+void EvaluationManager::useAllUTNs (bool value)
+{
+    update_results_ = false;
+
+    for (auto& target_it : data_)
+        useUTN(target_it.utn_, value, true);
+
+    update_results_ = true;
+    updateResultsToChanges();
 }
 
 void EvaluationManager::filterUTNs ()
 {
     loginf << "EvaluationManager: filterUTNs";
 
+    update_results_ = false;
+
     bool use;
     string comment;
+
+    std::set<std::pair<int,int>> remove_mode_as = removeModeACodeData();
+    std::set<unsigned int> remove_tas = removeTargetAddressData();
 
     for (auto& target_it : data_)
     {
@@ -1324,13 +1351,71 @@ void EvaluationManager::filterUTNs ()
             }
         }
 
+        if (use && remove_modeac_onlys_)
+        {
+            if (!target_it.callsigns().size()
+                    && !target_it.targetAddresses().size())
+            {
+                use = false;
+                comment = "Mode A/C only";
+            }
+        }
+
+        if (use && remove_mode_a_codes_)
+        {
+            for (auto t_ma : target_it.modeACodes())
+            {
+                for (auto& r_ma_p : remove_mode_as)
+                {
+                    if (r_ma_p.second == -1) // single
+                    {
+                        if (t_ma == r_ma_p.first)
+                        {
+                            use = false;
+                            comment = "Mode A";
+                            break;
+                        }
+                    }
+                    else // pair
+                    {
+                        if (t_ma >= r_ma_p.first && t_ma <= r_ma_p.second)
+                        {
+                            use = false;
+                            comment = "Mode A";
+                            break;
+                        }
+                    }
+                }
+
+                if (!use) // already removed
+                    break;
+            }
+        }
+
+        if (use && remove_target_addresses_)
+        {
+            for (auto t_ta : target_it.targetAddresses())
+            {
+                if (remove_tas.count(t_ta))
+                {
+                    use = false;
+                    comment = "Target Address";
+                    break;
+                }
+            }
+        }
+
         if (!use)
         {
             logdbg << "EvaluationManager: filterUTNs: removing " << target_it.utn_ << " comment '" << comment << "'";
-            useUTN (target_it.utn_, use, false);
+            useUTN (target_it.utn_, use, true);
             utnComment(target_it.utn_, comment, false);
         }
     }
+
+    update_results_ = true;
+    updateResultsToChanges();
+
 }
 
 std::string EvaluationManager::utnComment (unsigned int utn)
@@ -1410,6 +1495,113 @@ void EvaluationManager::removePsrOnlyTargets(bool value)
     loginf << "EvaluationManager: removePsrOnlyTargets: value " << value;
 
     remove_psr_only_targets_ = value;
+}
+
+std::string EvaluationManager::removeModeACodeValues() const
+{
+    return remove_mode_a_code_values_;
+}
+
+std::set<std::pair<int,int>> EvaluationManager::removeModeACodeData() const // single ma,-1 or range ma1,ma2
+{
+    std::set<std::pair<int,int>> data;
+
+    vector<string> parts = String::split(remove_mode_a_code_values_, ',');
+
+    for (auto& part_it : parts)
+    {
+        if (part_it.find("-") != std::string::npos) // range
+        {
+            vector<string> sub_parts = String::split(part_it, '-');
+
+            if (sub_parts.size() != 2)
+            {
+                logwrn << "EvaluationManager: removeModeACodeData: not able to parse range '" << part_it << "'";
+                continue;
+            }
+
+            int val1 = String::intFromOctalString(sub_parts.at(0));
+            int val2 = String::intFromOctalString(sub_parts.at(1));
+
+            data.insert({val1, val2});
+        }
+        else // single value
+        {
+            int val1 = String::intFromOctalString(part_it);
+            data.insert({val1, -1});
+        }
+    }
+
+    return data;
+}
+
+void EvaluationManager::removeModeACodeValues(const std::string& value)
+{
+    loginf << "EvaluationManager: removeModeACodeValues: value '" << value << "'";
+
+    remove_mode_a_code_values_ = value;
+}
+
+std::string EvaluationManager::removeTargetAddressValues() const
+{
+    return remove_target_address_values_;
+}
+
+std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
+{
+    std::set<unsigned int>  data;
+
+    vector<string> parts = String::split(remove_mode_a_code_values_, ',');
+
+    for (auto& part_it : parts)
+    {
+            int val1 = String::intFromHexString(part_it);
+            data.insert(val1);
+    }
+
+    return data;
+}
+
+void EvaluationManager::removeTargetAddressValues(const std::string& value)
+{
+    loginf << "EvaluationManager: removeTargetAddressValues: value '" << value << "'";
+
+    remove_target_address_values_ = value;
+}
+
+bool EvaluationManager::removeModeACOnlys() const
+{
+    return remove_modeac_onlys_;
+}
+
+void EvaluationManager::removeModeACOnlys(bool value)
+{
+    loginf << "EvaluationManager: removeModeACOnlys: value " << value;
+    remove_modeac_onlys_ = value;
+}
+
+bool EvaluationManager::removeTargetAddresses() const
+{
+    return remove_target_addresses_;
+}
+
+void EvaluationManager::removeTargetAddresses(bool value)
+{
+    loginf << "EvaluationManager: removeTargetAddresses: value " << value;
+
+    remove_target_addresses_ = value;
+}
+
+bool EvaluationManager::removeModeACodes() const
+{
+    return remove_mode_a_codes_;
+}
+
+void EvaluationManager::removeModeACodes(bool value)
+{
+    loginf << "EvaluationManager: removeModeACodes: value " << value;
+
+    remove_mode_a_codes_ = value;
 }
 
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()

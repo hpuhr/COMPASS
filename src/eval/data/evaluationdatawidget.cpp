@@ -39,7 +39,7 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     toolbar_->addWidget(spacer);
 
-    toolbar_->addAction("Filter");
+    toolbar_->addAction("Change Usage");
 
     connect(toolbar_, &QToolBar::actionTriggered, this, &EvaluationDataWidget::actionTriggeredSlot);
 
@@ -193,3 +193,4 @@ void EvaluationDataWidget::currentRowChanged(const QModelIndex& current, const Q
 
     eval_man_.showUTN(target.utn_);
 }
+

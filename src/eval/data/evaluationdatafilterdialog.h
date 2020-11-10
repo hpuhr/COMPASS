@@ -7,13 +7,27 @@ class EvaluationData;
 class EvaluationManager;
 
 class QCheckBox;
+class QLineEdit;
+class QTextEdit;
 
 class EvaluationDataFilterDialog  : public QDialog
 {
     Q_OBJECT
 
 public slots:
+    // shorts
     void removeShortTargetsSlot(bool checked);
+    void removeSTMinUpdatesEditedSlot();
+    void removeSTMinDurationEditedSlot();
+    // psr
+    void removePSROnlyTargetsSlot(bool checked);
+    // ma
+    void removeModeACOnlyTargetsSlot(bool checked);
+    void removeModeASlot(bool checked);
+    void removeModeAValuesSlot();
+    //ta
+    void removeTASlot(bool checked);
+    void removeTAValuesSlot();
 
     void runSlot();
     void cancelSlot();
@@ -28,10 +42,17 @@ protected:
 
     QCheckBox* remove_short_check_ {nullptr};
 
-    //    unsigned int remove_short_targets_min_updates_ {10};
-    //    double remove_short_targets_min_duration_ {60.0};
+    QLineEdit* remove_st_min_updates_edit_ {nullptr};
+    QLineEdit* remove_st_min_duration_edit_ {nullptr};
 
-    //    bool remove_psr_only_targets_ {true};
+    QCheckBox* remove_psr_only_targets_check_ {nullptr};
+
+    QCheckBox* remove_mode_ac_only_check_ {nullptr};
+    QCheckBox* remove_mode_a_check_ {nullptr};
+    QTextEdit* remove_mode_a_edit_ {nullptr};
+
+    QCheckBox* remove_ta_check_ {nullptr};
+    QTextEdit* remove_ta_edit_ {nullptr};
 
     QPushButton* run_button_{nullptr};
     QPushButton* cancel_button_{nullptr};

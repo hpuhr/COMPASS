@@ -155,7 +155,7 @@ public:
     const { return results_gen_.results(); } ;
 
     //void setUseTargetData (unsigned int utn, bool value);
-    void updateResultsToUseChangeOf (unsigned int utn);
+    void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);
     void showSurroundingData (unsigned int utn);
 
@@ -170,6 +170,7 @@ public:
 
     bool useUTN (unsigned int utn);
     void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
+    void useAllUTNs (bool value);
     void filterUTNs ();
 
     std::string utnComment (unsigned int utn);
@@ -186,6 +187,23 @@ public:
 
     bool removePsrOnlyTargets() const;
     void removePsrOnlyTargets(bool value);
+
+    bool removeModeACodes() const;
+    void removeModeACodes(bool value);
+
+    std::string removeModeACodeValues() const;
+    std::set<std::pair<int,int>> removeModeACodeData() const; // single ma,-1 or range ma1,ma2
+    void removeModeACodeValues(const std::string& value);
+
+    bool removeTargetAddresses() const;
+    void removeTargetAddresses(bool value);
+
+    std::string removeTargetAddressValues() const;
+    std::set<unsigned int> removeTargetAddressData() const;
+    void removeTargetAddressValues(const std::string& value);
+
+    bool removeModeACOnlys() const;
+    void removeModeACOnlys(bool value);
 
 protected:
     COMPASS& compass_;
@@ -213,11 +231,24 @@ protected:
     nlohmann::json configs_;
     std::string current_config_name_;
 
+    // utn filter stuff
+    bool update_results_ {true}; // to supress updating of results during bulk operations
+
     bool remove_short_targets_ {true};
     unsigned int remove_short_targets_min_updates_ {10};
     double remove_short_targets_min_duration_ {60.0};
 
     bool remove_psr_only_targets_ {true};
+    bool remove_modeac_onlys_ {false};
+
+    bool remove_mode_a_codes_{false};
+    std::string remove_mode_a_code_values_;
+
+    bool remove_target_addresses_{false};
+    std::string remove_target_address_values_;
+
+    nlohmann::json remove_not_detected_dbos_;
+
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

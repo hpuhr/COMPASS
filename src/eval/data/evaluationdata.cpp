@@ -113,7 +113,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
 
     loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
            << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
-              << " num_skipped " << num_skipped;
+           << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -259,8 +259,8 @@ void EvaluationData::finalize ()
         time_per_eval = elapsed_time_s/(double)(tmp_done_cnt);
         remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
 
-//        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
-//               << " elapsed_time_s " << elapsed_time_s;
+        //        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
+        //               << " elapsed_time_s " << elapsed_time_s;
 
         postprocess_dialog_.setLabelText(
                     ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
@@ -276,15 +276,15 @@ void EvaluationData::finalize ()
         }
     }
 
-//    unsigned int num_targets = target_data_.size();
+    //    unsigned int num_targets = target_data_.size();
 
-//    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-//    {
-//        target_data_[cnt].finalize();
-//    });
+    //    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+    //    {
+    //        target_data_[cnt].finalize();
+    //    });
 
-//    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-//        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
+    //    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+    //        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
 
     finalized_ = true;
 
@@ -349,6 +349,19 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 }
                 else
                     return QVariant();
+            }
+        case Qt::BackgroundRole:
+            {
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
+
+                const EvaluationTargetData& target = target_data_.at(index.row());
+
+                if (!target.use())
+                    return QBrush(Qt::lightGray);
+                else
+                    return QVariant();
+
             }
         case Qt::DisplayRole:
         case Qt::EditRole:
@@ -485,22 +498,14 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
 
         auto it = target_data_.begin()+index.row();
 
-        if ((Qt::CheckState)value.toInt() == Qt::Checked)
-        {
-            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << true;
+        bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
+        loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
 
-            eval_man_.useUTN(it->utn_, true, false);
-            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(true); });
-            return true;
-        }
-        else
-        {
-            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << false;
+        eval_man_.useUTN(it->utn_, checked, false);
+        target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
 
-            eval_man_.useUTN(it->utn_, false, false);
-            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
-            return true;
-        }
+        emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
+        return true;
     }
     else if (role == Qt::EditRole && index.column() == 2) // comment
     {
@@ -597,11 +602,11 @@ void EvaluationData::setUseTargetData (unsigned int utn, bool value)
     assert (hasTargetData(utn));
 
     QModelIndexList items = match(
-                        index(0, 0),
-                        Qt::UserRole,
-                        QVariant(utn),
-                        1, // look *
-                        Qt::MatchExactly); // look *
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(utn),
+                1, // look *
+                Qt::MatchExactly); // look *
 
     assert (items.size() == 1);
 
@@ -614,8 +619,7 @@ void EvaluationData::setUseAllTargetData (bool value)
 
     beginResetModel();
 
-    for (const auto& target_it : target_data_)
-        eval_man_.useUTN(target_it.utn_, value, false);
+    eval_man_.useAllUTNs(value);
 
     endResetModel();
 }
@@ -638,11 +642,11 @@ void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment
     assert (hasTargetData(utn));
 
     QModelIndexList items = match(
-                        index(0, 0),
-                        Qt::UserRole,
-                        QVariant(("comment_"+to_string(utn)).c_str()),
-                        1, // look *
-                        Qt::MatchExactly); // look *
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(("comment_"+to_string(utn)).c_str()),
+                1, // look *
+                Qt::MatchExactly); // look *
 
     assert (items.size() == 1);
 

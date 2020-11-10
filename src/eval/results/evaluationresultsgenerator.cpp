@@ -34,6 +34,7 @@
 #include <QApplication>
 #include <QThread>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -250,6 +251,12 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::ptime loading_start_time;
     boost::posix_time::ptime loading_stop_time;
 
+//    QMessageBox msg_box (QApplication::topLevelWidgets().first());
+//    msg_box.setWindowTitle("Generating Results");
+//    msg_box.setText( "Please wait.");
+//    msg_box.setStandardButtons(QMessageBox::NoButton);
+//    msg_box.show();
+
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
     // prepare for new data
@@ -284,13 +291,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
+    //msg_box.close();
+
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);
-}
-
-void EvaluationResultsGenerator::generateResultsReportPDF()
-{
-
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
@@ -298,9 +302,9 @@ EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
     return results_model_;
 }
 
-void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
+void EvaluationResultsGenerator::updateToChanges ()
 {
-    loginf << "EvaluationResultsGenerator: updateToUseChangeOf: utn " << utn;
+    loginf << "EvaluationResultsGenerator: updateToChanges";
 
     // clear everything
     results_model_.beginReset();
@@ -333,3 +337,4 @@ void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
 
     generateResultsReportGUI();
 }
+
