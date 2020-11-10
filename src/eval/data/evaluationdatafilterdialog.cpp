@@ -1,6 +1,9 @@
 #include "evaluationdatafilterdialog.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -10,6 +13,8 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QFormLayout>
+
+using namespace std;
 
 EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data, EvaluationManager& eval_man,
                                                        QWidget* parent, Qt::WindowFlags f)
@@ -98,6 +103,25 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     config_layout->addRow("\tTarget Adresses (hex)", remove_ta_edit_);
 
+    // dbos
+    remove_dbo_check_ = new QCheckBox();
+    remove_dbo_check_->setChecked(eval_man_.removeNotDetectedDBOs());
+    connect(remove_dbo_check_, &QCheckBox::clicked, this,
+            &EvaluationDataFilterDialog::removeDBOsSlot);
+
+    config_layout->addRow("Remove By Non-Detection of DBObject", remove_dbo_check_);
+
+    for (auto& dbo_it : COMPASS::instance().objectManager())
+    {
+        QCheckBox* tmp = new QCheckBox();
+        tmp->setChecked(eval_man_.removeNotDetectedDBO(dbo_it.first));
+        tmp->setProperty("dbo_name", dbo_it.first.c_str());
+        connect(tmp, &QCheckBox::clicked, this,
+                &EvaluationDataFilterDialog::removeSpecificDBOsSlot);
+
+        config_layout->addRow(("\tNon-Detection of "+dbo_it.first).c_str(), tmp);
+    }
+
     main_layout->addLayout(config_layout);
 
     main_layout->addStretch();
@@ -185,6 +209,24 @@ void EvaluationDataFilterDialog::removeTAValuesSlot()
 {
     assert (remove_ta_edit_);
     eval_man_.removeTargetAddressValues(remove_ta_edit_->document()->toPlainText().toStdString());
+}
+
+void EvaluationDataFilterDialog::removeDBOsSlot(bool checked)
+{
+    eval_man_.removeNotDetectedDBOs(checked);
+}
+
+void EvaluationDataFilterDialog::removeSpecificDBOsSlot(bool checked)
+{
+    QCheckBox* tmp = dynamic_cast<QCheckBox*>(sender());
+    assert (tmp);
+
+    QVariant data = tmp->property("dbo_name");
+    assert (data.isValid());
+
+    string dbo_name = data.toString().toStdString();
+
+    eval_man_.removeNotDetectedDBOs(dbo_name,checked);
 }
 
 void EvaluationDataFilterDialog::runSlot()

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include <map>
+
 class EvaluationData;
 class EvaluationManager;
 
@@ -28,6 +30,9 @@ public slots:
     //ta
     void removeTASlot(bool checked);
     void removeTAValuesSlot();
+    // dbo
+    void removeDBOsSlot(bool checked);
+    void removeSpecificDBOsSlot(bool checked);
 
     void runSlot();
     void cancelSlot();
@@ -54,8 +59,12 @@ protected:
     QCheckBox* remove_ta_check_ {nullptr};
     QTextEdit* remove_ta_edit_ {nullptr};
 
+    QCheckBox* remove_dbo_check_ {nullptr};
+    std::map<std::string, QCheckBox*> remove_dbo_checks_;
+
     QPushButton* run_button_{nullptr};
     QPushButton* cancel_button_{nullptr};
+
 };
 
 #endif // EVALUATIONDATAFILTERDIALOG_H

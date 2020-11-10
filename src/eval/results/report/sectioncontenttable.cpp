@@ -28,6 +28,7 @@
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
+#include <QMessageBox>
 
 #include <cassert>
 #include <type_traits>
@@ -470,7 +471,15 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: addUTNSlot: utn " << utn;
 
+        QMessageBox msg_box;
+        msg_box.setWindowTitle("Generating Results");
+        msg_box.setText( "Please wait.");
+        msg_box.setStandardButtons(QMessageBox::NoButton);
+        msg_box.show();
+
         eval_man_.useUTN(utn, true, true);
+
+        msg_box.close();
     }
 
     void SectionContentTable::removeUTNSlot ()
@@ -482,7 +491,15 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
+        QMessageBox msg_box;
+        msg_box.setWindowTitle("Generating Results");
+        msg_box.setText( "Please wait.");
+        msg_box.setStandardButtons(QMessageBox::NoButton);
+        msg_box.show();
+
         eval_man_.useUTN(utn, false, true);
+
+        msg_box.close();
     }
 
     void SectionContentTable::showFullUTNSlot ()

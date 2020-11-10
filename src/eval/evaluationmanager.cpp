@@ -44,6 +44,9 @@
 #include "json.hpp"
 
 #include <QTabWidget>
+#include <QApplication>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -85,7 +88,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("remove_mode_target_addresses", &remove_target_addresses_, false);
     registerParameter("remove_target_address_vales", &remove_target_address_values_, "");
     // dbo
-    registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, json::object());
+    registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
+    registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
 
     createSubConfigurables();
 }
@@ -1311,11 +1315,55 @@ void EvaluationManager::useAllUTNs (bool value)
     updateResultsToChanges();
 }
 
+void EvaluationManager::clearUTNComments ()
+{
+    update_results_ = false;
+
+    for (auto& target_it : data_)
+        utnComment(target_it.utn_, "", true);
+
+    update_results_ = true;
+}
+
+
 void EvaluationManager::filterUTNs ()
 {
     loginf << "EvaluationManager: filterUTNs";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     update_results_ = false;
+
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+    map<string, set<unsigned int>> associated_utns;
+
+    if (remove_not_detected_dbos_) // prepare associations
+    {
+        if (dbo_man.hasAssociations())
+        {
+            for (auto& dbo_it : dbo_man)
+            {
+                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
+                {
+//                    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+//                    dbo_it.second->loadAssociationsIfRequired();
+
+//                    while (!dbo_it.second->associationsLoaded())
+//                    {
+//                        QCoreApplication::processEvents();
+//                        QThread::msleep(1);
+//                    }
+
+//                    QApplication::restoreOverrideCursor();
+
+                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
+                }
+            }
+        }
+    }
 
     bool use;
     string comment;
@@ -1405,6 +1453,25 @@ void EvaluationManager::filterUTNs ()
             }
         }
 
+        if (use && remove_not_detected_dbos_) // prepare associations
+        {
+            if (dbo_man.hasAssociations())
+            {
+                for (auto& dbo_it : dbo_man)
+                {
+                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
+                            && associated_utns.count(dbo_it.first) // have associations
+                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
+                    {
+                        use = false; // remove it
+                        comment = "Not Detected by "+dbo_it.first;
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!use)
         {
             logdbg << "EvaluationManager: filterUTNs: removing " << target_it.utn_ << " comment '" << comment << "'";
@@ -1416,6 +1483,7 @@ void EvaluationManager::filterUTNs ()
     update_results_ = true;
     updateResultsToChanges();
 
+    QApplication::restoreOverrideCursor();
 }
 
 std::string EvaluationManager::utnComment (unsigned int utn)
@@ -1555,8 +1623,8 @@ std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
 
     for (auto& part_it : parts)
     {
-            int val1 = String::intFromHexString(part_it);
-            data.insert(val1);
+        int val1 = String::intFromHexString(part_it);
+        data.insert(val1);
     }
 
     return data;
@@ -1578,6 +1646,33 @@ void EvaluationManager::removeModeACOnlys(bool value)
 {
     loginf << "EvaluationManager: removeModeACOnlys: value " << value;
     remove_modeac_onlys_ = value;
+}
+
+bool EvaluationManager::removeNotDetectedDBOs() const
+{
+    return remove_not_detected_dbos_;
+}
+
+void EvaluationManager::removeNotDetectedDBOs(bool value)
+{
+    loginf << "EvaluationManager: removeNotDetectedDBOs: value " << value;
+
+    remove_not_detected_dbos_ = value;
+}
+
+bool EvaluationManager::removeNotDetectedDBO(const std::string& dbo_name) const
+{
+    if (!remove_not_detected_dbo_values_.contains(dbo_name))
+        return false;
+
+    return remove_not_detected_dbo_values_.at(dbo_name);
+}
+
+void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool value)
+{
+    loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbo_name << " value " << value;
+
+    remove_not_detected_dbo_values_[dbo_name] = value;
 }
 
 bool EvaluationManager::removeTargetAddresses() const

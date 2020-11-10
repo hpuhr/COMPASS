@@ -95,6 +95,10 @@ void EvaluationDataWidget::actionTriggeredSlot(QAction* action)
     connect (none_action, &QAction::triggered, this, &EvaluationDataWidget::useNoneSlot);
     menu.addAction(none_action);
 
+    QAction* clear_action = new QAction("Clear Comments", this);
+    connect (clear_action, &QAction::triggered, this, &EvaluationDataWidget::clearCommentsSlot);
+    menu.addAction(clear_action);
+
     QAction* filter_action = new QAction("Filter", this);
     connect (filter_action, &QAction::triggered, this, &EvaluationDataWidget::filterSlot);
     menu.addAction(filter_action);
@@ -110,6 +114,11 @@ void EvaluationDataWidget::useAllSlot()
 void EvaluationDataWidget::useNoneSlot()
 {
     eval_data_.setUseAllTargetData(false);
+}
+
+void EvaluationDataWidget::clearCommentsSlot()
+{
+    eval_data_.clearComments();
 }
 
 void EvaluationDataWidget::filterSlot()

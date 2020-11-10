@@ -171,6 +171,7 @@ public:
     bool useUTN (unsigned int utn);
     void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
     void useAllUTNs (bool value);
+    void clearUTNComments ();
     void filterUTNs ();
 
     std::string utnComment (unsigned int utn);
@@ -204,6 +205,12 @@ public:
 
     bool removeModeACOnlys() const;
     void removeModeACOnlys(bool value);
+
+    bool removeNotDetectedDBOs() const;
+    void removeNotDetectedDBOs(bool value);
+
+    bool removeNotDetectedDBO(const std::string& dbo_name) const;
+    void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
 
 protected:
     COMPASS& compass_;
@@ -247,8 +254,8 @@ protected:
     bool remove_target_addresses_{false};
     std::string remove_target_address_values_;
 
-    nlohmann::json remove_not_detected_dbos_;
-
+    bool remove_not_detected_dbos_{false};
+    nlohmann::json remove_not_detected_dbo_values_;
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

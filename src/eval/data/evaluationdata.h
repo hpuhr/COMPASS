@@ -118,6 +118,7 @@ public:
 
     void setUseTargetData (unsigned int utn, bool value);
     void setUseAllTargetData (bool value);
+    void clearComments ();
     void setUseByFilter ();
 
     void setTargetDataComment (unsigned int utn, std::string comment);

@@ -624,6 +624,17 @@ void EvaluationData::setUseAllTargetData (bool value)
     endResetModel();
 }
 
+void EvaluationData::clearComments ()
+{
+    loginf << "EvaluationData: clearComments";
+
+    beginResetModel();
+
+    eval_man_.clearUTNComments();
+
+    endResetModel();
+}
+
 void EvaluationData::setUseByFilter ()
 {
     loginf << "EvaluationData: setUseByFilter";
@@ -648,9 +659,8 @@ void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment
                 1, // look *
                 Qt::MatchExactly); // look *
 
-    assert (items.size() == 1);
-
-    setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
+    if (items.size() == 1)
+        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
 }
 
 EvaluationDataWidget* EvaluationData::widget()

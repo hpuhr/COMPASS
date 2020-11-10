@@ -35,6 +35,7 @@ public slots:
     void actionTriggeredSlot(QAction* action);
     void useAllSlot();
     void useNoneSlot();
+    void clearCommentsSlot();
     void filterSlot();
 
     void customContextMenuSlot(const QPoint& p);
