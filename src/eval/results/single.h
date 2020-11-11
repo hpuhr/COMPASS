@@ -47,6 +47,7 @@ namespace EvaluationRequirementResult
         void updateUseFromTarget ();
 
         const static std::string tr_details_table_name_;
+        const static std::string target_table_name_;
 
     protected:
         unsigned int utn_; // used to generate result

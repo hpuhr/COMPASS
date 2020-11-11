@@ -105,12 +105,12 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
-        if (!sector_section.hasTable("target_table"))
-            sector_section.addTable("target_table", 11,
+        if (!sector_section.hasTable(target_table_name_))
+            sector_section.addTable(target_table_name_, 11,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
              "#EUIs", "#MUIs", "PD"}, true, 10);
 
-        EvaluationResultsReport::SectionContentTable& target_table = sector_section.getTable("target_table");
+        EvaluationResultsReport::SectionContentTable& target_table = sector_section.getTable(target_table_name_);
 
         QVariant pd_var;
 
@@ -222,7 +222,7 @@ namespace EvaluationRequirementResult
     bool SingleDetection::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
             return true;
         else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
             return true;
@@ -235,7 +235,7 @@ namespace EvaluationRequirementResult
     {
 
         assert (hasViewableData(table, annotation));
-        if (table.name() == "target_table")
+        if (table.name() == target_table_name_)
         {
             return getTargetErrorsViewable();
         }
@@ -332,7 +332,7 @@ namespace EvaluationRequirementResult
     bool SingleDetection::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
             return true;
         else
             return false;;

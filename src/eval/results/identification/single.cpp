@@ -108,12 +108,12 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-        if (!tgt_overview_section.hasTable("target_table"))
-            tgt_overview_section.addTable("target_table", 14,
+        if (!tgt_overview_section.hasTable(target_table_name_))
+            tgt_overview_section.addTable(target_table_name_, 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
              "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
-        EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable("target_table");
+        EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable(target_table_name_);
 
         QVariant pd_var;
 
@@ -221,7 +221,7 @@ namespace EvaluationRequirementResult
     bool SingleIdentification::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
             return true;
         else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
             return true;
@@ -235,7 +235,7 @@ namespace EvaluationRequirementResult
 
         assert (hasViewableData(table, annotation));
 
-        if (table.name() == "target_table")
+        if (table.name() == target_table_name_)
         {
             return getTargetErrorsViewable();
         }
@@ -323,7 +323,7 @@ namespace EvaluationRequirementResult
     bool SingleIdentification::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "target_table" && annotation.toUInt() == utn_)
+        if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
             return true;
         else
             return false;;

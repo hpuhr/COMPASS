@@ -203,7 +203,9 @@ namespace EvaluationRequirementResult
     bool JoinedDetection::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "req_overview")
+        //loginf << "UGA2 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
+
+        if (table.name() == req_overview_table_name_)
             return true;
         else
             return false;;
@@ -247,7 +249,9 @@ namespace EvaluationRequirementResult
     bool JoinedDetection::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "req_overview")
+        //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
+
+        if (table.name() == req_overview_table_name_)
             return true;
         else
             return false;;

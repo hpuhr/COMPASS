@@ -74,6 +74,8 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
+    const static std::string req_overview_table_name_;
+
 protected:
     std::string type_;
     std::string result_id_;

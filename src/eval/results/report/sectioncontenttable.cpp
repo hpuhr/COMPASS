@@ -24,6 +24,9 @@
 #include "stringconv.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 #include <QTableView>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
@@ -65,9 +68,23 @@ namespace EvaluationResultsReport
     {
         assert (layout);
 
+        QVBoxLayout* main_layout = new QVBoxLayout();
+
+        QHBoxLayout* upper_layout = new QHBoxLayout();
+
+        upper_layout->addWidget(new QLabel(("Table: "+name_).c_str()));
+        upper_layout->addStretch();
+
+        toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
+        connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
+        upper_layout->addWidget(toogle_show_unused_button_);
+
+        main_layout->addLayout(upper_layout);
+
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
             proxy_model_->setSourceModel(this);
         }
 
@@ -101,7 +118,9 @@ namespace EvaluationResultsReport
         table_view_->resizeColumnsToContents();
         table_view_->resizeRowsToContents();
 
-        layout->addWidget(table_view_);
+        main_layout->addWidget(table_view_);
+
+        layout->addLayout(main_layout);
 
     }
 
@@ -222,7 +241,9 @@ namespace EvaluationResultsReport
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -277,7 +298,9 @@ namespace EvaluationResultsReport
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -302,7 +325,9 @@ namespace EvaluationResultsReport
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -333,6 +358,25 @@ namespace EvaluationResultsReport
         tmp.erase(0,15);
 
         return tmp;;
+    }
+
+    bool SectionContentTable::showUnused() const
+    {
+        return show_unused_;
+    }
+
+    void SectionContentTable::showUnused(bool value)
+    {
+        loginf << "SectionContentTable: showUnused: value " << value;
+
+        assert (proxy_model_);
+
+        beginResetModel();
+
+        show_unused_ = value;
+        proxy_model_->showUnused(show_unused_);
+
+        endResetModel();
     }
 
 
@@ -393,6 +437,8 @@ namespace EvaluationResultsReport
 
             eval_man_.showResultId(reference);
         }
+        else
+            loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
     }
 
     void SectionContentTable::customContextMenuSlot(const QPoint& p)
@@ -526,4 +572,8 @@ namespace EvaluationResultsReport
         eval_man_.showSurroundingData(utn);
     }
 
+    void SectionContentTable::toggleShowUnusedSlot()
+    {
+        showUnused(!show_unused_);
+    }
 }

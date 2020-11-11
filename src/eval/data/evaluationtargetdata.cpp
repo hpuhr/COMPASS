@@ -680,6 +680,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
     auto prev_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
     assert (prev_it != ref_indexes_.end());
 
+    //auto after_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
+    auto after_it = prev_it;
+
     while (prev_it != ref_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
     {
         if (!altitude_vec.isNull(*prev_it))
@@ -713,7 +716,7 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
 
     // search after index
     float tod_after;
-    auto after_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
+
     while (after_it != ref_indexes_.end() && tods.get(*after_it) - tod < 120.0)
     {
 //        if (utn_ == debug_utn)
