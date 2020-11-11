@@ -141,9 +141,10 @@ namespace EvaluationRequirementResult
             result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
         }
 
-        // "Req.", "Group", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                         requirement_->groupName().c_str(), {sum_uis_},
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                         requirement_->shortname().c_str(),
+                         result_id_.c_str(), {sum_uis_},
                          pd_var, condition.c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }

@@ -61,6 +61,18 @@ namespace EvaluationRequirementResult
         return getTargetSectionID()+":"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
     }
 
+    std::string Single::getRequirementSectionID () // TODO hack
+    {
+        string tmp = target()->mopsVersionsStr();
+
+        if (!tmp.size())
+            tmp = "Unknown";
+
+        tmp = "MOPS "+tmp+" Sum";
+
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
+    }
+
     void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& utn_section = root_item->getSection(getTargetSectionID());

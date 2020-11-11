@@ -165,9 +165,10 @@ namespace EvaluationRequirementResult
             result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
         }
 
-        // "Req.", "Group", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                         requirement_->groupName().c_str(), {num_pos_ok_+num_pos_nok_},
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                         +requirement_->shortname().c_str(),
+                         result_id_.c_str(), {num_pos_ok_+num_pos_nok_},
                          pd_var, condition.c_str(), result.c_str()}, this, {});
     }
 

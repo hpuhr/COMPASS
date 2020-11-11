@@ -104,8 +104,8 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
 
         if (!ov_sec.hasTable(req_overview_table_name_))
-            ov_sec.addTable(req_overview_table_name_, 7,
-            {"Sector Layer", "Req.", "Group", "#Updates", "Result", "Condition", "Result"});
+            ov_sec.addTable(req_overview_table_name_, 8,
+            {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"});
 
         //loginf << "UGA '" << req_overview_table_name_ << "'";
 
@@ -114,7 +114,7 @@ namespace EvaluationRequirementResult
 
     std::string Base::getRequirementSectionID ()
     {
-        return "Sectors:"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+result_id_+":"+requirement_->name();
     }
 
     EvaluationResultsReport::Section& Base::getRequirementSection (

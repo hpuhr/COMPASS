@@ -1702,6 +1702,11 @@ std::set<unsigned int> EvaluationManager::adsbMOPSVersions(unsigned int ta) cons
     return adsb_mops_versions_.at(ta);
 }
 
+bool EvaluationManager::splitResultsByMOPS() const
+{
+    return split_results_by_mops_;
+}
+
 bool EvaluationManager::removeTargetAddresses() const
 {
     return remove_target_addresses_;

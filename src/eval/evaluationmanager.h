@@ -216,6 +216,8 @@ public:
     bool hasADSBMOPSVersions(unsigned int ta) const;
     std::set<unsigned int> adsbMOPSVersions(unsigned int ta) const;
 
+    bool splitResultsByMOPS() const;
+
 protected:
     COMPASS& compass_;
 
@@ -277,6 +279,8 @@ protected:
 
     bool has_adsb_mops_versions_ {false};
     std::map<unsigned int, std::set<unsigned int>> adsb_mops_versions_;
+
+    bool split_results_by_mops_ {true};
 
     virtual void checkSubConfigurables() override;
 

@@ -58,6 +58,8 @@ namespace EvaluationRequirementResult
         std::string getTargetSectionID();
         std::string getTargetRequirementSectionID();
 
+        virtual std::string getRequirementSectionID () override;
+
         void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };
 

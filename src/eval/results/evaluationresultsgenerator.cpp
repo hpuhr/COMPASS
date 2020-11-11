@@ -114,6 +114,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     string remaining_time_str;
 
+    bool split_results_by_mops = eval_man_.splitResultsByMOPS();
+    string mops_str;
+
     for (auto& sec_it : sector_layers)
     {
         const string& sector_layer_name = sec_it->name();
@@ -138,6 +141,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
                 std::shared_ptr<Joined> result_sum;
+                map<string, std::shared_ptr<Joined>> mops_sums;
 
                 vector<shared_ptr<Single>> results;
                 results.resize(num_utns);
@@ -173,24 +177,28 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             tmp_done_cnt++;
                     }
 
-                    assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+                    //assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+                    // hack
+                    if (eval_cnt+tmp_done_cnt <= num_req_evals)
+                    {
 
-                    elapsed_time = boost::posix_time::microsec_clock::local_time();
+                        elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-                    time_diff = elapsed_time - start_time;
-                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+                        time_diff = elapsed_time - start_time;
+                        elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
-                    remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
+                        time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
+                        remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
 
-                    postprocess_dialog_.setLabelText(
-                                ("Sector Layer "+sector_layer_name
-                                 +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()
-                                 +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                                 +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
-                                 +" (estimated)").c_str());
+                        postprocess_dialog_.setLabelText(
+                                    ("Sector Layer "+sector_layer_name
+                                     +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()
+                                     +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                                     +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                                     +" (estimated)").c_str());
 
-                    postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
+                        postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
+                    }
 
                     if (!done)
                     {
@@ -199,21 +207,56 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     }
                 }
 
+                postprocess_dialog_.setLabelText(("Sector Layer "+sector_layer_name+":\nAggregating results").c_str());
+
                 for (auto& result_it : results)
                 {
                     results_[result_it->reqGrpId()][result_it->resultId()] = result_it;
                     results_vec_.push_back(result_it);
 
                     if (!result_sum)
-                        result_sum = result_it->createEmptyJoined(sector_layer_name+":Sum");
+                        result_sum = result_it->createEmptyJoined("Sum");
 
                     result_sum->join(result_it);
+
+                    if (split_results_by_mops)
+                    {
+                        mops_str = result_it->target()->mopsVersionsStr();
+
+                        if (!mops_str.size())
+                            mops_str = "Unknown";
+
+                        mops_str = "MOPS "+mops_str;
+
+                        if (!mops_sums.count(mops_str+" Sum"))
+                            mops_sums[mops_str+" Sum"] =
+                                    result_it->createEmptyJoined(mops_str+" Sum");
+
+                        mops_sums.at(mops_str+" Sum")->join(result_it);
+                    }
                 }
 
                 if (result_sum)
                 {
+                    loginf << "EvaluationResultsGenerator: evaluate: adding result '" << result_sum->reqGrpId()
+                           << "' id '" << result_sum->resultId() << "'";
+                    assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
+                }
+
+                if (split_results_by_mops)
+                {
+                    for (auto& mops_res_it : mops_sums)
+                    {
+                        loginf << "EvaluationResultsGenerator: evaluate: adding result '"
+                               << mops_res_it.second->reqGrpId()
+                               << "' id '" << mops_res_it.second->resultId() << "'";
+
+                        assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+                        results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
+                        results_vec_.push_back(mops_res_it.second); // has to be added after all singles
+                    }
                 }
 
                 assert (eval_cnt <= num_req_evals);
@@ -251,11 +294,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::ptime loading_start_time;
     boost::posix_time::ptime loading_stop_time;
 
-//    QMessageBox msg_box (QApplication::topLevelWidgets().first());
-//    msg_box.setWindowTitle("Generating Results");
-//    msg_box.setText( "Please wait.");
-//    msg_box.setStandardButtons(QMessageBox::NoButton);
-//    msg_box.show();
+    //    QMessageBox msg_box (QApplication::topLevelWidgets().first());
+    //    msg_box.setWindowTitle("Generating Results");
+    //    msg_box.setText( "Please wait.");
+    //    msg_box.setStandardButtons(QMessageBox::NoButton);
+    //    msg_box.show();
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
