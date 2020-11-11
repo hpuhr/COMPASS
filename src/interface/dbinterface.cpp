@@ -332,6 +332,43 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
     return data;
 }
 
+
+std::map<unsigned int, std::set<unsigned int>> DBInterface::queryADSBMOPSVersions()
+{
+    DBObject& object = COMPASS::instance().objectManager().object("ADSB");
+
+    assert(object.existsInDB());
+    assert(object.hasCurrentDataSourceDefinition());
+
+    QMutexLocker locker(&connection_mutex_);
+
+    std::map<unsigned int, std::set<unsigned int>> data;
+
+    shared_ptr<DBCommand> command = sql_generator_.getDistinctMOPSVersions(object);
+
+    shared_ptr<DBResult> result = current_connection_->execute(*command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+    assert (buffer->has<int>("TARGET_ADDR"));
+    assert (buffer->has<int>("MOPS_VERSION"));
+
+    NullableVector<int>& tas = buffer->get<int>("TARGET_ADDR");
+    NullableVector<int>& mops = buffer->get<int>("MOPS_VERSION");
+
+    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
+    {
+        if (!mops.isNull(cnt)
+                && !tas.isNull(cnt))
+        {
+            data[tas.get(cnt)].insert(mops.get(cnt));
+        }
+    }
+
+    return data;
+}
+
 bool DBInterface::hasDataSourceTables(DBObject& object)
 {
     if (!object.hasCurrentDataSourceDefinition())

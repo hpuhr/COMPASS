@@ -132,6 +132,13 @@ void EvaluationManager::loadData ()
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+    // load adsb mops versions in a hacky way
+    if (object_man.object("ADSB").hasData() && !has_adsb_mops_versions_)
+    {
+        adsb_mops_versions_ = COMPASS::instance().interface().queryADSBMOPSVersions();
+        has_adsb_mops_versions_ = true;
+    }
+
     // set use filters
     object_man.useFilters(true);
     object_man.loadWidget()->updateUseFilters();
@@ -362,6 +369,16 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
 
     if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
         read_set.add(object_man.object("Tracker").variable("tracked_alt_baro_ft"));
+
+//    if (dbo_name == "ADSB")
+//    {
+//        DBObject& obj = object_man.object("ADSB");
+
+//        read_set.add(obj.variable("mops_version"));
+//        read_set.add(obj.variable("nac_p"));
+//        read_set.add(obj.variable("nucp_nic"));
+//        read_set.add(obj.variable("sil"));
+//    }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
@@ -1350,18 +1367,6 @@ void EvaluationManager::filterUTNs ()
                 if (remove_not_detected_dbo_values_.contains(dbo_it.first)
                         && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
                 {
-//                    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-//                    dbo_it.second->loadAssociationsIfRequired();
-
-//                    while (!dbo_it.second->associationsLoaded())
-//                    {
-//                        QCoreApplication::processEvents();
-//                        QThread::msleep(1);
-//                    }
-
-//                    QApplication::restoreOverrideCursor();
-
                     associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
                 }
             }
@@ -1676,6 +1681,25 @@ void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool 
     loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbo_name << " value " << value;
 
     remove_not_detected_dbo_values_[dbo_name] = value;
+}
+
+bool EvaluationManager::hasADSBMOPSVersions() const
+{
+    return has_adsb_mops_versions_;
+}
+
+bool EvaluationManager::hasADSBMOPSVersions(unsigned int ta) const
+{
+    assert (has_adsb_mops_versions_);
+    return adsb_mops_versions_.count(ta);
+}
+
+std::set<unsigned int> EvaluationManager::adsbMOPSVersions(unsigned int ta) const
+{
+    assert (has_adsb_mops_versions_);
+    assert (adsb_mops_versions_.count(ta));
+
+    return adsb_mops_versions_.at(ta);
 }
 
 bool EvaluationManager::removeTargetAddresses() const

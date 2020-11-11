@@ -23,6 +23,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <set>
 
 class Buffer;
 class EvaluationManager;
@@ -126,6 +127,13 @@ public:
 
     bool hasPos() const;
 
+    bool hasADSBInfo() const;
+    std::set<unsigned int> mopsVersions() const;
+    std::string mopsVersionsStr() const;
+//    std::set<unsigned int> NACPs() const;
+//    std::set<unsigned int> NUCpNICs() const;
+//    std::set<unsigned int> SILs() const;
+
 protected:
     static bool in_appimage_;
 
@@ -169,6 +177,12 @@ protected:
     mutable double longitude_min_ {0};
     mutable double longitude_max_ {0};
 
+    mutable bool has_adsb_info_ {false};
+    mutable std::set<unsigned int> mops_versions_;
+//    mutable std::set<unsigned int> nacps_;
+//    mutable std::set<unsigned int> nucp_nics_;
+//    mutable std::set<unsigned int> sils_;
+
     mutable std::map<float, TstDataMapping> test_data_mappings_;
 
     void updateCallsigns() const;
@@ -176,6 +190,7 @@ protected:
     void updateModeACodes() const;
     void updateModeCMinMax() const;
     void updatePositionMinMax() const;
+    //void updateADSBInfo() const;
 
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(float tod) const; // test tod

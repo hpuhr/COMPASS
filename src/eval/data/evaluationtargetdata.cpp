@@ -133,6 +133,21 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
+    if (eval_man_.hasADSBMOPSVersions() && target_addresses_.size())
+    {
+        for (auto ta_it : target_addresses_)
+        {
+            if (eval_man_.hasADSBMOPSVersions(ta_it))
+            {
+                std::set<unsigned int> tmp_mops = eval_man_.adsbMOPSVersions(ta_it);
+                mops_versions_.insert(tmp_mops.begin(), tmp_mops.end());
+            }
+        }
+
+        has_adsb_info_ = mops_versions_.size();
+        //loginf << "UGA utn " << utn_ << " has mops " << mopsVersionsStr();
+    }
+
     calculateTestDataMappings();
 }
 
@@ -916,6 +931,48 @@ bool EvaluationTargetData::hasPos() const
     return has_pos_;
 }
 
+bool EvaluationTargetData::hasADSBInfo() const
+{
+    return has_adsb_info_;
+}
+
+std::set<unsigned int> EvaluationTargetData::mopsVersions() const
+{
+    return mops_versions_;
+}
+
+std::string EvaluationTargetData::mopsVersionsStr() const
+{
+    std::ostringstream out;
+
+    bool first = true;
+    for (auto mops : mops_versions_)
+    {
+        if (!first)
+            out << ",";
+        out << mops;
+
+        first = false;
+    }
+
+    return out.str();
+}
+
+//std::set<unsigned int> EvaluationTargetData::NACPs() const
+//{
+//    return nacps_;
+//}
+
+//std::set<unsigned int> EvaluationTargetData::NUCpNICs() const
+//{
+//    return nucp_nics_;
+//}
+
+//std::set<unsigned int> EvaluationTargetData::SILs() const
+//{
+//    return sils_;
+//}
+
 std::shared_ptr<Buffer> EvaluationTargetData::refBuffer() const
 {
     return ref_buffer_;
@@ -1206,6 +1263,96 @@ void EvaluationTargetData::updatePositionMinMax() const
         }
     }
 }
+
+//void EvaluationTargetData::updateADSBInfo() const
+//{
+//    has_adsb_info_ = false;
+
+//    string mops_name {"mops_version"};
+//    string nacp_name {"nac_p"};
+//    string nucp_nic_name {"nucp_nic"};
+//    string sil_name {"sil"};
+
+//    if (ref_data_.size() && ref_buffer_->dboName() == "ADSB")
+//    {
+//        assert (ref_buffer_->has<int>(mops_name));
+//        assert (ref_buffer_->has<char>(nacp_name));
+//        assert (ref_buffer_->has<char>(nucp_nic_name));
+//        assert (ref_buffer_->has<char>(sil_name));
+
+//        NullableVector<int>& mops = ref_buffer_->get<int>(mops_name);
+//        NullableVector<char>& nacps = ref_buffer_->get<char>(nacp_name);
+//        NullableVector<char>& nucp_nics = ref_buffer_->get<char>(nucp_nic_name);
+//        NullableVector<char>& sils = ref_buffer_->get<char>(sil_name);
+
+//        for (auto ind_it : ref_indexes_)
+//        {
+//            if (!mops.isNull(ind_it) && mops_versions_.count(mops.get(ind_it)))
+//            {
+//                mops_versions_.insert(mops.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!nacps.isNull(ind_it) && nacps_.count(nacps.get(ind_it)))
+//            {
+//                mops_versions_.insert(nacps.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!nucp_nics.isNull(ind_it) && nucp_nics_.count(nucp_nics.get(ind_it)))
+//            {
+//                nucp_nics_.insert(nucp_nics.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!sils.isNull(ind_it) && sils_.count(sils.get(ind_it)))
+//            {
+//                sils_.insert(sils.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+//        }
+//    }
+
+//    if (tst_data_.size() && tst_buffer_->dboName() == "ADSB")
+//    {
+//        assert (tst_buffer_->has<int>(mops_name));
+//        assert (tst_buffer_->has<char>(nacp_name));
+//        assert (tst_buffer_->has<char>(nucp_nic_name));
+//        assert (tst_buffer_->has<char>(sil_name));
+
+//        NullableVector<int>& mops = tst_buffer_->get<int>(mops_name);
+//        NullableVector<char>& nacps = tst_buffer_->get<char>(nacp_name);
+//        NullableVector<char>& nucp_nics = tst_buffer_->get<char>(nucp_nic_name);
+//        NullableVector<char>& sils = tst_buffer_->get<char>(sil_name);
+
+//        for (auto ind_it : tst_indexes_)
+//        {
+//            if (!mops.isNull(ind_it) && mops_versions_.count(mops.get(ind_it)))
+//            {
+//                mops_versions_.insert(mops.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!nacps.isNull(ind_it) && nacps_.count(nacps.get(ind_it)))
+//            {
+//                mops_versions_.insert(nacps.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!nucp_nics.isNull(ind_it) && nucp_nics_.count(nucp_nics.get(ind_it)))
+//            {
+//                nucp_nics_.insert(nucp_nics.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+
+//            if (!sils.isNull(ind_it) && sils_.count(sils.get(ind_it)))
+//            {
+//                sils_.insert(sils.get(ind_it));
+//                has_adsb_info_ = true;
+//            }
+//        }
+//    }
+//}
 
 void EvaluationTargetData::calculateTestDataMappings() const
 {

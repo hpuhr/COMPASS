@@ -72,6 +72,7 @@ class SQLGenerator
 
     /// @brief Returns command for active data sources select
     std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
+    std::shared_ptr<DBCommand> getDistinctMOPSVersions(DBObject& adsb_obj);
 
     std::string getCreateAssociationTableStatement(const std::string& table_name);
     std::shared_ptr<DBCommand> getSelectAssociationsCommand(const std::string& table_name);

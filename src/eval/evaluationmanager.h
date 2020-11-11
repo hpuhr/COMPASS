@@ -212,6 +212,10 @@ public:
     bool removeNotDetectedDBO(const std::string& dbo_name) const;
     void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
 
+    bool hasADSBMOPSVersions() const;
+    bool hasADSBMOPSVersions(unsigned int ta) const;
+    std::set<unsigned int> adsbMOPSVersions(unsigned int ta) const;
+
 protected:
     COMPASS& compass_;
 
@@ -270,6 +274,9 @@ protected:
     std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
+    bool has_adsb_mops_versions_ {false};
+    std::map<unsigned int, std::set<unsigned int>> adsb_mops_versions_;
 
     virtual void checkSubConfigurables() override;
 

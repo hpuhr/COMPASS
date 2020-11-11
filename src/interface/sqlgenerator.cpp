@@ -379,6 +379,23 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBO
     return getSelectCommand(object.currentMetaTable(), columns, true);
 }
 
+std::shared_ptr<DBCommand> SQLGenerator::getDistinctMOPSVersions(DBObject& adsb_obj)
+{
+    std::vector<const DBTableColumn*> columns;
+
+    const DBTableColumn& ta_col = adsb_obj.variable("target_addr").currentDBColumn();
+    const DBTableColumn& mops_col = adsb_obj.variable("mops_version").currentDBColumn();
+
+    columns.push_back(&mops_col);
+    columns.push_back(&ta_col);
+
+    PropertyList list;
+    list.addProperty("TARGET_ADDR", PropertyDataType::INT);
+    list.addProperty("MOPS_VERSION", PropertyDataType::INT);
+
+    return getSelectCommand(adsb_obj.currentMetaTable(), columns, true);
+}
+
 std::string SQLGenerator::getCreateAssociationTableStatement(const std::string& table_name)
 {
     std::stringstream ss;
@@ -959,7 +976,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const MetaDBTable& met
     command->set(ss.str());
     command->list(property_list);
 
-    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    loginf << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 
     return command;
 }
