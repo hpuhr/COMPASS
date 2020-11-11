@@ -360,6 +360,9 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
 
     // TODO add required variables from standard requirements
 
+    if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
+        read_set.add(object_man.object("Tracker").variable("tracked_alt_baro_ft"));
+
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
 }
@@ -1619,7 +1622,7 @@ std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
 {
     std::set<unsigned int>  data;
 
-    vector<string> parts = String::split(remove_mode_a_code_values_, ',');
+    vector<string> parts = String::split(remove_target_address_values_, ',');
 
     for (auto& part_it : parts)
     {

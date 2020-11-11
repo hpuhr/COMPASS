@@ -104,12 +104,13 @@ public:
 
     bool hasRefPosForTime (float tod) const;
     EvaluationTargetPosition refPosForTime (float tod) const;
+    std::pair<bool, float> estimateRefAltitude (float tod, unsigned int index) const;
+    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
     bool hasRefCallsignForTime (float tod) const;
     std::string refCallsignForTime (float tod) const;
 
     // test
-
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
 
@@ -144,6 +145,8 @@ protected:
     std::string ref_altitude_name_;
     std::string ref_callsign_name_;
 
+    bool has_ref_altitude_secondary_ {false};
+    std::string ref_altitude_secondary_name_;
 
     std::shared_ptr<Buffer> tst_buffer_;
     std::string tst_latitude_name_;

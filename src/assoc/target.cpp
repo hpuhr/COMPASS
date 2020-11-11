@@ -393,9 +393,9 @@ namespace Association
                << " interpolated has alt " << has_altitude << " alt " << altitude;
 
         if (in_appimage_) // inside appimage
-            return {{y_pos, x_pos, has_altitude, altitude}, true};
+            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
         else
-            return {{x_pos, y_pos, has_altitude, altitude}, true};
+            return {{x_pos, y_pos, has_altitude, true, altitude}, true};
     }
 
     std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (float tod, float d_max) const
@@ -466,7 +466,7 @@ namespace Association
                << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
                << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-        return {{int_lat, int_long, has_altitude, altitude}, true};
+        return {{int_lat, int_long, has_altitude, true, altitude}, true};
     }
 
     bool Target::hasDataForExactTime (float tod) const

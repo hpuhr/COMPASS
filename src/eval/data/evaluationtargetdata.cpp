@@ -35,6 +35,8 @@ using namespace Utils;
 
 bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
 
+//const unsigned int debug_utn = 3275;
+
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationManager& eval_man)
     : utn_(utn), eval_man_(eval_man)
 {
@@ -59,6 +61,12 @@ void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
     ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
     ref_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
     ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    if (dbo_name == "Tracker")
+    {
+        has_ref_altitude_secondary_ = true;
+        ref_altitude_secondary_name_ = "tracked_alt_baro_ft";
+    }
 }
 
 void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
@@ -402,6 +410,64 @@ std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_ma
 std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRefPosForTime (
         float tod, float d_max) const
 {
+    assert (test_data_mappings_.count(tod));
+    TstDataMapping& mapping = test_data_mappings_.at(tod);
+
+    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+        return {{}, false};
+
+    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact time
+    {
+        assert (mapping.tod_ref1_ == tod);
+
+//        if (utn_ == debug_utn)
+//            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 1pos tod "
+//        << String::timeStringFromDouble(tod);
+
+        return {refPosForTime(tod), true};
+    }
+
+    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
+    {
+        assert (mapping.tod_ref1_ <= tod);
+        assert (mapping.tod_ref2_ >= tod);
+
+        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        {
+//            if (utn_ == debug_utn)
+//                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+
+            return {{}, false};
+        }
+
+        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        {
+//            if (utn_ == debug_utn)
+//                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
+
+            return {{}, false};
+        }
+
+        if (!mapping.has_ref_pos_)
+        {
+//            if (utn_ == debug_utn)
+//                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+
+            return {{}, false};
+        }
+
+//        if (utn_ == debug_utn)
+//            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 2pos tod " << String::timeStringFromDouble(tod)
+//                   << " has_alt " << mapping.pos_ref_.has_altitude_
+//                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
+//                   << " alt " << mapping.pos_ref_.altitude_;
+
+        return {mapping.pos_ref_, true};
+    }
+
+    return {{}, false};
+
+    //old
     //    if (ref_data_.count(tod)) // contains exact value
     //        return {refPosForTime(tod), true};
 
@@ -535,37 +601,6 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     //        return {{y_pos, x_pos, has_altitude, altitude}, true};
     //    else
     //        return {{x_pos, y_pos, has_altitude, altitude}, true};
-
-    assert (test_data_mappings_.count(tod));
-    TstDataMapping& mapping = test_data_mappings_.at(tod);
-
-    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
-        return {{}, false};
-
-    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact time
-    {
-        assert (mapping.tod_ref1_ == tod);
-        return {refPosForTime(tod), true};
-    }
-
-    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
-    {
-        assert (mapping.tod_ref1_ <= tod);
-        assert (mapping.tod_ref2_ >= tod);
-
-        if (tod - mapping.tod_ref1_ > d_max) // lower to far
-            return {{}, false};
-
-        if (mapping.tod_ref2_ - tod > d_max) // upper to far
-            return {{}, false};
-
-        if (!mapping.has_ref_pos_)
-            return {{}, false};
-
-        return {mapping.pos_ref_, true};
-    }
-
-    return {{}, false};
 }
 
 bool EvaluationTargetData::hasRefPosForTime (float tod) const
@@ -598,10 +633,155 @@ EvaluationTargetPosition EvaluationTargetData::refPosForTime (float tod) const
     if (!altitude_vec.isNull(index))
     {
         pos.has_altitude_ = true;
+        pos.altitude_calculated_ = false;
         pos.altitude_ = altitude_vec.get(index);
     }
+    else if (has_ref_altitude_secondary_ && !ref_buffer_->get<int>(ref_altitude_secondary_name_).isNull(index))
+    {
+        pos.has_altitude_ = true;
+        pos.altitude_calculated_ = true;
+        pos.altitude_ = ref_buffer_->get<int>(ref_altitude_secondary_name_).get(index);
+    }
+    else // calculate
+    {
+        bool found;
+        float alt_calc;
+
+        tie(found,alt_calc) = estimateRefAltitude(tod, index);
+
+        if (found)
+        {
+            pos.has_altitude_ = true;
+            pos.altitude_calculated_ = true;
+            pos.altitude_ = alt_calc;
+        }
+    }
+
+//    if (utn_ == debug_utn)
+//        loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
+//               << " has_alt " << pos.has_altitude_ << " alt_calc " << pos.altitude_calculated_
+//               << " alt " << pos.altitude_;
 
     return pos;
+}
+
+std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, unsigned int index) const
+{
+    NullableVector<int>& altitude_vec = ref_buffer_->get<int>(ref_altitude_name_);
+    NullableVector<float>& tods = ref_buffer_->get<float>("tod");
+
+    //unsigned int buffer_size = ref_buffer_->size();
+
+    bool found_prev {false};
+    bool found_after {false};
+
+    // search for prev index
+    float tod_prev;
+    auto prev_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
+    assert (prev_it != ref_indexes_.end());
+
+    while (prev_it != ref_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
+    {
+        if (!altitude_vec.isNull(*prev_it))
+        {
+            found_prev = true;
+            tod_prev = tods.get(*prev_it);
+
+//            if (utn_ == debug_utn)
+//                loginf << "EvaluationTargetData: refPosForTime: found prev at tod "
+//                       << String::timeStringFromDouble(tod_prev);
+
+            break;
+        }
+
+        if (prev_it == ref_indexes_.begin()) // undefined decrement
+            break;
+
+        --prev_it;
+    }
+
+//    if (utn_ == debug_utn)
+//    {
+//        if (prev_it != ref_indexes_.end())
+//            loginf << "EvaluationTargetData: refPosForTime: checking prev found end";
+//        else if (prev_it != ref_indexes_.begin())
+//            loginf << "EvaluationTargetData: refPosForTime: checking prev found begin";
+//        else
+//            loginf << "EvaluationTargetData: refPosForTime: finished prev tod "
+//                   << String::timeStringFromDouble(tods.get(*prev_it)) << " found " << found_prev;
+//    }
+
+    // search after index
+    float tod_after;
+    auto after_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
+    while (after_it != ref_indexes_.end() && tods.get(*after_it) - tod < 120.0)
+    {
+//        if (utn_ == debug_utn)
+//            loginf << "EvaluationTargetData: refPosForTime: checking after tod "
+//                   << String::timeStringFromDouble(tods.get(*after_it));
+
+        if (!altitude_vec.isNull(*after_it))
+        {
+            found_after = true;
+            tod_after = tods.get(*after_it);
+
+//            if (utn_ == debug_utn)
+//                loginf << "EvaluationTargetData: refPosForTime: found after at tod "
+//                       << String::timeStringFromDouble(tod_after);
+
+            break;
+        }
+        ++after_it;
+    }
+
+//    if (utn_ == debug_utn)
+//    {
+//        if (after_it != ref_indexes_.end())
+//            loginf << "EvaluationTargetData: refPosForTime: checking after found end";
+//        else
+//            loginf << "EvaluationTargetData: refPosForTime: finished after tod "
+//                   << String::timeStringFromDouble(tods.get(*after_it)) << " found " << found_after;
+//    }
+
+    if (found_prev && found_after)
+    {
+        float alt_prev = altitude_vec.get(*prev_it);
+        float alt_after = altitude_vec.get(*after_it);
+
+        if (tod_after <= tod_prev || tod_prev >= tod)
+        {
+            loginf << "UGA tod_prev " << tod_prev << " tod " << tod << " tod_after " << tod_after;
+            return {false, 0}; // should never happen
+        }
+
+        float d_alt_ft = alt_after - alt_prev;
+        float d_t = tod_after - tod_prev;
+
+        float alt_spd_ft_s = d_alt_ft/d_t;
+
+        float d_t2 = tod - tod_prev;
+
+        float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
+
+        //loginf << "UGA " << alt_calc;
+
+//        if (utn_ == debug_utn)
+//            loginf << "EvaluationTargetData: refPosForTime: returning alt " << alt_calc;
+
+        return {true, alt_calc};
+    }
+    else if (found_prev && tod - tod_prev < 60.0)
+        return {true, altitude_vec.get(*prev_it)};
+    else if (found_after && tod_after - tod < 60.0)
+        return {true, altitude_vec.get(*after_it)};
+    else
+    {
+//        if (utn_ == debug_utn)
+//            loginf << "EvaluationTargetData: refPosForTime: tod " << String::timeStringFromDouble(tod)
+//                   << " none found";
+
+        return {false, 0}; // none found
+    }
 }
 
 bool EvaluationTargetData::hasRefCallsignForTime (float tod) const
@@ -664,7 +844,11 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
     pos.longitude_ = longitude_vec.get(index);
 
     if (!altitude_vec.isNull(index))
+    {
+        pos.has_altitude_ = true;
         pos.altitude_ = altitude_vec.get(index);
+        pos.altitude_calculated_ = false;
+    }
 
     return pos;
 }
@@ -1141,9 +1325,11 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos2 "
                        << pos2.latitude_ << ", " << pos2.longitude_;
 
-                std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+                std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
+                    OGRCreateCoordinateTransformation(&wgs84, &local)};
                 assert (ogr_geo2cart);
-                std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
+                std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {
+                    OGRCreateCoordinateTransformation(&local, &wgs84)};
                 assert (ogr_cart2geo);
 
                 double x_pos, y_pos;
@@ -1223,9 +1409,9 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     mapping.has_ref_pos_ = true;
 
                     if (in_appimage_) // inside appimage
-                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, altitude);
+                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
                     else
-                        mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, altitude);
+                        mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
                 }
             }
         }
@@ -1242,7 +1428,7 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
         if (mapping.has_ref_pos_)
             mapping.pos_ref_ = refPosForTime(mapping.tod_ref1_);
     }
-    else if (mapping.has_ref1_  && hasRefPosForTime(mapping.tod_ref1_)
+    else if (mapping.has_ref1_ && hasRefPosForTime(mapping.tod_ref1_)
              && mapping.has_ref2_ && hasRefPosForTime(mapping.tod_ref2_)) // two positions which can be interpolated
     {
         float lower = mapping.tod_ref1_;
@@ -1272,6 +1458,7 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
             {
                 double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
                 double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+
                 logdbg << "EvaluationTargetData: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
 
                 float d_t2 = mapping.tod_  - lower;
@@ -1313,7 +1500,7 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
 
                 mapping.has_ref_pos_ = true;
 
-                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, altitude);
+                mapping.pos_ref_ = EvaluationTargetPosition(int_lat, int_long, has_altitude, true, altitude);
             }
         }
     }
