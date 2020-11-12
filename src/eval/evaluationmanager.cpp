@@ -124,11 +124,27 @@ void EvaluationManager::loadData ()
 
     assert (initialized_);
 
+    // remove previous stuff
+    if (viewable_data_cfg_)
+    {
+        COMPASS::instance().viewManager().unsetCurrentViewPoint();
+        viewable_data_cfg_ = nullptr;
+    }
+
+    results_gen_.clear();
+
     reference_data_loaded_ = false;
     test_data_loaded_ = false;
     data_loaded_ = false;
 
     evaluated_ = false;
+
+    if (widget_)
+        widget_->updateButtons();
+
+    emit resultsChangedSignal();
+
+    // actually load
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
@@ -308,6 +324,17 @@ void EvaluationManager::evaluate ()
     assert (data_loaded_);
     assert (hasCurrentStandard());
 
+    // clean previous
+    results_gen_.clear();
+
+    evaluated_ = false;
+
+    if (widget_)
+        widget_->updateButtons();
+
+    emit resultsChangedSignal();
+
+    // eval
     results_gen_.evaluate(data_, currentStandard());
 
     evaluated_ = true;
@@ -317,6 +344,8 @@ void EvaluationManager::evaluate ()
         widget_->updateButtons();
         widget_->expandResults();
     }
+
+    emit resultsChangedSignal();
 }
 
 bool EvaluationManager::canGenerateReport ()

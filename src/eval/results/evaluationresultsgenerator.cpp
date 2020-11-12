@@ -50,6 +50,11 @@ EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_m
 
 }
 
+EvaluationResultsGenerator::~EvaluationResultsGenerator()
+{
+    clear();
+}
+
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
@@ -92,12 +97,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
-    results_.clear();
-    results_vec_.clear();
-    results_model_.endReset();
+    clear();
 
     vector<unsigned int> utns;
 
@@ -285,6 +285,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     postprocess_dialog_.close();
 
     QApplication::restoreOverrideCursor();
+}
+
+void EvaluationResultsGenerator::clear()
+{
+    // clear everything
+    results_model_.beginReset();
+    results_model_.clear();
+    results_.clear();
+    results_vec_.clear();
+    results_model_.endReset();
 }
 
 void EvaluationResultsGenerator::generateResultsReportGUI()

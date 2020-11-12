@@ -91,6 +91,7 @@ class EvaluationResultsGenerator
 {
 public:
     EvaluationResultsGenerator(EvaluationManager& eval_man);
+    ~EvaluationResultsGenerator();
 
     void evaluate (EvaluationData& data, EvaluationStandard& standard);
 
@@ -108,6 +109,8 @@ public:
     void updateToChanges();
 
     void generateResultsReportGUI();
+
+    void clear();
 
 protected:
     EvaluationManager& eval_man_;
