@@ -969,7 +969,7 @@ void EvaluationManager::updateReferenceDBO()
     loginf << "EvaluationManager: updateReferenceDBO";
     
     data_sources_ref_.clear();
-    active_sources_ref_.clear();
+    //active_sources_ref_.clear();
     
     if (!hasValidReferenceDBO())
         return;
@@ -995,11 +995,12 @@ void EvaluationManager::updateReferenceDataSources()
     {
         if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
         {
-            if (!active_sources_ref_.contains(to_string(ds_it->first)))
-                active_sources_ref_[to_string(ds_it->first)] = true; // init with default true
+            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
+                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t& active = active_sources_ref_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active
+                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_ref_.emplace(std::piecewise_construct,
                                       std::forward_as_tuple(ds_it->first),  // args for key
@@ -1041,7 +1042,7 @@ void EvaluationManager::updateTestDBO()
     loginf << "EvaluationManager: updateTestDBO";
 
     data_sources_tst_.clear();
-    active_sources_tst_.clear();
+    //active_sources_tst_.clear();
 
     if (!hasValidTestDBO())
         return;
@@ -1067,11 +1068,12 @@ void EvaluationManager::updateTestDataSources()
     {
         if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
         {
-            if (!active_sources_tst_.contains(to_string(ds_it->first)))
-                active_sources_tst_[to_string(ds_it->first)] = true; // init with default true
+            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
+                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t& active = active_sources_tst_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active =
+                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_tst_.emplace(std::piecewise_construct,
                                       std::forward_as_tuple(ds_it->first),  // args for key
