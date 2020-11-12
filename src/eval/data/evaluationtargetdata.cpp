@@ -133,19 +133,55 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
-    if (eval_man_.hasADSBMOPSVersions() && target_addresses_.size())
+    std::set<unsigned int> mops_version;
+    std::tuple<bool, unsigned int, unsigned int> nucp_info;
+    std::tuple<bool, unsigned int, unsigned int> nacp_info;
+
+    if (eval_man_.hasADSBInfo() && target_addresses_.size())
     {
         for (auto ta_it : target_addresses_)
         {
-            if (eval_man_.hasADSBMOPSVersions(ta_it))
+            if (eval_man_.hasADSBInfo(ta_it))
             {
-                std::set<unsigned int> tmp_mops = eval_man_.adsbMOPSVersions(ta_it);
-                mops_versions_.insert(tmp_mops.begin(), tmp_mops.end());
+                tie(mops_version, nucp_info, nacp_info) = eval_man_.adsbInfo(ta_it);
+                mops_versions_.insert(mops_version.begin(), mops_version.end());
+
+                if (get<0>(nucp_info))
+                {
+                    if (has_nucp_nic_)
+                    {
+                       min_nucp_nic_ = min (min_nucp_nic_, get<1>(nucp_info));
+                       max_nucp_nic_ = max (max_nucp_nic_, get<2>(nucp_info));
+                    }
+                    else
+                    {
+                        min_nucp_nic_ = get<1>(nucp_info);
+                        max_nucp_nic_ = get<2>(nucp_info);
+                        has_nucp_nic_ = true;
+                    }
+                }
+
+                if (get<0>(nacp_info))
+                {
+                    if (has_nacp)
+                    {
+                       min_nacp_ = min (min_nacp_, get<1>(nacp_info));
+                       max_nacp_ = max (max_nacp_, get<2>(nacp_info));
+                    }
+                    else
+                    {
+                        min_nacp_ = get<1>(nacp_info);
+                        max_nacp_ = get<2>(nacp_info);
+                        has_nacp = true;
+                    }
+                }
             }
         }
 
         has_adsb_info_ = mops_versions_.size();
-        //loginf << "UGA utn " << utn_ << " has mops " << mopsVersionsStr();
+//        loginf << "UGA utn " << utn_ << " mops " << mopsVersionsStr()
+//               << " nucp_nic " <<  (has_nucp_nic_ ? nucpNicStr() : " none ")
+//               << " nacp "<<  (has_nacp ? nacpStr() : " none ");
     }
 
     calculateTestDataMappings();
@@ -956,6 +992,42 @@ std::string EvaluationTargetData::mopsVersionsStr() const
     }
 
     return out.str();
+}
+
+std::string EvaluationTargetData::nucpNicStr() const
+{
+    if (hasNucpNic())
+    {
+        if (min_nucp_nic_ == max_nucp_nic_)
+            return to_string(min_nucp_nic_);
+        else
+            return to_string(min_nucp_nic_)+"-"+to_string(max_nucp_nic_);
+    }
+    else
+        return "";
+}
+
+std::string EvaluationTargetData::nacpStr() const
+{
+    if (hasNacp())
+    {
+        if (min_nacp_ == max_nacp_)
+            return to_string(min_nacp_);
+        else
+            return to_string(min_nacp_)+"-"+to_string(max_nacp_);
+    }
+    else
+        return "";
+}
+
+bool EvaluationTargetData::hasNucpNic() const
+{
+    return has_nucp_nic_;
+}
+
+bool EvaluationTargetData::hasNacp() const
+{
+    return has_nacp;
 }
 
 //std::set<unsigned int> EvaluationTargetData::NACPs() const

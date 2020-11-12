@@ -212,11 +212,14 @@ public:
     bool removeNotDetectedDBO(const std::string& dbo_name) const;
     void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
 
-    bool hasADSBMOPSVersions() const;
-    bool hasADSBMOPSVersions(unsigned int ta) const;
-    std::set<unsigned int> adsbMOPSVersions(unsigned int ta) const;
+    bool hasADSBInfo() const;
+    bool hasADSBInfo(unsigned int ta) const;
+    std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+            std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
 
     bool splitResultsByMOPS() const;
+
+    bool showAdsbInfo() const;
 
 protected:
     COMPASS& compass_;
@@ -277,10 +280,12 @@ protected:
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
-    bool has_adsb_mops_versions_ {false};
-    std::map<unsigned int, std::set<unsigned int>> adsb_mops_versions_;
+    bool has_adsb_info_ {false};
+    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+        std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
     bool split_results_by_mops_ {true};
+    bool show_adsb_info_ {true};
 
     virtual void checkSubConfigurables() override;
 

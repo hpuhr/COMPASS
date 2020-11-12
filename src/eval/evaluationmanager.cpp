@@ -133,10 +133,10 @@ void EvaluationManager::loadData ()
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     // load adsb mops versions in a hacky way
-    if (object_man.object("ADSB").hasData() && !has_adsb_mops_versions_)
+    if (object_man.object("ADSB").hasData() && !has_adsb_info_)
     {
-        adsb_mops_versions_ = COMPASS::instance().interface().queryADSBMOPSVersions();
-        has_adsb_mops_versions_ = true;
+        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
+        has_adsb_info_ = true;
     }
 
     // set use filters
@@ -1683,28 +1683,34 @@ void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool 
     remove_not_detected_dbo_values_[dbo_name] = value;
 }
 
-bool EvaluationManager::hasADSBMOPSVersions() const
+bool EvaluationManager::hasADSBInfo() const
 {
-    return has_adsb_mops_versions_;
+    return has_adsb_info_;
 }
 
-bool EvaluationManager::hasADSBMOPSVersions(unsigned int ta) const
+bool EvaluationManager::hasADSBInfo(unsigned int ta) const
 {
-    assert (has_adsb_mops_versions_);
-    return adsb_mops_versions_.count(ta);
+    assert (has_adsb_info_);
+    return adsb_info_.count(ta);
 }
 
-std::set<unsigned int> EvaluationManager::adsbMOPSVersions(unsigned int ta) const
+std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+        std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsigned int ta) const
 {
-    assert (has_adsb_mops_versions_);
-    assert (adsb_mops_versions_.count(ta));
+    assert (has_adsb_info_);
+    assert (adsb_info_.count(ta));
 
-    return adsb_mops_versions_.at(ta);
+    return adsb_info_.at(ta);
 }
 
 bool EvaluationManager::splitResultsByMOPS() const
 {
     return split_results_by_mops_;
+}
+
+bool EvaluationManager::showAdsbInfo() const
+{
+    return show_adsb_info_;
 }
 
 bool EvaluationManager::removeTargetAddresses() const

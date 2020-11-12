@@ -113,35 +113,72 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-        if (!tgt_overview_section.hasTable(target_table_name_))
-            tgt_overview_section.addTable(target_table_name_, 14,
-            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
+        if (eval_man_.showAdsbInfo())
+        {
+            if (!tgt_overview_section.hasTable(target_table_name_))
+                tgt_overview_section.addTable(target_table_name_, 17,
+                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
 
-        EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable(target_table_name_);
+            EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable(target_table_name_);
 
-        QVariant pd_var;
+            QVariant pd_var;
 
-        if (has_p_min_pos_)
-            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
+            if (has_p_min_pos_)
+                pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading = getTargetRequirementSectionID();
+            //string utn_req_section_heading = getTargetRequirementSectionID();
 
-        if (has_p_min_pos_)
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             Number::round(error_min_,2), Number::round(error_max_,2),
-             Number::round(error_avg_,2)}, this, {utn_});
+            if (has_p_min_pos_)
+                target_table.addRow(
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+                 target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+                 Number::round(error_min_,2), Number::round(error_max_,2),
+                 Number::round(error_avg_,2), target_->mopsVersionsStr().c_str(),
+                 target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
+            else
+                target_table.addRow(
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+                 target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+                 {},{},{}, target_->mopsVersionsStr().c_str(),
+                 target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
+        }
         else
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             {},{},{}}, this, {utn_});
+        {
+            if (!tgt_overview_section.hasTable(target_table_name_))
+                tgt_overview_section.addTable(target_table_name_, 14,
+                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
+
+            EvaluationResultsReport::SectionContentTable& target_table = tgt_overview_section.getTable(target_table_name_);
+
+            QVariant pd_var;
+
+            if (has_p_min_pos_)
+                pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
+
+            //string utn_req_section_heading = getTargetRequirementSectionID();
+
+            if (has_p_min_pos_)
+                target_table.addRow(
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+                 target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+                 Number::round(error_min_,2), Number::round(error_max_,2),
+                 Number::round(error_avg_,2)}, this, {utn_});
+            else
+                target_table.addRow(
+                {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+                 target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+                 target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+                 target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
+                 {},{},{}}, this, {utn_});
+        }
     }
 
     void SinglePositionMaxDistance::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)

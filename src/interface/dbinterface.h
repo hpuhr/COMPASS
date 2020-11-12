@@ -188,7 +188,9 @@ class DBInterface : public QObject, public Configurable
     /// @brief Executes query and returns numbers for all active sensors
     std::set<int> queryActiveSensorNumbers(DBObject& object);
 
-    std::map<unsigned int, std::set<unsigned int>> queryADSBMOPSVersions();
+    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+    std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
+    // ta -> mops versions, nucp_nics, nac_ps
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string
     //    filter); void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value,

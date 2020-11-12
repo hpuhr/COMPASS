@@ -224,7 +224,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         mops_str = result_it->target()->mopsVersionsStr();
 
                         if (!mops_str.size())
-                            mops_str = "Unknown";
+                            mops_str = "N/A";
 
                         mops_str = "MOPS "+mops_str;
 

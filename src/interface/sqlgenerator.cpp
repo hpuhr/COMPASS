@@ -379,21 +379,46 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBO
     return getSelectCommand(object.currentMetaTable(), columns, true);
 }
 
-std::shared_ptr<DBCommand> SQLGenerator::getDistinctMOPSVersions(DBObject& adsb_obj)
+std::shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBObject& adsb_obj)
 {
     std::vector<const DBTableColumn*> columns;
 
     const DBTableColumn& ta_col = adsb_obj.variable("target_addr").currentDBColumn();
     const DBTableColumn& mops_col = adsb_obj.variable("mops_version").currentDBColumn();
+    const DBTableColumn& nu_col = adsb_obj.variable("nucp_nic").currentDBColumn();
+    const DBTableColumn& na_col = adsb_obj.variable("nac_p").currentDBColumn();
 
     columns.push_back(&mops_col);
     columns.push_back(&ta_col);
+    columns.push_back(&nu_col);
+    columns.push_back(&na_col);
 
     PropertyList list;
     list.addProperty("TARGET_ADDR", PropertyDataType::INT);
     list.addProperty("MOPS_VERSION", PropertyDataType::INT);
+    list.addProperty("MIN_NUCP_NIC", PropertyDataType::CHAR);
+    list.addProperty("MAX_NUCP_NIC", PropertyDataType::CHAR);
+    list.addProperty("MIN_NACP", PropertyDataType::CHAR);
+    list.addProperty("MAX_NACP", PropertyDataType::CHAR);
 
-    return getSelectCommand(adsb_obj.currentMetaTable(), columns, true);
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
+
+    std::stringstream ss;
+
+    ss << "SELECT TARGET_ADDR, MOPS_VERSION, MIN(NUCP_NIC), MAX(NUCP_NIC), MIN(NAC_P), MAX(NAC_P)";
+
+    ss << " FROM ";
+
+    std::string main_table_name = adsb_obj.currentMetaTable().mainTableName();
+
+    ss << main_table_name;
+
+    ss << " group by TARGET_ADDR;";
+
+    command->set(ss.str());
+    command->list(list);
+
+    return command; // getSelectCommand(adsb_obj.currentMetaTable(), columns, true)
 }
 
 std::string SQLGenerator::getCreateAssociationTableStatement(const std::string& table_name)

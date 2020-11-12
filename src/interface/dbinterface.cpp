@@ -333,7 +333,8 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 }
 
 
-std::map<unsigned int, std::set<unsigned int>> DBInterface::queryADSBMOPSVersions()
+std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 {
     DBObject& object = COMPASS::instance().objectManager().object("ADSB");
 
@@ -342,9 +343,10 @@ std::map<unsigned int, std::set<unsigned int>> DBInterface::queryADSBMOPSVersion
 
     QMutexLocker locker(&connection_mutex_);
 
-    std::map<unsigned int, std::set<unsigned int>> data;
+    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+    std::tuple<bool, unsigned int, unsigned int>>> data;
 
-    shared_ptr<DBCommand> command = sql_generator_.getDistinctMOPSVersions(object);
+    shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
 
     shared_ptr<DBResult> result = current_connection_->execute(*command);
 
@@ -353,17 +355,31 @@ std::map<unsigned int, std::set<unsigned int>> DBInterface::queryADSBMOPSVersion
     shared_ptr<Buffer> buffer = result->buffer();
     assert (buffer->has<int>("TARGET_ADDR"));
     assert (buffer->has<int>("MOPS_VERSION"));
+    assert (buffer->has<char>("MIN_NUCP_NIC"));
+    assert (buffer->has<char>("MAX_NUCP_NIC"));
+    assert (buffer->has<char>("MIN_NACP"));
+    assert (buffer->has<char>("MAX_NACP"));
 
     NullableVector<int>& tas = buffer->get<int>("TARGET_ADDR");
     NullableVector<int>& mops = buffer->get<int>("MOPS_VERSION");
+    NullableVector<char>& min_nus = buffer->get<char>("MIN_NUCP_NIC");
+    NullableVector<char>& max_nus = buffer->get<char>("MAX_NUCP_NIC");
+    NullableVector<char>& min_nas = buffer->get<char>("MIN_NACP");
+    NullableVector<char>& max_nas = buffer->get<char>("MAX_NACP");
 
     for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
     {
-        if (!mops.isNull(cnt)
-                && !tas.isNull(cnt))
-        {
-            data[tas.get(cnt)].insert(mops.get(cnt));
-        }
+        if (tas.isNull(cnt))
+            continue;
+
+        if (!mops.isNull(cnt))
+            get<0>(data[tas.get(cnt)]).insert(mops.get(cnt));
+
+        if (!min_nus.isNull(cnt) && !max_nus.isNull(cnt))
+            get<1>(data[tas.get(cnt)]) = {true, min_nus.get(cnt), max_nus.get(cnt)};
+
+        if (!min_nas.isNull(cnt) && !max_nas.isNull(cnt))
+            get<2>(data[tas.get(cnt)]) = {true, min_nas.get(cnt), max_nas.get(cnt)};
     }
 
     return data;

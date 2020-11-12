@@ -130,9 +130,11 @@ public:
     bool hasADSBInfo() const;
     std::set<unsigned int> mopsVersions() const;
     std::string mopsVersionsStr() const;
-//    std::set<unsigned int> NACPs() const;
-//    std::set<unsigned int> NUCpNICs() const;
-//    std::set<unsigned int> SILs() const;
+
+    bool hasNucpNic() const;
+    std::string nucpNicStr() const;
+    bool hasNacp() const;
+    std::string nacpStr() const;
 
 protected:
     static bool in_appimage_;
@@ -179,9 +181,10 @@ protected:
 
     mutable bool has_adsb_info_ {false};
     mutable std::set<unsigned int> mops_versions_;
-//    mutable std::set<unsigned int> nacps_;
-//    mutable std::set<unsigned int> nucp_nics_;
-//    mutable std::set<unsigned int> sils_;
+    mutable bool has_nucp_nic_ {false};
+    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
+    mutable bool has_nacp {false};
+    mutable unsigned int min_nacp_, max_nacp_;
 
     mutable std::map<float, TstDataMapping> test_data_mappings_;
 
