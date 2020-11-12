@@ -92,6 +92,7 @@ protected:
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
     virtual std::string getRequirementSectionID ();
+    virtual std::string getRequirementSumSectionID ();
 
     EvaluationResultsReport::Section& getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

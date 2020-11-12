@@ -117,6 +117,12 @@ namespace EvaluationRequirementResult
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+result_id_+":"+requirement_->name();
     }
 
+    std::string Base::getRequirementSumSectionID ()
+    {
+        // hacky
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+"Sum"+":"+requirement_->name();
+    }
+
     EvaluationResultsReport::Section& Base::getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
