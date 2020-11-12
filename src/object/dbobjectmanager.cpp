@@ -359,21 +359,38 @@ void DBObjectManager::loadSlot()
     QMessageBox* msg_box = new QMessageBox();
     msg_box->setWindowTitle("Loading Associations");
     msg_box->setStandardButtons(QMessageBox::NoButton);
-    msg_box->show();
+
+    bool shown = false;
+
 
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
 
-        if (object.second->loadable())
+        msg_box->setText(("Processing DBObject "+object.first).c_str());
+
+        if (object.second->loadable() && !object.second->associationsLoaded())
+        {
+            if (!shown)
+            {
+                msg_box->show();
+                shown = true;
+            }
+
             object.second->loadAssociationsIfRequired();
+
+            while (!object.second->associationsLoaded())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
+        }
     }
 
     msg_box->close();
     delete msg_box;
 
     QApplication::restoreOverrideCursor();
-
 
     while (JobManager::instance().hasDBJobs())
     {

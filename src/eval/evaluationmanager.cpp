@@ -124,6 +124,8 @@ void EvaluationManager::loadData ()
 
     assert (initialized_);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     // remove previous stuff
     if (viewable_data_cfg_)
     {
@@ -154,6 +156,8 @@ void EvaluationManager::loadData ()
         adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
         has_adsb_info_ = true;
     }
+
+    QApplication::restoreOverrideCursor();
 
     // set use filters
     object_man.useFilters(true);

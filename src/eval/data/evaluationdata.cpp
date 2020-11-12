@@ -617,33 +617,45 @@ void EvaluationData::setUseAllTargetData (bool value)
 {
     loginf << "EvaluationData: setUseAllTargetData: value " << value;
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     beginResetModel();
 
     eval_man_.useAllUTNs(value);
 
     endResetModel();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void EvaluationData::clearComments ()
 {
     loginf << "EvaluationData: clearComments";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     beginResetModel();
 
     eval_man_.clearUTNComments();
 
     endResetModel();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void EvaluationData::setUseByFilter ()
 {
     loginf << "EvaluationData: setUseByFilter";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     beginResetModel();
 
     eval_man_.filterUTNs();
 
     endResetModel();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
