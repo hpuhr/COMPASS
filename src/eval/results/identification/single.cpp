@@ -108,47 +108,47 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-        if (eval_man_.showAdsbInfo())
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 14,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+//        if (eval_man_.showAdsbInfo())
+//        {
+//            if (!tgt_overview_section.hasTable(target_table_name_))
+//                tgt_overview_section.addTable(target_table_name_, 14,
+//                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+//                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
-            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-        }
-        else
-        {
+//            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
+//        }
+//        else
+//        {
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 14,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                  "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-        }
+//        }
 
         if (eval_man_.splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-            if (eval_man_.showAdsbInfo())
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 14,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+//            if (eval_man_.showAdsbInfo())
+//            {
+//                if (!sum_section.hasTable(target_table_name_))
+//                    sum_section.addTable(target_table_name_, 14,
+//                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+//                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
-                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-            }
-            else
-            {
+//                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
+//            }
+//            else
+//            {
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 14,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                      "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
-            }
+//            }
         }
     }
 
@@ -169,22 +169,22 @@ namespace EvaluationRequirementResult
          pd_var}, this, {utn_});
     }
 
-    void SingleIdentification::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
-    {
-        QVariant pd_var;
+//    void SingleIdentification::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
+//    {
+//        QVariant pd_var;
 
-        if (has_pid_)
-            pd_var = roundf(pid_ * 10000.0) / 100.0;
+//        if (has_pid_)
+//            pd_var = roundf(pid_ * 10000.0) / 100.0;
 
-        string utn_req_section_heading = getTargetRequirementSectionID();
+//        string utn_req_section_heading = getTargetRequirementSectionID();
 
-        target_table.addRow(
-        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
-         pd_var}, this, {utn_});
-    }
+//        target_table.addRow(
+//        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+//         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+//         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+//         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
+//         pd_var}, this, {utn_});
+//    }
 
     void SingleIdentification::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {

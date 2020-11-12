@@ -105,47 +105,47 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-        if (eval_man_.showAdsbInfo())
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 11,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#EUIs", "#MUIs", "PD"}, true, 10);
+//        if (eval_man_.showAdsbInfo())
+//        {
+//            if (!tgt_overview_section.hasTable(target_table_name_))
+//                tgt_overview_section.addTable(target_table_name_, 11,
+//                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+//                 "#EUIs", "#MUIs", "PD"}, true, 10);
 
-            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-        }
-        else
-        {
+//            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
+//        }
+//        else
+//        {
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 11,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                  "#EUIs", "#MUIs", "PD"}, true, 10);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-        }
+//        }
 
         if (eval_man_.splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-            if (eval_man_.showAdsbInfo())
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 11,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#EUIs", "#MUIs", "PD"}, true, 10);
+//            if (eval_man_.showAdsbInfo())
+//            {
+//                if (!sum_section.hasTable(target_table_name_))
+//                    sum_section.addTable(target_table_name_, 11,
+//                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+//                     "#EUIs", "#MUIs", "PD"}, true, 10);
 
-                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-            }
-            else
-            {
+//                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
+//            }
+//            else
+//            {
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 11,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
                      "#EUIs", "#MUIs", "PD"}, true, 10);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
-            }
+//            }
         }
     }
 
@@ -163,19 +163,19 @@ namespace EvaluationRequirementResult
          target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, pd_var}, this, {utn_});
     }
 
-    void SingleDetection::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
-    {
-        QVariant pd_var;
+//    void SingleDetection::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
+//    {
+//        QVariant pd_var;
 
-        if (has_pd_)
-            pd_var = roundf(pd_ * 10000.0) / 100.0;
+//        if (has_pd_)
+//            pd_var = roundf(pd_ * 10000.0) / 100.0;
 
-        target_table.addRow(
-        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-         target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, pd_var}, this, {utn_});
-    }
+//        target_table.addRow(
+//        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+//         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+//         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+//         target_->modeCMaxStr().c_str(), sum_uis_, missed_uis_, pd_var}, this, {utn_});
+//    }
 
     void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
