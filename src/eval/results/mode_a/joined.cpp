@@ -64,12 +64,12 @@ namespace EvaluationRequirementResult
 
         num_updates_ += single_result->numUpdates();
         num_no_ref_pos_ += single_result->numNoRefPos();
-        num_no_ref_id_ += single_result->numNoRefId();
+        num_no_ref_id_ += single_result->numNoRef();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
-        num_unknown_id_ += single_result->numUnknownId();
-        num_correct_id_ += single_result->numCorrectId();
-        num_false_id_ += single_result->numFalseId();
+        num_unknown_id_ += single_result->numUnknown();
+        num_correct_id_ += single_result->numCorrect();
+        num_false_id_ += single_result->numFalse();
 
         updatePID();
     }

@@ -38,11 +38,9 @@ namespace EvaluationRequirement
         float maxRefTimeDiff() const;
 
         bool useMinimumProbabilityExisting() const;
-
         float minimumProbabilityExisting() const;
 
         bool useMaximumProbabilityFalse() const;
-
         float maximumProbabilityFalse() const;
 
     protected:

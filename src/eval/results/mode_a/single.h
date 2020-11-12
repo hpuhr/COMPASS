@@ -32,8 +32,8 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
-            int num_unknown_id, int num_correct_id, int num_false_id,
+            int num_updates, int num_no_ref_pos, int num_no_ref, int num_pos_outside, int num_pos_inside,
+            int num_unknown, int num_correct, int num_false,
             std::vector<EvaluationRequirement::CheckDetail> details);
 
     virtual void print() override;
@@ -43,12 +43,12 @@ public:
 
     int numUpdates() const;
     int numNoRefPos() const;
-    int numNoRefId() const;
+    int numNoRef() const;
     int numPosOutside() const;
     int numPosInside() const;
-    int numUnknownId() const;
-    int numCorrectId() const;
-    int numFalseId() const;
+    int numUnknown() const;
+    int numCorrect() const;
+    int numFalse() const;
 
     std::vector<EvaluationRequirement::CheckDetail>& details();
 
@@ -66,12 +66,12 @@ public:
 protected:
     int num_updates_ {0};
     int num_no_ref_pos_ {0};
-    int num_no_ref_id_ {0};
+    int num_no_ref_ {0};
     int num_pos_outside_ {0};
     int num_pos_inside_ {0};
-    int num_unknown_id_ {0};
-    int num_correct_id_ {0};
-    int num_false_id_ {0};
+    int num_unknown_ {0};
+    int num_correct_ {0};
+    int num_false_ {0};
 
     bool has_pid_ {false};
     float pid_{0};

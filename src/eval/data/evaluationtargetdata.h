@@ -111,12 +111,18 @@ public:
     bool hasRefCallsignForTime (float tod) const;
     std::string refCallsignForTime (float tod) const;
 
+    bool hasRefModeAForTime (float tod) const; // only if set, is v, not g
+    unsigned int refModeAForTime (float tod) const;
+
     // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
 
     bool hasTstCallsignForTime (float tod) const;
     std::string tstCallsignForTime (float tod) const;
+
+    bool hasTstModeAForTime (float tod) const; // only if set, is v, not g
+    unsigned int tstModeAForTime (float tod) const;
 
     // nullptr if none
 
@@ -149,20 +155,30 @@ protected:
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     mutable std::vector<unsigned int> tst_indexes_;
 
+    // ref
     std::shared_ptr<Buffer> ref_buffer_;
     std::string ref_latitude_name_;
     std::string ref_longitude_name_;
     std::string ref_altitude_name_;
     std::string ref_callsign_name_;
 
+    std::string ref_modea_name_;
+    std::string ref_modea_g_name_; // can be empty
+    std::string ref_modea_v_name_; // can be empty
+
     bool has_ref_altitude_secondary_ {false};
     std::string ref_altitude_secondary_name_;
 
+    // tst
     std::shared_ptr<Buffer> tst_buffer_;
     std::string tst_latitude_name_;
     std::string tst_longitude_name_;
     std::string tst_altitude_name_;
     std::string tst_callsign_name_;
+
+    std::string tst_modea_name_;
+    std::string tst_modea_g_name_; // can be empty
+    std::string tst_modea_v_name_; // can be empty
 
     mutable std::vector<std::string> callsigns_;
     mutable std::vector<unsigned int> target_addresses_;

@@ -59,14 +59,24 @@ void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
 
     ref_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
     ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
-    ref_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
-    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
 
+    ref_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
     if (dbo_name == "Tracker")
     {
         has_ref_altitude_secondary_ = true;
         ref_altitude_secondary_name_ = "tracked_alt_baro_ft";
     }
+
+    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    // m3a
+    ref_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        ref_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
@@ -93,6 +103,16 @@ void EvaluationTargetData::setTstBuffer (std::shared_ptr<Buffer> buffer)
     tst_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
     tst_altitude_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
     tst_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+    tst_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    // m3a
+    tst_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        tst_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        tst_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
 }
 
 void EvaluationTargetData::addTstIndex (float tod, unsigned int index)
@@ -856,7 +876,7 @@ bool EvaluationTargetData::hasRefCallsignForTime (float tod) const
 
 std::string EvaluationTargetData::refCallsignForTime (float tod) const
 {
-    assert (hasRefPosForTime(tod));
+    assert (hasRefCallsignForTime(tod));
 
     auto it_pair = ref_data_.equal_range(tod);
 
@@ -868,6 +888,47 @@ std::string EvaluationTargetData::refCallsignForTime (float tod) const
     assert (!callsign_vec.isNull(index));
 
     return callsign_vec.get(index);
+}
+
+bool EvaluationTargetData::hasRefModeAForTime (float tod) const
+{
+    if (!ref_data_.count(tod))
+        return false;
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (ref_buffer_->get<int>(ref_modea_name_).isNull(index))
+        return false;
+
+    if (ref_modea_v_name_.size() && (ref_buffer_->get<string>(ref_modea_v_name_).isNull(index)
+                                     || ref_buffer_->get<string>(ref_modea_v_name_).get(index) != "Y"))
+        return false;
+
+    if (ref_modea_g_name_.size() && (ref_buffer_->get<string>(ref_modea_g_name_).isNull(index)
+                                     || ref_buffer_->get<string>(ref_modea_g_name_).get(index) != "N"))
+        return false;
+
+    return true;
+}
+
+unsigned int EvaluationTargetData::refModeAForTime (float tod) const
+{
+    assert (hasRefModeAForTime(tod));
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<int>& modea_vec = ref_buffer_->get<int>(ref_modea_name_);
+    assert (!modea_vec.isNull(index));
+
+    return modea_vec.get(index);
 }
 
 bool EvaluationTargetData::hasTstPosForTime (float tod) const
@@ -924,7 +985,7 @@ bool EvaluationTargetData::hasTstCallsignForTime (float tod) const
 
 std::string EvaluationTargetData::tstCallsignForTime (float tod) const
 {
-    assert (hasTstPosForTime(tod));
+    assert (hasTstCallsignForTime(tod));
 
     auto it_pair = tst_data_.equal_range(tod);
 
@@ -936,6 +997,47 @@ std::string EvaluationTargetData::tstCallsignForTime (float tod) const
     assert (!callsign_vec.isNull(index));
 
     return callsign_vec.get(index);
+}
+
+bool EvaluationTargetData::hasTstModeAForTime (float tod) const
+{
+    if (!tst_data_.count(tod))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (tst_buffer_->get<int>(tst_modea_name_).isNull(index))
+        return false;
+
+    if (tst_modea_v_name_.size() && (tst_buffer_->get<string>(tst_modea_v_name_).isNull(index)
+                                     || tst_buffer_->get<string>(tst_modea_v_name_).get(index) != "Y"))
+        return false;
+
+    if (tst_modea_g_name_.size() && (tst_buffer_->get<string>(tst_modea_g_name_).isNull(index)
+                                     || tst_buffer_->get<string>(tst_modea_g_name_).get(index) != "N"))
+        return false;
+
+    return true;
+}
+
+unsigned int EvaluationTargetData::tstModeAForTime (float tod) const
+{
+    assert (hasTstModeAForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    NullableVector<int>& modea_vec = tst_buffer_->get<int>(tst_modea_name_);
+    assert (!modea_vec.isNull(index));
+
+    return modea_vec.get(index);
 }
 
 double EvaluationTargetData::latitudeMin() const
