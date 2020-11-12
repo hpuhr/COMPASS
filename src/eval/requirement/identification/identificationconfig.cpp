@@ -34,11 +34,6 @@ namespace EvaluationRequirement
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
 
-    IdentificationConfig::~IdentificationConfig()
-    {
-
-    }
-
     void IdentificationConfig::addGUIElements(QFormLayout* layout)
     {
         assert (layout);

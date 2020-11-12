@@ -25,7 +25,6 @@
 
 #include <memory>
 
-
 class Group;
 class EvaluationStandard;
 
@@ -36,9 +35,8 @@ namespace EvaluationRequirement
     {
     public:
         IdentificationConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_man);
-        virtual ~IdentificationConfig();
+                             Group& group, EvaluationStandard& standard,
+                             EvaluationManager& eval_man);
 
         virtual void addGUIElements(QFormLayout* layout) override;
         IdentificationConfigWidget* widget() override;

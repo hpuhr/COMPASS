@@ -17,6 +17,7 @@
 
 #include "eval/requirement/identification/identification.h"
 #include "eval/results/identification/single.h"
+#include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -70,7 +71,7 @@ namespace EvaluationRequirement
         int num_correct_id {0};
         int num_false_id {0};
 
-        vector<IdentificationDetail> details;
+        vector<CheckDetail> details;
         EvaluationTargetPosition pos_current;
         string callsign;
         bool callsign_ok;

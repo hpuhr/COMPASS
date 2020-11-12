@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/identification/single.h"
-#include "eval/results/identification/joined.h"
+#include "eval/results/mode_a/single.h"
+#include "eval/results/mode_a/joined.h"
 #include "eval/requirement/base.h"
-#include "eval/requirement/identification/identification.h"
+#include "eval/requirement/mode_a/modea.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -36,14 +36,14 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    SingleIdentification::SingleIdentification(
+    SingleModeA::SingleModeA(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
             int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::CheckDetail> details)
-        : Single("SingleIdentification", result_id, requirement, sector_layer, utn, target, eval_man),
+        : Single("SingleModeA", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
           num_unknown_id_(num_unknown_id),
@@ -52,7 +52,7 @@ namespace EvaluationRequirementResult
         updatePID();
     }
 
-    void SingleIdentification::updatePID()
+    void SingleModeA::updatePID()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
@@ -75,25 +75,25 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleIdentification::print()
+    void SingleModeA::print()
     {
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeA> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        if (has_pid_)
-            loginf << "SingleIdentification: print: req. name " << req->name()
-                   << " utn " << utn_
-                   << " pid " << String::percentToString(100.0 * pid_)
-                   << " passed " << (pid_ >= req->minimumProbability());
-        else
-            loginf << "SingleIdentification: print: req. name " << req->name()
-                   << " utn " << utn_ << " has no data";
+//        if (has_pid_)
+//            loginf << "SingleModeA: print: req. name " << req->name()
+//                   << " utn " << utn_
+//                   << " pid " << String::percentToString(100.0 * pid_)
+//                   << " passed " << (pid_ >= req->minimumProbability());
+//        else
+//            loginf << "SingleModeA: print: req. name " << req->name()
+//                   << " utn " << utn_ << " has no data";
     }
 
-    void SingleIdentification::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeA::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        logdbg << "SingleIdentification " <<  requirement_->name() <<": addToReport";
+        logdbg << "SingleModeA " <<  requirement_->name() <<": addToReport";
 
         // add target to requirements->group->req
         addTargetToOverviewTable(root_item);
@@ -104,7 +104,7 @@ namespace EvaluationRequirementResult
         // TODO add requirement description, methods
     }
 
-    void SingleIdentification::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeA::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
@@ -152,7 +152,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void SingleIdentification::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
+    void SingleModeA::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
     {
         QVariant pd_var;
 
@@ -169,7 +169,7 @@ namespace EvaluationRequirementResult
          pd_var}, this, {utn_});
     }
 
-//    void SingleIdentification::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
+//    void SingleModeA::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
 //    {
 //        QVariant pd_var;
 
@@ -186,7 +186,7 @@ namespace EvaluationRequirementResult
 //         pd_var}, this, {utn_});
 //    }
 
-    void SingleIdentification::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeA::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         QVariant pd_var;
 
@@ -217,18 +217,18 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeA> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+        string condition = ">= "+String::percentToString(req->minimumProbabilityExisting() * 100.0);
 
         utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_pid_)
-            result = pid_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = pid_ >= req->minimumProbabilityExisting() ? "Passed" : "Failed";
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
@@ -248,7 +248,7 @@ namespace EvaluationRequirementResult
         reportDetails(utn_req_section);
     }
 
-    void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    void SingleModeA::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
@@ -274,7 +274,7 @@ namespace EvaluationRequirementResult
     }
 
 
-    bool SingleIdentification::hasViewableData (
+    bool SingleModeA::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -285,7 +285,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleIdentification::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> SingleModeA::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
 
@@ -299,7 +299,7 @@ namespace EvaluationRequirementResult
         {
             unsigned int detail_cnt = annotation.toUInt();
 
-            loginf << "SingleIdentification: viewableData: detail_cnt " << detail_cnt;
+            loginf << "SingleModeA: viewableData: detail_cnt " << detail_cnt;
 
             std::unique_ptr<nlohmann::json::object_t> viewable_ptr
                     = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
@@ -322,7 +322,7 @@ namespace EvaluationRequirementResult
             return nullptr;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleIdentification::getTargetErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> SingleModeA::getTargetErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                     utn_, req_grp_id_, result_id_);
@@ -376,7 +376,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool SingleIdentification::hasReference (
+    bool SingleModeA::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -385,7 +385,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string SingleIdentification::reference(
+    std::string SingleModeA::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -393,52 +393,52 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    std::shared_ptr<Joined> SingleIdentification::createEmptyJoined(const std::string& result_id)
+    std::shared_ptr<Joined> SingleModeA::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedIdentification> (result_id, requirement_, sector_layer_, eval_man_);
+        return make_shared<JoinedModeA> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SingleIdentification::numNoRefPos() const
+    int SingleModeA::numNoRefPos() const
     {
         return num_no_ref_pos_;
     }
 
-    int SingleIdentification::numNoRefId() const
+    int SingleModeA::numNoRefId() const
     {
         return num_no_ref_id_;
     }
 
-    int SingleIdentification::numPosOutside() const
+    int SingleModeA::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    int SingleIdentification::numPosInside() const
+    int SingleModeA::numPosInside() const
     {
         return num_pos_inside_;
     }
 
-    int SingleIdentification::numUpdates() const
+    int SingleModeA::numUpdates() const
     {
         return num_updates_;
     }
 
-    int SingleIdentification::numUnknownId() const
+    int SingleModeA::numUnknownId() const
     {
         return num_unknown_id_;
     }
 
-    int SingleIdentification::numCorrectId() const
+    int SingleModeA::numCorrectId() const
     {
         return num_correct_id_;
     }
 
-    int SingleIdentification::numFalseId() const
+    int SingleModeA::numFalseId() const
     {
         return num_false_id_;
     }
 
-    std::vector<EvaluationRequirement::CheckDetail>& SingleIdentification::details()
+    std::vector<EvaluationRequirement::CheckDetail>& SingleModeA::details()
     {
         return details_;
     }
