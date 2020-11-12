@@ -1787,14 +1787,18 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
     //    }
     //    }
 
-    data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
+    if (dbo_name_ref_ != dbo_name_tst_)
+        data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
+    else
+        data["db_objects"] = vector<string>{dbo_name_ref_};
 
     // ref srcs
     {
         vector<unsigned int> active_ref_srcs;
 
         for (auto& ds_it : data_sources_ref_)
-            active_ref_srcs.push_back(ds_it.first);
+            if (ds_it.second.isActive())
+                active_ref_srcs.push_back(ds_it.first);
 
         data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
     }
@@ -1804,7 +1808,8 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
         vector<unsigned int> active_tst_srcs;
 
         for (auto& ds_it : data_sources_tst_)
-            active_tst_srcs.push_back(ds_it.first);
+            if (ds_it.second.isActive())
+                active_tst_srcs.push_back(ds_it.first);
 
         data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
     }
