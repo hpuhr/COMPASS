@@ -7,9 +7,13 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancesingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancejoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/alongacrosssingle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/alongacrossjoined.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancesingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancejoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/alongacrosssingle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/alongacrossjoined.cpp"
     )
 
 
