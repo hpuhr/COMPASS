@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/positionmaxdistanceconfig.h"
-#include "eval/requirement/position/positionmaxdistanceconfigwidget.h"
+#include "eval/requirement/position/maxdistanceconfig.h"
+#include "eval/requirement/position/maxdistanceconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base.h"
 

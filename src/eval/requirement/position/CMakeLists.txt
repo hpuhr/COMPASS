@@ -4,13 +4,13 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistanceconfig.h"
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistanceconfigwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistance.h"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistance.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistanceconfig.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistanceconfigwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/positionmaxdistance.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/maxdistance.cpp"
 )
 
 

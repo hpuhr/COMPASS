@@ -20,8 +20,8 @@
 
 #include "configurable.h"
 #include "eval/requirement/config.h"
-#include "eval/requirement/position/positionmaxdistanceconfigwidget.h"
-#include "eval/requirement/position/positionmaxdistance.h"
+#include "eval/requirement/position/maxdistanceconfigwidget.h"
+#include "eval/requirement/position/maxdistance.h"
 
 class Group;
 class EvaluationStandard;

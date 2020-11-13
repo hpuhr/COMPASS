@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENPOSITIONMAXDISTANCERESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/position/positionmaxdistance.h"
+#include "eval/requirement/position/maxdistance.h"
 
 namespace EvaluationRequirementResult
 {

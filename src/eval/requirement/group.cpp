@@ -18,7 +18,7 @@
 #include "eval/requirement/group.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
-#include "eval/requirement/position/positionmaxdistanceconfig.h"
+#include "eval/requirement/position/maxdistanceconfig.h"
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"

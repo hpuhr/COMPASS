@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/single.h"
-#include "eval/results/position/joined.h"
+#include "eval/results/position/maxdistancesingle.h"
+#include "eval/results/position/maxdistancejoined.h"
 #include "eval/requirement/base.h"
 #include "eval/requirement/detection/detection.h"
 #include "evaluationtargetdata.h"
