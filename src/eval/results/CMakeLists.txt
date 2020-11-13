@@ -3,6 +3,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/detection/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/position/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/identification/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/mode_a/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/mode_c/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"

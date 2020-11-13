@@ -4,13 +4,13 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        #"${CMAKE_CURRENT_LIST_DIR}/detectionconfig.h"
-        #"${CMAKE_CURRENT_LIST_DIR}/detectionconfigwidget.h"
-        #"${CMAKE_CURRENT_LIST_DIR}/detection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/modecconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/modecconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/modec.h"
     PRIVATE
-        #"${CMAKE_CURRENT_LIST_DIR}/detectionconfig.cpp"
-        #"${CMAKE_CURRENT_LIST_DIR}/detectionconfigwidget.cpp"
-        #"${CMAKE_CURRENT_LIST_DIR}/detection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/modecconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/modecconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/modec.cpp"
 )
 
 

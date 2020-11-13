@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_a/modea.h"
-#include "eval/results/mode_a/single.h"
+#include "eval/requirement/mode_c/modec.h"
+#include "eval/results/mode_c/single.h"
 #include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
 #include "logger.h"
@@ -29,7 +29,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-    ModeA::ModeA(const std::string& name, const std::string& short_name, const std::string& group_name,
+    ModeC::ModeC(const std::string& name, const std::string& short_name, const std::string& group_name,
                  EvaluationManager& eval_man, float max_ref_time_diff,
                  bool use_minimum_probability_present, float minimum_probability_present,
                  bool use_maximum_probability_false, float maximum_probability_false)
@@ -43,11 +43,11 @@ namespace EvaluationRequirement
 
     }
 
-    std::shared_ptr<EvaluationRequirementResult::Single> ModeA::evaluate (
+    std::shared_ptr<EvaluationRequirementResult::Single> ModeC::evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer)
     {
-        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
                << " min present use " << use_minimum_probability_present_
                << " prob " << minimum_probability_present_
                << " max false use " << use_maximum_probability_false_
@@ -135,16 +135,16 @@ namespace EvaluationRequirement
             }
             ++num_pos_inside;
 
-            if (target_data.hasTstModeAForTime(tod))
+            if (target_data.hasTstModeCForTime(tod))
             {
-                code = target_data.tstModeAForTime(tod);
+                code = target_data.tstModeCForTime(tod);
 
                 tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
 
                 if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
                 {
-                    if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                            || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
+                    if ((ref_lower != -1 && target_data.hasRefModeCForTime(ref_lower))
+                            || (ref_upper != -1 && target_data.hasRefModeCForTime(ref_upper))) // ref value(s) exist
                     {
                         ref_exists = true;
                         code_ok = false;
@@ -152,15 +152,15 @@ namespace EvaluationRequirement
                         lower_nok = false;
                         upper_nok = false;
 
-                        if (ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
+                        if (ref_lower != -1 && target_data.hasRefModeCForTime(ref_lower))
                         {
-                            code_ok = target_data.refModeAForTime(ref_lower) == code;
+                            code_ok = fabs(target_data.refModeCForTime(ref_lower) == code) < 100;
                             lower_nok = !code_ok;
                         }
 
-                        if (!code_ok && ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))
+                        if (!code_ok && ref_upper != -1 && target_data.hasRefModeCForTime(ref_upper))
                         {
-                            code_ok = target_data.refModeAForTime(ref_upper) == code;
+                            code_ok = fabs(target_data.refModeCForTime(ref_upper) == code) < 100;
                             upper_nok = !code_ok;
                         }
 
@@ -178,7 +178,7 @@ namespace EvaluationRequirement
                             {
                                 comment += " test code '"+String::octStringFromInt(code, 4, '0')
                                         +"' reference code at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
+                                        +String::octStringFromInt(target_data.refModeCForTime(ref_lower), 4, '0')
                                         + "'";
                             }
                             else
@@ -186,7 +186,7 @@ namespace EvaluationRequirement
                                 assert (upper_nok);
                                 comment += " test code '"+String::octStringFromInt(code, 4, '0')
                                         +"' reference code at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
+                                        +String::octStringFromInt(target_data.refModeCForTime(ref_upper), 4, '0')
                                         + "'";
                             }
                         }
@@ -215,7 +215,7 @@ namespace EvaluationRequirement
                                num_unknown, num_correct, num_false, comment});
         }
 
-        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
                << " num_no_ref_val " << num_no_ref_val
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
@@ -227,33 +227,33 @@ namespace EvaluationRequirement
 
         assert (details.size() == tst_data.size());
 
-        return make_shared<EvaluationRequirementResult::SingleModeA>(
+        return make_shared<EvaluationRequirementResult::SingleModeC>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
                     num_unknown, num_correct, num_false, details);
     }
 
-    float ModeA::maxRefTimeDiff() const
+    float ModeC::maxRefTimeDiff() const
     {
         return max_ref_time_diff_;
     }
 
-    bool ModeA::useMinimumProbabilityPresent() const
+    bool ModeC::useMinimumProbabilityPresent() const
     {
         return use_minimum_probability_present_;
     }
 
-    float ModeA::minimumProbabilityPresent() const
+    float ModeC::minimumProbabilityPresent() const
     {
         return minimum_probability_present_;
     }
 
-    bool ModeA::useMaximumProbabilityFalse() const
+    bool ModeC::useMaximumProbabilityFalse() const
     {
         return use_maximum_probability_false_;
     }
 
-    float ModeA::maximumProbabilityFalse() const
+    float ModeC::maximumProbabilityFalse() const
     {
         return maximum_probability_false_;
     }

@@ -127,6 +127,40 @@ public:
     EvaluationDataWidget* widget();
     EvaluationDataFilterDialog& dialog();
 
+    // ref
+    std::shared_ptr<Buffer> ref_buffer_;
+
+    std::string ref_latitude_name_;
+    std::string ref_longitude_name_;
+    std::string ref_target_address_name_;
+    std::string ref_callsign_name_;
+
+    std::string ref_modea_name_;
+    std::string ref_modea_g_name_; // can be empty
+    std::string ref_modea_v_name_; // can be empty
+
+    std::string ref_modec_name_;
+    std::string ref_modec_g_name_; // can be empty
+    std::string ref_modec_v_name_; // can be empty
+    bool has_ref_altitude_secondary_ {false};
+    std::string ref_altitude_secondary_name_;
+
+    // tst
+    std::shared_ptr<Buffer> tst_buffer_;
+
+    std::string tst_latitude_name_;
+    std::string tst_longitude_name_;
+    std::string tst_target_address_name_;
+    std::string tst_callsign_name_;
+
+    std::string tst_modea_name_;
+    std::string tst_modea_g_name_; // can be empty
+    std::string tst_modea_v_name_; // can be empty
+
+    std::string tst_modec_name_;
+    std::string tst_modec_g_name_; // can be empty
+    std::string tst_modec_v_name_; // can be empty
+
 protected:
     EvaluationManager& eval_man_;
 

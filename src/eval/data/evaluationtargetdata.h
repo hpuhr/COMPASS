@@ -26,6 +26,7 @@
 #include <set>
 
 class Buffer;
+class EvaluationData;
 class EvaluationManager;
 
 class TstDataMapping // mapping to respective ref data
@@ -46,16 +47,16 @@ public:
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData(unsigned int utn, EvaluationManager& eval_man);
+    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
 
-    bool hasRefBuffer () const;
-    void setRefBuffer (std::shared_ptr<Buffer> buffer);
+//    bool hasRefBuffer () const;
+//    void setRefBuffer (std::shared_ptr<Buffer> buffer);
     void addRefIndex (float tod, unsigned int index);
-    std::shared_ptr<Buffer> refBuffer() const;
+//    std::shared_ptr<Buffer> refBuffer() const;
 
-    bool hasTstBuffer () const;
-    void setTstBuffer (std::shared_ptr<Buffer> buffer);
-    std::shared_ptr<Buffer> tstBuffer() const;
+//    bool hasTstBuffer () const;
+//    void setTstBuffer (std::shared_ptr<Buffer> buffer);
+//    std::shared_ptr<Buffer> tstBuffer() const;
     void addTstIndex (float tod, unsigned int index);
 
     bool hasData() const;
@@ -114,6 +115,9 @@ public:
     bool hasRefModeAForTime (float tod) const; // only if set, is v, not g
     unsigned int refModeAForTime (float tod) const;
 
+    bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
+    unsigned int refModeCForTime (float tod) const;
+
     // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
@@ -123,6 +127,9 @@ public:
 
     bool hasTstModeAForTime (float tod) const; // only if set, is v, not g
     unsigned int tstModeAForTime (float tod) const;
+
+    bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
+    unsigned int tstModeCForTime (float tod) const;
 
     // nullptr if none
 
@@ -145,6 +152,7 @@ public:
 protected:
     static bool in_appimage_;
 
+    EvaluationData& eval_data_;
     EvaluationManager& eval_man_;
 
     bool use_ {true};
@@ -154,31 +162,6 @@ protected:
 
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     mutable std::vector<unsigned int> tst_indexes_;
-
-    // ref
-    std::shared_ptr<Buffer> ref_buffer_;
-    std::string ref_latitude_name_;
-    std::string ref_longitude_name_;
-    std::string ref_altitude_name_;
-    std::string ref_callsign_name_;
-
-    std::string ref_modea_name_;
-    std::string ref_modea_g_name_; // can be empty
-    std::string ref_modea_v_name_; // can be empty
-
-    bool has_ref_altitude_secondary_ {false};
-    std::string ref_altitude_secondary_name_;
-
-    // tst
-    std::shared_ptr<Buffer> tst_buffer_;
-    std::string tst_latitude_name_;
-    std::string tst_longitude_name_;
-    std::string tst_altitude_name_;
-    std::string tst_callsign_name_;
-
-    std::string tst_modea_name_;
-    std::string tst_modea_g_name_; // can be empty
-    std::string tst_modea_v_name_; // can be empty
 
     mutable std::vector<std::string> callsigns_;
     mutable std::vector<unsigned int> target_addresses_;

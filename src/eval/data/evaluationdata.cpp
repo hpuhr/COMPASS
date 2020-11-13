@@ -19,8 +19,12 @@
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
 #include "dbobject.h"
+#include "dbovariable.h"
+#include "metadbovariable.h"
 #include "buffer.h"
 #include "stringconv.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
 
 #include <QApplication>
 #include <QThread>
@@ -51,6 +55,44 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
 
         return;
     }
+
+    assert (!ref_buffer_);
+    ref_buffer_ = buffer;
+
+    // preset variable names
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+
+    string dbo_name = ref_buffer_->dboName();
+
+    ref_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    ref_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
+    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    // mc
+    ref_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
+        ref_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
+        ref_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
+
+
+    if (dbo_name == "Tracker")
+    {
+        has_ref_altitude_secondary_ = true;
+        ref_altitude_secondary_name_ = "tracked_alt_baro_ft";
+    }
+
+    // m3a
+    ref_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        ref_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
 
     set<int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
@@ -95,15 +137,15 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-            if (!targetData(utn_it).hasRefBuffer())
-                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+//            if (!targetData(utn_it).hasRefBuffer())
+//                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
 
@@ -127,6 +169,35 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
 
         return;
     }
+
+    assert (!tst_buffer_);
+    tst_buffer_ = buffer;
+
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+
+    string dbo_name = tst_buffer_->dboName();
+
+    tst_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    tst_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    tst_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
+    tst_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    // m3a
+    tst_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        tst_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        tst_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
+
+    // mc
+    tst_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
+        tst_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
+        tst_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
 
     set<int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
@@ -171,15 +242,15 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it, eval_man_});
+                target_data_.push_back({utn_it, *this, eval_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it);  // get iterator for random access
 
-            if (!targetData(utn_it).hasTstBuffer())
-                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
+//            if (!targetData(utn_it).hasTstBuffer())
+//                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
 
