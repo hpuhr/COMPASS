@@ -42,6 +42,8 @@ namespace EvaluationRequirement
         void toogleUseMaxProbFalseSlot ();
         void maxProbFalseEditSlot(QString value);
 
+        void maxDiffEditSlot(QString value);
+
     public:
         ModeCConfigWidget(ModeCConfig& config);
 
@@ -57,6 +59,8 @@ namespace EvaluationRequirement
 
         QCheckBox* max_prob_false_check_{nullptr};
         QLineEdit* max_prob_false_edit_{nullptr};
+
+        QLineEdit* max_diff_edit_{nullptr};
     };
 
 }

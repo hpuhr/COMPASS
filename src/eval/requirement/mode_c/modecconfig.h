@@ -55,6 +55,9 @@ namespace EvaluationRequirement
         float maximumProbabilityFalse() const;
         void maximumProbabilityFalse(float value);
 
+        float maxDifference() const;
+        void maxDifference(float value);
+
     protected:
         float max_ref_time_diff_ {0};
 
@@ -63,6 +66,8 @@ namespace EvaluationRequirement
 
         bool use_maximum_probability_false_ {true};
         float maximum_probability_false_{0};
+
+        float max_difference_ {0};
 
         std::unique_ptr<ModeCConfigWidget> widget_;
     };

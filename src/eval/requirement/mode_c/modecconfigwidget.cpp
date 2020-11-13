@@ -72,6 +72,14 @@ namespace EvaluationRequirement
 
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
 
+        // max diff
+        max_diff_edit_ = new QLineEdit(QString::number(config_.maxDifference()));
+        max_diff_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
+        connect(max_diff_edit_, &QLineEdit::textEdited,
+                this, &ModeCConfigWidget::maxDiffEditSlot);
+
+        form_layout_->addRow("Maximum Difference [ft]", max_diff_edit_);
+
         setLayout(form_layout_);
     }
 
@@ -127,6 +135,19 @@ namespace EvaluationRequirement
             config_.maximumProbabilityFalse(val);
         else
             loginf << "EvaluationRequirementModeCConfigWidget: maxProbFalseEditSlot: invalid value";
+    }
+
+    void ModeCConfigWidget::maxDiffEditSlot(QString value)
+    {
+        loginf << "EvaluationRequirementModeCConfigWidget: maxDiffEditSlot: value " << value.toStdString();
+
+        bool ok;
+        float val = value.toFloat(&ok);
+
+        if (ok)
+            config_.maxDifference(val);
+        else
+            loginf << "EvaluationRequirementModeCConfigWidget: maxDiffEditSlot: invalid value";
     }
 
 }

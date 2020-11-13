@@ -31,10 +31,12 @@ namespace EvaluationRequirement
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
         registerParameter("use_minimum_probability_present", &use_minimum_probability_present_, true);
-        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
+        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.97);
 
         registerParameter("use_maximum_probability_false", &use_maximum_probability_false_, true);
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
+
+        registerParameter("max_difference", &max_difference_, 100);
     }
 
     void ModeCConfig::addGUIElements(QFormLayout* layout)
@@ -57,7 +59,7 @@ namespace EvaluationRequirement
         shared_ptr<ModeC> req = make_shared<ModeC>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
                     use_minimum_probability_present_, minimum_probability_present_,
-                    use_maximum_probability_false_, maximum_probability_false_);
+                    use_maximum_probability_false_, maximum_probability_false_, max_difference_);
 
         return req;
     }
@@ -111,5 +113,15 @@ namespace EvaluationRequirement
     {
         maximum_probability_false_ = value;
     }
-
+    
+    float ModeCConfig::maxDifference() const
+    {
+        return max_difference_;
+    }
+    
+    void ModeCConfig::maxDifference(float value)
+    {
+        max_difference_ = value;
+    }
+    
 }

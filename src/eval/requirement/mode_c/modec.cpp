@@ -32,13 +32,14 @@ namespace EvaluationRequirement
     ModeC::ModeC(const std::string& name, const std::string& short_name, const std::string& group_name,
                  EvaluationManager& eval_man, float max_ref_time_diff,
                  bool use_minimum_probability_present, float minimum_probability_present,
-                 bool use_maximum_probability_false, float maximum_probability_false)
+                 bool use_maximum_probability_false, float maximum_probability_false,
+                 float maximum_difference)
         : Base(name, short_name, group_name, eval_man),
           max_ref_time_diff_(max_ref_time_diff),
           use_minimum_probability_present_(use_minimum_probability_present),
           minimum_probability_present_(minimum_probability_present),
           use_maximum_probability_false_(use_maximum_probability_false),
-          maximum_probability_false_(maximum_probability_false)
+          maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
     {
 
     }
@@ -70,7 +71,7 @@ namespace EvaluationRequirement
 
         vector<CheckDetail> details;
         EvaluationTargetPosition pos_current;
-        unsigned int code;
+        float code;
         bool code_ok;
 
         bool ref_exists;
@@ -154,13 +155,13 @@ namespace EvaluationRequirement
 
                         if (ref_lower != -1 && target_data.hasRefModeCForTime(ref_lower))
                         {
-                            code_ok = fabs(target_data.refModeCForTime(ref_lower) == code) < 100;
+                            code_ok = fabs(target_data.refModeCForTime(ref_lower) - code) <= maximum_difference_;
                             lower_nok = !code_ok;
                         }
 
                         if (!code_ok && ref_upper != -1 && target_data.hasRefModeCForTime(ref_upper))
                         {
-                            code_ok = fabs(target_data.refModeCForTime(ref_upper) == code) < 100;
+                            code_ok = fabs(target_data.refModeCForTime(ref_upper) - code) <= maximum_difference_;
                             upper_nok = !code_ok;
                         }
 

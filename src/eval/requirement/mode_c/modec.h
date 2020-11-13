@@ -29,7 +29,8 @@ namespace EvaluationRequirement
         ModeC(const std::string& name, const std::string& short_name, const std::string& group_name,
               EvaluationManager& eval_man, float max_ref_time_diff,
               bool use_minimum_probability_present, float minimum_probability_present,
-              bool use_maximum_probability_false, float maximum_probability_false);
+              bool use_maximum_probability_false, float maximum_probability_false,
+              float maximum_difference);
 
         virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
                 const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -51,6 +52,8 @@ namespace EvaluationRequirement
 
         bool use_maximum_probability_false_ {true};
         float maximum_probability_false_{0};
+
+        float maximum_difference_ {0};
     };
 
 }
