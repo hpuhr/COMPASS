@@ -84,16 +84,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         }
     }
 
-    QProgressDialog postprocess_dialog_ ("", "", 0, num_req_evals);
-    postprocess_dialog_.setWindowTitle("Evaluating");
-    postprocess_dialog_.setCancelButton(nullptr);
-    postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+    QProgressDialog postprocess_dialog ("", "", 0, num_req_evals);
+    postprocess_dialog.setWindowTitle("Evaluating");
+    postprocess_dialog.setCancelButton(nullptr);
+    postprocess_dialog.setWindowModality(Qt::ApplicationModal);
 
-    QLabel* progress_label = new QLabel("", &postprocess_dialog_);
+    QLabel* progress_label = new QLabel("", &postprocess_dialog);
     progress_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    postprocess_dialog_.setLabel(progress_label);
+    postprocess_dialog.setLabel(progress_label);
 
-    postprocess_dialog_.show();
+    postprocess_dialog.show();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -157,7 +157,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 bool done = false;
                 unsigned int tmp_done_cnt;
 
-                postprocess_dialog_.setLabelText(
+                postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
                              +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
 
@@ -190,14 +190,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
                         remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
 
-                        postprocess_dialog_.setLabelText(
+                        postprocess_dialog.setLabelText(
                                     ("Sector Layer "+sector_layer_name
                                      +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()
                                      +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
                                      +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
                                      +" (estimated)").c_str());
 
-                        postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
+                        postprocess_dialog.setValue(eval_cnt+tmp_done_cnt);
                     }
 
                     if (!done)
@@ -207,7 +207,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     }
                 }
 
-                postprocess_dialog_.setLabelText(("Sector Layer "+sector_layer_name+":\nAggregating results").c_str());
+                postprocess_dialog.setLabelText(("Sector Layer "+sector_layer_name+":\nAggregating results").c_str());
 
                 for (auto& result_it : results)
                 {
@@ -270,19 +270,20 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     time_diff = elapsed_time - start_time;
     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-    loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(elapsed_time_s, true);
+    loginf << "EvaluationResultsGenerator: evaluate: data done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     // 00:06:22.852 with no parallel
 
     emit eval_man_.resultsChangedSignal();
 
-    postprocess_dialog_.setLabelText("Generating Results");
+    postprocess_dialog.close();
 
-    postprocess_dialog_.setValue(num_req_evals);
+    loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
+    // generating results GUI
     generateResultsReportGUI();
 
-    postprocess_dialog_.close();
+    loginf << "EvaluationResultsGenerator: evaluate: done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     QApplication::restoreOverrideCursor();
 }
@@ -306,43 +307,28 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-//    QMessageBox msg_box (QApplication::topLevelWidgets().first());
-//    msg_box.setWindowTitle("Generating Results");
-//    msg_box.setText( "Please wait.");
-//    msg_box.setStandardButtons(QMessageBox::NoButton);
-//    msg_box.show();
-//    msg_box.update();
-
-//    // wait for a bit until messagebox is shown
-//    while ((boost::posix_time::microsec_clock::local_time()-loading_start_time).total_milliseconds() < 100)
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
+    QMessageBox msg_box; // QApplication::topLevelWidgets().first()
+    msg_box.setWindowTitle("Updating Results");
+    msg_box.setText( "Please wait...");
+    msg_box.setStandardButtons(QMessageBox::NoButton);
+    msg_box.setWindowModality(Qt::ApplicationModal);
+    msg_box.show();
 
     // prepare for new data
     results_model_.beginReset();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-//    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
-//    overview_section.addText("Sample");
+    // generate results
+    GenerateResultsTask* t = new (tbb::task::allocate_root()) GenerateResultsTask(
+                root_item, results_vec_);
+    tbb::task::enqueue(*t);
 
-//    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
-
-//    overview_text.addText("Why not visit Sweden this time of the year?");
-//    overview_text.addText("It has lovely lakes");
-//    overview_text.addText("Elk bytes\nline2");
-
-    // first add all joined
-    for (auto& result_it : results_vec_)
-        if (result_it->isJoined())
-            result_it->addToReport(root_item);
-
-    // then all singles
-    for (auto& result_it : results_vec_)
-        if (result_it->isSingle())
-            result_it->addToReport(root_item);
+    while (!t->done())
+    {
+        QCoreApplication::processEvents();
+        QThread::msleep(1);
+    }
 
     results_model_.endReset();
 
@@ -352,7 +338,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    //msg_box.close();
+    msg_box.close();
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);
