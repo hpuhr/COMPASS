@@ -41,6 +41,15 @@ namespace EvaluationRequirementResult
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
         : Joined("JoinedModeA", result_id, requirement, sector_layer, eval_man)
     {
+        std::shared_ptr<EvaluationRequirement::ModeA> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
+        assert (req);
+
+        use_p_present_req_ = req->useMinimumProbabilityPresent();
+        p_present_min_ = req->minimumProbabilityPresent();
+
+        use_p_false_req_ = req->useMaximumProbabilityFalse();
+        p_false_max_ = req->maximumProbabilityFalse();
     }
 
 
@@ -64,30 +73,36 @@ namespace EvaluationRequirementResult
 
         num_updates_ += single_result->numUpdates();
         num_no_ref_pos_ += single_result->numNoRefPos();
-        num_no_ref_id_ += single_result->numNoRefValue();
+        num_no_ref_val_ += single_result->numNoRefValue();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
-        num_unknown_id_ += single_result->numUnknown();
-        num_correct_id_ += single_result->numCorrect();
-        num_false_id_ += single_result->numFalse();
+        num_unknown_ += single_result->numUnknown();
+        num_correct_ += single_result->numCorrect();
+        num_false_ += single_result->numFalse();
 
-        updatePID();
+        updateProbabilities();
     }
 
-    void JoinedModeA::updatePID()
+    void JoinedModeA::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
+        assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
 
-        if (num_correct_id_+num_false_id_)
+        if (num_correct_+num_false_)
         {
-            pid_ = (float)num_correct_id_/(float)(num_correct_id_+num_false_id_);
-            has_pid_ = true;
+            p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
+            has_p_present_ = true;
+
+            p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+            has_p_false_ = true;
         }
         else
         {
-            pid_ = 0;
-            has_pid_ = false;
+            has_p_present_ = false;
+            p_present_ = 0;
+
+            has_p_false_ = false;
+            p_false_ = 0;
         }
     }
 
@@ -117,25 +132,49 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
-
-        // pd
-        QVariant pd_var;
-
-        string result {"Unknown"};
-
-        if (has_pid_)
+        // p present
         {
-            pd_var = String::percentToString(pid_ * 100.0).c_str();
+            QVariant pe_var;
 
-            result = pid_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
+            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
+
+            string result {"Unknown"};
+
+            if (has_p_present_)
+            {
+                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+                pe_var = roundf(p_present_ * 10000.0) / 100.0;
+            }
+
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                             (requirement_->shortname()+" Present").c_str(),
+                             result_id_.c_str(), {num_correct_+num_false_},
+                             pe_var, condition.c_str(), result.c_str()}, this, {});
         }
 
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                         requirement_->shortname().c_str(),
-                         result_id_.c_str(), {num_correct_id_+num_false_id_},
-                         pd_var, condition.c_str(), result.c_str()}, this, {});
+        // p false
+        {
+            QVariant pf_var;
+
+            string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
+
+            string result {"Unknown"};
+
+            if (has_p_false_)
+            {
+                result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
+                pf_var = roundf(p_false_ * 10000.0) / 100.0;
+            }
+
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                             (requirement_->shortname()+" False").c_str(),
+                             result_id_.c_str(), {num_correct_+num_false_},
+                             pf_var, condition.c_str(), result.c_str()}, this, {});
+        }
+
+
     }
 
     void JoinedModeA::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -150,42 +189,64 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
-        sec_det_table.addRow({"#Updates", "Total number target reports", num_updates_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
-                                num_no_ref_pos_+num_no_ref_id_}, this);
+        sec_det_table.addRow({"Use", "To be used in results", use_}, this);
+        sec_det_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
+                              num_no_ref_pos_+num_no_ref_val_}, this);
         sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
         sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        sec_det_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
-        sec_det_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
-        sec_det_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
+        sec_det_table.addRow({"#Unknown [1]", "Number of updates unknown code", num_unknown_}, this);
+        sec_det_table.addRow({"#Correct [1]", "Number of updates with correct code", num_correct_}, this);
+        sec_det_table.addRow({"#False [1]", "Number of updates with false code", num_false_}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::ModeA> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
-        assert (req);
-
-        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
-
-        // pd
-        QVariant pd_var;
-
-        string result {"Unknown"};
-
-        if (has_pid_)
         {
-            pd_var = String::percentToString(pid_ * 100.0).c_str();
+            QVariant pe_var;
 
-            result = pid_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
+            if (has_p_present_)
+                pe_var = roundf(p_present_ * 10000.0) / 100.0;
+
+            sec_det_table.addRow({"PP [%]", "Probability of Mode 3/A present", pe_var}, this);
+
+            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
+
+            sec_det_table.addRow(
+            {"Condition Present", ("Use: "+to_string(use_p_present_req_)).c_str(), condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_present_)
+                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+
+            sec_det_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
         }
 
-        sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
-        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
-        sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
+        {
+            QVariant pf_var;
+
+            if (has_p_false_)
+                pf_var = roundf(p_false_ * 10000.0) / 100.0;
+
+            sec_det_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
+
+            string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
+
+            sec_det_table.addRow(
+            {"Condition False", ("Use: "+to_string(use_p_false_req_)).c_str(), condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_false_)
+                result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
+
+            sec_det_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
+        }
 
         // figure
-        if (has_pid_ && pid_ != 1.0)
+        if ((has_p_present_ && p_present_ != 1.0)
+                || (has_p_false_ && p_false_ != 0.0))
         {
             sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                      getErrorsViewable());
@@ -269,24 +330,24 @@ namespace EvaluationRequirementResult
     void JoinedModeA::updatesToUseChanges()
     {
         loginf << "JoinedModeA: updatesToUseChanges: prev num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
-               << " num_unknown_id " << num_unknown_id_
-               << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
+               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
+               << " num_unknown_id " << num_unknown_
+               << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
 
-        if (has_pid_)
-            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_
-                   << " pid " << 100.0 * pid_;
-        else
-            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_ << " has no data";
+//        if (has_pid_)
+//            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_
+//                   << " pid " << 100.0 * pid_;
+//        else
+//            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_ << " has no data";
 
         num_updates_ = 0;
         num_no_ref_pos_ = 0;
-        num_no_ref_id_ = 0;
+        num_no_ref_val_ = 0;
         num_pos_outside_ = 0;
         num_pos_inside_ = 0;
-        num_unknown_id_ = 0;
-        num_correct_id_ = 0;
-        num_false_id_ = 0;
+        num_unknown_ = 0;
+        num_correct_ = 0;
+        num_false_ = 0;
 
         for (auto result_it : results_)
         {
@@ -298,15 +359,15 @@ namespace EvaluationRequirementResult
         }
 
         loginf << "JoinedModeA: updatesToUseChanges: updt num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
-               << " num_unknown_id " << num_unknown_id_
-               << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
+               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
+               << " num_unknown_id " << num_unknown_
+               << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
 
-        if (has_pid_)
-            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_
-                   << " pid " << 100.0 * pid_;
-        else
-            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_ << " has no data";
+//        if (has_pid_)
+//            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_
+//                   << " pid " << 100.0 * pid_;
+//        else
+//            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_ << " has no data";
     }
 
 }

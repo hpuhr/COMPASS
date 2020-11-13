@@ -199,13 +199,13 @@ namespace EvaluationRequirement
                 }
                 else
                 {
-                    comment = "No reference Mode 3/A";
+                    comment = "No reference code";
                     ++num_no_ref_val;
                 }
             }
             else
             {
-                comment = "No test Mode 3/A";
+                comment = "No test code";
                 ++num_unknown;
             }
 

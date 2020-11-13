@@ -50,18 +50,29 @@ namespace EvaluationRequirementResult
     protected:
         int num_updates_ {0};
         int num_no_ref_pos_ {0};
-        int num_no_ref_id_ {0};
+        int num_no_ref_val_ {0};
         int num_pos_outside_ {0};
         int num_pos_inside_ {0};
-        int num_unknown_id_ {0};
-        int num_correct_id_ {0};
-        int num_false_id_ {0};
+        int num_unknown_ {0};
+        int num_correct_ {0};
+        int num_false_ {0};
 
-        bool has_pid_ {false};
-        float pid_{0};
+        // min exist
+        bool use_p_present_req_ {false};
+        float p_present_min_{0};
+
+        bool has_p_present_ {false};
+        float p_present_{0};
+
+        // max false
+        bool use_p_false_req_ {false};
+        float p_false_max_{0};
+
+        bool has_p_false_ {false};
+        float p_false_{0};
 
         void addToValues (std::shared_ptr<SingleModeA> single_result);
-        void updatePID();
+        void updateProbabilities();
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 

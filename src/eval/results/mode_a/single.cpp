@@ -72,7 +72,8 @@ namespace EvaluationRequirementResult
             p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
             has_p_present_ = true;
 
-            p_false_max_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+            p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+            has_p_false_ = true;
 
             result_usable_ = true;
         }
@@ -108,47 +109,47 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-//        if (eval_man_.showAdsbInfo())
-//        {
-//            if (!tgt_overview_section.hasTable(target_table_name_))
-//                tgt_overview_section.addTable(target_table_name_, 14,
-//                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-//                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+        //        if (eval_man_.showAdsbInfo())
+        //        {
+        //            if (!tgt_overview_section.hasTable(target_table_name_))
+        //                tgt_overview_section.addTable(target_table_name_, 14,
+        //                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+        //                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
-//            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-//        }
-//        else
-//        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 15,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PE", "PF"}, true, 13);
+        //            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
+        //        }
+        //        else
+        //        {
+        if (!tgt_overview_section.hasTable(target_table_name_))
+            tgt_overview_section.addTable(target_table_name_, 15,
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP", "PF"}, true, 13);
 
-            addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-//        }
+        addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
+        //        }
 
         if (eval_man_.splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-//            if (eval_man_.showAdsbInfo())
-//            {
-//                if (!sum_section.hasTable(target_table_name_))
-//                    sum_section.addTable(target_table_name_, 14,
-//                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-//                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+            //            if (eval_man_.showAdsbInfo())
+            //            {
+            //                if (!sum_section.hasTable(target_table_name_))
+            //                    sum_section.addTable(target_table_name_, 14,
+            //                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+            //                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
 
-//                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-//            }
-//            else
-//            {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 15,
+            //                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
+            //            }
+            //            else
+            //            {
+            if (!sum_section.hasTable(target_table_name_))
+                sum_section.addTable(target_table_name_, 15,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PE", "PF"}, true, 13);
+                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP", "PF"}, true, 13);
 
-            addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-//            }
+            addTargetDetailsToTable(sum_section.getTable(target_table_name_));
+            //            }
         }
     }
 
@@ -173,33 +174,27 @@ namespace EvaluationRequirementResult
          pe_var, pf_var}, this, {utn_});
     }
 
-//    void SingleModeA::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
-//    {
-//        QVariant pd_var;
+    //    void SingleModeA::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
+    //    {
+    //        QVariant pd_var;
 
-//        if (has_pid_)
-//            pd_var = roundf(pid_ * 10000.0) / 100.0;
+    //        if (has_pid_)
+    //            pd_var = roundf(pid_ * 10000.0) / 100.0;
 
-//        string utn_req_section_heading = getTargetRequirementSectionID();
+    //        string utn_req_section_heading = getTargetRequirementSectionID();
 
-//        target_table.addRow(
-//        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-//         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-//         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-//         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
-//         pd_var}, this, {utn_});
-//    }
+    //        target_table.addRow(
+    //        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+    //         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+    //         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+    //         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
+    //         pd_var}, this, {utn_});
+    //    }
 
     void SingleModeA::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        QVariant pe_var;
-        QVariant pf_var;
 
-        if (has_p_present_)
-            pe_var = roundf(p_present_ * 10000.0) / 100.0;
 
-        if (has_p_false_)
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
 
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -213,35 +208,61 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
                               num_no_ref_pos_+num_no_ref_val_}, this);
         utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_val_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#Unknown [1]", "Number of updates unknown identification", num_unknown_}, this);
-        utn_req_table.addRow({"#Correct [1]", "Number of updates with correct identification", num_correct_}, this);
-        utn_req_table.addRow({"#False [1]", "Number of updates with false identification", num_false_}, this);
-        utn_req_table.addRow({"PE [%]", "Probability of Mode 3/A existing", pe_var}, this);
-        utn_req_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
+        utn_req_table.addRow({"#Unknown [1]", "Number of updates unknown code", num_unknown_}, this);
+        utn_req_table.addRow({"#Correct [1]", "Number of updates with correct code", num_correct_}, this);
+        utn_req_table.addRow({"#False [1]", "Number of updates with false code", num_false_}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::ModeA> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
-        assert (req);
+        {
+            QVariant pe_var;
 
-        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
+            if (has_p_present_)
+                pe_var = roundf(p_present_ * 10000.0) / 100.0;
 
-        utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
+            utn_req_table.addRow({"PP [%]", "Probability of Mode 3/A present", pe_var}, this);
 
-        string result {"Unknown"};
+            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
 
-        if (has_p_present_)
-            result = p_present_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
+            utn_req_table.addRow(
+            {"Condition Present", ("Use: "+to_string(use_p_present_req_)).c_str(), condition.c_str()}, this);
 
-        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+            string result {"Unknown"};
 
-        if (has_p_present_ && p_present_ != 1.0)
+            if (has_p_present_)
+                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+
+            utn_req_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
+        }
+
+        {
+            QVariant pf_var;
+
+            if (has_p_false_)
+                pf_var = roundf(p_false_ * 10000.0) / 100.0;
+
+            utn_req_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
+
+            string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
+
+            utn_req_table.addRow(
+            {"Condition False", ("Use: "+to_string(use_p_false_req_)).c_str(), condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_false_)
+                result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
+
+            utn_req_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
+        }
+
+        if ((has_p_present_ && p_present_ != 1.0)
+                || (has_p_false_ && p_false_ != 0.0))
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());
@@ -261,7 +282,8 @@ namespace EvaluationRequirementResult
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
-            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
+            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknwon",
+             "#Correct", "#False", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable(tr_details_table_name_);
@@ -451,6 +473,5 @@ namespace EvaluationRequirementResult
     {
         return details_;
     }
-
 
 }

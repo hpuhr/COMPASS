@@ -304,27 +304,35 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::ptime loading_start_time;
     boost::posix_time::ptime loading_stop_time;
 
-    //    QMessageBox msg_box (QApplication::topLevelWidgets().first());
-    //    msg_box.setWindowTitle("Generating Results");
-    //    msg_box.setText( "Please wait.");
-    //    msg_box.setStandardButtons(QMessageBox::NoButton);
-    //    msg_box.show();
-
     loading_start_time = boost::posix_time::microsec_clock::local_time();
+
+//    QMessageBox msg_box (QApplication::topLevelWidgets().first());
+//    msg_box.setWindowTitle("Generating Results");
+//    msg_box.setText( "Please wait.");
+//    msg_box.setStandardButtons(QMessageBox::NoButton);
+//    msg_box.show();
+//    msg_box.update();
+
+//    // wait for a bit until messagebox is shown
+//    while ((boost::posix_time::microsec_clock::local_time()-loading_start_time).total_milliseconds() < 100)
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
 
     // prepare for new data
     results_model_.beginReset();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
-    overview_section.addText("Sample");
+//    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
+//    overview_section.addText("Sample");
 
-    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
+//    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
 
-    overview_text.addText("Why not visit Sweden this time of the year?");
-    overview_text.addText("It has lovely lakes");
-    overview_text.addText("Elk bytes\nline2");
+//    overview_text.addText("Why not visit Sweden this time of the year?");
+//    overview_text.addText("It has lovely lakes");
+//    overview_text.addText("Elk bytes\nline2");
 
     // first add all joined
     for (auto& result_it : results_vec_)

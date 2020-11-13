@@ -362,7 +362,6 @@ void DBObjectManager::loadSlot()
 
     bool shown = false;
 
-
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
@@ -389,8 +388,6 @@ void DBObjectManager::loadSlot()
 
     msg_box->close();
     delete msg_box;
-
-    QApplication::restoreOverrideCursor();
 
     while (JobManager::instance().hasDBJobs())
     {
@@ -530,6 +527,8 @@ void DBObjectManager::finishLoading()
 
     if (load_widget_)
         load_widget_->loadingDone();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)

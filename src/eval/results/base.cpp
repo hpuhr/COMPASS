@@ -105,7 +105,7 @@ namespace EvaluationRequirementResult
 
         if (!ov_sec.hasTable(req_overview_table_name_))
             ov_sec.addTable(req_overview_table_name_, 8,
-            {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"});
+            {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Result [%]", "Condition", "Result"});
 
         //loginf << "UGA '" << req_overview_table_name_ << "'";
 
