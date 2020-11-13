@@ -320,14 +320,40 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
     // generate results
-    GenerateResultsTask* t = new (tbb::task::allocate_root()) GenerateResultsTask(
-                root_item, results_vec_);
-    tbb::task::enqueue(*t);
+//    GenerateResultsTask* t = new (tbb::task::allocate_root()) GenerateResultsTask(
+//                root_item, results_vec_);
+//    tbb::task::enqueue(*t);
 
-    while (!t->done())
+//    while (!t->done())
+//    {
+//        QCoreApplication::processEvents();
+//        QThread::msleep(1);
+//    }
+
+    // first add all joined
+    for (auto& result_it : results_vec_)
     {
-        QCoreApplication::processEvents();
-        QThread::msleep(1);
+        if (result_it->isJoined())
+        {
+            QCoreApplication::processEvents();
+            result_it->addToReport(root_item);
+        }
+    }
+
+    // then all singles
+
+    unsigned int cnt = 0;
+    for (auto& result_it : results_vec_)
+    {
+        if (result_it->isSingle())
+        {
+            if (cnt % 100 == 0)
+                QCoreApplication::processEvents();
+
+            result_it->addToReport(root_item);
+
+            ++cnt;
+        }
     }
 
     results_model_.endReset();

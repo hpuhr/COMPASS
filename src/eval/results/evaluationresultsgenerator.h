@@ -88,41 +88,41 @@ protected:
     bool single_thread_;
 };
 
-class GenerateResultsTask : public tbb::task {
+//class GenerateResultsTask : public tbb::task {
 
-public:
-    GenerateResultsTask(std::shared_ptr<EvaluationResultsReport::RootItem> root_item,
-                        std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec)
-        :root_item_(root_item), results_vec_(results_vec)
-    {
-    }
+//public:
+//    GenerateResultsTask(std::shared_ptr<EvaluationResultsReport::RootItem> root_item,
+//                        std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec)
+//        :root_item_(root_item), results_vec_(results_vec)
+//    {
+//    }
 
-    /*override*/ tbb::task* execute() {
-        // Do the job
+//    /*override*/ tbb::task* execute() {
+//        // Do the job
 
-        // first add all joined
-        for (auto& result_it : results_vec_)
-            if (result_it->isJoined())
-                result_it->addToReport(root_item_);
+//        // first add all joined
+//        for (auto& result_it : results_vec_)
+//            if (result_it->isJoined())
+//                result_it->addToReport(root_item_);
 
-        // then all singles
-        for (auto& result_it : results_vec_)
-            if (result_it->isSingle())
-                result_it->addToReport(root_item_);
+//        // then all singles
+//        for (auto& result_it : results_vec_)
+//            if (result_it->isSingle())
+//                result_it->addToReport(root_item_);
 
-        done_ = true;
+//        done_ = true;
 
-        return NULL; // or a pointer to a new task to be executed immediately
-    }
+//        return NULL; // or a pointer to a new task to be executed immediately
+//    }
 
-    bool done () { return done_; }
+//    bool done () { return done_; }
 
-protected:
-    std::shared_ptr<EvaluationResultsReport::RootItem> root_item_;
-    std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec_;
+//protected:
+//    std::shared_ptr<EvaluationResultsReport::RootItem> root_item_;
+//    std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec_;
 
-    bool done_ {false};
-};
+//    bool done_ {false};
+//};
 
 class EvaluationResultsGenerator
 {
