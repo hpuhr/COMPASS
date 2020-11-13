@@ -28,7 +28,7 @@ namespace EvaluationRequirement
     public:
         ModeA(const std::string& name, const std::string& short_name, const std::string& group_name,
               EvaluationManager& eval_man, float max_ref_time_diff,
-              bool use_minimum_probability_existing, float minimum_probability_existing,
+              bool use_minimum_probability_present, float minimum_probability_present,
               bool use_maximum_probability_false, float maximum_probability_false);
 
         virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -37,8 +37,8 @@ namespace EvaluationRequirement
 
         float maxRefTimeDiff() const;
 
-        bool useMinimumProbabilityExisting() const;
-        float minimumProbabilityExisting() const;
+        bool useMinimumProbabilityPresent() const;
+        float minimumProbabilityPresent() const;
 
         bool useMaximumProbabilityFalse() const;
         float maximumProbabilityFalse() const;
@@ -46,8 +46,8 @@ namespace EvaluationRequirement
     protected:
         float max_ref_time_diff_ {0};
 
-        bool use_minimum_probability_existing_ {true};
-        float minimum_probability_existing_{0};
+        bool use_minimum_probability_present_ {true};
+        float minimum_probability_present_{0};
 
         bool use_maximum_probability_false_ {true};
         float maximum_probability_false_{0};

@@ -36,7 +36,7 @@ public:
             int num_unknown_id, int num_correct_id, int num_false_id,
             std::vector<EvaluationRequirement::CheckDetail> details);
 
-    virtual void print() override;
+    //irtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;

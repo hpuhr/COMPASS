@@ -91,20 +91,20 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedIdentification::print()
-    {
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
-        assert (req);
+//    void JoinedIdentification::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::Identification> req =
+//                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+//        assert (req);
 
-        if (has_pid_)
-            loginf << "JoinedIdentification: print: req. name " << req->name()
-                   << " pid " << String::percentToString(100.0 * pid_)
-                   << " passed " << (pid_ >= req->minimumProbability());
-        else
-            loginf << "JoinedIdentification: print: req. name " << req->name()
-                   << " has no data";
-    }
+//        if (has_pid_)
+//            loginf << "JoinedIdentification: print: req. name " << req->name()
+//                   << " pid " << String::percentToString(100.0 * pid_)
+//                   << " passed " << (pid_ >= req->minimumProbability());
+//        else
+//            loginf << "JoinedIdentification: print: req. name " << req->name()
+//                   << " has no data";
+//    }
 
     void JoinedIdentification::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)

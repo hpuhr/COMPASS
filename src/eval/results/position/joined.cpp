@@ -111,19 +111,19 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedPositionMaxDistance::print()
-    {
-        std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
-                std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
-        assert (req);
+//    void JoinedPositionMaxDistance::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
+//                std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
+//        assert (req);
 
-        if (num_pos_)
-            loginf << "JoinedPositionMaxDistance: print: req. name " << req->name()
-                   << " pd " << String::percentToString(100.0 * p_min_pos_)
-                   << " passed " << (p_min_pos_ >= req->minimumProbability());
-        else
-            loginf << "JoinedPositionMaxDistance: print: req. name " << req->name() << " has no data";
-    }
+//        if (num_pos_)
+//            loginf << "JoinedPositionMaxDistance: print: req. name " << req->name()
+//                   << " pd " << String::percentToString(100.0 * p_min_pos_)
+//                   << " passed " << (p_min_pos_ >= req->minimumProbability());
+//        else
+//            loginf << "JoinedPositionMaxDistance: print: req. name " << req->name() << " has no data";
+//    }
 
     void JoinedPositionMaxDistance::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)

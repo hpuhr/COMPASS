@@ -904,12 +904,14 @@ bool EvaluationTargetData::hasRefModeAForTime (float tod) const
     if (ref_buffer_->get<int>(ref_modea_name_).isNull(index))
         return false;
 
-    if (ref_modea_v_name_.size() && (ref_buffer_->get<string>(ref_modea_v_name_).isNull(index)
-                                     || ref_buffer_->get<string>(ref_modea_v_name_).get(index) != "Y"))
+    if (ref_modea_v_name_.size()
+            && !ref_buffer_->get<string>(ref_modea_v_name_).isNull(index)
+            && ref_buffer_->get<string>(ref_modea_v_name_).get(index) == "N")
         return false;
 
-    if (ref_modea_g_name_.size() && (ref_buffer_->get<string>(ref_modea_g_name_).isNull(index)
-                                     || ref_buffer_->get<string>(ref_modea_g_name_).get(index) != "N"))
+    if (ref_modea_g_name_.size()
+            && !ref_buffer_->get<string>(ref_modea_g_name_).isNull(index)
+            && ref_buffer_->get<string>(ref_modea_g_name_).get(index) == "Y")
         return false;
 
     return true;
@@ -1013,12 +1015,14 @@ bool EvaluationTargetData::hasTstModeAForTime (float tod) const
     if (tst_buffer_->get<int>(tst_modea_name_).isNull(index))
         return false;
 
-    if (tst_modea_v_name_.size() && (tst_buffer_->get<string>(tst_modea_v_name_).isNull(index)
-                                     || tst_buffer_->get<string>(tst_modea_v_name_).get(index) != "Y"))
+    if (tst_modea_v_name_.size()
+            && !tst_buffer_->get<string>(tst_modea_v_name_).isNull(index)
+            && tst_buffer_->get<string>(tst_modea_v_name_).get(index) == "N")
         return false;
 
-    if (tst_modea_g_name_.size() && (tst_buffer_->get<string>(tst_modea_g_name_).isNull(index)
-                                     || tst_buffer_->get<string>(tst_modea_g_name_).get(index) != "N"))
+    if (tst_modea_g_name_.size()
+            && !tst_buffer_->get<string>(tst_modea_g_name_).isNull(index)
+            && tst_buffer_->get<string>(tst_modea_g_name_).get(index) == "Y")
         return false;
 
     return true;

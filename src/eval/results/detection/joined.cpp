@@ -87,19 +87,19 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedDetection::print()
-    {
-        std::shared_ptr<EvaluationRequirement::Detection> req =
-                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-        assert (req);
+//    void JoinedDetection::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::Detection> req =
+//                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+//        assert (req);
 
-        if (sum_uis_)
-            loginf << "JoinedDetection: print: req. name " << req->name()
-                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
-        else
-            loginf << "JoinedDetection: print: req. name " << req->name()
-                   << " has no data";
-    }
+//        if (sum_uis_)
+//            loginf << "JoinedDetection: print: req. name " << req->name()
+//                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
+//        else
+//            loginf << "JoinedDetection: print: req. name " << req->name()
+//                   << " has no data";
+//    }
 
     void JoinedDetection::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)

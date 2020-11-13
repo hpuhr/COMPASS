@@ -75,21 +75,21 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleIdentification::print()
-    {
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
-        assert (req);
+//    void SingleIdentification::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::Identification> req =
+//                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+//        assert (req);
 
-        if (has_pid_)
-            loginf << "SingleIdentification: print: req. name " << req->name()
-                   << " utn " << utn_
-                   << " pid " << String::percentToString(100.0 * pid_)
-                   << " passed " << (pid_ >= req->minimumProbability());
-        else
-            loginf << "SingleIdentification: print: req. name " << req->name()
-                   << " utn " << utn_ << " has no data";
-    }
+//        if (has_pid_)
+//            loginf << "SingleIdentification: print: req. name " << req->name()
+//                   << " utn " << utn_
+//                   << " pid " << String::percentToString(100.0 * pid_)
+//                   << " passed " << (pid_ >= req->minimumProbability());
+//        else
+//            loginf << "SingleIdentification: print: req. name " << req->name()
+//                   << " utn " << utn_ << " has no data";
+//    }
 
     void SingleIdentification::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {

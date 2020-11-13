@@ -35,7 +35,7 @@ public:
             double error_min, double error_max, double error_avg,
             std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details);
 
-    virtual void print() override;
+    //virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;

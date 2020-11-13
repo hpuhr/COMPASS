@@ -40,55 +40,55 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref, int num_pos_outside, int num_pos_inside,
+            int num_updates, int num_no_ref_pos, int num_no_ref_val, int num_pos_outside, int num_pos_inside,
             int num_unknown, int num_correct, int num_false,
             std::vector<EvaluationRequirement::CheckDetail> details)
         : Single("SingleModeA", result_id, requirement, sector_layer, utn, target, eval_man),
-          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_(num_no_ref),
+          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_val_(num_no_ref_val),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
           num_unknown_(num_unknown),
           num_correct_(num_correct), num_false_(num_false), details_(details)
-    {
-        updatePID();
-    }
-
-    void SingleModeA::updatePID()
-    {
-        assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_+num_unknown_+num_correct_+num_false_);
-
-        if (num_correct_+num_false_)
-        {
-            pid_ = (float)num_correct_/(float)(num_correct_+num_false_);
-            has_pid_ = true;
-
-            result_usable_ = true;
-        }
-        else
-        {
-            pid_ = 0;
-            has_pid_ = false;
-
-            result_usable_ = false;
-        }
-
-        updateUseFromTarget();
-    }
-
-    void SingleModeA::print()
     {
         std::shared_ptr<EvaluationRequirement::ModeA> req =
                 std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-//        if (has_pid_)
-//            loginf << "SingleModeA: print: req. name " << req->name()
-//                   << " utn " << utn_
-//                   << " pid " << String::percentToString(100.0 * pid_)
-//                   << " passed " << (pid_ >= req->minimumProbability());
-//        else
-//            loginf << "SingleModeA: print: req. name " << req->name()
-//                   << " utn " << utn_ << " has no data";
+        use_p_present_req_ = req->useMinimumProbabilityPresent();
+        p_present_min_ = req->minimumProbabilityPresent();
+
+        use_p_false_req_ = req->useMaximumProbabilityFalse();
+        p_false_max_ = req->maximumProbabilityFalse();
+
+        updateProbabilities();
+    }
+
+    void SingleModeA::updateProbabilities()
+    {
+        assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+        assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+
+        if (num_correct_+num_false_)
+        {
+            p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
+            has_p_present_ = true;
+
+            p_false_max_ = (float)(num_false_)/(float)(num_correct_+num_false_);
+
+            result_usable_ = true;
+        }
+        else
+        {
+            has_p_present_ = false;
+            p_present_ = 0;
+
+            has_p_false_ = false;
+            p_false_ = 0;
+
+
+            result_usable_ = false;
+        }
+
+        updateUseFromTarget();
     }
 
     void SingleModeA::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -120,9 +120,9 @@ namespace EvaluationRequirementResult
 //        else
 //        {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 14,
+                tgt_overview_section.addTable(target_table_name_, 15,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PE", "PF"}, true, 13);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
 //        }
@@ -142,22 +142,26 @@ namespace EvaluationRequirementResult
 //            }
 //            else
 //            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 14,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+            if (!tgt_overview_section.hasTable(target_table_name_))
+                tgt_overview_section.addTable(target_table_name_, 15,
+                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PE", "PF"}, true, 13);
 
-                addTargetDetailsToTable(sum_section.getTable(target_table_name_));
+            addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
 //            }
         }
     }
 
     void SingleModeA::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
     {
-        QVariant pd_var;
+        QVariant pe_var;
+        QVariant pf_var;
 
-        if (has_pid_)
-            pd_var = roundf(pid_ * 10000.0) / 100.0;
+        if (has_p_present_)
+            pe_var = roundf(p_present_ * 10000.0) / 100.0;
+
+        if (has_p_false_)
+            pf_var = roundf(p_false_ * 10000.0) / 100.0;
 
         string utn_req_section_heading = getTargetRequirementSectionID();
 
@@ -165,8 +169,8 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-         num_updates_, num_no_ref_pos_+num_no_ref_, num_unknown_, num_correct_, num_false_,
-         pd_var}, this, {utn_});
+         num_updates_, num_no_ref_pos_+num_no_ref_val_, num_unknown_, num_correct_, num_false_,
+         pe_var, pf_var}, this, {utn_});
     }
 
 //    void SingleModeA::addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table)
@@ -188,10 +192,14 @@ namespace EvaluationRequirementResult
 
     void SingleModeA::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        QVariant pd_var;
+        QVariant pe_var;
+        QVariant pf_var;
 
-        if (has_pid_)
-            pd_var = roundf(pid_ * 10000.0) / 100.0;
+        if (has_p_present_)
+            pe_var = roundf(p_present_ * 10000.0) / 100.0;
+
+        if (has_p_false_)
+            pf_var = roundf(p_false_ * 10000.0) / 100.0;
 
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -206,33 +214,34 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
-                              num_no_ref_pos_+num_no_ref_}, this);
+                              num_no_ref_pos_+num_no_ref_val_}, this);
         utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_val_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_}, this);
-        utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_}, this);
-        utn_req_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_}, this);
-        utn_req_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
+        utn_req_table.addRow({"#Unknown [1]", "Number of updates unknown identification", num_unknown_}, this);
+        utn_req_table.addRow({"#Correct [1]", "Number of updates with correct identification", num_correct_}, this);
+        utn_req_table.addRow({"#False [1]", "Number of updates with false identification", num_false_}, this);
+        utn_req_table.addRow({"PE [%]", "Probability of Mode 3/A existing", pe_var}, this);
+        utn_req_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::ModeA> req =
                 std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbabilityExisting() * 100.0);
+        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
 
         utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
 
         string result {"Unknown"};
 
-        if (has_pid_)
-            result = pid_ >= req->minimumProbabilityExisting() ? "Passed" : "Failed";
+        if (has_p_present_)
+            result = p_present_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
-        if (has_pid_ && pid_ != 1.0)
+        if (has_p_present_ && p_present_ != 1.0)
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());
@@ -403,9 +412,9 @@ namespace EvaluationRequirementResult
         return num_no_ref_pos_;
     }
 
-    int SingleModeA::numNoRef() const
+    int SingleModeA::numNoRefValue() const
     {
-        return num_no_ref_;
+        return num_no_ref_val_;
     }
 
     int SingleModeA::numPosOutside() const

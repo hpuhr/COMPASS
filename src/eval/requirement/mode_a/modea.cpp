@@ -31,12 +31,12 @@ namespace EvaluationRequirement
 
     ModeA::ModeA(const std::string& name, const std::string& short_name, const std::string& group_name,
                  EvaluationManager& eval_man, float max_ref_time_diff,
-                 bool use_minimum_probability_existing, float minimum_probability_existing,
+                 bool use_minimum_probability_present, float minimum_probability_present,
                  bool use_maximum_probability_false, float maximum_probability_false)
         : Base(name, short_name, group_name, eval_man),
           max_ref_time_diff_(max_ref_time_diff),
-          use_minimum_probability_existing_(use_minimum_probability_existing),
-          minimum_probability_existing_(minimum_probability_existing),
+          use_minimum_probability_present_(use_minimum_probability_present),
+          minimum_probability_present_(minimum_probability_present),
           use_maximum_probability_false_(use_maximum_probability_false),
           maximum_probability_false_(maximum_probability_false)
     {
@@ -48,8 +48,8 @@ namespace EvaluationRequirement
             const SectorLayer& sector_layer)
     {
         logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " min exist use " << use_minimum_probability_existing_
-               << " prob " << minimum_probability_existing_
+               << " min present use " << use_minimum_probability_present_
+               << " prob " << minimum_probability_present_
                << " max false use " << use_maximum_probability_false_
                << " prob " << maximum_probability_false_;
 
@@ -61,7 +61,7 @@ namespace EvaluationRequirement
 
         int num_updates {0};
         int num_no_ref_pos {0};
-        int num_no_ref {0};
+        int num_no_ref_val {0};
         int num_pos_outside {0};
         int num_pos_inside {0};
         int num_unknown {0};
@@ -97,7 +97,7 @@ namespace EvaluationRequirement
             {
                 details.push_back({tod, pos_current,
                                    false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                    num_unknown, num_correct, num_false, "No reference data"});
 
                 ++num_no_ref_pos;
@@ -113,7 +113,7 @@ namespace EvaluationRequirement
             {
                 details.push_back({tod, pos_current,
                                    false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                    num_unknown, num_correct, num_false, "No reference position"});
 
                 ++num_no_ref_pos;
@@ -127,7 +127,7 @@ namespace EvaluationRequirement
             {
                 details.push_back({tod, pos_current,
                                    ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                    num_unknown, num_correct, num_false, "Outside sector"});
 
                 ++num_pos_outside;
@@ -143,8 +143,8 @@ namespace EvaluationRequirement
 
                 if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
                 {
-                    if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                            || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
+                    if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
+                            || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
                     {
                         ref_exists = true;
                         code_ok = false;
@@ -177,16 +177,16 @@ namespace EvaluationRequirement
                             if (lower_nok)
                             {
                                 comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference id at "+String::timeStringFromDouble(ref_lower)
-                                        + "  '"+String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
+                                        +"' reference id at "+String::timeStringFromDouble(ref_lower)+ "  '"
+                                        +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
                                         + "'";
                             }
                             else
                             {
                                 assert (upper_nok);
                                 comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference id at "+String::timeStringFromDouble(ref_upper)
-                                        + "  '"+String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
+                                        +"' reference id at "+String::timeStringFromDouble(ref_upper)+ "  '"
+                                        +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
                                         + "'";
                             }
                         }
@@ -194,42 +194,42 @@ namespace EvaluationRequirement
                     else
                     {
                         comment = "No reference data";
-                        ++num_no_ref;
+                        ++num_no_ref_val;
                     }
                 }
                 else
                 {
-                    comment = "No reference identification";
-                    ++num_no_ref;
+                    comment = "No reference Mode 3/A";
+                    ++num_no_ref_val;
                 }
             }
             else
             {
-                comment = "No test identification";
+                comment = "No test Mode 3/A";
                 ++num_unknown;
             }
 
             details.push_back({tod, pos_current,
                                ref_exists, is_inside, !code,
-                               num_updates, num_no_ref_pos+num_no_ref, num_pos_inside, num_pos_outside,
+                               num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
                                num_unknown, num_correct, num_false, comment});
         }
 
         logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
-               << " num_no_ref_id " << num_no_ref
+               << " num_no_ref_val " << num_no_ref_val
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-               << " num_unknown_id " << num_unknown << " num_correct_id " << num_correct
-               << " num_false_id " << num_false;
+               << " num_unknown " << num_unknown << " num_correct " << num_correct
+               << " num_false " << num_false;
 
         assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-        assert (num_pos_inside == num_no_ref+num_unknown+num_correct+num_false);
+        assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
 
         assert (details.size() == tst_data.size());
 
         return make_shared<EvaluationRequirementResult::SingleModeA>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref_pos, num_no_ref, num_pos_outside, num_pos_inside,
+                    eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
                     num_unknown, num_correct, num_false, details);
     }
 
@@ -238,14 +238,14 @@ namespace EvaluationRequirement
         return max_ref_time_diff_;
     }
 
-    bool ModeA::useMinimumProbabilityExisting() const
+    bool ModeA::useMinimumProbabilityPresent() const
     {
-        return use_minimum_probability_existing_;
+        return use_minimum_probability_present_;
     }
 
-    float ModeA::minimumProbabilityExisting() const
+    float ModeA::minimumProbabilityPresent() const
     {
-        return minimum_probability_existing_;
+        return minimum_probability_present_;
     }
 
     bool ModeA::useMaximumProbabilityFalse() const

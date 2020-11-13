@@ -64,7 +64,7 @@ namespace EvaluationRequirementResult
 
         num_updates_ += single_result->numUpdates();
         num_no_ref_pos_ += single_result->numNoRefPos();
-        num_no_ref_id_ += single_result->numNoRef();
+        num_no_ref_id_ += single_result->numNoRefValue();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
         num_unknown_id_ += single_result->numUnknown();
@@ -89,21 +89,6 @@ namespace EvaluationRequirementResult
             pid_ = 0;
             has_pid_ = false;
         }
-    }
-
-    void JoinedModeA::print()
-    {
-        std::shared_ptr<EvaluationRequirement::ModeA> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
-        assert (req);
-
-//        if (has_pid_)
-//            loginf << "JoinedModeA: print: req. name " << req->name()
-//                   << " pid " << String::percentToString(100.0 * pid_)
-//                   << " passed " << (pid_ >= req->minimumProbability());
-//        else
-//            loginf << "JoinedModeA: print: req. name " << req->name()
-//                   << " has no data";
     }
 
     void JoinedModeA::addToReport (
@@ -132,7 +117,7 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbabilityExisting() * 100.0);
+        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
 
         // pd
         QVariant pd_var;
@@ -143,7 +128,7 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pid_ * 100.0).c_str();
 
-            result = pid_ >= req->minimumProbabilityExisting() ? "Passed" : "Failed";
+            result = pid_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -181,7 +166,7 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbabilityExisting() * 100.0);
+        string condition = ">= "+String::percentToString(req->minimumProbabilityPresent() * 100.0);
 
         // pd
         QVariant pd_var;
@@ -192,7 +177,7 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pid_ * 100.0).c_str();
 
-            result = pid_ >= req->minimumProbabilityExisting() ? "Passed" : "Failed";
+            result = pid_ >= req->minimumProbabilityPresent() ? "Passed" : "Failed";
         }
 
         sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);

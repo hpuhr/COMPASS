@@ -43,11 +43,11 @@ namespace EvaluationRequirement
         float maxRefTimeDiff() const;
         void maxRefTimeDiff(float value);
 
-        bool useMinimumProbabilityExisting() const;
-        void useMinimumProbabilityExisting(bool value);
+        bool useMinimumProbabilityPresent() const;
+        void useMinimumProbabilityPresent(bool value);
 
-        float minimumProbabilityExisting() const;
-        void minimumProbabilityExisting(float value);
+        float minimumProbabilityPresent() const;
+        void minimumProbabilityPresent(float value);
 
         bool useMaximumProbabilityFalse() const;
         void useMaximumProbabilityFalse(bool value);
@@ -58,8 +58,8 @@ namespace EvaluationRequirement
     protected:
         float max_ref_time_diff_ {0};
 
-        bool use_minimum_probability_existing_ {true};
-        float minimum_probability_existing_{0};
+        bool use_minimum_probability_present_ {true};
+        float minimum_probability_present_{0};
 
         bool use_maximum_probability_false_ {true};
         float maximum_probability_false_{0};

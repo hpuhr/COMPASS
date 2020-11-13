@@ -36,14 +36,13 @@ public:
             int num_unknown, int num_correct, int num_false,
             std::vector<EvaluationRequirement::CheckDetail> details);
 
-    virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
     int numUpdates() const;
     int numNoRefPos() const;
-    int numNoRef() const;
+    int numNoRefValue() const;
     int numPosOutside() const;
     int numPosInside() const;
     int numUnknown() const;
@@ -66,19 +65,30 @@ public:
 protected:
     int num_updates_ {0};
     int num_no_ref_pos_ {0};
-    int num_no_ref_ {0};
+    int num_no_ref_val_ {0};
     int num_pos_outside_ {0};
     int num_pos_inside_ {0};
     int num_unknown_ {0};
     int num_correct_ {0};
     int num_false_ {0};
 
-    bool has_pid_ {false};
-    float pid_{0};
+    // min exist
+    bool use_p_present_req_ {false};
+    float p_present_min_{0};
+
+    bool has_p_present_ {false};
+    float p_present_{0};
+
+    // max false
+    bool use_p_false_req_ {false};
+    float p_false_max_{0};
+
+    bool has_p_false_ {false};
+    float p_false_{0};
 
     std::vector<EvaluationRequirement::CheckDetail> details_;
 
-    void updatePID();
+    void updateProbabilities();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table);
     //void addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table);

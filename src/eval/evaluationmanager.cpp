@@ -396,12 +396,20 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name));
     read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name));
     read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name));
-    read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
 
     // TODO add required variables from standard requirements
 
     if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
         read_set.add(object_man.object("Tracker").variable("tracked_alt_baro_ft"));
+
+    // m3a
+    read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
+
+    if (object_man.metaVariable("mode3a_g").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("mode3a_g").getFor(dbo_name));
+
+    if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
 
 //    if (dbo_name == "ADSB")
 //    {

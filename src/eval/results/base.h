@@ -51,7 +51,6 @@ public:
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
-    virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     std::string type() const;

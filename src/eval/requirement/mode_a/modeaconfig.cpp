@@ -30,8 +30,8 @@ namespace EvaluationRequirement
     {
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
-        registerParameter("use_minimum_probability_existing", &use_minimum_probability_existing_, true);
-        registerParameter("minimum_probability_existing", &minimum_probability_existing_, 0.98);
+        registerParameter("use_minimum_probability_present", &use_minimum_probability_present_, true);
+        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
 
         registerParameter("use_maximum_probability_false", &use_maximum_probability_false_, true);
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
@@ -56,7 +56,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<ModeA> req = make_shared<ModeA>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    use_minimum_probability_existing_, minimum_probability_existing_,
+                    use_minimum_probability_present_, minimum_probability_present_,
                     use_maximum_probability_false_, maximum_probability_false_);
 
         return req;
@@ -72,24 +72,24 @@ namespace EvaluationRequirement
         max_ref_time_diff_ = value;
     }
 
-    bool ModeAConfig::useMinimumProbabilityExisting() const
+    bool ModeAConfig::useMinimumProbabilityPresent() const
     {
-        return use_minimum_probability_existing_;
+        return use_minimum_probability_present_;
     }
 
-    void ModeAConfig::useMinimumProbabilityExisting(bool value)
+    void ModeAConfig::useMinimumProbabilityPresent(bool value)
     {
-        use_minimum_probability_existing_ = value;
+        use_minimum_probability_present_ = value;
     }
 
-    float ModeAConfig::minimumProbabilityExisting() const
+    float ModeAConfig::minimumProbabilityPresent() const
     {
-        return minimum_probability_existing_;
+        return minimum_probability_present_;
     }
 
-    void ModeAConfig::minimumProbabilityExisting(float value)
+    void ModeAConfig::minimumProbabilityPresent(float value)
     {
-        minimum_probability_existing_ = value;
+        minimum_probability_present_ = value;
     }
 
     bool ModeAConfig::useMaximumProbabilityFalse() const

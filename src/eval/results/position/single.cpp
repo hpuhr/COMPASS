@@ -80,21 +80,21 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SinglePositionMaxDistance::print()
-    {
-        std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
-                std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
-        assert (req);
+//    void SinglePositionMaxDistance::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::PositionMaxDistance> req =
+//                std::static_pointer_cast<EvaluationRequirement::PositionMaxDistance>(requirement_);
+//        assert (req);
 
-        if (num_pos_)
-            loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
-                   << " utn " << utn_
-                   << " pd " << String::percentToString(100.0 * p_min_pos_)
-                   << " passed " << (p_min_pos_ >= req->minimumProbability());
-        else
-            loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
-                   << " utn " << utn_ << " has no data";
-    }
+//        if (num_pos_)
+//            loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
+//                   << " utn " << utn_
+//                   << " pd " << String::percentToString(100.0 * p_min_pos_)
+//                   << " passed " << (p_min_pos_ >= req->minimumProbability());
+//        else
+//            loginf << "SinglePositionMaxDistance: print: req. name " << req->name()
+//                   << " utn " << utn_ << " has no data";
+//    }
 
     void SinglePositionMaxDistance::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {

@@ -46,12 +46,12 @@ namespace EvaluationRequirement
 
         // prob
         minimum_prob_exist_check_ = new QCheckBox();
-        minimum_prob_exist_check_->setChecked(config_.useMinimumProbabilityExisting());
+        minimum_prob_exist_check_->setChecked(config_.useMinimumProbabilityPresent());
         connect(minimum_prob_exist_check_, &QCheckBox::clicked,
                 this, &ModeAConfigWidget::toogleUseMinimumProbExistingSlot);
         form_layout_->addRow("Use Minimum Probability Existing", minimum_prob_exist_check_);
 
-        minimum_prob_exist_edit_ = new QLineEdit(QString::number(config_.minimumProbabilityExisting()));
+        minimum_prob_exist_edit_ = new QLineEdit(QString::number(config_.minimumProbabilityPresent()));
         minimum_prob_exist_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(minimum_prob_exist_edit_, &QLineEdit::textEdited,
                 this, &ModeAConfigWidget::minimumProbExistingEditSlot);
@@ -92,7 +92,7 @@ namespace EvaluationRequirement
     void ModeAConfigWidget::toogleUseMinimumProbExistingSlot ()
     {
         assert (minimum_prob_exist_check_);
-        config_.useMinimumProbabilityExisting(minimum_prob_exist_check_->checkState() == Qt::Checked);
+        config_.useMinimumProbabilityPresent(minimum_prob_exist_check_->checkState() == Qt::Checked);
     }
 
 
@@ -104,7 +104,7 @@ namespace EvaluationRequirement
         float val = value.toFloat(&ok);
 
         if (ok)
-            config_.minimumProbabilityExisting(val);
+            config_.minimumProbabilityPresent(val);
         else
             loginf << "EvaluationRequirementModeAConfigWidget: minimumProbExistingEditSlot: invalid value";
     }

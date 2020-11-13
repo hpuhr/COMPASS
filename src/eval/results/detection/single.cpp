@@ -73,20 +73,20 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleDetection::print()
-    {
-        std::shared_ptr<EvaluationRequirement::Detection> req =
-                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-        assert (req);
+//    void SingleDetection::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::Detection> req =
+//                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+//        assert (req);
 
-        if (sum_uis_)
-            loginf << "SingleDetection: print: req. name " << req->name()
-                   << " utn " << utn_
-                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
-        else
-            loginf << "SingleDetection: print: req. name " << req->name()
-                   << " utn " << utn_ << " has no data";
-    }
+//        if (sum_uis_)
+//            loginf << "SingleDetection: print: req. name " << req->name()
+//                   << " utn " << utn_
+//                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
+//        else
+//            loginf << "SingleDetection: print: req. name " << req->name()
+//                   << " utn " << utn_ << " has no data";
+//    }
 
     void SingleDetection::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {

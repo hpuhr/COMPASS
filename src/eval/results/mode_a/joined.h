@@ -32,7 +32,7 @@ namespace EvaluationRequirementResult
 
         virtual void join(std::shared_ptr<Base> other) override;
 
-        virtual void print() override;
+        //virtual void print() override;
         virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
         virtual void updatesToUseChanges() override;
