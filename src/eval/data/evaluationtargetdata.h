@@ -24,10 +24,14 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <string>
 
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
+
+class OGRSpatialReference;
+class OGRCoordinateTransformation;
 
 class TstDataMapping // mapping to respective ref data
 {
@@ -48,6 +52,7 @@ class EvaluationTargetData
 {
 public:
     EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
+    virtual ~EvaluationTargetData();
 
 //    bool hasRefBuffer () const;
 //    void setRefBuffer (std::shared_ptr<Buffer> buffer);
@@ -186,6 +191,11 @@ protected:
     mutable unsigned int min_nacp_, max_nacp_;
 
     mutable std::map<float, TstDataMapping> test_data_mappings_;
+
+    std::unique_ptr<OGRSpatialReference> wgs84_;
+    mutable std::unique_ptr<OGRSpatialReference> local_;
+    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart_;
+    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo_;
 
     void updateCallsigns() const;
     void updateTargetAddresses() const;

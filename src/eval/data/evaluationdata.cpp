@@ -137,7 +137,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.emplace_back(utn_it, *this, eval_man_);
 
             assert (hasTargetData(utn_it));
 
@@ -242,7 +242,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it, *this, eval_man_});
+                target_data_.emplace_back(utn_it, *this, eval_man_);
 
             assert (hasTargetData(utn_it));
 
