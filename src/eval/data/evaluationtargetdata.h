@@ -19,6 +19,7 @@
 #define EVALUATIONTARGETDATA_H
 
 #include "evaluationtargetposition.h"
+#include "evaluationtargetvelocity.h"
 
 #include <map>
 #include <memory>
@@ -46,6 +47,7 @@ public:
 
     bool has_ref_pos_ {false};
     EvaluationTargetPosition pos_ref_;
+    EvaluationTargetVelocity spd_ref_;
 };
 
 class EvaluationTargetData
@@ -54,14 +56,7 @@ public:
     EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
     virtual ~EvaluationTargetData();
 
-//    bool hasRefBuffer () const;
-//    void setRefBuffer (std::shared_ptr<Buffer> buffer);
     void addRefIndex (float tod, unsigned int index);
-//    std::shared_ptr<Buffer> refBuffer() const;
-
-//    bool hasTstBuffer () const;
-//    void setTstBuffer (std::shared_ptr<Buffer> buffer);
-//    std::shared_ptr<Buffer> tstBuffer() const;
     void addTstIndex (float tod, unsigned int index);
 
     bool hasData() const;

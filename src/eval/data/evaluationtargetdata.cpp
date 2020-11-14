@@ -51,22 +51,10 @@ EvaluationTargetData::~EvaluationTargetData()
 
 }
 
-//bool EvaluationTargetData::hasRefBuffer () const
-//{
-//    return ref_buffer_ != nullptr;
-//}
-
-//void EvaluationTargetData::setRefBuffer (std::shared_ptr<Buffer> buffer)
-//{
-//    assert (!ref_buffer_);
-//    ref_buffer_ = buffer;
-//}
-
 void EvaluationTargetData::addRefIndex (float tod, unsigned int index)
 {
     ref_data_.insert({tod, index});
 }
-
 
 void EvaluationTargetData::addTstIndex (float tod, unsigned int index)
 {
@@ -300,54 +288,11 @@ const std::multimap<float, unsigned int>& EvaluationTargetData::tstData() const
 
 bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
 {
-    //    if (ref_data_.count(tod))
-    //        return true; // contains exact value
-
-    //    //    Return iterator to lower bound
-    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-    //    //    before k (i.e., either it is equivalent or goes after).
-
-    //    auto lb_it = ref_data_.lower_bound(tod);
-
-    //    if (lb_it == ref_data_.end())
-    //        return false;
-
-    //    assert (lb_it->first >= tod);
-
-    //    if (lb_it->first - tod > d_max)
-    //        return false; // too much time difference
-
-    //    // save value
-    //    float upper = lb_it->first;
-
-    //    lb_it--;
-
-    //    if (lb_it == ref_data_.end())
-    //        return false;
-
-    //    assert (tod >= lb_it->first);
-
-    //    if (tod - lb_it->first > d_max)
-    //        return false; // too much time difference
-
-    //    float lower = lb_it->first;
-
-    //    logdbg << "EvaluationTargetData: hasRefDataForTime: found " << String::timeStringFromDouble(lower)
-    //           << " <= " << String::timeStringFromDouble(tod)
-    //           << " <= " << String::timeStringFromDouble(upper);
-
-    //    return true;
     assert (test_data_mappings_.count(tod));
     TstDataMapping& mapping = test_data_mappings_.at(tod);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
-
-    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact time
-    {
-        assert (mapping.tod_ref1_ == tod);
-        return true;
-    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -368,51 +313,11 @@ bool EvaluationTargetData::hasRefDataForTime (float tod, float d_max) const
 
 std::pair<float, float> EvaluationTargetData::refTimesFor (float tod, float d_max)  const
 {
-    //    if (ref_data_.count(tod))
-    //        return {tod, -1}; // contains exact value
-
-    //    //    Return iterator to lower bound
-    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-    //    //    before k (i.e., either it is equivalent or goes after).
-
-    //    auto lb_it = ref_data_.lower_bound(tod);
-
-    //    if (lb_it == ref_data_.end())
-    //        return {-1, -1};
-
-    //    assert (lb_it->first >= tod);
-
-    //    if (lb_it->first - tod > d_max)
-    //        return {-1, -1}; // too much time difference
-
-    //    // save value
-    //    float upper = lb_it->first;
-
-    //    lb_it--;
-
-    //    if (lb_it == ref_data_.end())
-    //        return {-1, upper};
-
-    //    assert (tod >= lb_it->first);
-
-    //    if (tod - lb_it->first > d_max)
-    //        return {-1, upper}; // too much time difference
-
-    //    float lower = lb_it->first;
-
-    //    return {lower, upper};
-
     assert (test_data_mappings_.count(tod));
     TstDataMapping& mapping = test_data_mappings_.at(tod);
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {-1, -1};
-
-    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact time
-    {
-        assert (mapping.tod_ref1_ == tod);
-        return {tod, -1};
-    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -490,141 +395,6 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     }
 
     return {{}, false};
-
-    //old
-    //    if (ref_data_.count(tod)) // contains exact value
-    //        return {refPosForTime(tod), true};
-
-    //    //    Return iterator to lower bound
-    //    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
-    //    //    before k (i.e., either it is equivalent or goes after).
-
-    //    auto lb_it = ref_data_.lower_bound(tod);
-
-    //    assert (lb_it != ref_data_.end());
-    //    assert (lb_it->first >= tod); // too much time difference
-
-    //    assert (lb_it->first - tod <= d_max); // too much time difference
-
-    //    // save value
-    //    float upper = lb_it->first;
-
-    //    lb_it--;
-
-    //    assert (lb_it != ref_data_.end());
-
-    //    assert (tod >= lb_it->first);
-
-    //    assert (tod - lb_it->first <= d_max); // too much time difference
-
-    //    float lower = lb_it->first;
-
-    //    EvaluationTargetPosition pos1 = refPosForTime(lower);
-    //    EvaluationTargetPosition pos2 = refPosForTime(upper);
-    //    float d_t = upper - lower;
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t " << d_t;
-
-    //    assert (d_t >= 0);
-
-    //    if (pos1.latitude_ == pos2.latitude_
-    //            && pos1.longitude_ == pos2.longitude_) // same pos
-    //        return {pos1, true};
-
-    //    if (lower == upper) // same time
-    //    {
-    //        logwrn << "EvaluationTargetData: interpolatedRefPosForTime: ref has same time twice";
-    //        return {{}, false};
-    //    }
-
-    //    OGRSpatialReference wgs84;
-    //    wgs84.SetWellKnownGeogCS("WGS84");
-    //    OGRSpatialReference local;
-    //    local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
-
-    //    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-    //    assert (ogr_geo2cart);
-    //    std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-    //    assert (ogr_cart2geo);
-
-    //    double x_pos, y_pos;
-
-    //    if (in_appimage_) // inside appimage
-    //    {
-    //        x_pos = pos2.longitude_;
-    //        y_pos = pos2.latitude_;
-    //    }
-    //    else
-    //    {
-    //        x_pos = pos2.latitude_;
-    //        y_pos = pos2.longitude_;
-    //    }
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: geo2cart";
-    //    bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-    //    if (!ret)
-    //    {
-    //        logerr << "EvaluationTargetData: interpolatedRefPosForTime: error with latitude " << pos2.latitude_
-    //               << " longitude " << pos2.longitude_;
-    //        return {{}, false};
-    //    }
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: offsets x " << fixed << x_pos
-    //           << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
-
-    //    double v_x = x_pos/d_t;
-    //    double v_y = y_pos/d_t;
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: v_x " << v_x << " v_y " << v_y;
-
-    //    float d_t2 = tod - lower;
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: d_t2 " << d_t2;
-
-    //    assert (d_t2 >= 0);
-
-    //    x_pos = v_x * d_t2;
-    //    y_pos = v_y * d_t2;
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
-
-    //    ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
-
-    //    // x_pos long, y_pos lat
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: interpolated lat " << y_pos << " long " << x_pos;
-
-    //    // calculate altitude
-    //    bool has_altitude = false;
-    //    float altitude = 0.0;
-
-    //    if (pos1.has_altitude_ && !pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_;
-    //    }
-    //    else if (!pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        has_altitude = true;
-    //        altitude = pos2.altitude_;
-    //    }
-    //    else if (pos1.has_altitude_ && pos2.has_altitude_)
-    //    {
-    //        float v_alt = (pos2.altitude_ - pos1.altitude_)/d_t;
-    //        has_altitude = true;
-    //        altitude = pos1.altitude_ + v_alt*d_t2;
-    //    }
-
-    //    logdbg << "EvaluationTargetData: interpolatedRefPosForTime: pos1 has alt "
-    //           << pos1.has_altitude_ << " alt " << pos1.altitude_
-    //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
-    //           << " interpolated has alt " << has_altitude << " alt " << altitude;
-
-    //    if (in_appimage_) // inside appimage
-    //        return {{y_pos, x_pos, has_altitude, altitude}, true};
-    //    else
-    //        return {{x_pos, y_pos, has_altitude, altitude}, true};
 }
 
 bool EvaluationTargetData::hasRefPosForTime (float tod) const
@@ -695,8 +465,6 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
     NullableVector<int>& altitude_vec = eval_data_.ref_buffer_->get<int>(eval_data_.ref_modec_name_);
     NullableVector<float>& tods = eval_data_.ref_buffer_->get<float>("tod");
 
-    //unsigned int buffer_size = ref_buffer_->size();
-
     bool found_prev {false};
     bool found_after {false};
 
@@ -705,7 +473,6 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
     auto prev_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
     assert (prev_it != ref_indexes_.end());
 
-    //auto after_it = find(ref_indexes_.begin(), ref_indexes_.end(), index);
     auto after_it = prev_it;
 
     while (prev_it != ref_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
@@ -778,7 +545,8 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
 
         if (tod_after <= tod_prev || tod_prev >= tod)
         {
-            loginf << "UGA tod_prev " << tod_prev << " tod " << tod << " tod_after " << tod_after;
+            logerr << "EvaluationTargetData::estimateRefAltitude tod_prev " << tod_prev << " tod "
+                   << tod << " tod_after " << tod_after;
             return {false, 0}; // should never happen
         }
 
@@ -1324,7 +1092,6 @@ void EvaluationTargetData::updateModeACodes() const
     {
         NullableVector<int>& mode_a_codes = eval_data_.tst_buffer_->get<int>(eval_data_.tst_modea_name_);
         map<int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(tst_indexes_);
-        //unsigned int null_cnt = mode_a_codes.nullValueIndexes(tst_rec_nums_).size();
 
         for (auto& ma_it : distinct_codes)
         {
@@ -1344,7 +1111,7 @@ void EvaluationTargetData::updateModeCMinMax() const
 {
     logdbg << "EvaluationTargetData: updateModeC: utn " << utn_;
 
-    // TODO garbled, valid flags
+    // garbled, valid flags?
 
     has_mode_c_ = false;
 
@@ -1403,8 +1170,6 @@ void EvaluationTargetData::updateModeCMinMax() const
 
 void EvaluationTargetData::updatePositionMinMax() const
 {
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
-
     has_pos_ = false;
 
     if (ref_data_.size())
@@ -1622,7 +1387,6 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
             ret.tod_ref2_ = 0.0;
         }
     }
-    //}
 
     addRefPositiosToMapping(ret);
 
