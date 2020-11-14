@@ -32,13 +32,19 @@ namespace EvaluationRequirement
         PositionAlongAcrossDetail(
                 float tod, EvaluationTargetPosition tst_pos,
                 bool has_ref_pos, EvaluationTargetPosition ref_pos,
-                QVariant pos_inside, QVariant distance, bool pos_ok,
-                int num_pos, int num_no_ref, int num_inside, int num_outside, int num_pos_ok, int num_pos_nok,
+                QVariant pos_inside, QVariant distance_along, bool distance_along_ok,
+                QVariant distance_across, bool distance_across_ok,
+                unsigned int num_pos, unsigned int num_no_ref, unsigned int num_inside, unsigned int num_outside,
+                unsigned int num_along_ok, unsigned int num_along_nok,
+                unsigned int num_across_ok, unsigned int num_across_nok,
                 const std::string& comment)
             : tod_(tod), tst_pos_(tst_pos), has_ref_pos_(has_ref_pos), ref_pos_(ref_pos),
-              distance_(distance), pos_ok_(pos_ok), pos_inside_(pos_inside),
-              num_pos_(num_pos), num_no_ref_(num_no_ref),
-              num_inside_(num_inside), num_outside_(num_outside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
+              distance_along_(distance_along), distance_along_ok_(distance_along_ok),
+              distance_across_(distance_across), distance_across_ok_(distance_across_ok),
+              pos_inside_(pos_inside), num_pos_(num_pos), num_no_ref_(num_no_ref),
+              num_inside_(num_inside), num_outside_(num_outside),
+              num_along_ok_(num_along_ok), num_along_nok_(num_along_nok),
+              num_across_ok_(num_across_ok), num_across_nok_(num_across_nok),
               comment_(comment)
         {
         }
@@ -50,17 +56,22 @@ namespace EvaluationRequirement
         bool has_ref_pos_ {false};
         EvaluationTargetPosition ref_pos_;
 
-        QVariant distance_ {0}; // only set if has_ref_pos_
-        bool pos_ok_ {false};
+        QVariant distance_along_ {0}; // only set if has_ref_pos_
+        bool distance_along_ok_ {false};
+        QVariant distance_across_ {0}; // only set if has_ref_pos_
+        bool distance_across_ok_ {false};
 
         QVariant pos_inside_ {false};
 
-        int num_pos_ {0};
-        int num_no_ref_ {0};
-        int num_inside_ {0};
-        int num_outside_ {0};
-        int num_pos_ok_ {0};
-        int num_pos_nok_ {0};
+        unsigned int num_pos_ {0};
+        unsigned int num_no_ref_ {0};
+        unsigned int num_inside_ {0};
+        unsigned int num_outside_ {0};
+
+        unsigned int num_along_ok_ {0};
+        unsigned int num_along_nok_ {0};
+        unsigned int num_across_ok_ {0};
+        unsigned int num_across_nok_ {0};
 
         std::string comment_;
     };

@@ -31,25 +31,27 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_pos, int num_no_ref, int num_pos_outside, int num_pos_inside, int num_pos_ok, int num_pos_nok,
-            double error_min, double error_max, double error_avg,
+            unsigned int num_pos, unsigned int num_no_ref,
+            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_along_ok, unsigned int num_along_nok,
+            unsigned int num_across_ok, unsigned int num_across_nok,
+            tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
             std::vector<EvaluationRequirement::PositionAlongAcrossDetail> details);
 
-    //virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    int numPos() const;
-    int numNoRef() const;
-    int numPosOutside() const;
-    int numPosInside() const;
-    int numPosOk() const;
-    int numPosNOk() const;
+    unsigned int numPos() const;
+    unsigned int numNoRef() const;
+    unsigned int numPosOutside() const;
+    unsigned int numPosInside() const;
+    unsigned int numAlongOk() const;
+    unsigned int numAlongNOk() const;
+    unsigned int numAcrossOk() const;
+    unsigned int numAcrossNOk() const;
 
-    double errorMin() const;
-    double errorMax() const;
-    double errorAvg() const;
+    const tuple<vector<double>, vector<double>, vector<double>, vector<double>>& distanceValues() const;
 
     std::vector<EvaluationRequirement::PositionAlongAcrossDetail>& details();
 
@@ -65,23 +67,37 @@ public:
 
 
 protected:
-    int num_pos_ {0};
-    int num_no_ref_ {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_ {0};
-    int num_pos_ok_ {0};
-    int num_pos_nok_ {0};
+    unsigned int num_pos_ {0};
+    unsigned int num_no_ref_ {0};
+    unsigned int num_pos_outside_ {0};
+    unsigned int num_pos_inside_ {0};
+    unsigned int num_along_ok_ {0};
+    unsigned int num_along_nok_ {0};
+    unsigned int num_across_ok_ {0};
+    unsigned int num_across_nok_ {0};
 
-    double error_min_ {0};
-    double error_max_ {0};
-    double error_avg_ {0};
+    tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
 
-    bool has_p_min_pos_ {false};
-    float p_min_pos_{0};
+    double along_min_ {0};
+    double along_max_ {0};
+    double along_avg_ {0};
+    double along_var_ {0};
+
+    double across_min_ {0};
+    double across_max_ {0};
+    double across_avg_ {0};
+    double across_var_ {0};
+
+    bool has_p_min_along_ {false};
+    float p_min_along_{0};
+
+    bool has_p_min_across_ {false};
+    float p_min_across_{0};
 
     std::vector<EvaluationRequirement::PositionAlongAcrossDetail> details_;
 
-    void updatePMinPos();
+    void update();
+
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table);

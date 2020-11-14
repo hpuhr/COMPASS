@@ -42,59 +42,91 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_pos, int num_no_ref, int num_pos_outside, int num_pos_inside, int num_pos_ok, int num_pos_nok,
-            double error_min, double error_max, double error_avg,
+            unsigned int num_pos, unsigned int num_no_ref,
+            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_along_ok, unsigned int num_along_nok,
+            unsigned int num_across_ok, unsigned int num_across_nok,
+            tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
             std::vector<EvaluationRequirement::PositionAlongAcrossDetail> details)
         : Single("SinglePositionAlongAcross", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-          num_pos_inside_(num_pos_inside), num_pos_ok_(num_pos_ok), num_pos_nok_(num_pos_nok),
-          error_min_(error_min), error_max_(error_max), error_avg_(error_avg),
+          num_pos_inside_(num_pos_inside), num_along_ok_(num_along_ok), num_along_nok_(num_along_nok),
+          num_across_ok_(num_across_ok), num_across_nok_(num_across_nok), distance_values_(distance_values),
           details_(details)
     {
-        updatePMinPos();
+        update();
     }
 
 
-    void SinglePositionAlongAcross::updatePMinPos()
+    void SinglePositionAlongAcross::update()
     {
+        loginf << "UGA Single " << get<0>(distance_values_).size();
+
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_pos_ok_ + num_pos_nok_);
 
-        if (num_pos_ - num_no_ref_ - num_pos_outside_)
+        assert (get<0>(distance_values_).size() == num_along_ok_+num_along_nok_);
+        assert (get<0>(distance_values_).size() == num_across_ok_+num_across_nok_);
+
+        unsigned int num_distances = get<0>(distance_values_).size();
+
+        // dx, dy, dalong, dacross
+        if (num_distances)
         {
-            assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
-            p_min_pos_ = (float)num_pos_ok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
-            has_p_min_pos_ = true;
+            vector<double>& along_vals = get<2>(distance_values_);
+            vector<double>& across_vals = get<3>(distance_values_);
+
+            along_min_ = *min_element(along_vals.begin(), along_vals.end());;
+            along_max_ = *max_element(along_vals.begin(), along_vals.end());;
+            along_avg_ = std::accumulate(along_vals.begin(), along_vals.end(), 0.0) / (float) num_distances;
+
+            along_var_ = 0;
+            for(auto val : along_vals)
+                along_var_ += pow(val - along_avg_, 2);
+            along_var_ /= (float)num_distances;
+
+            across_min_ = *min_element(across_vals.begin(), across_vals.end());;
+            across_max_ = *max_element(across_vals.begin(), across_vals.end());;
+            across_avg_ = std::accumulate(across_vals.begin(), across_vals.end(), 0.0) / (float) num_distances;
+
+            across_var_ = 0;
+            for(auto val : across_vals)
+                across_var_ += pow(val - across_avg_, 2);
+            across_var_ /= (float)num_distances;
+
+            assert (num_along_nok_ <= num_distances);
+            p_min_along_ = (float)num_along_nok_/(float)num_distances;
+            has_p_min_along_ = true;
+
+            assert (num_across_nok_ <= num_distances);
+            p_min_across_ = (float)num_across_nok_/(float)num_distances;
+            has_p_min_across_ = true;
 
             result_usable_ = true;
         }
         else
         {
-            p_min_pos_ = 0;
-            has_p_min_pos_ = false;
+            along_min_ = 0;
+            along_max_ = 0;
+            along_avg_ = 0;
+            along_var_ = 0;
+
+            across_min_ = 0;
+            across_max_ = 0;
+            across_avg_ = 0;
+            across_var_ = 0;
+
+            has_p_min_along_ = false;
+            p_min_along_ = 0;
+
+            has_p_min_across_ =false;
+            p_min_across_ = 0;
 
             result_usable_ = false;
         }
 
         updateUseFromTarget();
     }
-
-//    void SinglePositionAlongAcross::print()
-//    {
-//        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
-//                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
-//        assert (req);
-
-//        if (num_pos_)
-//            loginf << "SinglePositionAlongAcross: print: req. name " << req->name()
-//                   << " utn " << utn_
-//                   << " pd " << String::percentToString(100.0 * p_min_pos_)
-//                   << " passed " << (p_min_pos_ >= req->minimumProbability());
-//        else
-//            loginf << "SinglePositionAlongAcross: print: req. name " << req->name()
-//                   << " utn " << utn_ << " has no data";
-//    }
 
     void SinglePositionAlongAcross::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
@@ -118,7 +150,7 @@ namespace EvaluationRequirementResult
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 17,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
+                 "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
 
             addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
         }
@@ -127,7 +159,7 @@ namespace EvaluationRequirementResult
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 14,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
+                 "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"}, true, 10);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
         }
@@ -141,7 +173,7 @@ namespace EvaluationRequirementResult
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 17,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
+                     "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
 
                 addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
             }
@@ -150,7 +182,7 @@ namespace EvaluationRequirementResult
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 14,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
+                     "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"}, true, 10);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
             }
@@ -159,65 +191,80 @@ namespace EvaluationRequirementResult
 
     void SinglePositionAlongAcross::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
     {
-        QVariant pd_var;
+        QVariant p_along_var;
 
-        if (has_p_min_pos_)
-            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
+        if (has_p_min_along_)
+            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
 
-        //string utn_req_section_heading = getTargetRequirementSectionID();
+        QVariant p_across_var;
 
-        if (has_p_min_pos_)
+        if (has_p_min_across_)
+            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
+
+        // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+        // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"
+
+        if (has_p_min_along_)
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             Number::round(error_min_,2), Number::round(error_max_,2),
-             Number::round(error_avg_,2)}, this, {utn_});
+             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
+             num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
         else
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             {},{},{}}, this, {utn_});
+             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
+             num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToTableADSB (
             EvaluationResultsReport::SectionContentTable& target_table)
     {
-        QVariant pd_var;
+        QVariant p_along_var;
 
-        if (has_p_min_pos_)
-            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
+        if (has_p_min_along_)
+            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
 
-        //string utn_req_section_heading = getTargetRequirementSectionID();
+        QVariant p_across_var;
 
-        if (has_p_min_pos_)
+        if (has_p_min_across_)
+            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
+
+        // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+        // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"
+
+        if (has_p_min_along_)
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             Number::round(error_min_,2), Number::round(error_max_,2),
-             Number::round(error_avg_,2), target_->mopsVersionsStr().c_str(),
+             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
+             num_across_ok_, num_across_nok_, p_across_var, target_->mopsVersionsStr().c_str(),
              target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
         else
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_pos_ok_, num_pos_nok_, pd_var,
-             {},{},{}, target_->mopsVersionsStr().c_str(),
+             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
+             num_across_ok_, num_across_nok_, p_across_var, target_->mopsVersionsStr().c_str(),
              target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        QVariant pd_var;
+        QVariant p_along_var;
 
-        if (has_p_min_pos_)
-            pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
+        if (has_p_min_along_)
+            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
+
+        QVariant p_across_var;
+
+        if (has_p_min_across_)
+            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
 
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -229,17 +276,22 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(root_item);
 
+        // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+        // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"
+
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#POK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
-        utn_req_table.addRow({"#PNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
-        utn_req_table.addRow({"POK [%]", "Probability of acceptable position", pd_var}, this);
-        utn_req_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
-        utn_req_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
-        utn_req_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
+        utn_req_table.addRow({"#ACOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
+        utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
+                             this);
+        utn_req_table.addRow({"PACOK [%]", "Probability of acceptable along-track error", p_along_var}, this);
+        utn_req_table.addRow({"#ALOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
+        utn_req_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
+                             this);
+        utn_req_table.addRow({"PALOK [%]", "Probability of acceptable across-track error", p_across_var}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
@@ -252,12 +304,13 @@ namespace EvaluationRequirementResult
 
         string result {"Unknown"};
 
-        if (has_p_min_pos_)
-            result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
+        if (has_p_min_along_)
+            result = p_min_along_ >= req->minimumProbability() ? "Passed" : "Failed";
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 
-        if (has_p_min_pos_ && p_min_pos_ != 1.0)
+        if ((has_p_min_along_ && p_min_along_ != 1.0)
+                || (has_p_min_across_ && p_min_across_ != 1.0))
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());
@@ -275,28 +328,28 @@ namespace EvaluationRequirementResult
 
     void SinglePositionAlongAcross::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        if (!utn_req_section.hasTable(tr_details_table_name_))
-            utn_req_section.addTable(tr_details_table_name_, 12,
-            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
-             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
+//        if (!utn_req_section.hasTable(tr_details_table_name_))
+//            utn_req_section.addTable(tr_details_table_name_, 12,
+//            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
+//             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
 
-        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable(tr_details_table_name_);
+//        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+//                utn_req_section.getTable(tr_details_table_name_);
 
-        unsigned int detail_cnt = 0;
+//        unsigned int detail_cnt = 0;
 
-        for (auto& rq_det_it : details_)
-        {
-            utn_req_details_table.addRow(
-            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
-             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
-             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
-             rq_det_it.comment_.c_str()},
-                        this, detail_cnt);
+//        for (auto& rq_det_it : details_)
+//        {
+//            utn_req_details_table.addRow(
+//            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+//             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
+//             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
+//             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
+//             rq_det_it.comment_.c_str()},
+//                        this, detail_cnt);
 
-            ++detail_cnt;
-        }
+//            ++detail_cnt;
+//        }
     }
 
     bool SinglePositionAlongAcross::hasViewableData (
@@ -338,7 +391,7 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_window_longitude"] = 0.02;
             (*viewable_ptr)["time"] = detail.tod_;
 
-            if (!detail.pos_ok_)
+            if (!detail.distance_along_ok_ || !detail.distance_across_ok_)
                 (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
 
             return viewable_ptr;
@@ -357,7 +410,7 @@ namespace EvaluationRequirementResult
 
         for (auto& detail_it : details_)
         {
-            if (detail_it.pos_ok_)
+            if (detail_it.distance_along_ok_ && detail_it.distance_across_ok_)
                 continue;
 
             if (has_pos)
@@ -427,27 +480,38 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    double SinglePositionAlongAcross::errorMin() const
+    unsigned int SinglePositionAlongAcross::numAlongOk() const
     {
-        return error_min_;
+        return num_along_ok_;
     }
 
-    double SinglePositionAlongAcross::errorMax() const
+    unsigned int SinglePositionAlongAcross::numAlongNOk() const
     {
-        return error_max_;
+        return num_along_nok_;
     }
 
-    double SinglePositionAlongAcross::errorAvg() const
+    unsigned int SinglePositionAlongAcross::numAcrossOk() const
     {
-        return error_avg_;
+        return num_across_ok_;
     }
 
-    int SinglePositionAlongAcross::numPosOutside() const
+    unsigned int SinglePositionAlongAcross::numAcrossNOk() const
+    {
+        return num_across_nok_;
+    }
+
+    const tuple<vector<double>, vector<double>, vector<double>, vector<double>>&
+    SinglePositionAlongAcross::distanceValues() const
+    {
+        return distance_values_;
+    }
+
+    unsigned int SinglePositionAlongAcross::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    int SinglePositionAlongAcross::numPosInside() const
+    unsigned int SinglePositionAlongAcross::numPosInside() const
     {
         return num_pos_inside_;
     }
@@ -457,24 +521,14 @@ namespace EvaluationRequirementResult
         return make_shared<JoinedPositionAlongAcross> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SinglePositionAlongAcross::numPos() const
+    unsigned int SinglePositionAlongAcross::numPos() const
     {
         return num_pos_;
     }
 
-    int SinglePositionAlongAcross::numNoRef() const
+    unsigned int SinglePositionAlongAcross::numNoRef() const
     {
         return num_no_ref_;
-    }
-
-    int SinglePositionAlongAcross::numPosOk() const
-    {
-        return num_pos_ok_;
-    }
-
-    int SinglePositionAlongAcross::numPosNOk() const
-    {
-        return num_pos_nok_;
     }
 
     std::vector<EvaluationRequirement::PositionAlongAcrossDetail>& SinglePositionAlongAcross::details()

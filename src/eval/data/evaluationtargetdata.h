@@ -103,9 +103,11 @@ public:
     std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
     // bool ok
+    std::pair<EvaluationTargetVelocity, bool> interpolatedRefSpdForTime (float tod, float d_max) const;
 
     bool hasRefPosForTime (float tod) const;
     EvaluationTargetPosition refPosForTime (float tod) const;
+    EvaluationTargetVelocity refSpdForTime (float tod) const;
     std::pair<bool, float> estimateRefAltitude (float tod, unsigned int index) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 

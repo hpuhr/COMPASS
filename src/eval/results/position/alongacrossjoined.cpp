@@ -63,67 +63,93 @@ namespace EvaluationRequirementResult
         if (!single_result->use())
             return;
 
-        unsigned int num_distance = num_pos_ok_+num_pos_nok_;
-        unsigned int other_num_distance = single_result->numPosOk()+single_result->numPosNOk();
-
         num_pos_ += single_result->numPos();
         num_no_ref_ += single_result->numNoRef();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
-        num_pos_ok_ += single_result->numPosOk();
-        num_pos_nok_ += single_result->numPosNOk();
+        num_along_ok_ += single_result->numAlongOk();
+        num_along_nok_ += single_result->numAlongNOk();
+        num_across_ok_ += single_result->numAcrossOk();
+        num_across_nok_ += single_result->numAcrossNOk();
 
-        if (first_)
-        {
-            error_min_ = single_result->errorMin();
-            error_max_ = single_result->errorMax();
-            first_ = false;
-        }
-        else
-        {
-            error_min_ = min(error_min_, single_result->errorMin());
-            error_max_ = max(error_max_, single_result->errorMax());
-        }
+        const tuple<vector<double>, vector<double>, vector<double>, vector<double>>& other_distance_values =
+                single_result->distanceValues();
 
-        if (num_distance+other_num_distance)
-            error_avg_ = (float)(error_avg_*num_distance + single_result->errorAvg()*other_num_distance)
-                    /(float)(num_distance+other_num_distance);
+        get<0>(distance_values_).insert(get<0>(distance_values_).end(),
+                                        get<0>(other_distance_values).begin(), get<0>(other_distance_values).end());
+        get<1>(distance_values_).insert(get<1>(distance_values_).end(),
+                                        get<1>(other_distance_values).begin(), get<1>(other_distance_values).end());
+        get<2>(distance_values_).insert(get<2>(distance_values_).end(),
+                                        get<2>(other_distance_values).begin(), get<2>(other_distance_values).end());
+        get<3>(distance_values_).insert(get<3>(distance_values_).end(),
+                                        get<3>(other_distance_values).begin(), get<3>(other_distance_values).end());
 
-        updatePMinPos();
+        update();
     }
 
-    void JoinedPositionAlongAcross::updatePMinPos()
+    void JoinedPositionAlongAcross::update()
     {
+        loginf << "UGA Joined " << get<0>(distance_values_).size();
+
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_pos_ok_ + num_pos_nok_);
 
-        if (num_pos_ - num_no_ref_ - num_pos_outside_)
+        assert (get<0>(distance_values_).size() == num_along_ok_+num_along_nok_);
+        assert (get<0>(distance_values_).size() == num_across_ok_+num_across_nok_);
+
+        unsigned int num_distances = get<0>(distance_values_).size();
+
+        // dx, dy, dalong, dacross
+        if (num_distances)
         {
-            assert (num_pos_ == num_no_ref_ + num_pos_outside_+ num_pos_ok_ + num_pos_nok_);
-            p_min_pos_ = (float)num_pos_ok_/(float)(num_pos_ - num_no_ref_ - num_pos_outside_);
-            has_p_min_pos_ = true;
+            vector<double>& along_vals = get<2>(distance_values_);
+            vector<double>& across_vals = get<3>(distance_values_);
+
+            along_min_ = *min_element(along_vals.begin(), along_vals.end());;
+            along_max_ = *max_element(along_vals.begin(), along_vals.end());;
+            along_avg_ = std::accumulate(along_vals.begin(), along_vals.end(), 0.0) / (float) num_distances;
+
+            along_var_ = 0;
+            for(auto val : along_vals)
+                along_var_ += pow(val - along_avg_, 2);
+            along_var_ /= (float)num_distances;
+
+            across_min_ = *min_element(across_vals.begin(), across_vals.end());;
+            across_max_ = *max_element(across_vals.begin(), across_vals.end());;
+            across_avg_ = std::accumulate(across_vals.begin(), across_vals.end(), 0.0) / (float) num_distances;
+
+            across_var_ = 0;
+            for(auto val : across_vals)
+                across_var_ += pow(val - across_avg_, 2);
+            across_var_ /= (float)num_distances;
+
+            assert (num_along_nok_ <= num_distances);
+            p_min_along_ = (float)num_along_nok_/(float)num_distances;
+            has_p_min_along_ = true;
+
+            assert (num_across_nok_ <= num_distances);
+            p_min_across_ = (float)num_across_nok_/(float)num_distances;
+            has_p_min_across_ = true;
         }
         else
         {
-            p_min_pos_ = 0;
-            has_p_min_pos_ = false;
+            along_min_ = 0;
+            along_max_ = 0;
+            along_avg_ = 0;
+            along_var_ = 0;
+
+            across_min_ = 0;
+            across_max_ = 0;
+            across_avg_ = 0;
+            across_var_ = 0;
+
+            has_p_min_along_ = false;
+            p_min_along_ = 0;
+
+            has_p_min_across_ = false;
+            p_min_across_ = 0;
         }
     }
-
-//    void JoinedPositionAlongAcross::print()
-//    {
-//        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
-//                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
-//        assert (req);
-
-//        if (num_pos_)
-//            loginf << "JoinedPositionAlongAcross: print: req. name " << req->name()
-//                   << " pd " << String::percentToString(100.0 * p_min_pos_)
-//                   << " passed " << (p_min_pos_ >= req->minimumProbability());
-//        else
-//            loginf << "JoinedPositionAlongAcross: print: req. name " << req->name() << " has no data";
-//    }
 
     void JoinedPositionAlongAcross::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -153,23 +179,45 @@ namespace EvaluationRequirementResult
 
         string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
-        // pd
-        QVariant pd_var;
-
-        string result {"Unknown"};
-
-        if (has_p_min_pos_)
+        // along
         {
-            pd_var = String::percentToString(p_min_pos_ * 100.0).c_str();
+            QVariant pd_var;
 
-            result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
+            string result {"Unknown"};
+
+            if (has_p_min_along_)
+            {
+                pd_var = String::percentToString(p_min_along_ * 100.0).c_str();
+
+                result = p_min_along_ >= req->minimumProbability() ? "Passed" : "Failed";
+            }
+
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                             +(requirement_->shortname()+" Along").c_str(),
+                             result_id_.c_str(), {num_along_ok_+num_along_nok_},
+                             pd_var, condition.c_str(), result.c_str()}, this, {});
         }
 
-        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                         +requirement_->shortname().c_str(),
-                         result_id_.c_str(), {num_pos_ok_+num_pos_nok_},
-                         pd_var, condition.c_str(), result.c_str()}, this, {});
+        // across
+        {
+            QVariant pd_var;
+
+            string result {"Unknown"};
+
+            if (has_p_min_across_)
+            {
+                pd_var = String::percentToString(p_min_across_ * 100.0).c_str();
+
+                result = p_min_across_ >= req->minimumProbability() ? "Passed" : "Failed";
+            }
+
+            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+            ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                             +(requirement_->shortname()+" Across").c_str(),
+                             result_id_.c_str(), {num_across_ok_+num_across_nok_},
+                             pd_var, condition.c_str(), result.c_str()}, this, {});
+        }
     }
 
     void JoinedPositionAlongAcross::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -184,42 +232,71 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
+        sec_det_table.addRow({"Use", "To be used in results", use_}, this);
+        sec_det_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
+        sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
+        sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+        sec_det_table.addRow({"#ACOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
+        sec_det_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
+                             this);
+
+
         // condition
         std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
                 std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-        // pd
-        QVariant pd_var;
-
-        string result {"Unknown"};
-
-        if (has_p_min_pos_)
+        // along
         {
-            pd_var = String::percentToString(p_min_pos_ * 100.0).c_str();
+            QVariant pd_var;
 
-            result = p_min_pos_ >= req->minimumProbability() ? "Passed" : "Failed";
+            if (has_p_min_along_)
+                pd_var = String::percentToString(p_min_along_ * 100.0).c_str();
+
+            sec_det_table.addRow({"PACOK [%]", "Probability of acceptable along-track error", pd_var}, this);
+
+            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+            sec_det_table.addRow({"Condition Along", {}, condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_min_along_)
+                result = p_min_along_ >= req->minimumProbability() ? "Passed" : "Failed";
+
+            sec_det_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
         }
 
-        sec_det_table.addRow({"#Pos [1]", "Number of updates", num_pos_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
-        sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
-        sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        sec_det_table.addRow({"#POK [1]", "Number of updates with acceptable distance", num_pos_ok_}, this);
-        sec_det_table.addRow({"#PNOK [1]", "Number of updates with unacceptable distance ", num_pos_nok_}, this);
-        sec_det_table.addRow({"POK [%]", "Probability of acceptable position", pd_var}, this);
+        sec_det_table.addRow({"#ALOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
+        sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
+                             this);
 
-        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
-        sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
-        sec_det_table.addRow({"EMin [m]", "Distance Error minimum", error_min_}, this);
-        sec_det_table.addRow({"EMax [m]", "Distance Error maxmimum", error_max_}, this);
-        sec_det_table.addRow({"EAvg [m]", "Distance Error average", error_avg_}, this);
+        // across
+        {
+            QVariant pd_var;
+
+            if (has_p_min_across_)
+                pd_var = String::percentToString(p_min_across_ * 100.0).c_str();
+
+            sec_det_table.addRow({"PALOK [%]", "Probability of acceptable across-track error", pd_var}, this);
+
+            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+            sec_det_table.addRow({"Condition Across", {}, condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_min_across_)
+                result = p_min_across_ >= req->minimumProbability() ? "Passed" : "Failed";
+
+            sec_det_table.addRow({"Condition Along Across", "", result.c_str()}, this);
+        }
 
         // figure
-        if (has_p_min_pos_ && p_min_pos_ != 1.0)
+        if ((has_p_min_along_ && p_min_along_ != 1.0)
+                || (has_p_min_across_ && p_min_across_ != 1.0))
         {
             sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                      getErrorsViewable());
@@ -295,23 +372,21 @@ namespace EvaluationRequirementResult
 
     void JoinedPositionAlongAcross::updatesToUseChanges()
     {
-        loginf << "JoinedPositionAlongAcross: updatesToUseChanges: prev num_pos " << num_pos_
-               << " num_no_ref " << num_no_ref_ << " num_pos_ok " << num_pos_ok_ << " num_pos_nok " << num_pos_nok_;
-
-        if (num_pos_)
-            loginf << "JoinedPositionAlongAcross: updatesToUseChanges: prev result " << result_id_
-                   << " pd " << 100.0 * p_min_pos_;
-        else
-            loginf << "JoinedPositionAlongAcross: updatesToUseChanges: prev result " << result_id_ << " has no data";
+        loginf << "JoinedPositionAlongAcross: updatesToUseChanges";
 
         num_pos_ = 0;
         num_no_ref_ = 0;
         num_pos_outside_ = 0;
         num_pos_inside_ = 0;
-        num_pos_ok_ = 0;
-        num_pos_nok_ = 0;
+        num_along_ok_ = 0;
+        num_along_nok_ = 0;
+        num_across_ok_ = 0;
+        num_across_nok_ = 0;
 
-        first_ = true;
+        get<0>(distance_values_).clear();
+        get<1>(distance_values_).clear();
+        get<2>(distance_values_).clear();
+        get<3>(distance_values_).clear();
 
         for (auto result_it : results_)
         {
@@ -321,15 +396,6 @@ namespace EvaluationRequirementResult
 
             addToValues(result);
         }
-
-        loginf << "JoinedPositionAlongAcross: updatesToUseChanges: updt num_pos " << num_pos_
-               << " num_no_ref " << num_no_ref_ << " num_pos_ok " << num_pos_ok_ << " num_pos_nok " << num_pos_nok_;
-
-        if (num_pos_)
-            loginf << "JoinedPositionAlongAcross: updatesToUseChanges: updt result " << result_id_
-                   << " pd " << 100.0 * p_min_pos_;
-        else
-            loginf << "JoinedPositionAlongAcross: updatesToUseChanges: updt result " << result_id_ << " has no data";
     }
 
 }

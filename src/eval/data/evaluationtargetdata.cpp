@@ -29,6 +29,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 using namespace Utils;
@@ -345,17 +346,6 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, false};
 
-    if (mapping.has_ref1_ && !mapping.has_ref2_) // exact time
-    {
-        assert (mapping.tod_ref1_ == tod);
-
-        //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 1pos tod "
-        //        << String::timeStringFromDouble(tod);
-
-        return {refPosForTime(tod), true};
-    }
-
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
         assert (mapping.tod_ref1_ <= tod);
@@ -392,6 +382,56 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
         //                   << " alt " << mapping.pos_ref_.altitude_;
 
         return {mapping.pos_ref_, true};
+    }
+
+    return {{}, false};
+}
+
+std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefSpdForTime (
+        float tod, float d_max) const
+{
+    assert (test_data_mappings_.count(tod));
+    TstDataMapping& mapping = test_data_mappings_.at(tod);
+
+    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+        return {{}, false};
+
+    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
+    {
+        assert (mapping.tod_ref1_ <= tod);
+        assert (mapping.tod_ref2_ >= tod);
+
+        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+        {
+            //            if (utn_ == debug_utn)
+            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+
+            return {{}, false};
+        }
+
+        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+        {
+            //            if (utn_ == debug_utn)
+            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
+
+            return {{}, false};
+        }
+
+        if (!mapping.has_ref_pos_)
+        {
+            //            if (utn_ == debug_utn)
+            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+
+            return {{}, false};
+        }
+
+        //        if (utn_ == debug_utn)
+        //            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 2pos tod " << String::timeStringFromDouble(tod)
+        //                   << " has_alt " << mapping.pos_ref_.has_altitude_
+        //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
+        //                   << " alt " << mapping.pos_ref_.altitude_;
+
+        return {mapping.spd_ref_, true};
     }
 
     return {{}, false};
@@ -1413,6 +1453,11 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
         {
             mapping.has_ref_pos_ = true;
             mapping.pos_ref_ = pos1;
+
+            mapping.spd_ref_.x_ = NAN;
+            mapping.spd_ref_.y_ = NAN;
+            mapping.spd_ref_.track_angle_ = NAN;
+            mapping.spd_ref_.speed_ = NAN;
         }
         else
         {
@@ -1517,6 +1562,11 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                         mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
                     else
                         mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
+
+                    mapping.spd_ref_.x_ = v_x;
+                    mapping.spd_ref_.y_ = v_y;
+                    mapping.spd_ref_.track_angle_ = atan2(v_y,v_x);
+                    mapping.spd_ref_.speed_ = sqrt(pow(v_x, 2) + pow(v_y, 2));
                 }
             }
         }

@@ -22,6 +22,8 @@
 
 namespace EvaluationRequirementResult
 {
+    using namespace std;
+
     class SinglePositionAlongAcross;
 
     class JoinedPositionAlongAcross : public Joined
@@ -49,23 +51,36 @@ namespace EvaluationRequirementResult
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     protected:
-        int num_pos_ {0};
-        int num_no_ref_ {0};
-        int num_pos_outside_ {0};
-        int num_pos_inside_ {0};
-        int num_pos_ok_ {0};
-        int num_pos_nok_ {0};
+        unsigned int num_pos_ {0};
+        unsigned int num_no_ref_ {0};
+        unsigned int num_pos_outside_ {0};
+        unsigned int num_pos_inside_ {0};
+        unsigned int num_along_ok_ {0};
+        unsigned int num_along_nok_ {0};
+        unsigned int num_across_ok_ {0};
+        unsigned int num_across_nok_ {0};
 
-        bool first_ {true};
-        double error_min_ {0};
-        double error_max_ {0};
-        double error_avg_ {0};
+        tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
 
-        bool has_p_min_pos_ {false};
-        float p_min_pos_{0};
+        double along_min_ {0};
+        double along_max_ {0};
+        double along_avg_ {0};
+        double along_var_ {0};
+
+        double across_min_ {0};
+        double across_max_ {0};
+        double across_avg_ {0};
+        double across_var_ {0};
+
+        bool has_p_min_along_ {false};
+        float p_min_along_{0};
+
+        bool has_p_min_across_ {false};
+        float p_min_across_{0};
 
         void addToValues (std::shared_ptr<SinglePositionAlongAcross> single_result);
-        void updatePMinPos();
+        void update();
+
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 

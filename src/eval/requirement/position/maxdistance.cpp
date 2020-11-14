@@ -63,12 +63,12 @@ namespace EvaluationRequirement
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
-        int num_pos {0};
-        int num_no_ref {0};
-        int num_pos_outside {0};
-        int num_pos_inside {0};
-        int num_pos_ok {0};
-        int num_pos_nok {0};
+        unsigned int num_pos {0};
+        unsigned int num_no_ref {0};
+        unsigned int num_pos_outside {0};
+        unsigned int num_pos_inside {0};
+        unsigned int num_pos_ok {0};
+        unsigned int num_pos_nok {0};
 
         std::vector<EvaluationRequirement::PositionMaxDistanceDetail> details;
 
@@ -164,7 +164,7 @@ namespace EvaluationRequirement
             if (!ok)
             {
                 details.push_back({tod, tst_pos,
-                                   false, {},
+                                   true, ref_pos,
                                    is_inside, {}, true, // pos_inside, distance, pos_ok
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
                                    "Position transformation error"});
