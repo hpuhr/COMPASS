@@ -89,8 +89,6 @@ namespace EvaluationRequirementResult
 
     void JoinedPositionAlongAcross::update()
     {
-        loginf << "UGA Joined " << get<0>(distance_values_).size();
-
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
@@ -123,12 +121,12 @@ namespace EvaluationRequirementResult
                 across_var_ += pow(val - across_avg_, 2);
             across_var_ /= (float)num_distances;
 
-            assert (num_along_nok_ <= num_distances);
-            p_min_along_ = (float)num_along_nok_/(float)num_distances;
+            assert (num_along_ok_ <= num_distances);
+            p_min_along_ = (float)num_along_ok_/(float)num_distances;
             has_p_min_along_ = true;
 
-            assert (num_across_nok_ <= num_distances);
-            p_min_across_ = (float)num_across_nok_/(float)num_distances;
+            assert (num_across_ok_ <= num_distances);
+            p_min_across_ = (float)num_across_ok_/(float)num_distances;
             has_p_min_across_ = true;
         }
         else
@@ -227,6 +225,10 @@ namespace EvaluationRequirementResult
         if (!sector_section.hasTable("sector_details_table"))
             sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
 
+        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
+                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
+        assert (req);
+
         EvaluationResultsReport::SectionContentTable& sec_det_table =
                 sector_section.getTable("sector_details_table");
 
@@ -237,24 +239,31 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
         sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        sec_det_table.addRow({"#ACOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
-        sec_det_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
+
+        // along
+        sec_det_table.addRow({"Min Along [m]", "Minimum of along-track error",
+                              String::doubleToStringPrecision(along_min_,2).c_str()}, this);
+        sec_det_table.addRow({"Max Along [m]", "Maximum of along-track error",
+                              String::doubleToStringPrecision(along_max_,2).c_str()}, this);
+        sec_det_table.addRow({"Average Along [m]", "Average of along-track error",
+                              String::doubleToStringPrecision(along_avg_,2).c_str()}, this);
+        sec_det_table.addRow({"Standard Deviation Along [m]", "Standard Deviation of along-track error",
+                              String::doubleToStringPrecision(sqrt(along_var_),2).c_str()}, this);
+        sec_det_table.addRow({"Variance Along [m]", "Variance of along-track error",
+                              String::doubleToStringPrecision(along_var_,2).c_str()}, this);
+        sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
+        sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
                              this);
 
 
         // condition
-        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
-                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
-        assert (req);
-
-        // along
         {
             QVariant pd_var;
 
             if (has_p_min_along_)
                 pd_var = String::percentToString(p_min_along_ * 100.0).c_str();
 
-            sec_det_table.addRow({"PACOK [%]", "Probability of acceptable along-track error", pd_var}, this);
+            sec_det_table.addRow({"PALOK [%]", "Probability of acceptable along-track error", pd_var}, this);
 
             string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
@@ -274,13 +283,29 @@ namespace EvaluationRequirementResult
 
 
         // across
+        sec_det_table.addRow({"Min Across [m]", "Minimum of across-track error",
+                              String::doubleToStringPrecision(across_min_,2).c_str()}, this);
+        sec_det_table.addRow({"Max Across [m]", "Maximum of across-track error",
+                              String::doubleToStringPrecision(across_max_,2).c_str()}, this);
+        sec_det_table.addRow({"Average Across [m]", "Average of across-track error",
+                              String::doubleToStringPrecision(across_avg_,2).c_str()}, this);
+        sec_det_table.addRow({"Standard Deviation Across [m]", "Standard Deviation of across-track error",
+                              String::doubleToStringPrecision(sqrt(across_var_),2).c_str()}, this);
+        sec_det_table.addRow({"Variance Across [m]", "Variance of across-track error",
+                              String::doubleToStringPrecision(across_var_,2).c_str()}, this);
+
+        sec_det_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
+        sec_det_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
+                             this);
+
+        // condition
         {
             QVariant pd_var;
 
             if (has_p_min_across_)
                 pd_var = String::percentToString(p_min_across_ * 100.0).c_str();
 
-            sec_det_table.addRow({"PALOK [%]", "Probability of acceptable across-track error", pd_var}, this);
+            sec_det_table.addRow({"PACOK [%]", "Probability of acceptable across-track error", pd_var}, this);
 
             string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
@@ -291,7 +316,7 @@ namespace EvaluationRequirementResult
             if (has_p_min_across_)
                 result = p_min_across_ >= req->minimumProbability() ? "Passed" : "Failed";
 
-            sec_det_table.addRow({"Condition Along Across", "", result.c_str()}, this);
+            sec_det_table.addRow({"Condition Across", "", result.c_str()}, this);
         }
 
         // figure

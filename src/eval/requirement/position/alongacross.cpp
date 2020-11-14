@@ -200,7 +200,7 @@ namespace EvaluationRequirement
             angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
 
             d_along = distance * cos(angle);
-            d_across = distance * cos(angle);
+            d_across = distance * sin(angle);
 
             ++num_distances;
 

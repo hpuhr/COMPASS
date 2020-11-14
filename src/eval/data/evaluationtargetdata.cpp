@@ -1400,7 +1400,7 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
         ret.tod_ref2_ = lb_it->first;
 
         // search lower values by decrementing iterator
-        while (lb_it != ref_data_.end() && tod < lb_it->first)
+        while (lb_it != ref_data_.end() && (tod < lb_it->first || lb_it->first == ret.tod_ref2_))
         {
             if (lb_it == ref_data_.begin()) // exit condition on first value
             {
@@ -1413,7 +1413,7 @@ TstDataMapping EvaluationTargetData::calculateTestDataMapping(float tod) const
             lb_it--;
         }
 
-        if (lb_it != ref_data_.end()) // lower tod found
+        if (lb_it != ref_data_.end() && lb_it->first != ret.tod_ref2_) // lower tod found
         {
             assert (tod >= lb_it->first);
 
@@ -1447,7 +1447,7 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
         logdbg << "EvaluationTargetData: addRefPositiosToMapping: d_t " << d_t;
 
-        assert (d_t >= 0);
+        assert (d_t > 0);
 
         if (pos1.latitude_ == pos2.latitude_ && pos1.longitude_ == pos2.longitude_) // same pos
         {

@@ -60,8 +60,6 @@ namespace EvaluationRequirementResult
 
     void SinglePositionAlongAcross::update()
     {
-        loginf << "UGA Single " << get<0>(distance_values_).size();
-
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
@@ -76,8 +74,8 @@ namespace EvaluationRequirementResult
             vector<double>& along_vals = get<2>(distance_values_);
             vector<double>& across_vals = get<3>(distance_values_);
 
-            along_min_ = *min_element(along_vals.begin(), along_vals.end());;
-            along_max_ = *max_element(along_vals.begin(), along_vals.end());;
+            along_min_ = *min_element(along_vals.begin(), along_vals.end());
+            along_max_ = *max_element(along_vals.begin(), along_vals.end());
             along_avg_ = std::accumulate(along_vals.begin(), along_vals.end(), 0.0) / (float) num_distances;
 
             along_var_ = 0;
@@ -94,12 +92,16 @@ namespace EvaluationRequirementResult
                 across_var_ += pow(val - across_avg_, 2);
             across_var_ /= (float)num_distances;
 
-            assert (num_along_nok_ <= num_distances);
-            p_min_along_ = (float)num_along_nok_/(float)num_distances;
+//            loginf << "UGA utn " << utn_ << " along_avg " << along_avg_ << " along_var " << along_var_
+//                   << " across_avg " << across_avg_ << " across_var " << across_var_
+//                   << " num_distances " << num_distances;
+
+            assert (num_along_ok_ <= num_distances);
+            p_min_along_ = (float)num_along_ok_/(float)num_distances;
             has_p_min_along_ = true;
 
-            assert (num_across_nok_ <= num_distances);
-            p_min_across_ = (float)num_across_nok_/(float)num_distances;
+            assert (num_across_ok_ <= num_distances);
+            p_min_across_ = (float)num_across_ok_/(float)num_distances;
             has_p_min_across_ = true;
 
             result_usable_ = true;
@@ -148,18 +150,21 @@ namespace EvaluationRequirementResult
         if (eval_man_.showAdsbInfo())
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 17,
+                tgt_overview_section.addTable(target_table_name_, 21,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                 "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
+                 "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
             addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
         }
         else
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 14,
+                tgt_overview_section.addTable(target_table_name_, 18,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"}, true, 10);
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK"
+                 "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
         }
@@ -171,18 +176,21 @@ namespace EvaluationRequirementResult
             if (eval_man_.showAdsbInfo())
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 17,
+                    sum_section.addTable(target_table_name_, 21,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                     "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
+                     "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
                 addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
             }
             else
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 14,
+                    sum_section.addTable(target_table_name_, 18,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"}, true, 10);
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK"
+                     "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
             }
@@ -209,15 +217,17 @@ namespace EvaluationRequirementResult
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
-             num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
+             target_->modeCMaxStr().c_str(),
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
         else
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
-             num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
+             target_->modeCMaxStr().c_str(),
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_ok_, num_along_nok_, p_along_var,
+             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToTableADSB (
@@ -241,35 +251,33 @@ namespace EvaluationRequirementResult
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
-             num_across_ok_, num_across_nok_, p_across_var, target_->mopsVersionsStr().c_str(),
-             target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
+             target_->modeCMaxStr().c_str(),
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
+             target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
+                        this, {utn_});
         else
             target_table.addRow(
             {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(), num_along_ok_, num_along_nok_, p_along_var,
-             num_across_ok_, num_across_nok_, p_across_var, target_->mopsVersionsStr().c_str(),
-             target_->nucpNicStr().c_str(), target_->nacpStr().c_str()}, this, {utn_});
+             target_->modeCMaxStr().c_str(),
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
+             target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
+                        this, {utn_});
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        QVariant p_along_var;
-
-        if (has_p_min_along_)
-            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
-
-        QVariant p_across_var;
-
-        if (has_p_min_across_)
-            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
-
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
         if (!utn_req_section.hasTable("details_overview_table"))
             utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+
+        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
+                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
+        assert (req);
 
         EvaluationResultsReport::SectionContentTable& utn_req_table =
                 utn_req_section.getTable("details_overview_table");
@@ -284,30 +292,81 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference positions", num_no_ref_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#ACOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
-        utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
+
+        // along
+        utn_req_table.addRow({"Min Along [m]", "Minimum of along-track error",
+                              String::doubleToStringPrecision(along_min_,2).c_str()}, this);
+        utn_req_table.addRow({"Max Along [m]", "Maximum of along-track error",
+                              String::doubleToStringPrecision(along_max_,2).c_str()}, this);
+        utn_req_table.addRow({"ALAvg [m]", "Average of along-track error",
+                              String::doubleToStringPrecision(along_avg_,2).c_str()}, this);
+        utn_req_table.addRow({"ALSDev Along [m]", "Standard Deviation of along-track error",
+                              String::doubleToStringPrecision(sqrt(along_var_),2).c_str()}, this);
+        utn_req_table.addRow({"Variance Along [m]", "Variance of along-track error",
+                              String::doubleToStringPrecision(along_var_,2).c_str()}, this);
+        utn_req_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
+        utn_req_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
                              this);
-        utn_req_table.addRow({"PACOK [%]", "Probability of acceptable along-track error", p_along_var}, this);
-        utn_req_table.addRow({"#ALOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
-        utn_req_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
-                             this);
-        utn_req_table.addRow({"PALOK [%]", "Probability of acceptable across-track error", p_across_var}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::PositionAlongAcross> req =
-                std::static_pointer_cast<EvaluationRequirement::PositionAlongAcross>(requirement_);
-        assert (req);
+        {
+            QVariant pd_var;
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+            if (has_p_min_along_)
+                pd_var = String::percentToString(p_min_along_ * 100.0).c_str();
 
-        utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
+            utn_req_table.addRow({"PALOK [%]", "Probability of acceptable along-track error", pd_var}, this);
 
-        string result {"Unknown"};
+            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
-        if (has_p_min_along_)
-            result = p_min_along_ >= req->minimumProbability() ? "Passed" : "Failed";
+            utn_req_table.addRow({"Condition Along", {}, condition.c_str()}, this);
 
-        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+            string result {"Unknown"};
+
+            if (has_p_min_along_)
+                result = p_min_along_ >= req->minimumProbability() ? "Passed" : "Failed";
+
+            utn_req_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
+        }
+
+        // across
+        utn_req_table.addRow({"Min Across [m]", "Minimum of across-track error",
+                              String::doubleToStringPrecision(across_min_,2).c_str()}, this);
+        utn_req_table.addRow({"Max Across [m]", "Maximum of across-track error",
+                              String::doubleToStringPrecision(across_max_,2).c_str()}, this);
+        utn_req_table.addRow({"ACAvg [m]", "Average of across-track error",
+                              String::doubleToStringPrecision(across_avg_,2).c_str()}, this);
+        utn_req_table.addRow({"ACSDev Across [m]", "Standard Deviation of across-track error",
+                              String::doubleToStringPrecision(sqrt(across_var_),2).c_str()}, this);
+        utn_req_table.addRow({"Variance Across [m]", "Variance of across-track error",
+                              String::doubleToStringPrecision(across_var_,2).c_str()}, this);
+
+        utn_req_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
+        utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
+                             this);
+
+        // condition
+        {
+            QVariant pd_var;
+
+            if (has_p_min_across_)
+                pd_var = String::percentToString(p_min_across_ * 100.0).c_str();
+
+            utn_req_table.addRow({"PACOK [%]", "Probability of acceptable across-track error", pd_var}, this);
+
+            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+
+            utn_req_table.addRow({"Condition Across", {}, condition.c_str()}, this);
+
+            string result {"Unknown"};
+
+            if (has_p_min_across_)
+                result = p_min_across_ >= req->minimumProbability() ? "Passed" : "Failed";
+
+            utn_req_table.addRow({"Condition Across", "", result.c_str()}, this);
+        }
+
+
 
         if ((has_p_min_along_ && p_min_along_ != 1.0)
                 || (has_p_min_across_ && p_min_across_ != 1.0))
