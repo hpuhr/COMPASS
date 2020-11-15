@@ -33,4 +33,25 @@ protected:
     void updateIfRequired(double lat1, double long1);
 };
 
+class FixedTransformation
+{
+public:
+    FixedTransformation(double lat1, double long1);
+    ~FixedTransformation();
+
+    std::tuple<bool, double, double> distanceCart (double lat2, double long2);
+    // ok, dist x, dist y
+    std::tuple<bool, double, double> wgsAddCartOffset (double x_pos2, double y_pos2);
+    // ok, lat, long
+
+protected:
+    static bool in_appimage_;
+    static const double max_wgs_dist_;
+
+    std::unique_ptr<OGRSpatialReference> wgs84_;
+    std::unique_ptr<OGRSpatialReference> local_;
+    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart_;
+    std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo_;
+};
+
 #endif // TRANSFORMATION_H

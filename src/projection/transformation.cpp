@@ -146,3 +146,91 @@ void Transformation::updateIfRequired(double lat1, double long1)
         ogr_cart2geo_.reset(OGRCreateCoordinateTransformation(local_.get(), wgs84_.get()));
     }
 }
+
+
+//////////////////////////////////////////////
+bool FixedTransformation::in_appimage_ {getenv("APPDIR")};
+const double FixedTransformation::max_wgs_dist_ {0.5};
+
+FixedTransformation::FixedTransformation(double lat1, double long1)
+    : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+{
+    wgs84_->SetWellKnownGeogCS("WGS84");
+
+    local_->SetStereographic(lat1, long1, 1.0, 0.0, 0.0);
+
+    ogr_geo2cart_.reset(OGRCreateCoordinateTransformation(wgs84_.get(), local_.get()));
+    ogr_cart2geo_.reset(OGRCreateCoordinateTransformation(local_.get(), wgs84_.get()));
+}
+
+FixedTransformation::~FixedTransformation()
+{
+}
+
+std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2, double long2)
+{
+    logdbg << "FixedTransformation: distanceCart: lat2 " << lat2 << " long2 " << long2;
+
+    double x_pos2, y_pos2;
+    bool ok;
+    std::tuple<bool, double, double> ret {false, 0, 0};
+
+    if (in_appimage_) // inside appimage
+    {
+        x_pos2 = long2;
+        y_pos2 = lat2;
+    }
+    else
+    {
+        x_pos2 = lat2;
+        y_pos2 = long2;
+    }
+
+    ok = ogr_geo2cart_->Transform(1, &x_pos2, &y_pos2); // wgs84 to cartesian offsets
+
+    if (!ok)
+    {
+        return ret;
+    }
+
+    ret = {true, x_pos2, y_pos2};
+
+    logdbg << "FixedTransformation: distanceCart: x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+
+    return ret;
+}
+
+std::tuple<bool, double, double> FixedTransformation::wgsAddCartOffset (double x_pos2, double y_pos2)
+{
+    logdbg << "FixedTransformation: wgsAddCartOffset: x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+
+    bool ok;
+    std::tuple<bool, double, double> ret {false, 0, 0};
+
+    ok = ogr_cart2geo_->Transform(1, &x_pos2, &y_pos2);
+
+    if (!ok)
+    {
+        //loginf << "UGA2";
+        return ret;
+    }
+
+    double lat2, long2;
+
+    if (in_appimage_) // inside appimage
+    {
+        lat2 = y_pos2;
+        long2 = x_pos2;
+    }
+    else
+    {
+        lat2 = x_pos2;
+        long2 = y_pos2;
+    }
+
+    ret = {true, lat2, long2};
+
+    return ret;
+}
+
+

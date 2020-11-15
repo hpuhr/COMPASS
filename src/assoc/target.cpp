@@ -6,7 +6,7 @@
 #include <cassert>
 #include <sstream>
 
-#include <ogr_spatialref.h>
+//#include <ogr_spatialref.h>
 
 using namespace std;
 using namespace Utils;
@@ -308,35 +308,40 @@ namespace Association
             return {{}, false};
         }
 
-        OGRSpatialReference wgs84;
-        wgs84.SetWellKnownGeogCS("WGS84");
-        OGRSpatialReference local;
-        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+//        OGRSpatialReference wgs84;
+//        wgs84.SetWellKnownGeogCS("WGS84");
+//        OGRSpatialReference local;
+//        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
         logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
         logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
-        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-        assert (ogr_geo2cart);
-        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-        assert (ogr_cart2geo);
+//        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+//        assert (ogr_geo2cart);
+//        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
+//        assert (ogr_cart2geo);
 
+        bool ok;
         double x_pos, y_pos;
 
-        if (in_appimage_) // inside appimage
-        {
-            x_pos = pos2.longitude_;
-            y_pos = pos2.latitude_;
-        }
-        else
-        {
-            x_pos = pos2.latitude_;
-            y_pos = pos2.longitude_;
-        }
+//        if (in_appimage_) // inside appimage
+//        {
+//            x_pos = pos2.longitude_;
+//            y_pos = pos2.latitude_;
+//        }
+//        else
+//        {
+//            x_pos = pos2.latitude_;
+//            y_pos = pos2.longitude_;
+//        }
 
         logdbg << "Target: interpolatedPosForTime: geo2cart";
-        bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-        if (!ret)
+        //bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+        tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+                    pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
+
+        if (!ok)
         {
             logerr << "Target: interpolatedPosForTime: error with latitude " << pos2.latitude_
                    << " longitude " << pos2.longitude_;
@@ -360,11 +365,13 @@ namespace Association
 
         logdbg << "Target: interpolatedPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
 
-        ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+        tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
+
+        //ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
 
         // x_pos long, y_pos lat
 
-        logdbg << "Target: interpolatedPosForTime: interpolated lat " << y_pos << " long " << x_pos;
+        logdbg << "Target: interpolatedPosForTime: interpolated lat " << x_pos << " long " << y_pos;
 
         // calculate altitude
         bool has_altitude = false;
@@ -392,9 +399,9 @@ namespace Association
                << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
                << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-        if (in_appimage_) // inside appimage
-            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
-        else
+//        if (in_appimage_) // inside appimage
+//            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
+//        else
             return {{x_pos, y_pos, has_altitude, true, altitude}, true};
     }
 
@@ -744,9 +751,11 @@ namespace Association
         double latitude_prev {0};
         double longitude_prev {0};
 
-        OGRSpatialReference wgs84;
-        wgs84.SetWellKnownGeogCS("WGS84");
-        OGRSpatialReference local;
+//        OGRSpatialReference wgs84;
+//        wgs84.SetWellKnownGeogCS("WGS84");
+//        OGRSpatialReference local;
+
+        Transformation trafo;
 
         double x_pos, y_pos;
         bool ok;
@@ -781,23 +790,26 @@ namespace Association
             d_t = tod - tod_prev;
             assert (d_t >= 0);
 
-            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
+//            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
 
-            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-            assert (ogr_geo2cart);
+//            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+//            assert (ogr_geo2cart);
 
-            if (in_appimage_) // inside appimage
-            {
-                x_pos = longitude_prev;
-                y_pos = latitude_prev;
-            }
-            else
-            {
-                x_pos = latitude_prev;
-                y_pos = longitude_prev;
-            }
+//            if (in_appimage_) // inside appimage
+//            {
+//                x_pos = longitude_prev;
+//                y_pos = latitude_prev;
+//            }
+//            else
+//            {
+//                x_pos = latitude_prev;
+//                y_pos = longitude_prev;
+//            }
 
-            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+//            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+            tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                        latitude, longitude, latitude_prev, longitude_prev);
 
             if (!ok)
                 continue;

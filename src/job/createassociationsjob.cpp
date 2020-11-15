@@ -25,8 +25,9 @@
 #include "metadbovariable.h"
 #include "dbovariable.h"
 #include "stringconv.h"
+#include "projection/transformation.h"
 
-#include <ogr_spatialref.h>
+//#include <ogr_spatialref.h>
 
 #include <tbb/tbb.h>
 
@@ -539,8 +540,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
     unsigned int tr_cnt = 0;
     float done_ratio;
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
+//    OGRSpatialReference wgs84;
+//    wgs84.SetWellKnownGeogCS("WGS84");
 
     float tod;
     vector<tuple<bool, unsigned int, double>> results;
@@ -559,12 +560,12 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
     vector<pair<unsigned int, Association::TargetReport*>> association_todos;
 
-    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
-    elapsed_time = boost::posix_time::microsec_clock::local_time();
-    unsigned int last_tr_cnt_cnt = 0;
+//    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
+//    elapsed_time = boost::posix_time::microsec_clock::local_time();
+//    unsigned int last_tr_cnt_cnt = 0;
 
-    boost::posix_time::time_duration tmp_time_diff;
-    double tmp_elapsed_time_s;
+//    boost::posix_time::time_duration tmp_time_diff;
+//    double tmp_elapsed_time_s;
 
     for (auto& dbo_it : target_reports_)
     {
@@ -584,11 +585,12 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                     time_diff = elapsed_time - start_time;
                     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    tmp_time_diff = elapsed_time - last_elapsed_time;
-                    tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
+//                    tmp_time_diff = elapsed_time - last_elapsed_time;
+//                    tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
 
-                    time_per_eval = 0.95*time_per_eval
-                            + 0.05*(tmp_elapsed_time_s/(double)(tr_cnt-last_tr_cnt_cnt));
+//                    time_per_eval = 0.95*time_per_eval
+//                            + 0.05*(tmp_elapsed_time_s/(double)(tr_cnt-last_tr_cnt_cnt));
+                    time_per_eval = elapsed_time_s/(float) tr_cnt;
                     remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
 
                     done_ratio = (float)tr_cnt / (float)num_trs;
@@ -597,8 +599,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                                        +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
 
                     //start_time = boost::posix_time::microsec_clock::local_time();
-                    last_tr_cnt_cnt = tr_cnt;
-                    last_elapsed_time = elapsed_time;
+//                    last_tr_cnt_cnt = tr_cnt;
+//                    last_elapsed_time = elapsed_time;
                 }
 
                 ++tr_cnt;
@@ -627,6 +629,15 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 results.resize(utn_cnt_);
 
                 tod = tr_it.tod_;
+
+                EvaluationTargetPosition tst_pos;
+
+                tst_pos.latitude_ = tr_it.latitude_;
+                tst_pos.longitude_ = tr_it.longitude_;
+                tst_pos.has_altitude_ = tr_it.has_mc_;
+                tst_pos.altitude_ = tr_it.mc_;
+
+                FixedTransformation trafo (tst_pos.latitude_, tst_pos.longitude_);
 
                 //loginf << "UGA: checking tr a/c/pos";
 
@@ -659,16 +670,11 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                                     // check positions
 
-                                    OGRSpatialReference local;
+//                                    OGRSpatialReference local;
 
-                                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+//                                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
-                                    EvaluationTargetPosition tst_pos;
 
-                                    tst_pos.latitude_ = tr_it.latitude_;
-                                    tst_pos.longitude_ = tr_it.longitude_;
-                                    tst_pos.has_altitude_ = tr_it.has_mc_;
-                                    tst_pos.altitude_ = tr_it.mc_;
 
                                     double x_pos, y_pos;
                                     double distance;
@@ -686,22 +692,25 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                                                   +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
                                              <= max_distance_acceptable_sensors_wgs_))
                                     {
-                                        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+//                                        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
-                                        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+//                                        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-                                        if (in_appimage_) // inside appimage
-                                        {
-                                            x_pos = tst_pos.longitude_;
-                                            y_pos = tst_pos.latitude_;
-                                        }
-                                        else
-                                        {
-                                            x_pos = tst_pos.latitude_;
-                                            y_pos = tst_pos.longitude_;
-                                        }
+//                                        if (in_appimage_) // inside appimage
+//                                        {
+//                                            x_pos = tst_pos.longitude_;
+//                                            y_pos = tst_pos.latitude_;
+//                                        }
+//                                        else
+//                                        {
+//                                            x_pos = tst_pos.latitude_;
+//                                            y_pos = tst_pos.longitude_;
+//                                        }
 
-                                        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+//                                        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+                                        tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                                                    ref_pos.latitude_, ref_pos.longitude_);
 
                                         if (ok)
                                         {
@@ -796,8 +805,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     //if (target.hasMA() && target.hasMA(3599))
     logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
+//    OGRSpatialReference wgs84;
+//    wgs84.SetWellKnownGeogCS("WGS84");
 
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
@@ -806,6 +815,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
     {
         Association::Target& other = targets_.at(cnt);
+        Transformation trafo;
 
         results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
@@ -854,9 +864,9 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                         unsigned int pos_dubious_cnt {0};
 
-                        OGRSpatialReference local;
+//                        OGRSpatialReference local;
 
-                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+//                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
                         EvaluationTargetPosition tst_pos;
 
@@ -876,22 +886,26 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             if (!ok)
                                 continue;
 
-                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+//                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
-                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+//                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-                            if (in_appimage_) // inside appimage
-                            {
-                                x_pos = tst_pos.longitude_;
-                                y_pos = tst_pos.latitude_;
-                            }
-                            else
-                            {
-                                x_pos = tst_pos.latitude_;
-                                y_pos = tst_pos.longitude_;
-                            }
+//                            if (in_appimage_) // inside appimage
+//                            {
+//                                x_pos = tst_pos.longitude_;
+//                                y_pos = tst_pos.latitude_;
+//                            }
+//                            else
+//                            {
+//                                x_pos = tst_pos.latitude_;
+//                                y_pos = tst_pos.longitude_;
+//                            }
 
-                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+//                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+                            tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                                        ref_pos.latitude_, ref_pos.longitude_,
+                                        tst_pos.latitude_, tst_pos.longitude_);
 
                             if (!ok)
                                 continue;

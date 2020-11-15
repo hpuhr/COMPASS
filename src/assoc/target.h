@@ -2,6 +2,7 @@
 #define ASSOCIATIONTARGET_H
 
 #include "evaluationtargetposition.h"
+#include "projection/transformation.h"
 
 #include <vector>
 #include <string>
@@ -51,6 +52,8 @@ namespace Association
         std::map<float, unsigned int> timed_indexes_;
         std::set <unsigned int> ds_ids_;
         std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_it, tn
+
+        mutable Transformation trafo_;
 
         void addAssociated (TargetReport* tr);
         void addAssociated (vector<TargetReport*> trs);
