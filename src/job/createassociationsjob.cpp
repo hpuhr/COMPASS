@@ -31,6 +31,8 @@
 
 #include <tbb/tbb.h>
 
+#include <boost/thread/mutex.hpp>
+
 using namespace std;
 using namespace Utils;
 
@@ -524,48 +526,34 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 {
     loginf << "CreateAssociationsJob: createNonTrackerUTNS";
 
-    int tmp_utn;
 
-    unsigned int num_trs = 0;
 
-    for (auto& dbo_it : target_reports_)
-    {
-        if (dbo_it.first == "Tracker") // already associated
-            continue;
+    //    unsigned int num_trs = 0;
 
-        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-            num_trs += ds_it.second.size();
-    }
+    //    for (auto& dbo_it : target_reports_)
+    //    {
+    //        if (dbo_it.first == "Tracker") // already associated
+    //            continue;
 
-    unsigned int tr_cnt = 0;
-    float done_ratio;
+    //        for (auto& ds_it : dbo_it.second) // ds_id -> trs
+    //            num_trs += ds_it.second.size();
+    //    }
 
-//    OGRSpatialReference wgs84;
-//    wgs84.SetWellKnownGeogCS("WGS84");
+    //    unsigned int tr_cnt = 0;
+    //    float done_ratio;
 
-    float tod;
-    vector<tuple<bool, unsigned int, double>> results;
-    // usable, utn, distance
+    //    boost::posix_time::ptime start_time;
+    //    boost::posix_time::ptime elapsed_time;
 
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime elapsed_time;
+    //    start_time = boost::posix_time::microsec_clock::local_time();
 
-    start_time = boost::posix_time::microsec_clock::local_time();
+    //    boost::posix_time::time_duration time_diff;
+    //    double elapsed_time_s;
+    //    double time_per_eval, remaining_time_s;
 
-    boost::posix_time::time_duration time_diff;
-    double elapsed_time_s;
-    double time_per_eval, remaining_time_s;
+    //    string remaining_time_str;
 
-    string remaining_time_str;
-
-    vector<pair<unsigned int, Association::TargetReport*>> association_todos;
-
-//    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
-//    elapsed_time = boost::posix_time::microsec_clock::local_time();
-//    unsigned int last_tr_cnt_cnt = 0;
-
-//    boost::posix_time::time_duration tmp_time_diff;
-//    double tmp_elapsed_time_s;
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     for (auto& dbo_it : target_reports_)
     {
@@ -574,57 +562,73 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs
         {
-            for (auto& tr_it : ds_it.second)
+            string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNS").c_str());
+
+            std::vector<Association::TargetReport>& target_reports = ds_it.second;
+            unsigned int num_target_reports = target_reports.size();
+            vector<int> tmp_assoc_utns; // tr_cnt -> utn
+            tmp_assoc_utns.resize(num_target_reports);
+
+            map<unsigned int, vector<Association::TargetReport*>> create_todos; // ta -> trs
+            boost::mutex create_todos_mutex;
+
+            //for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt)
+            tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
             {
-                if (tr_cnt % 50000 == 0)
-                {
-                    assert (tr_cnt <= num_trs);
+                Association::TargetReport& tr_it = target_reports[tr_cnt];
 
-                    elapsed_time = boost::posix_time::microsec_clock::local_time();
+                tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
-                    time_diff = elapsed_time - start_time;
-                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+                //                if (tr_cnt % 50000 == 0)
+                //                {
+                //                    assert (tr_cnt <= num_trs);
 
-//                    tmp_time_diff = elapsed_time - last_elapsed_time;
-//                    tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
+                //                    elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-//                    time_per_eval = 0.95*time_per_eval
-//                            + 0.05*(tmp_elapsed_time_s/(double)(tr_cnt-last_tr_cnt_cnt));
-                    time_per_eval = elapsed_time_s/(float) tr_cnt;
-                    remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
+                //                    time_diff = elapsed_time - start_time;
+                //                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    done_ratio = (float)tr_cnt / (float)num_trs;
-                    emit statusSignal(("Creating "+dbo_it.first+" UTNS ("
-                                       +String::percentToString(100.0*done_ratio)+"%)"
-                                       +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
+                //                    time_per_eval = elapsed_time_s/(float) tr_cnt;
+                //                    remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
 
-                    //start_time = boost::posix_time::microsec_clock::local_time();
-//                    last_tr_cnt_cnt = tr_cnt;
-//                    last_elapsed_time = elapsed_time;
-                }
+                //                    done_ratio = (float)tr_cnt / (float)num_trs;
+                //                    emit statusSignal(("Creating "+dbo_it.first+" UTNS ("
+                //                                       +String::percentToString(100.0*done_ratio)+"%)"
+                //                                       +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
 
-                ++tr_cnt;
+                //                }
+
+                int tmp_utn;
 
                 tmp_utn = findUTNForTargetReport(tr_it);
 
                 if (tmp_utn != -1) // existing target found
                 {
                     assert (targets_.count(tmp_utn));
-                    //targets_.at(tmp_utn).addAssociated(&tr_it);
-                    association_todos.push_back({tmp_utn, &tr_it});
-                    continue;
+                    //association_todos.push_back({tmp_utn, &tr_it});
+                    tmp_assoc_utns[tr_cnt] = tmp_utn;
+                    return;
                 }
 
                 if (tr_it.has_ta_)
                 {
-                    addTargetByTargetReport(tr_it);
-                    continue;
+                    //addTargetByTargetReport(tr_it);
+
+                    boost::mutex::scoped_lock lock(create_todos_mutex);
+                    create_todos[tr_it.ta_].push_back(&tr_it);
+
+                    return;
                 }
 
                 // tr non mode s
 
                 if (!associate_ac_non_trackers_)
-                    continue;
+                    return;
+
+                float tod;
+                vector<tuple<bool, unsigned int, double>> results;
+                // usable, utn, distance
 
                 results.resize(utn_cnt_);
 
@@ -641,100 +645,64 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                 //loginf << "UGA: checking tr a/c/pos";
 
-                tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+                double x_pos, y_pos;
+                double distance;
+
+                EvaluationTargetPosition ref_pos;
+                bool ok;
+
+                for (unsigned int target_cnt=0; target_cnt < utn_cnt_; ++target_cnt)
                 {
-                    Association::Target& other = targets_.at(cnt);
+                    Association::Target& other = targets_.at(target_cnt);
 
-                    results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+                    results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                    if (!(tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
+                    if ((tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
+                        continue;
+
+                    if (!other.isTimeInside(tod))
+                        continue;
+
+                    // check mode a code
+                    Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod);
+
+                    if (ma_res != Association::CompareResult::SAME)
+                        continue;
+                    //loginf << "UGA3 same mode a";
+
+                    // check mode c code
+                    Association::CompareResult mc_res = other.compareModeCCode(tr_it.has_mc_, tr_it.mc_, tod);
+
+                    if (mc_res != Association::CompareResult::SAME)
+                        continue;
+
+                    // check positions
+
+                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_);
+
+                    if (ok &&
+                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
+                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
+                             <= max_distance_acceptable_sensors_wgs_))
                     {
-                        if (other.isTimeInside(tod))
-                        {
-                            // check mode a code
-                            Association::CompareResult ma_res = other.compareModeACode(
-                                        tr_it.has_ma_, tr_it.ma_, tod);
 
-                            if (ma_res == Association::CompareResult::SAME)
-                            {
-                                //loginf << "UGA3 same mode a";
+                        tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
 
-                                // check mode c code
+                        if (!ok)
+                            continue;
 
-                                Association::CompareResult mc_res = other.compareModeCCode(
-                                            tr_it.has_mc_, tr_it.mc_, tod);
+                        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                                if (mc_res == Association::CompareResult::SAME)
-                                {
-                                    //loginf << "UGA3 same mode c";
+                        //loginf << "UGA3 distance " << distance;
 
-                                    // check positions
-
-//                                    OGRSpatialReference local;
-
-//                                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
-
-
-
-                                    double x_pos, y_pos;
-                                    double distance;
-
-                                    EvaluationTargetPosition ref_pos;
-                                    bool ok;
-
-                                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_);
-
-                                    //     double wgs_dist = sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-                                    //          +pow(ref_pos.longitude_-tst_pos.longitude_, 2));
-
-                                    if (ok &&
-                                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-                                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
-                                             <= max_distance_acceptable_sensors_wgs_))
-                                    {
-//                                        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
-
-//                                        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-//                                        if (in_appimage_) // inside appimage
-//                                        {
-//                                            x_pos = tst_pos.longitude_;
-//                                            y_pos = tst_pos.latitude_;
-//                                        }
-//                                        else
-//                                        {
-//                                            x_pos = tst_pos.latitude_;
-//                                            y_pos = tst_pos.longitude_;
-//                                        }
-
-//                                        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-
-                                        tie(ok, x_pos, y_pos) = trafo.distanceCart(
-                                                    ref_pos.latitude_, ref_pos.longitude_);
-
-                                        if (ok)
-                                        {
-                                            distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-
-                                            //loginf << "UGA3 distance " << distance;
-
-                                            if (distance < max_distance_acceptable_sensors_)
-                                            {
-                                                results[cnt] = tuple<bool, unsigned int, double>(
-                                                            true, other.utn_, distance);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        if (distance < max_distance_acceptable_sensors_)
+                            results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
                     }
-                });
+                }
 
                 // find best match
                 bool usable;
                 unsigned int other_utn;
-                double distance;
 
                 bool first = true;
                 unsigned int best_other_utn;
@@ -759,16 +727,41 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 if (!first)
                 {
                     //targets_.at(best_other_utn).addAssociated(&tr_it);
-                    association_todos.push_back({best_other_utn, &tr_it});
+                    //association_todos.push_back({best_other_utn, &tr_it});
+                    tmp_assoc_utns[tr_cnt] = best_other_utn;
                 }
+            });
+
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" Associations").c_str());
+
+            // create associations
+            int tmp_utn;
+            for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt) // tr_cnt -> utn
+            {
+                tmp_utn = tmp_assoc_utns.at(tr_cnt);
+                if (tmp_utn != -1)
+                    targets_.at(tmp_utn).addAssociated(&target_reports.at(tr_cnt));
+            }
+
+            // create new targets
+            for (auto& todo_it : create_todos) // ta -> trs
+            {
+                vector<Association::TargetReport*>& trs = todo_it.second;
+                assert (trs.size());
+
+                unsigned int new_utn = utn_cnt_;
+                addTargetByTargetReport(*trs.at(0));
+
+                for (unsigned int tr_cnt=1; tr_cnt < trs.size(); ++tr_cnt)
+                    targets_.at(new_utn).addAssociated(trs.at(tr_cnt));
             }
         }
     }
 
-    emit statusSignal("Adding Associations");
+    //    emit statusSignal("Adding Associations");
 
-    for (auto& assoc_it : association_todos)
-        targets_.at(assoc_it.first).addAssociated(assoc_it.second);
+    //    for (auto& assoc_it : association_todos)
+    //        targets_.at(assoc_it.first).addAssociated(assoc_it.second);
 }
 
 void CreateAssociationsJob::createAssociations()
@@ -805,8 +798,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     //if (target.hasMA() && target.hasMA(3599))
     logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
 
-//    OGRSpatialReference wgs84;
-//    wgs84.SetWellKnownGeogCS("WGS84");
+    //    OGRSpatialReference wgs84;
+    //    wgs84.SetWellKnownGeogCS("WGS84");
 
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
@@ -864,9 +857,9 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                         unsigned int pos_dubious_cnt {0};
 
-//                        OGRSpatialReference local;
+                        //                        OGRSpatialReference local;
 
-//                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+                        //                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
                         EvaluationTargetPosition tst_pos;
 
@@ -886,22 +879,22 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             if (!ok)
                                 continue;
 
-//                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+                            //                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
-//                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+                            //                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-//                            if (in_appimage_) // inside appimage
-//                            {
-//                                x_pos = tst_pos.longitude_;
-//                                y_pos = tst_pos.latitude_;
-//                            }
-//                            else
-//                            {
-//                                x_pos = tst_pos.latitude_;
-//                                y_pos = tst_pos.longitude_;
-//                            }
+                            //                            if (in_appimage_) // inside appimage
+                            //                            {
+                            //                                x_pos = tst_pos.longitude_;
+                            //                                y_pos = tst_pos.latitude_;
+                            //                            }
+                            //                            else
+                            //                            {
+                            //                                x_pos = tst_pos.latitude_;
+                            //                                y_pos = tst_pos.longitude_;
+                            //                            }
 
-//                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                            //                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
 
                             tie(ok, x_pos, y_pos) = trafo.distanceCart(
                                         ref_pos.latitude_, ref_pos.longitude_,
