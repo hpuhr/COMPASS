@@ -34,17 +34,17 @@
 using namespace std;
 using namespace Utils;
 
-bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
+//bool EvaluationTargetData::in_appimage_ {getenv("APPDIR")};
 
 //const unsigned int debug_utn = 3275;
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man)
-    : utn_(utn), eval_data_(eval_data), eval_man_(eval_man),
-      wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+    : utn_(utn), eval_data_(eval_data), eval_man_(eval_man)
+      //wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
 {
     use_ = eval_man_.useUTN(utn_);
 
-    wgs84_->SetWellKnownGeogCS("WGS84");
+    //wgs84_->SetWellKnownGeogCS("WGS84");
 }
 
 EvaluationTargetData::~EvaluationTargetData()
@@ -1468,36 +1468,40 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             }
             else
             {
-                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+//                local_->SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
-                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
-                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
-                assert (ogr_geo2cart);
-                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
-                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
-                assert (ogr_cart2geo);
+//                unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {
+//                    OGRCreateCoordinateTransformation(wgs84_.get(), local_.get())};
+//                assert (ogr_geo2cart);
+//                unique_ptr<OGRCoordinateTransformation> ogr_cart2geo{
+//                    OGRCreateCoordinateTransformation(local_.get(), wgs84_.get())};
+//                assert (ogr_cart2geo);
 
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos1 "
                        << pos1.latitude_ << ", " << pos1.longitude_;
                 logdbg << "EvaluationTargetData: addRefPositiosToMapping: pos2 "
                        << pos2.latitude_ << ", " << pos2.longitude_;
 
+                bool ok;
                 double x_pos, y_pos;
 
-                if (in_appimage_) // inside appimage
-                {
-                    x_pos = pos2.longitude_;
-                    y_pos = pos2.latitude_;
-                }
-                else
-                {
-                    x_pos = pos2.latitude_;
-                    y_pos = pos2.longitude_;
-                }
+//                if (in_appimage_) // inside appimage
+//                {
+//                    x_pos = pos2.longitude_;
+//                    y_pos = pos2.latitude_;
+//                }
+//                else
+//                {
+//                    x_pos = pos2.latitude_;
+//                    y_pos = pos2.longitude_;
+//                }
 
-                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
-                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-                if (!ret)
+                tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+                            pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
+
+//                logdbg << "EvaluationTargetData: addRefPositiosToMapping: geo2cart";
+//                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                if (!ok)
                 {
                     logerr << "EvaluationTargetData: addRefPositiosToMapping: error with latitude " << pos2.latitude_
                            << " longitude " << pos2.longitude_;
@@ -1523,12 +1527,16 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated offsets x "
                            << x_pos << " y " << y_pos;
 
-                    ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+                    //ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+
+                    tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
+
+                    //assert (ok); TODO?
 
                     // x_pos long, y_pos lat
 
                     logdbg << "EvaluationTargetData: addRefPositiosToMapping: interpolated lat "
-                           << y_pos << " long " << x_pos;
+                           << x_pos << " long " << y_pos;
 
                     // calculate altitude
                     bool has_altitude = false;
@@ -1558,10 +1566,10 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 
                     mapping.has_ref_pos_ = true;
 
-                    if (in_appimage_) // inside appimage
-                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
-                    else
-                        mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
+//                    if (in_appimage_) // inside appimage
+//                        mapping.pos_ref_ = EvaluationTargetPosition(y_pos, x_pos, has_altitude, true, altitude);
+//                    else
+                    mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
                     mapping.spd_ref_.x_ = v_x;
                     mapping.spd_ref_.y_ = v_y;

@@ -73,6 +73,12 @@ public:
             done_flags_[cnt] = true;
         });
 
+//        for(unsigned int cnt=0; cnt < num_targets; ++cnt)
+//        {
+//            target_data_[cnt].finalize();
+//            done_flags_[cnt] = true;
+//        }
+
         return NULL; // or a pointer to a new task to be executed immediately
     }
 

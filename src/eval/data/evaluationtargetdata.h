@@ -20,6 +20,7 @@
 
 #include "evaluationtargetposition.h"
 #include "evaluationtargetvelocity.h"
+#include "projection/transformation.h"
 
 #include <map>
 #include <memory>
@@ -31,8 +32,8 @@ class Buffer;
 class EvaluationData;
 class EvaluationManager;
 
-class OGRSpatialReference;
-class OGRCoordinateTransformation;
+//class OGRSpatialReference;
+//class OGRCoordinateTransformation;
 
 class TstDataMapping // mapping to respective ref data
 {
@@ -152,7 +153,7 @@ public:
     std::string nacpStr() const;
 
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
 
     EvaluationData& eval_data_;
     EvaluationManager& eval_man_;
@@ -189,10 +190,11 @@ protected:
 
     mutable std::map<float, TstDataMapping> test_data_mappings_;
 
-    std::unique_ptr<OGRSpatialReference> wgs84_;
-    mutable std::unique_ptr<OGRSpatialReference> local_;
+//    std::unique_ptr<OGRSpatialReference> wgs84_;
+//    mutable std::unique_ptr<OGRSpatialReference> local_;
     //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart_;
     //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo_;
+    mutable Transformation trafo_;
 
     void updateCallsigns() const;
     void updateTargetAddresses() const;
