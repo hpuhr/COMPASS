@@ -425,7 +425,6 @@ namespace Association
             return {{}, false};
         }
 
-
         double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
         double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
         logdbg << "Target: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;

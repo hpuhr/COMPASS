@@ -559,6 +559,13 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
     vector<pair<unsigned int, Association::TargetReport*>> association_todos;
 
+    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
+    elapsed_time = boost::posix_time::microsec_clock::local_time();
+    unsigned int last_tr_cnt_cnt = 0;
+
+    boost::posix_time::time_duration tmp_time_diff;
+    double tmp_elapsed_time_s;
+
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "Tracker") // already associated
@@ -577,7 +584,11 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                     time_diff = elapsed_time - start_time;
                     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    time_per_eval = elapsed_time_s/tr_cnt;
+                    tmp_time_diff = elapsed_time - last_elapsed_time;
+                    tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
+
+                    time_per_eval = 0.95*time_per_eval
+                            + 0.05*(tmp_elapsed_time_s/(double)(tr_cnt-last_tr_cnt_cnt));
                     remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
 
                     done_ratio = (float)tr_cnt / (float)num_trs;
@@ -586,6 +597,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                                        +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
 
                     //start_time = boost::posix_time::microsec_clock::local_time();
+                    last_tr_cnt_cnt = tr_cnt;
+                    last_elapsed_time = elapsed_time;
                 }
 
                 ++tr_cnt;
@@ -1000,7 +1013,6 @@ int CreateAssociationsJob::findUTNForTargetReport (const Association::TargetRepo
     // check in ta lookup map
     if (tr.has_ta_ && ta_2_utn_.count(tr.ta_))
         return ta_2_utn_.at(tr.ta_);
-
 
     return -1;
 }
