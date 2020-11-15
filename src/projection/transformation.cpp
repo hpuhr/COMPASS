@@ -1,0 +1,124 @@
+#include "transformation.h"
+
+#include <ogr_spatialref.h>
+
+bool Transformation::in_appimage_ {getenv("APPDIR")};
+const double Transformation::max_wgs_dist_ {0.5};
+
+Transformation::Transformation()
+{
+    wgs84_->SetWellKnownGeogCS("WGS84");
+}
+
+Transformation::~Transformation()
+{
+}
+
+std::tuple<bool, double, double> Transformation::distanceCart (double lat1, double long1, double lat2, double long2)
+{
+    updateIfRequired(lat1, long1);
+
+    double x_pos1, y_pos1, x_pos2, y_pos2;
+    bool ok;
+    std::tuple<bool, double, double> ret {false, 0, 0};
+
+    if (in_appimage_) // inside appimage
+    {
+        x_pos1 = long1;
+        y_pos1 = lat1;
+
+        x_pos2 = long2;
+        y_pos2 = lat2;
+    }
+    else
+    {
+        x_pos1 = lat1;
+        y_pos1 = long1;
+
+        x_pos2 = lat2;
+        y_pos2 = long2;
+    }
+
+    ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
+
+    if (!ok)
+        return ret;
+
+    ok = ogr_geo2cart_->Transform(1, &x_pos2, &y_pos2); // wgs84 to cartesian offsets
+
+    if (!ok)
+        return ret;
+
+    ret = {true, x_pos2-x_pos1, y_pos2-y_pos1};
+
+    return ret;
+}
+
+std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
+        double lat1, double long1, double x_pos2, double y_pos2)
+{
+    updateIfRequired(lat1, long1);
+
+    bool ok;
+    std::tuple<bool, double, double> ret {false, 0, 0};
+
+    // calc pos 1 cart
+    double x_pos1, y_pos1;
+
+    if (in_appimage_) // inside appimage
+    {
+        x_pos1 = long1;
+        y_pos1 = lat1;
+    }
+    else
+    {
+        x_pos1 = lat1;
+        y_pos1 = long1;
+    }
+
+    ok = ogr_geo2cart_->Transform(1, &x_pos1, &y_pos1); // wgs84 to cartesian offsets
+
+    if (!ok)
+        return ret;
+
+    // remove origin offset
+    x_pos2 -= x_pos1;
+    y_pos2 -= y_pos1;
+
+    ok = ogr_cart2geo_->Transform(1, &x_pos2, &y_pos2);
+
+    if (!ok)
+        return ret;
+
+    double lat2, long2;
+
+    if (in_appimage_) // inside appimage
+    {
+        lat2 = y_pos2;
+        long2 = x_pos2;
+    }
+    else
+    {
+        lat2 = x_pos2;
+        long2 = y_pos2;
+    }
+
+    ret = {true, lat2, long2};
+
+    return ret;
+}
+
+void Transformation::updateIfRequired(double lat1, double long1)
+{
+    if (!has_pos1_ || sqrt(pow(lat1_-lat1, 2)+pow(long1_-long1, 2)) > max_wgs_dist_) // set
+    {
+        has_pos1_ = true;
+        lat1_ = lat1;
+        long1_ = long1;
+
+        local_->SetStereographic(lat1_, long1_, 1.0, 0.0, 0.0);
+
+        ogr_geo2cart_.reset(OGRCreateCoordinateTransformation(wgs84_.get(), local_.get()));
+        ogr_cart2geo_.reset(OGRCreateCoordinateTransformation(local_.get(), wgs84_.get()));
+    }
+}
