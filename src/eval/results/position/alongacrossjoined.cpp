@@ -72,8 +72,8 @@ namespace EvaluationRequirementResult
         num_across_ok_ += single_result->numAcrossOk();
         num_across_nok_ += single_result->numAcrossNOk();
 
-        const tuple<vector<double>, vector<double>, vector<double>, vector<double>>& other_distance_values =
-                single_result->distanceValues();
+        const tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>>&
+                other_distance_values = single_result->distanceValues();
 
         get<0>(distance_values_).insert(get<0>(distance_values_).end(),
                                         get<0>(other_distance_values).begin(), get<0>(other_distance_values).end());
@@ -83,7 +83,8 @@ namespace EvaluationRequirementResult
                                         get<2>(other_distance_values).begin(), get<2>(other_distance_values).end());
         get<3>(distance_values_).insert(get<3>(distance_values_).end(),
                                         get<3>(other_distance_values).begin(), get<3>(other_distance_values).end());
-
+        get<4>(distance_values_).insert(get<4>(distance_values_).end(),
+                                        get<4>(other_distance_values).begin(), get<4>(other_distance_values).end());
         update();
     }
 
@@ -102,7 +103,9 @@ namespace EvaluationRequirementResult
         {
             vector<double>& along_vals = get<2>(distance_values_);
             vector<double>& across_vals = get<3>(distance_values_);
+            vector<double>& latency_vals = get<4>(distance_values_);
 
+            // along
             along_min_ = *min_element(along_vals.begin(), along_vals.end());;
             along_max_ = *max_element(along_vals.begin(), along_vals.end());;
             along_avg_ = std::accumulate(along_vals.begin(), along_vals.end(), 0.0) / (float) num_distances;
@@ -112,6 +115,7 @@ namespace EvaluationRequirementResult
                 along_var_ += pow(val - along_avg_, 2);
             along_var_ /= (float)num_distances;
 
+            // across
             across_min_ = *min_element(across_vals.begin(), across_vals.end());;
             across_max_ = *max_element(across_vals.begin(), across_vals.end());;
             across_avg_ = std::accumulate(across_vals.begin(), across_vals.end(), 0.0) / (float) num_distances;
@@ -120,6 +124,16 @@ namespace EvaluationRequirementResult
             for(auto val : across_vals)
                 across_var_ += pow(val - across_avg_, 2);
             across_var_ /= (float)num_distances;
+
+            // latency
+            latency_min_ = *min_element(latency_vals.begin(), latency_vals.end());;
+            latency_max_ = *max_element(latency_vals.begin(), latency_vals.end());;
+            latency_avg_ = std::accumulate(latency_vals.begin(), latency_vals.end(), 0.0) / (float) num_distances;
+
+            latency_var_ = 0;
+            for(auto val : latency_vals)
+                latency_var_ += pow(val - latency_avg_, 2);
+            latency_var_ /= (float)num_distances;
 
             assert (num_along_ok_ <= num_distances);
             p_min_along_ = (float)num_along_ok_/(float)num_distances;
@@ -140,6 +154,11 @@ namespace EvaluationRequirementResult
             across_max_ = 0;
             across_avg_ = 0;
             across_var_ = 0;
+
+            latency_min_ = 0;
+            latency_max_ = 0;
+            latency_avg_ = 0;
+            latency_var_ = 0;
 
             has_p_min_along_ = false;
             p_min_along_ = 0;
@@ -249,7 +268,7 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(along_avg_,2).c_str()}, this);
         sec_det_table.addRow({"Standard Deviation Along [m]", "Standard Deviation of along-track error",
                               String::doubleToStringPrecision(sqrt(along_var_),2).c_str()}, this);
-        sec_det_table.addRow({"Variance Along [m]", "Variance of along-track error",
+        sec_det_table.addRow({"Variance Along [m^2]", "Variance of along-track error",
                               String::doubleToStringPrecision(along_var_,2).c_str()}, this);
         sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_along_ok_}, this);
         sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_along_nok_},
@@ -281,6 +300,17 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable across-track error ", num_across_nok_},
                              this);
 
+        // latency
+        sec_det_table.addRow({"Min Latency [s]", "Minimum of latency",
+                              String::timeStringFromDouble(latency_min_).c_str()}, this);
+        sec_det_table.addRow({"Max Latency [s]", "Maximum of latency",
+                              String::timeStringFromDouble(latency_max_).c_str()}, this);
+        sec_det_table.addRow({"LAvg [s]", "Average of latency",
+                              String::timeStringFromDouble(latency_avg_).c_str()}, this);
+        sec_det_table.addRow({"LSDev Latency [s]", "Standard Deviation of latency",
+                              String::timeStringFromDouble(sqrt(latency_var_)).c_str()}, this);
+        sec_det_table.addRow({"Variance Latency [s]", "Variance of latency",
+                              String::timeStringFromDouble(latency_var_).c_str()}, this);
 
         // across
         sec_det_table.addRow({"Min Across [m]", "Minimum of across-track error",
@@ -291,7 +321,7 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(across_avg_,2).c_str()}, this);
         sec_det_table.addRow({"Standard Deviation Across [m]", "Standard Deviation of across-track error",
                               String::doubleToStringPrecision(sqrt(across_var_),2).c_str()}, this);
-        sec_det_table.addRow({"Variance Across [m]", "Variance of across-track error",
+        sec_det_table.addRow({"Variance Across [m^2]", "Variance of across-track error",
                               String::doubleToStringPrecision(across_var_,2).c_str()}, this);
 
         sec_det_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
@@ -412,6 +442,7 @@ namespace EvaluationRequirementResult
         get<1>(distance_values_).clear();
         get<2>(distance_values_).clear();
         get<3>(distance_values_).clear();
+        get<4>(distance_values_).clear();
 
         for (auto result_it : results_)
         {

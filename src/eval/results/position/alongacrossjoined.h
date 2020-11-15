@@ -60,7 +60,7 @@ namespace EvaluationRequirementResult
         unsigned int num_across_ok_ {0};
         unsigned int num_across_nok_ {0};
 
-        tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
+        tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
 
         double along_min_ {0};
         double along_max_ {0};
@@ -71,6 +71,11 @@ namespace EvaluationRequirementResult
         double across_max_ {0};
         double across_avg_ {0};
         double across_var_ {0};
+
+        double latency_min_ {0};
+        double latency_max_ {0};
+        double latency_avg_ {0};
+        double latency_var_ {0};
 
         bool has_p_min_along_ {false};
         float p_min_along_{0};

@@ -46,7 +46,7 @@ namespace EvaluationRequirementResult
             unsigned int num_pos_outside, unsigned int num_pos_inside,
             unsigned int num_along_ok, unsigned int num_along_nok,
             unsigned int num_across_ok, unsigned int num_across_nok,
-            tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
+            tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
             std::vector<EvaluationRequirement::PositionAlongAcrossDetail> details)
         : Single("SinglePositionAlongAcross", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
@@ -73,7 +73,9 @@ namespace EvaluationRequirementResult
         {
             vector<double>& along_vals = get<2>(distance_values_);
             vector<double>& across_vals = get<3>(distance_values_);
+            vector<double>& latency_vals = get<4>(distance_values_);
 
+            // along
             along_min_ = *min_element(along_vals.begin(), along_vals.end());
             along_max_ = *max_element(along_vals.begin(), along_vals.end());
             along_avg_ = std::accumulate(along_vals.begin(), along_vals.end(), 0.0) / (float) num_distances;
@@ -83,6 +85,7 @@ namespace EvaluationRequirementResult
                 along_var_ += pow(val - along_avg_, 2);
             along_var_ /= (float)num_distances;
 
+            // across
             across_min_ = *min_element(across_vals.begin(), across_vals.end());;
             across_max_ = *max_element(across_vals.begin(), across_vals.end());;
             across_avg_ = std::accumulate(across_vals.begin(), across_vals.end(), 0.0) / (float) num_distances;
@@ -91,6 +94,16 @@ namespace EvaluationRequirementResult
             for(auto val : across_vals)
                 across_var_ += pow(val - across_avg_, 2);
             across_var_ /= (float)num_distances;
+
+            // latency
+            latency_min_ = *min_element(latency_vals.begin(), latency_vals.end());;
+            latency_max_ = *max_element(latency_vals.begin(), latency_vals.end());;
+            latency_avg_ = std::accumulate(latency_vals.begin(), latency_vals.end(), 0.0) / (float) num_distances;
+
+            latency_var_ = 0;
+            for(auto val : latency_vals)
+                latency_var_ += pow(val - latency_avg_, 2);
+            latency_var_ /= (float)num_distances;
 
 //            loginf << "UGA utn " << utn_ << " along_avg " << along_avg_ << " along_var " << along_var_
 //                   << " across_avg " << across_avg_ << " across_var " << across_var_
@@ -117,6 +130,11 @@ namespace EvaluationRequirementResult
             across_max_ = 0;
             across_avg_ = 0;
             across_var_ = 0;
+
+            latency_min_ = 0;
+            latency_max_ = 0;
+            latency_avg_ = 0;
+            latency_var_ = 0;
 
             has_p_min_along_ = false;
             p_min_along_ = 0;
@@ -150,9 +168,9 @@ namespace EvaluationRequirementResult
         if (eval_man_.showAdsbInfo())
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 21,
+                tgt_overview_section.addTable(target_table_name_, 22,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
                  "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                  "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
@@ -161,9 +179,9 @@ namespace EvaluationRequirementResult
         else
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 18,
+                tgt_overview_section.addTable(target_table_name_, 19,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK"
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
                  "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
@@ -176,9 +194,9 @@ namespace EvaluationRequirementResult
             if (eval_man_.showAdsbInfo())
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 21,
+                    sum_section.addTable(target_table_name_, 22,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
                      "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                      "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
@@ -187,9 +205,9 @@ namespace EvaluationRequirementResult
             else
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 18,
+                    sum_section.addTable(target_table_name_, 19,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK"
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
                      "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
@@ -218,7 +236,7 @@ namespace EvaluationRequirementResult
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
              target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
              across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
         else
             target_table.addRow(
@@ -226,7 +244,7 @@ namespace EvaluationRequirementResult
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
              target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_ok_, num_along_nok_, p_along_var,
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
              across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
     }
 
@@ -252,7 +270,7 @@ namespace EvaluationRequirementResult
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
              target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
              across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
              target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
                         this, {utn_});
@@ -262,7 +280,7 @@ namespace EvaluationRequirementResult
              target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
              target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
              target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var,
+             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
              across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
              target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
                         this, {utn_});
@@ -329,6 +347,18 @@ namespace EvaluationRequirementResult
             utn_req_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
         }
 
+        // latency
+        utn_req_table.addRow({"Min Latency [s]", "Minimum of latency",
+                              String::timeStringFromDouble(latency_min_).c_str()}, this);
+        utn_req_table.addRow({"Max Latency [s]", "Maximum of latency",
+                              String::timeStringFromDouble(latency_max_).c_str()}, this);
+        utn_req_table.addRow({"ALAvg [s]", "Average of latency",
+                              String::timeStringFromDouble(latency_avg_).c_str()}, this);
+        utn_req_table.addRow({"ALSDev Latency [s]", "Standard Deviation of latency",
+                              String::timeStringFromDouble(sqrt(latency_var_)).c_str()}, this);
+        utn_req_table.addRow({"Variance Latency [s]", "Variance of latency",
+                              String::timeStringFromDouble(latency_var_).c_str()}, this);
+
         // across
         utn_req_table.addRow({"Min Across [m]", "Minimum of across-track error",
                               String::doubleToStringPrecision(across_min_,2).c_str()}, this);
@@ -338,7 +368,7 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(across_avg_,2).c_str()}, this);
         utn_req_table.addRow({"ACSDev Across [m]", "Standard Deviation of across-track error",
                               String::doubleToStringPrecision(sqrt(across_var_),2).c_str()}, this);
-        utn_req_table.addRow({"Variance Across [m]", "Variance of across-track error",
+        utn_req_table.addRow({"Variance Across [m^2]", "Variance of across-track error",
                               String::doubleToStringPrecision(across_var_,2).c_str()}, this);
 
         utn_req_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_across_ok_}, this);
@@ -559,7 +589,7 @@ namespace EvaluationRequirementResult
         return num_across_nok_;
     }
 
-    const tuple<vector<double>, vector<double>, vector<double>, vector<double>>&
+    const tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>>&
     SinglePositionAlongAcross::distanceValues() const
     {
         return distance_values_;
@@ -594,6 +624,4 @@ namespace EvaluationRequirementResult
     {
         return details_;
     }
-
-
 }

@@ -108,6 +108,12 @@ inline std::string timeStringFromDouble(double seconds, bool milliseconds = true
     int hours, minutes;
     std::ostringstream out;
 
+    if (seconds < 0)
+    {
+        out << "-";
+        seconds *= -1;
+    }
+
     hours = static_cast<int>(seconds / 3600.0);
     minutes = static_cast<int>(static_cast<double>(static_cast<int>(seconds) % 3600) / 60.0);
     seconds = seconds - hours * 3600.0 - minutes * 60.0;

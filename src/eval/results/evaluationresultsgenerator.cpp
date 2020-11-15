@@ -160,6 +160,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
                              +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
+                postprocess_dialog.setValue(eval_cnt);
 
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "'";
@@ -179,7 +180,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     //assert (eval_cnt+tmp_done_cnt <= num_req_evals);
                     // hack
-                    if (eval_cnt+tmp_done_cnt <= num_req_evals)
+                    if (eval_cnt+tmp_done_cnt <= num_req_evals && tmp_done_cnt)
                     {
 
                         elapsed_time = boost::posix_time::microsec_clock::local_time();
@@ -203,7 +204,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     if (!done)
                     {
                         QCoreApplication::processEvents();
-                        QThread::msleep(100);
+                        QThread::msleep(200);
                     }
                 }
 

@@ -35,7 +35,7 @@ public:
             unsigned int num_pos_outside, unsigned int num_pos_inside,
             unsigned int num_along_ok, unsigned int num_along_nok,
             unsigned int num_across_ok, unsigned int num_across_nok,
-            tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
+            tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values,
             std::vector<EvaluationRequirement::PositionAlongAcrossDetail> details);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
@@ -51,7 +51,7 @@ public:
     unsigned int numAcrossOk() const;
     unsigned int numAcrossNOk() const;
 
-    const tuple<vector<double>, vector<double>, vector<double>, vector<double>>& distanceValues() const;
+    const tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>>& distanceValues() const;
 
     std::vector<EvaluationRequirement::PositionAlongAcrossDetail>& details();
 
@@ -76,7 +76,8 @@ protected:
     unsigned int num_across_ok_ {0};
     unsigned int num_across_nok_ {0};
 
-    tuple<vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
+    tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values_;
+    // dx, dy, dalong, dacross, along, along latency
 
     double along_min_ {0};
     double along_max_ {0};
@@ -87,6 +88,11 @@ protected:
     double across_max_ {0};
     double across_avg_ {0};
     double across_var_ {0};
+
+    double latency_min_ {0};
+    double latency_max_ {0};
+    double latency_avg_ {0};
+    double latency_var_ {0};
 
     bool has_p_min_along_ {false};
     float p_min_along_{0};

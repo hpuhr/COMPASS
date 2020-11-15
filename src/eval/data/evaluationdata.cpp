@@ -144,8 +144,8 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-//            if (!targetData(utn_it).hasRefBuffer())
-//                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+            //            if (!targetData(utn_it).hasRefBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
 
@@ -249,8 +249,8 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it);  // get iterator for random access
 
-//            if (!targetData(utn_it).hasTstBuffer())
-//                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
+            //            if (!targetData(utn_it).hasTstBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
 
@@ -307,6 +307,15 @@ void EvaluationData::finalize ()
                 target_data_, done_flags);
     tbb::task::enqueue(*t);
 
+    postprocess_dialog_.setValue(0);
+
+    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
+    elapsed_time = boost::posix_time::microsec_clock::local_time();
+    unsigned int last_tmp_done_cnt = 0;
+
+    boost::posix_time::time_duration tmp_time_diff;
+    double tmp_elapsed_time_s;
+
     while (!done)
     {
         done = true;
@@ -322,28 +331,38 @@ void EvaluationData::finalize ()
 
         assert (tmp_done_cnt <= num_targets);
 
-        elapsed_time = boost::posix_time::microsec_clock::local_time();
+        if (tmp_done_cnt && tmp_done_cnt != last_tmp_done_cnt)
+        {
+            elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-        time_diff = elapsed_time - start_time;
-        elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+            time_diff = elapsed_time - start_time;
+            elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-        time_per_eval = elapsed_time_s/(double)(tmp_done_cnt);
-        remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
+            tmp_time_diff = elapsed_time - last_elapsed_time;
+            tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
 
-        //        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
-        //               << " elapsed_time_s " << elapsed_time_s;
+            time_per_eval = 0.95*time_per_eval + 0.05*(tmp_elapsed_time_s/(double)(tmp_done_cnt-last_tmp_done_cnt));
+            // halfnhalf
+            remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
 
-        postprocess_dialog_.setLabelText(
-                    ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                     +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
-                     +" (estimated)").c_str());
+            //        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
+            //               << " elapsed_time_s " << elapsed_time_s;
 
-        postprocess_dialog_.setValue(tmp_done_cnt);
+            postprocess_dialog_.setLabelText(
+                        ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                         +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                         +" (estimated)").c_str());
+
+            postprocess_dialog_.setValue(tmp_done_cnt);
+
+            last_tmp_done_cnt = tmp_done_cnt;
+            last_elapsed_time = elapsed_time;
+        }
 
         if (!done)
         {
             QCoreApplication::processEvents();
-            QThread::msleep(100);
+            QThread::msleep(200);
         }
     }
 
