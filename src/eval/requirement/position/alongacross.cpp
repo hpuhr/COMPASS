@@ -121,7 +121,7 @@ namespace EvaluationRequirement
                 if (!skip_no_data_details)
                     details.push_back({tod, tst_pos,
                                        false, {}, // has_ref_pos, ref_pos
-                                       {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       {}, {}, along_ok, {}, // pos_inside, distance_along, distance_along_ok, latency
                                        {}, across_ok, // distance_across, distance_across_ok
                                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                        num_along_ok, num_along_nok, num_across_ok, num_across_nok,
@@ -141,7 +141,7 @@ namespace EvaluationRequirement
                 if (!skip_no_data_details)
                     details.push_back({tod, tst_pos,
                                        false, {}, // has_ref_pos, ref_pos
-                                       {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       {}, {}, along_ok, {}, // pos_inside, distance_along, distance_along_ok, latency
                                        {}, across_ok, // distance_across, distance_across_ok
                                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                        num_along_ok, num_along_nok, num_across_ok, num_across_nok,
@@ -163,7 +163,7 @@ namespace EvaluationRequirement
                 if (!skip_no_data_details)
                     details.push_back({tod, tst_pos,
                                        true, ref_pos, // has_ref_pos, ref_pos
-                                       is_inside, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       is_inside, {}, along_ok, {}, // pos_inside, distance_along, distance_along_ok, latency
                                        {}, across_ok, // distance_across, distance_across_ok
                                        num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                        num_along_ok, num_along_nok, num_across_ok, num_across_nok,
@@ -193,7 +193,7 @@ namespace EvaluationRequirement
             {
                 details.push_back({tod, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                   is_inside, {}, along_ok, {}, // pos_inside, distance_along, distance_along_ok, latency
                                    {}, across_ok, // distance_across, distance_across_ok
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_along_ok, num_along_nok, num_across_ok, num_across_nok,
@@ -210,7 +210,7 @@ namespace EvaluationRequirement
 
             ++num_distances;
 
-            if (d_along > max_distance_)
+            if (fabs(d_along) > max_distance_)
             {
                 along_ok = false;
                 ++num_along_nok;
@@ -222,7 +222,7 @@ namespace EvaluationRequirement
                 comment = "";
             }
 
-            if (d_across > max_distance_)
+            if (fabs(d_across) > max_distance_)
             {
                 across_ok = false;
                 ++num_across_nok;
@@ -237,7 +237,7 @@ namespace EvaluationRequirement
 
             details.push_back({tod, tst_pos,
                                true, ref_pos,
-                               is_inside, d_along, along_ok, // pos_inside, distance_along, distance_along_ok
+                               is_inside, d_along, along_ok, d_along/ref_spd.speed_, // pos_inside, distance_along, distance_along_ok, latency
                                d_across, across_ok, // distance_across, distance_across_ok
                                num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                num_along_ok, num_along_nok, num_across_ok, num_across_nok,

@@ -170,7 +170,7 @@ namespace EvaluationRequirementResult
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 22,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
                  "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                  "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
@@ -181,7 +181,7 @@ namespace EvaluationRequirementResult
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 19,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
+                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
                  "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
@@ -196,7 +196,7 @@ namespace EvaluationRequirementResult
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 22,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
                      "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                      "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
@@ -207,7 +207,7 @@ namespace EvaluationRequirementResult
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 19,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "ALAvg",
+                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
                      "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
@@ -220,12 +220,12 @@ namespace EvaluationRequirementResult
         QVariant p_along_var;
 
         if (has_p_min_along_)
-            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
+            p_along_var = roundf(p_min_along_ * 10000.0) / 100.0;
 
         QVariant p_across_var;
 
         if (has_p_min_across_)
-            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
+            p_across_var = roundf(p_min_across_ * 10000.0) / 100.0;
 
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"
@@ -239,7 +239,7 @@ namespace EvaluationRequirementResult
          num_along_ok_, // "#ALOK"
          num_along_nok_, // "#ALNOK"
          p_along_var, // "PALOK"
-         Number::round(latency_avg_,2), // "ALAvg"
+         Number::round(latency_avg_,2), // "LAvg"
          Number::round(across_avg_,2), // "ACAvg"
          Number::round(sqrt(across_var_),2), // "ACSDev"
          num_across_ok_, // "#ACOK"
@@ -254,12 +254,12 @@ namespace EvaluationRequirementResult
         QVariant p_along_var;
 
         if (has_p_min_along_)
-            p_along_var = roundf(has_p_min_along_ * 10000.0) / 100.0;
+            p_along_var = roundf(p_min_along_ * 10000.0) / 100.0;
 
         QVariant p_across_var;
 
         if (has_p_min_across_)
-            p_across_var = roundf(has_p_min_across_ * 10000.0) / 100.0;
+            p_across_var = roundf(p_min_across_ * 10000.0) / 100.0;
 
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"
@@ -274,7 +274,7 @@ namespace EvaluationRequirementResult
          num_along_ok_, // "#ALOK"
          num_along_nok_, // "#ALNOK"
          p_along_var, // "PALOK"
-         Number::round(latency_avg_,2), // "ALAvg"
+         Number::round(latency_avg_,2), // "LAvg"
          Number::round(across_avg_,2), // "ACAvg"
          Number::round(sqrt(across_var_),2), // "ACSDev"
          num_across_ok_, // "#ACOK"
@@ -353,9 +353,9 @@ namespace EvaluationRequirementResult
                               String::timeStringFromDouble(latency_min_).c_str()}, this);
         utn_req_table.addRow({"Max Latency [s]", "Maximum of latency",
                               String::timeStringFromDouble(latency_max_).c_str()}, this);
-        utn_req_table.addRow({"ALAvg [s]", "Average of latency",
+        utn_req_table.addRow({"LAvg [s]", "Average of latency",
                               String::timeStringFromDouble(latency_avg_).c_str()}, this);
-        utn_req_table.addRow({"ALSDev Latency [s]", "Standard Deviation of latency",
+        utn_req_table.addRow({"LSDev Latency [s]", "Standard Deviation of latency",
                               String::timeStringFromDouble(sqrt(latency_var_)).c_str()}, this);
         utn_req_table.addRow({"Variance Latency [s]", "Variance of latency",
                               String::timeStringFromDouble(latency_var_).c_str()}, this);
@@ -418,28 +418,55 @@ namespace EvaluationRequirementResult
 
     void SinglePositionAlongAcross::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        //        if (!utn_req_section.hasTable(tr_details_table_name_))
-        //            utn_req_section.addTable(tr_details_table_name_, 12,
-        //            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
-        //             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
+        //        QVariant distance_along_ {0}; // only set if has_ref_pos_
+        //        bool distance_along_ok_ {false};
+        //        QVariant distance_across_ {0}; // only set if has_ref_pos_
+        //        bool distance_across_ok_ {false};
 
-        //        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-        //                utn_req_section.getTable(tr_details_table_name_);
+        //        QVariant pos_inside_ {false};
 
-        //        unsigned int detail_cnt = 0;
+        //        unsigned int num_pos_ {0};
+        //        unsigned int num_no_ref_ {0};
+        //        unsigned int num_inside_ {0};
+        //        unsigned int num_outside_ {0};
 
-        //        for (auto& rq_det_it : details_)
-        //        {
-        //            utn_req_details_table.addRow(
-        //            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-        //             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
-        //             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
-        //             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
-        //             rq_det_it.comment_.c_str()},
-        //                        this, detail_cnt);
+        //        unsigned int num_along_ok_ {0};
+        //        unsigned int num_along_nok_ {0};
+        //        unsigned int num_across_ok_ {0};
+        //        unsigned int num_across_nok_ {0};
 
-        //            ++detail_cnt;
-        //        }
+
+        if (!utn_req_section.hasTable(tr_details_table_name_))
+            utn_req_section.addTable(tr_details_table_name_, 13,
+            {"ToD", "NoRef", "PosInside",
+             "DAlong", "DAlongOK", "Latency", "#ALOK", "#ALNOK",
+             "DAcross", "DAcrossOK", "#ACOK", "#ACNOK",
+             "Comment"});
+
+        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+                utn_req_section.getTable(tr_details_table_name_);
+
+        unsigned int detail_cnt = 0;
+
+        for (auto& rq_det_it : details_)
+        {
+            utn_req_details_table.addRow(
+            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
+             rq_det_it.distance_along_,  // "DAlong"
+             rq_det_it.distance_along_ok_, // DAlongOK"
+             rq_det_it.latency_, // Latency"
+             rq_det_it.num_along_ok_, // "#ALOK",
+             rq_det_it.num_along_nok_, // "#ALNOK"
+             rq_det_it.distance_across_, // "DAcross"
+             rq_det_it.distance_across_ok_, // "DAcrossOK"
+             rq_det_it.num_across_ok_, // "#ACOK"
+             rq_det_it.num_across_nok_, // "#ACNOK"
+             rq_det_it.comment_.c_str()}, // "Comment"
+                        this, detail_cnt);
+
+            ++detail_cnt;
+        }
     }
 
     bool SinglePositionAlongAcross::hasViewableData (
