@@ -284,7 +284,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbo_name,
         }
     }
 
-    loginf << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
+    logdbg << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
     return ss.str();
 }
 
