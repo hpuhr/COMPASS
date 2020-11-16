@@ -221,6 +221,12 @@ public:
 
     bool showAdsbInfo() const;
 
+    bool skipNoDataDetails() const;
+    void skipNoDataDetails(bool value);
+
+    bool loadOnlySectorData() const;
+    void loadOnlySectorData(bool value);
+
 protected:
     COMPASS& compass_;
 
@@ -265,6 +271,10 @@ protected:
 
     bool remove_not_detected_dbos_{false};
     nlohmann::json remove_not_detected_dbo_values_;
+
+    // eval details
+    bool skip_no_data_details_ {true};
+    bool load_only_sector_data_ {true};
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

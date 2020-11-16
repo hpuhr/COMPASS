@@ -297,6 +297,22 @@ DBFilter* FilterManager::getFilter(unsigned int index)
     return filters_.at(index);
 }
 
+bool FilterManager::hasFilter (const std::string& name)
+{
+    auto it = find_if(filters_.begin(), filters_.end(), [name] (const DBFilter* f) { return f->getName() == name; } );
+
+    return it != filters_.end();
+}
+
+DBFilter* FilterManager::getFilter (const std::string& name)
+{
+    auto it = find_if(filters_.begin(), filters_.end(), [name] (const DBFilter* f) { return f->getName() == name; } );
+    assert (it != filters_.end());
+
+    return *it;
+}
+
+
 void FilterManager::reset()
 {
     for (unsigned int cnt = 0; cnt < filters_.size(); cnt++)

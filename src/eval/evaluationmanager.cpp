@@ -221,6 +221,67 @@ void EvaluationManager::loadData ()
         filter->widget()->update();
     }
 
+    if (load_only_sector_data_ && hasCurrentStandard())
+    {
+        assert (fil_man.hasFilter("Position"));
+        DBFilter* pos_fil = fil_man.getFilter("Position");
+
+        pos_fil->setActive(true);
+
+        json fil_cond;
+
+        bool first = true;
+        double lat_min, lat_max, long_min, long_max;
+        double tmp_lat_min, tmp_lat_max, tmp_long_min, tmp_long_max;
+
+        EvaluationStandard& standard = currentStandard();
+
+        std::vector<std::shared_ptr<SectorLayer>>& sector_layers = sectorsLayers();
+        for (auto& sec_it : sector_layers)
+        {
+            const string& sector_layer_name = sec_it->name();
+
+            for (auto& req_group_it : standard)
+            {
+                const string& requirement_group_name = req_group_it.first;
+
+                if (!useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+                    continue; // skip if not used
+
+                if (first)
+                {
+                    tie(lat_min, lat_max) = sec_it->getMinMaxLatitude();
+                    tie(long_min, long_max) = sec_it->getMinMaxLongitude();
+                    first = false;
+                }
+                else
+                {
+                    tie(tmp_lat_min, tmp_lat_max) = sec_it->getMinMaxLatitude();
+                    tie(tmp_long_min, tmp_long_max) = sec_it->getMinMaxLongitude();
+
+                    lat_min = min(lat_min, tmp_lat_min);
+                    lat_max = max(lat_max, tmp_lat_max);
+                    long_min = min(long_min, tmp_long_min);
+                    long_max = max(long_max, tmp_long_max);
+                }
+            }
+        }
+
+        //        lat_min = 46.49;
+        //        lat_max = 49.16;
+        //        long_min = 11.39;
+        //        long_max = 17.43;
+
+        if (!first)
+        {
+            fil_cond["Position"]["Latitude Maximum"] = to_string(lat_max+0.2);
+            fil_cond["Position"]["Latitude Minimum"] = to_string(lat_min-0.2);
+            fil_cond["Position"]["Longitude Maximum"] = to_string(long_max+0.2);
+            fil_cond["Position"]["Longitude Minimum"] = to_string(long_min-0.2);
+
+            pos_fil->loadViewPointConditions(fil_cond);
+        }
+    }
 
     // reference data
     {
@@ -419,15 +480,15 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
 
-//    if (dbo_name == "ADSB")
-//    {
-//        DBObject& obj = object_man.object("ADSB");
+    //    if (dbo_name == "ADSB")
+    //    {
+    //        DBObject& obj = object_man.object("ADSB");
 
-//        read_set.add(obj.variable("mops_version"));
-//        read_set.add(obj.variable("nac_p"));
-//        read_set.add(obj.variable("nucp_nic"));
-//        read_set.add(obj.variable("sil"));
-//    }
+    //        read_set.add(obj.variable("mops_version"));
+    //        read_set.add(obj.variable("nac_p"));
+    //        read_set.add(obj.variable("nucp_nic"));
+    //        read_set.add(obj.variable("sil"));
+    //    }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
@@ -1746,7 +1807,7 @@ bool EvaluationManager::hasADSBInfo(unsigned int ta) const
 }
 
 std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
-        std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsigned int ta) const
+std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsigned int ta) const
 {
     assert (has_adsb_info_);
     assert (adsb_info_.count(ta));
@@ -1762,6 +1823,26 @@ bool EvaluationManager::splitResultsByMOPS() const
 bool EvaluationManager::showAdsbInfo() const
 {
     return show_adsb_info_;
+}
+
+bool EvaluationManager::skipNoDataDetails() const
+{
+    return skip_no_data_details_;
+}
+
+void EvaluationManager::skipNoDataDetails(bool value)
+{
+    skip_no_data_details_ = value;
+}
+
+bool EvaluationManager::loadOnlySectorData() const
+{
+    return load_only_sector_data_;
+}
+
+void EvaluationManager::loadOnlySectorData(bool value)
+{
+    load_only_sector_data_ = value;
 }
 
 bool EvaluationManager::removeTargetAddresses() const

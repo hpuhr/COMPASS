@@ -105,9 +105,9 @@ namespace EvaluationRequirementResult
                 latency_var_ += pow(val - latency_avg_, 2);
             latency_var_ /= (float)num_distances;
 
-//            loginf << "UGA utn " << utn_ << " along_avg " << along_avg_ << " along_var " << along_var_
-//                   << " across_avg " << across_avg_ << " across_var " << across_var_
-//                   << " num_distances " << num_distances;
+            //            loginf << "UGA utn " << utn_ << " along_avg " << along_avg_ << " along_var " << along_var_
+            //                   << " across_avg " << across_avg_ << " across_var " << across_var_
+            //                   << " num_distances " << num_distances;
 
             assert (num_along_ok_ <= num_distances);
             p_min_along_ = (float)num_along_ok_/(float)num_distances;
@@ -230,22 +230,22 @@ namespace EvaluationRequirementResult
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK"
 
-        if (has_p_min_along_)
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
-             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
-        else
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
-             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var}, this, {utn_});
+        target_table.addRow(
+        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+         Number::round(along_avg_,2), // "ALAvg"
+         Number::round(sqrt(along_var_),2), // "ALSDev"
+         num_along_ok_, // "#ALOK"
+         num_along_nok_, // "#ALNOK"
+         p_along_var, // "PALOK"
+         Number::round(latency_avg_,2), // "ALAvg"
+         Number::round(across_avg_,2), // "ACAvg"
+         Number::round(sqrt(across_var_),2), // "ACSDev"
+         num_across_ok_, // "#ACOK"
+         num_across_nok_, // "#ACNOK"
+         p_across_var}, // "PACOK"
+                    this, {utn_});
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToTableADSB (
@@ -264,26 +264,27 @@ namespace EvaluationRequirementResult
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#ALOK", "#ALNOK", "PALOK", "MOPS", "NUCp/NIC", "NACp"
 
-        if (has_p_min_along_)
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
-             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
-             target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
-                        this, {utn_});
-        else
-            target_table.addRow(
-            {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
-             target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
-             target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-             target_->modeCMaxStr().c_str(),
-             along_avg_, sqrt(along_var_), num_along_ok_, num_along_nok_, p_along_var, latency_avg_,
-             across_avg_, sqrt(across_var_), num_across_ok_, num_across_nok_, p_across_var,
-             target_->mopsVersionsStr().c_str(), target_->nucpNicStr().c_str(), target_->nacpStr().c_str()},
-                        this, {utn_});
+        target_table.addRow(
+        {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
+         target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
+         target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
+         target_->modeCMaxStr().c_str(),
+         Number::round(along_avg_,2), // "ALAvg"
+         Number::round(sqrt(along_var_),2), // "ALSDev"
+         num_along_ok_, // "#ALOK"
+         num_along_nok_, // "#ALNOK"
+         p_along_var, // "PALOK"
+         Number::round(latency_avg_,2), // "ALAvg"
+         Number::round(across_avg_,2), // "ACAvg"
+         Number::round(sqrt(across_var_),2), // "ACSDev"
+         num_across_ok_, // "#ACOK"
+         num_across_nok_, // "#ACNOK"
+         p_across_var, // "PACOK"
+         target_->mopsVersionsStr().c_str(), // "MOPS"
+         target_->nucpNicStr().c_str(), // "NUCp/NIC"
+         target_->nacpStr().c_str()}, // "NACp"
+                    this, {utn_});
+
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -417,28 +418,28 @@ namespace EvaluationRequirementResult
 
     void SinglePositionAlongAcross::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-//        if (!utn_req_section.hasTable(tr_details_table_name_))
-//            utn_req_section.addTable(tr_details_table_name_, 12,
-//            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
-//             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
+        //        if (!utn_req_section.hasTable(tr_details_table_name_))
+        //            utn_req_section.addTable(tr_details_table_name_, 12,
+        //            {"ToD", "NoRef", "PosInside", "Distance", "PosOK", "#Pos", "#NoRef",
+        //             "#PosInside", "#PosOutside", "#PosOK", "#PosNOK", "Comment"});
 
-//        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-//                utn_req_section.getTable(tr_details_table_name_);
+        //        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+        //                utn_req_section.getTable(tr_details_table_name_);
 
-//        unsigned int detail_cnt = 0;
+        //        unsigned int detail_cnt = 0;
 
-//        for (auto& rq_det_it : details_)
-//        {
-//            utn_req_details_table.addRow(
-//            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-//             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
-//             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
-//             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
-//             rq_det_it.comment_.c_str()},
-//                        this, detail_cnt);
+        //        for (auto& rq_det_it : details_)
+        //        {
+        //            utn_req_details_table.addRow(
+        //            {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+        //             !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_, rq_det_it.distance_, rq_det_it.pos_ok_,
+        //             rq_det_it.num_pos_, rq_det_it.num_no_ref_,
+        //             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_pos_ok_, rq_det_it.num_pos_nok_,
+        //             rq_det_it.comment_.c_str()},
+        //                        this, detail_cnt);
 
-//            ++detail_cnt;
-//        }
+        //            ++detail_cnt;
+        //        }
     }
 
     bool SinglePositionAlongAcross::hasViewableData (

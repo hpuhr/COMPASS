@@ -18,6 +18,7 @@
 #include "eval/requirement/detection/detection.h"
 #include "eval/results/detection/single.h"
 #include "evaluationdata.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -214,6 +215,8 @@ namespace EvaluationRequirement
 
         string comment;
 
+        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+
         for (auto tst_it=tst_data.begin(); tst_it != tst_data.end(); ++tst_it)
         {
             comment = "";
@@ -310,10 +313,11 @@ namespace EvaluationRequirement
 
             if (!is_inside_ref_time_period)
             {
-                details.push_back(
-                {tod, {}, false,
-                 pos_current, is_inside_ref_time_period,
-                 sum_missed_uis, "Outside of reference time periods"});
+                if (!skip_no_data_details)
+                    details.push_back(
+                    {tod, {}, false,
+                     pos_current, is_inside_ref_time_period,
+                     sum_missed_uis, "Outside of reference time periods"});
 
                 // TODO undetected previous miss possible
                 continue;
@@ -335,10 +339,11 @@ namespace EvaluationRequirement
                 logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                        << " outside";
 
-                details.push_back(
-                {tod, {}, false,
-                 pos_current, is_inside_ref_time_period,
-                 sum_missed_uis, "Outside sector"});
+                if (!skip_no_data_details)
+                    details.push_back(
+                    {tod, {}, false,
+                     pos_current, is_inside_ref_time_period,
+                     sum_missed_uis, "Outside sector"});
 
                 was_outside = true;
 

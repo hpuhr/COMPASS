@@ -18,6 +18,7 @@
 #include "eval/requirement/position/maxdistance.h"
 #include "eval/results/position/maxdistancesingle.h"
 #include "evaluationdata.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -95,6 +96,9 @@ namespace EvaluationRequirement
         unsigned int num_distances {0};
         double error_min{0}, error_max{0}, error_sum{0};
 
+
+        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+
         for (const auto& tst_id : tst_data)
         {
             ++num_pos;
@@ -104,11 +108,12 @@ namespace EvaluationRequirement
 
             if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
             {
-                details.push_back({tod, tst_pos,
-                                   false, {},
-                                   {}, {}, true, // pos_inside, distance, pos_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
-                                   "No reference data"});
+                if (skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       false, {},
+                                       {}, {}, true, // pos_inside, distance, pos_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
+                                       "No reference data"});
 
                 ++num_no_ref;
                 continue;
@@ -121,11 +126,12 @@ namespace EvaluationRequirement
 
             if (!ok)
             {
-                details.push_back({tod, tst_pos,
-                                   false, {},
-                                   {}, {}, true, // pos_inside, distance, pos_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
-                                   "No reference position"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       false, {},
+                                       {}, {}, true, // pos_inside, distance, pos_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
+                                       "No reference position"});
 
                 ++num_no_ref;
                 continue;
@@ -135,11 +141,12 @@ namespace EvaluationRequirement
 
             if (!is_inside)
             {
-                details.push_back({tod, tst_pos,
-                                   true, ref_pos,
-                                   is_inside, {}, true, // pos_inside, distance, pos_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
-                                   "Outside sector"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       true, ref_pos,
+                                       is_inside, {}, true, // pos_inside, distance, pos_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside, num_pos_ok, num_pos_nok,
+                                       "Outside sector"});
                 ++num_pos_outside;
                 continue;
             }
@@ -222,7 +229,7 @@ namespace EvaluationRequirement
         assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
         assert (num_pos_inside == num_pos_ok + num_pos_nok);
 
-        assert (details.size() == num_pos);
+        //assert (details.size() == num_pos);
 
         float error_avg {0};
         if (num_distances)

@@ -71,6 +71,9 @@ class FilterManager : public QObject, public Configurable
     DBFilter* getFilter(unsigned int index);
     std::vector<DBFilter*>& filters() { return filters_; }
 
+    bool hasFilter (const std::string& name);
+    DBFilter* getFilter (const std::string& name);
+
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 

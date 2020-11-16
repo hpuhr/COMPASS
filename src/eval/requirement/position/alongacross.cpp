@@ -18,6 +18,7 @@
 #include "eval/requirement/position/alongacross.h"
 #include "eval/results/position/alongacrosssingle.h"
 #include "evaluationdata.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -103,6 +104,8 @@ namespace EvaluationRequirement
         tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values;
         // dx, dy, dalong, dacross, along, along latency
 
+        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+
         for (const auto& tst_id : tst_data)
         {
             ++num_pos;
@@ -115,13 +118,14 @@ namespace EvaluationRequirement
 
             if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
             {
-                details.push_back({tod, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
-                                   {}, across_ok, // distance_across, distance_across_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_along_ok, num_along_nok, num_across_ok, num_across_nok,
-                                   "No reference data"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       false, {}, // has_ref_pos, ref_pos
+                                       {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       {}, across_ok, // distance_across, distance_across_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                       num_along_ok, num_along_nok, num_across_ok, num_across_nok,
+                                       "No reference data"});
 
                 ++num_no_ref;
                 continue;
@@ -134,13 +138,14 @@ namespace EvaluationRequirement
 
             if (!ok)
             {
-                details.push_back({tod, tst_pos,
-                                   false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
-                                   {}, across_ok, // distance_across, distance_across_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_along_ok, num_along_nok, num_across_ok, num_across_nok,
-                                   "No reference position"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       false, {}, // has_ref_pos, ref_pos
+                                       {}, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       {}, across_ok, // distance_across, distance_across_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                       num_along_ok, num_along_nok, num_across_ok, num_across_nok,
+                                       "No reference position"});
 
                 ++num_no_ref;
                 continue;
@@ -155,13 +160,14 @@ namespace EvaluationRequirement
 
             if (!is_inside)
             {
-                details.push_back({tod, tst_pos,
-                                   true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, along_ok, // pos_inside, distance_along, distance_along_ok
-                                   {}, across_ok, // distance_across, distance_across_ok
-                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_along_ok, num_along_nok, num_across_ok, num_across_nok,
-                                   "Outside sector"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, tst_pos,
+                                       true, ref_pos, // has_ref_pos, ref_pos
+                                       is_inside, {}, along_ok, // pos_inside, distance_along, distance_along_ok
+                                       {}, across_ok, // distance_across, distance_across_ok
+                                       num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                       num_along_ok, num_along_nok, num_across_ok, num_across_nok,
+                                       "Outside sector"});
                 ++num_pos_outside;
                 continue;
             }
@@ -257,7 +263,7 @@ namespace EvaluationRequirement
         assert (num_distances == num_across_ok+num_across_nok);
         assert (num_distances == get<0>(distance_values).size());
 
-        assert (details.size() == num_pos);
+        //assert (details.size() == num_pos);
 
         return make_shared<EvaluationRequirementResult::SinglePositionAlongAcross>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

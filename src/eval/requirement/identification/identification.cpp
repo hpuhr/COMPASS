@@ -19,6 +19,7 @@
 #include "eval/results/identification/single.h"
 #include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -85,11 +86,16 @@ namespace EvaluationRequirement
         string comment;
         bool lower_nok, upper_nok;
 
+        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_detail;
+
         for (const auto& tst_id : tst_data)
         {
             ref_exists = false;
             is_inside = false;
             comment = "";
+
+            skip_detail = false;
 
             ++num_updates;
 
@@ -98,10 +104,11 @@ namespace EvaluationRequirement
 
             if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
             {
-                details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "No reference data"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       false, {}, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                       num_unknown_id, num_correct_id, num_false_id, "No reference data"});
 
                 ++num_no_ref_pos;
                 continue;
@@ -114,10 +121,11 @@ namespace EvaluationRequirement
 
             if (!ok)
             {
-                details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "No reference position"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       false, {}, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                       num_unknown_id, num_correct_id, num_false_id, "No reference position"});
 
                 ++num_no_ref_pos;
                 continue;
@@ -128,10 +136,11 @@ namespace EvaluationRequirement
 
             if (!is_inside)
             {
-                details.push_back({tod, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "Outside sector"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       ref_exists, is_inside, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                       num_unknown_id, num_correct_id, num_false_id, "Outside sector"});
 
                 ++num_pos_outside;
                 continue;
@@ -197,25 +206,38 @@ namespace EvaluationRequirement
                     else
                     {
                         comment = "No reference data";
+
+                        if (skip_no_data_details)
+                            skip_detail = true;
+
                         ++num_no_ref_id;
                     }
                 }
                 else
                 {
                     comment = "No reference identification";
+
+                    if (skip_no_data_details)
+                        skip_detail = true;
+
                     ++num_no_ref_id;
                 }
             }
             else
             {
                 comment = "No test identification";
+
+                if (skip_no_data_details)
+                    skip_detail = true;
+
                 ++num_unknown_id;
             }
 
-            details.push_back({tod, pos_current,
-                               ref_exists, is_inside, !callsign_ok,
-                               num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                               num_unknown_id, num_correct_id, num_false_id, comment});
+            if (!skip_detail)
+                details.push_back({tod, pos_current,
+                                   ref_exists, is_inside, !callsign_ok,
+                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                   num_unknown_id, num_correct_id, num_false_id, comment});
         }
 
         logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -228,7 +250,7 @@ namespace EvaluationRequirement
         assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
         assert (num_pos_inside == num_no_ref_id+num_unknown_id+num_correct_id+num_false_id);
 
-        assert (details.size() == tst_data.size());
+        //assert (details.size() == tst_data.size());
 
         if (num_correct_id+num_false_id)
         {

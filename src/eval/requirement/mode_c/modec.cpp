@@ -19,6 +19,7 @@
 #include "eval/results/mode_c/single.h"
 #include "eval/requirement/checkdetail.h"
 #include "evaluationdata.h"
+#include "evaluationmanager.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "sectorlayer.h"
@@ -83,11 +84,16 @@ namespace EvaluationRequirement
         string comment;
         bool lower_nok, upper_nok;
 
+        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_detail;
+
         for (const auto& tst_id : tst_data)
         {
             ref_exists = false;
             is_inside = false;
             comment = "";
+
+            skip_detail = false;
 
             ++num_updates;
 
@@ -96,10 +102,11 @@ namespace EvaluationRequirement
 
             if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
             {
-                details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "No reference data"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       false, {}, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                       num_unknown, num_correct, num_false, "No reference data"});
 
                 ++num_no_ref_pos;
                 continue;
@@ -112,10 +119,11 @@ namespace EvaluationRequirement
 
             if (!ok)
             {
-                details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "No reference position"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       false, {}, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                       num_unknown, num_correct, num_false, "No reference position"});
 
                 ++num_no_ref_pos;
                 continue;
@@ -126,10 +134,11 @@ namespace EvaluationRequirement
 
             if (!is_inside)
             {
-                details.push_back({tod, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, "Outside sector"});
+                if (!skip_no_data_details)
+                    details.push_back({tod, pos_current,
+                                       ref_exists, is_inside, false, // ref_exists, pos_inside,
+                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                       num_unknown, num_correct, num_false, "Outside sector"});
 
                 ++num_pos_outside;
                 continue;
@@ -195,25 +204,38 @@ namespace EvaluationRequirement
                     else
                     {
                         comment = "No reference data";
+
+                        if (skip_no_data_details)
+                            skip_detail = true;
+
                         ++num_no_ref_val;
                     }
                 }
                 else
                 {
                     comment = "No reference code";
+
+                    if (skip_no_data_details)
+                        skip_detail = true;
+
                     ++num_no_ref_val;
                 }
             }
             else
             {
                 comment = "No test code";
+
+                if (skip_no_data_details)
+                    skip_detail = true;
+
                 ++num_unknown;
             }
 
-            details.push_back({tod, pos_current,
-                               ref_exists, is_inside, !code,
-                               num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                               num_unknown, num_correct, num_false, comment});
+            if (!skip_detail)
+                details.push_back({tod, pos_current,
+                                   ref_exists, is_inside, !code,
+                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
+                                   num_unknown, num_correct, num_false, comment});
         }
 
         logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -226,7 +248,7 @@ namespace EvaluationRequirement
         assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
         assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
 
-        assert (details.size() == tst_data.size());
+        //assert (details.size() == tst_data.size());
 
         return make_shared<EvaluationRequirementResult::SingleModeC>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
