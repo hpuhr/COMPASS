@@ -150,7 +150,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
 
-    current_section_name_ = e->compoundResultsHeading(); // slightly hacky, remove "Results" from top
+    current_section_name_ = String::latexString(e->compoundResultsHeading()); // slightly hacky, remove "Results" from top
 
     // ignore if top "Results"
     if (current_section_name_ == "")
