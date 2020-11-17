@@ -34,67 +34,59 @@ ADSBQualityFilterWidget::ADSBQualityFilterWidget(ADSBQualityFilter& filter, cons
 
     // v0
     use_v0_check_ = new QCheckBox ();
-    use_v0_check_->setChecked(filter_.useV0());
     connect(use_v0_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV0Slot);
     layout->addRow("Use v0", use_v0_check_);
 
     // nucp
     use_min_nucp_check_ = new QCheckBox ();
-    use_min_nucp_check_->setChecked(filter_.useMinNUCP());
     connect(use_min_nucp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNUCPSlot);
     layout->addRow("Use Min NUCp", use_min_nucp_check_);
 
-    min_nucp_edit_ = new QLineEdit(QString::number(filter_.minNUCP()));
+    min_nucp_edit_ = new QLineEdit();
     connect(min_nucp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNUCPEditedSlot);
     layout->addRow("Min NUCp", min_nucp_edit_);
 
     // others
     use_v1_check_ = new QCheckBox ();
-    use_v1_check_->setChecked(filter_.useV1());
     connect(use_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV1Slot);
     layout->addRow("Use v1", use_v1_check_);
 
     use_v2_check_ = new QCheckBox ();
-    use_v2_check_->setChecked(filter_.useV2());
     connect(use_v2_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV2Slot);
     layout->addRow("Use v2", use_v2_check_);
 
     // nic
     use_min_nic_check_ = new QCheckBox ();
-    use_min_nic_check_->setChecked(filter_.useMinNIC());
     connect(use_min_nic_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNICSlot);
     layout->addRow("Use Min NIC", use_min_nic_check_);
 
-    min_nic_edit_ = new QLineEdit(QString::number(filter_.minNIC()));
+    min_nic_edit_ = new QLineEdit();
     connect(min_nic_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNICEditedSlot);
     layout->addRow("Min NIC", min_nic_edit_);
 
     // nacp
     use_min_nacp_check_ = new QCheckBox ();
-    use_min_nacp_check_->setChecked(filter_.useMinNACp());
     connect(use_min_nacp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNACpSlot);
     layout->addRow("Use Min NACp", use_min_nacp_check_);
 
-    min_nacp_edit_ = new QLineEdit(QString::number(filter_.minNACp()));
+    min_nacp_edit_ = new QLineEdit();
     connect(min_nacp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNACPEditedSlot);
     layout->addRow("Min NACp", min_nacp_edit_);
 
     // sil
     use_min_sil_v1_check_ = new QCheckBox ();
-    use_min_sil_v1_check_->setChecked(filter_.useMinSILv1());
     connect(use_min_sil_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinSILv1Slot);
     layout->addRow("Use Min SIL v1", use_min_sil_v1_check_);
 
-    min_sil_v1_edit_ = new QLineEdit(QString::number(filter_.minSILv1()));
+    min_sil_v1_edit_ = new QLineEdit();
     connect(min_sil_v1_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minSILv1PEditedSlot);
     layout->addRow("Min SIL v1", min_sil_v1_edit_);
 
     use_min_sil_v2_check_ = new QCheckBox ();
-    use_min_sil_v2_check_->setChecked(filter_.useMinSILv2());
     connect(use_min_sil_v2_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinSILv2Slot);
     layout->addRow("Use Min SIL v2", use_min_sil_v2_check_);
 
-    min_sil_v2_edit_ = new QLineEdit(QString::number(filter_.minSILv2()));
+    min_sil_v2_edit_ = new QLineEdit();
     connect(min_sil_v2_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minSILv2PEditedSlot);
     layout->addRow("Min SIL v2", min_sil_v2_edit_);
 
@@ -226,8 +218,39 @@ void ADSBQualityFilterWidget::update()
 {
     DBFilterWidget::update();
 
-    //assert (value_edit_);
+    assert (use_v0_check_);
+    use_v0_check_->setChecked(filter_.useV0());
 
-    //value_edit_->setText(filter_.utns().c_str());
+    assert (use_min_nucp_check_);
+    use_min_nucp_check_->setChecked(filter_.useMinNUCP());
+    assert (min_nucp_edit_);
+    min_nucp_edit_->setText(QString::number(filter_.minNUCP()));
+
+    assert (use_v1_check_);
+    use_v1_check_->setChecked(filter_.useV1());
+    assert (use_v2_check_);
+    use_v2_check_->setChecked(filter_.useV2());
+
+    assert (use_min_nic_check_);
+    use_min_nic_check_->setChecked(filter_.useMinNIC());
+    assert (min_nic_edit_);
+    min_nic_edit_->setText(QString::number(filter_.minNIC()));
+
+    assert (use_min_nacp_check_);
+    use_min_nacp_check_->setChecked(filter_.useMinNACp());
+    assert (min_nacp_edit_);
+    min_nacp_edit_->setText(QString::number(filter_.minNACp()));
+
+    assert (use_min_sil_v1_check_);
+    use_min_sil_v1_check_->setChecked(filter_.useMinSILv1());
+    assert (min_sil_v1_edit_);
+    min_sil_v1_edit_->setText(QString::number(filter_.minSILv1()));
+
+    assert (use_min_sil_v2_check_);
+    use_min_sil_v2_check_->setChecked(filter_.useMinSILv2());
+    assert (min_sil_v2_edit_);
+    min_sil_v2_edit_->setText(QString::number(filter_.minSILv2()));
+
 }
+
 

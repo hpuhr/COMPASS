@@ -64,7 +64,7 @@ bool ADSBQualityFilter::filters(const std::string& dbo_type)
 }
 
 std::string ADSBQualityFilter::getConditionString(const std::string& dbo_name, bool& first,
-                                          std::vector<DBOVariable*>& filtered_variables)
+                                                  std::vector<DBOVariable*>& filtered_variables)
 {
     logdbg << "ADSBQualityFilter: getConditionString: dbo " << dbo_name << " active " << active_;
 
@@ -153,8 +153,24 @@ void ADSBQualityFilter::checkSubConfigurables()
 
 void ADSBQualityFilter::reset()
 {
-//    for (auto& it : data_sources_)
-//        it.second.setActive(true);
+    use_v0_ = true;
+    use_v1_ = true;
+    use_v2_ = true;
+
+    use_min_nucp_ = true;
+    min_nucp_ = 4;
+
+    use_min_nic_ = true;
+    min_nic_ = 5;
+
+    use_min_nacp_ = true;
+    min_nacp_ = 5;
+
+    use_min_sil_v1_ = true;
+    min_sil_v1_ = 2;
+
+    use_min_sil_v2_ = true;
+    min_sil_v2_ = 4;
 
     widget_->update();
 }
@@ -167,7 +183,24 @@ void ADSBQualityFilter::saveViewPointConditions (nlohmann::json& filters)
     filters[name_] = json::object();
     json& filter = filters.at(name_);
 
-    //filter["utns"] = utns_str_;
+    filter["use_v0"] = use_v0_;
+    filter["use_v1"] = use_v1_;
+    filter["use_v2"] = use_v2_;
+
+    filter["use_min_nucp"] = use_min_nucp_;
+    filter["min_nucp"] = min_nucp_;
+
+    filter["use_min_nic"] = use_min_nic_;
+    filter["min_nic"] = min_nic_;
+
+    filter["use_min_nacp"] = use_min_nacp_;
+    filter["min_nacp"] = min_nacp_;
+
+    filter["use_min_sil_v1"] = use_min_sil_v1_;
+    filter["min_sil_v1"] = min_sil_v1_;
+
+    filter["use_min_sil_v2"] = use_min_sil_v2_;
+    filter["min_sil_v2"] = min_sil_v2_;
 }
 
 void ADSBQualityFilter::loadViewPointConditions (const nlohmann::json& filters)
@@ -177,10 +210,39 @@ void ADSBQualityFilter::loadViewPointConditions (const nlohmann::json& filters)
     assert (filters.contains(name_));
     const json& filter = filters.at(name_);
 
-//    assert (filter.contains("utns"));
-//    utns_str_ = filter.at("utns");
+    assert (filter.contains("use_v0"));
+    use_v0_ = filter.at("use_v0");
 
-//    updateUTNSFromStr(utns_str_);
+    assert (filter.contains("use_v1"));
+    use_v1_ = filter.at("use_v1");
+
+    assert (filter.contains("use_v2"));
+    use_v2_= filter.at("use_v2");
+
+    assert (filter.contains("use_min_nucp"));
+    use_min_nucp_ = filter.at("use_min_nucp");
+    assert (filter.contains("min_nucp"));
+    min_nucp_ = filter.at("min_nucp");
+
+    assert (filter.contains("use_min_nic"));
+    use_min_nic_ = filter.at("use_min_nic");
+    assert (filter.contains("min_nic"));
+    min_nic_ = filter.at("min_nic");
+
+    assert (filter.contains("use_min_nacp"));
+    use_min_nacp_ = filter.at("use_min_nacp");
+    assert (filter.contains("min_nacp"));
+    min_nacp_ = filter.at("min_nacp");
+
+    assert (filter.contains("use_min_sil_v1"));
+    use_min_sil_v1_ = filter.at("use_min_sil_v1");
+    assert (filter.contains("min_sil_v1"));
+    min_sil_v1_ = filter.at("min_sil_v1");
+
+    assert (filter.contains("use_min_sil_v2"));
+    use_min_sil_v2_ = filter.at("use_min_sil_v2");
+    assert (filter.contains("min_sil_v2"));
+    min_sil_v2_ = filter.at("min_sil_v2");
 
     if (widget())
         widget()->update();
