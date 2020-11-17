@@ -368,7 +368,7 @@ void DBObjectManager::loadSlot()
 
         msg_box->setText(("Processing DBObject "+object.first).c_str());
 
-        if (object.second->loadable() && !object.second->associationsLoaded())
+        if (has_associations_ && object.second->loadable() && !object.second->associationsLoaded())
         {
             if (!shown)
             {

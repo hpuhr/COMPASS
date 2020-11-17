@@ -172,7 +172,9 @@ namespace Association
 
     bool Target::isTimeInside (float tod) const
     {
-        assert (has_tod_);
+        if (!has_tod_)
+            return false;
+
         return tod >= tod_min_ && tod <= tod_max_;
     }
 

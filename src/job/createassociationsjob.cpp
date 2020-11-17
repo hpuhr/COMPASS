@@ -434,14 +434,54 @@ void CreateAssociationsJob::createTrackerUTNS()
                 continue;
             }
 
-            loginf << "CreateAssociationsJob: createTrackerUTNS: creating utns for ds_id " << ds_it.first;
+            loginf << "CreateAssociationsJob: createTrackerUTNS: cleaning new utns for ds_id " << ds_it.first;
+
+            emit statusSignal(("Cleaning new "+ds_name+" UTNs").c_str());
+
+            vector<unsigned int> index_to_utn;
+            unsigned int targets_size = tracker_targets.size();
+            for (auto& t_it : tracker_targets)
+                index_to_utn.push_back(t_it.first);
+
+            tbb::parallel_for(uint(0), targets_size, [&](unsigned int cnt)
+            {
+                tracker_targets.at(index_to_utn.at(cnt)).calculateSpeeds();
+            });
+
+            for (auto& target_it : tracker_targets)
+            {
+                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                {
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: new target dubious "
+                           << target_it.second.utn_ << ": calculateSpeeds: min "
+                           << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                           << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                           << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: new target removing non-mode s target reports";
+                    target_it.second.removeNonModeSTRs();
+
+                    target_it.second.calculateSpeeds();
+
+                    if (target_it.second.has_speed_)
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned new target "
+                               << target_it.second.utn_ << ": calculateSpeeds: min "
+                               << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                               << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                }
+            }
+
+            loginf << "CreateAssociationsJob: createTrackerUTNS: creating new utns for ds_id " << ds_it.first;
+
+            emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
 
             // tracker_targets exist, tie them together by mode s address
 
             int tmp_utn;
 
             float done_ratio;
-            unsigned int targets_size = tracker_targets.size();
+
             unsigned int target_cnt = 0;
 
             while (tracker_targets.size())
@@ -455,19 +495,22 @@ void CreateAssociationsJob::createTrackerUTNS()
                 auto tmp_target = tracker_targets.begin();
                 assert (tmp_target != tracker_targets.end());
 
-                logdbg << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
-
-                tmp_utn = findUTNForTarget(tmp_target->second);
-
-                logdbg << "CreateAssociationsJob: createTrackerUTNS: tmp utn " << tmp_target->first
-                       << " tmp_utn " << tmp_utn;
-
-                if (tmp_utn == -1) // none found, create new target
-                    addTarget(tmp_target->second);
-                else // attach to existing target
+                if (tmp_target->second.has_tod_)
                 {
-                    assert (targets_.count(tmp_utn));
-                    targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
+                    logdbg << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
+
+                    tmp_utn = findUTNForTarget(tmp_target->second);
+
+                    logdbg << "CreateAssociationsJob: createTrackerUTNS: tmp utn " << tmp_target->first
+                           << " tmp_utn " << tmp_utn;
+
+                    if (tmp_utn == -1) // none found, create new target
+                        addTarget(tmp_target->second);
+                    else // attach to existing target
+                    {
+                        assert (targets_.count(tmp_utn));
+                        targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
+                    }
                 }
 
                 tracker_targets.erase(tmp_target);
@@ -496,6 +539,14 @@ void CreateAssociationsJob::createTrackerUTNS()
 
                     loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
                     target_it.second.removeNonModeSTRs();
+
+                    if (!target_it.second.has_tod_)
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: empty target utn "
+                               << target_it.second.utn_;
+                        continue;
+                    }
+
                     target_it.second.calculateSpeeds();
 
                     if (target_it.second.has_speed_)
@@ -515,6 +566,21 @@ void CreateAssociationsJob::createTrackerUTNS()
                        <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
                         << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
                         << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
+
+//            for (unsigned int utn : to_be_erased)
+//            {
+//                loginf << "CreateAssociationsJob: createTrackerUTNS: erasing empty utn " << utn;
+//                targets_.erase(utn);
+
+//                for (auto& ta_it : ta_2_utn_)
+//                {
+//                    if (ta_it.second == utn)
+//                    {
+//                        ta_2_utn_.erase(ta_it.first);
+//                        break;
+//                    }
+//                }
+//            }
         }
     }
     else
@@ -526,34 +592,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 {
     loginf << "CreateAssociationsJob: createNonTrackerUTNS";
 
-
-
-    //    unsigned int num_trs = 0;
-
-    //    for (auto& dbo_it : target_reports_)
-    //    {
-    //        if (dbo_it.first == "Tracker") // already associated
-    //            continue;
-
-    //        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-    //            num_trs += ds_it.second.size();
-    //    }
-
-    //    unsigned int tr_cnt = 0;
-    //    float done_ratio;
-
-    //    boost::posix_time::ptime start_time;
-    //    boost::posix_time::ptime elapsed_time;
-
-    //    start_time = boost::posix_time::microsec_clock::local_time();
-
-    //    boost::posix_time::time_duration time_diff;
-    //    double elapsed_time_s;
-    //    double time_per_eval, remaining_time_s;
-
-    //    string remaining_time_str;
-
-    DBObjectManager& object_man = COMPASS::instance().objectManager();
+    unsigned int num_data_sources = 0;
 
     for (auto& dbo_it : target_reports_)
     {
@@ -561,9 +600,25 @@ void CreateAssociationsJob::createNonTrackerUTNS()
             continue;
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs
+            ++num_data_sources;
+    }
+
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
+
+    unsigned int ds_cnt = 0;
+    unsigned int done_perc;
+    for (auto& dbo_it : target_reports_)
+    {
+        if (dbo_it.first == "Tracker") // already associated
+            continue;
+
+        for (auto& ds_it : dbo_it.second) // ds_id -> trs
         {
+            assert (num_data_sources);
+            done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
+
             string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
-            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNS").c_str());
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNS ("+to_string(done_perc)+"%)").c_str());
 
             std::vector<Association::TargetReport>& target_reports = ds_it.second;
             unsigned int num_target_reports = target_reports.size();
@@ -579,25 +634,6 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 Association::TargetReport& tr_it = target_reports[tr_cnt];
 
                 tmp_assoc_utns[tr_cnt] = -1; // set as not associated
-
-                //                if (tr_cnt % 50000 == 0)
-                //                {
-                //                    assert (tr_cnt <= num_trs);
-
-                //                    elapsed_time = boost::posix_time::microsec_clock::local_time();
-
-                //                    time_diff = elapsed_time - start_time;
-                //                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
-
-                //                    time_per_eval = elapsed_time_s/(float) tr_cnt;
-                //                    remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
-
-                //                    done_ratio = (float)tr_cnt / (float)num_trs;
-                //                    emit statusSignal(("Creating "+dbo_it.first+" UTNS ("
-                //                                       +String::percentToString(100.0*done_ratio)+"%)"
-                //                                       +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
-
-                //                }
 
                 int tmp_utn;
 
@@ -732,7 +768,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 }
             });
 
-            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" Associations").c_str());
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" Associations ("
+                               +to_string(done_perc)+"%)").c_str());
 
             // create associations
             int tmp_utn;
@@ -755,6 +792,8 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 for (unsigned int tr_cnt=1; tr_cnt < trs.size(); ++tr_cnt)
                     targets_.at(new_utn).addAssociated(trs.at(tr_cnt));
             }
+
+            ++ds_cnt;
         }
     }
 
