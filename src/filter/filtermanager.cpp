@@ -31,6 +31,7 @@
 #include "viewpoint.h"
 #include "dbospecificvaluesdbfilter.h"
 #include "utnfilter.h"
+#include "adsbqualityfilter.h"
 
 #include "json.hpp"
 
@@ -85,8 +86,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             return;
         }
         std::string dbo_name = configuration()
-                                   .getSubConfiguration(class_id, instance_id)
-                                   .getParameterConfigValueString("dbo_name");
+                .getSubConfiguration(class_id, instance_id)
+                .getParameterConfigValueString("dbo_name");
 
         if (!checkDBObject(dbo_name))
         {
@@ -116,8 +117,8 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
                 return;
             }
             std::string dbo_name = configuration()
-                                       .getSubConfiguration(class_id, instance_id)
-                                       .getParameterConfigValueString("dbo_name");
+                    .getSubConfiguration(class_id, instance_id)
+                    .getParameterConfigValueString("dbo_name");
 
             if (!checkDBObject(dbo_name))
             {
@@ -156,14 +157,27 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
             }
 
             UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
-//            if (filter->disabled())
-//            {
-//                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source "
-//                          "filter for object "
-//                       << filter->dbObjectName();
-//                delete filter;
-//            }
-//            else
+            filters_.push_back(filter);
+        }
+        catch (const std::exception& e)
+        {
+            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
+                   << e.what() << "', deleting";
+            configuration().removeSubConfiguration(class_id, instance_id);
+        }
+    }
+    else if (class_id == "ADSBQualityFilter")
+    {
+        try
+        {
+            if (hasSubConfigurable(class_id, instance_id))
+            {
+                logerr << "FilterManager: generateSubConfigurable: adsb quality filter "
+                       << instance_id << " already present";
+                return;
+            }
+
+            ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
             filters_.push_back(filter);
         }
         catch (const std::exception& e)
@@ -216,7 +230,7 @@ void FilterManager::checkSubConfigurables()
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
         if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources() ||
-            !obj_it.second->existsInDB())
+                !obj_it.second->existsInDB())
             continue;
 
         bool exists = false;
@@ -245,7 +259,7 @@ void FilterManager::checkSubConfigurables()
             continue;
         }
         Configuration& ds_filter_configuration =
-            addNewSubConfiguration("DataSourcesFilter", instance_id);
+                addNewSubConfiguration("DataSourcesFilter", instance_id);
 
         ds_filter_configuration.addParameterString("dbo_name", obj_it.first);
         generateSubConfigurable("DataSourcesFilter", instance_id);
@@ -253,13 +267,22 @@ void FilterManager::checkSubConfigurables()
 
     // check for UTN filter
 
-    string utn_classid = "UTNFilter";
+    string classid = "UTNFilter";
 
     if (std::find_if(filters_.begin(), filters_.end(),
-                     [&utn_classid](const DBFilter* x) { return x->classId() == utn_classid;}) == filters_.end())
+                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
     { // not UTN filter
-        addNewSubConfiguration(utn_classid, utn_classid+"0");
-        generateSubConfigurable(utn_classid, utn_classid+"0");
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
+    }
+
+    classid = "ADSBQualityFilter";
+
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
+    { // not UTN filter
+        addNewSubConfiguration(classid, classid+"0");
+        generateSubConfigurable(classid, classid+"0");
     }
 }
 
@@ -411,8 +434,8 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     {
         if (obj_it.second->loadable() && obj_it.second->loadingWanted())
         {
-           db_objects[cnt] = obj_it.first;
-           ++cnt;
+            db_objects[cnt] = obj_it.first;
+            ++cnt;
         }
     }
 
