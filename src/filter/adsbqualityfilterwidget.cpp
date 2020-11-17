@@ -214,7 +214,6 @@ void ADSBQualityFilterWidget::minSILv2PEditedSlot (const QString& text)
 
 
 void ADSBQualityFilterWidget::update()
-
 {
     DBFilterWidget::update();
 
@@ -250,7 +249,6 @@ void ADSBQualityFilterWidget::update()
     use_min_sil_v2_check_->setChecked(filter_.useMinSILv2());
     assert (min_sil_v2_edit_);
     min_sil_v2_edit_->setText(QString::number(filter_.minSILv2()));
-
 }
 
 

@@ -227,6 +227,60 @@ public:
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
 
+    bool useV0() const;
+    void useV0(bool value);
+
+    bool useV1() const;
+    void useV1(bool value);
+
+    bool useV2() const;
+    void useV2(bool value);
+
+    bool useMinNUCP() const;
+    void useMinNUCP(bool value);
+
+    unsigned int minNUCP() const;
+    void minNUCP(unsigned int value);
+
+    bool useMinNIC() const;
+    void useMinNIC(bool value);
+
+    unsigned int minNIC() const;
+    void minNIC(unsigned int value);
+
+    bool useMinNACp() const;
+    void useMinNACp(bool value);
+
+    unsigned int minNACp() const;
+    void minNACp(unsigned int value);
+
+    bool useMinSILv1() const;
+    void useMinSILv1(bool value);
+
+    unsigned int minSILv1() const;
+    void minSILv1(unsigned int value);
+
+    bool useMinSILv2() const;
+    void useMinSILv2(bool value);
+
+    unsigned int minSILv2() const;
+    void minSILv2(unsigned int value);
+
+    bool useLoadFilter() const;
+    void useLoadFilter(bool value);
+
+    bool useTimeFilter() const;
+    void useTimeFilter(bool value);
+
+    float loadTimeBegin() const;
+    void loadTimeBegin(float value);
+
+    float loadTimeEnd() const;
+    void loadTimeEnd(float value);
+
+    bool useASDBFilter() const;
+    void useASDBFilter(bool value);
+
 protected:
     COMPASS& compass_;
 
@@ -275,6 +329,34 @@ protected:
     // eval details
     bool skip_no_data_details_ {true};
     bool load_only_sector_data_ {true};
+
+    // load filter
+    bool use_load_filter_ {false};
+
+    bool use_time_filter_ {false};
+    float load_time_begin_ {0};
+    float load_time_end_ {0};
+
+    bool use_adsb_filter_ {false};
+    bool use_v0_ {false};
+    bool use_v1_ {false};
+    bool use_v2_ {false};
+
+    bool use_min_nucp_ {false};
+    unsigned int min_nucp_ {0};
+
+    bool use_min_nic_ {false};
+    unsigned int min_nic_ {0};
+
+    bool use_min_nacp_ {false};
+    unsigned int min_nacp_ {0};
+
+    bool use_min_sil_v1_ {false};
+    unsigned int min_sil_v1_ {0};
+
+    bool use_min_sil_v2_ {false};
+    unsigned int min_sil_v2_ {0};
+
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 

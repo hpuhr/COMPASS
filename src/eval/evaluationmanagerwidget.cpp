@@ -17,6 +17,7 @@
 
 #include "evaluationmanagerwidget.h"
 #include "evaluationmaintabwidget.h"
+#include "evaluationfiltertabwidget.h"
 #include "evaluationtargetstabwidget.h"
 #include "evaluationstandardtabwidget.h"
 #include "evaluationresultstabwidget.h"
@@ -50,6 +51,7 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
     tab_widget_ = new QTabWidget();
 
     addMainWidget();
+    addFilterWidget();
     addTargetsWidget();
     addStandardWidget();
     addResultsWidget();
@@ -113,6 +115,13 @@ void EvaluationManagerWidget::addMainWidget ()
     main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
 
     tab_widget_->addTab(main_tab_widget_.get(), "Main");
+}
+
+void EvaluationManagerWidget::addFilterWidget ()
+{
+    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, *this));
+
+    tab_widget_->addTab(filter_widget_.get(), "Filter");
 }
 
 void EvaluationManagerWidget::addTargetsWidget ()

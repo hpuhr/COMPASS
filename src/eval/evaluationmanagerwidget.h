@@ -24,6 +24,7 @@
 
 class EvaluationManager;
 class EvaluationMainTabWidget;
+class EvaluationFilterTabWidget;
 class EvaluationTargetsTabWidget;
 class EvaluationStandardTabWidget;
 class EvaluationResultsTabWidget;
@@ -59,6 +60,7 @@ protected:
     QTabWidget* tab_widget_{nullptr};
 
     std::unique_ptr<EvaluationMainTabWidget> main_tab_widget_;
+    std::unique_ptr<EvaluationFilterTabWidget> filter_widget_;
     std::unique_ptr<EvaluationTargetsTabWidget> targets_tab_widget_;
     std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
     std::unique_ptr<EvaluationResultsTabWidget> results_tab_widget_;
@@ -68,6 +70,7 @@ protected:
     QPushButton* gen_report_button_ {nullptr};
 
     void addMainWidget ();
+    void addFilterWidget ();
     void addTargetsWidget ();
     void addStandardWidget ();
     void addResultsWidget ();

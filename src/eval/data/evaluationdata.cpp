@@ -404,6 +404,9 @@ void EvaluationData::clear()
 {
     beginResetModel();
 
+    ref_buffer_ = nullptr;
+    tst_buffer_ = nullptr;
+
     target_data_.clear();
     finalized_ = false;
 

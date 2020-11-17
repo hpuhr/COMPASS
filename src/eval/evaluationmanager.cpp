@@ -91,6 +91,33 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
     registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
 
+    // load filter
+    registerParameter("use_load_filter", &use_load_filter_, false);
+
+    registerParameter("use_time_filter", &use_time_filter_, false);
+    registerParameter("load_time_begin", &load_time_begin_, 0);
+    registerParameter("load_time_end", &load_time_end_, 0);
+
+    registerParameter("use_adsb_filter", &use_load_filter_, false);
+    registerParameter("use_v0", &use_v0_, true);
+    registerParameter("use_v1", &use_v1_, true);
+    registerParameter("use_v2", &use_v2_, true);
+
+    registerParameter("use_min_nucp", &use_min_nucp_, true);
+    registerParameter("min_nucp", &min_nucp_, 4);
+
+    registerParameter("use_min_nic", &use_min_nic_, true);
+    registerParameter("min_nic", &min_nic_, 5);
+
+    registerParameter("use_min_nacp", &use_min_nacp_, true);
+    registerParameter("min_nacp", &min_nacp_, 5);
+
+    registerParameter("use_min_sil_v1", &use_min_sil_v1_, true);
+    registerParameter("min_sil_v1", &min_sil_v1_, 2);
+
+    registerParameter("use_min_sil_v2", &use_min_sil_v2_, true);
+    registerParameter("min_sil_v2", &min_sil_v2_, 4);
+
     createSubConfigurables();
 }
 
@@ -221,6 +248,7 @@ void EvaluationManager::loadData ()
         filter->widget()->update();
     }
 
+    // position data
     if (load_only_sector_data_ && hasCurrentStandard())
     {
         assert (fil_man.hasFilter("Position"));
@@ -280,6 +308,57 @@ void EvaluationManager::loadData ()
             fil_cond["Position"]["Longitude Minimum"] = to_string(long_min-0.2);
 
             pos_fil->loadViewPointConditions(fil_cond);
+        }
+    }
+
+    // other filters
+    if (use_load_filter_)
+    {
+        if (use_time_filter_)
+        {
+            assert (fil_man.hasFilter("Time of Day"));
+            DBFilter* fil = fil_man.getFilter("Time of Day");
+
+            fil->setActive(true);
+
+            json filter;
+
+            filter["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(load_time_begin_);
+            filter["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(load_time_end_);
+
+            fil->loadViewPointConditions(filter);
+        }
+
+
+        if (use_adsb_filter_)
+        {
+            assert (fil_man.hasFilter("ADSB Quality"));
+            DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
+
+            adsb_fil->setActive(true);
+
+            json filter;
+
+            filter["ADSB Quality"]["use_v0"] = use_v0_;
+            filter["ADSB Quality"]["use_v1"] = use_v1_;
+            filter["ADSB Quality"]["use_v2"] = use_v2_;
+
+            filter["ADSB Quality"]["use_min_nucp"] = use_min_nucp_;
+            filter["ADSB Quality"]["min_nucp"] = min_nucp_;
+
+            filter["ADSB Quality"]["use_min_nic"] = use_min_nic_;
+            filter["ADSB Quality"]["min_nic"] = min_nic_;
+
+            filter["ADSB Quality"]["use_min_nacp"] = use_min_nacp_;
+            filter["ADSB Quality"]["min_nacp"] = min_nacp_;
+
+            filter["ADSB Quality"]["use_min_sil_v1"] = use_min_sil_v1_;
+            filter["ADSB Quality"]["min_sil_v1"] = min_sil_v1_;
+
+            filter["ADSB Quality"]["use_min_sil_v2"] = use_min_sil_v2_;
+            filter["ADSB Quality"]["min_sil_v2"] = min_sil_v2_;
+
+            adsb_fil->loadViewPointConditions(filter);
         }
     }
 
@@ -1922,3 +2001,202 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
 
     return data;
 }
+
+bool EvaluationManager::useV0() const
+{
+    return use_v0_;
+}
+
+void EvaluationManager::useV0(bool value)
+{
+    loginf << "EvaluationManager: useV0: value " << value;
+    use_v0_ = value;
+}
+
+bool EvaluationManager::useV1() const
+{
+    return use_v1_;
+}
+
+void EvaluationManager::useV1(bool value)
+{
+    loginf << "EvaluationManager: useV1: value " << value;
+    use_v1_ = value;
+}
+
+bool EvaluationManager::useV2() const
+{
+    return use_v2_;
+}
+
+void EvaluationManager::useV2(bool value)
+{
+    loginf << "EvaluationManager: useV2: value " << value;
+    use_v2_ = value;
+}
+
+bool EvaluationManager::useMinNUCP() const
+{
+    return use_min_nucp_;
+}
+
+void EvaluationManager::useMinNUCP(bool value)
+{
+    loginf << "EvaluationManager: useMinNUCP: value " << value;
+    use_min_nucp_ = value;
+}
+
+unsigned int EvaluationManager::minNUCP() const
+{
+    return min_nucp_;
+}
+
+void EvaluationManager::minNUCP(unsigned int value)
+{
+    loginf << "EvaluationManager: minNUCP: value " << value;
+    min_nucp_ = value;
+}
+
+bool EvaluationManager::useMinNIC() const
+{
+    return use_min_nic_;
+}
+
+void EvaluationManager::useMinNIC(bool value)
+{
+    loginf << "EvaluationManager: useMinNIC: value " << value;
+    use_min_nic_ = value;
+}
+
+unsigned int EvaluationManager::minNIC() const
+{
+    return min_nic_;
+}
+
+void EvaluationManager::minNIC(unsigned int value)
+{
+    loginf << "EvaluationManager: minNIC: value " << value;
+    min_nic_ = value;
+}
+
+bool EvaluationManager::useMinNACp() const
+{
+    return use_min_nacp_;
+}
+
+void EvaluationManager::useMinNACp(bool value)
+{
+    loginf << "EvaluationManager: useMinNACp: value " << value;
+    use_min_nacp_ = value;
+}
+
+unsigned int EvaluationManager::minNACp() const
+{
+    return min_nacp_;
+}
+
+void EvaluationManager::minNACp(unsigned int value)
+{
+    loginf << "EvaluationManager: minNACp: value " << value;
+    min_nacp_ = value;
+}
+
+bool EvaluationManager::useMinSILv1() const
+{
+    return use_min_sil_v1_;
+}
+
+void EvaluationManager::useMinSILv1(bool value)
+{
+    loginf << "EvaluationManager: useMinSILv1: value " << value;
+    use_min_sil_v1_ = value;
+}
+
+unsigned int EvaluationManager::minSILv1() const
+{
+    return min_sil_v1_;
+}
+
+void EvaluationManager::minSILv1(unsigned int value)
+{
+    loginf << "EvaluationManager: minSILv1: value " << value;
+    min_sil_v1_ = value;
+}
+
+bool EvaluationManager::useMinSILv2() const
+{
+    return use_min_sil_v2_;
+}
+
+void EvaluationManager::useMinSILv2(bool value)
+{
+    loginf << "EvaluationManager: useMinSILv2: value " << value;
+    use_min_sil_v2_ = value;
+}
+
+unsigned int EvaluationManager::minSILv2() const
+{
+    return min_sil_v2_;
+}
+
+void EvaluationManager::minSILv2(unsigned int value)
+{
+    loginf << "EvaluationManager: minSILv2: value " << value;
+    min_sil_v2_ = value;
+}
+
+bool EvaluationManager::useLoadFilter() const
+{
+    return use_load_filter_;
+}
+
+void EvaluationManager::useLoadFilter(bool value)
+{
+    loginf << "EvaluationManager: useLoadFilter: value " << value;
+    use_load_filter_ = value;
+}
+
+bool EvaluationManager::useTimeFilter() const
+{
+    return use_time_filter_;
+}
+
+void EvaluationManager::useTimeFilter(bool value)
+{
+    loginf << "EvaluationManager: useTimeFilter: value " << value;
+    use_time_filter_ = value;
+}
+
+float EvaluationManager::loadTimeBegin() const
+{
+    return load_time_begin_;
+}
+
+void EvaluationManager::loadTimeBegin(float value)
+{
+    loginf << "EvaluationManager: loadTimeBegin: value " << value;
+    load_time_begin_ = value;
+}
+
+float EvaluationManager::loadTimeEnd() const
+{
+    return load_time_end_;
+}
+
+void EvaluationManager::loadTimeEnd(float value)
+{
+    loginf << "EvaluationManager: loadTimeEnd: value " << value;
+    load_time_end_ = value;
+}
+
+bool EvaluationManager::useASDBFilter() const
+{
+    return use_adsb_filter_;
+}
+
+void EvaluationManager::useASDBFilter(bool value)
+{
+    loginf << "EvaluationManager: useASDBFilter: value " << value;
+    use_adsb_filter_ = value;
+}
+

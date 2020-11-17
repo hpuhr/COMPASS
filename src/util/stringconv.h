@@ -130,18 +130,26 @@ inline std::string timeStringFromDouble(double seconds, bool milliseconds = true
     return out.str();
 }
 
-inline double timeFromString(std::string time_str)
+inline double timeFromString(std::string time_str, bool* ok=nullptr)
 {
     std::vector<std::string> chunks = split(time_str, ':');
 
     double time;
 
     if (chunks.size() != 3)
-        throw std::invalid_argument("Util: timeFromString: wrong number of chunks");
+    {
+        if (ok)
+            *ok = false;
+
+        return 0;
+    }
 
     time = std::stod(chunks[0]) * 3600.0;
     time += std::stod(chunks[1]) * 60.0;
     time += std::stod(chunks[2]);
+
+    if (ok)
+        *ok = true;
 
     return time;
 }
