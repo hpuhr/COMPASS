@@ -32,9 +32,12 @@
 #include <QSortFilterProxyModel>
 #include <QMenu>
 #include <QMessageBox>
+#include <QClipboard>
+#include <QApplication>
 
 #include <cassert>
 #include <type_traits>
+#include <iostream>
 
 using namespace std;
 using namespace Utils;
@@ -78,6 +81,10 @@ namespace EvaluationResultsReport
         toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
         connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
         upper_layout->addWidget(toogle_show_unused_button_);
+
+        copy_button_ = new QPushButton("Copy Content");
+        connect (copy_button_, &QPushButton::clicked, this, &SectionContentTable::copyContentSlot);
+        upper_layout->addWidget(copy_button_);
 
         main_layout->addLayout(upper_layout);
 
@@ -237,7 +244,22 @@ namespace EvaluationResultsReport
         return headings_;
     }
 
-    std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row) const
+    unsigned int SectionContentTable::filteredRowCount () const
+    {
+        if (!proxy_model_)
+        {
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
+            SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+            assert (tmp);
+            proxy_model_->setSourceModel(tmp);
+        }
+
+        return proxy_model_->rowCount();
+    }
+
+    std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
     {
         if (!proxy_model_)
         {
@@ -288,7 +310,10 @@ namespace EvaluationResultsReport
             QModelIndex index = proxy_model_->index(row, col);
             assert (index.isValid());
             // get string can convert to latex
-            result.push_back(String::latexString(proxy_model_->data(index).toString().toStdString()));
+            if (latex)
+                result.push_back(String::latexString(proxy_model_->data(index).toString().toStdString()));
+            else
+                result.push_back(proxy_model_->data(index).toString().toStdString());
         }
 
         return result;
@@ -575,5 +600,45 @@ namespace EvaluationResultsReport
     void SectionContentTable::toggleShowUnusedSlot()
     {
         showUnused(!show_unused_);
+    }
+
+    void SectionContentTable::copyContentSlot()
+    {
+        loginf << "SectionContentTable: copyContentSlot";
+
+        stringstream ss;
+
+        unsigned int num_cols = headings_.size();
+
+        // headings
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (cnt == 0)
+                ss << headings_.at(cnt);
+            else
+                ss <<  ";" << headings_.at(cnt);
+        }
+        ss << "\n";
+
+        unsigned int num_rows = proxy_model_->rowCount();
+
+        vector<string> row_strings;
+
+        for (unsigned int row=0; row < num_rows; ++row)
+        {
+            row_strings = sortedRowStrings(row, false);
+            assert (row_strings.size() == num_cols);
+
+            for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+            {
+                if (cnt == 0)
+                    ss << row_strings.at(cnt);
+                else
+                    ss <<  ";" << row_strings.at(cnt);
+            }
+            ss << "\n";
+        }
+
+        QApplication::clipboard()->setText(ss.str().c_str());
     }
 }

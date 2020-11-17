@@ -197,7 +197,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     if (headings.size() >= 9)
         table.setWideTable(true);
 
-    unsigned int num_rows = e->rowCount();
+    unsigned int num_rows = e->filteredRowCount();
     vector<string> row_strings;
     string ref;
 

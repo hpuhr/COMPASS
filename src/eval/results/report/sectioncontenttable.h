@@ -101,6 +101,8 @@ namespace EvaluationResultsReport
 
         void toggleShowUnusedSlot();
 
+        void copyContentSlot();
+
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
                             vector<string> headings, Section* parent_section, EvaluationManager& eval_man,
@@ -123,7 +125,8 @@ namespace EvaluationResultsReport
         Qt::ItemFlags flags(const QModelIndex &index) const override;
 
         vector<string> headings() const;
-        std::vector<std::string> sortedRowStrings(unsigned int row) const;
+        unsigned int filteredRowCount () const;
+        std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
         bool hasReference (unsigned int row) const;
         std::string reference (unsigned int row) const;
@@ -146,6 +149,7 @@ namespace EvaluationResultsReport
         vector<QVariant> annotations_;
 
         mutable QPushButton* toogle_show_unused_button_ {nullptr};
+        mutable QPushButton* copy_button_ {nullptr};
 
         mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
         mutable QTableView* table_view_ {nullptr}; // for reset
