@@ -247,7 +247,7 @@ namespace EvaluationRequirement
             get<1>(distance_values).push_back(y_pos);
             get<2>(distance_values).push_back(d_along);
             get<3>(distance_values).push_back(d_across);
-            get<4>(distance_values).push_back(d_along/ref_spd.speed_);
+            get<4>(distance_values).push_back(-d_along/ref_spd.speed_);
         }
 
 //        logdbg << "EvaluationRequirementPositionAlongAcross '" << name_ << "': evaluate: utn " << target_data.utn_

@@ -168,10 +168,11 @@ namespace EvaluationRequirementResult
         if (eval_man_.showAdsbInfo())
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 22,
+                tgt_overview_section.addTable(target_table_name_, 29,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
-                 "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
+                 "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                 "LMin", "LMax", "LAvg", "LSDev",
+                 "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                  "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
             addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
@@ -179,10 +180,11 @@ namespace EvaluationRequirementResult
         else
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 19,
+                tgt_overview_section.addTable(target_table_name_, 26,
                 {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
-                 "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
+                 "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                 "LMin", "LMax", "LAvg", "LSDev",
+                 "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
         }
@@ -194,10 +196,11 @@ namespace EvaluationRequirementResult
             if (eval_man_.showAdsbInfo())
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 22,
+                    sum_section.addTable(target_table_name_, 29,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
-                     "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
+                     "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                     "LMin", "LMax", "LAvg", "LSDev",
+                     "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
                      "MOPS", "NUCp/NIC", "NACp"}, true, 12);
 
                 addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
@@ -205,10 +208,11 @@ namespace EvaluationRequirementResult
             else
             {
                 if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 19,
+                    sum_section.addTable(target_table_name_, 26,
                     {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK", "LAvg",
-                     "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
+                     "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+                     "LMin", "LMax", "LAvg", "LSDev",
+                     "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
 
                 addTargetDetailsToTable(sum_section.getTable(target_table_name_));
             }
@@ -234,12 +238,19 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+         Number::round(along_min_,2), // "ALMin"
+         Number::round(along_max_,2), // "ALMax"
          Number::round(along_avg_,2), // "ALAvg"
          Number::round(sqrt(along_var_),2), // "ALSDev"
          num_along_ok_, // "#ALOK"
          num_along_nok_, // "#ALNOK"
          p_along_var, // "PALOK"
+         Number::round(latency_min_,2), // "LMin"
+         Number::round(latency_max_,2), // "LMax"
          Number::round(latency_avg_,2), // "LAvg"
+         Number::round(sqrt(latency_var_),2), // "LSDev"
+         Number::round(across_min_,2), // "ACMin"
+         Number::round(across_max_,2), // "ACMax"
          Number::round(across_avg_,2), // "ACAvg"
          Number::round(sqrt(across_var_),2), // "ACSDev"
          num_across_ok_, // "#ACOK"
@@ -269,12 +280,19 @@ namespace EvaluationRequirementResult
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
          target_->modeCMaxStr().c_str(),
+         Number::round(along_min_,2), // "ALMin"
+         Number::round(along_max_,2), // "ALMax"
          Number::round(along_avg_,2), // "ALAvg"
          Number::round(sqrt(along_var_),2), // "ALSDev"
          num_along_ok_, // "#ALOK"
          num_along_nok_, // "#ALNOK"
          p_along_var, // "PALOK"
+         Number::round(latency_min_,2), // "LMin"
+         Number::round(latency_max_,2), // "LMax"
          Number::round(latency_avg_,2), // "LAvg"
+         Number::round(sqrt(latency_var_),2), // "LSDev"
+         Number::round(across_min_,2), // "ACMin"
+         Number::round(across_max_,2), // "ACMax"
          Number::round(across_avg_,2), // "ACAvg"
          Number::round(sqrt(across_var_),2), // "ACSDev"
          num_across_ok_, // "#ACOK"

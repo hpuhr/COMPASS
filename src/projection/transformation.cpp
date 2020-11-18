@@ -58,7 +58,7 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
         return ret;
     }
 
-    ret = {true, x_pos2-x_pos1, y_pos2-y_pos1};
+    ret = std::tuple<bool, double, double>(true, x_pos2-x_pos1, y_pos2-y_pos1);
 
     logdbg << "Transformation: distanceCart: x_pos1 " << x_pos1 << " y_pos1 " << y_pos1
            << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
@@ -127,7 +127,7 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (
         long2 = y_pos2;
     }
 
-    ret = {true, lat2, long2};
+    ret = std::tuple<bool, double, double>(true, lat2, long2);
 
     return ret;
 }
@@ -193,7 +193,7 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
         return ret;
     }
 
-    ret = {true, x_pos2, y_pos2};
+    ret = std::tuple<bool, double, double>(true, x_pos2, y_pos2);
 
     logdbg << "FixedTransformation: distanceCart: x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
 
@@ -228,7 +228,7 @@ std::tuple<bool, double, double> FixedTransformation::wgsAddCartOffset (double x
         long2 = y_pos2;
     }
 
-    ret = {true, lat2, long2};
+    ret = std::tuple<bool, double, double>(true, lat2, long2);
 
     return ret;
 }

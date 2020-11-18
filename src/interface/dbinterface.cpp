@@ -376,10 +376,12 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
             get<0>(data[tas.get(cnt)]).insert(mops.get(cnt));
 
         if (!min_nus.isNull(cnt) && !max_nus.isNull(cnt))
-            get<1>(data[tas.get(cnt)]) = {true, min_nus.get(cnt), max_nus.get(cnt)};
+            get<1>(data[tas.get(cnt)]) =
+                    std::tuple<bool, unsigned int, unsigned int>(true, min_nus.get(cnt), max_nus.get(cnt));
 
         if (!min_nas.isNull(cnt) && !max_nas.isNull(cnt))
-            get<2>(data[tas.get(cnt)]) = {true, min_nas.get(cnt), max_nas.get(cnt)};
+            get<2>(data[tas.get(cnt)]) =
+                    std::tuple<bool, unsigned int, unsigned int>(true, min_nas.get(cnt), max_nas.get(cnt));
     }
 
     return data;

@@ -98,7 +98,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("load_time_begin", &load_time_begin_, 0);
     registerParameter("load_time_end", &load_time_end_, 0);
 
-    registerParameter("use_adsb_filter", &use_load_filter_, false);
+    registerParameter("use_adsb_filter", &use_adsb_filter_, false);
     registerParameter("use_v0", &use_v0_, true);
     registerParameter("use_v1", &use_v1_, true);
     registerParameter("use_v2", &use_v2_, true);

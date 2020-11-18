@@ -606,9 +606,9 @@ std::pair<bool, float> EvaluationTargetData::estimateRefAltitude (float tod, uns
 
         return {true, alt_calc};
     }
-    else if (found_prev && tod - tod_prev < 60.0)
+    else if (found_prev && tod - tod_prev < 120.0)
         return {true, altitude_vec.get(*prev_it)};
-    else if (found_after && tod_after - tod < 60.0)
+    else if (found_after && tod_after - tod < 120.0)
         return {true, altitude_vec.get(*after_it)};
     else
     {
