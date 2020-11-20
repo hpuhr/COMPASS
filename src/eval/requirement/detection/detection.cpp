@@ -87,6 +87,8 @@ namespace EvaluationRequirement
 
         EvaluationTargetPosition ref_pos;
         float tod{0}, last_tod{0};
+        bool has_ground_bit;
+        bool ground_bit_set;
 
         bool inside, was_inside;
 
@@ -99,7 +101,11 @@ namespace EvaluationRequirement
                 tod = ref_it.first;
                 was_inside = inside;
 
-                inside = target_data.hasRefPosForTime(tod) && sector_layer.isInside(target_data.refPosForTime(tod));
+                // for ref
+                tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(tod);
+
+                inside = target_data.hasRefPosForTime(tod)
+                        && sector_layer.isInside(target_data.refPosForTime(tod), has_ground_bit, ground_bit_set);
 
                 if (first)
                 {
@@ -332,7 +338,14 @@ namespace EvaluationRequirement
             ok = ret_pos.second;
             assert (ok); // must be since inside ref time interval
 
-            is_inside = sector_layer.isInside(ref_pos);
+            has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+
+            if (has_ground_bit)
+                ground_bit_set = target_data.tstGroundBitForTime(tod);
+            else
+                ground_bit_set = false;
+
+            is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 
             if (!is_inside)
             {

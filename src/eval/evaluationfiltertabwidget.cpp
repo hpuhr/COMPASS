@@ -6,7 +6,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QFormLayout>
+#include <QGridLayout>
 #include <QCheckBox>
 #include <QLineEdit>
 
@@ -16,92 +16,155 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(EvaluationManager& eval_man
                                                      EvaluationManagerWidget& man_widget)
     : QWidget(nullptr), eval_man_(eval_man), man_widget_(man_widget)
 {
-    QFormLayout* layout = new QFormLayout();
+    QHBoxLayout* main_layout = new QHBoxLayout();
+
+    QGridLayout* layout = new QGridLayout();
+
+    int row = 0;
+
+    QLabel* label = new QLabel("Use Load Filter");
+    label->setMinimumWidth(100);
+    layout->addWidget(label, row, 0);
 
     use_filter_check_ = new QCheckBox ();
     connect(use_filter_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseFiltersSlot);
-    layout->addRow("Use Load Filter", use_filter_check_);
+    layout->addWidget(use_filter_check_, row, 1);
 
     // time
+    ++row;
+    layout->addWidget(new QLabel("Use Time Filter"), row, 0);
+
     use_time_check_ = new QCheckBox ();
     connect(use_time_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseTimeSlot);
-    layout->addRow("Use Time Filter", use_time_check_);
+    layout->addWidget(use_time_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Time Begin"), row, 0);
 
     time_begin_edit_ = new QLineEdit();
     connect(time_begin_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeBeginEditedSlot);
-    layout->addRow("Time Begin", time_begin_edit_);
+    layout->addWidget(time_begin_edit_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Time End"), row, 0);
 
     time_end_edit_ = new QLineEdit();
     connect(time_end_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
-    layout->addRow("Time End", time_end_edit_);
+    layout->addWidget(time_end_edit_, row, 1);
 
     // adsb
+    ++row;
+    layout->addWidget(new QLabel("Use ADS-B Filter"), row, 0);
+
     use_adsb_check_ = new QCheckBox ();
     connect(use_adsb_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseADSBSlot);
-    layout->addRow("Use ADS-B Filter", use_adsb_check_);
+    layout->addWidget(use_adsb_check_, row, 1);
 
     // v0
+    ++row;
+    layout->addWidget(new QLabel("Use v0"), row, 0);
+
     use_v0_check_ = new QCheckBox ();
     connect(use_v0_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseV0Slot);
-    layout->addRow("Use v0", use_v0_check_);
+    layout->addWidget(use_v0_check_, row, 1);
 
     // nucp
+    ++row;
+    layout->addWidget(new QLabel("Use Min NUCp"), row, 0);
+
     use_min_nucp_check_ = new QCheckBox ();
     connect(use_min_nucp_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseMinNUCPSlot);
-    layout->addRow("Use Min NUCp", use_min_nucp_check_);
+    layout->addWidget(use_min_nucp_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Min NUCp"), row, 0);
 
     min_nucp_edit_ = new QLineEdit();
     connect(min_nucp_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::minNUCPEditedSlot);
-    layout->addRow("Min NUCp", min_nucp_edit_);
+    layout->addWidget(min_nucp_edit_, row, 1);
 
     // others
+    ++row;
+    layout->addWidget(new QLabel("Use v1"), row, 0);
+
     use_v1_check_ = new QCheckBox ();
     connect(use_v1_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseV1Slot);
-    layout->addRow("Use v1", use_v1_check_);
+    layout->addWidget(use_v1_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Use v2"), row, 0);
 
     use_v2_check_ = new QCheckBox ();
     connect(use_v2_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseV2Slot);
-    layout->addRow("Use v2", use_v2_check_);
+    layout->addWidget(use_v2_check_, row, 1);
 
     // nic
+    ++row;
+    layout->addWidget(new QLabel("Use Min NIC"), row, 0);
+
     use_min_nic_check_ = new QCheckBox ();
     connect(use_min_nic_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseMinNICSlot);
-    layout->addRow("Use Min NIC", use_min_nic_check_);
+    layout->addWidget(use_min_nic_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Min NIC"), row, 0);
 
     min_nic_edit_ = new QLineEdit();
     connect(min_nic_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::minNICEditedSlot);
-    layout->addRow("Min NIC", min_nic_edit_);
+    layout->addWidget(min_nic_edit_, row, 1);
 
     // nacp
+    ++row;
+    layout->addWidget(new QLabel("Use Min NACp"), row, 0);
+
     use_min_nacp_check_ = new QCheckBox ();
     connect(use_min_nacp_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseMinNACpSlot);
-    layout->addRow("Use Min NACp", use_min_nacp_check_);
+    layout->addWidget(use_min_nacp_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Min NACp"), row, 0);
 
     min_nacp_edit_ = new QLineEdit();
     connect(min_nacp_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::minNACPEditedSlot);
-    layout->addRow("Min NACp", min_nacp_edit_);
+    layout->addWidget(min_nacp_edit_, row, 1);
 
     // sil
+    ++row;
+    layout->addWidget(new QLabel("Use Min SIL v1"), row, 0);
+
     use_min_sil_v1_check_ = new QCheckBox ();
     connect(use_min_sil_v1_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseMinSILv1Slot);
-    layout->addRow("Use Min SIL v1", use_min_sil_v1_check_);
+    layout->addWidget(use_min_sil_v1_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Min SIL v1"), row, 0);
 
     min_sil_v1_edit_ = new QLineEdit();
     connect(min_sil_v1_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::minSILv1PEditedSlot);
-    layout->addRow("Min SIL v1", min_sil_v1_edit_);
+    layout->addWidget(min_sil_v1_edit_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Use Min SIL v2"), row, 0);
 
     use_min_sil_v2_check_ = new QCheckBox ();
     connect(use_min_sil_v2_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseMinSILv2Slot);
-    layout->addRow("Use Min SIL v2", use_min_sil_v2_check_);
+    layout->addWidget(use_min_sil_v2_check_, row, 1);
+
+    ++row;
+    layout->addWidget(new QLabel("Min SIL v2"), row, 0);
 
     min_sil_v2_edit_ = new QLineEdit();
     connect(min_sil_v2_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::minSILv2PEditedSlot);
-    layout->addRow("Min SIL v2", min_sil_v2_edit_);
+    layout->addWidget(min_sil_v2_edit_, row, 1);
 
     update();
 
     setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
+
+    main_layout->addLayout(layout);
+    main_layout->addStretch();
+
+    setLayout(main_layout);
 }
 
 void EvaluationFilterTabWidget::toggleUseFiltersSlot()
@@ -147,7 +210,7 @@ void EvaluationFilterTabWidget::timeEndEditedSlot (const QString& text)
 void EvaluationFilterTabWidget::toggleUseADSBSlot()
 {
     assert (use_adsb_check_);
-    eval_man_.useASDBFilter(use_v0_check_->checkState() == Qt::Checked);
+    eval_man_.useASDBFilter(use_adsb_check_->checkState() == Qt::Checked);
 }
 
 void EvaluationFilterTabWidget::toggleUseV0Slot()

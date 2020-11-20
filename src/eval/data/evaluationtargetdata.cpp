@@ -876,6 +876,64 @@ bool EvaluationTargetData::hasTstModeCForTime (float tod) const
     return true;
 }
 
+bool EvaluationTargetData::hasTstGroundBitForTime (float tod) const // only if set
+{
+    if (!tst_data_.count(tod))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_.tst_ground_bit_name_.size()
+            && !eval_data_.tst_buffer_->get<string>(eval_data_.tst_ground_bit_name_).isNull(index))
+        return true;
+
+    return false;
+}
+
+bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on ground
+{
+    assert (hasTstGroundBitForTime(tod));
+
+    if (!tst_data_.count(tod))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_.tst_ground_bit_name_.size()
+            && !eval_data_.tst_buffer_->get<string>(eval_data_.tst_ground_bit_name_).isNull(index)
+            && eval_data_.tst_buffer_->get<string>(eval_data_.tst_ground_bit_name_).get(index) == "Y")
+        return true;
+
+    return false;
+}
+
+ // has gbs, gbs true
+pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (float tod) const // true is on ground
+{
+    if (!eval_data_.tst_ground_bit_name_.size())
+        return pair<bool,bool>(false, false);
+
+    DataMappingTimes times = findTstTimes(tod);
+
+    if (times.has_other1_ && fabs(tod - times.tod_other1_) < 15.0 && hasTstGroundBitForTime(times.tod_other1_)
+            && tstGroundBitForTime(times.tod_other1_))
+        return pair<bool,bool> (true, true);
+
+    if (times.has_other2_ && fabs(tod - times.tod_other2_) < 15.0 && hasTstGroundBitForTime(times.tod_other2_))
+        return pair<bool,bool> (true, tstGroundBitForTime(times.tod_other2_));
+
+    return pair<bool,bool>(false, false);
+}
+
+
 unsigned int EvaluationTargetData::tstModeCForTime (float tod) const
 {
     assert (hasTstModeCForTime(tod));
@@ -1661,4 +1719,56 @@ void EvaluationTargetData::addRefPositiosToMappingFast (TstDataMapping& mapping)
         }
     }
     // else do nothing
+}
+
+DataMappingTimes EvaluationTargetData::findTstTimes(float tod_ref) const // ref tod
+{
+    DataMappingTimes ret;
+
+    ret.tod_ = tod_ref;
+
+    //    Return iterator to lower bound
+    //    Returns an iterator pointing to the first element in the container whose key is not considered to go
+    //    before k (i.e., either it is equivalent or goes after).
+
+    auto lb_it = tst_data_.lower_bound(tod_ref);
+
+    if (lb_it != tst_data_.end()) // upper tod found
+    {
+        assert (lb_it->first >= tod_ref);
+
+        // save upper value
+        ret.has_other2_ = true;
+        ret.tod_other2_ = lb_it->first;
+
+        // search lower values by decrementing iterator
+        while (lb_it != tst_data_.end() && (tod_ref < lb_it->first || lb_it->first == ret.tod_other2_))
+        {
+            if (lb_it == tst_data_.begin()) // exit condition on first value
+            {
+                if (tod_ref < lb_it->first) // set as not found
+                    lb_it = tst_data_.end();
+
+                break;
+            }
+
+            lb_it--;
+        }
+
+        if (lb_it != tst_data_.end() && lb_it->first != ret.tod_other2_) // lower tod found
+        {
+            assert (tod_ref >= lb_it->first);
+
+            // add lower value
+            ret.has_other1_ = true;
+            ret.tod_other1_ = lb_it->first;
+        }
+        else // not found, clear previous
+        {
+            ret.has_other2_ = false;
+            ret.tod_other2_ = 0.0;
+        }
+    }
+
+    return ret;
 }

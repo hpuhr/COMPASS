@@ -43,6 +43,8 @@ namespace EvaluationResultsReport
 {
     using namespace std;
 
+    //typedef void (*CallBackFunction)(void);
+
     class TableQSortFilterProxyModel : public QSortFilterProxyModel
     {
         Q_OBJECT
@@ -99,9 +101,10 @@ namespace EvaluationResultsReport
         void showFullUTNSlot ();
         void showSurroundingDataSlot ();
 
+        void showMenuSlot();
         void toggleShowUnusedSlot();
-
         void copyContentSlot();
+        void executeCallBackSlot();
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
@@ -134,6 +137,9 @@ namespace EvaluationResultsReport
         bool showUnused() const;
         void showUnused(bool value);
 
+        void registerCallBack (const std::string& name, std::function<void()> func);
+        void executeCallBack (const std::string& name);
+
     protected:
         unsigned int num_columns_ {0};
         vector<string> headings_;
@@ -148,11 +154,14 @@ namespace EvaluationResultsReport
         vector<EvaluationRequirementResult::Base*> result_ptrs_;
         vector<QVariant> annotations_;
 
-        mutable QPushButton* toogle_show_unused_button_ {nullptr};
-        mutable QPushButton* copy_button_ {nullptr};
+//        mutable QPushButton* toogle_show_unused_button_ {nullptr};
+//        mutable QPushButton* copy_button_ {nullptr};
+         mutable QPushButton* options_button_ {nullptr};
 
         mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
         mutable QTableView* table_view_ {nullptr}; // for reset
+
+        std::map<std::string, std::function<void()>> callback_map_;
     };
 
 }

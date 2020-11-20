@@ -74,10 +74,11 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
     assert (!hasSector(sector->name()));
 }
 
-bool SectorLayer::isInside(const EvaluationTargetPosition& pos)  const
+bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
+                           bool has_ground_bit, bool ground_bit_set)  const
 {
     for (auto& sec_it : sectors_)
-        if (sec_it->isInside(pos))
+        if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
             logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
                    << " alt " << pos.altitude_;

@@ -78,13 +78,9 @@ namespace EvaluationResultsReport
         upper_layout->addWidget(new QLabel(("Table: "+name_).c_str()));
         upper_layout->addStretch();
 
-        toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
-        connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
-        upper_layout->addWidget(toogle_show_unused_button_);
-
-        copy_button_ = new QPushButton("Copy Content");
-        connect (copy_button_, &QPushButton::clicked, this, &SectionContentTable::copyContentSlot);
-        upper_layout->addWidget(copy_button_);
+        options_button_ = new QPushButton("Options");
+        connect (options_button_, &QPushButton::clicked, this, &SectionContentTable::showMenuSlot);
+        upper_layout->addWidget(options_button_);
 
         main_layout->addLayout(upper_layout);
 
@@ -404,6 +400,17 @@ namespace EvaluationResultsReport
         endResetModel();
     }
 
+    void SectionContentTable::registerCallBack (const std::string& name, std::function<void()> func)
+    {
+        assert (!callback_map_.count(name));
+        callback_map_.emplace(name, func);
+    }
+    void SectionContentTable::executeCallBack (const std::string& name)
+    {
+        assert (callback_map_.count(name));
+        callback_map_.at(name)();
+    }
+
 
     void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
     {
@@ -597,6 +604,37 @@ namespace EvaluationResultsReport
         eval_man_.showSurroundingData(utn);
     }
 
+    void SectionContentTable::showMenuSlot()
+    {
+        QMenu menu;
+
+        //        toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
+        //        connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
+        //        upper_layout->addWidget(toogle_show_unused_button_);
+
+        //        copy_button_ = new QPushButton("Copy Content");
+        //        connect (copy_button_, &QPushButton::clicked, this, &SectionContentTable::copyContentSlot);
+        //        upper_layout->addWidget(copy_button_);
+
+        QAction* unused_action = new QAction("Toggle Show Unused", this);
+        connect (unused_action, &QAction::triggered, this, &SectionContentTable::toggleShowUnusedSlot);
+        menu.addAction(unused_action);
+
+        QAction* copy_action = new QAction("Copy Content", this);
+        connect (copy_action, &QAction::triggered, this, &SectionContentTable::copyContentSlot);
+        menu.addAction(copy_action);
+
+        for (auto& cb_it : callback_map_)
+        {
+            QAction* copy_action = new QAction(cb_it.first.c_str(), this);
+            connect (copy_action, &QAction::triggered, this, &SectionContentTable::executeCallBackSlot);
+            copy_action->setData(cb_it.first.c_str());
+            menu.addAction(copy_action);
+        }
+
+        menu.exec(QCursor::pos());
+    }
+
     void SectionContentTable::toggleShowUnusedSlot()
     {
         showUnused(!show_unused_);
@@ -640,5 +678,18 @@ namespace EvaluationResultsReport
         }
 
         QApplication::clipboard()->setText(ss.str().c_str());
+    }
+
+    void SectionContentTable::executeCallBackSlot()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        string name = action->data().toString().toStdString();
+
+        loginf << "SectionContentTable: executeCallBackSlot: name " << name;
+
+        assert (callback_map_.count(name));
+        executeCallBack(name);
     }
 }

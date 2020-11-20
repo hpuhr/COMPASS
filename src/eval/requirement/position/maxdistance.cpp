@@ -99,6 +99,9 @@ namespace EvaluationRequirement
 
         bool skip_no_data_details = eval_man_.skipNoDataDetails();
 
+        bool has_ground_bit;
+        bool ground_bit_set;
+
         for (const auto& tst_id : tst_data)
         {
             ++num_pos;
@@ -137,7 +140,14 @@ namespace EvaluationRequirement
                 continue;
             }
 
-            is_inside = sector_layer.isInside(ref_pos);
+            has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+
+            if (has_ground_bit)
+                ground_bit_set = target_data.tstGroundBitForTime(tod);
+            else
+                ground_bit_set = false;
+
+            is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 
             if (!is_inside)
             {

@@ -206,6 +206,31 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         row_strings = e->sortedRowStrings(row);
         assert (row_strings.size() == num_cols);
 
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (row_strings[cnt].size() > 24)
+            {
+                std::string::size_type space_pos = row_strings[cnt].rfind(' ', 24);
+                std::string::size_type comma_pos = row_strings[cnt].rfind(',', 24);
+
+                if (space_pos == std::string::npos)
+                {
+                    if (comma_pos == std::string::npos)
+                    {
+                        break; // no 64-bit-or-less substring
+                    }
+                    else
+                    {
+                        row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
+                    }
+                }
+                else
+                {
+                    row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
+                }
+            }
+        }
+
         if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
         {
             ref = e->reference(row);

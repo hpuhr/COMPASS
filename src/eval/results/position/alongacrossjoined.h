@@ -50,6 +50,8 @@ namespace EvaluationRequirementResult
         virtual std::string reference(
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+        void exportAsCSV();
+
     protected:
         unsigned int num_pos_ {0};
         unsigned int num_no_ref_ {0};

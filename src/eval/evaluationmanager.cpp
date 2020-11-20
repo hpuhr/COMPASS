@@ -559,15 +559,15 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
 
-    //    if (dbo_name == "ADSB")
-    //    {
-    //        DBObject& obj = object_man.object("ADSB");
+        if (dbo_name == "ADSB")
+        {
+            DBObject& obj = object_man.object("ADSB");
 
-    //        read_set.add(obj.variable("mops_version"));
-    //        read_set.add(obj.variable("nac_p"));
-    //        read_set.add(obj.variable("nucp_nic"));
-    //        read_set.add(obj.variable("sil"));
-    //    }
+            read_set.add(obj.variable("ground_bit"));
+//            read_set.add(obj.variable("nac_p"));
+//            read_set.add(obj.variable("nucp_nic"));
+//            read_set.add(obj.variable("sil"));
+        }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));

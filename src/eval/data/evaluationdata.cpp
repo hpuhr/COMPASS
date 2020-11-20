@@ -199,6 +199,12 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
         tst_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
 
+    // ground bit
+    if (object.name() == "ADSB")
+    {
+        tst_ground_bit_name_ = "ground_bit";
+    }
+
     set<int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
     unsigned int num_skipped {0};

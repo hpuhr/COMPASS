@@ -28,8 +28,11 @@
 #include "logger.h"
 #include "stringconv.h"
 
+#include <QFileDialog>
+
 #include <algorithm>
 #include <cassert>
+#include <fstream>
 
 using namespace std;
 using namespace Utils;
@@ -98,7 +101,7 @@ namespace EvaluationRequirementResult
 
         unsigned int num_distances = get<0>(distance_values_).size();
 
-        // dx, dy, dalong, dacross
+        // dx, dy, dalong, dacross, latency
         if (num_distances)
         {
             vector<double>& along_vals = get<2>(distance_values_);
@@ -251,6 +254,14 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::SectionContentTable& sec_det_table =
                 sector_section.getTable("sector_details_table");
 
+        // callbacks
+        auto exportAsCSV_lambda = [this]() {
+            this->exportAsCSV();
+        };
+
+        sec_det_table.registerCallBack("Save Data As CSV", exportAsCSV_lambda);
+
+        // details
         addCommonDetails(sec_det_table);
 
         sec_det_table.addRow({"Use", "To be used in results", use_}, this);
@@ -451,6 +462,49 @@ namespace EvaluationRequirementResult
             assert (result);
 
             addToValues(result);
+        }
+    }
+
+    void JoinedPositionAlongAcross::exportAsCSV()
+    {
+        loginf << "JoinedPositionAlongAcross: exportAsCSV";
+
+        QFileDialog dialog(nullptr);
+        dialog.setFileMode(QFileDialog::AnyFile);
+        dialog.setNameFilter("CSV Files (*.csv)");
+        dialog.setDefaultSuffix("csv");
+        dialog.setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+
+        if (dialog.exec())
+        {
+            QStringList file_names = dialog.selectedFiles();
+            assert (file_names.size() == 1);
+
+            string filename = file_names.at(0).toStdString();
+
+            std::ofstream output_file;
+
+            output_file.open(filename, std::ios_base::out);
+
+            if (output_file)
+            {
+                // dx, dy, distance, dalong, dacross, latency
+                output_file << "d_x;d_y;distance;d_along;d_across;latency\n";
+                unsigned int size = get<0>(distance_values_).size();
+
+                const vector<double>& dxs = get<0>(distance_values_);
+                const vector<double>& dys = get<1>(distance_values_);
+                const vector<double>& alongs = get<2>(distance_values_);
+                const vector<double>& across = get<3>(distance_values_);
+                const vector<double>& latencies = get<4>(distance_values_);
+
+                for (unsigned int cnt=0; cnt < size; ++cnt)
+                {
+                    output_file << dxs.at(cnt) << ";" << dys.at(cnt) << ";"
+                                << sqrt(pow(dxs.at(cnt),2)+pow(dys.at(cnt),2)) << ";"
+                                << alongs.at(cnt) << ";" << across.at(cnt) << ";" << latencies.at(cnt) << "\n";
+                }
+            }
         }
     }
 

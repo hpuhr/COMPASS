@@ -51,6 +51,18 @@ public:
     EvaluationTargetVelocity spd_ref_;
 };
 
+class DataMappingTimes // mapping to respective tst data
+{
+public:
+    float tod_ {0}; // tod of test
+
+    bool has_other1_ {false};
+    float tod_other1_ {0};
+
+    bool has_other2_ {false};
+    float tod_other2_ {0};
+};
+
 class EvaluationTargetData
 {
 public:
@@ -134,6 +146,11 @@ public:
     bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
     unsigned int tstModeCForTime (float tod) const;
 
+    bool hasTstGroundBitForTime (float tod) const; // only if set
+    bool tstGroundBitForTime (float tod) const; // true is on ground
+
+    std::pair<bool,bool> tstGroundBitForTimeInterpolated (float tod) const; // has gbs, gbs true
+
     // nullptr if none
 
     double latitudeMin() const;
@@ -207,6 +224,8 @@ protected:
     TstDataMapping calculateTestDataMapping(float tod) const; // test tod
     void addRefPositiosToMapping (TstDataMapping& mapping) const;
     void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
+
+    DataMappingTimes findTstTimes(float tod_ref) const; // ref tod
 };
 
 #endif // EVALUATIONTARGETDATA_H

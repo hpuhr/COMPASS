@@ -167,6 +167,8 @@ public:
     std::string tst_modec_g_name_; // can be empty
     std::string tst_modec_v_name_; // can be empty
 
+    std::string tst_ground_bit_name_; // can be empty
+
 protected:
     EvaluationManager& eval_man_;
 
