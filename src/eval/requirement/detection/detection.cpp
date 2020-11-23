@@ -336,7 +336,14 @@ namespace EvaluationRequirement
 
             ref_pos = ret_pos.first;
             ok = ret_pos.second;
-            assert (ok); // must be since inside ref time interval
+            //assert (ok); // must be since inside ref time interval
+
+            if (!ok)
+            {
+                loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
+                       << " impossible check failed";
+                continue;
+            }
 
             has_ground_bit = target_data.hasTstGroundBitForTime(tod);
 
