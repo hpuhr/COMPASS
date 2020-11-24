@@ -48,55 +48,105 @@ public:
     bool useV2() const;
     void useV2(bool value);
 
+    // nucp
     bool useMinNUCP() const;
     void useMinNUCP(bool value);
 
     unsigned int minNUCP() const;
     void minNUCP(unsigned int value);
 
+    bool useMaxNUCP() const;
+    void useMaxNUCP(bool value);
+
+    unsigned int maxNUCP() const;
+    void maxNUCP(unsigned int value);
+
+    // nic
     bool useMinNIC() const;
     void useMinNIC(bool value);
 
     unsigned int minNIC() const;
     void minNIC(unsigned int value);
 
+    bool useMaxNIC() const;
+    void useMaxNIC(bool value);
+
+    unsigned int maxNIC() const;
+    void maxNIC(unsigned int value);
+
+    // nacp
     bool useMinNACp() const;
     void useMinNACp(bool value);
 
     unsigned int minNACp() const;
     void minNACp(unsigned int value);
 
+    bool useMaxNACp() const;
+    void useMaxNACp(bool value);
+
+    unsigned int maxNACp() const;
+    void maxNACp(unsigned int value);
+
+    // sil v1
     bool useMinSILv1() const;
     void useMinSILv1(bool value);
 
     unsigned int minSILv1() const;
     void minSILv1(unsigned int value);
 
+    bool useMaxSILv1() const;
+    void useMaxSILv1(bool value);
+
+    unsigned int maxSILv1() const;
+    void maxSILv1(unsigned int value);
+
+    // sil v2
     bool useMinSILv2() const;
     void useMinSILv2(bool value);
 
     unsigned int minSILv2() const;
     void minSILv2(unsigned int value);
 
+    bool useMaxSILv2() const;
+    void useMaxSILv2(bool value);
+
+    unsigned int maxSILv2() const;
+    void maxSILv2(unsigned int value);
+
 protected:
     bool use_v0_ {false};
     bool use_v1_ {false};
     bool use_v2_ {false};
 
+    // nucp
     bool use_min_nucp_ {false};
     unsigned int min_nucp_ {0};
+    bool use_max_nucp_ {false};
+    unsigned int max_nucp_ {0};
 
+    // nic
     bool use_min_nic_ {false};
     unsigned int min_nic_ {0};
+    bool use_max_nic_ {false};
+    unsigned int max_nic_ {0};
 
+    // nacp
     bool use_min_nacp_ {false};
     unsigned int min_nacp_ {0};
+    bool use_max_nacp_ {false};
+    unsigned int max_nacp_ {0};
 
+    // sil v1
     bool use_min_sil_v1_ {false};
     unsigned int min_sil_v1_ {0};
+    bool use_max_sil_v1_ {false};
+    unsigned int max_sil_v1_ {0};
 
+    // sil v2
     bool use_min_sil_v2_ {false};
     unsigned int min_sil_v2_ {0};
+    bool use_max_sil_v2_ {false};
+    unsigned int max_sil_v2_ {0};
 
     virtual void checkSubConfigurables();
 };

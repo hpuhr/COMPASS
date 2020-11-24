@@ -23,6 +23,7 @@
 #include "eval/results/base.h"
 #include "evaluationdata.h"
 #include "sectorlayer.h"
+#include "logger.h"
 
 #include <tbb/tbb.h>
 
@@ -47,8 +48,9 @@ public:
                  EvaluationData& data,
                  std::shared_ptr<EvaluationRequirement::Base> req,
                  const SectorLayer& sector_layer,
-                 std::vector<bool>& done_flags, bool single_thread)
-        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer), done_flags_(done_flags),
+                 std::vector<bool>& done_flags, bool& task_done, bool single_thread)
+        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer),
+          done_flags_(done_flags), task_done_(task_done),
           single_thread_(single_thread)
     {
     }
@@ -56,7 +58,10 @@ public:
     /*override*/ tbb::task* execute() {
         // Do the job
 
+        loginf << "EvaluateTask: execute: starting";
+
         unsigned int num_utns = utns_.size();
+        assert (done_flags_.size() == num_utns);
 
         if (single_thread_)
         {
@@ -75,6 +80,12 @@ public:
             });
         }
 
+        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+            assert (results_[utn_cnt]);
+
+        loginf << "EvaluateTask: execute: done";
+        task_done_ = true;
+
         return NULL; // or a pointer to a new task to be executed immediately
     }
 
@@ -85,6 +96,7 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> req_;
     const SectorLayer& sector_layer_;
     std::vector<bool>& done_flags_;
+    bool& task_done_;
     bool single_thread_;
 };
 

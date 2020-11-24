@@ -103,20 +103,40 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_v1", &use_v1_, true);
     registerParameter("use_v2", &use_v2_, true);
 
+    // nucp
     registerParameter("use_min_nucp", &use_min_nucp_, true);
     registerParameter("min_nucp", &min_nucp_, 4);
 
+    registerParameter("use_max_nucp", &use_max_nucp_, true);
+    registerParameter("max_nucp", &max_nucp_, 4);
+
+    // nic
     registerParameter("use_min_nic", &use_min_nic_, true);
     registerParameter("min_nic", &min_nic_, 5);
 
+    registerParameter("use_max_nic", &use_max_nic_, true);
+    registerParameter("max_nic", &max_nic_, 5);
+
+    // nacp
     registerParameter("use_min_nacp", &use_min_nacp_, true);
     registerParameter("min_nacp", &min_nacp_, 5);
 
+    registerParameter("use_max_nacp", &use_max_nacp_, true);
+    registerParameter("max_nacp", &max_nacp_, 5);
+
+    // sil v1
     registerParameter("use_min_sil_v1", &use_min_sil_v1_, true);
     registerParameter("min_sil_v1", &min_sil_v1_, 2);
 
+    registerParameter("use_max_sil_v1", &use_max_sil_v1_, true);
+    registerParameter("max_sil_v1", &max_sil_v1_, 2);
+
+    // sil v2
     registerParameter("use_min_sil_v2", &use_min_sil_v2_, true);
     registerParameter("min_sil_v2", &min_sil_v2_, 4);
+
+    registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
+    registerParameter("max_sil_v2", &max_sil_v2_, 4);
 
     createSubConfigurables();
 }
@@ -343,20 +363,35 @@ void EvaluationManager::loadData ()
             filter["ADSB Quality"]["use_v1"] = use_v1_;
             filter["ADSB Quality"]["use_v2"] = use_v2_;
 
+            // nucp
             filter["ADSB Quality"]["use_min_nucp"] = use_min_nucp_;
             filter["ADSB Quality"]["min_nucp"] = min_nucp_;
+            filter["ADSB Quality"]["use_max_nucp"] = use_max_nucp_;
+            filter["ADSB Quality"]["max_nucp"] = max_nucp_;
 
+            // nic
             filter["ADSB Quality"]["use_min_nic"] = use_min_nic_;
             filter["ADSB Quality"]["min_nic"] = min_nic_;
+            filter["ADSB Quality"]["use_max_nic"] = use_max_nic_;
+            filter["ADSB Quality"]["max_nic"] = max_nic_;
 
+            // nacp
             filter["ADSB Quality"]["use_min_nacp"] = use_min_nacp_;
             filter["ADSB Quality"]["min_nacp"] = min_nacp_;
+            filter["ADSB Quality"]["use_max_nacp"] = use_max_nacp_;
+            filter["ADSB Quality"]["max_nacp"] = max_nacp_;
 
+            // sil v1
             filter["ADSB Quality"]["use_min_sil_v1"] = use_min_sil_v1_;
             filter["ADSB Quality"]["min_sil_v1"] = min_sil_v1_;
+            filter["ADSB Quality"]["use_max_sil_v1"] = use_max_sil_v1_;
+            filter["ADSB Quality"]["max_sil_v1"] = max_sil_v1_;
 
+            // sil v2
             filter["ADSB Quality"]["use_min_sil_v2"] = use_min_sil_v2_;
             filter["ADSB Quality"]["min_sil_v2"] = min_sil_v2_;
+            filter["ADSB Quality"]["use_max_sil_v2"] = use_max_sil_v2_;
+            filter["ADSB Quality"]["max_sil_v2"] = max_sil_v2_;
 
             adsb_fil->loadViewPointConditions(filter);
         }
@@ -2143,6 +2178,116 @@ void EvaluationManager::minSILv2(unsigned int value)
 {
     loginf << "EvaluationManager: minSILv2: value " << value;
     min_sil_v2_ = value;
+}
+
+bool EvaluationManager::useMaxNUCP() const
+{
+    return use_max_nucp_;
+}
+
+void EvaluationManager::useMaxNUCP(bool value)
+{
+    loginf << "EvaluationManager: useMaxNUCP: value " << value;
+    use_max_nucp_ = value;
+}
+
+unsigned int EvaluationManager::maxNUCP() const
+{
+    return max_nucp_;
+}
+
+void EvaluationManager::maxNUCP(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNUCP: value " << value;
+    max_nucp_ = value;
+}
+
+bool EvaluationManager::useMaxNIC() const
+{
+    return use_max_nic_;
+}
+
+void EvaluationManager::useMaxNIC(bool value)
+{
+    loginf << "EvaluationManager: useMaxNIC: value " << value;
+    use_max_nic_ = value;
+}
+
+unsigned int EvaluationManager::maxNIC() const
+{
+    return max_nic_;
+}
+
+void EvaluationManager::maxNIC(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNIC: value " << value;
+    max_nic_ = value;
+}
+
+bool EvaluationManager::useMaxNACp() const
+{
+    return use_max_nacp_;
+}
+
+void EvaluationManager::useMaxNACp(bool value)
+{
+    loginf << "EvaluationManager: useMaxNACp: value " << value;
+    use_max_nacp_ = value;
+}
+
+unsigned int EvaluationManager::maxNACp() const
+{
+    return max_nacp_;
+}
+
+void EvaluationManager::maxNACp(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNACp: value " << value;
+    max_nacp_ = value;
+}
+
+bool EvaluationManager::useMaxSILv1() const
+{
+    return use_max_sil_v1_;
+}
+
+void EvaluationManager::useMaxSILv1(bool value)
+{
+    loginf << "EvaluationManager: useMaxSILv1: value " << value;
+    use_max_sil_v1_ = value;
+}
+
+unsigned int EvaluationManager::maxSILv1() const
+{
+    return max_sil_v1_;
+}
+
+void EvaluationManager::maxSILv1(unsigned int value)
+{
+    loginf << "EvaluationManager: maxSILv1: value " << value;
+    max_sil_v1_ = value;
+}
+
+bool EvaluationManager::useMaxSILv2() const
+{
+    return use_max_sil_v2_;
+}
+
+void EvaluationManager::useMaxSILv2(bool value)
+{
+    loginf << "EvaluationManager: useMaxSILv2: value " << value;
+    use_max_sil_v2_ = value;
+}
+
+unsigned int EvaluationManager::maxSILv2() const
+{
+    return max_sil_v2_;
+}
+
+void EvaluationManager::maxSILv2(unsigned int value)
+{
+    loginf << "EvaluationManager: maxSILv2: value " << value;
+    max_sil_v2_ = value;
 }
 
 bool EvaluationManager::useLoadFilter() const

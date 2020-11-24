@@ -49,6 +49,21 @@ protected slots:
     void toggleUseMinSILv2Slot();
     void minSILv2PEditedSlot (const QString& text);
 
+    void toggleUseMaxNUCPSlot();
+    void maxNUCPEditedSlot (const QString& text);
+
+    void toggleUseMaxNICSlot();
+    void maxNICEditedSlot (const QString& text);
+
+    void toggleUseMaxNACpSlot();
+    void maxNACPEditedSlot (const QString& text);
+
+    void toggleUseMaxSILv1Slot();
+    void maxSILv1PEditedSlot (const QString& text);
+
+    void toggleUseMaxSILv2Slot();
+    void maxSILv2PEditedSlot (const QString& text);
+
 public:
     ADSBQualityFilterWidget(ADSBQualityFilter& filter, const std::string& class_id, const std::string& instance_id);
     virtual ~ADSBQualityFilterWidget();
@@ -76,6 +91,21 @@ protected:
 
     QCheckBox* use_min_sil_v2_check_{nullptr};
     QLineEdit* min_sil_v2_edit_{nullptr};
+
+    QCheckBox* use_max_nucp_check_{nullptr};
+    QLineEdit* max_nucp_edit_{nullptr};
+
+    QCheckBox* use_max_nic_check_{nullptr};
+    QLineEdit* max_nic_edit_{nullptr};
+
+    QCheckBox* use_max_nacp_check_{nullptr};
+    QLineEdit* max_nacp_edit_{nullptr};
+
+    QCheckBox* use_max_sil_v1_check_{nullptr};
+    QLineEdit* max_sil_v1_edit_{nullptr};
+
+    QCheckBox* use_max_sil_v2_check_{nullptr};
+    QLineEdit* max_sil_v2_edit_{nullptr};
 };
 
 #endif // ADSBQUALITYFILTERWIDGET_H

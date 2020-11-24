@@ -27,70 +27,140 @@ ADSBQualityFilterWidget::ADSBQualityFilterWidget(ADSBQualityFilter& filter, cons
                                                  const std::string& instance_id)
     : DBFilterWidget(class_id, instance_id, filter), filter_(filter)
 {
-    QFormLayout* layout = new QFormLayout();
+    QGridLayout* layout = new QGridLayout();
     //layout->setContentsMargins(0, 0, 0, 0);
     //layout->setSpacing(0);
-    child_layout_->addLayout(layout);
+
+
+    int row = 0;
 
     // v0
-    use_v0_check_ = new QCheckBox ();
+    ++row;
+
+    use_v0_check_ = new QCheckBox ("Use v0");
     connect(use_v0_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV0Slot);
-    layout->addRow("Use v0", use_v0_check_);
+    layout->addWidget(use_v0_check_, row, 0);
 
     // nucp
-    use_min_nucp_check_ = new QCheckBox ();
+    ++row;
+
+    use_min_nucp_check_ = new QCheckBox ("Use Min NUCp");
     connect(use_min_nucp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNUCPSlot);
-    layout->addRow("Use Min NUCp", use_min_nucp_check_);
+    layout->addWidget(use_min_nucp_check_, row, 0);
 
     min_nucp_edit_ = new QLineEdit();
     connect(min_nucp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNUCPEditedSlot);
-    layout->addRow("Min NUCp", min_nucp_edit_);
+    layout->addWidget(min_nucp_edit_, row, 1);
+
+    ++row;
+
+    use_max_nucp_check_ = new QCheckBox ("Use Max NUCp");
+    connect(use_max_nucp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMaxNUCPSlot);
+    layout->addWidget(use_max_nucp_check_, row, 0);
+
+    max_nucp_edit_ = new QLineEdit();
+    connect(max_nucp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::maxNUCPEditedSlot);
+    layout->addWidget(max_nucp_edit_, row, 1);
 
     // others
-    use_v1_check_ = new QCheckBox ();
-    connect(use_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV1Slot);
-    layout->addRow("Use v1", use_v1_check_);
+    ++row;
 
-    use_v2_check_ = new QCheckBox ();
+    use_v1_check_ = new QCheckBox ("Use v1");
+    connect(use_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV1Slot);
+    layout->addWidget(use_v1_check_, row, 0);
+
+    ++row;
+
+    use_v2_check_ = new QCheckBox ("Use v2");
     connect(use_v2_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseV2Slot);
-    layout->addRow("Use v2", use_v2_check_);
+    layout->addWidget(use_v2_check_, row, 0);
 
     // nic
-    use_min_nic_check_ = new QCheckBox ();
+    ++row;
+
+    use_min_nic_check_ = new QCheckBox ("Use Min NIC");
     connect(use_min_nic_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNICSlot);
-    layout->addRow("Use Min NIC", use_min_nic_check_);
+    layout->addWidget(use_min_nic_check_, row, 0);
 
     min_nic_edit_ = new QLineEdit();
     connect(min_nic_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNICEditedSlot);
-    layout->addRow("Min NIC", min_nic_edit_);
+    layout->addWidget(min_nic_edit_, row, 1);
+
+    ++row;
+
+    use_max_nic_check_ = new QCheckBox ("Use Max NIC");
+    connect(use_max_nic_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMaxNICSlot);
+    layout->addWidget(use_max_nic_check_, row, 0);
+
+    max_nic_edit_ = new QLineEdit();
+    connect(max_nic_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::maxNICEditedSlot);
+    layout->addWidget(max_nic_edit_, row, 1);
 
     // nacp
-    use_min_nacp_check_ = new QCheckBox ();
+    ++row;
+
+    use_min_nacp_check_ = new QCheckBox ("Use Min NACp");
     connect(use_min_nacp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinNACpSlot);
-    layout->addRow("Use Min NACp", use_min_nacp_check_);
+    layout->addWidget(use_min_nacp_check_, row, 0);
 
     min_nacp_edit_ = new QLineEdit();
     connect(min_nacp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minNACPEditedSlot);
-    layout->addRow("Min NACp", min_nacp_edit_);
+    layout->addWidget(min_nacp_edit_, row, 1);
+
+    ++row;
+
+    use_max_nacp_check_ = new QCheckBox ("Use Max NACp");
+    connect(use_max_nacp_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMaxNACpSlot);
+    layout->addWidget(use_max_nacp_check_, row, 0);
+
+    max_nacp_edit_ = new QLineEdit();
+    connect(max_nacp_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::maxNACPEditedSlot);
+    layout->addWidget(max_nacp_edit_, row, 1);
 
     // sil
-    use_min_sil_v1_check_ = new QCheckBox ();
+    ++row;
+
+    use_min_sil_v1_check_ = new QCheckBox ("Use Min SIL v1");
     connect(use_min_sil_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinSILv1Slot);
-    layout->addRow("Use Min SIL v1", use_min_sil_v1_check_);
+    layout->addWidget(use_min_sil_v1_check_, row, 0);
 
     min_sil_v1_edit_ = new QLineEdit();
     connect(min_sil_v1_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minSILv1PEditedSlot);
-    layout->addRow("Min SIL v1", min_sil_v1_edit_);
+    layout->addWidget(min_sil_v1_edit_, row, 1);
 
-    use_min_sil_v2_check_ = new QCheckBox ();
+    ++row;
+
+    use_max_sil_v1_check_ = new QCheckBox ("Use Max SIL v1");
+    connect(use_max_sil_v1_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMaxSILv1Slot);
+    layout->addWidget(use_max_sil_v1_check_, row, 0);
+
+    max_sil_v1_edit_ = new QLineEdit();
+    connect(max_sil_v1_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::maxSILv1PEditedSlot);
+    layout->addWidget(max_sil_v1_edit_, row, 1);
+
+    ++row;
+
+    use_min_sil_v2_check_ = new QCheckBox ("Use Min SIL v2");
     connect(use_min_sil_v2_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMinSILv2Slot);
-    layout->addRow("Use Min SIL v2", use_min_sil_v2_check_);
+    layout->addWidget(use_min_sil_v2_check_, row, 0);
 
     min_sil_v2_edit_ = new QLineEdit();
     connect(min_sil_v2_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::minSILv2PEditedSlot);
-    layout->addRow("Min SIL v2", min_sil_v2_edit_);
+    layout->addWidget(min_sil_v2_edit_, row, 1);
+
+    ++row;
+
+    use_max_sil_v2_check_ = new QCheckBox ("Use Max SIL v2");
+    connect(use_max_sil_v2_check_, &QCheckBox::clicked, this, &ADSBQualityFilterWidget::toggleUseMaxSILv2Slot);
+    layout->addWidget(use_max_sil_v2_check_, row, 0);
+
+    max_sil_v2_edit_ = new QLineEdit();
+    connect(max_sil_v2_edit_, &QLineEdit::textEdited, this, &ADSBQualityFilterWidget::maxSILv2PEditedSlot);
+    layout->addWidget(max_sil_v2_edit_, row, 1);
 
     update();
+
+    child_layout_->addLayout(layout);
 }
 
 ADSBQualityFilterWidget::~ADSBQualityFilterWidget()
@@ -212,6 +282,103 @@ void ADSBQualityFilterWidget::minSILv2PEditedSlot (const QString& text)
         filter_.minSILv2(val);
 }
 
+void ADSBQualityFilterWidget::toggleUseMaxNUCPSlot()
+{
+    assert (use_max_nucp_check_);
+    filter_.useMaxNUCP(use_max_nucp_check_->checkState() == Qt::Checked);
+}
+
+void ADSBQualityFilterWidget::maxNUCPEditedSlot (const QString& text)
+{
+    unsigned int val;
+    bool ok;
+
+    val = text.toUInt(&ok);
+
+    if (!ok)
+        logwrn << "ADSBQualityFilterWidget: maxNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        filter_.maxNUCP(val);
+}
+
+void ADSBQualityFilterWidget::toggleUseMaxNICSlot()
+{
+    assert (use_max_nic_check_);
+    filter_.useMaxNIC(use_max_nic_check_->checkState() == Qt::Checked);
+}
+
+void ADSBQualityFilterWidget::maxNICEditedSlot (const QString& text)
+{
+    unsigned int val;
+    bool ok;
+
+    val = text.toUInt(&ok);
+
+    if (!ok)
+        logwrn << "ADSBQualityFilterWidget: maxNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        filter_.maxNIC(val);
+}
+
+void ADSBQualityFilterWidget::toggleUseMaxNACpSlot()
+{
+    assert (use_max_nacp_check_);
+    filter_.useMaxNACp(use_max_nacp_check_->checkState() == Qt::Checked);
+}
+
+void ADSBQualityFilterWidget::maxNACPEditedSlot (const QString& text)
+{
+    unsigned int val;
+    bool ok;
+
+    val = text.toUInt(&ok);
+
+    if (!ok)
+        logwrn << "ADSBQualityFilterWidget: maxNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        filter_.maxNACp(val);
+}
+
+void ADSBQualityFilterWidget::toggleUseMaxSILv1Slot()
+{
+    assert (use_max_sil_v1_check_);
+    filter_.useMaxSILv1(use_max_sil_v1_check_->checkState() == Qt::Checked);
+}
+
+void ADSBQualityFilterWidget::maxSILv1PEditedSlot (const QString& text)
+{
+    unsigned int val;
+    bool ok;
+
+    val = text.toUInt(&ok);
+
+    if (!ok)
+        logwrn << "ADSBQualityFilterWidget: maxSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        filter_.maxSILv1(val);
+}
+
+
+void ADSBQualityFilterWidget::toggleUseMaxSILv2Slot()
+{
+    assert (use_max_sil_v2_check_);
+    filter_.useMaxSILv2(use_max_sil_v2_check_->checkState() == Qt::Checked);
+}
+
+void ADSBQualityFilterWidget::maxSILv2PEditedSlot (const QString& text)
+{
+    unsigned int val;
+    bool ok;
+
+    val = text.toUInt(&ok);
+
+    if (!ok)
+        logwrn << "ADSBQualityFilterWidget: maxSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+    else
+        filter_.maxSILv2(val);
+}
+
+
 
 void ADSBQualityFilterWidget::update()
 {
@@ -249,6 +416,32 @@ void ADSBQualityFilterWidget::update()
     use_min_sil_v2_check_->setChecked(filter_.useMinSILv2());
     assert (min_sil_v2_edit_);
     min_sil_v2_edit_->setText(QString::number(filter_.minSILv2()));
+
+    //
+    assert (use_max_nucp_check_);
+    use_max_nucp_check_->setChecked(filter_.useMaxNUCP());
+    assert (max_nucp_edit_);
+    max_nucp_edit_->setText(QString::number(filter_.maxNUCP()));
+
+    assert (use_max_nic_check_);
+    use_max_nic_check_->setChecked(filter_.useMaxNIC());
+    assert (max_nic_edit_);
+    max_nic_edit_->setText(QString::number(filter_.maxNIC()));
+
+    assert (use_max_nacp_check_);
+    use_max_nacp_check_->setChecked(filter_.useMaxNACp());
+    assert (max_nacp_edit_);
+    max_nacp_edit_->setText(QString::number(filter_.maxNACp()));
+
+    assert (use_max_sil_v1_check_);
+    use_max_sil_v1_check_->setChecked(filter_.useMaxSILv1());
+    assert (max_sil_v1_edit_);
+    max_sil_v1_edit_->setText(QString::number(filter_.maxSILv1()));
+
+    assert (use_max_sil_v2_check_);
+    use_max_sil_v2_check_->setChecked(filter_.useMaxSILv2());
+    assert (max_sil_v2_edit_);
+    max_sil_v2_edit_->setText(QString::number(filter_.maxSILv2()));
 }
 
 

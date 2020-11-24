@@ -147,14 +147,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 results.resize(num_utns);
 
                 vector<bool> done_flags;
-                done_flags.resize(num_utns);
+                done_flags.resize(num_utns, false);
+                bool task_done = false;
 
                 // generate results
                 EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-                            results, utns, data, req, *sec_it, done_flags, false);
+                            results, utns, data, req, *sec_it, done_flags, task_done, false);
                 tbb::task::enqueue(*t);
 
-                bool done = false;
                 unsigned int tmp_done_cnt;
 
                 postprocess_dialog.setLabelText(
@@ -165,16 +165,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
                        << " req '" << req_cfg_it->name() << "'";
 
-                while (!done)
+                while (!task_done)
                 {
-                    done = true;
                     tmp_done_cnt = 0;
 
                     for (auto done_it : done_flags)
                     {
-                        if (!done_it)
-                            done = false;
-                        else
+                        if (done_it)
                             tmp_done_cnt++;
                     }
 
@@ -201,7 +198,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         postprocess_dialog.setValue(eval_cnt+tmp_done_cnt);
                     }
 
-                    if (!done)
+                    if (!task_done)
                     {
                         QCoreApplication::processEvents();
                         QThread::msleep(200);
