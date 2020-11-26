@@ -18,6 +18,7 @@
 #ifndef DBOASSOCIATIONCOLLECTION_H
 #define DBOASSOCIATIONCOLLECTION_H
 
+#include <string>
 #include <map>
 #include <vector>
 #include <set>

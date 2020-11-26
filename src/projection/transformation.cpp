@@ -3,7 +3,7 @@
 
 #include <ogr_spatialref.h>
 
-bool Transformation::in_appimage_ {getenv("APPDIR")};
+bool Transformation::in_appimage_ {getenv("APPDIR") != nullptr};
 const double Transformation::max_wgs_dist_ {0.5};
 
 Transformation::Transformation()
@@ -12,9 +12,17 @@ Transformation::Transformation()
     wgs84_->SetWellKnownGeogCS("WGS84");
 }
 
+Transformation::Transformation (const Transformation& a)
+    : wgs84_{new OGRSpatialReference()}, local_{new OGRSpatialReference()}
+{
+    wgs84_->SetWellKnownGeogCS("WGS84");
+}
+
+
 Transformation::~Transformation()
 {
 }
+
 
 std::tuple<bool, double, double> Transformation::distanceCart (double lat1, double long1, double lat2, double long2)
 {
@@ -58,7 +66,10 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1, doub
         return ret;
     }
 
-    ret = std::tuple<bool, double, double>(true, x_pos2-x_pos1, y_pos2-y_pos1);
+//    if (in_appimage_) // inside appimage
+//        ret = std::tuple<bool, double, double>(true, y_pos2-y_pos1, x_pos2-x_pos1);
+//    else
+        ret = std::tuple<bool, double, double>(true, x_pos2-x_pos1, y_pos2-y_pos1);
 
     logdbg << "Transformation: distanceCart: x_pos1 " << x_pos1 << " y_pos1 " << y_pos1
            << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
@@ -149,7 +160,7 @@ void Transformation::updateIfRequired(double lat1, double long1)
 
 
 //////////////////////////////////////////////
-bool FixedTransformation::in_appimage_ {getenv("APPDIR")};
+bool FixedTransformation::in_appimage_ {getenv("APPDIR") != nullptr};
 const double FixedTransformation::max_wgs_dist_ {0.5};
 
 FixedTransformation::FixedTransformation(double lat1, double long1)

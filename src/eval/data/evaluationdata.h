@@ -57,8 +57,8 @@ typedef boost::multi_index_container<
 class EvaluateTargetsFinalizeTask : public tbb::task {
 
 public:
-    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags)
-        : target_data_(target_data), done_flags_(done_flags)
+    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags, bool& done)
+        : target_data_(target_data), done_flags_(done_flags), done_(done)
     {
     }
 
@@ -79,12 +79,15 @@ public:
 //            done_flags_[cnt] = true;
 //        }
 
+        done_ = true;
+
         return NULL; // or a pointer to a new task to be executed immediately
     }
 
 protected:
     TargetCache& target_data_;
     std::vector<bool>& done_flags_;
+    bool& done_;
 };
 
 

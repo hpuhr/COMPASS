@@ -137,7 +137,8 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.emplace_back(utn_it, *this, eval_man_);
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
 
             assert (hasTargetData(utn_it));
 
@@ -248,7 +249,9 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.emplace_back(utn_it, *this, eval_man_);
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
+                //target_data_.emplace_back(utn_it, *this, eval_man_);
 
             assert (hasTargetData(utn_it));
 
@@ -310,7 +313,7 @@ void EvaluationData::finalize ()
     string remaining_time_str;
 
     EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-                target_data_, done_flags);
+                target_data_, done_flags, done);
     tbb::task::enqueue(*t);
 
     postprocess_dialog_.setValue(0);
@@ -324,14 +327,11 @@ void EvaluationData::finalize ()
 
     while (!done)
     {
-        done = true;
         tmp_done_cnt = 0;
 
         for (auto done_it : done_flags)
         {
-            if (!done_it)
-                done = false;
-            else
+            if (done_it)
                 tmp_done_cnt++;
         }
 

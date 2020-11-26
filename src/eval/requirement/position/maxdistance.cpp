@@ -32,7 +32,7 @@ using namespace Utils;
 
 namespace EvaluationRequirement
 {
-    bool PositionMaxDistance::in_appimage_ {getenv("APPDIR")};
+    bool PositionMaxDistance::in_appimage_ {getenv("APPDIR") != nullptr};
 
 
     PositionMaxDistance::PositionMaxDistance(const std::string& name, const std::string& short_name, const std::string& group_name,

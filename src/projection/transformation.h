@@ -10,7 +10,9 @@ class Transformation
 {
 public:
     Transformation();
-    ~Transformation();
+    Transformation (const Transformation& a); // only called during creation, slightly hacky
+    virtual ~Transformation();
+
 
     std::tuple<bool, double, double> distanceCart (double lat1, double long1, double lat2, double long2);
     // ok, dist x, dist y
@@ -37,7 +39,7 @@ class FixedTransformation
 {
 public:
     FixedTransformation(double lat1, double long1);
-    ~FixedTransformation();
+    virtual ~FixedTransformation();
 
     std::tuple<bool, double, double> distanceCart (double lat2, double long2);
     // ok, dist x, dist y

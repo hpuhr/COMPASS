@@ -36,7 +36,7 @@
 using namespace std;
 using namespace Utils;
 
-bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR")};
+bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR") != nullptr};
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
                                              std::map<std::string, std::shared_ptr<Buffer>> buffers)

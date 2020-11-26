@@ -32,7 +32,7 @@ using namespace Utils;
 
 namespace EvaluationRequirement
 {
-    bool PositionAlongAcross::in_appimage_ {getenv("APPDIR")};
+    bool PositionAlongAcross::in_appimage_ {getenv("APPDIR") != nullptr};
 
 
     PositionAlongAcross::PositionAlongAcross(const std::string& name, const std::string& short_name, const std::string& group_name,

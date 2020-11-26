@@ -13,7 +13,7 @@ using namespace Utils;
 
 namespace Association
 {
-    bool Target::in_appimage_ {getenv("APPDIR")};
+    bool Target::in_appimage_ {getenv("APPDIR") != nullptr};
     double Target::max_time_diff_ {15.0};
     double Target::max_altitude_diff_ {300.0};
 

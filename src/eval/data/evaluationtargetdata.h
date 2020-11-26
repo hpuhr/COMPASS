@@ -31,6 +31,7 @@
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
+//class Transformation;
 
 //class OGRSpatialReference;
 //class OGRCoordinateTransformation;
@@ -66,6 +67,7 @@ public:
 class EvaluationTargetData
 {
 public:
+    EvaluationTargetData();
     EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
     virtual ~EvaluationTargetData();
 
@@ -172,8 +174,8 @@ public:
 protected:
     //static bool in_appimage_;
 
-    EvaluationData& eval_data_;
-    EvaluationManager& eval_man_;
+    EvaluationData* eval_data_ {nullptr};
+    EvaluationManager* eval_man_ {nullptr};
 
     bool use_ {true};
 
