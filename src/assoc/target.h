@@ -29,8 +29,8 @@ namespace Association
         ~Target();
 
         static bool in_appimage_;
-        static double max_time_diff_;
-        static double max_altitude_diff_;
+//        static double max_time_diff_;
+//        static double max_altitude_diff_;
 
         unsigned int utn_{0};
         bool tmp_ {false};
@@ -81,12 +81,17 @@ namespace Association
         float duration () const;
         bool timeOverlaps (Target& other) const;
         float probTimeOverlaps (Target& other) const; // ratio of overlap, measured by shortest target
-        std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (Target& other) const;
+
+        std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (
+                Target& other, float max_time_diff) const;
         // unknown, same, different
-        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod);
+        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff);
+
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
-                Target& other, const std::vector<float>& timestamps) const;
-        CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod);
+                Target& other, const std::vector<float>& timestamps,
+                float max_time_diff, float max_alt_diff) const;
+        CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod,
+                                        float max_time_diff, float max_alt_diff);
         // unknown, same, different timestamps from this
 
         void calculateSpeeds();

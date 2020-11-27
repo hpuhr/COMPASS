@@ -14,8 +14,8 @@ using namespace Utils;
 namespace Association
 {
     bool Target::in_appimage_ {getenv("APPDIR") != nullptr};
-    double Target::max_time_diff_ {15.0};
-    double Target::max_altitude_diff_ {300.0};
+//    double Target::max_time_diff_ {15.0};
+//    double Target::max_altitude_diff_ {300.0};
 
     Target::Target(unsigned int utn, bool tmp)
         : utn_(utn), tmp_(tmp)
@@ -547,7 +547,8 @@ namespace Association
         return overlap_duration / targets_min_duration;
     }
 
-    std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (Target& other) const
+    std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (
+            Target& other, float max_time_diff) const
     {
         vector<float> unknown;
         vector<float> same;
@@ -560,7 +561,7 @@ namespace Association
         {
             tod = tr_it->tod_;
 
-            cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod);
+            cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod, max_time_diff);
 
             if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
@@ -575,14 +576,14 @@ namespace Association
         return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod)
+    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff)
     {
-        if (!hasDataForTime(tod, max_time_diff_))
+        if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
 
         float lower, upper;
 
-        tie(lower, upper) = timesFor(tod, max_time_diff_);
+        tie(lower, upper) = timesFor(tod, max_time_diff);
 
         if (lower == -1 && upper == -1)
             return CompareResult::UNKNOWN;
@@ -642,7 +643,7 @@ namespace Association
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
-            Target& other, const std::vector<float>& timestamps) const
+            Target& other, const std::vector<float>& timestamps, float max_time_diff, float max_alt_diff) const
     {
         vector<float> unknown;
         vector<float> same;
@@ -659,7 +660,7 @@ namespace Association
             tr = &dataForExactTime (tod);
             tod = ts_it;
 
-            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod);
+            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod, max_time_diff, max_alt_diff);
 
             if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
@@ -674,14 +675,15 @@ namespace Association
         return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod)
+    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod,
+                                            float max_time_diff, float max_alt_diff)
     {
-        if (!hasDataForTime(tod, max_time_diff_))
+        if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
 
         float lower, upper;
 
-        tie(lower, upper) = timesFor(tod, max_time_diff_);
+        tie(lower, upper) = timesFor(tod, max_time_diff);
 
         if (lower == -1 && upper == -1)
             return CompareResult::UNKNOWN;
@@ -704,7 +706,7 @@ namespace Association
             if (!ref1.has_mc_)
                 return CompareResult::DIFFERENT;  // mode c here, but none in other
 
-            if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)) // is same
+            if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)) // is same
                 return CompareResult::SAME;
             else
                 return CompareResult::DIFFERENT;
@@ -731,8 +733,8 @@ namespace Association
         if (!ref1.has_mc_ && !ref2.has_mc_)
             return CompareResult::DIFFERENT; // mode c here, but none in other
 
-        if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)
-                || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_altitude_diff_)) // one of them is same
+        if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)
+                || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_alt_diff)) // one of them is same
         {
             return CompareResult::SAME;
         }

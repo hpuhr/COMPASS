@@ -50,8 +50,8 @@ void CreateAssociationsJob::run()
 {
     logdbg << "CreateAssociationsJob: run: start";
 
-    Association::Target::max_time_diff_ = max_time_diff_;
-    Association::Target::max_altitude_diff_ = max_altitude_diff_;
+//    Association::Target::max_time_diff_ = max_time_diff_;
+//    Association::Target::max_altitude_diff_ = max_altitude_diff_;
 
     started_ = true;
 
@@ -448,9 +448,11 @@ void CreateAssociationsJob::createTrackerUTNS()
                 tracker_targets.at(index_to_utn.at(cnt)).calculateSpeeds();
             });
 
+            float max_speed_kts = task_.maxSpeedTrackerKts();
+
             for (auto& target_it : tracker_targets)
             {
-                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
                 {
                     loginf << "CreateAssociationsJob: createTrackerUTNS: new target dubious "
                            << target_it.second.utn_ << ": calculateSpeeds: min "
@@ -499,7 +501,7 @@ void CreateAssociationsJob::createTrackerUTNS()
                 {
                     logdbg << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
 
-                    tmp_utn = findUTNForTarget(tmp_target->second);
+                    tmp_utn = findUTNForTrackerTarget(tmp_target->second);
 
                     logdbg << "CreateAssociationsJob: createTrackerUTNS: tmp utn " << tmp_target->first
                            << " tmp_utn " << tmp_utn;
@@ -529,7 +531,7 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             for (auto& target_it : targets_)
             {
-                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
                 {
                     loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
                            << target_it.second.utn_ << ": calculateSpeeds: min "
@@ -556,7 +558,7 @@ void CreateAssociationsJob::createTrackerUTNS()
                                << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
                                << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
 
-                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
                         still_dubious.push_back(target_it.second.utn_);
                 }
             }
@@ -599,14 +601,19 @@ void CreateAssociationsJob::createNonTrackerUTNS()
         if (dbo_it.first == "Tracker") // already associated
             continue;
 
-        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-            ++num_data_sources;
+        num_data_sources += dbo_it.second.size();
     }
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+    const bool associate_non_mode_s = task_.associateNonModeS();
+    const double max_time_diff_sensor = task_.maxTimeDiffSensor();
+    const double max_altitude_diff_sensor = task_.maxAltitudeDiffSensor();
+    const double max_distance_acceptable_sensor = task_.maxDistanceAcceptableSensor();
+
     unsigned int ds_cnt = 0;
     unsigned int done_perc;
+
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "Tracker") // already associated
@@ -659,7 +666,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                 // tr non mode s
 
-                if (!associate_ac_non_trackers_)
+                if (!associate_non_mode_s)
                     return;
 
                 float tod;
@@ -700,27 +707,30 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                         continue;
 
                     // check mode a code
-                    Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod);
+                    Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod,
+                                                                               max_time_diff_sensor);
 
                     if (ma_res != Association::CompareResult::SAME)
                         continue;
                     //loginf << "UGA3 same mode a";
 
                     // check mode c code
-                    Association::CompareResult mc_res = other.compareModeCCode(tr_it.has_mc_, tr_it.mc_, tod);
+                    Association::CompareResult mc_res = other.compareModeCCode(
+                                tr_it.has_mc_, tr_it.mc_, tod,
+                                max_time_diff_sensor, max_altitude_diff_sensor);
 
                     if (mc_res != Association::CompareResult::SAME)
                         continue;
 
                     // check positions
 
-                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_);
+                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_sensor);
 
-                    if (ok &&
-                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
-                             <= max_distance_acceptable_sensors_wgs_))
-                    {
+//                    if (ok &&
+//                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
+//                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
+//                             <= max_distance_acceptable_sensors_wgs_))
+//                    {
 
                         tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
 
@@ -731,9 +741,9 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                         //loginf << "UGA3 distance " << distance;
 
-                        if (distance < max_distance_acceptable_sensors_)
+                        if (distance < max_distance_acceptable_sensor)
                             results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
-                    }
+//                    }
                 }
 
                 // find best match
@@ -825,7 +835,7 @@ void CreateAssociationsJob::createAssociations()
     }
 }
 
-int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
+int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& target)
 // tries to find existing utn for target, -1 if failed
 {
     int tmp_utn = findUTNForTargetByTA(target);
@@ -844,6 +854,15 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     // usable, other utn, num updates, avg distance
     results.resize(utn_cnt_);
 
+    const double prob_min_time_overlap_tracker = task_.probMinTimeOverlapTracker();
+    const double max_time_diff_tracker = task_.maxTimeDiffTracker();
+    const unsigned int min_updates_tracker = task_.minUpdatesTracker();
+    const double max_altitude_diff_tracker = task_.maxAltitudeDiffTracker();
+    const unsigned int max_positions_dubious_tracker = task_.maxPositionsDubiousTracker();
+    const double max_distance_quit_tracker = task_.maxDistanceQuitTracker();
+    const double max_distance_dubious_tracker = task_.maxDistanceDubiousTracker();
+    const double max_distance_acceptable_tracker = task_.maxDistanceAcceptableTracker();
+
     tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
     {
         Association::Target& other = targets_.at(cnt);
@@ -858,20 +877,20 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                    << " other " << other.utn_
                    << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
 
-            if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_)
+            if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_tracker)
             {
                 vector<float> ma_unknown;
                 vector<float> ma_same;
                 vector<float> ma_different;
 
-                tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other);
+                tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
 
                 //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                 logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
                        << " other " << other.utn_
                        << " ma same " << ma_same.size() << " diff " << ma_different.size();
 
-                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_)
+                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_tracker)
                 {
                     // check mode c codes
 
@@ -879,7 +898,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                     vector<float> mc_same;
                     vector<float> mc_different;
 
-                    tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(other, ma_same);
+                    tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
+                                other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker);
 
                     //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                     logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
@@ -887,7 +907,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                            << " ma same " << ma_same.size() << " diff " << ma_different.size()
                            << " mc same " << mc_same.size() << " diff " << mc_different.size();
 
-                    if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_)
+                    if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_tracker)
                     {
                         // check positions
 
@@ -913,7 +933,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             assert (target.hasDataForExactTime(tod_it));
                             tst_pos = target.posForExactTime(tod_it);
 
-                            tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod_it, max_time_diff_);
+                            tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod_it, max_time_diff_tracker);
 
                             if (!ok)
                                 continue;
@@ -944,10 +964,10 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                            if (distance > max_distance_dubious_)
+                            if (distance > max_distance_dubious_tracker)
                                 ++pos_dubious_cnt;
 
-                            if (distance > max_distance_quit_ || pos_dubious_cnt > max_positions_dubious_)
+                            if (distance > max_distance_quit_tracker || pos_dubious_cnt > max_positions_dubious_tracker)
                                 // too far or dubious, quit
                             {
                                 same_distances.clear();
@@ -960,11 +980,11 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             distances_sum += distance;
                         }
 
-                        if (same_distances.size() >= min_updates_)
+                        if (same_distances.size() >= min_updates_tracker)
                         {
                             double distance_avg = distances_sum / (float) same_distances.size();
 
-                            if (distance_avg < max_distance_acceptable_trackers_)
+                            if (distance_avg < max_distance_acceptable_tracker)
                             {
                                 //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                                 logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
@@ -1005,7 +1025,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
         if (!usable)
             continue;
 
-        score = (double)num_updates*(max_distance_acceptable_trackers_-distance_avg);
+        score = (double)num_updates*(max_distance_acceptable_tracker-distance_avg);
 
         if (first || score > best_score)
         {
