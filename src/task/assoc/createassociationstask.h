@@ -150,32 +150,34 @@ protected:
     std::string longitude_var_str_;
     MetaDBOVariable* longitude_var_{nullptr};
 
+    bool associate_non_mode_s_ {true};
+
+    // tracker stuff
     double max_time_diff_tracker_ {15.0};
-    double max_time_diff_sensor_ {15.0};
 
     double max_distance_quit_tracker_ {10*NM2M}; //10nm in meters // kb 5
-    double max_distance_quit_sensor_ {10*NM2M}; //10nm in meters // kb 5
     double max_distance_dubious_tracker_ {3*NM2M}; //kb 2.5? 2.5 lowest
-
     unsigned int max_positions_dubious_tracker_ {5};
 
     double max_distance_acceptable_tracker_ {NM2M/2.0};
-    double max_distance_acceptable_sensor_ {2*NM2M};
-
     double max_altitude_diff_tracker_ {300.0};
-    double max_altitude_diff_sensor_ {300.0};
-
-    double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
 
     unsigned int min_updates_tracker_ {2}; // kb 3!!!
 
-    bool associate_non_mode_s_ {true};
+    double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
 
     double max_speed_tracker_kts_ {100000};
+
+    // sensor
+    double max_time_diff_sensor_ {15.0};
+
+    double max_distance_acceptable_sensor_ {2*NM2M};
+
+    double max_altitude_diff_sensor_ {300.0};
+
     // target id? kb: nope
     // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
     // kb: split tracker/sensor parameters
-
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
