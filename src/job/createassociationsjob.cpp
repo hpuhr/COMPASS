@@ -26,6 +26,7 @@
 #include "dbovariable.h"
 #include "stringconv.h"
 #include "projection/transformation.h"
+#include "evaluationmanager.h"
 
 //#include <ogr_spatialref.h>
 
@@ -50,8 +51,8 @@ void CreateAssociationsJob::run()
 {
     logdbg << "CreateAssociationsJob: run: start";
 
-//    Association::Target::max_time_diff_ = max_time_diff_;
-//    Association::Target::max_altitude_diff_ = max_altitude_diff_;
+    //    Association::Target::max_time_diff_ = max_time_diff_;
+    //    Association::Target::max_altitude_diff_ = max_altitude_diff_;
 
     started_ = true;
 
@@ -333,6 +334,10 @@ void CreateAssociationsJob::createTrackerUTNS()
 
         DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+        bool clean_dubious_utns = task_.cleanDubiousUtns();
+        bool mark_dubious_utns_unused = task_.markDubiousUtnsUnused();
+        bool comment_dubious_utns = task_.commentDubiousUtns();
+
         // create utn for all tracks
         for (auto& ds_it : ds_id_trs) // ds_id->trs
         {
@@ -460,17 +465,22 @@ void CreateAssociationsJob::createTrackerUTNS()
                            << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
                            << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
 
-                    loginf << "CreateAssociationsJob: createTrackerUTNS: new target removing non-mode s target reports";
-                    target_it.second.removeNonModeSTRs();
+                    if (clean_dubious_utns)
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: new target removing non-mode s"
+                                  " target reports";
+                        target_it.second.removeNonModeSTRs();
 
-                    target_it.second.calculateSpeeds();
+                        target_it.second.calculateSpeeds();
 
-                    if (target_it.second.has_speed_)
-                        loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned new target "
-                               << target_it.second.utn_ << ": calculateSpeeds: min "
-                               << String::doubleToStringPrecision(target_it.second.speed_min_,2)
-                               << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
-                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                        if (target_it.second.has_speed_)
+                            loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned new target "
+                                   << target_it.second.utn_ << ": calculateSpeeds: min "
+                                   << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                                   << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                                   << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                                   << " kts";
+                    }
                 }
             }
 
@@ -520,69 +530,72 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first << " done";
 
-            emit statusSignal(("Checking "+ds_name+" UTNs").c_str());
-
-            tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+            if (clean_dubious_utns || mark_dubious_utns_unused || comment_dubious_utns)
             {
-                targets_.at(cnt).calculateSpeeds();
-            });
+                emit statusSignal(("Checking "+ds_name+" UTNs").c_str());
 
-            vector <unsigned int> still_dubious;
-
-            for (auto& target_it : targets_)
-            {
-                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
+                tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
                 {
-                    loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
-                           << target_it.second.utn_ << ": calculateSpeeds: min "
-                           << String::doubleToStringPrecision(target_it.second.speed_min_,2)
-                           << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
-                           << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                    targets_.at(cnt).calculateSpeeds();
+                });
 
-                    loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
-                    target_it.second.removeNonModeSTRs();
+                vector <unsigned int> still_dubious;
 
-                    if (!target_it.second.has_tod_)
+                for (auto& target_it : targets_)
+                {
+                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
                     {
-                        loginf << "CreateAssociationsJob: createTrackerUTNS: empty target utn "
-                               << target_it.second.utn_;
-                        continue;
-                    }
-
-                    target_it.second.calculateSpeeds();
-
-                    if (target_it.second.has_speed_)
-                        loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned target "
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
                                << target_it.second.utn_ << ": calculateSpeeds: min "
                                << String::doubleToStringPrecision(target_it.second.speed_min_,2)
                                << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
-                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                               << " kts";
 
-                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
-                        still_dubious.push_back(target_it.second.utn_);
+                        if (clean_dubious_utns)
+                        {
+                            loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
+                            target_it.second.removeNonModeSTRs();
+
+                            if (!target_it.second.has_tod_)
+                            {
+                                loginf << "CreateAssociationsJob: createTrackerUTNS: empty target utn "
+                                       << target_it.second.utn_;
+                                continue;
+                            }
+
+                            target_it.second.calculateSpeeds();
+
+                            if (target_it.second.has_speed_)
+                                loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned target "
+                                       << target_it.second.utn_ << ": calculateSpeeds: min "
+                                       << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                                       << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                                       << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                                       << " kts";
+                        }
+
+                        if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
+                            still_dubious.push_back(target_it.second.utn_);
+                    }
+                }
+
+                EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+                for (unsigned int utn : still_dubious)
+                {
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: target " << utn << " still dubious"
+                           <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
+                            << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
+                            << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
+
+                    if (mark_dubious_utns_unused)
+                        eval_man.useUTN(utn, false, false, false);
+
+                    if (comment_dubious_utns)
+                        eval_man.utnComment(utn, "Dubious Association", false);
                 }
             }
-
-            for (unsigned int utn : still_dubious)
-                loginf << "CreateAssociationsJob: createTrackerUTNS: target " << utn << " still dubious"
-                       <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
-                        << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
-                        << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
-
-//            for (unsigned int utn : to_be_erased)
-//            {
-//                loginf << "CreateAssociationsJob: createTrackerUTNS: erasing empty utn " << utn;
-//                targets_.erase(utn);
-
-//                for (auto& ta_it : ta_2_utn_)
-//                {
-//                    if (ta_it.second == utn)
-//                    {
-//                        ta_2_utn_.erase(ta_it.first);
-//                        break;
-//                    }
-//                }
-//            }
         }
     }
     else
@@ -726,24 +739,24 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
                     tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_sensor);
 
-//                    if (ok &&
-//                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-//                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
-//                             <= max_distance_acceptable_sensors_wgs_))
-//                    {
+                    //                    if (ok &&
+                    //                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
+                    //                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
+                    //                             <= max_distance_acceptable_sensors_wgs_))
+                    //                    {
 
-                        tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
+                    tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
 
-                        if (!ok)
-                            continue;
+                    if (!ok)
+                        continue;
 
-                        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+                    distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                        //loginf << "UGA3 distance " << distance;
+                    //loginf << "UGA3 distance " << distance;
 
-                        if (distance < max_distance_acceptable_sensor)
-                            results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
-//                    }
+                    if (distance < max_distance_acceptable_sensor)
+                        results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
+                    //                    }
                 }
 
                 // find best match

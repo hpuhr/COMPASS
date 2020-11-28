@@ -119,6 +119,15 @@ public:
     double maxSpeedTrackerKts() const;
     void maxSpeedTrackerKts(double value);
 
+    bool cleanDubiousUtns() const;
+    void cleanDubiousUtns(bool value);
+
+    bool markDubiousUtnsUnused() const;
+    void markDubiousUtnsUnused(bool value);
+
+    bool commentDubiousUtns() const;
+    void commentDubiousUtns(bool value);
+
 protected:
     std::string key_var_str_;
     MetaDBOVariable* key_var_{nullptr};
@@ -151,6 +160,9 @@ protected:
     MetaDBOVariable* longitude_var_{nullptr};
 
     bool associate_non_mode_s_ {true};
+    bool clean_dubious_utns_ {true};
+    bool mark_dubious_utns_unused_ {false};
+    bool comment_dubious_utns_ {true};
 
     // tracker stuff
     double max_time_diff_tracker_ {15.0};
@@ -170,14 +182,8 @@ protected:
 
     // sensor
     double max_time_diff_sensor_ {15.0};
-
     double max_distance_acceptable_sensor_ {2*NM2M};
-
     double max_altitude_diff_sensor_ {300.0};
-
-    // target id? kb: nope
-    // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
-    // kb: split tracker/sensor parameters
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

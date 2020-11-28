@@ -61,6 +61,34 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
     registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
     registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
     registerParameter("longitude_var_str", &longitude_var_str_, "pos_long_deg");
+
+    // common
+    registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
+    registerParameter("clean_dubious_utns", &clean_dubious_utns_, true);
+    registerParameter("mark_dubious_utns_unused", &mark_dubious_utns_unused_, false);
+    registerParameter("comment_dubious_utns", &comment_dubious_utns_, true);
+
+    // tracker stuff
+    registerParameter("max_time_diff_tracker", &max_time_diff_tracker_, 15.0);
+
+    registerParameter("max_distance_quit_tracker", &max_distance_quit_tracker_, 10*NM2M); // kb 5nm
+    registerParameter("max_distance_dubious_tracker", &max_distance_dubious_tracker_, 3*NM2M); //kb 2.5? 2.5 lowest
+    registerParameter("max_positions_dubious_tracker", &max_positions_dubious_tracker_, 5);
+
+    registerParameter("max_distance_acceptable_tracker", &max_distance_acceptable_tracker_, NM2M/2.0);
+    registerParameter("max_altitude_diff_tracker", &max_altitude_diff_tracker_, 300.0);
+
+    registerParameter("min_updates_tracker", &min_updates_tracker_, 2); // kb 3!!!
+    registerParameter("prob_min_time_overlap_tracker", &prob_min_time_overlap_tracker_, 0.5); //kb 0.7
+    registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000);
+
+    // sensor
+    registerParameter("max_time_diff_sensor", &max_time_diff_sensor_, 15.0);
+    registerParameter("max_distance_acceptable_sensor", &max_distance_acceptable_sensor_, 2*NM2M);
+    registerParameter("max_altitude_diff_sensor", &max_altitude_diff_sensor_, 300.0);
+
+    // target id? kb: nope
+    // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
 }
 
 CreateAssociationsTask::~CreateAssociationsTask() {}
@@ -382,6 +410,39 @@ void CreateAssociationsTask::maxSpeedTrackerKts(double value)
 {
     loginf << "CreateAssociationsTask: maxSpeedTrackerKts: value " << value;
     max_speed_tracker_kts_ = value;
+}
+
+bool CreateAssociationsTask::cleanDubiousUtns() const
+{
+    return clean_dubious_utns_;
+}
+
+void CreateAssociationsTask::cleanDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: cleanDubiousUtns: value " << value;
+    clean_dubious_utns_ = value;
+}
+
+bool CreateAssociationsTask::markDubiousUtnsUnused() const
+{
+    return mark_dubious_utns_unused_;
+}
+
+void CreateAssociationsTask::markDubiousUtnsUnused(bool value)
+{
+    loginf << "CreateAssociationsTask: markDubiousUtnsUnused: value " << value;
+    mark_dubious_utns_unused_ = value;
+}
+
+bool CreateAssociationsTask::commentDubiousUtns() const
+{
+    return comment_dubious_utns_;
+}
+
+void CreateAssociationsTask::commentDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: commentDubiousUtns: value " << value;
+    comment_dubious_utns_ = value;
 }
 
 void CreateAssociationsTask::newDataSlot(DBObject& object)

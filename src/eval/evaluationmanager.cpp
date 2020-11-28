@@ -594,15 +594,15 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
 
-        if (dbo_name == "ADSB")
-        {
-            DBObject& obj = object_man.object("ADSB");
+    if (dbo_name == "ADSB")
+    {
+        DBObject& obj = object_man.object("ADSB");
 
-            read_set.add(obj.variable("ground_bit"));
-//            read_set.add(obj.variable("nac_p"));
-//            read_set.add(obj.variable("nucp_nic"));
-//            read_set.add(obj.variable("sil"));
-        }
+        read_set.add(obj.variable("ground_bit"));
+        //            read_set.add(obj.variable("nac_p"));
+        //            read_set.add(obj.variable("nucp_nic"));
+        //            read_set.add(obj.variable("sil"));
+    }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
@@ -1552,10 +1552,37 @@ void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bo
 
 void EvaluationManager::useAllUTNs (bool value)
 {
+    loginf << "EvaluationManager: useAllUTNs: value " << value;
+
     update_results_ = false;
 
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    set<unsigned int> already_set;
+
+    // set those already loaded, and remember them
     for (auto& target_it : data_)
+    {
         useUTN(target_it.utn_, value, true);
+        already_set.insert(target_it.utn_);
+    }
+
+
+    // set those only existing in config
+    string utn_str;
+    unsigned int utn;
+
+    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
+    {
+        utn_str = utn_it.first;
+        utn = stoul(utn_str);
+
+        //loginf << "EvaluationManager: useAllUTNs: utn_str '" << utn_str << "' utn '" << utn << "' value " << value;
+
+        if (!already_set.count(utn))
+            configs_[current_config_name_]["utns"][utn_str]["use"] = value;
+    }
 
     update_results_ = true;
     updateResultsToChanges();
@@ -1563,10 +1590,36 @@ void EvaluationManager::useAllUTNs (bool value)
 
 void EvaluationManager::clearUTNComments ()
 {
+    loginf << "EvaluationManager: clearUTNComments";
+
     update_results_ = false;
 
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    set<unsigned int> already_set;
+
+    // set those already loaded, and remember them
     for (auto& target_it : data_)
+    {
         utnComment(target_it.utn_, "", true);
+        already_set.insert(target_it.utn_);
+    }
+
+    // set those only existing in config
+    string utn_str;
+    unsigned int utn;
+
+    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
+    {
+        utn_str = utn_it.first;
+        utn = stoul(utn_str);
+
+        //loginf << "EvaluationManager: clearUTNComments: utn_str '" << utn_str << "' utn '" << utn << "'";
+
+        if (!already_set.count(utn))
+            configs_[current_config_name_]["utns"][utn_str]["comment"] = "";
+    }
 
     update_results_ = true;
 }

@@ -33,6 +33,10 @@ public slots:
     void expertModeChangedSlot();
 
     void toggleAssociateNonModeSSlot();
+    void toggleCleanDubiousUtnsSlot();
+    void toggleMarkDubiousUtnsUnusedSlot();
+    void toggleCommentDubiousUtnsSlot();
+
     void maxTimeDiffTrackerEditedSlot (const QString& text);
 
     void maxTimeDiffSensorEditedSlot (const QString& text);
@@ -59,6 +63,9 @@ protected:
     CreateAssociationsTask& task_;
 
     QCheckBox* associate_non_mode_s_check_{nullptr};
+    QCheckBox* clean_dubious_utns_check_{nullptr};
+    QCheckBox* mark_dubious_utns_unused_check_{nullptr};
+    QCheckBox* comment_dubious_utns_check_{nullptr};
 
     // tracker
     QLineEdit* max_time_diff_tracker_edit_{nullptr};
