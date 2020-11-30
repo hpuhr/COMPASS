@@ -113,7 +113,9 @@ std::string LatexSection::toString()
 {
     stringstream ss;
 
-    if (level_ == LatexSectionLevel::SECTION)
+    if (level_ == LatexSectionLevel::CHAPTER)
+        ss << R"(\chapter{)" << heading_ << "}";
+    else if (level_ == LatexSectionLevel::SECTION)
         ss << R"(\section{)" << heading_ << "}";
     else if (level_ == LatexSectionLevel::SUBSECTION)
         ss << R"(\subsection{)" << heading_ << "}";

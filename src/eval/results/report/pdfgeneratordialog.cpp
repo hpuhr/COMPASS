@@ -31,6 +31,8 @@
 #include <QCheckBox>
 #include <QFileDialog>
 
+using namespace std;
+
 namespace EvaluationResultsReport
 {
 
@@ -120,6 +122,24 @@ PDFGeneratorDialog::PDFGeneratorDialog(PDFGenerator& generator,
         connect(include_target_tr_details_check_, &QCheckBox::clicked, this,
                 &PDFGeneratorDialog::includeTargetTRDetailsEditedSlot);
         config_grid->addWidget(include_target_tr_details_check_, row, 1);
+
+        // table rows
+        ++row;
+        config_grid->addWidget(new QLabel("Maximum Table Rows"), row, 0);
+
+        num_max_table_rows_edit_ = new QLineEdit();
+        num_max_table_rows_edit_->setText(QString::number(generator_.numMaxTableRows()));
+        connect(num_max_table_rows_edit_, &QLineEdit::textEdited, this, &PDFGeneratorDialog::numMaxTableRowsEditedSlot);
+        config_grid->addWidget(num_max_table_rows_edit_, row, 1);
+
+        ++row;
+        config_grid->addWidget(new QLabel("Maximum Table Column Width"), row, 0);
+
+        num_max_table_col_width_edit_ = new QLineEdit();
+        num_max_table_col_width_edit_->setText(QString::number(generator_.numMaxTableColWidth()));
+        connect(num_max_table_col_width_edit_, &QLineEdit::textEdited,
+                this, &PDFGeneratorDialog::numMaxTableColWidthEditedSlot);
+        config_grid->addWidget(num_max_table_col_width_edit_, row, 1);
 
         // wait
         ++row;
@@ -277,6 +297,39 @@ void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
 {
     generator_.includeTargetTRDetails(checked);
 }
+
+void PDFGeneratorDialog::numMaxTableRowsEditedSlot(const QString& text)
+{
+    string value_str = text.toStdString();
+    loginf << "PDFGeneratorDialog: numMaxTableRowsEditedSlot: value '" << value_str << "'";
+
+    bool ok;
+
+    unsigned int value = text.toUInt(&ok);
+
+    if (ok)
+        generator_.numMaxTableRows(value);
+    else
+        logwrn << "PDFGeneratorDialog: numMaxTableRowsEditedSlot: unable to parse '" << value_str << "'";
+
+}
+
+void PDFGeneratorDialog::numMaxTableColWidthEditedSlot(const QString& text)
+{
+    string value_str = text.toStdString();
+    loginf << "PDFGeneratorDialog: numMaxTableColWidthEditedSlot: value '" << value_str << "'";
+
+    bool ok;
+
+    unsigned int value = text.toUInt(&ok);
+
+    if (ok)
+        generator_.numMaxTableColWidth(value);
+    else
+        logwrn << "PDFGeneratorDialog: numMaxTableColWidthEditedSlot: unable to parse '" << value_str << "'";
+
+}
+
 
 void PDFGeneratorDialog::runPDFLatexChangedSlot (bool checked)
 {

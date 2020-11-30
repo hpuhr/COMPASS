@@ -55,10 +55,11 @@ using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
                            bool add_overview_screenshot, bool include_target_details,
-                           bool include_target_tr_details, bool wait_on_map_loading)
+                           bool include_target_tr_details, unsigned int max_table_col_width, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
       add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
-      include_target_tr_details_(include_target_tr_details), wait_on_map_loading_(wait_on_map_loading)
+      include_target_tr_details_(include_target_tr_details), max_table_col_width_(max_table_col_width),
+      wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -208,10 +209,10 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
         {
-            if (row_strings[cnt].size() > 24)
+            if (row_strings[cnt].size() > max_table_col_width_)
             {
-                std::string::size_type space_pos = row_strings[cnt].rfind(' ', 24);
-                std::string::size_type comma_pos = row_strings[cnt].rfind(',', 24);
+                std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
+                std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);
 
                 if (space_pos == std::string::npos)
                 {

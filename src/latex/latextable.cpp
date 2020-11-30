@@ -24,11 +24,13 @@
 using namespace std;
 using namespace Utils;
 
+unsigned int LatexTable::num_max_rows_ = 1000;
+
 LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
                        std::vector<std::string> headings, std::string heading_alignment,
                        bool convert_to_latex)
- : name_(name), num_columns_(num_columns), headings_(headings), heading_alignment_(heading_alignment),
-   convert_to_latex_(convert_to_latex)
+    : name_(name), num_columns_(num_columns), headings_(headings), heading_alignment_(heading_alignment),
+      convert_to_latex_(convert_to_latex)
 {
     assert (headings_.size() == num_columns_);
 
@@ -38,7 +40,7 @@ LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
 
         ss << "|";
         for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
-                ss << " l |";
+            ss << " l |";
 
         heading_alignment_ = ss.str();
     }
@@ -76,8 +78,23 @@ std::string LatexTable::toString()
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);
 
+    unsigned int row_cnt=0;
+    bool max_rows_reached = false;
     for (auto& row : rows_)
+    {
+        if (row_cnt > num_max_rows_)
+        {
+            max_rows_reached = true;
+            break;
+        }
+
         ss << getLine(row);
+
+        ++row_cnt;
+    }
+
+    if (max_rows_reached)
+        ss << getPointsLine();
 
     ss << R"(\end{tabularx})" << "\n";
 
@@ -121,6 +138,23 @@ std::string LatexTable::getLine (const std::vector<std::string>& row, bool bold)
 
         if (bold)
             ss << "}";
+    }
+
+    ss << R"( \\ \hline)" << "\n";
+
+    return ss.str();
+}
+
+std::string LatexTable::getPointsLine ()
+{
+    stringstream ss;
+
+    for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
+    {
+        if (cnt != 0)
+            ss << " & ";
+
+        ss << "...";
     }
 
     ss << R"( \\ \hline)" << "\n";

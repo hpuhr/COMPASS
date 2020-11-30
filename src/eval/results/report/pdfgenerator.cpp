@@ -28,6 +28,7 @@
 #include "mysqlppconnection.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
+#include "latextable.h"
 #include "system.h"
 
 #include "eval/results/report/section.h"
@@ -66,6 +67,9 @@ namespace EvaluationResultsReport
         registerParameter("abstract", &abstract_, "");
 
         report_filename_ = "report.tex";
+
+        registerParameter("num_max_table_rows", &num_max_table_rows_, 1000);
+        registerParameter("num_max_table_col_width", &num_max_table_col_width_, 18);
 
         registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
 
@@ -138,8 +142,9 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
+        LatexTable::num_max_rows_ = num_max_table_rows_;
         LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
-                              wait_on_map_loading_);
+                              num_max_table_col_width_, wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -461,5 +466,25 @@ namespace EvaluationResultsReport
     void PDFGenerator::includeTargetTRDetails(bool value)
     {
         include_target_tr_details_ = value;
+    }
+    
+    unsigned int PDFGenerator::numMaxTableRows() const
+    {
+        return num_max_table_rows_;
+    }
+    
+    void PDFGenerator::numMaxTableRows(unsigned int value)
+    {
+        num_max_table_rows_ = value;
+    }
+
+    unsigned int PDFGenerator::numMaxTableColWidth() const
+    {
+        return num_max_table_col_width_;
+    }
+
+    void PDFGenerator::numMaxTableColWidth(unsigned int value)
+    {
+        num_max_table_col_width_ = value;
     }
 }

@@ -68,6 +68,7 @@ namespace EvaluationRequirement
         unsigned int num_no_ref {0};
         unsigned int num_pos_outside {0};
         unsigned int num_pos_inside {0};
+        unsigned int num_pos_calc_errors {0};
         unsigned int num_along_ok {0};
         unsigned int num_along_nok {0};
         unsigned int num_across_ok {0};
@@ -208,12 +209,25 @@ namespace EvaluationRequirement
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_along_ok, num_along_nok, num_across_ok, num_across_nok,
                                    "Position transformation error"});
-                ++num_no_ref;
+                ++num_pos_calc_errors;
                 continue;
             }
 
             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
             angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
+
+            if (isnan(angle))
+            {
+                details.push_back({tod, tst_pos,
+                                   true, ref_pos, // has_ref_pos, ref_pos
+                                   is_inside, {}, along_ok, {}, // pos_inside, distance_along, distance_along_ok, latency
+                                   {}, across_ok, // distance_across, distance_across_ok
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_along_ok, num_along_nok, num_across_ok, num_across_nok,
+                                   "Angle NaN"});
+                ++num_pos_calc_errors;
+                continue;
+            }
 
             d_along = distance * cos(angle);
             d_across = distance * sin(angle);
@@ -267,6 +281,14 @@ namespace EvaluationRequirement
 //               << " num_distances " << num_distances;
 
         assert (num_no_ref <= num_pos);
+
+        if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
+            loginf << "EvaluationRequirementPositionAlongAcross '" << name_ << "': evaluate: utn " << target_data.utn_
+                   << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+                   << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
+                   << " num_pos_calc_errors " << num_pos_calc_errors
+                   << " num_distances " << num_distances;
+
         assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
         assert (num_distances == num_along_ok+num_along_nok);
