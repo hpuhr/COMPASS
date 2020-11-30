@@ -2052,31 +2052,55 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
     //    }
 
     if (dbo_name_ref_ != dbo_name_tst_)
+    {
         data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
+
+        // ref srcs
+        {
+            vector<unsigned int> active_ref_srcs;
+
+            for (auto& ds_it : data_sources_ref_)
+                if (ds_it.second.isActive())
+                    active_ref_srcs.push_back(ds_it.first);
+
+            data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
+        }
+
+        // tst srcs
+        {
+            vector<unsigned int> active_tst_srcs;
+
+            for (auto& ds_it : data_sources_tst_)
+                if (ds_it.second.isActive())
+                    active_tst_srcs.push_back(ds_it.first);
+
+            data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
+        }
+
+    }
     else
+    {
         data["db_objects"] = vector<string>{dbo_name_ref_};
 
-    // ref srcs
-    {
-        vector<unsigned int> active_ref_srcs;
+        vector<unsigned int> active_srcs;
 
-        for (auto& ds_it : data_sources_ref_)
-            if (ds_it.second.isActive())
-                active_ref_srcs.push_back(ds_it.first);
+        // ref srcs
+        {
+            for (auto& ds_it : data_sources_ref_)
+                if (ds_it.second.isActive())
+                    active_srcs.push_back(ds_it.first);
+        }
 
-        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
+        // tst srcs
+        {
+            for (auto& ds_it : data_sources_tst_)
+                if (ds_it.second.isActive())
+                    active_srcs.push_back(ds_it.first);
+        }
+
+        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_srcs;
     }
 
-    // tst srcs
-    {
-        vector<unsigned int> active_tst_srcs;
-
-        for (auto& ds_it : data_sources_tst_)
-            if (ds_it.second.isActive())
-                active_tst_srcs.push_back(ds_it.first);
-
-        data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
-    }
 
     return data;
 }

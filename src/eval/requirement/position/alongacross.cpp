@@ -216,7 +216,7 @@ namespace EvaluationRequirement
             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
             angle = ref_spd.track_angle_ - atan2(y_pos, x_pos);
 
-            if (isnan(angle))
+            if (std::isnan(angle))
             {
                 details.push_back({tod, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
