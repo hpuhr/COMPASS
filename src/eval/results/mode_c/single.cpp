@@ -107,54 +107,23 @@ namespace EvaluationRequirementResult
 
     void SingleModeC::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
+        addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
-        //        if (eval_man_.showAdsbInfo())
-        //        {
-        //            if (!tgt_overview_section.hasTable(target_table_name_))
-        //                tgt_overview_section.addTable(target_table_name_, 14,
-        //                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-        //                 "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+        if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
+            addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 
-        //            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-        //        }
-        //        else
-        //        {
-        if (!tgt_overview_section.hasTable(target_table_name_))
-            tgt_overview_section.addTable(target_table_name_, 15,
+    }
+
+    void SingleModeC::addTargetDetailsToTable (
+            EvaluationResultsReport::Section& section, const std::string& table_name)
+    {
+        if (!section.hasTable(table_name))
+            section.addTable(table_name, 15,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
              "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP", "PF"}, true, 13);
 
-        addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-        //        }
+        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
-        if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
-        {
-            EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
-
-            //            if (eval_man_.showAdsbInfo())
-            //            {
-            //                if (!sum_section.hasTable(target_table_name_))
-            //                    sum_section.addTable(target_table_name_, 14,
-            //                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-            //                     "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
-
-            //                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-            //            }
-            //            else
-            //            {
-            if (!sum_section.hasTable(target_table_name_))
-                sum_section.addTable(target_table_name_, 15,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP", "PF"}, true, 13);
-
-            addTargetDetailsToTable(sum_section.getTable(target_table_name_));
-            //            }
-        }
-    }
-
-    void SingleModeC::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
-    {
         QVariant pe_var;
         QVariant pf_var;
 
@@ -163,8 +132,6 @@ namespace EvaluationRequirementResult
 
         if (has_p_false_)
             pf_var = roundf(p_false_ * 10000.0) / 100.0;
-
-        string utn_req_section_heading = getTargetRequirementSectionID();
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),

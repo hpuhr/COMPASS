@@ -166,61 +166,33 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (eval_man_.resultsGenerator().showAdsbInfo())
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 29,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
-                 "LMin", "LMax", "LAvg", "LSDev",
-                 "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
-                 "MOPS", "NUCp/NIC", "NACp"}, true, 12);
-
-            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-        }
+            addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
         else
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 26,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
-                 "LMin", "LMax", "LAvg", "LSDev",
-                 "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
-
-            addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-        }
+            addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
         if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
             if (eval_man_.resultsGenerator().showAdsbInfo())
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 29,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
-                     "LMin", "LMax", "LAvg", "LSDev",
-                     "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
-                     "MOPS", "NUCp/NIC", "NACp"}, true, 12);
-
-                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-            }
+                addTargetDetailsToTableADSB(sum_section, target_table_name_);
             else
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 26,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
-                     "LMin", "LMax", "LAvg", "LSDev",
-                     "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
-
-                addTargetDetailsToTable(sum_section.getTable(target_table_name_));
-            }
+                addTargetDetailsToTable(sum_section, target_table_name_);
         }
     }
 
-    void SinglePositionAlongAcross::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
+    void SinglePositionAlongAcross::addTargetDetailsToTable (
+            EvaluationResultsReport::Section& section, const std::string& table_name)
     {
+        if (!section.hasTable(table_name))
+            section.addTable(table_name, 26,
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+             "LMin", "LMax", "LAvg", "LSDev",
+             "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK"}, true, 12);
+
+        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
         QVariant p_along_var;
 
         if (has_p_min_along_)
@@ -260,8 +232,18 @@ namespace EvaluationRequirementResult
     }
 
     void SinglePositionAlongAcross::addTargetDetailsToTableADSB (
-            EvaluationResultsReport::SectionContentTable& target_table)
+            EvaluationResultsReport::Section& section, const std::string& table_name)
     {
+        if (!section.hasTable(table_name))
+            section.addTable(table_name, 29,
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "ALMin", "ALMax", "ALAvg", "ALSDev", "#ALOK", "#ALNOK", "PALOK",
+             "LMin", "LMax", "LAvg", "LSDev",
+             "ACMin", "ACMax", "ACAvg", "ACSDev", "#ACOK", "#ACNOK", "PACOK",
+             "MOPS", "NUCp/NIC", "NACp"}, true, 12);
+
+        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
         QVariant p_along_var;
 
         if (has_p_min_along_)

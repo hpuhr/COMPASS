@@ -114,57 +114,35 @@ namespace EvaluationRequirementResult
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
         if (eval_man_.resultsGenerator().showAdsbInfo())
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 17,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
-
-            addTargetDetailsToTableADSB(tgt_overview_section.getTable(target_table_name_));
-        }
+            addTargetDetailsToTableADSB(tgt_overview_section, target_table_name_);
         else
-        {
-            if (!tgt_overview_section.hasTable(target_table_name_))
-                tgt_overview_section.addTable(target_table_name_, 14,
-                {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                 "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
-
-            addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
-        }
+            addTargetDetailsToTable(tgt_overview_section, target_table_name_);
 
         if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
             if (eval_man_.resultsGenerator().showAdsbInfo())
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 17,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
-
-                addTargetDetailsToTableADSB(sum_section.getTable(target_table_name_));
-            }
+                addTargetDetailsToTableADSB(sum_section, target_table_name_);
             else
-            {
-                if (!sum_section.hasTable(target_table_name_))
-                    sum_section.addTable(target_table_name_, 14,
-                    {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                     "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
-
-                addTargetDetailsToTable(sum_section.getTable(target_table_name_));
-            }
+                addTargetDetailsToTable(sum_section, target_table_name_);
         }
     }
 
-    void SinglePositionMaxDistance::addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table)
+    void SinglePositionMaxDistance::addTargetDetailsToTable (
+            EvaluationResultsReport::Section& section, const std::string& table_name)
     {
+        if (!section.hasTable(table_name))
+            section.addTable(table_name, 14,
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg"}, true, 10);
+
+        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
         QVariant pd_var;
 
         if (has_p_min_pos_)
             pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
-
-        //string utn_req_section_heading = getTargetRequirementSectionID();
 
         if (has_p_min_pos_)
             target_table.addRow(
@@ -184,14 +162,19 @@ namespace EvaluationRequirementResult
     }
 
     void SinglePositionMaxDistance::addTargetDetailsToTableADSB (
-            EvaluationResultsReport::SectionContentTable& target_table)
+            EvaluationResultsReport::Section& section, const std::string& table_name)
     {
+        if (!section.hasTable(table_name))
+            section.addTable(table_name, 17,
+            {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
+             "#POK", "#PNOK", "POK", "EMin", "EMax", "EAvg", "MOPS", "NUCp/NIC", "NACp"}, true, 10);
+
+        EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+
         QVariant pd_var;
 
         if (has_p_min_pos_)
             pd_var = roundf(p_min_pos_ * 10000.0) / 100.0;
-
-        //string utn_req_section_heading = getTargetRequirementSectionID();
 
         if (has_p_min_pos_)
             target_table.addRow(

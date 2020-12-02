@@ -84,8 +84,8 @@ protected:
     void updatePMinPos();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addTargetDetailsToTable (EvaluationResultsReport::SectionContentTable& target_table);
-    void addTargetDetailsToTableADSB (EvaluationResultsReport::SectionContentTable& target_table);
+    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
+    void addTargetDetailsToTableADSB (EvaluationResultsReport::Section& section, const std::string& table_name);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 
     std::unique_ptr<nlohmann::json::object_t> getTargetErrorsViewable ();
