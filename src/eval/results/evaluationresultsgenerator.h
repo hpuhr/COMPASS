@@ -22,6 +22,7 @@
 #include "eval/requirement/base.h"
 #include "eval/results/base.h"
 #include "evaluationdata.h"
+#include "evaluationresultsgeneratorwidget.h"
 #include "sectorlayer.h"
 #include "logger.h"
 #include "configurable.h"
@@ -135,8 +136,12 @@ public:
     bool skipNoDataDetails() const;
     void skipNoDataDetails(bool value);
 
+    EvaluationResultsGeneratorWidget& widget();
+
 protected:
     EvaluationManager& eval_man_;
+
+    std::unique_ptr<EvaluationResultsGeneratorWidget> widget_;
 
     bool skip_no_data_details_ {true};
     bool split_results_by_mops_ {false};

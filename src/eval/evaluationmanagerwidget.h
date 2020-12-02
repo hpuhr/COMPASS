@@ -68,12 +68,6 @@ protected:
     QPushButton* load_button_ {nullptr};
     QPushButton* evaluate_button_ {nullptr};
     QPushButton* gen_report_button_ {nullptr};
-
-    void addMainWidget ();
-    void addFilterWidget ();
-    void addTargetsWidget ();
-    void addStandardWidget ();
-    void addResultsWidget ();
 };
 
 #endif // EVALUATIONMANAGERWIDGET_H

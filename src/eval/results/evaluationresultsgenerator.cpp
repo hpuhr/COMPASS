@@ -74,7 +74,8 @@ void EvaluationResultsGenerator::checkSubConfigurables()
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
-    loginf << "EvaluationResultsGenerator: evaluate";
+    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details " << skip_no_data_details_
+           << " split_results_by_mops " << split_results_by_mops_ << " show_adsb_info " << show_adsb_info_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
@@ -423,6 +424,14 @@ bool EvaluationResultsGenerator::skipNoDataDetails() const
 void EvaluationResultsGenerator::skipNoDataDetails(bool value)
 {
     skip_no_data_details_ = value;
+}
+
+EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
+{
+    if (!widget_)
+        widget_.reset(new EvaluationResultsGeneratorWidget(*this));
+
+    return *widget_.get();
 }
 
 bool EvaluationResultsGenerator::splitResultsByMOPS() const

@@ -23,6 +23,8 @@
 #include "evaluationresultstabwidget.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
+#include "evaluationresultsgenerator.h"
+#include "evaluationresultsgeneratorwidget.h"
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationdatasourcewidget.h"
@@ -50,11 +52,22 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
 
     tab_widget_ = new QTabWidget();
 
-    addMainWidget();
-    addFilterWidget();
-    addTargetsWidget();
-    addStandardWidget();
-    addResultsWidget();
+    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
+    tab_widget_->addTab(main_tab_widget_.get(), "Main");
+
+    targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
+    tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
+
+    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, *this));
+    tab_widget_->addTab(filter_widget_.get(), "Filter");
+
+    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
+    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
+
+    tab_widget_->addTab(&eval_man_.resultsGenerator().widget(), "Results Config");
+
+    results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
+    tab_widget_->addTab(results_tab_widget_.get(), "Results");
 
     main_layout_->addWidget(tab_widget_);
 
@@ -108,41 +121,6 @@ void EvaluationManagerWidget::reshowLastResultId()
 {
     assert (results_tab_widget_);
     results_tab_widget_->reshowLastId();
-}
-
-void EvaluationManagerWidget::addMainWidget ()
-{
-    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(main_tab_widget_.get(), "Main");
-}
-
-void EvaluationManagerWidget::addFilterWidget ()
-{
-    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(filter_widget_.get(), "Filter");
-}
-
-void EvaluationManagerWidget::addTargetsWidget ()
-{
-    targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
-}
-
-void EvaluationManagerWidget::addStandardWidget ()
-{
-    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
-}
-
-void EvaluationManagerWidget::addResultsWidget ()
-{
-    results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(results_tab_widget_.get(), "Results");
 }
 
 void EvaluationManagerWidget::loadDataSlot()

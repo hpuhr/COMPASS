@@ -21,47 +21,51 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
 #include "evaluationtargetdata.h"
+#include "evaluationmanager.h"
+#include "evaluationresultsgenerator.h"
 #include "sectorlayer.h"
 
 namespace EvaluationRequirementResult
 {
-    const std::string Single::tr_details_table_name_ {"Target Reports Details"};
-    const std::string Single::target_table_name_ {"Targets"};
+const std::string Single::tr_details_table_name_ {"Target Reports Details"};
+const std::string Single::target_table_name_ {"Targets"};
 
-    Single::Single(
-            const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
-            const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
-            EvaluationManager& eval_man)
-        : Base(type, result_id, requirement, sector_layer, eval_man), utn_(utn), target_(target)
-    {
-    }
+Single::Single(
+        const std::string& type, const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
+        EvaluationManager& eval_man)
+    : Base(type, result_id, requirement, sector_layer, eval_man), utn_(utn), target_(target)
+{
+}
 
-    unsigned int Single::utn() const
-    {
-        return utn_;
-    }
+unsigned int Single::utn() const
+{
+    return utn_;
+}
 
-    const EvaluationTargetData* Single::target() const
-    {
-        return target_;
-    }
+const EvaluationTargetData* Single::target() const
+{
+    return target_;
+}
 
-    void Single::updateUseFromTarget ()
-    {
-        use_ = result_usable_ && target_->use();
-    }
+void Single::updateUseFromTarget ()
+{
+    use_ = result_usable_ && target_->use();
+}
 
-    std::string Single::getTargetSectionID()
-    {
-        return "Targets:UTN "+to_string(utn_);
-    }
+std::string Single::getTargetSectionID()
+{
+    return "Targets:UTN "+to_string(utn_);
+}
 
-    std::string Single::getTargetRequirementSectionID ()
-    {
-        return getTargetSectionID()+":"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
-    }
+std::string Single::getTargetRequirementSectionID ()
+{
+    return getTargetSectionID()+":"+sector_layer_.name()+":"+requirement_->groupName()+":"+requirement_->name();
+}
 
-    std::string Single::getRequirementSectionID () // TODO hack
+std::string Single::getRequirementSectionID () // TODO hack
+{
+    if (eval_man_.resultsGenerator().splitResultsByMOPS())
     {
         string tmp = target()->mopsVersionsStr();
 
@@ -72,27 +76,30 @@ namespace EvaluationRequirementResult
 
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
     }
+    else
+        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
+}
 
-    void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Single::addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    EvaluationResultsReport::Section& utn_section = root_item->getSection(getTargetSectionID());
+
+    if (!utn_section.hasTable("details_overview_table")) // only set once, called from many
     {
-        EvaluationResultsReport::Section& utn_section = root_item->getSection(getTargetSectionID());
+        utn_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
 
-        if (!utn_section.hasTable("details_overview_table")) // only set once, called from many
-        {
-            utn_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+        EvaluationResultsReport::SectionContentTable& utn_table =
+                utn_section.getTable("details_overview_table");
 
-            EvaluationResultsReport::SectionContentTable& utn_table =
-                    utn_section.getTable("details_overview_table");
-
-            utn_table.addRow({"UTN", "Unique Target Number", utn_}, this);
-            utn_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
-            utn_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
-            utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->callsignsStr().c_str()}, this);
-            utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->targetAddressesStr().c_str()}, this);
-            utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
-            utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
-            utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
-        }
+        utn_table.addRow({"UTN", "Unique Target Number", utn_}, this);
+        utn_table.addRow({"Begin", "Begin time of target", target_->timeBeginStr().c_str()}, this);
+        utn_table.addRow({"End", "End time of target", target_->timeEndStr().c_str()}, this);
+        utn_table.addRow({"Callsign", "Mode S target identification(s)", target_->callsignsStr().c_str()}, this);
+        utn_table.addRow({"Target Addr.", "Mode S target address(es)", target_->targetAddressesStr().c_str()}, this);
+        utn_table.addRow({"Mode 3/A", "Mode 3/A code(s)", target_->modeACodesStr().c_str()}, this);
+        utn_table.addRow({"Mode C Min", "Minimum Mode C code [ft]", target_->modeCMinStr().c_str()}, this);
+        utn_table.addRow({"Mode C Max", "Maximum Mode C code [ft]", target_->modeCMaxStr().c_str()}, this);
     }
+}
 
 }
