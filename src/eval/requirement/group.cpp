@@ -20,6 +20,7 @@
 #include "eval/requirement/detection/detectionconfig.h"
 #include "eval/requirement/position/maxdistanceconfig.h"
 #include "eval/requirement/position/alongacrossconfig.h"
+#include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
@@ -77,6 +78,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionAlongAcrossConfig* config =
                 new EvaluationRequirement::PositionAlongAcrossConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementPositionAlongConfig") == 0)
+    {
+        EvaluationRequirement::PositionAlongConfig* config =
+                new EvaluationRequirement::PositionAlongConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -260,6 +271,11 @@ void Group::showMenu ()
             QAction* aa_action = req_menu->addAction("Position Along/Across");
             aa_action->setData("EvaluationRequirementPositionAlongAcrossConfig");
             connect(aa_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* along_action = req_menu->addAction("Position Along");
+            along_action->setData("EvaluationRequirementPositionAlongConfig");
+            connect(along_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
         }
 
     }

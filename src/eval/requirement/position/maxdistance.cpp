@@ -32,16 +32,12 @@ using namespace Utils;
 
 namespace EvaluationRequirement
 {
-    bool PositionMaxDistance::in_appimage_ {getenv("APPDIR") != nullptr};
-
-
     PositionMaxDistance::PositionMaxDistance(const std::string& name, const std::string& short_name, const std::string& group_name,
                                              EvaluationManager& eval_man,
                                              float max_ref_time_diff, float max_distance, float minimum_probability)
         : Base(name, short_name, group_name, eval_man),
           max_ref_time_diff_(max_ref_time_diff), max_distance_(max_distance), minimum_probability_(minimum_probability)
     {
-
     }
 
     float PositionMaxDistance::maxDistance() const

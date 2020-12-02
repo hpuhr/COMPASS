@@ -4,12 +4,16 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/detail.h"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistance.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongacrossconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongacrossconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongacross.h"
+        "${CMAKE_CURRENT_LIST_DIR}/along.h"
+        "${CMAKE_CURRENT_LIST_DIR}/alongconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.cpp"
@@ -17,6 +21,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/alongacrossconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongacrossconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongacross.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/along.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/alongconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.cpp"
 )
 
 

@@ -15,48 +15,39 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENT_H
-#define EVALUATIONREQUIREMENT_H
+#ifndef EVALUATIONREQUIREMENPOSITIONALONG_H
+#define EVALUATIONREQUIREMENPOSITIONALONG_H
 
-#include <string>
-#include <memory>
-
-class EvaluationTargetData;
-class EvaluationManager;
-class SectorLayer;
-
-namespace EvaluationRequirementResult {
-    class Single;
-}
+#include "eval/requirement/base.h"
+#include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement
 {
 
-class Base
+class PositionAlong : public Base
 {
 public:
-    Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-                          EvaluationManager& eval_man);
+    PositionAlong(
+            const std::string& name, const std::string& short_name, const std::string& group_name,
+            EvaluationManager& eval_man,
+            float max_time_diff, float max_abs_value, float minimum_probability);
+
+    float maxRefTimeDiff() const;
+    float maxAbsValue() const;
+    float minimumProbability() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-            const SectorLayer& sector_layer) = 0;
-    // instance is the self-reference for the result
+            const SectorLayer& sector_layer) override;
 
-    std::string name() const;
-    std::string shortname() const;
-    std::string groupName() const;
 
 protected:
-    static bool in_appimage_;
 
-    std::string name_;
-    std::string short_name_;
-    std::string group_name_;
-
-    EvaluationManager& eval_man_;
+    float max_ref_time_diff_ {0};
+    float max_abs_value_ {0};
+    float minimum_probability_{0};
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENT_H
+#endif // EVALUATIONREQUIREMENPOSITIONALONG_H
