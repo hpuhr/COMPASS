@@ -24,15 +24,12 @@
 #include "evaluationdata.h"
 #include "sectorlayer.h"
 #include "logger.h"
+#include "configurable.h"
 
 #include <tbb/tbb.h>
 
 class EvaluationManager;
 class EvaluationStandard;
-
-//namespace EvaluationRequirement {
-//    class Base;
-//}
 
 namespace EvaluationRequirementResult
 {
@@ -100,47 +97,15 @@ protected:
     bool single_thread_;
 };
 
-//class GenerateResultsTask : public tbb::task {
-
-//public:
-//    GenerateResultsTask(std::shared_ptr<EvaluationResultsReport::RootItem> root_item,
-//                        std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec)
-//        :root_item_(root_item), results_vec_(results_vec)
-//    {
-//    }
-
-//    /*override*/ tbb::task* execute() {
-//        // Do the job
-
-//        // first add all joined
-//        for (auto& result_it : results_vec_)
-//            if (result_it->isJoined())
-//                result_it->addToReport(root_item_);
-
-//        // then all singles
-//        for (auto& result_it : results_vec_)
-//            if (result_it->isSingle())
-//                result_it->addToReport(root_item_);
-
-//        done_ = true;
-
-//        return NULL; // or a pointer to a new task to be executed immediately
-//    }
-
-//    bool done () { return done_; }
-
-//protected:
-//    std::shared_ptr<EvaluationResultsReport::RootItem> root_item_;
-//    std::vector<std::shared_ptr<EvaluationRequirementResult::Base>>& results_vec_;
-
-//    bool done_ {false};
-//};
-
-class EvaluationResultsGenerator
+class EvaluationResultsGenerator : public Configurable
 {
 public:
-    EvaluationResultsGenerator(EvaluationManager& eval_man);
-    ~EvaluationResultsGenerator();
+    EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
+                               EvaluationManager& eval_man);
+    virtual ~EvaluationResultsGenerator();
+
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
     void evaluate (EvaluationData& data, EvaluationStandard& standard);
 
@@ -161,14 +126,29 @@ public:
 
     void clear();
 
+    bool splitResultsByMOPS() const;
+    void splitResultsByMOPS(bool value);
+
+    bool showAdsbInfo() const;
+    void showAdsbInfo(bool value);
+
+    bool skipNoDataDetails() const;
+    void skipNoDataDetails(bool value);
+
 protected:
     EvaluationManager& eval_man_;
+
+    bool skip_no_data_details_ {true};
+    bool split_results_by_mops_ {false};
+    bool show_adsb_info_ {false};
 
     EvaluationResultsReport::TreeModel results_model_;
 
     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
     std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
+
+    virtual void checkSubConfigurables() override;
 };
 
 #endif // EVALUATIONRESULTSGENERATOR_H

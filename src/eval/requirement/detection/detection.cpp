@@ -221,7 +221,7 @@ namespace EvaluationRequirement
 
         string comment;
 
-        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
 
         for (auto tst_it=tst_data.begin(); tst_it != tst_data.end(); ++tst_it)
         {

@@ -147,12 +147,12 @@ public:
     typedef std::map<std::string,
       std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
 
-    ResultIterator begin() { return results_gen_.begin(); }
-    ResultIterator end() { return results_gen_.end(); }
+    ResultIterator begin();
+    ResultIterator end();
 
-    bool hasResults() { return results_gen_.results().size(); }
+    bool hasResults();
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
-    const { return results_gen_.results(); } ;
+    const;
 
     //void setUseTargetData (unsigned int utn, bool value);
     void updateResultsToChanges ();
@@ -216,13 +216,6 @@ public:
     bool hasADSBInfo(unsigned int ta) const;
     std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
             std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
-
-    bool splitResultsByMOPS() const;
-
-    bool showAdsbInfo() const;
-
-    bool skipNoDataDetails() const;
-    void skipNoDataDetails(bool value);
 
     bool loadOnlySectorData() const;
     void loadOnlySectorData(bool value);
@@ -362,8 +355,6 @@ protected:
     bool remove_not_detected_dbos_{false};
     nlohmann::json remove_not_detected_dbo_values_;
 
-    // eval details
-    bool skip_no_data_details_ {true};
     bool load_only_sector_data_ {true};
 
     // load filter
@@ -413,7 +404,6 @@ protected:
     bool use_max_sil_v2_ {false};
     unsigned int max_sil_v2_ {0};
 
-
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
@@ -423,7 +413,7 @@ protected:
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
-    EvaluationResultsGenerator results_gen_;
+    std::unique_ptr<EvaluationResultsGenerator> results_gen_;
     std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
@@ -431,9 +421,6 @@ protected:
     bool has_adsb_info_ {false};
     std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
-
-    bool split_results_by_mops_ {true};
-    bool show_adsb_info_ {true};
 
     virtual void checkSubConfigurables() override;
 

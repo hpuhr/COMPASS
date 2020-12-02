@@ -44,10 +44,17 @@ using namespace std;
 using namespace EvaluationRequirementResult;
 using namespace Utils;
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
-    : eval_man_(eval_man), results_model_(eval_man_)
+EvaluationResultsGenerator::EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
+                                                       EvaluationManager& eval_man)
+    : Configurable(class_id, instance_id, &eval_man, "eval_results.json"),
+      eval_man_(eval_man), results_model_(eval_man_)
 {
+    registerParameter("skip_no_data_details", &skip_no_data_details_, true);
+    registerParameter("split_results_by_mops", &split_results_by_mops_, false);
+    registerParameter("show_adsb_info", &show_adsb_info_, false);
 
+
+    createSubConfigurables();
 }
 
 EvaluationResultsGenerator::~EvaluationResultsGenerator()
@@ -55,6 +62,15 @@ EvaluationResultsGenerator::~EvaluationResultsGenerator()
     clear();
 }
 
+void EvaluationResultsGenerator::generateSubConfigurable(const std::string& class_id,
+                                                         const std::string& instance_id)
+{
+    assert (false);
+}
+
+void EvaluationResultsGenerator::checkSubConfigurables()
+{
+}
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
@@ -114,7 +130,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     string remaining_time_str;
 
-    bool split_results_by_mops = eval_man_.splitResultsByMOPS();
     string mops_str;
 
     for (auto& sec_it : sector_layers)
@@ -217,7 +232,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     result_sum->join(result_it);
 
-                    if (split_results_by_mops)
+                    if (split_results_by_mops_)
                     {
                         mops_str = result_it->target()->mopsVersionsStr();
 
@@ -243,7 +258,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
 
-                if (split_results_by_mops)
+                if (split_results_by_mops_)
                 {
                     for (auto& mops_res_it : mops_sums)
                     {
@@ -318,15 +333,6 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
     // generate results
-//    GenerateResultsTask* t = new (tbb::task::allocate_root()) GenerateResultsTask(
-//                root_item, results_vec_);
-//    tbb::task::enqueue(*t);
-
-//    while (!t->done())
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
 
     // first add all joined
     for (auto& result_it : results_vec_)
@@ -407,5 +413,35 @@ void EvaluationResultsGenerator::updateToChanges ()
     }
 
     generateResultsReportGUI();
+}
+
+bool EvaluationResultsGenerator::skipNoDataDetails() const
+{
+    return skip_no_data_details_;
+}
+
+void EvaluationResultsGenerator::skipNoDataDetails(bool value)
+{
+    skip_no_data_details_ = value;
+}
+
+bool EvaluationResultsGenerator::splitResultsByMOPS() const
+{
+    return split_results_by_mops_;
+}
+
+void EvaluationResultsGenerator::splitResultsByMOPS(bool value)
+{
+    split_results_by_mops_ = value;
+}
+
+bool EvaluationResultsGenerator::showAdsbInfo() const
+{
+    return show_adsb_info_;
+}
+
+void EvaluationResultsGenerator::showAdsbInfo(bool value)
+{
+    show_adsb_info_ = value;
 }
 

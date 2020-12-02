@@ -97,7 +97,7 @@ namespace EvaluationRequirement
         double error_min{0}, error_max{0}, error_sum{0};
 
 
-        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
 
         bool has_ground_bit;
         bool ground_bit_set;

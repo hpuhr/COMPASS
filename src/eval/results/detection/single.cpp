@@ -124,7 +124,7 @@ namespace EvaluationRequirementResult
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
 //        }
 
-        if (eval_man_.splitResultsByMOPS()) // add to general sum table
+        if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 

@@ -113,7 +113,7 @@ namespace EvaluationRequirementResult
     {
         EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
 
-        if (eval_man_.showAdsbInfo())
+        if (eval_man_.resultsGenerator().showAdsbInfo())
         {
             if (!tgt_overview_section.hasTable(target_table_name_))
                 tgt_overview_section.addTable(target_table_name_, 17,
@@ -132,11 +132,11 @@ namespace EvaluationRequirementResult
             addTargetDetailsToTable(tgt_overview_section.getTable(target_table_name_));
         }
 
-        if (eval_man_.splitResultsByMOPS()) // add to general sum table
+        if (eval_man_.resultsGenerator().splitResultsByMOPS()) // add to general sum table
         {
             EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
 
-            if (eval_man_.showAdsbInfo())
+            if (eval_man_.resultsGenerator().showAdsbInfo())
             {
                 if (!sum_section.hasTable(target_table_name_))
                     sum_section.addTable(target_table_name_, 17,

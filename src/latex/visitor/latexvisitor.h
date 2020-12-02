@@ -63,7 +63,7 @@ protected:
     bool add_overview_screenshot_ {true};
     bool include_target_details_ {false};
     bool include_target_tr_details_ {false};
-    unsigned int max_table_col_width_ {18};
+    unsigned int max_table_col_width_ {24};
     bool wait_on_map_loading_ {true};
 
     bool ignore_listbox_views_ {false};

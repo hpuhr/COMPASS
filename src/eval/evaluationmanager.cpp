@@ -58,7 +58,7 @@ using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this), results_gen_(*this)
+    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
@@ -180,7 +180,7 @@ void EvaluationManager::loadData ()
         viewable_data_cfg_ = nullptr;
     }
 
-    results_gen_.clear();
+    results_gen_->clear();
 
     reference_data_loaded_ = false;
     test_data_loaded_ = false;
@@ -504,7 +504,7 @@ void EvaluationManager::evaluate ()
     assert (hasCurrentStandard());
 
     // clean previous
-    results_gen_.clear();
+    results_gen_->clear();
 
     evaluated_ = false;
 
@@ -514,7 +514,7 @@ void EvaluationManager::evaluate ()
     emit resultsChangedSignal();
 
     // eval
-    results_gen_.evaluate(data_, currentStandard());
+    results_gen_->evaluate(data_, currentStandard());
 
     evaluated_ = true;
 
@@ -625,6 +625,12 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 
         standards_[standard->name()].reset(standard);
     }
+    else if (class_id == "EvaluationResultsGenerator")
+    {
+        assert (!results_gen_);
+        results_gen_.reset(new EvaluationResultsGenerator(class_id, instance_id, *this));
+        assert (results_gen_);
+    }
     else if (class_id == "EvaluationResultsReportPDFGenerator")
     {
         assert (!pdf_gen_);
@@ -647,6 +653,10 @@ EvaluationManagerWidget* EvaluationManager::widget()
 
 void EvaluationManager::checkSubConfigurables()
 {
+    if (!results_gen_)
+        generateSubConfigurable("EvaluationResultsGenerator", "EvaluationResultsGenerator0");
+    assert (results_gen_);
+
     if (!pdf_gen_)
         generateSubConfigurable("EvaluationResultsReportPDFGenerator", "EvaluationResultsReportPDFGenerator0");
 
@@ -1151,7 +1161,8 @@ std::vector<std::string> EvaluationManager::currentRequirementNames()
 
 EvaluationResultsGenerator& EvaluationManager::resultsGenerator()
 {
-    return results_gen_;
+    assert (results_gen_);
+    return *results_gen_;
 }
 
 bool EvaluationManager::sectorsLoaded() const
@@ -1370,6 +1381,30 @@ void EvaluationManager::showResultId (const std::string& id)
     widget_->showResultId(id);
 }
 
+
+EvaluationManager::ResultIterator EvaluationManager::begin()
+{
+    assert (results_gen_);
+    return results_gen_->begin();
+}
+EvaluationManager::ResultIterator EvaluationManager::end()
+{
+    assert (results_gen_);
+    return results_gen_->end();
+}
+
+bool EvaluationManager::hasResults()
+{
+    assert (results_gen_);
+    return results_gen_->results().size();
+}
+const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>&
+EvaluationManager::results() const
+{
+    assert (results_gen_);
+    return results_gen_->results(); }
+;
+
 //void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
 //{
 //    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
@@ -1382,7 +1417,7 @@ void EvaluationManager::updateResultsToChanges ()
 {
     if (evaluated_)
     {
-        results_gen_.updateToChanges();
+        results_gen_->updateToChanges();
 
         if (widget_)
         {
@@ -1982,26 +2017,6 @@ std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsign
     return adsb_info_.at(ta);
 }
 
-bool EvaluationManager::splitResultsByMOPS() const
-{
-    return split_results_by_mops_;
-}
-
-bool EvaluationManager::showAdsbInfo() const
-{
-    return show_adsb_info_;
-}
-
-bool EvaluationManager::skipNoDataDetails() const
-{
-    return skip_no_data_details_;
-}
-
-void EvaluationManager::skipNoDataDetails(bool value)
-{
-    skip_no_data_details_ = value;
-}
-
 bool EvaluationManager::loadOnlySectorData() const
 {
     return load_only_sector_data_;
@@ -2421,4 +2436,6 @@ void EvaluationManager::useASDBFilter(bool value)
     loginf << "EvaluationManager: useASDBFilter: value " << value;
     use_adsb_filter_ = value;
 }
+
+
 

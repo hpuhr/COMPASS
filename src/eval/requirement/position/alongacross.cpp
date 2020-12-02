@@ -105,7 +105,7 @@ namespace EvaluationRequirement
         tuple<vector<double>, vector<double>, vector<double>, vector<double>, vector<double>> distance_values;
         // dx, dy, dalong, dacross, along, along latency
 
-        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
 
         bool has_ground_bit;
         bool ground_bit_set;

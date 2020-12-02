@@ -83,7 +83,7 @@ namespace EvaluationRequirement
         string comment;
         bool lower_nok, upper_nok;
 
-        bool skip_no_data_details = eval_man_.skipNoDataDetails();
+        bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
         bool skip_detail;
 
         bool has_ground_bit;
