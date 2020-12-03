@@ -14,6 +14,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/along.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/across.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acrossconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/acrossconfigwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.cpp"
@@ -24,6 +27,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/along.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/across.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acrossconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/acrossconfigwidget.cpp"
 )
 
 
