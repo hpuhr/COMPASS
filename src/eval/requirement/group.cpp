@@ -18,8 +18,7 @@
 #include "eval/requirement/group.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
-#include "eval/requirement/position/maxdistanceconfig.h"
-#include "eval/requirement/position/alongacrossconfig.h"
+#include "eval/requirement/position/distanceconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
@@ -66,20 +65,10 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
     }
-    else if (class_id.compare("EvaluationRequirementPositionMaxDistanceConfig") == 0)
+    else if (class_id.compare("EvaluationRequirementPositionDistanceConfig") == 0)
     {
-        EvaluationRequirement::PositionMaxDistanceConfig* config =
-                new EvaluationRequirement::PositionMaxDistanceConfig(
-                    class_id, instance_id, *this, standard_, eval_man_);
-        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
-
-        assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
-    }
-    else if (class_id.compare("EvaluationRequirementPositionAlongAcrossConfig") == 0)
-    {
-        EvaluationRequirement::PositionAlongAcrossConfig* config =
-                new EvaluationRequirement::PositionAlongAcrossConfig(
+        EvaluationRequirement::PositionDistanceConfig* config =
+                new EvaluationRequirement::PositionDistanceConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -209,7 +198,13 @@ void Group::removeRequirementConfig (const std::string& name)
     auto iter = std::find_if(configs_.begin(), configs_.end(),
                              [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
 
+    assert (iter != configs_.end());
+
+    standard_.beginModelReset();
+
     configs_.erase(iter);
+
+    standard_.endModelReset();
 
     emit configsChangedSignal();
 }
@@ -259,7 +254,7 @@ void Group::showMenu ()
         connect(del_action, &QAction::triggered, this, &Group::deleteGroupSlot);
 
         // requirements
-        QMenu* req_menu = menu.addMenu("Add Requirement");;
+        QMenu* req_menu = menu.addMenu("Add Requirement");
 
         { // detection
             QAction* add_det_action = req_menu->addAction("Detection");
@@ -286,13 +281,9 @@ void Group::showMenu ()
         }
 
         { // position
-            QAction* md_action = req_menu->addAction("Position Max Distance");
-            md_action->setData("EvaluationRequirementPositionMaxDistanceConfig");
+            QAction* md_action = req_menu->addAction("Position Distance");
+            md_action->setData("EvaluationRequirementPositionDistanceConfig");
             connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
-
-            QAction* aa_action = req_menu->addAction("Position Along/Across");
-            aa_action->setData("EvaluationRequirementPositionAlongAcrossConfig");
-            connect(aa_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
             QAction* along_action = req_menu->addAction("Position Along");
             along_action->setData("EvaluationRequirementPositionAlongConfig");
@@ -306,6 +297,17 @@ void Group::showMenu ()
             latency_action->setData("EvaluationRequirementPositionLatencyConfig");
             connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
+        }
+
+        {
+            QMenu* del_menu = menu.addMenu("Delete Requirement");
+
+            for (auto& cfg_it : configs_)
+            {
+                QAction* action = del_menu->addAction(cfg_it->name().c_str());
+                action->setData(cfg_it->name().c_str());
+                connect(action, &QAction::triggered, this, &Group::deleteRequirementSlot);
+            }
         }
 
     }
@@ -378,6 +380,28 @@ void Group::addRequirementSlot()
 
     addRequirementConfig(class_id, req_name, req_short_name);
 }
+
+void Group::deleteRequirementSlot()
+{
+    loginf << "EvaluationRequirementGroup " << name_ << ": deleteRequirementSlot";
+
+    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+    assert (action);
+
+    QVariant data = action->data();
+    assert (data.isValid());
+
+    string name = data.toString().toStdString();
+
+    QMessageBox::StandardButton reply;
+      reply = QMessageBox::question(nullptr, "Delete Requirement", ("Confirm to delete requirement '"+name+"'").c_str(),
+                                    QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::Yes)
+      {
+        removeRequirementConfig(name);
+      }
+}
+
 
 void Group::sortConfigs()
 {

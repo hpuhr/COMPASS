@@ -43,7 +43,7 @@ signals:
 public slots:
     void deleteGroupSlot();
     void addRequirementSlot();
-
+    void deleteRequirementSlot();
 
 public:
     Group(const std::string& class_id, const std::string& instance_id,

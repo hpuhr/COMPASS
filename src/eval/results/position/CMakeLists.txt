@@ -5,10 +5,8 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/maxdistancesingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/maxdistancejoined.h"
-        "${CMAKE_CURRENT_LIST_DIR}/alongacrosssingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/alongacrossjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/distancesingle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/distancejoined.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongsingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/alongjoined.h"
         "${CMAKE_CURRENT_LIST_DIR}/acrosssingle.h"
@@ -16,10 +14,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/latencysingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/latencyjoined.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/maxdistancesingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/maxdistancejoined.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/alongacrosssingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/alongacrossjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/distancesingle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/distancejoined.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongsingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/alongjoined.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/acrosssingle.cpp"
