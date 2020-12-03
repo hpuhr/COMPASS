@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/position/acrosssingle.h"
-#include "eval/results/position/acrossjoined.h"
+#include "eval/results/position/latencysingle.h"
+#include "eval/results/position/latencyjoined.h"
 #include "eval/requirement/base.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
@@ -39,26 +39,26 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-JoinedPositionAcross::JoinedPositionAcross(
+JoinedPositionLatency::JoinedPositionLatency(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         const SectorLayer& sector_layer, EvaluationManager& eval_man)
-    : Joined("JoinedPositionAcross", result_id, requirement, sector_layer, eval_man)
+    : Joined("JoinedPositionLatency", result_id, requirement, sector_layer, eval_man)
 {
 }
 
 
-void JoinedPositionAcross::join(std::shared_ptr<Base> other)
+void JoinedPositionLatency::join(std::shared_ptr<Base> other)
 {
     Joined::join(other);
 
-    std::shared_ptr<SinglePositionAcross> other_sub =
-            std::static_pointer_cast<SinglePositionAcross>(other);
+    std::shared_ptr<SinglePositionLatency> other_sub =
+            std::static_pointer_cast<SinglePositionLatency>(other);
     assert (other_sub);
 
     addToValues(other_sub);
 }
 
-void JoinedPositionAcross::addToValues (std::shared_ptr<SinglePositionAcross> single_result)
+void JoinedPositionLatency::addToValues (std::shared_ptr<SinglePositionLatency> single_result)
 {
     assert (single_result);
 
@@ -79,7 +79,7 @@ void JoinedPositionAcross::addToValues (std::shared_ptr<SinglePositionAcross> si
     update();
 }
 
-void JoinedPositionAcross::update()
+void JoinedPositionLatency::update()
 {
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
@@ -115,30 +115,30 @@ void JoinedPositionAcross::update()
     }
 }
 
-void JoinedPositionAcross::addToReport (
+void JoinedPositionLatency::addToReport (
         std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "JoinedPositionAcross " <<  requirement_->name() <<": addToReport";
+    logdbg << "JoinedPositionLatency " <<  requirement_->name() <<": addToReport";
 
     if (!results_.size()) // some data must exist
     {
-        logerr << "JoinedPositionAcross " <<  requirement_->name() <<": addToReport: no data";
+        logerr << "JoinedPositionLatency " <<  requirement_->name() <<": addToReport: no data";
         return;
     }
 
-    logdbg << "JoinedPositionAcross " <<  requirement_->name() << ": addToReport: adding joined result";
+    logdbg << "JoinedPositionLatency " <<  requirement_->name() << ": addToReport: adding joined result";
 
     addToOverviewTable(root_item);
     addDetails(root_item);
 }
 
-void JoinedPositionAcross::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void JoinedPositionLatency::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
     // condition
-    std::shared_ptr<EvaluationRequirement::PositionAcross> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionLatency> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionLatency>(requirement_);
     assert (req);
 
     string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
@@ -156,20 +156,20 @@ void JoinedPositionAcross::addToOverviewTable(std::shared_ptr<EvaluationResultsR
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                     +(requirement_->shortname()+" Across").c_str(),
+                     +(requirement_->shortname()+" Latency").c_str(),
                      result_id_.c_str(), {num_value_ok_+num_value_nok_},
                      p_min_var, condition.c_str(), result.c_str()}, this, {});
 }
 
-void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void JoinedPositionLatency::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
     if (!sector_section.hasTable("sector_details_table"))
         sector_section.addTable("sector_details_table", 3, {"Name", "comment", "Value"}, false);
 
-    std::shared_ptr<EvaluationRequirement::PositionAcross> req =
-            std::static_pointer_cast<EvaluationRequirement::PositionAcross>(requirement_);
+    std::shared_ptr<EvaluationRequirement::PositionLatency> req =
+            std::static_pointer_cast<EvaluationRequirement::PositionLatency>(requirement_);
     assert (req);
 
     EvaluationResultsReport::SectionContentTable& sec_det_table =
@@ -192,18 +192,18 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
     // along
-    sec_det_table.addRow({"ACMin [m]", "Minimum of across-track error",
-                          String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    sec_det_table.addRow({"ACMax [m]", "Maximum of across-track error",
-                          String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-    sec_det_table.addRow({"ACAvg [m]", "Average of across-track error",
-                          String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    sec_det_table.addRow({"ACSDev [m]", "Standard Deviation of across-track error",
-                          String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"ACVar [m]", "Variance of across-track error",
-                          String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_value_ok_}, this);
-    sec_det_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_value_nok_},
+    sec_det_table.addRow({"LTMin [s]", "Minimum of latency",
+                          String::timeStringFromDouble(value_min_,2).c_str()}, this);
+    sec_det_table.addRow({"LTMax [s]", "Maximum of latency",
+                          String::timeStringFromDouble(value_max_,2).c_str()}, this);
+    sec_det_table.addRow({"LTAvg [s]", "Average of latency",
+                          String::timeStringFromDouble(value_avg_,2).c_str()}, this);
+    sec_det_table.addRow({"LTSDev [s]", "Standard Deviation of latency",
+                          String::timeStringFromDouble(sqrt(value_var_),2).c_str()}, this);
+    sec_det_table.addRow({"LTVar [s]", "Variance of latency",
+                          String::timeStringFromDouble(value_var_,2).c_str()}, this);
+    sec_det_table.addRow({"#LTOK [1]", "Number of updates with latency", num_value_ok_}, this);
+    sec_det_table.addRow({"#LTNOK [1]", "Number of updates with unacceptable latency ", num_value_nok_},
                          this);
 
 
@@ -214,18 +214,18 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
         if (has_p_min_)
             p_min_var = roundf(p_min_ * 10000.0) / 100.0;
 
-        sec_det_table.addRow({"PACOK [%]", "Probability of acceptable across-track error", p_min_var}, this);
+        sec_det_table.addRow({"PLTOK [%]", "Probability of acceptable latency", p_min_var}, this);
 
         string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
-        sec_det_table.addRow({"Condition Across", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition Latency", {}, condition.c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_p_min_)
             result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
 
-        sec_det_table.addRow({"Condition Across Fulfilled", "", result.c_str()}, this);
+        sec_det_table.addRow({"Condition Latency Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
@@ -242,7 +242,7 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
     }
 }
 
-bool JoinedPositionAcross::hasViewableData (
+bool JoinedPositionLatency::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
@@ -251,7 +251,7 @@ bool JoinedPositionAcross::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::viewableData(
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionLatency::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasViewableData(table, annotation));
@@ -259,7 +259,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::viewableData(
     return getErrorsViewable();
 }
 
-std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> JoinedPositionLatency::getErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
             eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -287,7 +287,7 @@ std::unique_ptr<nlohmann::json::object_t> JoinedPositionAcross::getErrorsViewabl
     return viewable_ptr;
 }
 
-bool JoinedPositionAcross::hasReference (
+bool JoinedPositionLatency::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == req_overview_table_name_)
@@ -296,16 +296,16 @@ bool JoinedPositionAcross::hasReference (
         return false;;
 }
 
-std::string JoinedPositionAcross::reference(
+std::string JoinedPositionLatency::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
     return "Report:Results:"+getRequirementSectionID();
 }
 
-void JoinedPositionAcross::updatesToUseChanges()
+void JoinedPositionLatency::updatesToUseChanges()
 {
-    loginf << "JoinedPositionAcross: updatesToUseChanges";
+    loginf << "JoinedPositionLatency: updatesToUseChanges";
 
     num_pos_ = 0;
     num_no_ref_ = 0;
@@ -318,17 +318,17 @@ void JoinedPositionAcross::updatesToUseChanges()
 
     for (auto result_it : results_)
     {
-        std::shared_ptr<SinglePositionAcross> result =
-                std::static_pointer_cast<SinglePositionAcross>(result_it);
+        std::shared_ptr<SinglePositionLatency> result =
+                std::static_pointer_cast<SinglePositionLatency>(result_it);
         assert (result);
 
         addToValues(result);
     }
 }
 
-void JoinedPositionAcross::exportAsCSV()
+void JoinedPositionLatency::exportAsCSV()
 {
-    loginf << "JoinedPositionAcross: exportAsCSV";
+    loginf << "JoinedPositionLatency: exportAsCSV";
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -349,7 +349,7 @@ void JoinedPositionAcross::exportAsCSV()
 
         if (output_file)
         {
-            output_file << "d_across\n";
+            output_file << "latency\n";
             unsigned int size = values_.size();
 
             for (unsigned int cnt=0; cnt < size; ++cnt)

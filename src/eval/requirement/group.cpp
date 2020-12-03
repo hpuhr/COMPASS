@@ -22,6 +22,7 @@
 #include "eval/requirement/position/alongacrossconfig.h"
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
+#include "eval/requirement/position/latencyconfig.h"
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
@@ -99,6 +100,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionAcrossConfig* config =
                 new EvaluationRequirement::PositionAcrossConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementPositionLatencyConfig") == 0)
+    {
+        EvaluationRequirement::PositionLatencyConfig* config =
+                new EvaluationRequirement::PositionLatencyConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -290,6 +301,10 @@ void Group::showMenu ()
             QAction* across_action = req_menu->addAction("Position Across");
             across_action->setData("EvaluationRequirementPositionAcrossConfig");
             connect(across_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* latency_action = req_menu->addAction("Position Latency");
+            latency_action->setData("EvaluationRequirementPositionLatencyConfig");
+            connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
         }
 

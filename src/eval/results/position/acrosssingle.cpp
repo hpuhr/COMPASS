@@ -224,15 +224,15 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
         // along
-        utn_req_table.addRow({"Min Across [m]", "Minimum of across-track error",
+        utn_req_table.addRow({"ACMin [m]", "Minimum of across-track error",
                               String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-        utn_req_table.addRow({"Max Across [m]", "Maximum of across-track error",
+        utn_req_table.addRow({"ACMax [m]", "Maximum of across-track error",
                               String::doubleToStringPrecision(value_max_,2).c_str()}, this);
         utn_req_table.addRow({"ACAvg [m]", "Average of across-track error",
                               String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-        utn_req_table.addRow({"ACSDev Across [m]", "Standard Deviation of across-track error",
+        utn_req_table.addRow({"ACSDev [m]", "Standard Deviation of across-track error",
                               String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-        utn_req_table.addRow({"Variance Across [m]", "Variance of across-track error",
+        utn_req_table.addRow({"ACVar [m]", "Variance of across-track error",
                               String::doubleToStringPrecision(value_var_,2).c_str()}, this);
         utn_req_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_value_ok_}, this);
         utn_req_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_value_nok_},

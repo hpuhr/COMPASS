@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/position/across.h"
-#include "eval/results/position/acrosssingle.h"
+#include "eval/requirement/position/latency.h"
+#include "eval/results/position/latencysingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -33,7 +33,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-PositionAcross::PositionAcross(const std::string& name, const std::string& short_name, const std::string& group_name,
+PositionLatency::PositionLatency(const std::string& name, const std::string& short_name, const std::string& group_name,
                                          EvaluationManager& eval_man,
                                          float max_ref_time_diff, float max_abs_value, float minimum_probability)
     : Base(name, short_name, group_name, eval_man),
@@ -42,22 +42,22 @@ PositionAcross::PositionAcross(const std::string& name, const std::string& short
 
 }
 
-float PositionAcross::maxAbsValue() const
+float PositionLatency::maxAbsValue() const
 {
     return max_abs_value_;
 }
 
 
-float PositionAcross::minimumProbability() const
+float PositionLatency::minimumProbability() const
 {
     return minimum_probability_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionAcross '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_ << " minimum_probability " << minimum_probability_;
 
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -84,7 +84,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     EvaluationTargetPosition tst_pos;
 
     double x_pos, y_pos;
-    double distance, angle, d_across;
+    double distance, angle, d_along, latency;
 
     bool is_inside;
     pair<EvaluationTargetPosition, bool> ret_pos;
@@ -218,15 +218,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
             continue;
         }
 
-        d_across = distance * sin(angle);
+        d_along = distance * cos(angle);
+        latency = -d_along/ref_spd.speed_;
 
         ++num_distances;
 
-        if (fabs(d_across) > max_abs_value_)
+        if (fabs(latency) > max_abs_value_)
         {
             along_ok = false;
             ++num_value_nok;
-            comment = "Across-track not OK";
+            comment = "Latency not OK";
         }
         else
         {
@@ -236,15 +237,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
         details.push_back({tod, tst_pos,
                            true, ref_pos,
-                           is_inside, d_across, along_ok, // pos_inside, value, value_ok
+                           is_inside, d_along, along_ok, // pos_inside, value, value_ok
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                            num_value_ok, num_value_nok,
                            comment});
 
-        values.push_back(d_across);
+        values.push_back(latency);
     }
 
-//        logdbg << "EvaluationRequirementPositionAcross '" << name_ << "': evaluate: utn " << target_data.utn_
+//        logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
 //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
 //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
 //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -253,7 +254,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionAcross '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
@@ -266,13 +267,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
 
     //assert (details.size() == num_pos);
 
-    return make_shared<EvaluationRequirementResult::SinglePositionAcross>(
+    return make_shared<EvaluationRequirementResult::SinglePositionLatency>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
                 values, details);
 }
 
-float PositionAcross::maxRefTimeDiff() const
+float PositionLatency::maxRefTimeDiff() const
 {
     return max_ref_time_diff_;
 }

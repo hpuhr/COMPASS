@@ -192,15 +192,15 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
 
     // along
-    sec_det_table.addRow({"Min Along [m]", "Minimum of along-track error",
+    sec_det_table.addRow({"ALMin [m]", "Minimum of along-track error",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    sec_det_table.addRow({"Max Along [m]", "Maximum of along-track error",
+    sec_det_table.addRow({"ALMax [m]", "Maximum of along-track error",
                           String::doubleToStringPrecision(value_max_,2).c_str()}, this);
     sec_det_table.addRow({"ALAvg [m]", "Average of along-track error",
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    sec_det_table.addRow({"ALSDev Along [m]", "Standard Deviation of along-track error",
+    sec_det_table.addRow({"ALSDev [m]", "Standard Deviation of along-track error",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"Variance Along [m]", "Variance of along-track error",
+    sec_det_table.addRow({"ALVar [m]", "Variance of along-track error",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_value_ok_}, this);
     sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_value_nok_},

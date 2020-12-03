@@ -13,6 +13,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/alongjoined.h"
         "${CMAKE_CURRENT_LIST_DIR}/acrosssingle.h"
         "${CMAKE_CURRENT_LIST_DIR}/acrossjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latencysingle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyjoined.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancesingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistancejoined.cpp"
@@ -22,6 +24,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/alongjoined.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/acrosssingle.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/acrossjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/latencysingle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyjoined.cpp"
     )
 
 

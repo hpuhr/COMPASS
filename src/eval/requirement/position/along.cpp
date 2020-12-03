@@ -98,7 +98,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> along_values;
+    vector<double> values;
 
     bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
 
@@ -241,7 +241,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
                            num_value_ok, num_value_nok,
                            comment});
 
-        along_values.push_back(d_along);
+        values.push_back(d_along);
     }
 
 //        logdbg << "EvaluationRequirementPositionAlong '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -262,14 +262,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_value_ok+num_value_nok);
-    assert (num_distances == along_values.size());
+    assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionAlong>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
-                along_values, details);
+                values, details);
 }
 
 float PositionAlong::maxRefTimeDiff() const

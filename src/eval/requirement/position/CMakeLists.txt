@@ -17,6 +17,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/across.h"
         "${CMAKE_CURRENT_LIST_DIR}/acrossconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/acrossconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latency.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyconfigwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/maxdistanceconfigwidget.cpp"
@@ -30,6 +33,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/across.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/acrossconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/acrossconfigwidget.cpp"
-)
+        "${CMAKE_CURRENT_LIST_DIR}/latency.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/latencyconfigwidget.cpp"
+    )
 
 
