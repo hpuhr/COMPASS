@@ -270,6 +270,11 @@ std::string EvaluationTargetData::modeCMaxStr() const
         return "";
 }
 
+bool EvaluationTargetData::isPrimaryOnly () const
+{
+    return !callsigns_.size() && !target_addresses_.size() && !mode_a_codes_.size() && !has_mode_c_;
+}
+
 bool EvaluationTargetData::use() const
 {
     return use_;

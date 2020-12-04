@@ -107,6 +107,8 @@ public:
     int modeCMax() const;
     std::string modeCMaxStr() const;
 
+    bool isPrimaryOnly () const;
+
     bool use() const;
     void use(bool use);
 

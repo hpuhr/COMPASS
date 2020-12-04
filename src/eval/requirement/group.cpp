@@ -25,6 +25,7 @@
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
+#include "eval/requirement/extra/utnsconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -55,7 +56,17 @@ Group::~Group()
 void Group::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
+    if (class_id.compare("EvaluationRequirementExtraUTNsConfig") == 0)
+    {
+        EvaluationRequirement::ExtraUTNsConfig* config =
+                new EvaluationRequirement::ExtraUTNsConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
     {
         EvaluationRequirement::DetectionConfig* config =
                 new EvaluationRequirement::DetectionConfig(
@@ -255,6 +266,12 @@ void Group::showMenu ()
 
         // requirements
         QMenu* req_menu = menu.addMenu("Add Requirement");
+
+        { // extra
+            QAction* add_det_action = req_menu->addAction("Extra UTNs");
+            add_det_action->setData("EvaluationRequirementExtraUTNsConfig");
+            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
 
         { // detection
             QAction* add_det_action = req_menu->addAction("Detection");
