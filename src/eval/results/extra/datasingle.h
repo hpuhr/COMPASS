@@ -15,11 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTEXTRAUTNSRESULT_H
-#define EVALUATIONREQUIREMENTEXTRAUTNSRESULT_H
+#ifndef EVALUATIONREQUIREMENTEXTRADATARESULT_H
+#define EVALUATIONREQUIREMENTEXTRADATARESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/extra/utns.h"
+#include "eval/requirement/extra/data.h"
 
 namespace EvaluationRequirementResult
 {
@@ -65,4 +65,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTEXTRAUTNSRESULT_H
+#endif // EVALUATIONREQUIREMENTEXTRADATARESULT_H

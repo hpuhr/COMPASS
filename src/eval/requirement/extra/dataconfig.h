@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTEXTRAUTNSCONFIG_H
-#define EVALUATIONREQUIREMENTEXTRAUTNSCONFIG_H
+#ifndef EVALUATIONREQUIREMENTEXTRADATACONFIG_H
+#define EVALUATIONREQUIREMENTEXTRADATACONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/config.h"
-#include "eval/requirement/extra/utnsconfigwidget.h"
-#include "eval/requirement/extra/utns.h"
+#include "eval/requirement/extra/dataconfigwidget.h"
+#include "eval/requirement/extra/data.h"
 
 #include <memory>
 
@@ -72,4 +72,4 @@ namespace EvaluationRequirement
 
 }
 
-#endif // EVALUATIONREQUIREMENTEXTRAUTNSCONFIG_H
+#endif // EVALUATIONREQUIREMENTEXTRADATACONFIG_H

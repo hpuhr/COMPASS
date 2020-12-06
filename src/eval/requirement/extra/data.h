@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTEXTRAUTNS_H
-#define EVALUATIONREQUIREMENTEXTRAUTNS_H
+#ifndef EVALUATIONREQUIREMENTEXTRADATA_H
+#define EVALUATIONREQUIREMENTEXTRADATA_H
 
 #include "eval/requirement/base.h"
 #include "evaluationtargetposition.h"
@@ -78,4 +78,4 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTEXTRAUTNS_H
+#endif // EVALUATIONREQUIREMENTEXTRADATA_H

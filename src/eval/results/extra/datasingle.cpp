@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/extra/utnssingle.h"
-#include "eval/results/extra/utnsjoined.h"
+#include "eval/results/extra/datasingle.h"
+#include "eval/results/extra/datajoined.h"
 #include "eval/requirement/base.h"
-#include "eval/requirement/extra/utns.h"
+#include "eval/requirement/extra/data.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/extra/utns.h"
-#include "eval/results/extra/utnssingle.h"
+#include "eval/requirement/extra/data.h"
+#include "eval/results/extra/datasingle.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"

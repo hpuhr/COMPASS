@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/extra/utnsconfig.h"
-#include "eval/requirement/extra/utnsconfigwidget.h"
+#include "eval/requirement/extra/dataconfig.h"
+#include "eval/requirement/extra/dataconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base.h"
 

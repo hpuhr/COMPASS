@@ -25,7 +25,7 @@
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
-#include "eval/requirement/extra/utnsconfig.h"
+#include "eval/requirement/extra/dataconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>

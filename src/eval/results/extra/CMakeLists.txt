@@ -5,11 +5,11 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/utnssingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/utnsjoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datasingle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/datajoined.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/utnssingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/utnsjoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datasingle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/datajoined.cpp"
     )
 
 
