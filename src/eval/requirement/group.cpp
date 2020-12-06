@@ -56,10 +56,10 @@ Group::~Group()
 void Group::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationRequirementExtraUTNsConfig") == 0)
+    if (class_id.compare("EvaluationRequirementExtraDataConfig") == 0)
     {
-        EvaluationRequirement::ExtraUTNsConfig* config =
-                new EvaluationRequirement::ExtraUTNsConfig(
+        EvaluationRequirement::ExtraDataConfig* config =
+                new EvaluationRequirement::ExtraDataConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -268,8 +268,8 @@ void Group::showMenu ()
         QMenu* req_menu = menu.addMenu("Add Requirement");
 
         { // extra
-            QAction* add_det_action = req_menu->addAction("Extra UTNs");
-            add_det_action->setData("EvaluationRequirementExtraUTNsConfig");
+            QAction* add_det_action = req_menu->addAction("Extra Data");
+            add_det_action->setData("EvaluationRequirementExtraDataConfig");
             connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 

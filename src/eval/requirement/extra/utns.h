@@ -26,10 +26,10 @@
 namespace EvaluationRequirement
 {
 
-class ExtraUTNsDetail
+class ExtraDataDetail
 {
 public:
-    ExtraUTNsDetail(
+    ExtraDataDetail(
             float tod, EvaluationTargetPosition pos_current, bool inside, bool extra, bool ref_exists,
             const std::string& comment)
         : tod_(tod), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
@@ -47,10 +47,10 @@ public:
     std::string comment_;
 };
 
-class ExtraUTNs : public Base
+class ExtraData : public Base
 {
 public:
-    ExtraUTNs(
+    ExtraData(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man,
             float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,

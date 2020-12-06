@@ -29,7 +29,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-ExtraUTNsConfigWidget::ExtraUTNsConfigWidget(ExtraUTNsConfig& config)
+ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& config)
     : QWidget(), config_(config)
 {
     form_layout_ = new QFormLayout();
@@ -40,7 +40,7 @@ ExtraUTNsConfigWidget::ExtraUTNsConfigWidget(ExtraUTNsConfig& config)
     min_duration_edit_ = new QLineEdit(QString::number(config_.minDuration()));
     min_duration_edit_->setValidator(new QDoubleValidator(0.1, 3000.0, 1, this));
     connect(min_duration_edit_, &QLineEdit::textEdited,
-            this, &ExtraUTNsConfigWidget::minDurationEditSlot);
+            this, &ExtraDataConfigWidget::minDurationEditSlot);
 
     form_layout_->addRow("Minimum Duration [s]", min_duration_edit_);
 
@@ -48,7 +48,7 @@ ExtraUTNsConfigWidget::ExtraUTNsConfigWidget(ExtraUTNsConfig& config)
     min_num_updates_edit_ = new QLineEdit(QString::number(config_.minNumUpdates()));
     min_num_updates_edit_->setValidator(new QDoubleValidator(0, 300, 0, this));
     connect(min_num_updates_edit_, &QLineEdit::textEdited,
-            this, &ExtraUTNsConfigWidget::minNumUpdatesEditSlot);
+            this, &ExtraDataConfigWidget::minNumUpdatesEditSlot);
 
     form_layout_->addRow("Minimum Number of Updates [1]", min_num_updates_edit_);
 
@@ -56,7 +56,7 @@ ExtraUTNsConfigWidget::ExtraUTNsConfigWidget(ExtraUTNsConfig& config)
     ignore_primary_only_check_ = new QCheckBox ();
     ignore_primary_only_check_->setChecked(config_.ignorePrimaryOnly());
     connect(ignore_primary_only_check_, &QCheckBox::clicked,
-            this, &ExtraUTNsConfigWidget::toggleIgnorePrimaryOnlySlot);
+            this, &ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot);
 
     form_layout_->addRow("Ignore Primary Only", ignore_primary_only_check_);
 
@@ -64,16 +64,16 @@ ExtraUTNsConfigWidget::ExtraUTNsConfigWidget(ExtraUTNsConfig& config)
     maximum_probability_edit_ = new QLineEdit(QString::number(config_.maximumProbability()));
     maximum_probability_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
     connect(maximum_probability_edit_, &QLineEdit::textEdited,
-            this, &ExtraUTNsConfigWidget::maximumProbEditSlot);
+            this, &ExtraDataConfigWidget::maximumProbEditSlot);
 
     form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
 
     setLayout(form_layout_);
 }
 
-void ExtraUTNsConfigWidget::minDurationEditSlot(QString value)
+void ExtraDataConfigWidget::minDurationEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementExtraUTNsConfigWidget: minDurationEditSlot: value " << value.toStdString();
+    loginf << "ExtraDataConfigWidget: minDurationEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -81,12 +81,12 @@ void ExtraUTNsConfigWidget::minDurationEditSlot(QString value)
     if (ok)
         config_.minDuration(val);
     else
-        loginf << "EvaluationRequirementExtraUTNsConfigWidget: minDurationEditSlot: invalid value";
+        loginf << "ExtraDataConfigWidget: minDurationEditSlot: invalid value";
 }
 
-void ExtraUTNsConfigWidget::minNumUpdatesEditSlot(QString value)
+void ExtraDataConfigWidget::minNumUpdatesEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementExtraUTNsConfigWidget: minNumUpdatesEditSlot: value " << value.toStdString();
+    loginf << "ExtraDataConfigWidget: minNumUpdatesEditSlot: value " << value.toStdString();
 
     bool ok;
     unsigned int val = value.toUInt(&ok);
@@ -94,20 +94,20 @@ void ExtraUTNsConfigWidget::minNumUpdatesEditSlot(QString value)
     if (ok)
         config_.minNumUpdates(val);
     else
-        loginf << "EvaluationRequirementExtraUTNsConfigWidget: minNumUpdatesEditSlot: invalid value";
+        loginf << "ExtraDataConfigWidget: minNumUpdatesEditSlot: invalid value";
 }
 
-void ExtraUTNsConfigWidget::toggleIgnorePrimaryOnlySlot()
+void ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot()
 {
-    loginf << "EvaluationRequirementExtraUTNsConfigWidget: toggleIgnorePrimaryOnlySlot";
+    loginf << "ExtraDataConfigWidget: toggleIgnorePrimaryOnlySlot";
 
     assert (ignore_primary_only_check_);
     config_.ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
 }
 
-void ExtraUTNsConfigWidget::maximumProbEditSlot(QString value)
+void ExtraDataConfigWidget::maximumProbEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementExtraUTNsConfigWidget: maximumProbEditSlot: value " << value.toStdString();
+    loginf << "ExtraDataConfigWidget: maximumProbEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -115,7 +115,7 @@ void ExtraUTNsConfigWidget::maximumProbEditSlot(QString value)
     if (ok)
         config_.maximumProbability(val);
     else
-        loginf << "EvaluationRequirementExtraUTNsConfigWidget: maximumProbEditSlot: invalid value";
+        loginf << "ExtraDataConfigWidget: maximumProbEditSlot: invalid value";
 }
 
 }

@@ -25,7 +25,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ExtraUTNsConfig::ExtraUTNsConfig(
+    ExtraDataConfig::ExtraDataConfig(
             const std::string& class_id, const std::string& instance_id,
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
         : Config(class_id, instance_id, group, standard, eval_man)
@@ -37,81 +37,81 @@ namespace EvaluationRequirement
         registerParameter("maximum_probability", &maximum_probability_, 0.0);
     }
 
-    ExtraUTNsConfig::~ExtraUTNsConfig()
+    ExtraDataConfig::~ExtraDataConfig()
     {
 
     }
 
-    void ExtraUTNsConfig::addGUIElements(QFormLayout* layout)
+    void ExtraDataConfig::addGUIElements(QFormLayout* layout)
     {
         assert (layout);
 
         Config::addGUIElements(layout);
     }
 
-    ExtraUTNsConfigWidget* ExtraUTNsConfig::widget()
+    ExtraDataConfigWidget* ExtraDataConfig::widget()
     {
         if (!widget_)
-            widget_.reset(new ExtraUTNsConfigWidget(*this));
+            widget_.reset(new ExtraDataConfigWidget(*this));
 
         return widget_.get();
     }
 
-    std::shared_ptr<Base> ExtraUTNsConfig::createRequirement()
+    std::shared_ptr<Base> ExtraDataConfig::createRequirement()
     {
-        shared_ptr<ExtraUTNs> req = make_shared<ExtraUTNs>(
+        shared_ptr<ExtraData> req = make_shared<ExtraData>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_, min_duration_,
                     min_num_updates_, ignore_primary_only_, maximum_probability_);
 
         return req;
     }
 
-    float ExtraUTNsConfig::maxRefTimeDiff() const
+    float ExtraDataConfig::maxRefTimeDiff() const
     {
         return max_ref_time_diff_;
     }
 
-    void ExtraUTNsConfig::maxRefTimeDiff(float value)
+    void ExtraDataConfig::maxRefTimeDiff(float value)
     {
         max_ref_time_diff_ = value;
     }
 
-    float ExtraUTNsConfig::minDuration() const
+    float ExtraDataConfig::minDuration() const
     {
         return min_duration_;
     }
 
-    void ExtraUTNsConfig::minDuration(float value)
+    void ExtraDataConfig::minDuration(float value)
     {
         min_duration_ = value;
     }
 
-    unsigned int ExtraUTNsConfig::minNumUpdates() const
+    unsigned int ExtraDataConfig::minNumUpdates() const
     {
         return min_num_updates_;
     }
 
-    void ExtraUTNsConfig::minNumUpdates(unsigned int value)
+    void ExtraDataConfig::minNumUpdates(unsigned int value)
     {
         min_num_updates_ = value;
     }
 
-    bool ExtraUTNsConfig::ignorePrimaryOnly() const
+    bool ExtraDataConfig::ignorePrimaryOnly() const
     {
         return ignore_primary_only_;
     }
 
-    void ExtraUTNsConfig::ignorePrimaryOnly(bool value)
+    void ExtraDataConfig::ignorePrimaryOnly(bool value)
     {
         ignore_primary_only_ = value;
     }
 
-    float ExtraUTNsConfig::maximumProbability() const
+    float ExtraDataConfig::maximumProbability() const
     {
         return maximum_probability_;
     }
 
-    void ExtraUTNsConfig::maximumProbability(float value)
+    void ExtraDataConfig::maximumProbability(float value)
     {
         maximum_probability_ = value;
     }

@@ -36,20 +36,20 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleExtraUTNs::SingleExtraUTNs(
+SingleExtraData::SingleExtraData(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
-        bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraUTNsDetail> details)
-    : Single("SingleExtraUTNs", result_id, requirement, sector_layer, utn, target, eval_man),
+        bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraDataDetail> details)
+    : Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man),
       ignore_(ignore), test_data_only_(test_data_only), details_(details)
 {
     result_usable_ = !ignore;
 }
 
-void SingleExtraUTNs::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
-    logdbg << "ExtraUTNs " <<  requirement_->name() <<": addToReport";
+    logdbg << "ExtraData " <<  requirement_->name() <<": addToReport";
 
     // add target to requirements->group->req
     addTargetToOverviewTable(root_item);
@@ -60,7 +60,7 @@ void SingleExtraUTNs::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
-void SingleExtraUTNs::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraData::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
@@ -68,7 +68,7 @@ void SingleExtraUTNs::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
-void SingleExtraUTNs::addTargetDetailsToTable (
+void SingleExtraData::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     if (ignore_)
@@ -89,7 +89,7 @@ void SingleExtraUTNs::addTargetDetailsToTable (
                  ignore_, test_data_only_}, this, {utn_});
 }
 
-void SingleExtraUTNs::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -124,7 +124,7 @@ void SingleExtraUTNs::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     reportDetails(utn_req_section);
 }
 
-void SingleExtraUTNs::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+void SingleExtraData::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 5,
@@ -147,7 +147,7 @@ void SingleExtraUTNs::reportDetails(EvaluationResultsReport::Section& utn_req_se
     }
 }
 
-bool SingleExtraUTNs::hasViewableData (
+bool SingleExtraData::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -158,7 +158,7 @@ bool SingleExtraUTNs::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::viewableData(
+std::unique_ptr<nlohmann::json::object_t> SingleExtraData::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
 
@@ -171,13 +171,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::viewableData(
     {
         unsigned int detail_cnt = annotation.toUInt();
 
-        loginf << "SinglePositionMaxDistance: viewableData: detail_cnt " << detail_cnt;
-
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
         assert (viewable_ptr);
 
-        const EvaluationRequirement::ExtraUTNsDetail& detail = details_.at(detail_cnt);
+        const EvaluationRequirement::ExtraDataDetail& detail = details_.at(detail_cnt);
 
         (*viewable_ptr)["position_latitude"] = detail.pos_current_.latitude_;
         (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
@@ -191,7 +189,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleExtraData::getTargetErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -254,7 +252,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::getTargetErrorsViewab
     return viewable_ptr;
 }
 
-bool SingleExtraUTNs::hasReference (
+bool SingleExtraData::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -263,7 +261,7 @@ bool SingleExtraUTNs::hasReference (
         return false;;
 }
 
-std::string SingleExtraUTNs::reference(
+std::string SingleExtraData::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
@@ -271,17 +269,17 @@ std::string SingleExtraUTNs::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-std::shared_ptr<Joined> SingleExtraUTNs::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SingleExtraData::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedExtraUTNs> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedExtraData> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-bool SingleExtraUTNs::ignore() const
+bool SingleExtraData::ignore() const
 {
     return ignore_;
 }
 
-bool SingleExtraUTNs::testDataOnly() const
+bool SingleExtraData::testDataOnly() const
 {
     return test_data_only_;
 }

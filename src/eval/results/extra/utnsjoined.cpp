@@ -36,26 +36,26 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    JoinedExtraUTNs::JoinedExtraUTNs(
+    JoinedExtraData::JoinedExtraData(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
-        : Joined("JoinedExtraUTNs", result_id, requirement, sector_layer, eval_man)
+        : Joined("JoinedExtraData", result_id, requirement, sector_layer, eval_man)
     {
     }
 
 
-    void JoinedExtraUTNs::join(std::shared_ptr<Base> other)
+    void JoinedExtraData::join(std::shared_ptr<Base> other)
     {
         Joined::join(other);
 
-        std::shared_ptr<SingleExtraUTNs> other_sub =
-                std::static_pointer_cast<SingleExtraUTNs>(other);
+        std::shared_ptr<SingleExtraData> other_sub =
+                std::static_pointer_cast<SingleExtraData>(other);
         assert (other_sub);
 
         addToValues(other_sub);
     }
 
-    void JoinedExtraUTNs::addToValues (std::shared_ptr<SingleExtraUTNs> single_result)
+    void JoinedExtraData::addToValues (std::shared_ptr<SingleExtraData> single_result)
     {
         assert (single_result);
 
@@ -73,13 +73,13 @@ namespace EvaluationRequirementResult
         updateProb();
     }
 
-    void JoinedExtraUTNs::updateProb()
+    void JoinedExtraData::updateProb()
     {
         assert (num_tdo_targets_ <= num_targets_);
 
         if (num_targets_)
         {
-            logdbg << "JoinedExtraUTNs: updatePD: result_id " << result_id_ << " num_targets " << num_targets_
+            logdbg << "JoinedExtraData: updatePD: result_id " << result_id_ << " num_targets " << num_targets_
                    << " num_tdo_targets " << num_tdo_targets_;
 
             prob_ = (float)num_tdo_targets_/(float)(num_targets_);
@@ -92,30 +92,30 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedExtraUTNs::addToReport (
+    void JoinedExtraData::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        logdbg << "JoinedExtraUTNs " <<  requirement_->name() <<": addToReport";
+        logdbg << "JoinedExtraData " <<  requirement_->name() <<": addToReport";
 
         if (!results_.size()) // some data must exist
         {
-            logerr << "JoinedExtraUTNs " <<  requirement_->name() <<": addToReport: no data";
+            logerr << "JoinedExtraData " <<  requirement_->name() <<": addToReport: no data";
             return;
         }
 
-        logdbg << "JoinedExtraUTNs " <<  requirement_->name() << ": addToReport: adding joined result";
+        logdbg << "JoinedExtraData " <<  requirement_->name() << ": addToReport: adding joined result";
 
         addToOverviewTable(root_item);
         addDetails(root_item);
     }
 
-    void JoinedExtraUTNs::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedExtraData::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::ExtraUTNs> req =
-                std::static_pointer_cast<EvaluationRequirement::ExtraUTNs>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ExtraData> req =
+                std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
         assert (req);
 
         string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
@@ -140,7 +140,7 @@ namespace EvaluationRequirementResult
         // "Report:Results:Overview"
     }
 
-    void JoinedExtraUTNs::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedExtraData::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
@@ -156,8 +156,8 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"#TDO [1]", "Number of (not ignored) test data only targets",  num_tdo_targets_}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::ExtraUTNs> req =
-                std::static_pointer_cast<EvaluationRequirement::ExtraUTNs>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ExtraData> req =
+                std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
         assert (req);
 
         string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
@@ -192,7 +192,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    bool JoinedExtraUTNs::hasViewableData (
+    bool JoinedExtraData::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == req_overview_table_name_)
@@ -201,14 +201,14 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedExtraUTNs::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasViewableData(table, annotation));
         return getErrorsViewable();
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedExtraUTNs::getErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> JoinedExtraData::getErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
                 eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -236,7 +236,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool JoinedExtraUTNs::hasReference (
+    bool JoinedExtraData::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -247,22 +247,22 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string JoinedExtraUTNs::reference(
+    std::string JoinedExtraData::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
         return "Report:Results:"+getRequirementSectionID();
     }
 
-    void JoinedExtraUTNs::updatesToUseChanges()
+    void JoinedExtraData::updatesToUseChanges()
     {
         num_targets_ = 0;
         num_tdo_targets_ = 0;
 
         for (auto result_it : results_)
         {
-            std::shared_ptr<SingleExtraUTNs> result =
-                    std::static_pointer_cast<SingleExtraUTNs>(result_it);
+            std::shared_ptr<SingleExtraData> result =
+                    std::static_pointer_cast<SingleExtraData>(result_it);
             assert (result);
 
             addToValues(result);

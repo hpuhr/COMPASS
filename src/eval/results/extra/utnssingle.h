@@ -24,14 +24,14 @@
 namespace EvaluationRequirementResult
 {
 
-class SingleExtraUTNs : public Single
+class SingleExtraData : public Single
 {
 public:
-    SingleExtraUTNs(
+    SingleExtraData(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraUTNsDetail> details);
+            bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraDataDetail> details);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -53,7 +53,7 @@ public:
 protected:
     bool ignore_ {false};
     bool test_data_only_ {false};
-    std::vector<EvaluationRequirement::ExtraUTNsDetail> details_;
+    std::vector<EvaluationRequirement::ExtraDataDetail> details_;
 
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);

@@ -27,9 +27,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class ExtraUTNsConfig;
+    class ExtraDataConfig;
 
-    class ExtraUTNsConfigWidget : public QWidget
+    class ExtraDataConfigWidget : public QWidget
     {
         Q_OBJECT
 
@@ -40,10 +40,10 @@ namespace EvaluationRequirement
         void maximumProbEditSlot(QString value);
 
     public:
-        ExtraUTNsConfigWidget(ExtraUTNsConfig& config);
+        ExtraDataConfigWidget(ExtraDataConfig& config);
 
     protected:
-        ExtraUTNsConfig& config_;
+        ExtraDataConfig& config_;
 
         QFormLayout* form_layout_ {nullptr};
 

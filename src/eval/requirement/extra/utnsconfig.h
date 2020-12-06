@@ -32,16 +32,16 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class ExtraUTNsConfig : public Config
+    class ExtraDataConfig : public Config
     {
     public:
-        ExtraUTNsConfig(const std::string& class_id, const std::string& instance_id,
+        ExtraDataConfig(const std::string& class_id, const std::string& instance_id,
                         Group& group, EvaluationStandard& standard,
                         EvaluationManager& eval_man);
-        virtual ~ExtraUTNsConfig();
+        virtual ~ExtraDataConfig();
 
         virtual void addGUIElements(QFormLayout* layout) override;
-        ExtraUTNsConfigWidget* widget() override;
+        ExtraDataConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float maxRefTimeDiff() const;
@@ -67,7 +67,7 @@ namespace EvaluationRequirement
         bool ignore_primary_only_ {true};
         float maximum_probability_{0};
 
-        std::unique_ptr<ExtraUTNsConfigWidget> widget_;
+        std::unique_ptr<ExtraDataConfigWidget> widget_;
     };
 
 }

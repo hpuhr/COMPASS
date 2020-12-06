@@ -22,12 +22,12 @@
 
 namespace EvaluationRequirementResult
 {
-    class SingleExtraUTNs;
+    class SingleExtraData;
 
-    class JoinedExtraUTNs : public Joined
+    class JoinedExtraData : public Joined
     {
     public:
-        JoinedExtraUTNs(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        JoinedExtraData(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
                         const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
@@ -54,7 +54,7 @@ namespace EvaluationRequirementResult
         bool has_prob_ {false};
         float prob_{0};
 
-        void addToValues (std::shared_ptr<SingleExtraUTNs> single_result);
+        void addToValues (std::shared_ptr<SingleExtraData> single_result);
         void updateProb();
 
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

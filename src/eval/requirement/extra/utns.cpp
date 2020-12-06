@@ -30,7 +30,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-ExtraUTNs::ExtraUTNs(
+ExtraData::ExtraData(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
         float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
@@ -42,31 +42,31 @@ ExtraUTNs::ExtraUTNs(
 
 }
 
-float ExtraUTNs::minDuration() const
+float ExtraData::minDuration() const
 {
     return min_duration_;
 }
 
-unsigned int ExtraUTNs::minNumUpdates() const
+unsigned int ExtraData::minNumUpdates() const
 {
     return min_num_updates_;
 }
 
-bool ExtraUTNs::ignorePrimaryOnly() const
+bool ExtraData::ignorePrimaryOnly() const
 {
     return ignore_primary_only_;
 }
 
-float ExtraUTNs::maximumProbability() const
+float ExtraData::maximumProbability() const
 {
     return maximum_probability_;
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> ExtraUTNs::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementExtraUTNs '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " maximum_probability " << maximum_probability_;
 
@@ -125,7 +125,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraUTNs::evaluate (
     unsigned int num_tst_inside = 0;
     EvaluationTargetPosition tst_pos;
 
-    vector<ExtraUTNsDetail> details;
+    vector<ExtraDataDetail> details;
     bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
 
     {
@@ -193,10 +193,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraUTNs::evaluate (
     bool test_data_only = !num_ref_inside && num_tst_inside;
 
     if (!ignore && test_data_only)
-        loginf << "EvaluationRequirementExtraUTNs '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
                << " not ignored tdo, ref " << num_ref_inside << " tst " << num_tst_inside;
 
-    return make_shared<EvaluationRequirementResult::SingleExtraUTNs>(
+    return make_shared<EvaluationRequirementResult::SingleExtraData>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, ignore, test_data_only, details);
 }
