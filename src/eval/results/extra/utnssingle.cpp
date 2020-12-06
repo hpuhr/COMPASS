@@ -40,9 +40,9 @@ SingleExtraUTNs::SingleExtraUTNs(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
-        bool ignore, bool test_data_only)
+        bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraUTNsDetail> details)
     : Single("SingleExtraUTNs", result_id, requirement, sector_layer, utn, target, eval_man),
-      ignore_(ignore), test_data_only_(test_data_only)
+      ignore_(ignore), test_data_only_(test_data_only), details_(details)
 {
     result_usable_ = !ignore;
 }
@@ -77,7 +77,7 @@ void SingleExtraUTNs::addTargetDetailsToTable (
     if (!section.hasTable(table_name))
         section.addTable(table_name, 12,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#Ref", "#Tst", "Ign.", "TDO"}, true, 11);
+                          "#Ref", "#Tst", "Ign.", "TDO"}, true, 11, Qt::DescendingOrder);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -121,47 +121,39 @@ void SingleExtraUTNs::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     }
 
     // add further details
-    //reportDetails(utn_req_section);
+    reportDetails(utn_req_section);
 }
 
-//void ExtraUTNs::reportDetails(EvaluationResultsReport::Section& utn_req_section)
-//{
-//    if (!utn_req_section.hasTable(tr_details_table_name_))
-//        utn_req_section.addTable(tr_details_table_name_, 5,
-//                                 {"ToD", "DToD", "Ref.", "MUI", "Comment"});
+void SingleExtraUTNs::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+{
+    if (!utn_req_section.hasTable(tr_details_table_name_))
+        utn_req_section.addTable(tr_details_table_name_, 5,
+                                 {"ToD", "Inside", "Extra", "Ref.", "Comment"});
 
-//    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-//            utn_req_section.getTable(tr_details_table_name_);
+    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+            utn_req_section.getTable(tr_details_table_name_);
 
-//    unsigned int detail_cnt = 0;
+    unsigned int detail_cnt = 0;
 
-//    for (auto& rq_det_it : details_)
-//    {
-//        if (rq_det_it.d_tod_.isValid())
-//            utn_req_details_table.addRow(
-//                        {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-//                         String::timeStringFromDouble(rq_det_it.d_tod_.toFloat()).c_str(),
-//                         rq_det_it.ref_exists_, rq_det_it.missed_uis_, rq_det_it.comment_.c_str()},
-//                        this, detail_cnt);
-//        else
-//            utn_req_details_table.addRow(
-//                        {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
-//                         rq_det_it.d_tod_,
-//                         rq_det_it.ref_exists_, rq_det_it.missed_uis_,
-//                         rq_det_it.comment_.c_str()},
-//                        this, detail_cnt);
+    for (auto& rq_det_it : details_)
+    {
+        utn_req_details_table.addRow(
+                    {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
+                     rq_det_it.inside_, rq_det_it.extra_,
+                     rq_det_it.ref_exists_, rq_det_it.comment_.c_str()},
+                    this, detail_cnt);
 
-//        ++detail_cnt;
-//    }
-//}
+        ++detail_cnt;
+    }
+}
 
 bool SingleExtraUTNs::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
         return true;
-//    else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
-//        return true;
+        else if (table.name() == tr_details_table_name_ && annotation.isValid() && annotation.toUInt() < details_.size())
+            return true;
     else
         return false;
 }
@@ -175,29 +167,26 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::viewableData(
     {
         return getTargetErrorsViewable();
     }
-//    else if (table.name() == tr_details_table_name_ && annotation.isValid())
-//    {
-//        unsigned int detail_cnt = annotation.toUInt();
+    else if (table.name() == tr_details_table_name_ && annotation.isValid())
+    {
+        unsigned int detail_cnt = annotation.toUInt();
 
-//        loginf << "SinglePositionMaxDistance: viewableData: detail_cnt " << detail_cnt;
+        loginf << "SinglePositionMaxDistance: viewableData: detail_cnt " << detail_cnt;
 
-//        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
-//                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
-//        assert (viewable_ptr);
+        std::unique_ptr<nlohmann::json::object_t> viewable_ptr
+                = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+        assert (viewable_ptr);
 
-//        const EvaluationRequirement::DetectionDetail& detail = details_.at(detail_cnt);
+        const EvaluationRequirement::ExtraUTNsDetail& detail = details_.at(detail_cnt);
 
-//        (*viewable_ptr)["position_latitude"] = detail.pos_current_.latitude_;
-//        (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
-//        (*viewable_ptr)["position_window_latitude"] = 0.02;
-//        (*viewable_ptr)["position_window_longitude"] = 0.02;
-//        (*viewable_ptr)["time"] = detail.tod_;
+        (*viewable_ptr)["position_latitude"] = detail.pos_current_.latitude_;
+        (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
+        (*viewable_ptr)["position_window_latitude"] = 0.02;
+        (*viewable_ptr)["position_window_longitude"] = 0.02;
+        (*viewable_ptr)["time"] = detail.tod_;
 
-//        if (detail.miss_occurred_)
-//            (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
-
-//        return viewable_ptr;
-//    }
+        return viewable_ptr;
+    }
     else
         return nullptr;
 }
@@ -207,60 +196,60 @@ std::unique_ptr<nlohmann::json::object_t> SingleExtraUTNs::getTargetErrorsViewab
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
 
-//    bool has_pos = false;
-//    double lat_min, lat_max, lon_min, lon_max;
+    //    bool has_pos = false;
+    //    double lat_min, lat_max, lon_min, lon_max;
 
-//    for (auto& detail_it : details_)
-//    {
-//        if (!detail_it.miss_occurred_)
-//            continue;
+    //    for (auto& detail_it : details_)
+    //    {
+    //        if (!detail_it.miss_occurred_)
+    //            continue;
 
-//        if (has_pos)
-//        {
-//            lat_min = min(lat_min, detail_it.pos_current_.latitude_);
-//            lat_max = max(lat_max, detail_it.pos_current_.latitude_);
+    //        if (has_pos)
+    //        {
+    //            lat_min = min(lat_min, detail_it.pos_current_.latitude_);
+    //            lat_max = max(lat_max, detail_it.pos_current_.latitude_);
 
-//            lon_min = min(lon_min, detail_it.pos_current_.longitude_);
-//            lon_max = max(lon_max, detail_it.pos_current_.longitude_);
-//        }
-//        else // tst pos always set
-//        {
-//            lat_min = detail_it.pos_current_.latitude_;
-//            lat_max = detail_it.pos_current_.latitude_;
+    //            lon_min = min(lon_min, detail_it.pos_current_.longitude_);
+    //            lon_max = max(lon_max, detail_it.pos_current_.longitude_);
+    //        }
+    //        else // tst pos always set
+    //        {
+    //            lat_min = detail_it.pos_current_.latitude_;
+    //            lat_max = detail_it.pos_current_.latitude_;
 
-//            lon_min = detail_it.pos_current_.longitude_;
-//            lon_max = detail_it.pos_current_.longitude_;
+    //            lon_min = detail_it.pos_current_.longitude_;
+    //            lon_max = detail_it.pos_current_.longitude_;
 
-//            has_pos = true;
-//        }
+    //            has_pos = true;
+    //        }
 
-//        if (detail_it.has_last_position_)
-//        {
-//            lat_min = min(lat_min, detail_it.pos_last.latitude_);
-//            lat_max = max(lat_max, detail_it.pos_last.latitude_);
+    //        if (detail_it.has_last_position_)
+    //        {
+    //            lat_min = min(lat_min, detail_it.pos_last.latitude_);
+    //            lat_max = max(lat_max, detail_it.pos_last.latitude_);
 
-//            lon_min = min(lon_min, detail_it.pos_last.longitude_);
-//            lon_max = max(lon_max, detail_it.pos_last.longitude_);
-//        }
-//    }
+    //            lon_min = min(lon_min, detail_it.pos_last.longitude_);
+    //            lon_max = max(lon_max, detail_it.pos_last.longitude_);
+    //        }
+    //    }
 
-//    if (has_pos)
-//    {
-//        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
-//        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
+    //    if (has_pos)
+    //    {
+    //        (*viewable_ptr)["position_latitude"] = (lat_max+lat_min)/2.0;
+    //        (*viewable_ptr)["position_longitude"] = (lon_max+lon_min)/2.0;;
 
-//        double lat_w = 1.1*(lat_max-lat_min)/2.0;
-//        double lon_w = 1.1*(lon_max-lon_min)/2.0;
+    //        double lat_w = 1.1*(lat_max-lat_min)/2.0;
+    //        double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-//        if (lat_w < 0.02)
-//            lat_w = 0.02;
+    //        if (lat_w < 0.02)
+    //            lat_w = 0.02;
 
-//        if (lon_w < 0.02)
-//            lon_w = 0.02;
+    //        if (lon_w < 0.02)
+    //            lon_w = 0.02;
 
-//        (*viewable_ptr)["position_window_latitude"] = lat_w;
-//        (*viewable_ptr)["position_window_longitude"] = lon_w;
-//    }
+    //        (*viewable_ptr)["position_window_latitude"] = lat_w;
+    //        (*viewable_ptr)["position_window_longitude"] = lon_w;
+    //    }
 
     return viewable_ptr;
 }

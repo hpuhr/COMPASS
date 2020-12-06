@@ -30,6 +30,7 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
         : Config(class_id, instance_id, group, standard, eval_man)
     {
+        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 5.0);
         registerParameter("min_duration", &min_duration_, 60.0);
         registerParameter("min_num_updates", &min_num_updates_, 10);
         registerParameter("ignore_primary_only", &ignore_primary_only_, true);
@@ -59,10 +60,20 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ExtraUTNsConfig::createRequirement()
     {
         shared_ptr<ExtraUTNs> req = make_shared<ExtraUTNs>(
-                    name_, short_name_, group_.name(), eval_man_, min_duration_,
+                    name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_, min_duration_,
                     min_num_updates_, ignore_primary_only_, maximum_probability_);
 
         return req;
+    }
+
+    float ExtraUTNsConfig::maxRefTimeDiff() const
+    {
+        return max_ref_time_diff_;
+    }
+
+    void ExtraUTNsConfig::maxRefTimeDiff(float value)
+    {
+        max_ref_time_diff_ = value;
     }
 
     float ExtraUTNsConfig::minDuration() const

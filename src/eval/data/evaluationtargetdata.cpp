@@ -782,8 +782,101 @@ EvaluationTargetPosition EvaluationTargetData::tstPosForTime (float tod) const
         pos.altitude_ = altitude_vec.get(index);
         pos.altitude_calculated_ = false;
     }
+    else // calculate
+    {
+        bool found;
+        float alt_calc;
+
+        tie(found,alt_calc) = estimateTstAltitude(tod, index);
+
+        if (found)
+        {
+            pos.has_altitude_ = true;
+            pos.altitude_calculated_ = true;
+            pos.altitude_ = alt_calc;
+        }
+    }
 
     return pos;
+}
+
+std::pair<bool, float> EvaluationTargetData::estimateTstAltitude (float tod, unsigned int index) const
+{
+    NullableVector<int>& altitude_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
+    NullableVector<float>& tods = eval_data_->tst_buffer_->get<float>("tod");
+
+    bool found_prev {false};
+    bool found_after {false};
+
+    // search for prev index
+    float tod_prev;
+    auto prev_it = find(tst_indexes_.begin(), tst_indexes_.end(), index);
+    assert (prev_it != tst_indexes_.end());
+
+    auto after_it = prev_it;
+
+    while (prev_it != tst_indexes_.end() && tod - tods.get(*prev_it) < 120.0)
+    {
+        if (!altitude_vec.isNull(*prev_it))
+        {
+            found_prev = true;
+            tod_prev = tods.get(*prev_it);
+
+            break;
+        }
+
+        if (prev_it == tst_indexes_.begin()) // undefined decrement
+            break;
+
+        --prev_it;
+    }
+
+    // search after index
+    float tod_after;
+
+    while (after_it != tst_indexes_.end() && tods.get(*after_it) - tod < 120.0)
+    {
+        if (!altitude_vec.isNull(*after_it))
+        {
+            found_after = true;
+            tod_after = tods.get(*after_it);
+
+            break;
+        }
+        ++after_it;
+    }
+
+    if (found_prev && found_after)
+    {
+        float alt_prev = altitude_vec.get(*prev_it);
+        float alt_after = altitude_vec.get(*after_it);
+
+        if (tod_after <= tod_prev || tod_prev >= tod)
+        {
+            logerr << "EvaluationTargetData::estimateRefAltitude tod_prev " << tod_prev << " tod "
+                   << tod << " tod_after " << tod_after;
+            return {false, 0}; // should never happen
+        }
+
+        float d_alt_ft = alt_after - alt_prev;
+        float d_t = tod_after - tod_prev;
+
+        float alt_spd_ft_s = d_alt_ft/d_t;
+
+        float d_t2 = tod - tod_prev;
+
+        float alt_calc = alt_prev + alt_spd_ft_s*d_t2;
+
+        return {true, alt_calc};
+    }
+    else if (found_prev && tod - tod_prev < 120.0)
+        return {true, altitude_vec.get(*prev_it)};
+    else if (found_after && tod_after - tod < 120.0)
+        return {true, altitude_vec.get(*after_it)};
+    else
+    {
+        return {false, 0}; // none found
+    }
 }
 
 bool EvaluationTargetData::hasTstCallsignForTime (float tod) const

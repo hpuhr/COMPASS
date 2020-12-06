@@ -322,14 +322,25 @@ void EvaluationManager::loadData ()
 
         if (!first)
         {
-            fil_cond["Position"]["Latitude Maximum"] = to_string(lat_max+0.2);
-            fil_cond["Position"]["Latitude Minimum"] = to_string(lat_min-0.2);
-            fil_cond["Position"]["Longitude Maximum"] = to_string(long_max+0.2);
-            fil_cond["Position"]["Longitude Minimum"] = to_string(long_min-0.2);
+            latitude_min_ = lat_min-0.2;
+            latitude_max_ = lat_max+0.2;
+            longitude_min_ = long_min-0.2;
+            longitude_max_ = long_max+0.2;
+            min_max_pos_set_ = true;
+
+            fil_cond["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+            fil_cond["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+            fil_cond["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+            fil_cond["Position"]["Longitude Minimum"] = to_string(longitude_min_);
 
             pos_fil->loadViewPointConditions(fil_cond);
+
         }
+        else
+            min_max_pos_set_ = false;
     }
+    else
+        min_max_pos_set_ = false;
 
     // other filters
     if (use_load_filter_)
@@ -2116,6 +2127,13 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
         data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_srcs;
     }
 
+    if (load_only_sector_data_ && min_max_pos_set_)
+    {
+        data["filters"]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+        data["filters"]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+        data["filters"]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+        data["filters"]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
+    }
 
     return data;
 }

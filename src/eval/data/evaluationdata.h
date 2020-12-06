@@ -132,7 +132,6 @@ public:
 
     void setTargetDataComment (unsigned int utn, std::string comment);
 
-
     EvaluationDataWidget* widget();
     EvaluationDataFilterDialog& dialog();
 

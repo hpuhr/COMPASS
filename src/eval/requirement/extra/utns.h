@@ -26,36 +26,26 @@
 namespace EvaluationRequirement
 {
 
-//class ExtraUTNsDetail
-//{
-//public:
-//    ExtraUTNsDetail(
-//            float tod, QVariant d_tod,
-//            bool miss_occurred, EvaluationTargetPosition pos_current,
-//            bool ref_exists, int missed_uis, const std::string& comment)
-//        : tod_(tod), d_tod_(d_tod), miss_occurred_(miss_occurred), pos_current_(pos_current),
-//          ref_exists_(ref_exists), missed_uis_(missed_uis),
-//          comment_(comment)
-//    {
-//    }
+class ExtraUTNsDetail
+{
+public:
+    ExtraUTNsDetail(
+            float tod, EvaluationTargetPosition pos_current, bool inside, bool extra, bool ref_exists,
+            const std::string& comment)
+        : tod_(tod), pos_current_(pos_current), inside_(inside), extra_(extra), ref_exists_(ref_exists),
+          comment_(comment)
+    {
+    }
 
-//    float tod_ {0};
-//    QVariant d_tod_;
-//    bool miss_occurred_ {false};
+    float tod_ {0};
+    EvaluationTargetPosition pos_current_;
+    bool inside_ {false};
+    bool extra_ {false};
 
-//    EvaluationTargetPosition pos_current_;
+    bool ref_exists_ {false};
 
-//    bool ref_exists_ {false};
-
-//    int missed_uis_ {0};
-//    int max_gap_uis_ {0};
-//    int no_ref_uis_ {0};
-
-//    std::string comment_;
-
-//    bool has_last_position_ {false};
-//    EvaluationTargetPosition pos_last;
-//};
+    std::string comment_;
+};
 
 class ExtraUTNs : public Base
 {
@@ -63,7 +53,7 @@ public:
     ExtraUTNs(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man,
-            float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
+            float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
             float maximum_probability);
 
     float minDuration() const;
@@ -79,6 +69,8 @@ public:
             const SectorLayer& sector_layer) override;
 
 protected:
+    float max_ref_time_diff_ {0};
+
     float min_duration_{0};
     unsigned int min_num_updates_ {0};
     bool ignore_primary_only_ {true};

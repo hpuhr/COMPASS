@@ -357,6 +357,12 @@ protected:
 
     bool load_only_sector_data_ {true};
 
+    bool min_max_pos_set_ {false};
+    double latitude_min_ {0};
+    double latitude_max_ {0};
+    double longitude_min_ {0};
+    double longitude_max_ {0};
+
     // load filter
     bool use_load_filter_ {false};
 

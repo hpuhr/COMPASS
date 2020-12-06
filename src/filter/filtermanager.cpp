@@ -396,6 +396,9 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     if (data.contains("filters"))
     {
         const json& filters = data.at("filters");
+
+        logdbg << "FilterManager: showViewPointSlot: filter data '" << filters.dump(4) << "'";
+
         assert (filters.is_object());
 
         disableAllFilters();

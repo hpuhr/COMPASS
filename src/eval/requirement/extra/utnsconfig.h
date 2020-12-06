@@ -44,6 +44,9 @@ namespace EvaluationRequirement
         ExtraUTNsConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
+        float maxRefTimeDiff() const;
+        void maxRefTimeDiff(float value);
+
         float minDuration() const;
         void minDuration(float value);
 
@@ -57,6 +60,8 @@ namespace EvaluationRequirement
         void maximumProbability(float value);
 
     protected:
+        float max_ref_time_diff_ {0};
+
         float min_duration_{0};
         unsigned int min_num_updates_ {0};
         bool ignore_primary_only_ {true};

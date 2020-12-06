@@ -212,7 +212,7 @@ namespace EvaluationRequirement
         map<unsigned int, float> period_last_tst_times; // period number -> lst tst times
         set<unsigned int> finalized_periods;
 
-        bool is_inside_ref_time_period {false}, was_inside_ref_time_period {false};
+        bool is_inside_ref_time_period {false};//, was_inside_ref_time_period {false};
         unsigned int period_index {0};
 
         set<unsigned int> finished_periods;
@@ -231,11 +231,10 @@ namespace EvaluationRequirement
             tod = tst_it->first;
             pos_current = target_data.tstPosForTime(tod);
 
-
             logdbg << "EvaluationRequirementDetection '" << name_
                    << "': evaluate: utn " << target_data.utn_ << " tod " << tod;
 
-            was_inside_ref_time_period = is_inside_ref_time_period;
+            //was_inside_ref_time_period = is_inside_ref_time_period;
             is_inside_ref_time_period = ref_periods.isInside(tod);
 
             // check if previous periods need to be finalized

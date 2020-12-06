@@ -140,6 +140,7 @@ public:
     // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
+    std::pair<bool, float> estimateTstAltitude (float tod, unsigned int index) const;
 
     bool hasTstCallsignForTime (float tod) const;
     std::string tstCallsignForTime (float tod) const;
