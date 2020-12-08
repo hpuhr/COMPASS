@@ -122,7 +122,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool is_inside_ref_time_period {false};
     bool has_tod{false};
     float tod_min, tod_max;
-    unsigned int num_tst_inside = 0;
+    unsigned int num_ok = 0;
+    unsigned int num_extra = 0;
     EvaluationTargetPosition tst_pos;
 
     vector<ExtraDataDetail> details;
@@ -142,6 +143,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
             if (is_inside_ref_time_period)
             {
+                ++num_ok;
                 details.push_back({tod, tst_pos, true, false, true, "OK"}); // inside, extra, ref
                 continue;
             }
@@ -159,7 +161,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
 
             if (inside)
             {
-                ++num_tst_inside;
+                ++num_extra;
                 details.push_back({tod, tst_pos, true, true, false, "Extra"}); // inside, extra, ref
 
                 if (!has_tod)
@@ -179,9 +181,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
         }
     }
 
-    unsigned int num_inside = num_ref_inside + num_tst_inside;
-
-    if (num_inside < min_num_updates_)
+    if (num_extra && num_extra < min_num_updates_)
         ignore = true;
 
     if (!ignore && has_tod && (tod_max-tod_min) < min_duration_)
@@ -190,14 +190,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     if (!ignore && ignore_primary_only_ && target_data.isPrimaryOnly())
         ignore = true;
 
-    bool test_data_only = !num_ref_inside && num_tst_inside;
+    bool has_extra_test_data = num_extra;
 
-    if (!ignore && test_data_only)
-        loginf << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " not ignored tdo, ref " << num_ref_inside << " tst " << num_tst_inside;
+//    if (!ignore && test_data_only)
+//        loginf << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
+//               << " not ignored tdo, ref " << num_ref_inside << " num_ok " << num_ok << " num_extra " << num_extra;
 
     return make_shared<EvaluationRequirementResult::SingleExtraData>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, ignore, test_data_only, details);
+                eval_man_, ignore, num_extra, num_ok, has_extra_test_data, details);
 }
 }

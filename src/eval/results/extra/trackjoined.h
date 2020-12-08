@@ -22,12 +22,12 @@
 
 namespace EvaluationRequirementResult
 {
-    class SingleTrack;
+    class SingleExtraTrack;
 
-    class JoinedTrack : public Joined
+    class JoinedExtraTrack : public Joined
     {
     public:
-        JoinedTrack(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        JoinedExtraTrack(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
                         const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
@@ -55,7 +55,7 @@ namespace EvaluationRequirementResult
         bool has_prob_ {false};
         float prob_{0};
 
-        void addToValues (std::shared_ptr<SingleTrack> single_result);
+        void addToValues (std::shared_ptr<SingleExtraTrack> single_result);
         void updateProb();
 
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

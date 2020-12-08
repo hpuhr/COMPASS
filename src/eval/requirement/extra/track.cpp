@@ -262,7 +262,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     assert (num_pos == num_pos_inside + num_pos_outside);
     assert (num_pos_inside == num_no_track_num + num_extra + num_ok);
 
-    return make_shared<EvaluationRequirementResult::SingleTrack>(
+    return make_shared<EvaluationRequirementResult::SingleExtraTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, ignore, num_pos_inside, num_extra, num_ok, details);
 }

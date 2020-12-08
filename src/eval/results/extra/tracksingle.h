@@ -24,10 +24,10 @@
 namespace EvaluationRequirementResult
 {
 
-class SingleTrack : public Single
+class SingleExtraTrack : public Single
 {
 public:
-    SingleTrack(
+    SingleExtraTrack(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,

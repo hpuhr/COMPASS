@@ -40,11 +40,15 @@ SingleExtraData::SingleExtraData(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
-        bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraDataDetail> details)
+        bool ignore, unsigned int num_extra, unsigned int num_ok, bool has_extra_test_data,
+        std::vector<EvaluationRequirement::ExtraDataDetail> details)
     : Single("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man),
-      ignore_(ignore), test_data_only_(test_data_only), details_(details)
+      ignore_(ignore), num_extra_(num_extra), num_ok_(num_ok), has_extra_test_data_(has_extra_test_data),
+      details_(details)
 {
-    result_usable_ = !ignore;
+    //result_usable_ = !ignore;
+
+    updateProb();
 }
 
 void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -60,6 +64,29 @@ void SingleExtraData::addToReport (std::shared_ptr<EvaluationResultsReport::Root
     // TODO add requirement description, methods
 }
 
+void SingleExtraData::updateProb()
+{
+    if (num_extra_ + num_ok_)
+    {
+        logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_
+               << " num_ok " << num_ok_;
+
+        prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
+        has_prob_ = true;
+
+        result_usable_ = !ignore_;
+    }
+    else
+    {
+        prob_ = 0;
+        has_prob_ = false;
+
+        result_usable_ = false;
+    }
+
+    updateUseFromTarget();
+}
+
 void SingleExtraData::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
@@ -71,13 +98,16 @@ void SingleExtraData::addTargetToOverviewTable(shared_ptr<EvaluationResultsRepor
 void SingleExtraData::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
-    if (ignore_)
-        return;
+    QVariant prob_var;
+
+    if (has_prob_)
+        prob_var = roundf(prob_ * 10000.0) / 100.0;
 
     if (!section.hasTable(table_name))
-        section.addTable(table_name, 12,
+        section.addTable(table_name, 14,
                          {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-                          "#Ref", "#Tst", "Ign.", "TDO"}, true, 11, Qt::DescendingOrder);
+                          "#Tst", "Ign.", "#Check", "#OK", "#Extra", "PEx"}, true, 13,
+                         Qt::DescendingOrder);
 
     EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -85,8 +115,8 @@ void SingleExtraData::addTargetDetailsToTable (
                 {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
                  target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
                  target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
-                 target_->modeCMaxStr().c_str(), target_->numRefUpdates(), target_->numTstUpdates(),
-                 ignore_, test_data_only_}, this, {utn_});
+                 target_->modeCMaxStr().c_str(), target_->numTstUpdates(),
+                  ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
 }
 
 void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -95,6 +125,10 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
 
     if (!utn_req_section.hasTable("details_overview_table"))
         utn_req_section.addTable("details_overview_table", 3, {"Name", "comment", "Value"}, false);
+
+    std::shared_ptr<EvaluationRequirement::ExtraData> req =
+            std::static_pointer_cast<EvaluationRequirement::ExtraData>(requirement_);
+    assert (req);
 
     EvaluationResultsReport::SectionContentTable& utn_req_table =
             utn_req_section.getTable("details_overview_table");
@@ -105,10 +139,33 @@ void SingleExtraData::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
     utn_req_table.addRow({"#Ref [1]", "Number of reference updates", target_->numRefUpdates()}, this);
     utn_req_table.addRow({"#Tst [1]", "Number of test updates",  target_->numTstUpdates()}, this);
     utn_req_table.addRow({"Ign.", "Ignore target", ignore_}, this);
-    utn_req_table.addRow({"TDO.", "Test data only", test_data_only_}, this);
+    utn_req_table.addRow({"#Check.", "Number of checked test updates", num_extra_+num_ok_}, this);
+    utn_req_table.addRow({"#OK.", "Number of OK test updates", num_ok_}, this);
+    utn_req_table.addRow({"#Extra", "Number of extra test updates", num_extra_}, this);
+
+    // condition
+    {
+        QVariant prob_var;
+
+        if (has_prob_)
+            prob_var = roundf(prob_ * 10000.0) / 100.0;
+
+        utn_req_table.addRow({"PEx [%]", "Probability of update with extra data", prob_var}, this);
+
+        string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
+
+        utn_req_table.addRow({"Condition", {}, condition.c_str()}, this);
+
+        string result {"Unknown"};
+
+        if (has_prob_)
+            result = prob_ <= req->maximumProbability() ? "Passed" : "Failed";
+
+        utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
+    }
 
     // add figure
-    if (!ignore_ && test_data_only_)
+    if (!ignore_ && num_extra_)
     {
         utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                   getTargetErrorsViewable());
@@ -279,9 +336,24 @@ bool SingleExtraData::ignore() const
     return ignore_;
 }
 
-bool SingleExtraData::testDataOnly() const
+bool SingleExtraData::hasExtraTestData() const
 {
-    return test_data_only_;
+    return has_extra_test_data_;
+}
+
+const std::vector<EvaluationRequirement::ExtraDataDetail>& SingleExtraData::details() const
+{
+    return details_;
+}
+
+unsigned int SingleExtraData::numExtra() const
+{
+    return num_extra_;
+}
+
+unsigned int SingleExtraData::numOK() const
+{
+    return num_ok_;
 }
 
 }

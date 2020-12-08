@@ -31,7 +31,8 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
             EvaluationManager& eval_man,
-            bool ignore, bool test_data_only, std::vector<EvaluationRequirement::ExtraDataDetail> details);
+            bool ignore, unsigned int num_extra, unsigned int num_ok, bool has_extra_test_data,
+            std::vector<EvaluationRequirement::ExtraDataDetail> details);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -48,13 +49,23 @@ public:
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     bool ignore() const;
-    bool testDataOnly() const;
+    unsigned int numExtra() const;
+    unsigned int numOK() const;
+    bool hasExtraTestData() const;
+
+    const std::vector<EvaluationRequirement::ExtraDataDetail>& details() const;
 
 protected:
     bool ignore_ {false};
-    bool test_data_only_ {false};
+    unsigned int num_extra_ {0};
+    unsigned int num_ok_ {0};
+    bool has_extra_test_data_ {false};
     std::vector<EvaluationRequirement::ExtraDataDetail> details_;
 
+    bool has_prob_ {false};
+    float prob_{0};
+
+    void updateProb();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

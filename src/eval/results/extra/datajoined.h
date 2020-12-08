@@ -48,8 +48,8 @@ namespace EvaluationRequirementResult
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     protected:
-        unsigned int num_targets_ {0}; // ignored removed
-        unsigned int num_tdo_targets_ {0}; // test data only targets, ignored removed
+        unsigned int num_extra_ {0};
+        unsigned int num_ok_ {0};
 
         bool has_prob_ {false};
         float prob_{0};

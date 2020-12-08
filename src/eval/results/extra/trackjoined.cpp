@@ -36,26 +36,26 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    JoinedTrack::JoinedTrack(
+    JoinedExtraTrack::JoinedExtraTrack(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
-        : Joined("JoinedTrack", result_id, requirement, sector_layer, eval_man)
+        : Joined("JoinedExtraTrack", result_id, requirement, sector_layer, eval_man)
     {
     }
 
 
-    void JoinedTrack::join(std::shared_ptr<Base> other)
+    void JoinedExtraTrack::join(std::shared_ptr<Base> other)
     {
         Joined::join(other);
 
-        std::shared_ptr<SingleTrack> other_sub =
-                std::static_pointer_cast<SingleTrack>(other);
+        std::shared_ptr<SingleExtraTrack> other_sub =
+                std::static_pointer_cast<SingleExtraTrack>(other);
         assert (other_sub);
 
         addToValues(other_sub);
     }
 
-    void JoinedTrack::addToValues (std::shared_ptr<SingleTrack> single_result)
+    void JoinedExtraTrack::addToValues (std::shared_ptr<SingleExtraTrack> single_result)
     {
         assert (single_result);
 
@@ -69,7 +69,7 @@ namespace EvaluationRequirementResult
         updateProb();
     }
 
-    void JoinedTrack::updateProb()
+    void JoinedExtraTrack::updateProb()
     {
         assert (num_inside_ >= num_extra_ + num_ok_);
 
@@ -88,7 +88,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedTrack::addToReport (
+    void JoinedExtraTrack::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "JoinedTrack " <<  requirement_->name() <<": addToReport";
@@ -105,7 +105,7 @@ namespace EvaluationRequirementResult
         addDetails(root_item);
     }
 
-    void JoinedTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedExtraTrack::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
@@ -136,7 +136,7 @@ namespace EvaluationRequirementResult
         // "Report:Results:Overview"
     }
 
-    void JoinedTrack::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedExtraTrack::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
@@ -148,9 +148,9 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
-        sec_det_table.addRow({"#Check.", "Number of checked test updates", num_extra_+num_ok_}, this);
-        sec_det_table.addRow({"#OK.", "Number of OK test updates", num_ok_}, this);
-        sec_det_table.addRow({"#Extra", "Number of extra test updates", num_extra_}, this);
+        sec_det_table.addRow({"#Check.", "Number of checked test track updates", num_extra_+num_ok_}, this);
+        sec_det_table.addRow({"#OK.", "Number of OK test track updates", num_ok_}, this);
+        sec_det_table.addRow({"#Extra", "Number of extra test track updates", num_extra_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::ExtraTrack> req =
@@ -189,7 +189,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    bool JoinedTrack::hasViewableData (
+    bool JoinedExtraTrack::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == req_overview_table_name_)
@@ -198,14 +198,14 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedTrack::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasViewableData(table, annotation));
         return getErrorsViewable();
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedTrack::getErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> JoinedExtraTrack::getErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
                 eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -233,7 +233,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool JoinedTrack::hasReference (
+    bool JoinedExtraTrack::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -244,14 +244,14 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string JoinedTrack::reference(
+    std::string JoinedExtraTrack::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
         return "Report:Results:"+getRequirementSectionID();
     }
 
-    void JoinedTrack::updatesToUseChanges()
+    void JoinedExtraTrack::updatesToUseChanges()
     {
         num_inside_ = 0;
         num_extra_ = 0;
@@ -259,8 +259,8 @@ namespace EvaluationRequirementResult
 
         for (auto result_it : results_)
         {
-            std::shared_ptr<SingleTrack> result =
-                    std::static_pointer_cast<SingleTrack>(result_it);
+            std::shared_ptr<SingleExtraTrack> result =
+                    std::static_pointer_cast<SingleExtraTrack>(result_it);
             assert (result);
 
             addToValues(result);

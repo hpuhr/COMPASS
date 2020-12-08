@@ -62,27 +62,17 @@ namespace EvaluationRequirementResult
         if (!single_result->use())
             return;
 
-        if (!single_result->ignore())
-        {
-            ++num_targets_;
-
-            if (single_result->testDataOnly())
-                ++num_tdo_targets_;
-        }
+        num_extra_ += single_result->numExtra();
+        num_ok_ += single_result->numOK();
 
         updateProb();
     }
 
     void JoinedExtraData::updateProb()
     {
-        assert (num_tdo_targets_ <= num_targets_);
-
-        if (num_targets_)
+        if (num_extra_ + num_ok_)
         {
-            logdbg << "JoinedExtraData: updatePD: result_id " << result_id_ << " num_targets " << num_targets_
-                   << " num_tdo_targets " << num_tdo_targets_;
-
-            prob_ = (float)num_tdo_targets_/(float)(num_targets_);
+            prob_ = (float)num_extra_/(float)(num_extra_ + num_ok_);
             has_prob_ = true;
         }
         else
@@ -135,7 +125,7 @@ namespace EvaluationRequirementResult
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                          requirement_->shortname().c_str(),
-                         result_id_.c_str(), {num_targets_},
+                         result_id_.c_str(), {num_extra_+num_ok_},
                          prob_var, condition.c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }
@@ -152,8 +142,9 @@ namespace EvaluationRequirementResult
 
         addCommonDetails(sec_det_table);
 
-        sec_det_table.addRow({"#Targets [1]", "Number of (not ignored) targets", num_targets_}, this);
-        sec_det_table.addRow({"#TDO [1]", "Number of (not ignored) test data only targets",  num_tdo_targets_}, this);
+        sec_det_table.addRow({"#Check.", "Number of checked test updates", num_extra_+num_ok_}, this);
+        sec_det_table.addRow({"#OK.", "Number of OK test updates", num_ok_}, this);
+        sec_det_table.addRow({"#Extra", "Number of extra test updates", num_extra_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::ExtraData> req =
@@ -174,7 +165,7 @@ namespace EvaluationRequirementResult
             result = prob_ <= req->maximumProbability() ? "Passed" : "Failed";
         }
 
-        sec_det_table.addRow({"P. [%]", "Probability of extra target", prob_var}, this);
+        sec_det_table.addRow({"PEx [%]", "Probability of extra test update", prob_var}, this);
         sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
         sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
@@ -256,8 +247,8 @@ namespace EvaluationRequirementResult
 
     void JoinedExtraData::updatesToUseChanges()
     {
-        num_targets_ = 0;
-        num_tdo_targets_ = 0;
+        num_extra_ = 0;
+        num_ok_  = 0;
 
         for (auto result_it : results_)
         {

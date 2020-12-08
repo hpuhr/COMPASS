@@ -36,13 +36,13 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-SingleTrack::SingleTrack(
+SingleExtraTrack::SingleExtraTrack(
         const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
         const SectorLayer& sector_layer, unsigned int utn, const EvaluationTargetData* target,
         EvaluationManager& eval_man,
         bool ignore, unsigned int num_inside, unsigned int num_extra, unsigned int num_ok,
         std::vector<EvaluationRequirement::ExtraTrackDetail> details)
-    : Single("SingleTrack", result_id, requirement, sector_layer, utn, target, eval_man),
+    : Single("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man),
       ignore_(ignore), num_inside_(num_inside), num_extra_(num_extra), num_ok_(num_ok), details_(details)
 {
     //loginf << "SingleTrack: ctor: result_id " << result_id_ << " ignore " << ignore_;
@@ -50,7 +50,7 @@ SingleTrack::SingleTrack(
     updateProb();
 }
 
-void SingleTrack::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraTrack::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     logdbg << "Track " <<  requirement_->name() <<": addToReport";
 
@@ -63,7 +63,7 @@ void SingleTrack::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem
     // TODO add requirement description, methods
 }
 
-void SingleTrack::updateProb()
+void SingleExtraTrack::updateProb()
 {
     assert (num_inside_ >= num_extra_ + num_ok_);
 
@@ -88,7 +88,7 @@ void SingleTrack::updateProb()
     updateUseFromTarget();
 }
 
-void SingleTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
@@ -96,7 +96,7 @@ void SingleTrack::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::R
         addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
 }
 
-void SingleTrack::addTargetDetailsToTable (
+void SingleExtraTrack::addTargetDetailsToTable (
         EvaluationResultsReport::Section& section, const std::string& table_name)
 {
     QVariant prob_var;
@@ -119,7 +119,7 @@ void SingleTrack::addTargetDetailsToTable (
                  ignore_, num_extra_+num_ok_, num_ok_, num_extra_, prob_var}, this, {utn_});
 }
 
-void SingleTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -138,9 +138,9 @@ void SingleTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
     utn_req_table.addRow({"Use", "To be used in results", use_}, this);
     utn_req_table.addRow({"#Tst [1]", "Number of test updates",  target_->numTstUpdates()}, this);
     utn_req_table.addRow({"Ign.", "Ignore target", ignore_}, this);
-    utn_req_table.addRow({"#Check.", "Number of checked test updates", num_extra_+num_ok_}, this);
-    utn_req_table.addRow({"#OK.", "Number of OK test updates", num_ok_}, this);
-    utn_req_table.addRow({"#Extra", "Number of extra test updates", num_extra_}, this);
+    utn_req_table.addRow({"#Check.", "Number of checked test track updates", num_extra_+num_ok_}, this);
+    utn_req_table.addRow({"#OK.", "Number of OK test track updates", num_ok_}, this);
+    utn_req_table.addRow({"#Extra", "Number of extra test track updates", num_extra_}, this);
 
     // condition
     {
@@ -180,7 +180,7 @@ void SingleTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::R
     reportDetails(utn_req_section);
 }
 
-void SingleTrack::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+void SingleExtraTrack::reportDetails(EvaluationResultsReport::Section& utn_req_section)
 {
     if (!utn_req_section.hasTable(tr_details_table_name_))
         utn_req_section.addTable(tr_details_table_name_, 5,
@@ -203,7 +203,7 @@ void SingleTrack::reportDetails(EvaluationResultsReport::Section& utn_req_sectio
     }
 }
 
-bool SingleTrack::hasViewableData (
+bool SingleExtraTrack::hasViewableData (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -214,7 +214,7 @@ bool SingleTrack::hasViewableData (
         return false;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleTrack::viewableData(
+std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::viewableData(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
 
@@ -245,7 +245,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrack::viewableData(
         return nullptr;
 }
 
-std::unique_ptr<nlohmann::json::object_t> SingleTrack::getTargetErrorsViewable ()
+std::unique_ptr<nlohmann::json::object_t> SingleExtraTrack::getTargetErrorsViewable ()
 {
     std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                 utn_, req_grp_id_, result_id_);
@@ -308,7 +308,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleTrack::getTargetErrorsViewable (
     return viewable_ptr;
 }
 
-bool SingleTrack::hasReference (
+bool SingleExtraTrack::hasReference (
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -317,7 +317,7 @@ bool SingleTrack::hasReference (
         return false;;
 }
 
-std::string SingleTrack::reference(
+std::string SingleExtraTrack::reference(
         const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
 {
     assert (hasReference(table, annotation));
@@ -325,32 +325,32 @@ std::string SingleTrack::reference(
     return "Report:Results:"+getTargetRequirementSectionID();
 }
 
-std::shared_ptr<Joined> SingleTrack::createEmptyJoined(const std::string& result_id)
+std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedTrack> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, eval_man_);
 }
 
-bool SingleTrack::ignore() const
+bool SingleExtraTrack::ignore() const
 {
     return ignore_;
 }
 
-unsigned int SingleTrack::numInside() const
+unsigned int SingleExtraTrack::numInside() const
 {
     return num_inside_;
 }
 
-unsigned int SingleTrack::numExtra() const
+unsigned int SingleExtraTrack::numExtra() const
 {
     return num_extra_;
 }
 
-unsigned int SingleTrack::numOK() const
+unsigned int SingleExtraTrack::numOK() const
 {
     return num_ok_;
 }
 
-const std::vector<EvaluationRequirement::ExtraTrackDetail>& SingleTrack::details() const
+const std::vector<EvaluationRequirement::ExtraTrackDetail>& SingleExtraTrack::details() const
 {
     return details_;
 }
