@@ -605,6 +605,9 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
 
+    if (object_man.metaVariable("track_num").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
+
     if (dbo_name == "ADSB")
     {
         DBObject& obj = object_man.object("ADSB");

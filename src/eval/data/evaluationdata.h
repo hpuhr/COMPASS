@@ -171,6 +171,8 @@ public:
 
     std::string tst_ground_bit_name_; // can be empty
 
+    std::string tst_track_num_name_; // can be empty
+
 protected:
     EvaluationManager& eval_man_;
 

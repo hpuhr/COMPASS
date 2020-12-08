@@ -1037,6 +1037,33 @@ pair<bool,bool> EvaluationTargetData::tstGroundBitForTimeInterpolated (float tod
     return pair<bool,bool>(false, false);
 }
 
+bool EvaluationTargetData::hasTstTrackNumForTime (float tod) const
+{
+    if (!eval_data_->tst_track_num_name_.size())
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    return !eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_num_name_).isNull(index);
+}
+
+unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
+{
+    assert (hasTstTrackNumForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    return eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_num_name_).get(index);
+}
+
 
 unsigned int EvaluationTargetData::tstModeCForTime (float tod) const
 {

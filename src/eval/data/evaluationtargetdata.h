@@ -156,6 +156,9 @@ public:
 
     std::pair<bool,bool> tstGroundBitForTimeInterpolated (float tod) const; // has gbs, gbs true
 
+    bool hasTstTrackNumForTime (float tod) const;
+    unsigned int tstTrackNumForTime (float tod) const;
+
     // nullptr if none
 
     double latitudeMin() const;

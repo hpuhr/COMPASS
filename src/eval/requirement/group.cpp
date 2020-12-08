@@ -26,6 +26,7 @@
 #include "eval/requirement/mode_a/modeaconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
 #include "eval/requirement/extra/dataconfig.h"
+#include "eval/requirement/extra/trackconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -60,6 +61,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::ExtraDataConfig* config =
                 new EvaluationRequirement::ExtraDataConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementExtraTrackConfig") == 0)
+    {
+        EvaluationRequirement::ExtraTrackConfig* config =
+                new EvaluationRequirement::ExtraTrackConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -267,9 +278,15 @@ void Group::showMenu ()
         // requirements
         QMenu* req_menu = menu.addMenu("Add Requirement");
 
-        { // extra
+        { // extra data
             QAction* add_det_action = req_menu->addAction("Extra Data");
             add_det_action->setData("EvaluationRequirementExtraDataConfig");
+            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // extra track
+            QAction* add_det_action = req_menu->addAction("Extra Track");
+            add_det_action->setData("EvaluationRequirementExtraTrackConfig");
             connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
