@@ -7936,6 +7936,22 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping193": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Custom calculated, based on 340.SID",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_lu_ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "track_lu_ds_id",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping2": {
                                         "parameters": {
                                             "active": true,
@@ -8562,82 +8578,82 @@
                                     },
                                     "JSONDataMapping55": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 63.75, not found",
+                                            "comment": "Type number, value 63.75",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_es_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "290.ES.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping56": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 1.75, not found",
+                                            "comment": "Type number, value 1.75",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_mds_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "290.MDS.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping57": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 63.75, not found",
+                                            "comment": "Type number, value 63.75",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_mlt_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "290.MLT.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping58": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 63.75, not mapped since enum",
+                                            "comment": "Type number, value 63.75,",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_psr_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "290.PSR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping59": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 1.75, not found",
+                                            "comment": "Type number, value 1.75",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_ssr_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "290.SSR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping6": {
@@ -8930,11 +8946,11 @@
                                     },
                                     "JSONDataMapping76": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 50, not found",
+                                            "comment": "Type number, value 50",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_lu_sac",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -8946,11 +8962,11 @@
                                     },
                                     "JSONDataMapping77": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 20, not found",
+                                            "comment": "Type number, value 20",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_lu_sic",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
