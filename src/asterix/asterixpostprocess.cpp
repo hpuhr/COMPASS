@@ -622,6 +622,17 @@ void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& rec
         }
     }
 
+    //340.SID.SAC
+
+    if (record.contains("340") && record.at("340").contains("SID")
+            && record.at("340").at("SID").contains("SAC")
+            && record.at("340").at("SID").contains("SIC"))
+    {
+        unsigned int lu_sac = record.at("340").at("SID").at("SAC");
+        unsigned int lu_sic = record.at("340").at("SID").at("SIC");
+        record["track_lu_ds_id"] = lu_sac * 256 + lu_sic;
+    }
+
     // overrides
     if (override_active_)
     {
