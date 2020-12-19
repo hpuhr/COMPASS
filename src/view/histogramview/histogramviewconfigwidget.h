@@ -27,6 +27,7 @@ class QCheckBox;
 class HistogramView;
 class QLineEdit;
 class QPushButton;
+class DBOVariableSelectionWidget;
 
 /**
  * @brief Widget with configuration elements for a HistogramView
@@ -38,6 +39,8 @@ class HistogramViewConfigWidget : public QWidget
 
   public slots:
 //    void toggleShowOnlySeletedSlot();
+
+    void selectedVariableChangedSlot();
 
     void exportSlot();
     void exportDoneSlot(bool cancelled);
@@ -59,6 +62,8 @@ class HistogramViewConfigWidget : public QWidget
   protected:
     /// Base view
     HistogramView* view_;
+
+    DBOVariableSelectionWidget* select_var_ {nullptr};
 
 //    QCheckBox* only_selected_check_{nullptr};
 

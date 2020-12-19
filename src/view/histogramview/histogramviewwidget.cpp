@@ -69,6 +69,7 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     hlayout->addWidget(main_splitter_);
 
     setLayout(hlayout);
+    setContentsMargins(0, 0, 0, 0);
 
     setFocusPolicy(Qt::StrongFocus);
 

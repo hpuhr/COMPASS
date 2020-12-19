@@ -21,6 +21,7 @@
 
 #include "compass.h"
 #include "dbobjectmanager.h"
+#include "dbobject.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatasource.h"
 #include "histogramviewdatawidget.h"
@@ -33,7 +34,12 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
                          ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
-//    registerParameter("show_only_selected", &show_only_selected_, false);
+    registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
+    registerParameter("data_var_name", &data_var_name_, "tod");
+
+    registerParameter("use_log_scale", &use_log_scale_, false);
+
+    // create sub done in init
 }
 
 HistogramView::~HistogramView()
@@ -146,13 +152,56 @@ void HistogramView::accept(LatexVisitor& v)
     v.visit(this);
 }
 
+bool HistogramView::useLogScale() const
+{
+    return use_log_scale_;
+}
+
+void HistogramView::useLogScale(bool use_log_scale)
+{
+    use_log_scale_ = use_log_scale;
+}
+
+bool HistogramView::hasDataVar ()
+{
+    if (!data_var_dbo_.size() || !data_var_name_.size())
+        return false;
+
+    if (data_var_dbo_ == META_OBJECT_NAME)
+        return COMPASS::instance().objectManager().existsMetaVariable(data_var_name_);
+    else
+        return COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_);
+}
+
+bool HistogramView::isDataVarMeta ()
+{
+    return data_var_dbo_ == META_OBJECT_NAME;
+}
+
+DBOVariable& HistogramView::dataVar()
+{
+    assert (hasDataVar());
+    assert (!isDataVarMeta());
+    assert (COMPASS::instance().objectManager().object(data_var_dbo_).hasVariable(data_var_name_));
+
+    return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
+}
+
+MetaDBOVariable& HistogramView::metaDataVar()
+{
+    assert (hasDataVar());
+    assert (isDataVarMeta());
+
+    return COMPASS::instance().objectManager().metaVariable(data_var_name_);
+}
+
 void HistogramView::updateSelection()
 {
     loginf << "HistogramView: updateSelection";
     assert(widget_);
 
-//    if (show_only_selected_)
-//        widget_->getDataWidget()->updateToSelection();
+    //    if (show_only_selected_)
+    //        widget_->getDataWidget()->updateToSelection();
 //    else
 //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }

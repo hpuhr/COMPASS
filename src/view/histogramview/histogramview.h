@@ -25,6 +25,9 @@ class HistogramViewWidget;
 class HistogramViewDataSource;
 class HistogramViewDataWidget;
 
+class DBOVariable;
+class MetaDBOVariable;
+
 class HistogramView : public View
 {
     Q_OBJECT
@@ -65,11 +68,25 @@ class HistogramView : public View
 
     virtual void accept(LatexVisitor& v) override;
 
-  protected:
+    bool useLogScale() const;
+    void useLogScale(bool value);
+
+    bool hasDataVar ();
+    bool isDataVarMeta ();
+    DBOVariable& dataVar();
+    MetaDBOVariable& metaDataVar();
+
+
+protected:
     /// For data display
     HistogramViewWidget* widget_{nullptr};
     /// For data loading
     HistogramViewDataSource* data_source_{nullptr};
+
+    std::string data_var_dbo_;
+    std::string data_var_name_;
+
+    bool use_log_scale_ {false};
 
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;

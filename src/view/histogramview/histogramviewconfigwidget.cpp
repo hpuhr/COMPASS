@@ -25,7 +25,7 @@
 #include <QVBoxLayout>
 
 #include "dbobjectmanager.h"
-#include "dbovariableorderedsetwidget.h"
+#include "dbovariableselectionwidget.h"
 #include "histogramview.h"
 #include "histogramviewdatasource.h"
 #include "logger.h"
@@ -39,6 +39,19 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
     QVBoxLayout* vlayout = new QVBoxLayout;
 
     assert(view_);
+
+    select_var_ = new DBOVariableSelectionWidget();
+    select_var_->showMetaVariables(true);
+    if (view_->hasDataVar())
+    {
+        if (view_->isDataVarMeta())
+            select_var_->selectedMetaVariable(view_->metaDataVar());
+        else
+            select_var_->selectedVariable(view_->dataVar());
+    }
+    connect(select_var_, &DBOVariableSelectionWidget::selectionChanged, this,
+            &HistogramViewConfigWidget::selectedVariableChangedSlot);
+    vlayout->addWidget(select_var_);
 
 //    only_selected_check_ = new QCheckBox("Show Only Selected");
 //    only_selected_check_->setChecked(view_->showOnlySelected());
@@ -71,15 +84,6 @@ HistogramViewConfigWidget::~HistogramViewConfigWidget() {}
 //    view_->showOnlySelected(checked);
 //}
 
-//void HistogramViewConfigWidget::toggleUsePresentation()
-//{
-//    assert(presentation_check_);
-//    bool checked = presentation_check_->checkState() == Qt::Checked;
-//    logdbg << "HistogramViewConfigWidget: toggleUsePresentation: setting use presentation to "
-//           << checked;
-//    view_->usePresentation(checked);
-//}
-
 //void HistogramViewConfigWidget::toggleUseOverwrite()
 //{
 //    assert(overwrite_check_);
@@ -88,13 +92,10 @@ HistogramViewConfigWidget::~HistogramViewConfigWidget() {}
 //    view_->overwriteCSV(checked);
 //}
 
-//void HistogramViewConfigWidget::showAssociationsSlot()
-//{
-//    assert(associations_check_);
-//    bool checked = associations_check_->checkState() == Qt::Checked;
-//    logdbg << "HistogramViewConfigWidget: showAssociationsSlot: setting to " << checked;
-//    view_->showAssociations(checked);
-//}
+void HistogramViewConfigWidget::selectedVariableChangedSlot()
+{
+
+}
 
 void HistogramViewConfigWidget::exportSlot()
 {

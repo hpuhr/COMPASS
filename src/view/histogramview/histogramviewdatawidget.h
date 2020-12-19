@@ -29,6 +29,15 @@ class QTabWidget;
 class Buffer;
 class DBObject;
 
+namespace QtCharts {
+    class QChart;
+    class QBarSeries;
+    class QChartView;
+    class QBarCategoryAxis;
+    class QValueAxis;
+}
+
+
 /**
  * @brief Widget with tab containing BufferTableWidgets in HistogramView
  *
@@ -75,11 +84,12 @@ class HistogramViewDataWidget : public QWidget
     HistogramView* view_{nullptr};
     /// Data source
     HistogramViewDataSource* data_source_{nullptr};
-    /// Main tab widget
-    //QTabWidget* tab_widget_{nullptr};
-    /// Container with all table widgets
-    //AllBufferTableWidget* all_buffer_table_widget_{nullptr};
-    //std::map<std::string, BufferTableWidget*> buffer_tables_;
+
+    QtCharts::QBarSeries* chart_series_ {nullptr};
+    QtCharts::QChart* chart_ {nullptr};
+    QtCharts::QBarCategoryAxis* chart_x_axis_ {nullptr};
+    QtCharts::QValueAxis* chart_y_axis_ {nullptr};
+    QtCharts::QChartView* chart_view_ {nullptr};
 };
 
 #endif /* HISTOGRAMVIEWDATAWIDGET_H_ */
