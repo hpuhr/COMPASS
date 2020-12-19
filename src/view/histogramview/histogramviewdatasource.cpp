@@ -96,40 +96,6 @@ void HistogramViewDataSource::checkSubConfigurables()
 
         if (obj_man.existsMetaVariable("rec_num"))
             set_->add(obj_man.metaVariable("rec_num"));
-
-//        //        Time of Day
-//        if (obj_man.existsMetaVariable("tod"))
-//            set_->add(obj_man.metaVariable("tod"));
-
-//        //        Datasource
-//        if (obj_man.existsMetaVariable("ds_id"))
-//            set_->add(obj_man.metaVariable("ds_id"));
-
-//        //        Lat/Long
-//        if (obj_man.existsMetaVariable("pos_lat_deg"))
-//            set_->add(obj_man.metaVariable("pos_lat_deg"));
-//        if (obj_man.existsMetaVariable("pos_long_deg"))
-//            set_->add(obj_man.metaVariable("pos_long_deg"));
-
-//        //        Mode 3/A code
-//        if (obj_man.existsMetaVariable("mode3a_code"))
-//            set_->add(obj_man.metaVariable("mode3a_code"));
-
-//        //        Mode S TA
-//        if (obj_man.existsMetaVariable("target_addr"))
-//            set_->add(obj_man.metaVariable("target_addr"));
-
-//        //        Mode S Callsign
-//        if (obj_man.existsMetaVariable("callsign"))
-//            set_->add(obj_man.metaVariable("callsign"));
-
-//        //        Mode C
-//        if (obj_man.existsMetaVariable("modec_code_ft"))
-//            set_->add(obj_man.metaVariable("modec_code_ft"));
-
-//        //        Track Number
-//        if (obj_man.existsMetaVariable("track_num"))
-//            set_->add(obj_man.metaVariable("track_num"));
     }
 }
 
@@ -220,11 +186,6 @@ bool HistogramViewDataSource::addTemporaryVariable (const std::string& dbo_name,
 
 void HistogramViewDataSource::removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
-//    auto el = find(temporary_added_variables_.begin(), temporary_added_variables_.end(),
-//                   pair<string, string>{dbo_name, var_name});
-//    assert (el != temporary_added_variables_.end());
-//    temporary_added_variables_.erase(el);
-
     DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (dbo_name == META_OBJECT_NAME)

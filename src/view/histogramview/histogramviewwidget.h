@@ -28,12 +28,6 @@ class HistogramViewConfigWidget;
 class QSplitter;
 class QTabWidget;
 
-/**
- * @brief Used for textual data display in a HistogramView.
- *
- * Consists of a HistogramViewDataWidget for data view and a HistogramViewConfigWidget for configuration
- * and starting the loading process.
- */
 class HistogramViewWidget : public ViewWidget
 {
   public:

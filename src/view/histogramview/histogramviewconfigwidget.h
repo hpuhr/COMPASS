@@ -38,9 +38,6 @@ class HistogramViewConfigWidget : public QWidget
 
   public slots:
 //    void toggleShowOnlySeletedSlot();
-//    void toggleUsePresentation();
-//    void toggleUseOverwrite();
-//    void showAssociationsSlot();
 
     void exportSlot();
     void exportDoneSlot(bool cancelled);
@@ -62,14 +59,8 @@ class HistogramViewConfigWidget : public QWidget
   protected:
     /// Base view
     HistogramView* view_;
-    /// Variable read list widget
-    //DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
 
 //    QCheckBox* only_selected_check_{nullptr};
-//    QCheckBox* presentation_check_{nullptr};
-//    QCheckBox* associations_check_{nullptr};
-
-//    QCheckBox* overwrite_check_{nullptr};
 
     QPushButton* export_button_{nullptr};
 

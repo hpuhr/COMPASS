@@ -25,37 +25,15 @@ class HistogramViewWidget;
 class HistogramViewDataSource;
 class HistogramViewDataWidget;
 
-/**
- * @brief View for textual inspection of database contents
- *
- * Has a different data loading mechanism that other Views because it launches separate queries.
- * Data contents are shown in a HistogramViewWidget. In the configuration area a number
- * of parameters of the SQL query can be set, the most prominent being the list of read variables.
- * Those configure a HistogramViewDataSource, which is used for data loading.
- *
- * When the 'Update' button is clicked, a separate query is executed (asynchronously) and when done,
- * the resulting Buffers are delivered by callback and displayed.
- */
 class HistogramView : public View
 {
     Q_OBJECT
   public slots:
-    //    /// @brief Is executed when selection is changed. Does nothing.
-    //    void selectionChanged();
-    //    /// @brief Is executed when selection is to be cleared. Does nothing.
-    //    void selectionToBeCleared();
     virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
     void allLoadingDoneSlot();
 
   signals:
-    //    /// @brief Is emitted when selection was changed locally
-    //    void setSelection (const ViewSelectionEntries& entries);
-    //    /// @brief Is emitted when somthing was added to the selection
-    //    void addSelection (const ViewSelectionEntries& entries);
-    //    /// @brief Is emitted when selection should be cleared
-    //    void clearSelection();
-
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
     void showAssociationsSignal(bool value);

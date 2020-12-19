@@ -29,13 +29,6 @@
 class Job;
 class ViewableDataConfig;
 
-/**
- * @brief Handles database queries and resulting data for HistogramView
- *
- * Creates database queries for all contained DBObjects when updateData () is called and
- * emits signal updateData() when resulting buffer is delivered by callback. Stores Buffers
- * and handles cleanup.
- */
 class HistogramViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
@@ -65,14 +58,6 @@ class HistogramViewDataSource : public QObject, public Configurable
         assert(set_);
         return set_;
     }
-    /// @brief Returns stored result Buffers
-    // std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
-
-    /// @brief Sets use selection flag
-    // void setUseSelection (bool use_selection) { use_selection_=use_selection; }
-    /// @brief Returns use selection flag
-    // bool getUseSelection () { return use_selection_; }
-
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
 

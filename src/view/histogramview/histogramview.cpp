@@ -141,21 +141,10 @@ DBOVariableSet HistogramView::getSet(const std::string& dbo_name)
     return data_source_->getSet()->getExistingInDBFor(dbo_name);
 }
 
-// void HistogramView::selectionChanged()
-//{
-//    //  assert (data_source_);
-//    //  data_source_->updateSelection();
-//}
-// void HistogramView::selectionToBeCleared()
-//{
-
-//}
-
 void HistogramView::accept(LatexVisitor& v)
 {
     v.visit(this);
 }
-
 
 void HistogramView::updateSelection()
 {
@@ -191,6 +180,5 @@ void HistogramView::allLoadingDoneSlot()
 {
     loginf << "HistogramView: allLoadingDoneSlot";
     assert(widget_);
-    //widget_->getDataWidget()->selectFirstSelectedRow();
 }
 

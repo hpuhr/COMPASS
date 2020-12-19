@@ -40,38 +40,11 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
     assert(view_);
 
-//    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
-//    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
-//            this, &HistogramViewConfigWidget::reloadWantedSlot);
-//    vlayout->addWidget(variable_set_widget_);
-
 //    only_selected_check_ = new QCheckBox("Show Only Selected");
 //    only_selected_check_->setChecked(view_->showOnlySelected());
 //    connect(only_selected_check_, &QCheckBox::clicked, this,
 //            &HistogramViewConfigWidget::toggleShowOnlySeletedSlot);
 //    vlayout->addWidget(only_selected_check_);
-
-//    presentation_check_ = new QCheckBox("Use Presentation");
-//    presentation_check_->setChecked(view_->usePresentation());
-//    connect(presentation_check_, &QCheckBox::clicked, this,
-//            &HistogramViewConfigWidget::toggleUsePresentation);
-//    vlayout->addWidget(presentation_check_);
-
-//    associations_check_ = new QCheckBox("Show Associations");
-//    associations_check_->setChecked(view_->showAssociations());
-//    connect(associations_check_, &QCheckBox::clicked, this,
-//            &HistogramViewConfigWidget::showAssociationsSlot);
-//    if (!view_->canShowAssociations())
-//        associations_check_->setDisabled(true);
-//    vlayout->addWidget(associations_check_);
-
-//    vlayout->addStretch();
-
-//    overwrite_check_ = new QCheckBox("Overwrite Exported File");
-//    overwrite_check_->setChecked(view_->overwriteCSV());
-//    connect(overwrite_check_, &QCheckBox::clicked, this,
-//            &HistogramViewConfigWidget::toggleUseOverwrite);
-//    vlayout->addWidget(overwrite_check_);
 
     export_button_ = new QPushButton("Export");
     connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
