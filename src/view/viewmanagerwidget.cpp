@@ -62,6 +62,7 @@ ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     connect(&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
     connect(&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
 
+    view_class_list_.append("HistogramView");
     view_class_list_.append("ListBoxView");
 
 #if USE_EXPERIMENTAL_SOURCE == true

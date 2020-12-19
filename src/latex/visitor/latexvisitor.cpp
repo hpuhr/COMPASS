@@ -24,6 +24,7 @@
 #include "listboxview.h"
 #include "listboxviewdatawidget.h"
 #include "allbuffertablewidget.h"
+#include "histogramview.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
@@ -342,6 +343,13 @@ void LatexVisitor::visit(ListBoxView* e)
                 table.addRow(row_it);
         }
     }
+}
+
+void LatexVisitor::visit(HistogramView* e)
+{
+    assert (e);
+
+    loginf << "LatexVisitor: visit: HistogramView " << e->instanceId();
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true

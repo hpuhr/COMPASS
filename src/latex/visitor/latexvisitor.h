@@ -24,7 +24,10 @@
 
 class ViewPoint;
 class ListBoxView;
+class HistogramView;
+#if USE_EXPERIMENTAL_SOURCE == true
 class OSGView;
+#endif
 class LatexDocument;
 
 namespace EvaluationResultsReport
@@ -44,6 +47,7 @@ public:
 
     virtual void visit(const ViewPoint* e);
     virtual void visit(ListBoxView* e);
+    virtual void visit(HistogramView* e);
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
 #endif

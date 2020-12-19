@@ -21,6 +21,7 @@
 #include "files.h"
 #include "global.h"
 #include "listboxview.h"
+#include "histogramview.h"
 #include "logger.h"
 #include "managementwidget.h"
 #include "stringconv.h"
@@ -198,6 +199,17 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         assert(view);
         view->init();
     }
+    else if (class_id.compare("HistogramView") == 0)
+    {
+        HistogramView* view = new HistogramView(class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt(instance_id);
+
+        if (number >= view_count_)
+            view_count_ = number + 1;
+
+        assert(view);
+        view->init();
+    }
 #if USE_EXPERIMENTAL_SOURCE == true
     else if (class_id.compare("OSGView") == 0)
     {
@@ -210,16 +222,6 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         view->init();
     }
 #endif
-    //  else if (class_id.compare ("HistogramView") == 0)
-    //  {
-    //    HistogramView* view = new HistogramView ( class_id, instance_id, this );
-    //    unsigned int number = getAppendedInt (instance_id);
-    //    if (number >= view_count_)
-    //      view_count_ = number+1;
-
-    //    assert( view );
-    //    view->init();
-    //  }
     //  else if (class_id.compare ("ScatterPlotView") == 0)
     //  {
     //    ScatterPlotView* view = new ScatterPlotView ( class_id, instance_id, this );
