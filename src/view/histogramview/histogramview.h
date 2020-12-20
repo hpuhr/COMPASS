@@ -74,8 +74,13 @@ class HistogramView : public View
     bool hasDataVar ();
     bool isDataVarMeta ();
     DBOVariable& dataVar();
-    MetaDBOVariable& metaDataVar();
+    void dataVar (DBOVariable& var);
 
+    MetaDBOVariable& metaDataVar();
+    void metaDataVar (MetaDBOVariable& var);
+
+    std::string dataVarDBO() const;
+    std::string dataVarName() const;
 
 protected:
     /// For data display

@@ -22,6 +22,7 @@
 #include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "metadbovariable.h"
 #include "histogramviewconfigwidget.h"
 #include "histogramviewdatasource.h"
 #include "histogramviewdatawidget.h"
@@ -31,7 +32,7 @@
 #include "latexvisitor.h"
 
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
-                         ViewContainer* w, ViewManager& view_manager)
+                             ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
@@ -87,22 +88,22 @@ bool HistogramView::init()
     connect(data_source_, &HistogramViewDataSource::loadingStartedSignal, widget_->configWidget(),
             &HistogramViewConfigWidget::loadingStartedSlot);
 
-//    connect(this, &HistogramView::showOnlySelectedSignal, widget_->getDataWidget(),
-//            &HistogramViewDataWidget::showOnlySelectedSlot);
-//    connect(this, &HistogramView::usePresentationSignal, widget_->getDataWidget(),
-//            &HistogramViewDataWidget::usePresentationSlot);
-//    connect(this, &HistogramView::showAssociationsSignal, widget_->getDataWidget(),
-//            &HistogramViewDataWidget::showAssociationsSlot);
+    //    connect(this, &HistogramView::showOnlySelectedSignal, widget_->getDataWidget(),
+    //            &HistogramViewDataWidget::showOnlySelectedSlot);
+    //    connect(this, &HistogramView::usePresentationSignal, widget_->getDataWidget(),
+    //            &HistogramViewDataWidget::usePresentationSlot);
+    //    connect(this, &HistogramView::showAssociationsSignal, widget_->getDataWidget(),
+    //            &HistogramViewDataWidget::showAssociationsSlot);
 
-//    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
-//    widget_->getDataWidget()->usePresentationSlot(use_presentation_);
-//    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
+    //    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
+    //    widget_->getDataWidget()->usePresentationSlot(use_presentation_);
+    //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
 }
 
 void HistogramView::generateSubConfigurable(const std::string& class_id,
-                                          const std::string& instance_id)
+                                            const std::string& instance_id)
 {
     logdbg << "HistogramView: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
@@ -144,7 +145,25 @@ DBOVariableSet HistogramView::getSet(const std::string& dbo_name)
 {
     assert(data_source_);
 
-    return data_source_->getSet()->getExistingInDBFor(dbo_name);
+    DBOVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
+
+    if (hasDataVar())
+    {
+        if (isDataVarMeta())
+        {
+            MetaDBOVariable& meta_var = metaDataVar();
+
+            if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
+                set.add(meta_var.getFor(dbo_name));
+        }
+        else
+        {
+            if (!set.hasVariable(dataVar()))
+                set.add(dataVar());
+        }
+    }
+
+    return set;
 }
 
 void HistogramView::accept(LatexVisitor& v)
@@ -187,12 +206,39 @@ DBOVariable& HistogramView::dataVar()
     return COMPASS::instance().objectManager().object(data_var_dbo_).variable(data_var_name_);
 }
 
+void HistogramView::dataVar (DBOVariable& var)
+{
+    data_var_dbo_ = var.dboName();
+    data_var_name_ = var.name();
+    assert (hasDataVar());
+    assert (!isDataVarMeta());
+}
+
 MetaDBOVariable& HistogramView::metaDataVar()
 {
     assert (hasDataVar());
     assert (isDataVarMeta());
 
     return COMPASS::instance().objectManager().metaVariable(data_var_name_);
+}
+
+void HistogramView::metaDataVar (MetaDBOVariable& var)
+{
+    data_var_dbo_ = META_OBJECT_NAME;
+    data_var_name_ = var.name();
+    assert (hasDataVar());
+    assert (isDataVarMeta());
+}
+
+
+std::string HistogramView::dataVarDBO() const
+{
+    return data_var_dbo_;
+}
+
+std::string HistogramView::dataVarName() const
+{
+    return data_var_name_;
 }
 
 void HistogramView::updateSelection()
@@ -202,8 +248,8 @@ void HistogramView::updateSelection()
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
-//    else
-//        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
+    //    else
+    //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
 }
 
 void HistogramView::unshowViewPointSlot (const ViewableDataConfig* vp)
