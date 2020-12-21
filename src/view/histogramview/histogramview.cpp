@@ -78,10 +78,10 @@ bool HistogramView::init()
     connect(data_source_, &HistogramViewDataSource::updateDataSignal, widget_->getDataWidget(),
             &HistogramViewDataWidget::updateDataSlot);
 
-    connect(widget_->configWidget(), &HistogramViewConfigWidget::exportSignal,
-            widget_->getDataWidget(), &HistogramViewDataWidget::exportDataSlot);
-    connect(widget_->getDataWidget(), &HistogramViewDataWidget::exportDoneSignal,
-            widget_->configWidget(), &HistogramViewConfigWidget::exportDoneSlot);
+//    connect(widget_->configWidget(), &HistogramViewConfigWidget::exportSignal,
+//            widget_->getDataWidget(), &HistogramViewDataWidget::exportDataSlot);
+//    connect(widget_->getDataWidget(), &HistogramViewDataWidget::exportDoneSignal,
+//            widget_->configWidget(), &HistogramViewConfigWidget::exportDoneSlot);
 
     connect(widget_->configWidget(), &HistogramViewConfigWidget::reloadRequestedSignal,
             &COMPASS::instance().objectManager(), &DBObjectManager::loadSlot);
@@ -212,6 +212,9 @@ void HistogramView::dataVar (DBOVariable& var)
     data_var_name_ = var.name();
     assert (hasDataVar());
     assert (!isDataVarMeta());
+
+    assert (widget_);
+    widget_->getDataWidget()->update();
 }
 
 MetaDBOVariable& HistogramView::metaDataVar()
@@ -228,6 +231,9 @@ void HistogramView::metaDataVar (MetaDBOVariable& var)
     data_var_name_ = var.name();
     assert (hasDataVar());
     assert (isDataVarMeta());
+
+    assert (widget_);
+    widget_->getDataWidget()->update();
 }
 
 
@@ -275,5 +281,7 @@ void HistogramView::allLoadingDoneSlot()
 {
     loginf << "HistogramView: allLoadingDoneSlot";
     assert(widget_);
+
+    widget_->configWidget()->setDisabled(false);
 }
 

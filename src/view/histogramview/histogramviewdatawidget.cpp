@@ -67,56 +67,6 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     chart_view_->setRenderHint(QPainter::Antialiasing);
     chart_view_->setRubberBand(QChartView::RectangleRubberBand);
 
-//    QBarSet *set0 = new QBarSet("Jane");
-//    QBarSet *set1 = new QBarSet("John");
-//    QBarSet *set2 = new QBarSet("Axel");
-//    QBarSet *set3 = new QBarSet("Mary");
-//    QBarSet *set4 = new QBarSet("Samantha");
-
-//    *set0 << 1 << 2 << 3 << 4 << 5 << 6;
-//    *set1 << 5 << 0 << 0 << 4 << 0 << 7;
-//    *set2 << 3 << 5 << 8 << 13 << 8 << 5;
-//    *set3 << 5 << 6 << 7 << 3 << 4 << 5;
-//    *set4 << 9 << 7 << 5 << 3 << 1 << 2;
-
-//    QBarSeries *series = new QBarSeries();
-//    series->setUseOpenGL(true); // not used in this chart
-//    series->append(set0);
-//    series->append(set1);
-//    series->append(set2);
-//    series->append(set3);
-//    series->append(set4);
-
-//    QChart *chart = new QChart();
-//    chart->addSeries(series);
-//    chart->setTitle("Simple barchart example");
-//    chart->layout()->setContentsMargins(0, 0, 0, 0);
-//    chart->setBackgroundRoundness(0);
-//    //chart->setAnimationOptions(QChart::SeriesAnimations);
-
-//    QStringList categories;
-//    categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
-
-//    QBarCategoryAxis *axisX = new QBarCategoryAxis();
-//    axisX->append(categories);
-//    chart->addAxis(axisX, Qt::AlignBottom);
-//    series->attachAxis(axisX);
-
-//    //QLogValueAxis *axisY = new QLogValueAxis();
-////    axisY->setBase(8.0);
-////    axisY->setMinorTickCount(-1);
-//    QValueAxis *axisY = new QValueAxis();
-//    axisY->setRange(0,15);
-//    chart->addAxis(axisY, Qt::AlignLeft);
-//    series->attachAxis(axisY);
-
-//    chart->legend()->setVisible(true);
-//    chart->legend()->setAlignment(Qt::AlignBottom);
-
-//    QChartView *chartView = new QChartView(chart);
-//    chartView->setRenderHint(QPainter::Antialiasing);
-//    chartView->setRubberBand(QChartView::RectangleRubberBand);
-
     layout->addWidget(chart_view_);
 
     setLayout(layout);
@@ -124,8 +74,14 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
 HistogramViewDataWidget::~HistogramViewDataWidget()
 {
-    // TODO
-    // buffer_tables_.clear();
+}
+
+void HistogramViewDataWidget::update()
+{
+    loginf << "HistogramViewDataWidget: update";
+
+    updateFromAllData();
+    updateChart();
 }
 
 void HistogramViewDataWidget::clear ()
@@ -145,20 +101,6 @@ void HistogramViewDataWidget::clear ()
     bin_size_ = 0;
 }
 
-//void HistogramViewDataWidget::clearTables()
-//{
-//    logdbg << "HistogramViewDataWidget: updateTables: start";
-//    // TODO
-//    //  std::map <DB_OBJECT_TYPE, BufferTableWidget*>::iterator it;
-
-//    //  for (it = buffer_tables_.begin(); it != buffer_tables_.end(); it++)
-//    //  {
-//    //    it->second->show (0, 0, false);
-//    //  }
-
-//    logdbg << "HistogramViewDataWidget: updateTables: end";
-//}
-
 void HistogramViewDataWidget::loadingStartedSlot()
 {
     clear();
@@ -174,47 +116,9 @@ void HistogramViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<B
     buffers_[object.name()] = buffer;
     updateFromData(object.name());
 
-    chart_series_->clear();
+    updateChart();
 
-    QBarSet *set0 = new QBarSet((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
-    //*set0 << 1 << 2 << 3 << 4 << 5 << 6;
-    for (auto bin : counts_)
-    {
-        if (bin > max_bin_cnt_)
-            max_bin_cnt_ = bin;
-
-        *set0 << bin;
-    }
-
-    chart_series_->append(set0);
-
-    if (chart_x_axis_)
-        delete chart_x_axis_;
-
-    QStringList categories;
-
-    for (auto lbl : labels_)
-        categories << lbl.c_str();
-    //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
-
-    chart_x_axis_ = new QBarCategoryAxis();
-    //chart_x_axis_->setTickCount(5);
-    chart_x_axis_->append(categories);
-    chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
-    chart_series_->attachAxis(chart_x_axis_);
-
-    if (chart_y_axis_)
-        delete chart_y_axis_;
-
-    chart_y_axis_ = new QValueAxis();
-    chart_y_axis_->setRange(0, max_bin_cnt_);
-    chart_->addAxis(chart_y_axis_, Qt::AlignLeft);
-    chart_series_->attachAxis(chart_y_axis_);
-
-    chart_->zoomReset();
-    //chart_->setTitle("Simple barchart example");
-
-    logdbg << "HistogramViewDataWidget: updateTables: end";
+    logdbg << "HistogramViewDataWidget: updateDataSlot: end";
 }
 
 void HistogramViewDataWidget::updateFromData(std::string dbo_name)
@@ -253,224 +157,339 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
-    //unsigned num_bins = 20;
-
     switch (data_type)
     {
-        case PropertyDataType::BOOL:
+    case PropertyDataType::BOOL:
+    {
+        if (!buffer->has<bool>(current_var_name))
         {
-            assert(buffer->has<bool>(current_var_name));
-            NullableVector<bool>& data = buffer->get<bool>(current_var_name);
-
-            break;
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
         }
-        case PropertyDataType::CHAR:
+
+        assert(buffer->has<bool>(current_var_name));
+        NullableVector<bool>& data = buffer->get<bool>(current_var_name);
+
+        bool data_min {true};
+        bool data_max {false};
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
         {
-            assert(buffer->has<char>(current_var_name));
-            NullableVector<char>& data = buffer->get<char>(current_var_name);
-
-            break;
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
         }
-        case PropertyDataType::UCHAR:
+
+        updateCounts<bool> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::CHAR:
+    {
+        if (!buffer->has<char>(current_var_name))
         {
-            assert(buffer->has<unsigned char>(current_var_name));
-            NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
-
-            break;
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
         }
-        case PropertyDataType::INT:
+
+        assert(buffer->has<char>(current_var_name));
+        NullableVector<char>& data = buffer->get<char>(current_var_name);
+
+        bool min_max_set {true};
+        char data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
         {
-            assert(buffer->has<int>(current_var_name));
-            NullableVector<int>& data = buffer->get<int>(current_var_name);
-
-            bool min_max_set {true};
-            int data_min, data_max;
-
-            tie(min_max_set, data_min, data_max) = data.minMaxValues();
-
-            if (!min_max_set)
-            {
-                logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
-                return;
-            }
-
-            if (!bin_size_valid_ ||
-                    (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
-                                                                    || data_max > data_max_.toDouble())))
-            {
-                loginf << "UGA up all bin_size_valid " << bin_size_valid_;
-
-                loginf << " data_min_.isValid() " << data_min_.isValid()
-                       << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-                          << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
-
-                loginf << " data_max_.isValid() " << data_max_.isValid()
-                       << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-                       << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
-
-                updateFromAllData(); // clear, recalc min/max, update
-                return;
-            }
-
-            loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-                   << " bin_size " << bin_size_;
-
-            updateCounts<int> (data, data_var);
-
-            break;
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
         }
-        case PropertyDataType::UINT:
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
         {
-            assert(buffer->has<unsigned int>(current_var_name));
-            NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
-
-            bool min_max_set {true};
-            unsigned int data_min, data_max;
-
-            tie(min_max_set, data_min, data_max) = data.minMaxValues();
-
-            if (!min_max_set)
-            {
-                logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
-                return;
-            }
-
-            if (!bin_size_valid_ ||
-                    (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
-                                                                    || data_max > data_max_.toDouble())))
-            {
-                loginf << "UGA up all bin_size_valid " << bin_size_valid_;
-
-                loginf << " data_min_.isValid() " << data_min_.isValid()
-                       << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-                          << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
-
-                loginf << " data_max_.isValid() " << data_max_.isValid()
-                       << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-                       << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
-
-                updateFromAllData(); // clear, recalc min/max, update
-                return;
-            }
-
-            loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-                   << " bin_size " << bin_size_;
-
-            updateCounts<unsigned int> (data, data_var);
-
-            break;
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
         }
-        case PropertyDataType::LONGINT:
+
+        updateCounts<char> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::UCHAR:
+    {
+        if (!buffer->has<unsigned char>(current_var_name))
         {
-            assert(buffer->has<long int>(current_var_name));
-            NullableVector<long int>& data = buffer->get<long int>(current_var_name);
-
-
-            break;
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
         }
-        case PropertyDataType::ULONGINT:
+
+        assert(buffer->has<unsigned char>(current_var_name));
+        NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
+
+        bool min_max_set {true};
+        unsigned char data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
         {
-            assert(buffer->has<unsigned long>(current_var_name));
-            NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
-
-
-            break;
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
         }
-        case PropertyDataType::FLOAT:
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
         {
-            assert(buffer->has<float>(current_var_name));
-            NullableVector<float>& data = buffer->get<float>(current_var_name);
-
-            bool min_max_set {true};
-            float data_min, data_max;
-
-            tie(min_max_set, data_min, data_max) = data.minMaxValues();
-
-            if (!min_max_set)
-            {
-                logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
-                return;
-            }
-
-            if (!bin_size_valid_ ||
-                    (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
-                                                                    || data_max > data_max_.toDouble())))
-            {
-                loginf << "UGA up all bin_size_valid " << bin_size_valid_;
-
-                loginf << " data_min_.isValid() " << data_min_.isValid()
-                       << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-                          << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
-
-                loginf << " data_max_.isValid() " << data_max_.isValid()
-                       << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-                       << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
-
-                updateFromAllData(); // clear, recalc min/max, update
-                return;
-            }
-
-            loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-                   << " bin_size " << bin_size_;
-
-            updateCounts<float> (data, data_var);
-
-            break;
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
         }
-        case PropertyDataType::DOUBLE:
+
+        updateCounts<unsigned char> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::INT:
+    {
+        if (!buffer->has<int>(current_var_name))
         {
-            assert(buffer->has<double>(current_var_name));
-            NullableVector<double>& data = buffer->get<double>(current_var_name);
-
-            bool min_max_set {true};
-            double data_min, data_max;
-
-            tie(min_max_set, data_min, data_max) = data.minMaxValues();
-
-            if (!min_max_set)
-            {
-                logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
-                return;
-            }
-
-            if (!bin_size_valid_ ||
-                    (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
-                                                                    || data_max > data_max_.toDouble())))
-            {
-                loginf << "UGA up all bin_size_valid " << bin_size_valid_;
-
-                loginf << " data_min_.isValid() " << data_min_.isValid()
-                       << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-                          << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
-
-                loginf << " data_max_.isValid() " << data_max_.isValid()
-                       << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-                       << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
-
-                updateFromAllData(); // clear, recalc min/max, update
-                return;
-            }
-
-            loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-                   << " bin_size " << bin_size_;
-
-            updateCounts<double> (data, data_var);
-
-            break;
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
         }
-        case PropertyDataType::STRING:
+
+        assert(buffer->has<int>(current_var_name));
+        NullableVector<int>& data = buffer->get<int>(current_var_name);
+
+        bool min_max_set {true};
+        int data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
         {
-            assert(buffer->has<string>(current_var_name));
-            //NullableVector<string>& data = buffer->get<string>(current_var_name);
-
-            break;
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
         }
-        default:
-            logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
-                   << Property::asString(data_type);
-            throw std::runtime_error(
-                "HistogramViewDataWidget: updateFromData: impossible property type " +
-                Property::asString(data_type));
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        updateCounts<int> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::UINT:
+    {
+        if (!buffer->has<unsigned int>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<unsigned int>(current_var_name));
+        NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
+
+        bool min_max_set {true};
+        unsigned int data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        updateCounts<unsigned int> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        if (!buffer->has<long int>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<long int>(current_var_name));
+        NullableVector<long int>& data = buffer->get<long int>(current_var_name);
+
+        bool min_max_set {true};
+        long int data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        updateCounts<long int> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::ULONGINT:
+    {
+        if (!buffer->has<unsigned long>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<unsigned long>(current_var_name));
+        NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
+
+        bool min_max_set {true};
+        unsigned long data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        updateCounts<unsigned long> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        if (!buffer->has<float>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<float>(current_var_name));
+        NullableVector<float>& data = buffer->get<float>(current_var_name);
+
+        bool min_max_set {true};
+        float data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+
+        updateCounts<float> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        if (!buffer->has<double>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<double>(current_var_name));
+        NullableVector<double>& data = buffer->get<double>(current_var_name);
+
+        bool min_max_set {true};
+        double data_min, data_max;
+
+        tie(min_max_set, data_min, data_max) = data.minMaxValues();
+
+        if (!min_max_set)
+        {
+            logwrn << "HistogramViewDataWidget: updateFromData: no data set in buffer";
+            return;
+        }
+
+        if (!bin_size_valid_ ||
+                (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
+                                                                || data_max > data_max_.toDouble())))
+        {
+            loginf << "UGA up all bin_size_valid " << bin_size_valid_;
+
+            loginf << " data_min_.isValid() " << data_min_.isValid()
+                   << " data_min < data_min_ " << (data_min < data_min_.toDouble())
+                   << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
+
+            loginf << " data_max_.isValid() " << data_max_.isValid()
+                   << " data_max > data_max_ " << (data_max > data_max_.toDouble())
+                   << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
+
+            updateFromAllData(); // clear, recalc min/max, update
+            return;
+        }
+
+        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
+               << " bin_size " << bin_size_;
+
+        updateCounts<double> (data, data_var);
+
+        break;
+    }
+    case PropertyDataType::STRING:
+    {
+        if (!buffer->has<string>(current_var_name))
+        {
+            loginf << "HistogramViewDataWidget: updateFromData: buffer does not contain " << current_var_name;
+            return;
+        }
+
+        assert(buffer->has<string>(current_var_name));
+        //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+        break;
+    }
+    default:
+        logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
+               << Property::asString(data_type);
+        throw std::runtime_error(
+                    "HistogramViewDataWidget: updateFromData: impossible property type " +
+                    Property::asString(data_type));
     }
 
 }
@@ -494,8 +513,53 @@ void HistogramViewDataWidget::updateFromAllData()
     loginf << "HistogramViewDataWidget: updateFromAllData: done";
 }
 
+void HistogramViewDataWidget::updateChart()
+{
+    chart_series_->clear();
+
+    QBarSet *set0 = new QBarSet((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
+    //*set0 << 1 << 2 << 3 << 4 << 5 << 6;
+    for (auto bin : counts_)
+    {
+        if (bin > max_bin_cnt_)
+            max_bin_cnt_ = bin;
+
+        *set0 << bin;
+    }
+
+    chart_series_->append(set0);
+
+    if (chart_x_axis_)
+        delete chart_x_axis_;
+
+    QStringList categories;
+
+    for (auto lbl : labels_)
+        categories << lbl.c_str();
+    //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
+
+    chart_x_axis_ = new QBarCategoryAxis();
+    chart_x_axis_->setLabelsAngle(85);
+    chart_x_axis_->append(categories);
+    chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
+    chart_series_->attachAxis(chart_x_axis_);
+
+    if (chart_y_axis_)
+        delete chart_y_axis_;
+
+    chart_y_axis_ = new QValueAxis();
+    chart_y_axis_->setRange(0, max_bin_cnt_);
+    chart_->addAxis(chart_y_axis_, Qt::AlignLeft);
+    chart_series_->attachAxis(chart_y_axis_);
+
+    chart_->zoomReset();
+    //chart_->setTitle("Simple barchart example");
+}
+
 void HistogramViewDataWidget::calculateGlobalMinMax()
 {
+    loginf << "HistogramViewDataWidget: calculateGlobalMinMax";
+
     for (auto& buf_it : buffers_)
     {
         Buffer* buffer = buf_it.second.get();
@@ -528,93 +592,153 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
 
         switch (data_type)
         {
-            case PropertyDataType::BOOL:
+        case PropertyDataType::BOOL:
+        {
+            if (!buffer->has<bool>(current_var_name))
             {
-                assert(buffer->has<bool>(current_var_name));
-                //NullableVector<bool>& data = buffer->get<bool>(current_var_name);
-                data_min_ = false;
-                data_max_ = true;
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::CHAR:
+
+            assert(buffer->has<bool>(current_var_name));
+            //NullableVector<bool>& data = buffer->get<bool>(current_var_name);
+            data_min_ = false;
+            data_max_ = true;
+
+            break;
+        }
+        case PropertyDataType::CHAR:
+        {
+            if (!buffer->has<char>(current_var_name))
             {
-                assert(buffer->has<char>(current_var_name));
-                NullableVector<char>& data = buffer->get<char>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::UCHAR:
+
+            assert(buffer->has<char>(current_var_name));
+            NullableVector<char>& data = buffer->get<char>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::UCHAR:
+        {
+            if (!buffer->has<unsigned char>(current_var_name))
             {
-                assert(buffer->has<unsigned char>(current_var_name));
-                NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::INT:
+
+            assert(buffer->has<unsigned char>(current_var_name));
+            NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::INT:
+        {
+            if (!buffer->has<int>(current_var_name))
             {
-                assert(buffer->has<int>(current_var_name));
-                NullableVector<int>& data = buffer->get<int>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::UINT:
+
+            assert(buffer->has<int>(current_var_name));
+            NullableVector<int>& data = buffer->get<int>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::UINT:
+        {
+            if (!buffer->has<unsigned int>(current_var_name))
             {
-                assert(buffer->has<unsigned int>(current_var_name));
-                NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::LONGINT:
+
+            assert(buffer->has<unsigned int>(current_var_name));
+            NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::LONGINT:
+        {
+            if (!buffer->has<long int>(current_var_name))
             {
-                assert(buffer->has<long int>(current_var_name));
-                NullableVector<long int>& data = buffer->get<long int>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::ULONGINT:
+
+            assert(buffer->has<long int>(current_var_name));
+            NullableVector<long int>& data = buffer->get<long int>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::ULONGINT:
+        {
+            if (!buffer->has<unsigned long>(current_var_name))
             {
-                assert(buffer->has<unsigned long>(current_var_name));
-                NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::FLOAT:
+
+            assert(buffer->has<unsigned long>(current_var_name));
+            NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::FLOAT:
+        {
+            if (!buffer->has<float>(current_var_name))
             {
-                assert(buffer->has<float>(current_var_name));
-                NullableVector<float>& data = buffer->get<float>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::DOUBLE:
+
+            assert(buffer->has<float>(current_var_name));
+            NullableVector<float>& data = buffer->get<float>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::DOUBLE:
+        {
+            if (!buffer->has<double>(current_var_name))
             {
-                assert(buffer->has<double>(current_var_name));
-                NullableVector<double>& data = buffer->get<double>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            case PropertyDataType::STRING:
+
+            assert(buffer->has<double>(current_var_name));
+            NullableVector<double>& data = buffer->get<double>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        case PropertyDataType::STRING:
+        {
+            if (!buffer->has<string>(current_var_name))
             {
-                assert(buffer->has<string>(current_var_name));
-                NullableVector<string>& data = buffer->get<string>(current_var_name);
-                updateMinMax (data);
-
-                break;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                return;
             }
-            default:
-                logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
-                       << Property::asString(data_type);
-                throw std::runtime_error(
-                    "HistogramViewDataWidget: updateFromData: impossible property type " +
-                    Property::asString(data_type));
+
+            assert(buffer->has<string>(current_var_name));
+            NullableVector<string>& data = buffer->get<string>(current_var_name);
+            updateMinMax (data);
+
+            break;
+        }
+        default:
+            logerr << "HistogramViewDataWidget: updateFromData: impossible for property type "
+                   << Property::asString(data_type);
+            throw std::runtime_error(
+                        "HistogramViewDataWidget: updateFromData: impossible property type " +
+                        Property::asString(data_type));
         }
     }
 

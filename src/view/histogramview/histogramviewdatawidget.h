@@ -75,16 +75,8 @@ class HistogramViewDataWidget : public QWidget
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();
 
-    /// @brief Clears the table contents
-//    void clearTables();
-//    void resetModels();
-//    void updateToSelection();
-
-    //void selectFirstSelectedRow();
-
-    //AllBufferTableWidget* getAllBufferTableWidget ();
-
-    void clear ();
+    void update();
+    void clear();
 
   protected:
     HistogramView* view_{nullptr};
@@ -112,6 +104,7 @@ class HistogramViewDataWidget : public QWidget
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();
+    void updateChart();
 
     void calculateGlobalMinMax();
 

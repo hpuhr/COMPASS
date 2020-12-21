@@ -38,41 +38,30 @@ class HistogramViewConfigWidget : public QWidget
     Q_OBJECT
 
   public slots:
-//    void toggleShowOnlySeletedSlot();
-
     void selectedVariableChangedSlot();
 
-    void exportSlot();
-    void exportDoneSlot(bool cancelled);
+//    void exportSlot();
+//    void exportDoneSlot(bool cancelled);
 
-    void reloadWantedSlot();
     void reloadRequestedSlot();
     void loadingStartedSlot();
 
   signals:
-    void exportSignal(bool overwrite);
+    //void exportSignal(bool overwrite);
     void reloadRequestedSignal();  // reload from database
 
   public:
-    /// @brief Constructor
     HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
-    /// @brief Destructor
     virtual ~HistogramViewConfigWidget();
 
   protected:
-    /// Base view
     HistogramView* view_;
 
     DBOVariableSelectionWidget* select_var_ {nullptr};
 
-//    QCheckBox* only_selected_check_{nullptr};
+    //QPushButton* export_button_{nullptr};
 
-    QPushButton* export_button_{nullptr};
-
-    QPushButton* update_button_{nullptr};
-    bool reload_needed_{false};
-
-    void updateUpdateButton();
+    QPushButton* reload_button_{nullptr};
 };
 
 #endif /* HISTOGRAMVIEWCONFIGWIDGET_H_ */
