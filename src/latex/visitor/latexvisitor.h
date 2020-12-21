@@ -28,6 +28,7 @@ class HistogramView;
 #if USE_EXPERIMENTAL_SOURCE == true
 class OSGView;
 #endif
+class ScatterPlotView;
 class LatexDocument;
 
 namespace EvaluationResultsReport
@@ -51,6 +52,7 @@ public:
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
 #endif
+    virtual void visit(ScatterPlotView* e);
 
     virtual void visit(const EvaluationResultsReport::Section* e);
     virtual void visit(const EvaluationResultsReport::SectionContentTable* e);

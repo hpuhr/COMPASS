@@ -1,6 +1,7 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/listboxview/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/histogramview/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/scatterplotview/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/viewbase/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/points/CMakeLists.txt")
 

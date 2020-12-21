@@ -65,9 +65,12 @@ ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     view_class_list_.append("HistogramView");
     view_class_list_.append("ListBoxView");
 
+
 #if USE_EXPERIMENTAL_SOURCE == true
     view_class_list_.append("OSGView");
 #endif
+
+    view_class_list_.append("ScatterPlotView");
 
     update();
 

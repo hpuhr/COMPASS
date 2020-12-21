@@ -116,7 +116,7 @@ class HistogramViewDataWidget : public QWidget
 
         std::tie(min_max_set, data_min, data_max) = data.minMaxValues();
 
-        loginf << "UGA min_max_set " << min_max_set << " data_min " << data_min << " data_max " << data_max;
+//        loginf << "UGA min_max_set " << min_max_set << " data_min " << data_min << " data_max " << data_max;
 
         if (!min_max_set)
             return;
@@ -137,9 +137,8 @@ class HistogramViewDataWidget : public QWidget
             data_min_ = min_var;
             data_max_ = max_var;
         }
-
-        loginf << "UGA2 data_min_ " << data_min_.toString().toStdString()
-               << " data_max_ " << data_max_.toString().toStdString();
+//        loginf << "UGA2 data_min_ " << data_min_.toString().toStdString()
+//               << " data_max_ " << data_max_.toString().toStdString();
     }
 
     void updateMinMax(NullableVector<std::string>& data);

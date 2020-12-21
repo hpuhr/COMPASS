@@ -25,6 +25,7 @@
 #include "listboxviewdatawidget.h"
 #include "allbuffertablewidget.h"
 #include "histogramview.h"
+#include "scatterplotview.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
@@ -415,6 +416,13 @@ void LatexVisitor::visit(OSGView* e)
     sec.addImage(image_path, e->instanceId());
 }
 #endif
+
+void LatexVisitor::visit(ScatterPlotView* e)
+{
+    assert (e);
+
+    loginf << "LatexVisitor: visit: ScatterPlotView " << e->instanceId();
+}
 
 void LatexVisitor::imagePrefix(const std::string& image_prefix)
 {
