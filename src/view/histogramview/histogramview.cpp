@@ -38,7 +38,7 @@ HistogramView::HistogramView(const std::string& class_id, const std::string& ins
     registerParameter("data_var_dbo", &data_var_dbo_, META_OBJECT_NAME);
     registerParameter("data_var_name", &data_var_name_, "tod");
 
-    registerParameter("use_log_scale", &use_log_scale_, false);
+    registerParameter("use_log_scale", &use_log_scale_, true);
 
     // create sub done in init
 }
@@ -179,6 +179,11 @@ bool HistogramView::useLogScale() const
 void HistogramView::useLogScale(bool use_log_scale)
 {
     use_log_scale_ = use_log_scale;
+
+    HistogramViewDataWidget* data_widget = dynamic_cast<HistogramViewDataWidget*>(getDataWidget());
+    assert (data_widget);
+
+    data_widget->updateChart();
 }
 
 bool HistogramView::hasDataVar ()

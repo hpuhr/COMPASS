@@ -40,6 +40,8 @@ class HistogramViewConfigWidget : public QWidget
   public slots:
     void selectedVariableChangedSlot();
 
+    void toggleLogScale();
+
 //    void exportSlot();
 //    void exportDoneSlot(bool cancelled);
 
@@ -59,6 +61,7 @@ class HistogramViewConfigWidget : public QWidget
 
     DBOVariableSelectionWidget* select_var_ {nullptr};
 
+    QCheckBox* log_check_ {nullptr};
     //QPushButton* export_button_{nullptr};
 
     QPushButton* reload_button_{nullptr};

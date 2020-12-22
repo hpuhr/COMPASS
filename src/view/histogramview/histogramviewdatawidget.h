@@ -38,7 +38,7 @@ namespace QtCharts {
     class QBarSeries;
     class QChartView;
     class QBarCategoryAxis;
-    class QValueAxis;
+    class QAbstractAxis;
 }
 
 
@@ -76,6 +76,8 @@ class HistogramViewDataWidget : public QWidget
     virtual ~HistogramViewDataWidget();
 
     void update();
+    void updateChart();
+
     void clear();
 
   protected:
@@ -99,12 +101,11 @@ class HistogramViewDataWidget : public QWidget
     QtCharts::QBarSeries* chart_series_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
     QtCharts::QBarCategoryAxis* chart_x_axis_ {nullptr};
-    QtCharts::QValueAxis* chart_y_axis_ {nullptr};
+    QtCharts::QAbstractAxis* chart_y_axis_ {nullptr};
     QtCharts::QChartView* chart_view_ {nullptr};
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();
-    void updateChart();
 
     void calculateGlobalMinMax();
 

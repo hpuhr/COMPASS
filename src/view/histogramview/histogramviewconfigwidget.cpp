@@ -53,6 +53,12 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
             &HistogramViewConfigWidget::selectedVariableChangedSlot);
     vlayout->addWidget(select_var_);
 
+    log_check_ = new QCheckBox("Logarithmic Y Scale");
+    log_check_->setChecked(view_->useLogScale());
+    connect(log_check_, &QCheckBox::clicked, this,
+            &HistogramViewConfigWidget::toggleLogScale);
+    vlayout->addWidget(log_check_);
+
 //    export_button_ = new QPushButton("Export");
 //    connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
 //    vlayout->addWidget(export_button_);
@@ -103,6 +109,14 @@ void HistogramViewConfigWidget::selectedVariableChangedSlot()
 //        msgBox.exec();
 //    }
 //}
+
+void HistogramViewConfigWidget::toggleLogScale()
+{
+    assert(log_check_);
+    bool checked = log_check_->checkState() == Qt::Checked;
+    logdbg << "HistogramViewConfigWidget: toggleLogScale: setting overwrite to " << checked;
+    view_->useLogScale(checked);
+}
 
 void HistogramViewConfigWidget::reloadRequestedSlot()
 {

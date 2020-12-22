@@ -36,6 +36,7 @@
 #include <QtCharts/QLegend>
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QLogValueAxis>
 #include <QGraphicsLayout>
 
 #include <algorithm>
@@ -518,6 +519,8 @@ void HistogramViewDataWidget::updateChart()
 {
     chart_series_->clear();
 
+    bool use_log_scale = view_->useLogScale();
+
     QBarSet *set0 = new QBarSet((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
     //*set0 << 1 << 2 << 3 << 4 << 5 << 6;
     for (auto bin : counts_)
@@ -525,7 +528,11 @@ void HistogramViewDataWidget::updateChart()
         if (bin > max_bin_cnt_)
             max_bin_cnt_ = bin;
 
-        *set0 << bin;
+        if (use_log_scale && bin == 0)
+            *set0 << 10e-6; // Logarithms of zero and negative values are undefined.
+        else
+            *set0 << bin;
+
     }
 
     chart_series_->append(set0);
@@ -540,16 +547,37 @@ void HistogramViewDataWidget::updateChart()
     //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
 
     chart_x_axis_ = new QBarCategoryAxis();
+    chart_x_axis_->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
     chart_x_axis_->setLabelsAngle(85);
     chart_x_axis_->append(categories);
     chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
     chart_series_->attachAxis(chart_x_axis_);
 
     if (chart_y_axis_)
+    {
+        chart_series_->detachAxis(chart_y_axis_);
         delete chart_y_axis_;
+    }
 
-    chart_y_axis_ = new QValueAxis();
-    chart_y_axis_->setRange(0, max_bin_cnt_);
+    if (view_->useLogScale())
+    {
+        QLogValueAxis* chart_y_axis = new QLogValueAxis();
+
+        chart_y_axis->setLabelFormat("%g");
+        chart_y_axis->setBase(10.0);
+        chart_y_axis->setMinorTickCount(-1);
+
+        chart_y_axis_ = chart_y_axis;
+        chart_y_axis_->setRange(10e-2, max_bin_cnt_);
+    }
+    else
+    {
+        chart_y_axis_ = new QValueAxis();
+        chart_y_axis_->setRange(0, max_bin_cnt_);
+    }
+
+    chart_y_axis_->setTitleText("Count");
+
     chart_->addAxis(chart_y_axis_, Qt::AlignLeft);
     chart_series_->attachAxis(chart_y_axis_);
 

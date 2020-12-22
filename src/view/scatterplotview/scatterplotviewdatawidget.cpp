@@ -818,7 +818,7 @@ void ScatterPlotViewDataWidget::updateChart()
 
     for (unsigned int cnt=0; cnt < x_values_.size(); ++cnt)
     {
-        if (!isnan(x_values_.at(cnt)) && !isnan(y_values_.at(cnt)))
+        if (!std::isnan(x_values_.at(cnt)) && !std::isnan(y_values_.at(cnt)))
             chart_series->append(x_values_.at(cnt), y_values_.at(cnt));
     }
 
