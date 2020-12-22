@@ -47,6 +47,8 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string&
 
 ScatterPlotView::~ScatterPlotView()
 {
+    loginf << "ScatterPlotView: dtor";
+
     if (data_source_)
     {
         delete data_source_;
@@ -58,6 +60,8 @@ ScatterPlotView::~ScatterPlotView()
         delete widget_;
         widget_ = nullptr;
     }
+
+    loginf << "ScatterPlotView: dtor: done";
 }
 
 void ScatterPlotView::update(bool atOnce) {}

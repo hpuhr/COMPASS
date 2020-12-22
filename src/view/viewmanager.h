@@ -27,7 +27,7 @@ class COMPASS;
 class Buffer;
 class ViewContainer;
 class ViewContainerWidget;
-class ViewManagerWidget;
+//class ViewManagerWidget;
 class View;
 class ViewableDataConfig;
 class ViewPointsWidget;
@@ -75,7 +75,7 @@ class ViewManager : public QObject, public Configurable
     std::map<std::string, View*> getViews() { return views_; }
     DBOVariableSet getReadSet(const std::string& dbo_name);
 
-    ViewManagerWidget* widget();
+    //ViewManagerWidget* widget();
 
     ViewPointsWidget* viewPointsWidget() const;
 
@@ -87,10 +87,14 @@ class ViewManager : public QObject, public Configurable
     void doViewPointAfterLoad ();
     void selectTimeWindow(float time_min, float time_max);
 
+    void showMainViewContainerAddView();
+
+    QStringList viewClassList() const;
+
 protected:
     COMPASS& compass_;
 
-    ViewManagerWidget* widget_{nullptr};
+    //ViewManagerWidget* widget_{nullptr};
     ViewPointsWidget* view_points_widget_{nullptr};
 
     bool initialized_{false};
@@ -107,6 +111,8 @@ protected:
     bool view_point_data_selected_ {false};
 
     unsigned int container_count_{0};
+
+    QStringList view_class_list_;
 
     virtual void checkSubConfigurables();
 };

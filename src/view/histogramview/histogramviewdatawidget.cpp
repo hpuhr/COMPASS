@@ -74,6 +74,7 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
 HistogramViewDataWidget::~HistogramViewDataWidget()
 {
+    delete chart_view_;
 }
 
 void HistogramViewDataWidget::update()

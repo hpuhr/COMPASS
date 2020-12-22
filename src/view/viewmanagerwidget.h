@@ -36,9 +36,9 @@ class ViewManagerWidget : public QFrame
     void databaseBusy();
     void databaseIdle();
 
-    void addViewMenuSlot();
-    void addViewSlot();
-    void addViewNewWindowSlot();
+    //void addViewMenuSlot();
+    //void addViewSlot();
+    //void addViewNewWindowSlot();
     //  void addTemplateSlot ();
     //  void addTemplateNewWindowSlot ();
 
@@ -55,8 +55,7 @@ class ViewManagerWidget : public QFrame
 
     QPushButton* add_button_;
 
-    QStringList view_class_list_;
-    std::vector<ViewContainerConfigWidget*> cont_widgets_;
+//    QStringList view_class_list_;
     std::map<QAction*, std::pair<std::string, int> > add_template_actions_;
 };
 

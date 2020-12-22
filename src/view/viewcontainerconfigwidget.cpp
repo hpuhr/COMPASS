@@ -109,7 +109,7 @@ void ViewContainerConfigWidget::updateSlot()
         delete view_widgets_[i];
     view_widgets_.clear();
 
-    const std::vector<View*>& views = view_container_->getViews();
+    const std::vector<std::unique_ptr<View>>& views = view_container_->getViews();
     n = views.size();
     for (i = 0; i < n; ++i)
     {

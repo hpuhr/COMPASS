@@ -66,10 +66,10 @@ ManagementWidget::ManagementWidget() : QWidget()
 
     QVBoxLayout* right_layout = new QVBoxLayout();
 
-    ViewManagerWidget* viewman_widget = COMPASS::instance().viewManager().widget();
-    viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    viewman_widget->setLineWidth(frame_width);
-    right_layout->addWidget(viewman_widget);
+//    ViewManagerWidget* viewman_widget = COMPASS::instance().viewManager().widget();
+//    viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    viewman_widget->setLineWidth(frame_width);
+//    right_layout->addWidget(viewman_widget);
 
     JobManagerWidget* jobman_widget = JobManager::instance().widget();
     jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);

@@ -51,6 +51,12 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
     QHBoxLayout* layout = new QHBoxLayout();
 
+//    chart_series_ = new QScatterSeries();
+//    //chart_series_->setName("scatter1");
+//    chart_series_->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+//    chart_series_->setMarkerSize(8.0);
+//    chart_series_->setUseOpenGL(true);
+
     chart_ = new QChart();
     chart_->layout()->setContentsMargins(0, 0, 0, 0);
     chart_->setBackgroundRoundness(0);
@@ -69,6 +75,9 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
 {
+    loginf << "ScatterPlotViewDataWidget: dtor";
+
+    delete chart_view_;
 }
 
 void ScatterPlotViewDataWidget::update()
@@ -98,6 +107,7 @@ void ScatterPlotViewDataWidget::clear ()
 void ScatterPlotViewDataWidget::loadingStartedSlot()
 {
     clear();
+    chart_->removeAllSeries();
 }
 
 void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -796,21 +806,23 @@ void ScatterPlotViewDataWidget::updateChart()
 {
     chart_->removeAllSeries();
 
-    assert (x_values_.size() == y_values_.size());
+    QScatterSeries* chart_series = new QScatterSeries();
+    //chart_series_->setName("scatter1");
+    chart_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+    chart_series->setMarkerSize(8.0);
+    chart_series->setUseOpenGL(true);
 
-    QScatterSeries *series0 = new QScatterSeries();
-    //series0->setName("scatter1");
-    series0->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-    series0->setMarkerSize(15.0);
-    series0->setUseOpenGL(true);
+    chart_series->clear();
+
+    assert (x_values_.size() == y_values_.size());
 
     for (unsigned int cnt=0; cnt < x_values_.size(); ++cnt)
     {
         if (!isnan(x_values_.at(cnt)) && !isnan(y_values_.at(cnt)))
-            series0->append(x_values_.at(cnt), y_values_.at(cnt));
+            chart_series->append(x_values_.at(cnt), y_values_.at(cnt));
     }
 
-    chart_->addSeries(series0);
+    chart_->addSeries(chart_series);
 
     chart_->createDefaultAxes();
     chart_->setDropShadowEnabled(false);

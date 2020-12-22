@@ -36,7 +36,7 @@ class DBObject;
 
 namespace QtCharts {
     class QChart;
-    class QBarSeries;
+    class QScatterSeries;
     class QChartView;
     class QBarCategoryAxis;
     class QValueAxis;
@@ -87,6 +87,7 @@ class ScatterPlotViewDataWidget : public QWidget
     std::vector<double> x_values_;
     std::vector<double> y_values_;
 
+    //QtCharts::QScatterSeries* chart_series_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
     QtCharts::QChartView* chart_view_ {nullptr};
 

@@ -42,6 +42,7 @@
 #include <QTabWidget>
 #include <QLocale>
 #include <QMessageBox>
+#include <QPushButton>
 
 using namespace Utils;
 using namespace std;
@@ -93,9 +94,18 @@ MainWindow::MainWindow()
 
     tab_widget_->setCurrentIndex(0);
 
+    add_view_button_ = new QPushButton();
+    add_view_button_->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
+    add_view_button_->setFixedSize(UI_ICON_SIZE);
+    add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    add_view_button_->setToolTip(tr("Add view"));
+    connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
+    tab_widget_->setCornerWidget(add_view_button_);
+
+    add_view_button_->setDisabled(true);
+
     QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
                      &FilterManager::startedSlot);
-
 }
 
 MainWindow::~MainWindow()
@@ -168,9 +178,10 @@ void MainWindow::startSlot()
 //    }
 
     COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget
+    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
 
     tab_widget_->setCurrentIndex(0);
+    add_view_button_->setDisabled(false);
 
     emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
 
@@ -186,6 +197,12 @@ void MainWindow::quitRequestedSlot()
 {
     shutdown();
     QApplication::quit();
+}
+
+void MainWindow::showAddViewMenuSlot()
+{
+    loginf << "MainWindow: showAddViewMenuSlot";
+    COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

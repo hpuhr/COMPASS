@@ -81,6 +81,16 @@ void ViewManager::init(QTabWidget* tab_widget)
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
+    view_class_list_.append("HistogramView");
+    view_class_list_.append("ListBoxView");
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    view_class_list_.append("OSGView");
+#endif
+
+    view_class_list_.append("ScatterPlotView");
+
+
     initialized_ = true;
 
     createSubConfigurables();
@@ -91,21 +101,31 @@ void ViewManager::close()
     loginf << "ViewManager: close";
     initialized_ = false;
 
-    logdbg << "ViewManager: close: deleting container widgets";
+//    loginf << "ViewManager: close: deleting views";
+//    while (views_.size())
+//    {
+//        auto first_it = views_.begin();
+//        loginf << "ViewManager: close: deleting view " << first_it->first;
+//        delete first_it->second;
+//        views_.erase(first_it);
+//    }
+
+    loginf << "ViewManager: close: deleting container widgets";
     while (container_widgets_.size())
     {
         auto first_it = container_widgets_.begin();
-        logdbg << "ViewManager: close: deleting container widget " << first_it->first;
-        delete first_it->second;
+        loginf << "ViewManager: close: deleting container widget " << first_it->first;
+        delete first_it->second; // deletes the respective view container, which removes itself from this
         container_widgets_.erase(first_it);
     }
 
-    logdbg << "ViewManager: close: deleting containers size " << containers_.size();
+    loginf << "ViewManager: close: deleting containers size " << containers_.size();
     while (containers_.size())
     {
         auto first_it = containers_.begin();
-        logdbg << "ViewManager: close: deleting container " << first_it->first;
+        loginf << "ViewManager: close: deleting container " << first_it->first;
         delete first_it->second;
+        //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
     }
 
     if (view_points_widget_)
@@ -117,11 +137,14 @@ void ViewManager::close()
 
     view_points_report_gen_ = nullptr;
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
+//    if (widget_)
+//    {
+//        loginf << "ViewManager: close: deleting widget";
+//        delete widget_;
+//        widget_ = nullptr;
+//    }
+
+    loginf << "ViewManager: close: done";
 }
 
 ViewManager::~ViewManager()
@@ -130,7 +153,7 @@ ViewManager::~ViewManager()
 
     assert(!container_widgets_.size());
     assert(!containers_.size());
-    assert(!widget_);
+    //assert(!widget_);
     assert(!initialized_);
 }
 
@@ -179,8 +202,8 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("ViewManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
 
-    if (widget_)
-        widget_->update();
+//    if (widget_)
+//        widget_->update();
 }
 
 void ViewManager::checkSubConfigurables()
@@ -211,16 +234,16 @@ DBOVariableSet ViewManager::getReadSet(const std::string& dbo_name)
     return read_set;
 }
 
-ViewManagerWidget* ViewManager::widget()
-{
-    if (!widget_)
-    {
-        widget_ = new ViewManagerWidget(*this);
-    }
+//ViewManagerWidget* ViewManager::widget()
+//{
+//    if (!widget_)
+//    {
+//        widget_ = new ViewManagerWidget(*this);
+//    }
 
-    assert(widget_);
-    return widget_;
-}
+//    assert(widget_);
+//    return widget_;
+//}
 
 
 
@@ -482,6 +505,17 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
     }
 }
 
+void ViewManager::showMainViewContainerAddView()
+{
+    assert (containers_.count("ViewContainer0"));
+    containers_.at("ViewContainer0")->showAddViewMenuSlot();
+}
+
+QStringList ViewManager::viewClassList() const
+{
+    return view_class_list_;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
@@ -562,8 +596,8 @@ void ViewManager::removeContainer(std::string instance_id)
     {
         containers_.erase(it);
 
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
+//        if (initialized_ && widget_)  // not during destructor
+//            widget_->update();
 
         return;
     }
@@ -583,8 +617,8 @@ void ViewManager::removeContainerWidget(std::string instance_id)
     {
         container_widgets_.erase(it);
 
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
+//        if (initialized_ && widget_)  // not during destructor
+//            widget_->update();
 
         return;
     }
@@ -606,8 +640,8 @@ void ViewManager::deleteContainerWidget(std::string instance_id)
 
         container_widgets_.erase(it);
 
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
+//        if (initialized_ && widget_)  // not during destructor
+//            widget_->update();
 
         return;
     }

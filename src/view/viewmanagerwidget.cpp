@@ -62,16 +62,6 @@ ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     connect(&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
     connect(&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
 
-    view_class_list_.append("HistogramView");
-    view_class_list_.append("ListBoxView");
-
-
-#if USE_EXPERIMENTAL_SOURCE == true
-    view_class_list_.append("OSGView");
-#endif
-
-    view_class_list_.append("ScatterPlotView");
-
     update();
 
     logdbg << "ViewManagerWidget: constructor: end";
@@ -91,33 +81,33 @@ void ViewManagerWidget::databaseIdle()
     add_button_->setDisabled(false);
 }
 
-void ViewManagerWidget::addViewMenuSlot()
-{
-    add_template_actions_.clear();
+//void ViewManagerWidget::addViewMenuSlot()
+//{
+//    add_template_actions_.clear();
 
-    QMenu menu;
-    QMenu* submenu;
-    QString name;
-    unsigned int i, n = cont_widgets_.size();
+//    QMenu menu;
+//    QMenu* submenu;
+//    QString name;
+//    unsigned int i, n = cont_widgets_.size();
 
-    for (QString view_class : view_class_list_)
-    {
-        submenu = menu.addMenu(view_class);
+//    for (QString view_class : view_class_list_)
+//    {
+//        submenu = menu.addMenu(view_class);
 
-        QAction* new_window_action =
-            submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()));
-        new_window_action->setData(view_class);
+//        QAction* new_window_action =
+//            submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()));
+//        new_window_action->setData(view_class);
 
-        for (i = 0; i < n; ++i)
-        {
-            name = cont_widgets_[i]->name();
-            QAction* action = submenu->addAction(name, this, SLOT(addViewSlot()));
-            QStringList list;
-            list.append(view_class);
-            list.append(QString::number(i));
-            action->setData(list);
-        }
-    }
+//        for (i = 0; i < n; ++i)
+//        {
+//            name = cont_widgets_[i]->name();
+//            QAction* action = submenu->addAction(name, this, SLOT(addViewSlot()));
+//            QStringList list;
+//            list.append(view_class);
+//            list.append(QString::number(i));
+//            action->setData(list);
+//        }
+//    }
 
     //  std::map<std::string, Configuration> &templates =
     //  ViewManager::getInstance().getConfiguration()
@@ -148,61 +138,61 @@ void ViewManagerWidget::addViewMenuSlot()
     //      }
     //  }
 
-    menu.exec(QCursor::pos());
-}
+//    menu.exec(QCursor::pos());
+//}
 
-void ViewManagerWidget::addViewNewWindowSlot()
-{
-    QAction* action = dynamic_cast<QAction*>(QObject::sender());
-    assert(action);
-    QString class_name = action->data().toString();
-    ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget();
-    container_widget->viewContainer().addView(class_name.toStdString());
+//void ViewManagerWidget::addViewNewWindowSlot()
+//{
+//    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+//    assert(action);
+//    QString class_name = action->data().toString();
+//    ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget();
+//    container_widget->viewContainer().addView(class_name.toStdString());
 
-    update();
-}
+//    update();
+//}
 
-void ViewManagerWidget::addViewSlot()
-{
-    QAction* action = dynamic_cast<QAction*>(QObject::sender());
-    assert(action);
-    QStringList list = action->data().toStringList();
-    assert(list.size() == 2);
-    QString class_name = list.at(0);
-    QString number_str = list.at(1);
-    bool ok;
-    unsigned int containter_id = number_str.toUInt(&ok);
-    assert(ok);
+//void ViewManagerWidget::addViewSlot()
+//{
+//    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+//    assert(action);
+//    QStringList list = action->data().toStringList();
+//    assert(list.size() == 2);
+//    QString class_name = list.at(0);
+//    QString number_str = list.at(1);
+//    bool ok;
+//    unsigned int containter_id = number_str.toUInt(&ok);
+//    assert(ok);
 
-    loginf << "ViewManagerWidget: addViewSlot: class " << class_name.toStdString();
+//    loginf << "ViewManagerWidget: addViewSlot: class " << class_name.toStdString();
 
-    if (containter_id < 0 || containter_id >= cont_widgets_.size())
-        throw(std::runtime_error("ViewManagerWidget: addViewSlot: container out of bounds"));
-    cont_widgets_[containter_id]->addView(class_name.toStdString());
-}
+//    if (containter_id < 0 || containter_id >= cont_widgets_.size())
+//        throw(std::runtime_error("ViewManagerWidget: addViewSlot: container out of bounds"));
+//    cont_widgets_[containter_id]->addView(class_name.toStdString());
+//}
 
 void ViewManagerWidget::update()
 {
     loginf << "ViewManagerWidget: update";
 
-    cont_widgets_.clear();
+//    cont_widgets_.clear();
 
-    QLayoutItem* child;
-    while ((child = cont_layout_->takeAt(0)) != 0)
-    {
-        cont_layout_->removeItem(child);
-    }
+//    QLayoutItem* child;
+//    while ((child = cont_layout_->takeAt(0)) != 0)
+//    {
+//        cont_layout_->removeItem(child);
+//    }
 
-    std::map<std::string, ViewContainer*> containers = view_manager_.getContainers();
+//    std::map<std::string, ViewContainer*> containers = view_manager_.getContainers();
 
-    // loginf  << "ViewManagerWidget: update size containers " << containers.size();
+//    // loginf  << "ViewManagerWidget: update size containers " << containers.size();
 
-    std::map<std::string, ViewContainer*>::iterator it;
-    for (it = containers.begin(); it != containers.end(); it++)
-    {
-        cont_widgets_.push_back(it->second->configWidget());
-        cont_layout_->addWidget(it->second->configWidget());
-    }
+//    std::map<std::string, ViewContainer*>::iterator it;
+//    for (it = containers.begin(); it != containers.end(); it++)
+//    {
+//        cont_widgets_.push_back(it->second->configWidget());
+//        cont_layout_->addWidget(it->second->configWidget());
+//    }
 }
 
 // void ViewManagerWidget::addTemplateSlot ()

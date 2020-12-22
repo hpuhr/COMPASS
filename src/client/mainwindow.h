@@ -32,6 +32,7 @@ class ManagementWidget;
 class QTabWidget;
 class QCheckBox;
 class QMenu;
+class QPushButton;
 class TaskManagerWidget;
 
 /**
@@ -59,6 +60,7 @@ class MainWindow : public QMainWindow
     // void keyPressEvent ( QKeyEvent * event );
 
     void quitRequestedSlot();
+    void showAddViewMenuSlot();
 
   public:
     /// @brief Constructor
@@ -78,6 +80,8 @@ protected:
     TaskManagerWidget* task_manager_widget_{nullptr};
 
     ManagementWidget* management_widget_{nullptr};
+
+    QPushButton* add_view_button_{nullptr};
 
     bool save_configuration_{true};
 
