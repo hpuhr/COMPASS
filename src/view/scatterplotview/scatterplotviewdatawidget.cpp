@@ -72,22 +72,11 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
     setLayout(layout);
 
-//    if (identifier_value == "Radar")
-//        color = QColor("#00FF00");
-//    else if (identifier_value == "MLAT")
-//        color = QColor("#FF0000");
-//    else if (identifier_value == "ADSB")
-//        color = QColor("#6666FF");
-//    else if (identifier_value == "RefTraj")
-//        color = QColor("#FFA500");
-//    else if (identifier_value == "Tracker")
-//        color = QColor("#DDDDDD");
-
     colors_["Radar"] = QColor("#00FF00");
     colors_["MLAT"] = QColor("#FF0000");
     colors_["ADSB"] = QColor("#6666FF");
     colors_["RefTraj"] = QColor("#FFA500");
-    colors_["Tracker"] = QColor("#DDDDDD");
+    colors_["Tracker"] = QColor("#CCCCCC");
 }
 
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
@@ -834,24 +823,30 @@ void ScatterPlotViewDataWidget::updateChart()
         vector<double>& y_values = y_values_[data.first];
 
         QScatterSeries* chart_series = new QScatterSeries();
-        chart_series->setName(data.first.c_str());
         chart_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
         chart_series->setMarkerSize(8.0);
         chart_series->setUseOpenGL(true);
         chart_series->setColor(colors_[data.first]);
 
         assert (x_values.size() == y_values.size());
+        unsigned int sum_cnt {0};
 
         for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
         {
             if (!std::isnan(x_values.at(cnt)) && !std::isnan(y_values.at(cnt)))
+            {
                 chart_series->append(x_values.at(cnt), y_values.at(cnt));
+                ++sum_cnt;
+            }
         }
 
+        chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
         chart_->addSeries(chart_series);
     }
 
     chart_->createDefaultAxes();
+    chart_->axisX()->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
+    chart_->axisY()->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
     chart_->setDropShadowEnabled(false);
 }
 

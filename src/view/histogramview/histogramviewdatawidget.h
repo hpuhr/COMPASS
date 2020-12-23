@@ -88,7 +88,7 @@ class HistogramViewDataWidget : public QWidget
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
     unsigned int num_bins_{20};
-    std::vector<unsigned int> counts_;
+    std::map<std::string, std::vector<unsigned int>> counts_;
     unsigned int data_null_cnt_;
     std::vector<std::string> labels_;
     unsigned int max_bin_cnt_ {0};
@@ -97,6 +97,8 @@ class HistogramViewDataWidget : public QWidget
 
     bool bin_size_valid_ {false};
     double bin_size_;
+
+    std::map<std::string, QColor> colors_;
 
     QtCharts::QBarSeries* chart_series_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
@@ -147,19 +149,20 @@ class HistogramViewDataWidget : public QWidget
     void updateMinMax(NullableVector<unsigned long int>& data);
 
     template<typename T>
-    void updateCounts(NullableVector<T>& data, DBOVariable* data_var)
+    void updateCounts(const std::string& dbo_name, NullableVector<T>& data, DBOVariable* data_var)
     {
+        loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
+
         if (!bin_size_valid_)
         {
             logerr << "HistogramViewDataWidget: updateCounts: no bin size set";
             return;
         }
 
-        if (!counts_.size())
+        if (!labels_.size()) // set labels
         {
             for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
             {
-                counts_.push_back(0);
                 if (data_var->representation() != DBOVariable::Representation::STANDARD)
                     labels_.push_back(data_var->getAsSpecialRepresentationString(
                                           data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
@@ -167,6 +170,14 @@ class HistogramViewDataWidget : public QWidget
                     labels_.push_back(std::to_string(data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
 
             }
+        }
+
+        std::vector<unsigned int>& counts = counts_[dbo_name];
+
+        if (!counts.size()) // set 0 bins
+        {
+            for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+                counts.push_back(0);
         }
 
         unsigned int bin_number;
@@ -187,8 +198,10 @@ class HistogramViewDataWidget : public QWidget
                        << " bin number " << bin_number << " data " << data.get(cnt);
 
             assert (bin_number < num_bins_);
-            counts_.at(bin_number) += 1;
+            counts.at(bin_number) += 1;
         }
+
+        loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
     }
 };
 

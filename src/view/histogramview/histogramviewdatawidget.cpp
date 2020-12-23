@@ -71,6 +71,12 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     layout->addWidget(chart_view_);
 
     setLayout(layout);
+
+    colors_["Radar"] = QColor("#00FF00");
+    colors_["MLAT"] = QColor("#FF0000");
+    colors_["ADSB"] = QColor("#6666FF");
+    colors_["RefTraj"] = QColor("#FFA500");
+    colors_["Tracker"] = QColor("#CCCCCC");
 }
 
 HistogramViewDataWidget::~HistogramViewDataWidget()
@@ -125,6 +131,8 @@ void HistogramViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<B
 
 void HistogramViewDataWidget::updateFromData(std::string dbo_name)
 {
+    loginf << "HistogramViewDataWidget: updateFromData: start dbo " << dbo_name;
+
     assert (buffers_.count(dbo_name));
     Buffer* buffer = buffers_.at(dbo_name).get();
 
@@ -183,7 +191,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<bool> (data, data_var);
+        updateCounts<bool> (dbo_name, data, data_var);
 
         break;
     }
@@ -217,7 +225,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<char> (data, data_var);
+        updateCounts<char> (dbo_name, data, data_var);
 
         break;
     }
@@ -251,7 +259,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned char> (data, data_var);
+        updateCounts<unsigned char> (dbo_name, data, data_var);
 
         break;
     }
@@ -285,7 +293,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<int> (data, data_var);
+        updateCounts<int> (dbo_name, data, data_var);
 
         break;
     }
@@ -319,7 +327,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned int> (data, data_var);
+        updateCounts<unsigned int> (dbo_name, data, data_var);
 
         break;
     }
@@ -353,7 +361,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<long int> (data, data_var);
+        updateCounts<long int> (dbo_name, data, data_var);
 
         break;
     }
@@ -387,7 +395,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned long> (data, data_var);
+        updateCounts<unsigned long> (dbo_name, data, data_var);
 
         break;
     }
@@ -422,7 +430,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
         }
 
 
-        updateCounts<float> (data, data_var);
+        updateCounts<float> (dbo_name, data, data_var);
 
         break;
     }
@@ -452,24 +460,24 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
                 (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
                                                                 || data_max > data_max_.toDouble())))
         {
-            loginf << "UGA up all bin_size_valid " << bin_size_valid_;
+//            loginf << "UGA up all bin_size_valid " << bin_size_valid_;
 
-            loginf << " data_min_.isValid() " << data_min_.isValid()
-                   << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-                   << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
+//            loginf << " data_min_.isValid() " << data_min_.isValid()
+//                   << " data_min < data_min_ " << (data_min < data_min_.toDouble())
+//                   << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
 
-            loginf << " data_max_.isValid() " << data_max_.isValid()
-                   << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-                   << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
+//            loginf << " data_max_.isValid() " << data_max_.isValid()
+//                   << " data_max > data_max_ " << (data_max > data_max_.toDouble())
+//                   << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
 
             updateFromAllData(); // clear, recalc min/max, update
             return;
         }
 
-        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-               << " bin_size " << bin_size_;
+//        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
+//               << " bin_size " << bin_size_;
 
-        updateCounts<double> (data, data_var);
+        updateCounts<double> (dbo_name, data, data_var);
 
         break;
     }
@@ -494,6 +502,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
                     Property::asString(data_type));
     }
 
+    loginf << "HistogramViewDataWidget: updateFromData: done dbo " << dbo_name;
 }
 
 void HistogramViewDataWidget::updateFromAllData()
@@ -517,25 +526,34 @@ void HistogramViewDataWidget::updateFromAllData()
 
 void HistogramViewDataWidget::updateChart()
 {
+    loginf << "HistogramViewDataWidget: updateChart";
+
     chart_series_->clear();
 
     bool use_log_scale = view_->useLogScale();
 
-    QBarSet *set0 = new QBarSet((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
-    //*set0 << 1 << 2 << 3 << 4 << 5 << 6;
-    for (auto bin : counts_)
+    for (auto& cnt_it : counts_)
     {
-        if (bin > max_bin_cnt_)
-            max_bin_cnt_ = bin;
+        unsigned int sum_cnt {0};
+        for (auto bin : cnt_it.second)
+            sum_cnt += bin;
 
-        if (use_log_scale && bin == 0)
-            *set0 << 10e-6; // Logarithms of zero and negative values are undefined.
-        else
-            *set0 << bin;
+        QBarSet *set = new QBarSet((cnt_it.first+" ("+to_string(sum_cnt)+")").c_str());
+        //*set0 << 1 << 2 << 3 << 4 << 5 << 6;
+        for (auto bin : cnt_it.second)
+        {
+            if (bin > max_bin_cnt_)
+                max_bin_cnt_ = bin;
 
+            if (use_log_scale && bin == 0)
+                *set << 10e-6; // Logarithms of zero and negative values are undefined.
+            else
+                *set << bin;
+
+        }
+        set->setColor(colors_[cnt_it.first]);
+        chart_series_->append(set);
     }
-
-    chart_series_->append(set0);
 
     if (chart_x_axis_)
         delete chart_x_axis_;
@@ -583,6 +601,8 @@ void HistogramViewDataWidget::updateChart()
 
     chart_->zoomReset();
     //chart_->setTitle("Simple barchart example");
+
+    loginf << "HistogramViewDataWidget: updateChart: done";
 }
 
 void HistogramViewDataWidget::calculateGlobalMinMax()
