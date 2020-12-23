@@ -23,6 +23,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QFormLayout>
 
 #include "dbobjectmanager.h"
 #include "dbovariableselectionwidget.h"
@@ -52,6 +53,31 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
     connect(select_var_, &DBOVariableSelectionWidget::selectionChanged, this,
             &HistogramViewConfigWidget::selectedVariableChangedSlot);
     vlayout->addWidget(select_var_);
+
+    // eval
+    {
+        QVBoxLayout* eval_layout = new QVBoxLayout();
+
+        QFormLayout* eval_form_layout = new QFormLayout;
+        eval_form_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
+
+        eval_results_grpreq_label_ = new QLabel();
+        eval_results_grpreq_label_->setWordWrap(true);
+
+        eval_form_layout->addRow(tr("Requirement"), eval_results_grpreq_label_);
+
+        eval_results_id_label_ = new QLabel();
+        eval_results_id_label_->setWordWrap(true);
+
+        eval_form_layout->addRow(tr("Result"), eval_results_id_label_);
+
+        eval_layout->addLayout(eval_form_layout);
+
+        vlayout->addLayout(eval_layout);
+
+        updateEvalConfig();
+    }
+
 
     log_check_ = new QCheckBox("Logarithmic Y Scale");
     log_check_->setChecked(view_->useLogScale());
@@ -116,6 +142,25 @@ void HistogramViewConfigWidget::toggleLogScale()
     bool checked = log_check_->checkState() == Qt::Checked;
     logdbg << "HistogramViewConfigWidget: toggleLogScale: setting overwrite to " << checked;
     view_->useLogScale(checked);
+}
+
+void HistogramViewConfigWidget::updateEvalConfig()
+{
+    loginf << "HistogramViewConfigWidget: updateEvalConfig";
+
+    // grp_req
+    assert (eval_results_grpreq_label_);
+    assert (eval_results_id_label_);
+
+    if (view_->evalResultGrpReq().size())
+        eval_results_grpreq_label_->setText(view_->evalResultGrpReq().c_str());
+    else
+        eval_results_grpreq_label_->setText("None");
+
+    if (view_->evalResultsID().size())
+        eval_results_id_label_->setText(view_->evalResultsID().c_str());
+    else
+        eval_results_id_label_->setText("None");
 }
 
 void HistogramViewConfigWidget::reloadRequestedSlot()

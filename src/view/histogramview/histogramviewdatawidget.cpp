@@ -25,6 +25,28 @@
 #include "metadbovariable.h"
 #include "histogramviewdatasource.h"
 #include "logger.h"
+#include "evaluationmanager.h"
+
+#include "eval/results/extra/datasingle.h"
+#include "eval/results/extra/datajoined.h"
+#include "eval/results/extra/tracksingle.h"
+#include "eval/results/extra/trackjoined.h"
+#include "eval/results/detection/joined.h"
+#include "eval/results/detection/single.h"
+#include "eval/results/position/distancejoined.h"
+#include "eval/results/position/distancesingle.h"
+#include "eval/results/position/alongsingle.h"
+#include "eval/results/position/alongjoined.h"
+#include "eval/results/position/acrosssingle.h"
+#include "eval/results/position/acrossjoined.h"
+#include "eval/results/position/latencysingle.h"
+#include "eval/results/position/latencyjoined.h"
+#include "eval/results/identification/single.h"
+#include "eval/results/identification/joined.h"
+#include "eval/results/mode_a/single.h"
+#include "eval/results/mode_a/joined.h"
+#include "eval/results/mode_c/single.h"
+#include "eval/results/mode_c/joined.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
@@ -44,6 +66,7 @@
 QT_CHARTS_USE_NAMESPACE
 
 using namespace std;
+using namespace EvaluationRequirementResult;
 
 HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramViewDataSource* data_source,
                                                  QWidget* parent, Qt::WindowFlags f)
@@ -112,6 +135,7 @@ void HistogramViewDataWidget::clear ()
 void HistogramViewDataWidget::loadingStartedSlot()
 {
     clear();
+    updateChart();
 }
 
 void HistogramViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -524,6 +548,371 @@ void HistogramViewDataWidget::updateFromAllData()
     loginf << "HistogramViewDataWidget: updateFromAllData: done";
 }
 
+void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result)
+{
+    loginf << "HistogramViewDataWidget: updateFromResult";
+
+    if (result->type() == "SingleExtraData")
+        showResult(static_pointer_cast<SingleExtraData>(result));
+    else if (result->type() == "JoinedExtraData")
+        showResult(static_pointer_cast<JoinedExtraData>(result));
+    else if (result->type() == "SingleExtraTrack")
+        showResult(static_pointer_cast<SingleExtraTrack>(result));
+    else if (result->type() == "JoinedExtraTrack")
+        showResult(static_pointer_cast<JoinedExtraTrack>(result));
+    else if (result->type() == "SingleDetection")
+        showResult(static_pointer_cast<SingleDetection>(result));
+    else if (result->type() == "JoinedDetection")
+        showResult(static_pointer_cast<JoinedDetection>(result));
+    else if (result->type() == "SinglePositionDistance")
+        showResult(static_pointer_cast<SinglePositionDistance>(result));
+    else if (result->type() == "JoinedPositionDistance")
+        showResult(static_pointer_cast<JoinedPositionDistance>(result));
+    else if (result->type() == "SinglePositionAlong")
+        showResult(static_pointer_cast<SinglePositionAlong>(result));
+    else if (result->type() == "JoinedPositionAlong")
+        showResult(static_pointer_cast<JoinedPositionAlong>(result));
+    else if (result->type() == "SinglePositionAcross")
+        showResult(static_pointer_cast<SinglePositionAcross>(result));
+    else if (result->type() == "JoinedPositionAcross")
+        showResult(static_pointer_cast<JoinedPositionAcross>(result));
+    else if (result->type() == "SinglePositionLatency")
+        showResult(static_pointer_cast<SinglePositionLatency>(result));
+    else if (result->type() == "JoinedPositionLatency")
+        showResult(static_pointer_cast<JoinedPositionLatency>(result));
+    else if (result->type() == "SingleIdentification")
+        showResult(static_pointer_cast<SingleIdentification>(result));
+    else if (result->type() == "JoinedIdentification")
+        showResult(static_pointer_cast<JoinedIdentification>(result));
+    else if (result->type() == "SingleModeA")
+        showResult(static_pointer_cast<SingleModeA>(result));
+    else if (result->type() == "JoinedModeA")
+        showResult(static_pointer_cast<JoinedModeA>(result));
+    else if (result->type() == "SingleModeC")
+        showResult(static_pointer_cast<SingleModeC>(result));
+    else if (result->type() == "JoinedModeC")
+        showResult(static_pointer_cast<JoinedModeC>(result));
+    else
+        throw runtime_error("HistogramViewDataWidget: updateFromResult: unknown result type");
+}
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result)
+{
+
+}
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraData> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined data";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleExtraData>(result_it));
+
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleExtraData>(result_it));
+    }
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result)
+{
+
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined track";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleExtraTrack>(result_it));
+
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleExtraTrack>(result_it));
+    }
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result)
+{
+
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined detection";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleDetection>(result_it));
+
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleDetection>(result_it));
+    }
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result)
+{
+    assert (result);
+
+    const vector<double>& values = result->values(); // distance values
+
+    updateMinMax (values);
+    updateCounts(values);
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result)
+{
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results) // calculate global min max
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionDistance> single_result =
+                static_pointer_cast<SinglePositionDistance>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateMinMax (single_result->values());
+    }
+
+    for (auto& result_it : results) // update counts
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionDistance> single_result =
+                static_pointer_cast<SinglePositionDistance>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateCounts (single_result->values());
+    }
+
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result)
+{
+    assert (result);
+
+    const vector<double>& values = result->values(); // along values
+
+    updateMinMax (values);
+    updateCounts(values);
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionAlong> result)
+{
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results) // calculate global min max
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionAlong> single_result =
+                static_pointer_cast<SinglePositionAlong>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateMinMax (single_result->values());
+    }
+
+    for (auto& result_it : results) // update counts
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionAlong> single_result =
+                static_pointer_cast<SinglePositionAlong>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateCounts (single_result->values());
+    }
+
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionAcross> result)
+{
+    assert (result);
+
+    const vector<double>& values = result->values(); // across values
+
+    updateMinMax (values);
+    updateCounts(values);
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result)
+{
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results) // calculate global min max
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionAcross> single_result =
+                static_pointer_cast<SinglePositionAcross>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateMinMax (single_result->values());
+    }
+
+    for (auto& result_it : results) // update counts
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionAcross> single_result =
+                static_pointer_cast<SinglePositionAcross>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateCounts (single_result->values());
+    }
+
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result)
+{
+    assert (result);
+
+    const vector<double>& values = result->values(); // latency values
+
+    updateMinMax (values);
+    updateCounts(values);
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result)
+{
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results) // calculate global min max
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionLatency> single_result =
+                static_pointer_cast<SinglePositionLatency>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateMinMax (single_result->values());
+    }
+
+    for (auto& result_it : results) // update counts
+    {
+        shared_ptr<EvaluationRequirementResult::SinglePositionLatency> single_result =
+                static_pointer_cast<SinglePositionLatency>(result_it);
+        assert (single_result);
+
+        if (single_result->use())
+            updateCounts (single_result->values());
+    }
+
+    updateChart();
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::SingleIdentification> result)
+{
+
+}
+
+
+void HistogramViewDataWidget::showResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result)
+{
+    logdbg << "HistogramViewDataWidget: updateFromResult: joined identification";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleIdentification>(result_it));
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleIdentification>(result_it));
+    }
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeA> result)
+{
+
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeA> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleModeA>(result_it));
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleModeA>(result_it));
+    }
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result)
+{
+
+}
+
+
+void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined mode c";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleModeC>(result_it));
+        if (result_it->use())
+            showResult (static_pointer_cast<SingleModeC>(result_it));
+    }
+}
+
 void HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
@@ -565,7 +954,12 @@ void HistogramViewDataWidget::updateChart()
     //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
 
     chart_x_axis_ = new QBarCategoryAxis();
-    chart_x_axis_->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
+
+    if (view_->showResults())
+        chart_x_axis_->setTitleText(( view_->evalResultGrpReq()+":"+view_->evalResultsID()).c_str());
+    else
+        chart_x_axis_->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
+
     chart_x_axis_->setLabelsAngle(85);
     chart_x_axis_->append(categories);
     chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
@@ -603,6 +997,45 @@ void HistogramViewDataWidget::updateChart()
     //chart_->setTitle("Simple barchart example");
 
     loginf << "HistogramViewDataWidget: updateChart: done";
+}
+
+void HistogramViewDataWidget::updateResults()
+{
+    loginf << "HistogramViewDataWidget: updateResults";
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    if (eval_man.hasResults() && view_->showResults())
+    {
+        clear();
+
+        string eval_grpreq = view_->evalResultGrpReq();
+        string eval_id = view_->evalResultsID();
+
+        // check if ids are set
+        if (!eval_grpreq.size() || !eval_id.size())
+            return;
+
+        const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results =
+                eval_man.results();
+
+        // check if ids are in result
+        if (!results.count(eval_grpreq) || !results.at(eval_grpreq).count(eval_id))
+        {
+            logwrn << "HistogramViewDataWidget: updateResults: ids set but not in results";
+            return;
+        }
+
+        std::shared_ptr<EvaluationRequirementResult::Base> result = results.at(eval_grpreq).at(eval_id);
+        assert (result);
+        updateFromResult(result);
+    }
+
+//    osg_layer_model_->beginResetModel();
+//    osg_layer_model_->resultsItem().update();
+//    osg_layer_model_->endResetModel();
+
+//    drawSlot();
 }
 
 void HistogramViewDataWidget::calculateGlobalMinMax()
@@ -888,6 +1321,115 @@ void HistogramViewDataWidget::updateMinMax(NullableVector<unsigned long int>& da
         data_min_ = min_var;
         data_max_ = max_var;
     }
+}
+
+void HistogramViewDataWidget::updateMinMax(const std::vector<double>& data)
+{
+    bool min_max_set {false};
+    double data_min, data_max;
+
+    if (data_min_.isValid() && data_max_.isValid())
+    {
+        data_min = data_min_.toDouble();
+        data_max = data_max_.toDouble();
+        min_max_set = true;
+    }
+
+    for (auto val_it : data)
+    {
+        if (!min_max_set)
+        {
+            data_min = val_it;
+            data_max = val_it;
+            min_max_set = true;
+        }
+        else
+        {
+            data_min = std::min(data_min, val_it);
+            data_max = std::max(data_max, val_it);
+        }
+    }
+
+    if (min_max_set) // min max must be set
+    {
+        QVariant min_var = QVariant::fromValue(data_min);
+        QVariant max_var = QVariant::fromValue(data_max);
+
+        if (data_min_.isValid() && data_max_.isValid())
+        {
+            if (min_var < data_min_)
+                data_min_ = min_var;
+
+            if (max_var > data_max_)
+                data_max_ = max_var;
+        }
+        else
+        {
+            data_min_ = min_var;
+            data_max_ = max_var;
+        }
+    }
+
+    if (data_max_.isValid() && data_min_.isValid())
+    {
+        bin_size_ = (data_max_.toDouble()-data_min_.toDouble())/((double)num_bins_-1);
+        bin_size_valid_ = true;
+    }
+    else
+    {
+        bin_size_ = 0;
+        bin_size_valid_ = false;
+    }
+}
+
+void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
+{
+    loginf << "HistogramViewDataWidget: updateCounts: from result";
+
+    if (!bin_size_valid_)
+    {
+        logerr << "HistogramViewDataWidget: updateCounts: no bin size set";
+        return;
+    }
+
+    if (!labels_.size()) // set labels
+    {
+        for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+        {
+//            if (data_var->representation() != DBOVariable::Representation::STANDARD)
+//                labels_.push_back(data_var->getAsSpecialRepresentationString(
+//                                      data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
+//            else
+                labels_.push_back(std::to_string(data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
+
+        }
+    }
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+    std::vector<unsigned int>& counts = counts_[dbo_name];
+
+    if (!counts.size()) // set 0 bins
+    {
+        for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+            counts.push_back(0);
+    }
+
+    unsigned int bin_number;
+    unsigned int data_size = data.size();
+
+    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    {
+        bin_number = (unsigned int) ((data.at(cnt)-data_min_.toDouble())/bin_size_);
+
+        if (bin_number >= num_bins_)
+            logerr << "HistogramViewDataWidget: updateFromData: bin_size " << bin_size_
+                   << " bin number " << bin_number << " data " << data.at(cnt);
+
+        assert (bin_number < num_bins_);
+        counts.at(bin_number) += 1;
+    }
+
+    loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
 }
 
 void HistogramViewDataWidget::exportDataSlot(bool overwrite)

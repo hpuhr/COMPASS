@@ -23,11 +23,13 @@
 #include "dbovariable.h"
 
 class DBOVariableOrderedSetWidget;
-class QCheckBox;
 class HistogramView;
+class DBOVariableSelectionWidget;
+
+class QCheckBox;
 class QLineEdit;
 class QPushButton;
-class DBOVariableSelectionWidget;
+class QLabel;
 
 /**
  * @brief Widget with configuration elements for a HistogramView
@@ -56,10 +58,16 @@ class HistogramViewConfigWidget : public QWidget
     HistogramViewConfigWidget(HistogramView* view, QWidget* parent = nullptr);
     virtual ~HistogramViewConfigWidget();
 
+    void updateEvalConfig();
+
   protected:
     HistogramView* view_;
 
     DBOVariableSelectionWidget* select_var_ {nullptr};
+
+    // eval
+    QLabel* eval_results_grpreq_label_{nullptr};
+    QLabel* eval_results_id_label_{nullptr};
 
     QCheckBox* log_check_ {nullptr};
     //QPushButton* export_button_{nullptr};

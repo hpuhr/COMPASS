@@ -30,6 +30,8 @@
 #include "logger.h"
 #include "viewselection.h"
 #include "latexvisitor.h"
+#include "evaluationmanager.h"
+
 
 HistogramView::HistogramView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
@@ -98,6 +100,10 @@ bool HistogramView::init()
     //    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     //    widget_->getDataWidget()->usePresentationSlot(use_presentation_);
     //    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
+
+    // eval
+    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal,
+            this, &HistogramView::resultsChangedSlot);
 
     return true;
 }
@@ -256,7 +262,7 @@ void HistogramView::updateSelection()
 {
     loginf << "HistogramView: updateSelection";
     assert(widget_);
-
+    
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
     //    else
@@ -267,9 +273,55 @@ void HistogramView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "HistogramView: unshowViewPoint";
 
-    assert (vp);
-    assert (data_source_);
-    data_source_->unshowViewPoint(vp);
+//    assert (vp);
+//    assert (data_source_);
+//    data_source_->unshowViewPoint(vp);
+
+    current_view_point_ = nullptr;
+}
+
+bool HistogramView::showResults() const
+{
+    return show_results_;
+}
+
+void HistogramView::showResults(bool value)
+{
+    show_results_ = value;
+}
+
+std::string HistogramView::evalResultGrpReq() const
+{
+    return eval_results_grpreq_;
+}
+
+void HistogramView::evalResultGrpReq(const std::string& value)
+{
+    if (eval_results_grpreq_ == value)
+        return;
+
+    loginf << "HistogramView: evalResultGrpReq: value " << value;
+
+    eval_results_grpreq_ = value;
+
+    widget_->getDataWidget()->updateResults();
+}
+
+std::string HistogramView::evalResultsID() const
+{
+    return eval_results_id_;
+}
+
+void HistogramView::evalResultsID(const std::string& value)
+{
+    if (eval_results_id_ == value)
+        return;
+
+    loginf << "HistogramView: evalResultsID: value " << value;
+
+    eval_results_id_ = value;
+
+    widget_->getDataWidget()->updateResults();
 }
 
 void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
@@ -277,9 +329,45 @@ void HistogramView::showViewPointSlot (const ViewableDataConfig* vp)
     loginf << "HistogramView: showViewPoint";
 
     assert (vp);
-    assert (data_source_);
-    data_source_->showViewPoint(vp);
-    assert (widget_);
+//    assert (data_source_);
+//    data_source_->showViewPoint(vp);
+//    assert (widget_);
+
+    current_view_point_ = vp;
+
+    //widget_->getDataWidget()->resetViewPointZoomed(); // TODO
+}
+
+void HistogramView::resultsChangedSlot()
+{
+    loginf << "HistogramView: resultsChangedSlot";
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results =
+            eval_man.results();
+
+    // check if result ids are still valid
+    if (!results.size())
+    {
+        eval_results_grpreq_ = "";
+        eval_results_id_ = "";
+    }
+    else
+    {
+        if (!results.count(eval_results_grpreq_))
+        {
+            eval_results_grpreq_ = "";
+            eval_results_id_ = "";
+        }
+        else if (!results.at(eval_results_grpreq_).count(eval_results_id_))
+        {
+            eval_results_id_ = "";
+        }
+    }
+
+    widget_->configWidget()->updateEvalConfig();
+    widget_->getDataWidget()->updateResults();
 }
 
 void HistogramView::allLoadingDoneSlot()
@@ -288,5 +376,34 @@ void HistogramView::allLoadingDoneSlot()
     assert(widget_);
 
     widget_->configWidget()->setDisabled(false);
+
+    if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
+    {
+        const nlohmann::json& data = current_view_point_->data();
+        assert (data.at("evaluation_results").contains("show_results"));
+        assert (data.at("evaluation_results").contains("req_grp_id"));
+        assert (data.at("evaluation_results").contains("result_id"));
+
+        show_results_ = data.at("evaluation_results").at("show_results");
+        eval_results_grpreq_ = data.at("evaluation_results").at("req_grp_id");
+        eval_results_id_ = data.at("evaluation_results").at("result_id");
+
+        show_results_ = true;
+
+//        eval_highlight_details_.clear();
+
+//        if (data.at("evaluation_results").contains("highlight_details"))
+//        {
+//            loginf << "OSGView: loadingDoneSlot: highlight_details "
+//                   << data.at("evaluation_results").at("highlight_details").dump();
+
+//            vector<unsigned int> highlight_details = data.at("evaluation_results").at("highlight_details");
+//            eval_highlight_details_ = move(highlight_details);
+//        }
+
+        resultsChangedSlot();
+    }
+    else
+        show_results_ = false;
 }
 

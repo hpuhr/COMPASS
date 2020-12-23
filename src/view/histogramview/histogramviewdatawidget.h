@@ -33,6 +33,31 @@ class QTabWidget;
 class Buffer;
 class DBObject;
 
+namespace EvaluationRequirementResult
+{
+    class Base;
+    class SingleExtraData;
+    class JoinedExtraData;
+    class SingleExtraTrack;
+    class JoinedExtraTrack;
+    class SingleDetection;
+    class JoinedDetection;
+    class SinglePositionDistance;
+    class JoinedPositionDistance;
+    class SinglePositionAlong;
+    class JoinedPositionAlong;
+    class SinglePositionAcross;
+    class JoinedPositionAcross;
+    class SinglePositionLatency;
+    class JoinedPositionLatency;
+    class SingleIdentification;
+    class JoinedIdentification;
+    class SingleModeA;
+    class JoinedModeA;
+    class SingleModeC;
+    class JoinedModeC;
+}
+
 namespace QtCharts {
     class QChart;
     class QBarSeries;
@@ -40,7 +65,6 @@ namespace QtCharts {
     class QBarCategoryAxis;
     class QAbstractAxis;
 }
-
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in HistogramView
@@ -78,6 +102,8 @@ class HistogramViewDataWidget : public QWidget
     void update();
     void updateChart();
 
+    void updateResults();
+
     void clear();
 
   protected:
@@ -108,6 +134,27 @@ class HistogramViewDataWidget : public QWidget
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();
+    void updateFromResult(std::shared_ptr<EvaluationRequirementResult::Base> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraData> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAlong> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionAcross> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentification> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeA> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeA> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result);
+    void showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result);
 
     void calculateGlobalMinMax();
 
@@ -147,6 +194,7 @@ class HistogramViewDataWidget : public QWidget
     void updateMinMax(NullableVector<std::string>& data);
     void updateMinMax(NullableVector<long int>& data);
     void updateMinMax(NullableVector<unsigned long int>& data);
+    void updateMinMax(const std::vector<double>& data);
 
     template<typename T>
     void updateCounts(const std::string& dbo_name, NullableVector<T>& data, DBOVariable* data_var)
@@ -203,6 +251,8 @@ class HistogramViewDataWidget : public QWidget
 
         loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;
     }
+
+    void updateCounts(const std::vector<double>& data);
 };
 
 #endif /* HISTOGRAMVIEWDATAWIDGET_H_ */

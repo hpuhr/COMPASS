@@ -36,6 +36,8 @@ class HistogramView : public View
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
     void allLoadingDoneSlot();
 
+    void resultsChangedSlot();
+
   signals:
     void showOnlySelectedSignal(bool value);
     void usePresentationSignal(bool value);
@@ -82,6 +84,18 @@ class HistogramView : public View
     std::string dataVarDBO() const;
     std::string dataVarName() const;
 
+    bool showResults() const;
+    void showResults(bool value);
+
+    std::string evalResultGrpReq() const;
+    void evalResultGrpReq(const std::string& value);
+
+    std::string evalResultsID() const;
+    void evalResultsID(const std::string& value);
+
+    bool hasViewPoint () { return current_view_point_ != nullptr; }
+    const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
+
 protected:
     /// For data display
     HistogramViewWidget* widget_{nullptr};
@@ -92,6 +106,12 @@ protected:
     std::string data_var_name_;
 
     bool use_log_scale_ {false};
+
+    bool show_results_{true};
+    std::string eval_results_grpreq_;
+    std::string eval_results_id_;
+
+    const ViewableDataConfig* current_view_point_ {nullptr};
 
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
