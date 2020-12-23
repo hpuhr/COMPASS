@@ -84,8 +84,10 @@ class ScatterPlotViewDataWidget : public QWidget
     std::map<std::string, unsigned int> buffer_x_counts_;
     std::map<std::string, unsigned int> buffer_y_counts_;
 
-    std::vector<double> x_values_;
-    std::vector<double> y_values_;
+    std::map<std::string, std::vector<double>> x_values_;
+    std::map<std::string, std::vector<double>> y_values_;
+
+    std::map<std::string, QColor> colors_;
 
     //QtCharts::QScatterSeries* chart_series_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};

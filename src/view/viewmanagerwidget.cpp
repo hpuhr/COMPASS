@@ -28,7 +28,6 @@
 #include "jobmanager.h"
 #include "logger.h"
 #include "viewcontainer.h"
-#include "viewcontainerconfigwidget.h"
 #include "viewcontainerwidget.h"
 #include "viewmanager.h"
 
