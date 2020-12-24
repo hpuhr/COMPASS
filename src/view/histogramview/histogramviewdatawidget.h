@@ -115,7 +115,7 @@ class HistogramViewDataWidget : public QWidget
 
     unsigned int num_bins_{20};
     std::map<std::string, std::vector<unsigned int>> counts_;
-    unsigned int data_null_cnt_;
+    std::map<std::string, unsigned int> data_null_cnt_;
     std::vector<std::string> labels_;
     unsigned int max_bin_cnt_ {0};
     QVariant data_min_;
@@ -235,7 +235,7 @@ class HistogramViewDataWidget : public QWidget
         {
             if (data.isNull(cnt))
             {
-                ++data_null_cnt_;
+                ++data_null_cnt_[dbo_name];
                 continue;
             }
 

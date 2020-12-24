@@ -122,7 +122,7 @@ void HistogramViewDataWidget::clear ()
     buffers_.clear();
 
     counts_.clear();
-    data_null_cnt_ = 0;
+    data_null_cnt_.clear();
     labels_.clear();
 
     max_bin_cnt_ = 0;
@@ -536,6 +536,7 @@ void HistogramViewDataWidget::updateFromAllData()
     loginf << "HistogramViewDataWidget: updateFromAllData";
 
     counts_.clear();
+    data_null_cnt_.clear();
     labels_.clear();
 
     max_bin_cnt_ = 0;
@@ -945,6 +946,12 @@ void HistogramViewDataWidget::updateChart()
                 *set << bin;
 
         }
+
+        if (data_null_cnt_.size())
+        {
+            *set << data_null_cnt_[cnt_it.first];
+        }
+
         set->setColor(colors_[cnt_it.first]);
         chart_series_->append(set);
     }
@@ -956,6 +963,9 @@ void HistogramViewDataWidget::updateChart()
 
     for (auto lbl : labels_)
         categories << lbl.c_str();
+
+    if (data_null_cnt_.size())
+        categories << "NULL";
     //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
 
     chart_x_axis_ = new QBarCategoryAxis();
@@ -1013,7 +1023,7 @@ void HistogramViewDataWidget::updateResults()
     if (eval_man.hasResults() && view_->showResults())
     {
         counts_.clear();
-        data_null_cnt_ = 0;
+        data_null_cnt_.clear();
         labels_.clear();
 
         max_bin_cnt_ = 0;
