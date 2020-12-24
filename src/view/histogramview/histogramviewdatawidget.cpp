@@ -559,57 +559,80 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
     loginf << "HistogramViewDataWidget: updateFromResult";
 
     if (result->type() == "SingleExtraData")
-        showResult(static_pointer_cast<SingleExtraData>(result));
+        updateCountResult(static_pointer_cast<SingleExtraData>(result));
     else if (result->type() == "JoinedExtraData")
-        showResult(static_pointer_cast<JoinedExtraData>(result));
+        updateCountResult(static_pointer_cast<JoinedExtraData>(result));
     else if (result->type() == "SingleExtraTrack")
-        showResult(static_pointer_cast<SingleExtraTrack>(result));
+        updateCountResult(static_pointer_cast<SingleExtraTrack>(result));
     else if (result->type() == "JoinedExtraTrack")
-        showResult(static_pointer_cast<JoinedExtraTrack>(result));
+        updateCountResult(static_pointer_cast<JoinedExtraTrack>(result));
     else if (result->type() == "SingleDetection")
-        showResult(static_pointer_cast<SingleDetection>(result));
+        updateCountResult(static_pointer_cast<SingleDetection>(result));
     else if (result->type() == "JoinedDetection")
-        showResult(static_pointer_cast<JoinedDetection>(result));
+        updateCountResult(static_pointer_cast<JoinedDetection>(result));
     else if (result->type() == "SinglePositionDistance")
-        showResult(static_pointer_cast<SinglePositionDistance>(result));
+        updateCountResult(static_pointer_cast<SinglePositionDistance>(result));
     else if (result->type() == "JoinedPositionDistance")
-        showResult(static_pointer_cast<JoinedPositionDistance>(result));
+        updateCountResult(static_pointer_cast<JoinedPositionDistance>(result));
     else if (result->type() == "SinglePositionAlong")
-        showResult(static_pointer_cast<SinglePositionAlong>(result));
+        updateCountResult(static_pointer_cast<SinglePositionAlong>(result));
     else if (result->type() == "JoinedPositionAlong")
-        showResult(static_pointer_cast<JoinedPositionAlong>(result));
+        updateCountResult(static_pointer_cast<JoinedPositionAlong>(result));
     else if (result->type() == "SinglePositionAcross")
-        showResult(static_pointer_cast<SinglePositionAcross>(result));
+        updateCountResult(static_pointer_cast<SinglePositionAcross>(result));
     else if (result->type() == "JoinedPositionAcross")
-        showResult(static_pointer_cast<JoinedPositionAcross>(result));
+        updateCountResult(static_pointer_cast<JoinedPositionAcross>(result));
     else if (result->type() == "SinglePositionLatency")
-        showResult(static_pointer_cast<SinglePositionLatency>(result));
+        updateCountResult(static_pointer_cast<SinglePositionLatency>(result));
     else if (result->type() == "JoinedPositionLatency")
-        showResult(static_pointer_cast<JoinedPositionLatency>(result));
+        updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
     else if (result->type() == "SingleIdentification")
-        showResult(static_pointer_cast<SingleIdentification>(result));
+        updateCountResult(static_pointer_cast<SingleIdentification>(result));
     else if (result->type() == "JoinedIdentification")
-        showResult(static_pointer_cast<JoinedIdentification>(result));
+        updateCountResult(static_pointer_cast<JoinedIdentification>(result));
     else if (result->type() == "SingleModeA")
-        showResult(static_pointer_cast<SingleModeA>(result));
+        updateCountResult(static_pointer_cast<SingleModeA>(result));
     else if (result->type() == "JoinedModeA")
-        showResult(static_pointer_cast<JoinedModeA>(result));
+        updateCountResult(static_pointer_cast<JoinedModeA>(result));
     else if (result->type() == "SingleModeC")
-        showResult(static_pointer_cast<SingleModeC>(result));
+        updateCountResult(static_pointer_cast<SingleModeC>(result));
     else if (result->type() == "JoinedModeC")
-        showResult(static_pointer_cast<JoinedModeC>(result));
+        updateCountResult(static_pointer_cast<JoinedModeC>(result));
     else
         throw runtime_error("HistogramViewDataWidget: updateFromResult: unknown result type");
+
+    updateChart();
 }
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraData> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single extra data";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numOK()+result->numExtra());
+        counts_[dbo_name].push_back(result->numOK());
+        counts_[dbo_name].push_back(result->numExtra());
+
+        labels_.push_back("#Check");
+        labels_.push_back("#OK");
+        labels_.push_back("#Extra");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numOK()+result->numExtra();
+        counts_[dbo_name].at(1) += result->numOK();
+        counts_[dbo_name].at(2) += result->numExtra();
+    }
 }
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraData> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraData> result)
 {
-    logdbg << "HistogramViewDataWidget: showResult: joined data";
+    logdbg << "HistogramViewDataWidget: showResult: joined extra data";
 
     assert (result);
 
@@ -620,18 +643,39 @@ void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementR
         assert (static_pointer_cast<SingleExtraData>(result_it));
 
         if (result_it->use())
-            showResult (static_pointer_cast<SingleExtraData>(result_it));
+            updateCountResult (static_pointer_cast<SingleExtraData>(result_it));
     }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single extra track";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numOK()+result->numExtra());
+        counts_[dbo_name].push_back(result->numOK());
+        counts_[dbo_name].push_back(result->numExtra());
+
+        labels_.push_back("#Check");
+        labels_.push_back("#OK");
+        labels_.push_back("#Extra");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numOK()+result->numExtra();
+        counts_[dbo_name].at(1) += result->numOK();
+        counts_[dbo_name].at(2) += result->numExtra();
+    }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined track";
 
@@ -644,18 +688,36 @@ void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementR
         assert (static_pointer_cast<SingleExtraTrack>(result_it));
 
         if (result_it->use())
-            showResult (static_pointer_cast<SingleExtraTrack>(result_it));
+            updateCountResult (static_pointer_cast<SingleExtraTrack>(result_it));
     }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single detection";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->sumUIs());
+        counts_[dbo_name].push_back(result->missedUIs());
+
+        labels_.push_back("#EUIs");
+        labels_.push_back("#MUIs");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->sumUIs();
+        counts_[dbo_name].at(1) += result->missedUIs();
+    }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined detection";
 
@@ -668,12 +730,12 @@ void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementR
         assert (static_pointer_cast<SingleDetection>(result_it));
 
         if (result_it->use())
-            showResult (static_pointer_cast<SingleDetection>(result_it));
+            updateCountResult (static_pointer_cast<SingleDetection>(result_it));
     }
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result)
 {
     assert (result);
@@ -682,11 +744,10 @@ void HistogramViewDataWidget::showResult (
 
     updateMinMax (values);
     updateCounts(values);
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result)
 {
     assert (result);
@@ -712,12 +773,10 @@ void HistogramViewDataWidget::showResult (
         if (single_result->use())
             updateCounts (single_result->values());
     }
-
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result)
 {
     assert (result);
@@ -726,11 +785,10 @@ void HistogramViewDataWidget::showResult (
 
     updateMinMax (values);
     updateCounts(values);
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionAlong> result)
 {
     assert (result);
@@ -756,12 +814,10 @@ void HistogramViewDataWidget::showResult (
         if (single_result->use())
             updateCounts (single_result->values());
     }
-
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionAcross> result)
 {
     assert (result);
@@ -770,11 +826,10 @@ void HistogramViewDataWidget::showResult (
 
     updateMinMax (values);
     updateCounts(values);
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result)
 {
     assert (result);
@@ -800,12 +855,10 @@ void HistogramViewDataWidget::showResult (
         if (single_result->use())
             updateCounts (single_result->values());
     }
-
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result)
 {
     assert (result);
@@ -818,7 +871,7 @@ void HistogramViewDataWidget::showResult (
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result)
 {
     assert (result);
@@ -844,19 +897,41 @@ void HistogramViewDataWidget::showResult (
         if (single_result->use())
             updateCounts (single_result->values());
     }
-
-    updateChart();
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SingleIdentification> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single identification";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numNoRefId());
+        counts_[dbo_name].push_back(result->numUnknownId());
+        counts_[dbo_name].push_back(result->numCorrectId());
+        counts_[dbo_name].push_back(result->numFalseId());
+
+        labels_.push_back("#NoRef");
+        labels_.push_back("#UID");
+        labels_.push_back("#CID");
+        labels_.push_back("#FID");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numNoRefId();
+        counts_[dbo_name].at(1) += result->numUnknownId();
+        counts_[dbo_name].at(2) += result->numCorrectId();
+        counts_[dbo_name].at(3) += result->numFalseId();
+    }
 }
 
 
-void HistogramViewDataWidget::showResult (
+void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result)
 {
     logdbg << "HistogramViewDataWidget: updateFromResult: joined identification";
@@ -869,18 +944,42 @@ void HistogramViewDataWidget::showResult (
     {
         assert (static_pointer_cast<SingleIdentification>(result_it));
         if (result_it->use())
-            showResult (static_pointer_cast<SingleIdentification>(result_it));
+            updateCountResult (static_pointer_cast<SingleIdentification>(result_it));
     }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeA> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeA> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single mode a";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numNoRefValue());
+        counts_[dbo_name].push_back(result->numUnknown());
+        counts_[dbo_name].push_back(result->numCorrect());
+        counts_[dbo_name].push_back(result->numFalse());
+
+        labels_.push_back("#NoRef");
+        labels_.push_back("#Unknown");
+        labels_.push_back("#Correct");
+        labels_.push_back("#False");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numNoRefValue();
+        counts_[dbo_name].at(1) += result->numUnknown();
+        counts_[dbo_name].at(2) += result->numCorrect();
+        counts_[dbo_name].at(3) += result->numFalse();
+    }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeA> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeA> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a";
 
@@ -892,18 +991,42 @@ void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementR
     {
         assert (static_pointer_cast<SingleModeA>(result_it));
         if (result_it->use())
-            showResult (static_pointer_cast<SingleModeA>(result_it));
+            updateCountResult (static_pointer_cast<SingleModeA>(result_it));
     }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result)
 {
+    logdbg << "HistogramViewDataWidget: showResult: single mode c";
 
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numNoRefValue());
+        counts_[dbo_name].push_back(result->numUnknown());
+        counts_[dbo_name].push_back(result->numCorrect());
+        counts_[dbo_name].push_back(result->numFalse());
+
+        labels_.push_back("#NoRef");
+        labels_.push_back("#Unknown");
+        labels_.push_back("#Correct");
+        labels_.push_back("#False");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numNoRefValue();
+        counts_[dbo_name].at(1) += result->numUnknown();
+        counts_[dbo_name].at(2) += result->numCorrect();
+        counts_[dbo_name].at(3) += result->numFalse();
+    }
 }
 
 
-void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode c";
 
@@ -915,7 +1038,7 @@ void HistogramViewDataWidget::showResult (std::shared_ptr<EvaluationRequirementR
     {
         assert (static_pointer_cast<SingleModeC>(result_it));
         if (result_it->use())
-            showResult (static_pointer_cast<SingleModeC>(result_it));
+            updateCountResult (static_pointer_cast<SingleModeC>(result_it));
     }
 }
 
