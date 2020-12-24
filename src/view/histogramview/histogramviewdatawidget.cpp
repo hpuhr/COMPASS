@@ -117,6 +117,8 @@ void HistogramViewDataWidget::update()
 
 void HistogramViewDataWidget::clear ()
 {
+    loginf << "HistogramViewDataWidget: clear";
+
     buffers_.clear();
 
     counts_.clear();
@@ -540,6 +542,9 @@ void HistogramViewDataWidget::updateFromAllData()
 
     data_min_.clear();
     data_max_.clear();
+
+    loginf << "HistogramViewDataWidget: updateFromAllData: num buffers " << buffers_.size();
+
     calculateGlobalMinMax();
 
     for (auto& buf_it : buffers_)
@@ -1007,7 +1012,17 @@ void HistogramViewDataWidget::updateResults()
 
     if (eval_man.hasResults() && view_->showResults())
     {
-        clear();
+        counts_.clear();
+        data_null_cnt_ = 0;
+        labels_.clear();
+
+        max_bin_cnt_ = 0;
+
+        data_min_.clear();
+        data_max_.clear();
+
+        bin_size_valid_ = false;
+        bin_size_ = 0;
 
         string eval_grpreq = view_->evalResultGrpReq();
         string eval_id = view_->evalResultsID();

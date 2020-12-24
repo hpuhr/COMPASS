@@ -107,7 +107,7 @@ protected:
 
     bool use_log_scale_ {false};
 
-    bool show_results_{true};
+    bool show_results_{false}; // no results at first
     std::string eval_results_grpreq_;
     std::string eval_results_id_;
 

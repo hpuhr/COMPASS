@@ -288,6 +288,13 @@ bool HistogramView::showResults() const
 void HistogramView::showResults(bool value)
 {
     show_results_ = value;
+
+    widget_->configWidget()->updateEvalConfig();
+
+    if (show_results_)
+        getDataWidget()->updateResults();
+    else
+        getDataWidget()->update();
 }
 
 std::string HistogramView::evalResultGrpReq() const
@@ -388,7 +395,7 @@ void HistogramView::allLoadingDoneSlot()
         eval_results_grpreq_ = data.at("evaluation_results").at("req_grp_id");
         eval_results_id_ = data.at("evaluation_results").at("result_id");
 
-        show_results_ = true;
+        //show_results_ = true;
 
 //        eval_highlight_details_.clear();
 

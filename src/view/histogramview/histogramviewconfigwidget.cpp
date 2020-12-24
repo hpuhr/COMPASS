@@ -41,6 +41,13 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
     assert(view_);
 
+    // data variable
+    selected_var_check_ = new QCheckBox("Show Variable Data");
+    selected_var_check_->setChecked(!view_->showResults());
+    connect(selected_var_check_, &QCheckBox::clicked, this,
+            &HistogramViewConfigWidget::showSelectedVariableDataSlot);
+    vlayout->addWidget(selected_var_check_);
+
     select_var_ = new DBOVariableSelectionWidget();
     select_var_->showMetaVariables(true);
     if (view_->hasDataVar())
@@ -56,6 +63,13 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
     // eval
     {
+        eval_results_check_ = new QCheckBox("Show Evaluation Result Data");
+        eval_results_check_->setChecked(!view_->showResults());
+        connect(eval_results_check_, &QCheckBox::clicked, this,
+                &HistogramViewConfigWidget::showEvaluationResultDataSlot);
+        vlayout->addWidget(eval_results_check_);
+
+
         QVBoxLayout* eval_layout = new QVBoxLayout();
 
         QFormLayout* eval_form_layout = new QFormLayout;
@@ -100,6 +114,26 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 }
 
 HistogramViewConfigWidget::~HistogramViewConfigWidget() {}
+
+void HistogramViewConfigWidget::showSelectedVariableDataSlot()
+{
+    loginf << "HistogramViewConfigWidget: showSelectedVariableDataSlot";
+
+    if (selected_var_check_->checkState() == Qt::Unchecked) // only unchecked with other checkbox
+        selected_var_check_->setChecked(true);
+    else
+        view_->showResults(false);
+}
+
+void HistogramViewConfigWidget::showEvaluationResultDataSlot()
+{
+    loginf << "HistogramViewConfigWidget: showEvaluationResultDataSlot";
+
+    if (eval_results_check_->checkState() == Qt::Unchecked) // only unchecked with other checkbox
+        eval_results_check_->setChecked(true);
+    else
+        view_->showResults(true);
+}
 
 void HistogramViewConfigWidget::selectedVariableChangedSlot()
 {
@@ -161,6 +195,11 @@ void HistogramViewConfigWidget::updateEvalConfig()
         eval_results_id_label_->setText(view_->evalResultsID().c_str());
     else
         eval_results_id_label_->setText("None");
+
+    eval_results_check_->setEnabled(view_->evalResultGrpReq().size() && view_->evalResultsID().size());
+    eval_results_check_->setChecked(view_->showResults());
+
+    selected_var_check_->setChecked(!view_->showResults());
 }
 
 void HistogramViewConfigWidget::reloadRequestedSlot()

@@ -40,6 +40,8 @@ class HistogramViewConfigWidget : public QWidget
     Q_OBJECT
 
   public slots:
+    void showSelectedVariableDataSlot();
+    void showEvaluationResultDataSlot();
     void selectedVariableChangedSlot();
 
     void toggleLogScale();
@@ -63,9 +65,12 @@ class HistogramViewConfigWidget : public QWidget
   protected:
     HistogramView* view_;
 
+    // data variable
+    QCheckBox* selected_var_check_ {nullptr}; // active if variable data is shown
     DBOVariableSelectionWidget* select_var_ {nullptr};
 
     // eval
+    QCheckBox* eval_results_check_ {nullptr}; // active if eval data is shown
     QLabel* eval_results_grpreq_label_{nullptr};
     QLabel* eval_results_id_label_{nullptr};
 
