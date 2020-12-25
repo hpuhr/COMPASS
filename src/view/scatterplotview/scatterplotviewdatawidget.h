@@ -86,6 +86,8 @@ class ScatterPlotViewDataWidget : public QWidget
 
     std::map<std::string, std::vector<double>> x_values_;
     std::map<std::string, std::vector<double>> y_values_;
+    std::map<std::string, std::vector<bool>> selected_values_;
+    std::map<std::string, std::vector<unsigned int>> rec_num_values_;
 
     std::map<std::string, QColor> colors_;
 

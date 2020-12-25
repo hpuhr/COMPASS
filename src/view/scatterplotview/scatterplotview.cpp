@@ -332,6 +332,8 @@ void ScatterPlotView::updateSelection()
     loginf << "ScatterPlotView: updateSelection";
     assert(widget_);
 
+    widget_->getDataWidget()->update();
+
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
     //    else
