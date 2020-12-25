@@ -225,7 +225,7 @@ void HistogramView::dataVar (DBOVariable& var)
     assert (!isDataVarMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updateToData();
 }
 
 MetaDBOVariable& HistogramView::metaDataVar()
@@ -244,7 +244,7 @@ void HistogramView::metaDataVar (MetaDBOVariable& var)
     assert (isDataVarMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updateToData();
 }
 
 
@@ -294,7 +294,7 @@ void HistogramView::showResults(bool value)
     if (show_results_)
         getDataWidget()->updateResults();
     else
-        getDataWidget()->update();
+        getDataWidget()->updateToData();
 }
 
 std::string HistogramView::evalResultGrpReq() const
@@ -411,6 +411,9 @@ void HistogramView::allLoadingDoneSlot()
         resultsChangedSlot();
     }
     else
+    {
         show_results_ = false;
+        getDataWidget()->loadingDoneSlot();
+    }
 }
 

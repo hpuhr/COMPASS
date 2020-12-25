@@ -226,7 +226,7 @@ void ScatterPlotView::dataVarX (DBOVariable& var)
     assert (!isDataVarXMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updatePlot();
 }
 
 MetaDBOVariable& ScatterPlotView::metaDataVarX()
@@ -245,7 +245,7 @@ void ScatterPlotView::metaDataVarX (MetaDBOVariable& var)
     assert (isDataVarXMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updatePlot();
 }
 
 
@@ -293,7 +293,7 @@ void ScatterPlotView::dataVarY (DBOVariable& var)
     assert (!isDataVarYMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updatePlot();
 }
 
 MetaDBOVariable& ScatterPlotView::metaDataVarY()
@@ -312,7 +312,7 @@ void ScatterPlotView::metaDataVarY (MetaDBOVariable& var)
     assert (isDataVarYMeta());
 
     assert (widget_);
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updatePlot();
 }
 
 
@@ -332,7 +332,7 @@ void ScatterPlotView::updateSelection()
     loginf << "ScatterPlotView: updateSelection";
     assert(widget_);
 
-    widget_->getDataWidget()->update();
+    widget_->getDataWidget()->updatePlot();
 
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
@@ -365,5 +365,6 @@ void ScatterPlotView::allLoadingDoneSlot()
     assert(widget_);
 
     widget_->configWidget()->setDisabled(false);
+    getDataWidget()->loadingDoneSlot(); // updates plot
 }
 

@@ -107,7 +107,7 @@ HistogramViewDataWidget::~HistogramViewDataWidget()
     delete chart_view_;
 }
 
-void HistogramViewDataWidget::update()
+void HistogramViewDataWidget::updateToData()
 {
     loginf << "HistogramViewDataWidget: update";
 
@@ -148,11 +148,15 @@ void HistogramViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<B
         return;
 
     buffers_[object.name()] = buffer;
-    updateFromData(object.name());
-
-    updateChart();
+    //updateFromData(object.name());
 
     logdbg << "HistogramViewDataWidget: updateDataSlot: end";
+}
+
+void HistogramViewDataWidget::loadingDoneSlot()
+{
+    //updateChart();
+    updateToData();
 }
 
 void HistogramViewDataWidget::updateFromData(std::string dbo_name)

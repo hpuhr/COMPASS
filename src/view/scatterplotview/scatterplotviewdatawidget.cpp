@@ -24,13 +24,14 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "scatterplotviewdatasource.h"
+#include "scatterplotviewchartview.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QTabWidget>
 
-#include <QtCharts/QChartView>
+//#include <QtCharts/QChartView>
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
@@ -49,22 +50,9 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
     assert(data_source_);
     setContentsMargins(0, 0, 0, 0);
 
-    QHBoxLayout* layout = new QHBoxLayout();
+    layout_ = new QHBoxLayout();
 
-    chart_ = new QChart();
-    chart_->layout()->setContentsMargins(0, 0, 0, 0);
-    chart_->setBackgroundRoundness(0);
-
-    chart_->legend()->setVisible(true);
-    chart_->legend()->setAlignment(Qt::AlignBottom);
-
-    chart_view_ = new QChartView(chart_);
-    chart_view_->setRenderHint(QPainter::Antialiasing);
-    chart_view_->setRubberBand(QChartView::RectangleRubberBand);
-
-    layout->addWidget(chart_view_);
-
-    setLayout(layout);
+    setLayout(layout_);
 
     colors_["Radar"] = QColor("#00FF00");
     colors_["MLAT"] = QColor("#FF0000");
@@ -80,7 +68,7 @@ ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
     delete chart_view_;
 }
 
-void ScatterPlotViewDataWidget::update()
+void ScatterPlotViewDataWidget::updatePlot()
 {
     loginf << "ScatterPlotViewDataWidget: update";
 
@@ -111,7 +99,9 @@ void ScatterPlotViewDataWidget::clear ()
 void ScatterPlotViewDataWidget::loadingStartedSlot()
 {
     clear();
-    chart_->removeAllSeries();
+
+    if (chart_)
+        chart_->removeAllSeries();
 }
 
 void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -175,9 +165,12 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
     assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
     assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
 
-    updateChart();
-
     logdbg << "ScatterPlotViewDataWidget: updateDataSlot: end";
+}
+
+void ScatterPlotViewDataWidget::loadingDoneSlot()
+{
+    updateChart();
 }
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
@@ -874,6 +867,18 @@ void ScatterPlotViewDataWidget::updateFromAllData()
 
 void ScatterPlotViewDataWidget::updateChart()
 {
+    assert (layout_);
+
+    if (!chart_)
+    {
+        chart_ = new QChart();
+        chart_->layout()->setContentsMargins(0, 0, 0, 0);
+        chart_->setBackgroundRoundness(0);
+
+        chart_->legend()->setVisible(true);
+        chart_->legend()->setAlignment(Qt::AlignBottom);
+    }
+
     chart_->removeAllSeries();
 
     QScatterSeries* selected_chart_series {nullptr};
@@ -936,6 +941,16 @@ void ScatterPlotViewDataWidget::updateChart()
     chart_->axisX()->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
     chart_->axisY()->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());
     chart_->setDropShadowEnabled(false);
+
+    if (!chart_view_)
+    {
+        chart_view_ = new QChartView(chart_);
+        //chart_view_ = new ScatterPlotViewChartView(chart_);
+        chart_view_->setRenderHint(QPainter::Antialiasing);
+        chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+
+        layout_->addWidget(chart_view_);
+    }
 }
 
 

@@ -84,6 +84,7 @@ class HistogramViewDataWidget : public QWidget
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
     void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
     void exportDoneSlot(bool cancelled);
@@ -99,7 +100,7 @@ class HistogramViewDataWidget : public QWidget
     /// @brief Destructor
     virtual ~HistogramViewDataWidget();
 
-    void update();
+    void updateToData();
     void updateChart();
 
     void updateResults();

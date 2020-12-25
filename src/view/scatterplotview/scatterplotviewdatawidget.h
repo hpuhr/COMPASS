@@ -30,13 +30,15 @@
 
 class ScatterPlotView;
 class ScatterPlotViewDataSource;
-class QTabWidget;
+//class QTabWidget;
+class QHBoxLayout;
 class Buffer;
 class DBObject;
 
 namespace QtCharts {
     class QChart;
     class QScatterSeries;
+    //class ScatterPlotViewChartView;
     class QChartView;
     class QBarCategoryAxis;
     class QValueAxis;
@@ -60,6 +62,7 @@ class ScatterPlotViewDataWidget : public QWidget
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
     void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void loadingDoneSlot();
 
 //    void showOnlySelectedSlot(bool value);
 //    void usePresentationSlot(bool use_presentation);
@@ -72,7 +75,7 @@ class ScatterPlotViewDataWidget : public QWidget
     /// @brief Destructor
     virtual ~ScatterPlotViewDataWidget();
 
-    void update();
+    void updatePlot();
     void clear();
 
   protected:
@@ -91,9 +94,10 @@ class ScatterPlotViewDataWidget : public QWidget
 
     std::map<std::string, QColor> colors_;
 
-    //QtCharts::QScatterSeries* chart_series_ {nullptr};
+    QHBoxLayout* layout_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
     QtCharts::QChartView* chart_view_ {nullptr};
+    //QtCharts::ScatterPlotViewChartView* chart_view_ {nullptr};
 
     bool canUpdateFromDataX(std::string dbo_name);
     void updateFromDataX(std::string dbo_name, unsigned int current_size);
