@@ -21,6 +21,7 @@
 #include "global.h"
 #include "nullablevector.h"
 #include "dbovariable.h"
+#include "scatterplotviewdatatoolwidget.h"
 
 #include <QWidget>
 #include <QVariant>
@@ -38,8 +39,8 @@ class DBObject;
 namespace QtCharts {
     class QChart;
     class QScatterSeries;
-    //class ScatterPlotViewChartView;
-    class QChartView;
+    class ScatterPlotViewChartView;
+    //class QChartView;
     class QBarCategoryAxis;
     class QValueAxis;
 }
@@ -64,9 +65,18 @@ class ScatterPlotViewDataWidget : public QWidget
     void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
     void loadingDoneSlot();
 
+    void toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor);
+
+    void rectangleSelectedSlot (QPointF p1, QPointF p2);
+
+    void invertSelectionSlot();
+    void clearSelectionSlot();
+
 //    void showOnlySelectedSlot(bool value);
 //    void usePresentationSlot(bool use_presentation);
 //    void showAssociationsSlot(bool value);
+
+    void resetZoomSlot();
 
   public:
     /// @brief Constructor
@@ -89,20 +99,31 @@ class ScatterPlotViewDataWidget : public QWidget
 
     std::map<std::string, std::vector<double>> x_values_;
     std::map<std::string, std::vector<double>> y_values_;
+
+    bool has_x_min_max_ {false};
+    double x_min_ {0}, x_max_ {0};
+
+    bool has_y_min_max_ {false};
+    double y_min_ {0}, y_max_ {0};
+
     std::map<std::string, std::vector<bool>> selected_values_;
     std::map<std::string, std::vector<unsigned int>> rec_num_values_;
 
     std::map<std::string, QColor> colors_;
 
+    QCursor current_cursor_{Qt::CrossCursor};
+    ScatterPlotViewDataTool selected_tool_{SP_ZOOM_TOOL};
+
     QHBoxLayout* layout_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
-    QtCharts::QChartView* chart_view_ {nullptr};
-    //QtCharts::ScatterPlotViewChartView* chart_view_ {nullptr};
+    //QtCharts::QChartView* chart_view_ {nullptr};
+    QtCharts::ScatterPlotViewChartView* chart_view_ {nullptr};
 
     bool canUpdateFromDataX(std::string dbo_name);
     void updateFromDataX(std::string dbo_name, unsigned int current_size);
     bool canUpdateFromDataY(std::string dbo_name);
     void updateFromDataY(std::string dbo_name, unsigned int current_size);
+    void updateMinMax();
     void updateFromAllData();
     void updateChart();
 
@@ -118,6 +139,10 @@ class ScatterPlotViewDataWidget : public QWidget
                 target.push_back(data.get(cnt));
         }
     }
+
+    virtual void mouseMoveEvent(QMouseEvent* event);
+
+    void selectData (double x_min, double x_max, double y_min, double y_max);
 };
 
 #endif /* SCATTERPLOTVIEWDATAWIDGET_H_ */

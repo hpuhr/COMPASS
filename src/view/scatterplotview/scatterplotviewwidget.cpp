@@ -25,6 +25,7 @@
 #include "scatterplotview.h"
 #include "scatterplotviewconfigwidget.h"
 #include "scatterplotviewdatawidget.h"
+#include "scatterplotviewdatatoolwidget.h"
 
 /*
  */
@@ -44,14 +45,31 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
 
     QSettings settings("COMPASS", instanceId().c_str());
 
-    {  // data widget
+    {  // data stuff
+
+        QWidget* data_layout_widget = new QWidget();
+        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sp_left.setHorizontalStretch(5);
+        data_layout_widget->setSizePolicy(sp_left);
+        data_layout_widget->setContentsMargins(0, 0, 0, 0);
+
+        QVBoxLayout* data_layout = new QVBoxLayout;
+        data_layout->setContentsMargins(0, 0, 0, 0);
+
+        tool_widget_ = new ScatterPlotViewDataToolWidget(view, this);
+        tool_widget_->setContentsMargins(0, 0, 0, 0);
+        data_layout->addWidget(tool_widget_);
+
         data_widget_ = new ScatterPlotViewDataWidget(getView(), view->getDataSource());
         //data_widget_->setAutoFillBackground(true);
-        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_left.setHorizontalStretch(3);
-        data_widget_->setSizePolicy(sp_left);
+        //QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        //sp_left.setHorizontalStretch(3);
+        //data_widget_->setSizePolicy(sp_left);
+        data_layout->addWidget(data_widget_);
 
-        main_splitter_->addWidget(data_widget_);
+        //main_splitter_->addWidget(data_widget_);
+        data_layout_widget->setLayout(data_layout);
+        main_splitter_->addWidget(data_layout_widget);
     }
 
     {  // config widget
@@ -75,6 +93,15 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
 
     // connect stuff here
     // connect( config_widget_, SIGNAL(variableChanged()), this, SLOT(variableChangedSlot()) );
+
+    connect(tool_widget_, &ScatterPlotViewDataToolWidget::toolChangedSignal, data_widget_,
+            &ScatterPlotViewDataWidget::toolChangedSlot);
+
+    connect(tool_widget_, &ScatterPlotViewDataToolWidget::invertSelectionSignal, data_widget_,
+            &ScatterPlotViewDataWidget::invertSelectionSlot);
+    connect(tool_widget_, &ScatterPlotViewDataToolWidget::clearSelectionSignal, data_widget_,
+            &ScatterPlotViewDataWidget::clearSelectionSlot);
+
 }
 
 /*

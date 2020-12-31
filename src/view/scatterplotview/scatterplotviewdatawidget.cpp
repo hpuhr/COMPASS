@@ -36,6 +36,7 @@
 #include <QtCharts/QLegend>
 #include <QtCharts/QValueAxis>
 #include <QGraphicsLayout>
+#include <QShortcut>
 
 #include <algorithm>
 
@@ -59,6 +60,12 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
     colors_["ADSB"] = QColor("#6666FF");
     colors_["RefTraj"] = QColor("#FFA500");
     colors_["Tracker"] = QColor("#CCCCCC");
+
+    // shortcuts
+    {
+        QShortcut* space_shortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+        connect (space_shortcut, &QShortcut::activated, this, &ScatterPlotViewDataWidget::resetZoomSlot);
+    }
 }
 
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
@@ -77,10 +84,14 @@ void ScatterPlotViewDataWidget::updatePlot()
 
     x_values_.clear();
     y_values_.clear();
+    has_x_min_max_ = false;
+    has_y_min_max_ = false;
+
     selected_values_.clear();
     rec_num_values_.clear();
 
     updateFromAllData();
+    updateMinMax();
     updateChart();
 }
 
@@ -92,6 +103,9 @@ void ScatterPlotViewDataWidget::clear ()
 
     x_values_.clear();
     y_values_.clear();
+    has_x_min_max_ = false;
+    has_y_min_max_ = false;
+
     selected_values_.clear();
     rec_num_values_.clear();
 }
@@ -170,7 +184,96 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
 
 void ScatterPlotViewDataWidget::loadingDoneSlot()
 {
+    updateMinMax();
+
     updateChart();
+}
+
+
+void ScatterPlotViewDataWidget::toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor)
+{
+    current_cursor_ = cursor;
+    selected_tool_ = selected;
+}
+
+void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
+{
+    loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot";
+
+    if (chart_)
+    {
+        if (selected_tool_ == SP_ZOOM_TOOL)
+        {
+            loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: zoom";
+
+            chart_->axisX()->setRange(min(p1.x(), p2.x()), max(p1.x(), p2.x()));
+            chart_->axisY()->setRange(min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+        }
+        else if (selected_tool_ == SP_SELECT_TOOL)
+        {
+            loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: select";
+
+            selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+        }
+        else
+            throw std::runtime_error("ScatterPlotViewDataWidget: rectangleSelectedSlot: unknown tool "
+                                     +to_string((unsigned int)selected_tool_));
+    }
+}
+
+void ScatterPlotViewDataWidget::invertSelectionSlot()
+{
+    loginf << "ScatterPlotViewDataWidget: invertSelectionSlot";
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
+        {
+            if (selected_vec.isNull(cnt))
+                selected_vec.set(cnt, true);
+            else
+                selected_vec.set(cnt, !selected_vec.get(cnt));
+        }
+    }
+
+    emit view_->selectionChangedSignal();
+}
+
+void ScatterPlotViewDataWidget::clearSelectionSlot()
+{
+    loginf << "ScatterPlotViewDataWidget: clearSelectionSlot";
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
+            selected_vec.set(cnt, false);
+    }
+
+    emit view_->selectionChangedSignal();
+}
+
+void ScatterPlotViewDataWidget::resetZoomSlot()
+{
+    loginf << "ScatterPlotViewDataWidget: resetZoomSlot";
+
+    if (chart_)
+    {
+        //chart_->createDefaultAxes();
+
+        if (has_x_min_max_ && has_y_min_max_)
+        {
+            chart_->axisX()->setRange(x_min_, x_max_);
+            chart_->axisY()->setRange(y_min_, y_max_);
+        }
+
+        chart_->zoomReset();
+    }
 }
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
@@ -802,6 +905,55 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
 }
 
+void ScatterPlotViewDataWidget::updateMinMax()
+{
+    has_x_min_max_ = false;
+
+    for (auto& x_values_it : x_values_)
+    {
+        for (auto x_it : x_values_it.second)
+        {
+            if (has_x_min_max_)
+            {
+                x_min_ = std::min(x_min_, x_it);
+                x_max_ = std::max(x_max_, x_it);
+            }
+            else
+            {
+                x_min_ = x_it;
+                x_max_ = x_it;
+
+                has_x_min_max_ = true;
+            }
+        }
+    }
+
+    has_y_min_max_ = false;
+
+    for (auto& y_values_it : y_values_)
+    {
+        for (auto y_it : y_values_it.second)
+        {
+            if (has_y_min_max_)
+            {
+                y_min_ = std::min(y_min_, y_it);
+                y_max_ = std::max(y_max_, y_it);
+            }
+            else
+            {
+                y_min_ = y_it;
+                y_max_ = y_it;
+
+                has_y_min_max_ = true;
+            }
+        }
+    }
+
+    loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: has_x_min_max " << has_x_min_max_
+           << " x_min " << x_min_ << " x_max " << x_max_
+           << " has_y_min_max " << has_y_min_max_ << " y_min " << y_min_ << " y_max " << y_max_;
+}
+
 void ScatterPlotViewDataWidget::updateFromAllData()
 {
     loginf << "ScatterPlotViewDataWidget: updateFromAllData";
@@ -927,8 +1079,11 @@ void ScatterPlotViewDataWidget::updateChart()
             }
         }
 
-        chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
-        chart_->addSeries(chart_series);
+        if (sum_cnt)
+        {
+            chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
+            chart_->addSeries(chart_series);
+        }
     }
 
     if (selected_chart_series)
@@ -944,16 +1099,83 @@ void ScatterPlotViewDataWidget::updateChart()
 
     if (!chart_view_)
     {
-        chart_view_ = new QChartView(chart_);
-        //chart_view_ = new ScatterPlotViewChartView(chart_);
+        //chart_view_ = new QChartView(chart_);
+        chart_view_ = new ScatterPlotViewChartView(chart_);
         chart_view_->setRenderHint(QPainter::Antialiasing);
         chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+
+        connect (chart_view_, &ScatterPlotViewChartView::rectangleSelectedSignal,
+                 this, &ScatterPlotViewDataWidget::rectangleSelectedSlot);
 
         layout_->addWidget(chart_view_);
     }
 }
 
+void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    setCursor(current_cursor_);
+    //osgEarth::QtGui::ViewerWidget::mouseMoveEvent(event);
 
+    QWidget::mouseMoveEvent(event);
+}
+
+void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y_min, double y_max)
+{
+    loginf << "ScatterPlotViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
+           << " y_min " << y_min << " y_max " << y_max;
+
+    unsigned int sel_cnt = 0;
+    for (auto& buf_it : buffers_)
+    {
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        assert (buf_it.second->has<int>("rec_num"));
+        NullableVector<int>& rec_num_vec = buf_it.second->get<int>("rec_num");
+
+        std::map<int, std::vector<unsigned int>> rec_num_indexes =
+                rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
+        // rec_num -> index
+
+        std::vector<double>& x_values = x_values_.at(buf_it.first);
+        std::vector<double>& y_values = y_values_.at(buf_it.first);
+        std::vector<unsigned int>& rec_num_values = rec_num_values_.at(buf_it.first);
+
+        assert (x_values.size() == y_values.size());
+        assert (x_values.size() == rec_num_values.size());
+
+        double x, y;
+        bool in_range;
+        unsigned int rec_num, index;
+
+        for (unsigned int cnt=0; cnt < x_values.size(); ++cnt)
+        {
+            x = x_values.at(cnt);
+            y = y_values.at(cnt);
+            rec_num = rec_num_values.at(cnt);
+
+            in_range = false;
+
+            if (!std::isnan(x) && !std::isnan(y))
+                in_range =  x >= x_min && x <= x_max && y >= y_min && y <= y_max;
+
+            assert (rec_num_indexes.count(rec_num));
+            std::vector<unsigned int>& indexes = rec_num_indexes.at((int)rec_num);
+            assert (indexes.size() == 1);
+
+            index = indexes.at(0);
+
+            selected_vec.set(index, in_range);
+
+            if (in_range)
+                ++sel_cnt;
+        }
+    }
+
+    loginf << "ScatterPlotViewDataWidget: selectData: sel_cnt " << sel_cnt;
+
+    emit view_->selectionChangedSignal();
+}
 
 //void ScatterPlotViewDataWidget::showOnlySelectedSlot(bool value)
 //{

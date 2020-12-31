@@ -29,48 +29,71 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QTabWidget>
 
 using namespace Utils;
 
 ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent)
     : QWidget(parent), view_(view)
 {
-    QVBoxLayout* vlayout = new QVBoxLayout;
+    //QVBoxLayout* vlayout = new QVBoxLayout;
 
     assert(view_);
 
-    vlayout->addWidget(new QLabel("X Variable"));
+    setMinimumWidth(400);
 
-    select_var_x_ = new DBOVariableSelectionWidget();
-    select_var_x_->showMetaVariables(true);
-    if (view_->hasDataVarX())
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QVBoxLayout* vlayout = new QVBoxLayout(this);
+    vlayout->setContentsMargins(0, 0, 0, 0);
+
+    QTabWidget* tab_widget = new QTabWidget(this);
+    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
+
+    // config
     {
-        if (view_->isDataVarXMeta())
-            select_var_x_->selectedMetaVariable(view_->metaDataVarX());
-        else
-            select_var_x_->selectedVariable(view_->dataVarX());
+        QWidget* cfg_widget = new QWidget();
+        QVBoxLayout* cfg_layout = new QVBoxLayout();
+
+        cfg_layout->addWidget(new QLabel("X Variable"));
+
+        select_var_x_ = new DBOVariableSelectionWidget();
+        select_var_x_->showMetaVariables(true);
+        if (view_->hasDataVarX())
+        {
+            if (view_->isDataVarXMeta())
+                select_var_x_->selectedMetaVariable(view_->metaDataVarX());
+            else
+                select_var_x_->selectedVariable(view_->dataVarX());
+        }
+        connect(select_var_x_, &DBOVariableSelectionWidget::selectionChanged, this,
+                &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
+        cfg_layout->addWidget(select_var_x_);
+
+        cfg_layout->addWidget(new QLabel("Y Variable"));
+
+        select_var_y_ = new DBOVariableSelectionWidget();
+        select_var_y_->showMetaVariables(true);
+        if (view_->hasDataVarY())
+        {
+            if (view_->isDataVarYMeta())
+                select_var_y_->selectedMetaVariable(view_->metaDataVarY());
+            else
+                select_var_y_->selectedVariable(view_->dataVarY());
+        }
+        connect(select_var_y_, &DBOVariableSelectionWidget::selectionChanged, this,
+                &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
+        cfg_layout->addWidget(select_var_y_);
+
+        cfg_layout->addStretch();
+
+        cfg_widget->setLayout(cfg_layout);
+
+        tab_widget->addTab(cfg_widget, "Config");
     }
-    connect(select_var_x_, &DBOVariableSelectionWidget::selectionChanged, this,
-            &ScatterPlotViewConfigWidget::selectedVariableXChangedSlot);
-    vlayout->addWidget(select_var_x_);
 
-    vlayout->addWidget(new QLabel("Y Variable"));
-
-    select_var_y_ = new DBOVariableSelectionWidget();
-    select_var_y_->showMetaVariables(true);
-    if (view_->hasDataVarY())
-    {
-        if (view_->isDataVarYMeta())
-            select_var_y_->selectedMetaVariable(view_->metaDataVarY());
-        else
-            select_var_y_->selectedVariable(view_->dataVarY());
-    }
-    connect(select_var_y_, &DBOVariableSelectionWidget::selectionChanged, this,
-            &ScatterPlotViewConfigWidget::selectedVariableYChangedSlot);
-    vlayout->addWidget(select_var_y_);
-
-
-    vlayout->addStretch();
+    vlayout->addWidget(tab_widget);
 
     reload_button_ = new QPushButton("Reload");
     connect(reload_button_, &QPushButton::clicked, this,

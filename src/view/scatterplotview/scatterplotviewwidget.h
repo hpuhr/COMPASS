@@ -22,6 +22,7 @@
 #include "viewwidget.h"
 
 class ScatterPlotView;
+class ScatterPlotViewDataToolWidget;
 class ScatterPlotViewDataWidget;
 class ScatterPlotViewConfigWidget;
 
@@ -51,6 +52,8 @@ class ScatterPlotViewWidget : public ViewWidget
     ScatterPlotViewDataWidget* getDataWidget() { return data_widget_; }
 
   protected:
+    ScatterPlotViewDataToolWidget* tool_widget_{nullptr};
+
     QSplitter* main_splitter_{nullptr};
     /// Data widget with data display
     ScatterPlotViewDataWidget* data_widget_{nullptr};
