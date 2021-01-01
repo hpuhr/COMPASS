@@ -9,6 +9,8 @@
 
 class ScatterPlotViewDataWidget;
 
+class QRubberBand;
+
 namespace QtCharts
 {
 
@@ -31,6 +33,9 @@ protected:
     ScatterPlotViewDataWidget* data_widget_ {nullptr};
 
     bool show_rect_ {false};
+    QRubberBand* rectangle_ {nullptr};
+
+    bool has_p1_ {false};
     QPoint p1_;
     QPointF p1_data_;
 

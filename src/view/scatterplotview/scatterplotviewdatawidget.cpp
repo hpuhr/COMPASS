@@ -1138,7 +1138,8 @@ void ScatterPlotViewDataWidget::updateChart()
         //chart_view_->setDragMode(QGraphicsView::ScrollHandDrag);
 
         connect (chart_view_, &ScatterPlotViewChartView::rectangleSelectedSignal,
-                 this, &ScatterPlotViewDataWidget::rectangleSelectedSlot);
+                 this, &ScatterPlotViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+        // queued needed, otherwise crash when signal is emitted in ScatterPlotViewChartView::seriesReleasedSlot
 
         for (auto series_it : chart_->series())
         {
