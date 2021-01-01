@@ -36,10 +36,10 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string&
     : View(class_id, instance_id, w, view_manager)
 {
     registerParameter("data_var_x_dbo", &data_var_x_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_x_name", &data_var_x_name_, "pos_lat_deg");
+    registerParameter("data_var_x_name", &data_var_x_name_, "pos_long_deg");
 
     registerParameter("data_var_y_dbo", &data_var_y_dbo_, META_OBJECT_NAME);
-    registerParameter("data_var_y_name", &data_var_y_name_, "pos_long_deg");
+    registerParameter("data_var_y_name", &data_var_y_name_, "pos_lat_deg");
 
 
     // create sub done in init

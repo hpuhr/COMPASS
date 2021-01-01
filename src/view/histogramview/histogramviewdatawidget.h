@@ -89,6 +89,8 @@ class HistogramViewDataWidget : public QWidget
     void exportDataSlot(bool overwrite);
     void exportDoneSlot(bool cancelled);
 
+    void resetZoomSlot();
+
 //    void showOnlySelectedSlot(bool value);
 //    void usePresentationSlot(bool use_presentation);
 //    void showAssociationsSlot(bool value);
@@ -116,6 +118,8 @@ class HistogramViewDataWidget : public QWidget
 
     unsigned int num_bins_{20};
     std::map<std::string, std::vector<unsigned int>> counts_;
+    std::vector<unsigned int> selected_counts_;
+
     std::map<std::string, unsigned int> data_null_cnt_;
     std::vector<std::string> labels_;
     unsigned int max_bin_cnt_ {0};
@@ -198,7 +202,8 @@ class HistogramViewDataWidget : public QWidget
     void updateMinMax(const std::vector<double>& data);
 
     template<typename T>
-    void updateCounts(const std::string& dbo_name, NullableVector<T>& data, DBOVariable* data_var)
+    void updateCounts(const std::string& dbo_name, NullableVector<T>& data, NullableVector<bool>& selected_vec,
+                      DBOVariable* data_var)
     {
         loginf << "HistogramViewDataWidget: updateCounts: start dbo " << dbo_name;
 
@@ -247,7 +252,21 @@ class HistogramViewDataWidget : public QWidget
                        << " bin number " << bin_number << " data " << data.get(cnt);
 
             assert (bin_number < num_bins_);
-            counts.at(bin_number) += 1;
+
+            if (!selected_vec.isNull(cnt) && selected_vec.get(cnt)) // is selected
+            {
+                if (!selected_counts_.size()) // set 0 bins
+                {
+                    for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
+                        selected_counts_.push_back(0);
+                }
+
+                selected_counts_.at(bin_number) += 1;
+            }
+            else
+            {
+                counts.at(bin_number) += 1;
+            }
         }
 
         loginf << "HistogramViewDataWidget: updateCounts: end dbo " << dbo_name;

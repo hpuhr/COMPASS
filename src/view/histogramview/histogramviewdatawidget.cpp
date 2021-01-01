@@ -59,7 +59,9 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLogValueAxis>
+
 #include <QGraphicsLayout>
+#include <QShortcut>
 
 #include <algorithm>
 
@@ -100,6 +102,12 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     colors_["ADSB"] = QColor("#6666FF");
     colors_["RefTraj"] = QColor("#FFA500");
     colors_["Tracker"] = QColor("#CCCCCC");
+
+    // shortcuts
+    {
+        QShortcut* space_shortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+        connect (space_shortcut, &QShortcut::activated, this, &HistogramViewDataWidget::resetZoomSlot);
+    }
 }
 
 HistogramViewDataWidget::~HistogramViewDataWidget()
@@ -122,6 +130,7 @@ void HistogramViewDataWidget::clear ()
     buffers_.clear();
 
     counts_.clear();
+    selected_counts_.clear();
     data_null_cnt_.clear();
     labels_.clear();
 
@@ -197,6 +206,9 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
+    assert (buffer->has<bool>("selected"));
+    NullableVector<bool>& selected_vec = buffer->get<bool>("selected");
+
     switch (data_type)
     {
     case PropertyDataType::BOOL:
@@ -221,7 +233,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<bool> (dbo_name, data, data_var);
+        updateCounts<bool> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -255,7 +267,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<char> (dbo_name, data, data_var);
+        updateCounts<char> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -289,7 +301,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned char> (dbo_name, data, data_var);
+        updateCounts<unsigned char> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -323,7 +335,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<int> (dbo_name, data, data_var);
+        updateCounts<int> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -357,7 +369,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned int> (dbo_name, data, data_var);
+        updateCounts<unsigned int> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -391,7 +403,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<long int> (dbo_name, data, data_var);
+        updateCounts<long int> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -425,7 +437,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
             return;
         }
 
-        updateCounts<unsigned long> (dbo_name, data, data_var);
+        updateCounts<unsigned long> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -460,7 +472,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
         }
 
 
-        updateCounts<float> (dbo_name, data, data_var);
+        updateCounts<float> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -507,7 +519,7 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
 //        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
 //               << " bin_size " << bin_size_;
 
-        updateCounts<double> (dbo_name, data, data_var);
+        updateCounts<double> (dbo_name, data, selected_vec, data_var);
 
         break;
     }
@@ -540,6 +552,7 @@ void HistogramViewDataWidget::updateFromAllData()
     loginf << "HistogramViewDataWidget: updateFromAllData";
 
     counts_.clear();
+    selected_counts_.clear();
     data_null_cnt_.clear();
     labels_.clear();
 
@@ -1050,6 +1063,20 @@ void HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
+    if (chart_x_axis_)
+    {
+        chart_series_->detachAxis(chart_x_axis_);
+        delete chart_x_axis_;
+        chart_x_axis_ = nullptr;
+    }
+
+    if (chart_y_axis_)
+    {
+        chart_series_->detachAxis(chart_y_axis_);
+        delete chart_y_axis_;
+        chart_y_axis_ = nullptr;
+    }
+
     chart_series_->clear();
 
     bool use_log_scale = view_->useLogScale();
@@ -1068,7 +1095,7 @@ void HistogramViewDataWidget::updateChart()
                 max_bin_cnt_ = bin;
 
             if (use_log_scale && bin == 0)
-                *set << 10e-6; // Logarithms of zero and negative values are undefined.
+                *set << 10e-3; // Logarithms of zero and negative values are undefined.
             else
                 *set << bin;
 
@@ -1076,15 +1103,33 @@ void HistogramViewDataWidget::updateChart()
 
         if (data_null_cnt_.size())
         {
-            *set << data_null_cnt_[cnt_it.first];
+            if (use_log_scale && data_null_cnt_[cnt_it.first] == 0)
+                *set << 10e-3;
+            else
+                *set << data_null_cnt_[cnt_it.first];
         }
 
         set->setColor(colors_[cnt_it.first]);
         chart_series_->append(set);
     }
 
-    if (chart_x_axis_)
-        delete chart_x_axis_;
+    if (selected_counts_.size())
+    {
+        unsigned int sum_cnt {0};
+        for (auto bin : selected_counts_)
+            sum_cnt += bin;
+
+        QBarSet *set = new QBarSet(("Selected ("+to_string(sum_cnt)+")").c_str());
+
+        for (auto bin : selected_counts_)
+            if (use_log_scale && bin == 0)
+                *set << 10e-3; // Logarithms of zero and negative values are undefined.
+            else
+                *set << bin;
+
+        set->setColor(Qt::yellow); // darker than yellow #808000
+        chart_series_->append(set);
+    }
 
     QStringList categories;
 
@@ -1098,7 +1143,7 @@ void HistogramViewDataWidget::updateChart()
     chart_x_axis_ = new QBarCategoryAxis();
 
     if (view_->showResults())
-        chart_x_axis_->setTitleText(( view_->evalResultGrpReq()+":"+view_->evalResultsID()).c_str());
+        chart_x_axis_->setTitleText((view_->evalResultGrpReq()+":"+view_->evalResultsID()).c_str());
     else
         chart_x_axis_->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
 
@@ -1106,12 +1151,6 @@ void HistogramViewDataWidget::updateChart()
     chart_x_axis_->append(categories);
     chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
     chart_series_->attachAxis(chart_x_axis_);
-
-    if (chart_y_axis_)
-    {
-        chart_series_->detachAxis(chart_y_axis_);
-        delete chart_y_axis_;
-    }
 
     if (view_->useLogScale())
     {
@@ -1150,6 +1189,7 @@ void HistogramViewDataWidget::updateResults()
     if (eval_man.hasResults() && view_->showResults())
     {
         counts_.clear();
+        selected_counts_.clear();
         data_null_cnt_.clear();
         labels_.clear();
 
@@ -1590,7 +1630,18 @@ void HistogramViewDataWidget::exportDataSlot(bool overwrite)
 
 }
 
-void HistogramViewDataWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
+void HistogramViewDataWidget::exportDoneSlot(bool cancelled)
+{
+    emit exportDoneSignal(cancelled);
+}
+
+void HistogramViewDataWidget::resetZoomSlot()
+{
+    loginf << "HistogramViewDataWidget: resetZoomSlot";
+
+    if (chart_)
+        chart_->zoomReset();
+}
 
 //void HistogramViewDataWidget::showOnlySelectedSlot(bool value)
 //{

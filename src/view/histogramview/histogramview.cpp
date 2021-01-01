@@ -263,6 +263,8 @@ void HistogramView::updateSelection()
     loginf << "HistogramView: updateSelection";
     assert(widget_);
     
+    widget_->getDataWidget()->updateToData();
+
     //    if (show_only_selected_)
     //        widget_->getDataWidget()->updateToSelection();
     //    else
