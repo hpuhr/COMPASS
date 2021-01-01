@@ -25,12 +25,20 @@ ScatterPlotViewDataToolWidget::ScatterPlotViewDataToolWidget(ScatterPlotView* vi
 
     // tool actions
     {
+        QAction* nav_action_ =
+            toolbar_->addAction(QIcon(Files::getIconFilepath("navigate.png").c_str()), "Navigate");
+        navigate_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(nav_action_));
+        assert(navigate_button_);
+        navigate_button_->setCheckable(true);
+        navigate_button_->setChecked(true);
+    }
+
+    {
         QAction* zoom_action_ =
-            toolbar_->addAction(QIcon(Files::getIconFilepath("zoom_select_action.png").c_str()), "Zoom");
-        zoom_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(zoom_action_));
-        assert(zoom_button_);
-        zoom_button_->setCheckable(true);
-        zoom_button_->setChecked(true);
+            toolbar_->addAction(QIcon(Files::getIconFilepath("zoom_select_action.png").c_str()), "Zoom to Rectangle");
+        zoom_rect_button_ = dynamic_cast<QToolButton*>(toolbar_->widgetForAction(zoom_action_));
+        assert(zoom_rect_button_);
+        zoom_rect_button_->setCheckable(true);
     }
 
     {
@@ -81,8 +89,14 @@ void ScatterPlotViewDataToolWidget::actionTriggeredSlot(QAction* action)
     if (text == "Navigate")
     {
         unselectAllTools();
-        zoom_button_->setChecked(true);
-        emit toolChangedSignal(SP_ZOOM_TOOL, Qt::OpenHandCursor);
+        navigate_button_->setChecked(true);
+        emit toolChangedSignal(SP_NAVIGATE_TOOL, Qt::OpenHandCursor);
+    }
+    else if (text == "Zoom to Rectangle")
+    {
+        unselectAllTools();
+        zoom_rect_button_->setChecked(true);
+        emit toolChangedSignal(SP_ZOOM_RECT_TOOL, Qt::CrossCursor);
     }
 //    else if (text == "Label")
 //    {
@@ -174,7 +188,8 @@ void ScatterPlotViewDataToolWidget::actionTriggeredSlot(QAction* action)
 
 void ScatterPlotViewDataToolWidget::unselectAllTools()
 {
-    zoom_button_->setChecked(false);
+    navigate_button_->setChecked(false);
+    zoom_rect_button_->setChecked(false);
     //label_button_->setChecked(false);
     //measure_button_->setChecked(false);
     select_button_->setChecked(false);

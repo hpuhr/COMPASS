@@ -40,7 +40,7 @@ namespace QtCharts {
     class QChart;
     class QScatterSeries;
     class ScatterPlotViewChartView;
-    //class QChartView;
+    class QChartView;
     class QBarCategoryAxis;
     class QValueAxis;
 }
@@ -88,7 +88,10 @@ class ScatterPlotViewDataWidget : public QWidget
     void updatePlot();
     void clear();
 
-  protected:
+    ScatterPlotViewDataTool selectedTool() const;
+    QCursor currentCursor() const;
+
+protected:
     ScatterPlotView* view_{nullptr};
     /// Data source
     ScatterPlotViewDataSource* data_source_{nullptr};
@@ -111,8 +114,8 @@ class ScatterPlotViewDataWidget : public QWidget
 
     std::map<std::string, QColor> colors_;
 
-    QCursor current_cursor_{Qt::CrossCursor};
-    ScatterPlotViewDataTool selected_tool_{SP_ZOOM_TOOL};
+    QCursor current_cursor_{Qt::OpenHandCursor};
+    ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
 
     QHBoxLayout* layout_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};

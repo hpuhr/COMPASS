@@ -8,7 +8,8 @@
 
 enum ScatterPlotViewDataTool
 {
-    SP_ZOOM_TOOL = 0,
+    SP_NAVIGATE_TOOL = 0,
+    SP_ZOOM_RECT_TOOL,
     //LABEL_TOOL,
     //MEASURE_TOOL,
     SP_SELECT_TOOL
@@ -47,7 +48,8 @@ private:
 
     QToolBar* toolbar_ {nullptr};
 
-    QToolButton* zoom_button_{nullptr};
+    QToolButton* navigate_button_{nullptr};
+    QToolButton* zoom_rect_button_{nullptr};
     QToolButton* select_button_{nullptr};
 
     void unselectAllTools();

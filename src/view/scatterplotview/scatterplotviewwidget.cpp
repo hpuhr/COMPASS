@@ -102,6 +102,9 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
     connect(tool_widget_, &ScatterPlotViewDataToolWidget::clearSelectionSignal, data_widget_,
             &ScatterPlotViewDataWidget::clearSelectionSlot);
 
+    connect(tool_widget_, &ScatterPlotViewDataToolWidget::zoomToHomeSignal, data_widget_,
+            &ScatterPlotViewDataWidget::resetZoomSlot);
+
 }
 
 /*

@@ -37,6 +37,7 @@
 #include <QtCharts/QValueAxis>
 #include <QGraphicsLayout>
 #include <QShortcut>
+#include <QApplication>
 
 #include <algorithm>
 
@@ -70,14 +71,14 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotView* view, Scat
 
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
 {
-    loginf << "ScatterPlotViewDataWidget: dtor";
+    logdbg << "ScatterPlotViewDataWidget: dtor";
 
     delete chart_view_;
 }
 
 void ScatterPlotViewDataWidget::updatePlot()
 {
-    loginf << "ScatterPlotViewDataWidget: update";
+    logdbg << "ScatterPlotViewDataWidget: updatePlot";
 
     buffer_x_counts_.clear();
     buffer_y_counts_.clear();
@@ -108,6 +109,16 @@ void ScatterPlotViewDataWidget::clear ()
 
     selected_values_.clear();
     rec_num_values_.clear();
+}
+
+ScatterPlotViewDataTool ScatterPlotViewDataWidget::selectedTool() const
+{
+    return selected_tool_;
+}
+
+QCursor ScatterPlotViewDataWidget::currentCursor() const
+{
+    return current_cursor_;
 }
 
 void ScatterPlotViewDataWidget::loadingStartedSlot()
@@ -169,10 +180,10 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
         updateFromDataY(dbo_name, current_size);
     }
     else
-        loginf << "ScatterPlotViewDataWidget: updateDataSlot: " << dbo_name
+        logdbg << "ScatterPlotViewDataWidget: updateDataSlot: " << dbo_name
                << " update not possible";
 
-    loginf << "ScatterPlotViewDataWidget: updateDataSlot: after x " << x_values_[dbo_name].size()
+    logdbg << "ScatterPlotViewDataWidget: updateDataSlot: after x " << x_values_[dbo_name].size()
            << " y " << y_values_[dbo_name].size();
 
     assert (x_values_[dbo_name].size() == y_values_[dbo_name].size());
@@ -202,7 +213,7 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2)
 
     if (chart_)
     {
-        if (selected_tool_ == SP_ZOOM_TOOL)
+        if (selected_tool_ == SP_ZOOM_RECT_TOOL)
         {
             loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: zoom";
 
@@ -264,7 +275,7 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
     if (chart_)
     {
-        //chart_->createDefaultAxes();
+        chart_->createDefaultAxes();
 
         if (has_x_min_max_ && has_y_min_max_)
         {
@@ -272,7 +283,7 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
             chart_->axisY()->setRange(y_min_, y_max_);
         }
 
-        chart_->zoomReset();
+        //chart_->zoomReset();
     }
 }
 
@@ -381,7 +392,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
 
 void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned int current_size)
 {
-    loginf << "ScatterPlotViewDataWidget: updateFromDataX: dbo_name " << dbo_name << " current_size " << current_size;
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: dbo_name " << dbo_name << " current_size " << current_size;
 
     assert (buffers_.count(dbo_name));
     Buffer* buffer = buffers_.at(dbo_name).get();
@@ -428,7 +439,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<bool>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -444,7 +455,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<char>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -460,7 +471,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<unsigned char>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -476,7 +487,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -492,7 +503,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<unsigned int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -508,7 +519,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<long int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -524,7 +535,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<unsigned long>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -540,7 +551,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<float>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -556,7 +567,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<double>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -572,7 +583,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
     {
         if (!buffer->has<string>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -695,7 +706,7 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
 
 void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned int current_size)
 {
-    loginf << "ScatterPlotViewDataWidget: updateFromDataY: dbo_name " << dbo_name << " current_size " << current_size;
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: dbo_name " << dbo_name << " current_size " << current_size;
 
     assert (buffers_.count(dbo_name));
     Buffer* buffer = buffers_.at(dbo_name).get();
@@ -742,7 +753,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<bool>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -758,7 +769,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<char>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -774,7 +785,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<unsigned char>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -790,7 +801,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -806,7 +817,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<unsigned int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -822,7 +833,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<long int>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -854,7 +865,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<float>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -870,7 +881,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<double>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -886,7 +897,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
     {
         if (!buffer->has<string>(current_var_name))
         {
-            loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
             return;
         }
 
@@ -949,16 +960,16 @@ void ScatterPlotViewDataWidget::updateMinMax()
         }
     }
 
-    loginf << "ScatterPlotViewDataWidget: loadingDoneSlot: has_x_min_max " << has_x_min_max_
+    logdbg << "ScatterPlotViewDataWidget: loadingDoneSlot: has_x_min_max " << has_x_min_max_
            << " x_min " << x_min_ << " x_max " << x_max_
            << " has_y_min_max " << has_y_min_max_ << " y_min " << y_min_ << " y_max " << y_max_;
 }
 
 void ScatterPlotViewDataWidget::updateFromAllData()
 {
-    loginf << "ScatterPlotViewDataWidget: updateFromAllData";
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData";
 
-    loginf << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: before x " << x_values_.size()
            << " y " << y_values_.size();
 
     for (auto& buf_it : buffers_)
@@ -1000,7 +1011,7 @@ void ScatterPlotViewDataWidget::updateFromAllData()
             updateFromDataY(buf_it.first, current_size);
         }
         else
-            loginf << "ScatterPlotViewDataWidget: updateFromAllData: " << buf_it.first
+            logdbg << "ScatterPlotViewDataWidget: updateFromAllData: " << buf_it.first
                    << " update not possible";
 
         assert (x_values_[buf_it.first].size() == y_values_[buf_it.first].size());
@@ -1008,17 +1019,19 @@ void ScatterPlotViewDataWidget::updateFromAllData()
         assert (x_values_[buf_it.first].size() == rec_num_values_[buf_it.first].size());
     }
 
-    loginf << "ScatterPlotViewDataWidget: updateFromAllData: after x " << x_values_.size()
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: after x " << x_values_.size()
            << " y " << y_values_.size();
 
 
     assert (x_values_.size() == y_values_.size());
 
-    loginf << "ScatterPlotViewDataWidget: updateFromAllData: done";
+    logdbg << "ScatterPlotViewDataWidget: updateFromAllData: done";
 }
 
 void ScatterPlotViewDataWidget::updateChart()
 {
+    logdbg << "ScatterPlotViewDataWidget: updateChart";
+
     assert (layout_);
 
     if (!chart_)
@@ -1030,7 +1043,6 @@ void ScatterPlotViewDataWidget::updateChart()
         chart_->legend()->setVisible(true);
         chart_->legend()->setAlignment(Qt::AlignBottom);
     }
-
     chart_->removeAllSeries();
 
     QScatterSeries* selected_chart_series {nullptr};
@@ -1081,15 +1093,35 @@ void ScatterPlotViewDataWidget::updateChart()
 
         if (sum_cnt)
         {
+            logdbg << "ScatterPlotViewDataWidget: updateChart: adding " << data.first << " (" << sum_cnt << ")";
+
             chart_series->setName((data.first+" ("+to_string(sum_cnt)+")").c_str());
             chart_->addSeries(chart_series);
+
+            if (selected_chart_series)
+            {
+                connect (chart_series, &QScatterSeries::pressed,
+                         chart_view_, &ScatterPlotViewChartView::seriesPressedSlot);
+                connect (chart_series, &QScatterSeries::released,
+                         chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
+            }
         }
     }
 
     if (selected_chart_series)
     {
+        logdbg << "ScatterPlotViewDataWidget: updateChart: adding " << " Selected (" << selected_cnt << ")";
+
         selected_chart_series->setName(("Selected ("+to_string(selected_cnt)+")").c_str());
         chart_->addSeries(selected_chart_series);
+
+        if (selected_chart_series)
+        {
+            connect (selected_chart_series, &QScatterSeries::pressed,
+                     chart_view_, &ScatterPlotViewChartView::seriesPressedSlot);
+            connect (selected_chart_series, &QScatterSeries::released,
+                     chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
+        }
     }
 
     chart_->createDefaultAxes();
@@ -1100,12 +1132,24 @@ void ScatterPlotViewDataWidget::updateChart()
     if (!chart_view_)
     {
         //chart_view_ = new QChartView(chart_);
-        chart_view_ = new ScatterPlotViewChartView(chart_);
+        chart_view_ = new ScatterPlotViewChartView(this, chart_);
         chart_view_->setRenderHint(QPainter::Antialiasing);
-        chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+        //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+        //chart_view_->setDragMode(QGraphicsView::ScrollHandDrag);
 
         connect (chart_view_, &ScatterPlotViewChartView::rectangleSelectedSignal,
                  this, &ScatterPlotViewDataWidget::rectangleSelectedSlot);
+
+        for (auto series_it : chart_->series())
+        {
+            QScatterSeries* scat_series = dynamic_cast<QScatterSeries*>(series_it);
+            assert (scat_series);
+
+            connect (scat_series, &QScatterSeries::pressed,
+                     chart_view_, &ScatterPlotViewChartView::seriesPressedSlot);
+            connect (scat_series, &QScatterSeries::released,
+                     chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
+        }
 
         layout_->addWidget(chart_view_);
     }
@@ -1121,8 +1165,10 @@ void ScatterPlotViewDataWidget::mouseMoveEvent(QMouseEvent* event)
 
 void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y_min, double y_max)
 {
+    bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
+
     loginf << "ScatterPlotViewDataWidget: selectData: x_min " << x_min << " x_max " << x_max
-           << " y_min " << y_min << " y_max " << y_max;
+           << " y_min " << y_min << " y_max " << y_max << " ctrl pressed " << ctrl_pressed;
 
     unsigned int sel_cnt = 0;
     for (auto& buf_it : buffers_)
@@ -1164,6 +1210,9 @@ void ScatterPlotViewDataWidget::selectData (double x_min, double x_max, double y
             assert (indexes.size() == 1);
 
             index = indexes.at(0);
+
+            if (ctrl_pressed && !selected_vec.isNull(index) && selected_vec.get(index))
+                in_range = true; // add selection to existing
 
             selected_vec.set(index, in_range);
 
