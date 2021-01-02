@@ -16,6 +16,7 @@
  */
 
 #include "histogramviewwidget.h"
+#include "histogramviewdatatoolwidget.h"
 
 #include <QHBoxLayout>
 #include <QSettings>
@@ -55,6 +56,10 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
         QVBoxLayout* data_layout = new QVBoxLayout;
         data_layout->setContentsMargins(0, 0, 0, 0);
 
+        tool_widget_ = new HistogramViewDataToolWidget(view, this);
+        tool_widget_->setContentsMargins(0, 0, 0, 0);
+        data_layout->addWidget(tool_widget_);
+
         data_widget_ = new HistogramViewDataWidget(getView(), view->getDataSource());
         //data_widget_->setAutoFillBackground(true);
 //        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -88,6 +93,17 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     // connect stuff here
     // connect( config_widget_, SIGNAL(variableChanged()), this, SLOT(variableChangedSlot()) );
+
+//    connect(tool_widget_, &HistogramViewDataToolWidget::toolChangedSignal, data_widget_,
+//            &HistogramViewDataWidget::toolChangedSlot);
+
+    connect(tool_widget_, &HistogramViewDataToolWidget::invertSelectionSignal, data_widget_,
+            &HistogramViewDataWidget::invertSelectionSlot);
+    connect(tool_widget_, &HistogramViewDataToolWidget::clearSelectionSignal, data_widget_,
+            &HistogramViewDataWidget::clearSelectionSlot);
+
+    connect(tool_widget_, &HistogramViewDataToolWidget::zoomToHomeSignal, data_widget_,
+            &HistogramViewDataWidget::resetZoomSlot);
 }
 
 /*

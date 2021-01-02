@@ -22,6 +22,7 @@
 #include "viewwidget.h"
 
 class HistogramView;
+class HistogramViewDataToolWidget;
 class HistogramViewDataWidget;
 class HistogramViewConfigWidget;
 
@@ -51,6 +52,8 @@ class HistogramViewWidget : public ViewWidget
     HistogramViewDataWidget* getDataWidget() { return data_widget_; }
 
   protected:
+    HistogramViewDataToolWidget* tool_widget_{nullptr};
+
     QSplitter* main_splitter_{nullptr};
     /// Data widget with data display
     HistogramViewDataWidget* data_widget_{nullptr};

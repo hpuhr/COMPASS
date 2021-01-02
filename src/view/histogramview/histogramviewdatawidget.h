@@ -92,7 +92,11 @@ class HistogramViewDataWidget : public QWidget
 
     void resetZoomSlot();
 
+    //void toolChangedSlot(ScatterPlotViewDataTool selected, QCursor cursor);
     void rectangleSelectedSlot (unsigned int index1, unsigned int index2);
+
+    void invertSelectionSlot();
+    void clearSelectionSlot();
 
 //    void showOnlySelectedSlot(bool value);
 //    void usePresentationSlot(bool use_presentation);

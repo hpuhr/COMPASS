@@ -11,6 +11,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewchartview.h"
+        "${CMAKE_CURRENT_LIST_DIR}/histogramviewdatatoolwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/histogramview.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewdatasource.cpp"
@@ -18,6 +19,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewdatawidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/histogramviewchartview.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/histogramviewdatatoolwidget.cpp"
 )
 
 

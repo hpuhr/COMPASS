@@ -1943,6 +1943,43 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
     emit view_->selectionChangedSignal();
 }
 
+void HistogramViewDataWidget::invertSelectionSlot()
+{
+    loginf << "HistogramViewDataWidget: invertSelectionSlot";
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
+        {
+            if (selected_vec.isNull(cnt))
+                selected_vec.set(cnt, true);
+            else
+                selected_vec.set(cnt, !selected_vec.get(cnt));
+        }
+    }
+
+    emit view_->selectionChangedSignal();
+}
+
+void HistogramViewDataWidget::clearSelectionSlot()
+{
+    loginf << "HistogramViewDataWidget: clearSelectionSlot";
+
+    for (auto& buf_it : buffers_)
+    {
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
+            selected_vec.set(cnt, false);
+    }
+
+    emit view_->selectionChangedSignal();
+}
+
 //void HistogramViewDataWidget::showOnlySelectedSlot(bool value)
 //{
 //    loginf << "HistogramViewDataWidget: showOnlySelectedSlot: " << value;
