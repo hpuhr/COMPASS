@@ -64,6 +64,7 @@ namespace QtCharts {
     class QChartView;
     class QBarCategoryAxis;
     class QAbstractAxis;
+    class HistogramViewChartView;
 }
 
 /**
@@ -91,6 +92,8 @@ class HistogramViewDataWidget : public QWidget
 
     void resetZoomSlot();
 
+    void rectangleSelectedSlot (unsigned int index1, unsigned int index2);
+
 //    void showOnlySelectedSlot(bool value);
 //    void usePresentationSlot(bool use_presentation);
 //    void showAssociationsSlot(bool value);
@@ -109,7 +112,9 @@ class HistogramViewDataWidget : public QWidget
 
     void clear();
 
-  protected:
+    unsigned int numBins() const;
+
+protected:
     HistogramView* view_{nullptr};
     /// Data source
     HistogramViewDataSource* data_source_{nullptr};
@@ -121,6 +126,8 @@ class HistogramViewDataWidget : public QWidget
     std::vector<unsigned int> selected_counts_;
 
     std::map<std::string, unsigned int> data_null_cnt_;
+    unsigned int data_null_selected_cnt_{0};
+
     std::vector<std::string> labels_;
     unsigned int max_bin_cnt_ {0};
     QVariant data_min_;
@@ -135,7 +142,7 @@ class HistogramViewDataWidget : public QWidget
     QtCharts::QChart* chart_ {nullptr};
     QtCharts::QBarCategoryAxis* chart_x_axis_ {nullptr};
     QtCharts::QAbstractAxis* chart_y_axis_ {nullptr};
-    QtCharts::QChartView* chart_view_ {nullptr};
+    QtCharts::HistogramViewChartView* chart_view_ {nullptr};
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();
@@ -236,12 +243,18 @@ class HistogramViewDataWidget : public QWidget
 
         unsigned int bin_number;
         unsigned int data_size = data.size();
+        bool selected;
 
         for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
+            selected = !selected_vec.isNull(cnt) && selected_vec.get(cnt);
+
             if (data.isNull(cnt))
             {
-                ++data_null_cnt_[dbo_name];
+                if (selected)
+                    ++data_null_selected_cnt_;
+                else
+                    ++data_null_cnt_[dbo_name];
                 continue;
             }
 
@@ -253,7 +266,7 @@ class HistogramViewDataWidget : public QWidget
 
             assert (bin_number < num_bins_);
 
-            if (!selected_vec.isNull(cnt) && selected_vec.get(cnt)) // is selected
+            if (selected) // is selected
             {
                 if (!selected_counts_.size()) // set 0 bins
                 {
@@ -273,6 +286,52 @@ class HistogramViewDataWidget : public QWidget
     }
 
     void updateCounts(const std::vector<double>& data);
+
+    template<typename T>
+    void selectData(NullableVector<T>& data, NullableVector<bool>& selected_vec,
+                      bool select_min_max, T data_min, T data_max, bool select_null, bool add_to_selection)
+    {
+        loginf << "HistogramViewDataWidget: selectData: data_min " << data_min << " data_max " << data_max
+               << " select_null " << select_null << " add_to_selection " << add_to_selection;
+
+        unsigned int data_size = data.size();
+        T value;
+        bool select;
+        unsigned int select_cnt = 0;
+
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
+        {
+            if (data.isNull(cnt))
+            {
+                if (select_null)
+                {
+                    selected_vec.set(cnt, true);
+                    ++select_cnt;
+                }
+                else if (!add_to_selection)
+                    selected_vec.set(cnt, false);
+
+                continue;
+            }
+
+            if (!select_min_max)
+                continue;
+
+            value = data.get(cnt);
+
+            select = value >= data_min && value < data_max;
+
+            if (!select && add_to_selection && !selected_vec.isNull(cnt))
+                select = selected_vec.get(cnt);
+
+            selected_vec.set(cnt, select);
+
+            if (select)
+                ++select_cnt;
+        }
+
+        loginf << "HistogramViewDataWidget: selectData: select_cnt: " << select_cnt;
+    }
 };
 
 #endif /* HISTOGRAMVIEWDATAWIDGET_H_ */

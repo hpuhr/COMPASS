@@ -24,6 +24,7 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "histogramviewdatasource.h"
+#include "histogramviewchartview.h"
 #include "logger.h"
 #include "evaluationmanager.h"
 
@@ -62,6 +63,7 @@
 
 #include <QGraphicsLayout>
 #include <QShortcut>
+#include <QApplication>
 
 #include <algorithm>
 
@@ -89,9 +91,17 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     chart_->legend()->setVisible(true);
     chart_->legend()->setAlignment(Qt::AlignBottom);
 
-    chart_view_ = new QChartView(chart_);
+    chart_view_ = new HistogramViewChartView(this, chart_);
     chart_view_->setRenderHint(QPainter::Antialiasing);
-    chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+    //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+
+//    connect (chart_series_, &QBarSeries::clicked,
+//             chart_view_, &HistogramViewChartView::seriesPressedSlot);
+//    connect (chart_series_, &QBarSeries::released,
+//             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
+
+    connect (chart_view_, &HistogramViewChartView::rectangleSelectedSignal,
+             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
 
     layout->addWidget(chart_view_);
 
@@ -132,6 +142,7 @@ void HistogramViewDataWidget::clear ()
     counts_.clear();
     selected_counts_.clear();
     data_null_cnt_.clear();
+    data_null_selected_cnt_ = 0;
     labels_.clear();
 
     max_bin_cnt_ = 0;
@@ -141,6 +152,11 @@ void HistogramViewDataWidget::clear ()
 
     bin_size_valid_ = false;
     bin_size_ = 0;
+}
+
+unsigned int HistogramViewDataWidget::numBins() const
+{
+    return num_bins_;
 }
 
 void HistogramViewDataWidget::loadingStartedSlot()
@@ -554,6 +570,7 @@ void HistogramViewDataWidget::updateFromAllData()
     counts_.clear();
     selected_counts_.clear();
     data_null_cnt_.clear();
+    data_null_selected_cnt_ = 0;
     labels_.clear();
 
     max_bin_cnt_ = 0;
@@ -1081,6 +1098,14 @@ void HistogramViewDataWidget::updateChart()
 
     bool use_log_scale = view_->useLogScale();
 
+    bool add_null = data_null_cnt_.size() || data_null_selected_cnt_;
+
+    if (add_null && !data_null_cnt_.size()) // null to be shown, but no dbo counts, only selected
+    {
+        for (auto& cnt_it : counts_) // add zero counts to dbo
+            data_null_cnt_[cnt_it.first] = 0;
+    }
+
     for (auto& cnt_it : counts_)
     {
         unsigned int sum_cnt {0};
@@ -1101,7 +1126,7 @@ void HistogramViewDataWidget::updateChart()
 
         }
 
-        if (data_null_cnt_.size())
+        if (add_null)
         {
             if (use_log_scale && data_null_cnt_[cnt_it.first] == 0)
                 *set << 10e-3;
@@ -1113,19 +1138,33 @@ void HistogramViewDataWidget::updateChart()
         chart_series_->append(set);
     }
 
-    if (selected_counts_.size())
+    if (selected_counts_.size() || data_null_selected_cnt_)
     {
+        if (!selected_counts_.size()) // none selected
+        {
+            for (unsigned int cnt=0; cnt < num_bins_; ++cnt) // add zero counts to selected
+                selected_counts_.push_back(0);
+        }
+
         unsigned int sum_cnt {0};
         for (auto bin : selected_counts_)
             sum_cnt += bin;
 
-        QBarSet *set = new QBarSet(("Selected ("+to_string(sum_cnt)+")").c_str());
+        QBarSet *set = new QBarSet(("Selected ("+to_string(sum_cnt+data_null_selected_cnt_)+")").c_str());
 
         for (auto bin : selected_counts_)
             if (use_log_scale && bin == 0)
                 *set << 10e-3; // Logarithms of zero and negative values are undefined.
             else
                 *set << bin;
+
+        if (add_null)
+        {
+            if (data_null_selected_cnt_ == 0)
+                *set << 10e-3;
+            else
+                *set << data_null_selected_cnt_;
+        }
 
         set->setColor(Qt::yellow); // darker than yellow #808000
         chart_series_->append(set);
@@ -1190,6 +1229,7 @@ void HistogramViewDataWidget::updateResults()
     {
         counts_.clear();
         selected_counts_.clear();
+        data_null_selected_cnt_ = 0;
         data_null_cnt_.clear();
         labels_.clear();
 
@@ -1641,6 +1681,266 @@ void HistogramViewDataWidget::resetZoomSlot()
 
     if (chart_)
         chart_->zoomReset();
+}
+
+void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsigned int index2)
+{
+    loginf << "HistogramViewDataWidget: rectangleSelectedSlot: index1 " << index1 << " index2 " << index2;
+
+    unsigned int min_index = min(index1, index2);
+    unsigned int max_index = max(index1, index2);
+
+    bool select_null = max_index == num_bins_;
+
+    bool select_min_max = !(min_index == max_index && max_index == num_bins_); // not b´oth num bins
+
+    if (select_null)
+        max_index -= 1;
+
+    bool add_to_selection = QApplication::keyboardModifiers() & Qt::ControlModifier;
+
+    loginf << "HistogramViewDataWidget: rectangleSelectedSlot: select_min_max " << select_min_max
+           << " min_index " << min_index << " max_index " << max_index << " select_null " << select_null;
+
+    if (!bin_size_valid_ )
+    {
+        loginf << "HistogramViewDataWidget: rectangleSelectedSlot: bin size not valid";
+        return;
+    }
+
+    if (view_->showResults())
+    {
+        loginf << "HistogramViewDataWidget: rectangleSelectedSlot: selection of evalution results not available";
+        return;
+    }
+
+    double val_min = min_index * bin_size_ + data_min_.toDouble();
+    double val_max = (max_index+1) * bin_size_ + data_min_.toDouble();
+
+    //bin_number = (unsigned int) ((data.get(cnt)-data_min_.toDouble())/bin_size_);
+
+    loginf << "HistogramViewDataWidget: rectangleSelectedSlot: val_min " << val_min << " val_max " << val_max;
+
+    DBOVariable* data_var {nullptr};
+
+    if (!view_->hasDataVar())
+    {
+        logwrn << "HistogramViewDataWidget: rectangleSelectedSlot: no data var";
+        return;
+    }
+
+    for (auto& buf_it : buffers_)
+    {
+        string dbo_name = buf_it.first;
+
+        if (view_->isDataVarMeta())
+        {
+            MetaDBOVariable& meta_var = view_->metaDataVar();
+            if (!meta_var.existsIn(dbo_name))
+            {
+                logwrn << "HistogramViewDataWidget: rectangleSelectedSlot: meta var does not exist in dbo";
+                continue;
+            }
+
+            data_var = &meta_var.getFor(dbo_name);
+        }
+        else
+        {
+            data_var = &view_->dataVar();
+
+            if (data_var->dboName() != dbo_name)
+                continue;
+        }
+        assert (data_var);
+
+        PropertyDataType data_type = data_var->dataType();
+        string current_var_name = data_var->name();
+
+        assert (buf_it.second->has<bool>("selected"));
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>("selected");
+
+        shared_ptr<Buffer> buffer = buf_it.second;
+
+        switch (data_type)
+        {
+        case PropertyDataType::BOOL:
+        {
+            if (!buffer->has<bool>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<bool>(current_var_name));
+            NullableVector<bool>& data = buffer->get<bool>(current_var_name);
+
+            selectData<bool> (data, selected_vec, select_min_max, (bool) val_min, (bool) val_max,
+                              select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::CHAR:
+        {
+            if (!buffer->has<char>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<char>(current_var_name));
+            NullableVector<char>& data = buffer->get<char>(current_var_name);
+
+            selectData<char> (data, selected_vec, select_min_max, (char) val_min, (char) val_max,
+                              select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::UCHAR:
+        {
+            if (!buffer->has<unsigned char>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<unsigned char>(current_var_name));
+            NullableVector<unsigned char>& data = buffer->get<unsigned char>(current_var_name);
+
+            selectData<unsigned char> (data, selected_vec, select_min_max,
+                                       (unsigned char) val_min, (unsigned char) val_max,
+                                       select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::INT:
+        {
+            if (!buffer->has<int>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<int>(current_var_name));
+            NullableVector<int>& data = buffer->get<int>(current_var_name);
+
+            selectData<int> (data, selected_vec, select_min_max, (int) val_min, (int) val_max,
+                             select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::UINT:
+        {
+            if (!buffer->has<unsigned int>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<unsigned int>(current_var_name));
+            NullableVector<unsigned int>& data = buffer->get<unsigned int>(current_var_name);
+
+            selectData<unsigned int> (data, selected_vec, select_min_max,
+                                      (unsigned int) val_min, (unsigned int) val_max,
+                                      select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::LONGINT:
+        {
+            if (!buffer->has<long int>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<long int>(current_var_name));
+            NullableVector<long int>& data = buffer->get<long int>(current_var_name);
+
+            selectData<long int> (data, selected_vec, select_min_max, (long int) val_min, (long int) val_max,
+                                  select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::ULONGINT:
+        {
+            if (!buffer->has<unsigned long>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<unsigned long>(current_var_name));
+            NullableVector<unsigned long>& data = buffer->get<unsigned long>(current_var_name);
+
+            selectData<unsigned long> (data, selected_vec, select_min_max,
+                                       (unsigned long) val_min, (unsigned long) val_max,
+                                       select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::FLOAT:
+        {
+            if (!buffer->has<float>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<float>(current_var_name));
+            NullableVector<float>& data = buffer->get<float>(current_var_name);
+
+            selectData<float> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::DOUBLE:
+        {
+            if (!buffer->has<double>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<double>(current_var_name));
+            NullableVector<double>& data = buffer->get<double>(current_var_name);
+
+            selectData<double> (data, selected_vec, select_min_max, val_min, val_max, select_null, add_to_selection);
+
+            break;
+        }
+        case PropertyDataType::STRING:
+        {
+            if (!buffer->has<string>(current_var_name))
+            {
+                loginf << "HistogramViewDataWidget: rectangleSelectedSlot: buffer does not contain "
+                       << current_var_name;
+                return;
+            }
+
+            assert(buffer->has<string>(current_var_name));
+            //NullableVector<string>& data = buffer->get<string>(current_var_name);
+
+            break;
+        }
+        default:
+            logerr << "HistogramViewDataWidget: rectangleSelectedSlot: impossible for property type "
+                   << Property::asString(data_type);
+            throw std::runtime_error(
+                        "HistogramViewDataWidget: rectangleSelectedSlot: impossible property type " +
+                        Property::asString(data_type));
+        }
+    }
+
+    emit view_->selectionChangedSignal();
 }
 
 //void HistogramViewDataWidget::showOnlySelectedSlot(bool value)
