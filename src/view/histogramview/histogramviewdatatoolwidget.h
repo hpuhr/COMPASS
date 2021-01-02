@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <map>
 
-enum HistoGramViewDataTool
+enum HistogramViewDataTool
 {
     //HG_NAVIGATE_TOOL = 0,
     //SP_ZOOM_RECT_TOOL,

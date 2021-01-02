@@ -18,14 +18,15 @@
 #ifndef HISTOGRAMVIEWDATAWIDGET_H_
 #define HISTOGRAMVIEWDATAWIDGET_H_
 
+#include "global.h"
+#include "nullablevector.h"
+#include "dbovariable.h"
+#include "histogramviewdatatoolwidget.h"
+
 #include <QWidget>
 #include <QVariant>
 
 #include <memory>
-
-#include "global.h"
-#include "nullablevector.h"
-#include "dbovariable.h"
 
 class HistogramView;
 class HistogramViewDataSource;
@@ -118,6 +119,10 @@ class HistogramViewDataWidget : public QWidget
 
     unsigned int numBins() const;
 
+    HistogramViewDataTool selectedTool() const;
+    QCursor currentCursor() const;
+
+
 protected:
     HistogramView* view_{nullptr};
     /// Data source
@@ -141,6 +146,9 @@ protected:
     double bin_size_;
 
     std::map<std::string, QColor> colors_;
+
+    QCursor current_cursor_{Qt::CrossCursor};
+    HistogramViewDataTool selected_tool_{HG_SELECT_TOOL};
 
     QtCharts::QBarSeries* chart_series_ {nullptr};
     QtCharts::QChart* chart_ {nullptr};
@@ -173,6 +181,8 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result);
 
     void calculateGlobalMinMax();
+
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
 
     template<typename T>
     void updateMinMax(NullableVector<T>& data)

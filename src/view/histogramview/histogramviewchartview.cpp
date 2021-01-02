@@ -121,7 +121,10 @@ void HistogramViewChartView::mouseMoveEvent(QMouseEvent* event)
         return;
     }
 
+    setCursor(data_widget_->currentCursor());
+
     //QChartView::mouseMoveEvent(event);
+    QChartView::mouseMoveEvent(event);
 }
 
 void HistogramViewChartView::mouseReleaseEvent(QMouseEvent* event)

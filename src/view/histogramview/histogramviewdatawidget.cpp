@@ -159,6 +159,16 @@ unsigned int HistogramViewDataWidget::numBins() const
     return num_bins_;
 }
 
+HistogramViewDataTool HistogramViewDataWidget::selectedTool() const
+{
+    return selected_tool_;
+}
+
+QCursor HistogramViewDataWidget::currentCursor() const
+{
+    return current_cursor_;
+}
+
 void HistogramViewDataWidget::loadingStartedSlot()
 {
     clear();
@@ -1470,6 +1480,18 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
     loginf << "HistogramViewDataWidget: updateFromAllData: done: data_min_ " << data_min_.toString().toStdString()
            << " data_max_ " << data_max_.toString().toStdString();
 }
+
+void HistogramViewDataWidget::mouseMoveEvent(QMouseEvent* event)
+// for some reason not called, added to HistogramViewChartView::mouseMoveEvent
+{
+    loginf << "HistogramViewDataWidget: mouseMoveEvent";
+
+    setCursor(current_cursor_);
+    //osgEarth::QtGui::ViewerWidget::mouseMoveEvent(event);
+
+    QWidget::mouseMoveEvent(event);
+}
+
 
 void HistogramViewDataWidget::updateMinMax(NullableVector<std::string>& data)
 {
