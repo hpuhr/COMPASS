@@ -38,6 +38,7 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     //setAutoFillBackground(true);
 
     QHBoxLayout* hlayout = new QHBoxLayout;
+    hlayout->setContentsMargins(0, 0, 0, 0);
 
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Horizontal);
@@ -45,13 +46,25 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
     QSettings settings("COMPASS", instanceId().c_str());
 
     {  // data widget
+        QWidget* data_layout_widget = new QWidget();
+        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sp_left.setHorizontalStretch(5);
+        data_layout_widget->setSizePolicy(sp_left);
+        data_layout_widget->setContentsMargins(0, 0, 0, 0);
+
+        QVBoxLayout* data_layout = new QVBoxLayout;
+        data_layout->setContentsMargins(0, 0, 0, 0);
+
         data_widget_ = new HistogramViewDataWidget(getView(), view->getDataSource());
         //data_widget_->setAutoFillBackground(true);
-        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sp_left.setHorizontalStretch(3);
-        data_widget_->setSizePolicy(sp_left);
+//        QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+//        sp_left.setHorizontalStretch(3);
+//        data_widget_->setSizePolicy(sp_left);
+        data_layout->addWidget(data_widget_);
 
-        main_splitter_->addWidget(data_widget_);
+        //main_splitter_->addWidget(data_widget_);
+        data_layout_widget->setLayout(data_layout);
+        main_splitter_->addWidget(data_layout_widget);
     }
 
     {  // config widget

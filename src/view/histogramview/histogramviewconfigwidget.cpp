@@ -16,6 +16,12 @@
  */
 
 #include "histogramviewconfigwidget.h"
+#include "dbobjectmanager.h"
+#include "dbovariableselectionwidget.h"
+#include "histogramview.h"
+#include "histogramviewdatasource.h"
+#include "logger.h"
+#include "stringconv.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -24,86 +30,105 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFormLayout>
+#include <QTabWidget>
 
-#include "dbobjectmanager.h"
-#include "dbovariableselectionwidget.h"
-#include "histogramview.h"
-#include "histogramviewdatasource.h"
-#include "logger.h"
-#include "stringconv.h"
 
 using namespace Utils;
 
 HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidget* parent)
     : QWidget(parent), view_(view)
 {
-    QVBoxLayout* vlayout = new QVBoxLayout;
+    //QVBoxLayout* vlayout = new QVBoxLayout;
 
     assert(view_);
 
-    // data variable
-    selected_var_check_ = new QCheckBox("Show Variable Data");
-    selected_var_check_->setChecked(!view_->showResults());
-    connect(selected_var_check_, &QCheckBox::clicked, this,
-            &HistogramViewConfigWidget::showSelectedVariableDataSlot);
-    vlayout->addWidget(selected_var_check_);
+    setMinimumWidth(400);
 
-    select_var_ = new DBOVariableSelectionWidget();
-    select_var_->showMetaVariables(true);
-    if (view_->hasDataVar())
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QVBoxLayout* vlayout = new QVBoxLayout(this);
+    vlayout->setContentsMargins(0, 0, 0, 0);
+
+    QTabWidget* tab_widget = new QTabWidget(this);
+    tab_widget->setStyleSheet("QTabBar::tab { height: 42px; }");
+
+    // config
     {
-        if (view_->isDataVarMeta())
-            select_var_->selectedMetaVariable(view_->metaDataVar());
-        else
-            select_var_->selectedVariable(view_->dataVar());
+        QWidget* cfg_widget = new QWidget();
+        QVBoxLayout* cfg_layout = new QVBoxLayout();
+
+
+        // data variable
+        selected_var_check_ = new QCheckBox("Show Variable Data");
+        selected_var_check_->setChecked(!view_->showResults());
+        connect(selected_var_check_, &QCheckBox::clicked, this,
+                &HistogramViewConfigWidget::showSelectedVariableDataSlot);
+        cfg_layout->addWidget(selected_var_check_);
+
+        select_var_ = new DBOVariableSelectionWidget();
+        select_var_->showMetaVariables(true);
+        if (view_->hasDataVar())
+        {
+            if (view_->isDataVarMeta())
+                select_var_->selectedMetaVariable(view_->metaDataVar());
+            else
+                select_var_->selectedVariable(view_->dataVar());
+        }
+        connect(select_var_, &DBOVariableSelectionWidget::selectionChanged, this,
+                &HistogramViewConfigWidget::selectedVariableChangedSlot);
+        cfg_layout->addWidget(select_var_);
+
+        // eval
+        {
+            eval_results_check_ = new QCheckBox("Show Evaluation Result Data");
+            eval_results_check_->setChecked(!view_->showResults());
+            connect(eval_results_check_, &QCheckBox::clicked, this,
+                    &HistogramViewConfigWidget::showEvaluationResultDataSlot);
+            cfg_layout->addWidget(eval_results_check_);
+
+
+            QVBoxLayout* eval_layout = new QVBoxLayout();
+
+            QFormLayout* eval_form_layout = new QFormLayout;
+            eval_form_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
+
+            eval_results_grpreq_label_ = new QLabel();
+            eval_results_grpreq_label_->setWordWrap(true);
+
+            eval_form_layout->addRow(tr("Requirement"), eval_results_grpreq_label_);
+
+            eval_results_id_label_ = new QLabel();
+            eval_results_id_label_->setWordWrap(true);
+
+            eval_form_layout->addRow(tr("Result"), eval_results_id_label_);
+
+            eval_layout->addLayout(eval_form_layout);
+
+            cfg_layout->addLayout(eval_layout);
+
+            updateEvalConfig();
+        }
+
+
+        log_check_ = new QCheckBox("Logarithmic Y Scale");
+        log_check_->setChecked(view_->useLogScale());
+        connect(log_check_, &QCheckBox::clicked, this,
+                &HistogramViewConfigWidget::toggleLogScale);
+        cfg_layout->addWidget(log_check_);
+
+        //    export_button_ = new QPushButton("Export");
+        //    connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
+        //    vlayout->addWidget(export_button_);
+
+        cfg_layout->addStretch();
+
+        cfg_widget->setLayout(cfg_layout);
+
+        tab_widget->addTab(cfg_widget, "Config");
     }
-    connect(select_var_, &DBOVariableSelectionWidget::selectionChanged, this,
-            &HistogramViewConfigWidget::selectedVariableChangedSlot);
-    vlayout->addWidget(select_var_);
 
-    // eval
-    {
-        eval_results_check_ = new QCheckBox("Show Evaluation Result Data");
-        eval_results_check_->setChecked(!view_->showResults());
-        connect(eval_results_check_, &QCheckBox::clicked, this,
-                &HistogramViewConfigWidget::showEvaluationResultDataSlot);
-        vlayout->addWidget(eval_results_check_);
-
-
-        QVBoxLayout* eval_layout = new QVBoxLayout();
-
-        QFormLayout* eval_form_layout = new QFormLayout;
-        eval_form_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
-
-        eval_results_grpreq_label_ = new QLabel();
-        eval_results_grpreq_label_->setWordWrap(true);
-
-        eval_form_layout->addRow(tr("Requirement"), eval_results_grpreq_label_);
-
-        eval_results_id_label_ = new QLabel();
-        eval_results_id_label_->setWordWrap(true);
-
-        eval_form_layout->addRow(tr("Result"), eval_results_id_label_);
-
-        eval_layout->addLayout(eval_form_layout);
-
-        vlayout->addLayout(eval_layout);
-
-        updateEvalConfig();
-    }
-
-
-    log_check_ = new QCheckBox("Logarithmic Y Scale");
-    log_check_->setChecked(view_->useLogScale());
-    connect(log_check_, &QCheckBox::clicked, this,
-            &HistogramViewConfigWidget::toggleLogScale);
-    vlayout->addWidget(log_check_);
-
-//    export_button_ = new QPushButton("Export");
-//    connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
-//    vlayout->addWidget(export_button_);
-
-    vlayout->addStretch();
+    vlayout->addWidget(tab_widget);
 
     reload_button_ = new QPushButton("Reload");
     connect(reload_button_, &QPushButton::clicked, this,

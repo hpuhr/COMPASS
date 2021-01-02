@@ -39,6 +39,7 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id, const 
     //setAutoFillBackground(true);
 
     QHBoxLayout* hlayout = new QHBoxLayout;
+    hlayout->setContentsMargins(0, 0, 0, 0);
 
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Horizontal);
