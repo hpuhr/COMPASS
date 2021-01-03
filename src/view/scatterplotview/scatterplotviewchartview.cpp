@@ -15,13 +15,18 @@ ScatterPlotViewChartView::ScatterPlotViewChartView (
     assert (data_widget_);
 }
 
+ScatterPlotViewChartView::~ScatterPlotViewChartView()
+{
+
+}
+
 void ScatterPlotViewChartView::seriesPressedSlot(const QPointF& point)
 {
-    loginf << "ScatterPlotViewChartView: seriesPressedSlot: point x " << point.x() << " y " << point.y();
+    logdbg << "ScatterPlotViewChartView: seriesPressedSlot: point x " << point.x() << " y " << point.y();
 
     QPointF p = chart()->mapToPosition(point); // widget pos
 
-    loginf << "ScatterPlotViewChartView: seriesPressedSlot: p x " << p.x() << " y " << p.y();
+    logdbg << "ScatterPlotViewChartView: seriesPressedSlot: p x " << p.x() << " y " << p.y();
 
     ScatterPlotViewDataTool tool = data_widget_->selectedTool();
 
@@ -69,7 +74,7 @@ void ScatterPlotViewChartView::seriesPressedSlot(const QPointF& point)
 
 void ScatterPlotViewChartView::seriesReleasedSlot(const QPointF& point)
 {
-    loginf << "ScatterPlotViewChartView: seriesReleasedSlot";
+    logdbg << "ScatterPlotViewChartView: seriesReleasedSlot";
 
     //    if (show_rect_) // only if rect was shown
     //    {

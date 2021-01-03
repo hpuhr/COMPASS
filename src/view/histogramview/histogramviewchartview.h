@@ -26,6 +26,7 @@ signals:
 
 public:
     HistogramViewChartView(HistogramViewDataWidget* data_widget, QChart* chart, QWidget* parent = nullptr);
+    virtual ~HistogramViewChartView();
 
 protected:
     HistogramViewDataWidget* data_widget_ {nullptr};

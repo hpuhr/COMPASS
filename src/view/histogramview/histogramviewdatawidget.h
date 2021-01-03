@@ -22,6 +22,7 @@
 #include "nullablevector.h"
 #include "dbovariable.h"
 #include "histogramviewdatatoolwidget.h"
+#include "histogramviewchartview.h"
 
 #include <QWidget>
 #include <QVariant>
@@ -60,9 +61,9 @@ namespace EvaluationRequirementResult
     class JoinedModeC;
 }
 
-namespace QtCharts {
-    class HistogramViewChartView;
-}
+//namespace QtCharts {
+//    class HistogramViewChartView;
+//}
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in HistogramView

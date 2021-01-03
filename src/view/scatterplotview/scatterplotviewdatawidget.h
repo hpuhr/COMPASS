@@ -22,6 +22,7 @@
 #include "nullablevector.h"
 #include "dbovariable.h"
 #include "scatterplotviewdatatoolwidget.h"
+#include "scatterplotviewchartview.h"
 
 #include <QWidget>
 #include <QVariant>
@@ -39,7 +40,7 @@ class DBObject;
 namespace QtCharts {
     class QChart;
     class QScatterSeries;
-    class ScatterPlotViewChartView;
+    //class ScatterPlotViewChartView;
     class QChartView;
     class QBarCategoryAxis;
     class QValueAxis;

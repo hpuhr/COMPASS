@@ -149,6 +149,8 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
 
 DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
 {
+    loginf << "ScatterPlotView: getSet";
+
     assert(data_source_);
 
     DBOVariableSet set = data_source_->getSet()->getExistingInDBFor(dbo_name);
@@ -160,12 +162,18 @@ DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
             MetaDBOVariable& meta_var = metaDataVarX();
 
             if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
+            {
+                loginf << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbo_name).name();
                 set.add(meta_var.getFor(dbo_name));
+            }
         }
         else
         {
             if (!set.hasVariable(dataVarX()))
+            {
+                loginf << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
                 set.add(dataVarX());
+            }
         }
     }
 
@@ -176,12 +184,18 @@ DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
             MetaDBOVariable& meta_var = metaDataVarY();
 
             if (meta_var.existsIn(dbo_name) && !set.hasVariable(meta_var.getFor(dbo_name)))
+            {
+                loginf << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbo_name).name();
                 set.add(meta_var.getFor(dbo_name));
+            }
         }
         else
         {
             if (!set.hasVariable(dataVarY()))
+            {
+                loginf << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
                 set.add(dataVarY());
+            }
         }
     }
 

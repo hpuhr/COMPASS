@@ -16,6 +16,11 @@ HistogramViewChartView::HistogramViewChartView (
     assert (data_widget_);
 }
 
+HistogramViewChartView::~HistogramViewChartView()
+{
+
+}
+
 //void HistogramViewChartView::seriesPressedSlot(int index, QBarSet* barset)
 //{
 //    loginf << "HistogramViewChartView: seriesPressedSlot: point index " << index

@@ -28,6 +28,7 @@ public slots:
 
 public:
     ScatterPlotViewChartView (ScatterPlotViewDataWidget* data_widget, QChart* chart, QWidget* parent = nullptr);
+    virtual ~ScatterPlotViewChartView();
 
 protected:
     ScatterPlotViewDataWidget* data_widget_ {nullptr};
