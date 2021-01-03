@@ -91,6 +91,10 @@ class ScatterPlotViewDataWidget : public QWidget
     ScatterPlotViewDataTool selectedTool() const;
     QCursor currentCursor() const;
 
+    bool showsData() const;
+
+    QPixmap renderPixmap();
+
 protected:
     ScatterPlotView* view_{nullptr};
     /// Data source
@@ -117,10 +121,12 @@ protected:
     QCursor current_cursor_{Qt::OpenHandCursor};
     ScatterPlotViewDataTool selected_tool_{SP_NAVIGATE_TOOL};
 
-    QHBoxLayout* layout_ {nullptr};
-    QtCharts::QChart* chart_ {nullptr};
+    QHBoxLayout* main_layout_ {nullptr};
+    //QtCharts::QChart* chart_ {nullptr};
     //QtCharts::QChartView* chart_view_ {nullptr};
-    QtCharts::ScatterPlotViewChartView* chart_view_ {nullptr};
+    std::unique_ptr<QtCharts::ScatterPlotViewChartView> chart_view_ {nullptr};
+
+    bool shows_data_ {false};
 
     bool canUpdateFromDataX(std::string dbo_name);
     void updateFromDataX(std::string dbo_name, unsigned int current_size);

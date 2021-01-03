@@ -25,7 +25,9 @@
 #include "listboxviewdatawidget.h"
 #include "allbuffertablewidget.h"
 #include "histogramview.h"
+#include "histogramviewdatawidget.h"
 #include "scatterplotview.h"
+#include "scatterplotviewdatawidget.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
@@ -351,6 +353,42 @@ void LatexVisitor::visit(HistogramView* e)
     assert (e);
 
     loginf << "LatexVisitor: visit: HistogramView " << e->instanceId();
+
+    std::string screenshot_path = report_.path()+"/screenshots";
+
+    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+
+    if (!screenshot_folder_created_)
+    {
+        Files::createMissingDirectories(screenshot_path);
+        screenshot_folder_created_ = true;
+    }
+
+    e->showInTabWidget();
+
+    HistogramViewDataWidget* data_widget = e->getDataWidget();
+    assert (data_widget);
+
+    if (!data_widget->showsData())
+        return;
+
+    // normal screenshot
+    QPixmap pmap = data_widget->renderPixmap();;
+
+    QImage screenshot = pmap.toImage();
+
+    std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
+
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    // add normal screenshot after overview
+    sec.addImage(image_path, e->instanceId());
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -422,6 +460,42 @@ void LatexVisitor::visit(ScatterPlotView* e)
     assert (e);
 
     loginf << "LatexVisitor: visit: ScatterPlotView " << e->instanceId();
+
+    std::string screenshot_path = report_.path()+"/screenshots";
+
+    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+
+    if (!screenshot_folder_created_)
+    {
+        Files::createMissingDirectories(screenshot_path);
+        screenshot_folder_created_ = true;
+    }
+
+    e->showInTabWidget();
+
+    ScatterPlotViewDataWidget* data_widget = e->getDataWidget();
+    assert (data_widget);
+
+    if (!data_widget->showsData())
+        return;
+
+    // normal screenshot
+    QPixmap pmap = data_widget->renderPixmap();;
+
+    QImage screenshot = pmap.toImage();
+
+    std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
+
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    // add normal screenshot after overview
+    sec.addImage(image_path, e->instanceId());
 }
 
 void LatexVisitor::imagePrefix(const std::string& image_prefix)

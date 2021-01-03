@@ -172,7 +172,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
 bool DBOVariableSelectionWidget::showDataType(PropertyDataType type)
 {
-    return std::find(only_data_types_.begin(), only_data_types_.end(), type) != only_data_types_.begin();
+    return std::find(only_data_types_.begin(), only_data_types_.end(), type) != only_data_types_.end();
 }
 
 /*

@@ -31,6 +31,7 @@
 class HistogramView;
 class HistogramViewDataSource;
 class QTabWidget;
+class QHBoxLayout;
 class Buffer;
 class DBObject;
 
@@ -60,11 +61,6 @@ namespace EvaluationRequirementResult
 }
 
 namespace QtCharts {
-    class QChart;
-    class QBarSeries;
-    class QChartView;
-    class QBarCategoryAxis;
-    class QAbstractAxis;
     class HistogramViewChartView;
 }
 
@@ -122,6 +118,9 @@ class HistogramViewDataWidget : public QWidget
     HistogramViewDataTool selectedTool() const;
     QCursor currentCursor() const;
 
+    bool showsData() const;
+
+    QPixmap renderPixmap();
 
 protected:
     HistogramView* view_{nullptr};
@@ -150,11 +149,11 @@ protected:
     QCursor current_cursor_{Qt::CrossCursor};
     HistogramViewDataTool selected_tool_{HG_SELECT_TOOL};
 
-    QtCharts::QBarSeries* chart_series_ {nullptr};
-    QtCharts::QChart* chart_ {nullptr};
-    QtCharts::QBarCategoryAxis* chart_x_axis_ {nullptr};
-    QtCharts::QAbstractAxis* chart_y_axis_ {nullptr};
-    QtCharts::HistogramViewChartView* chart_view_ {nullptr};
+    QHBoxLayout* main_layout_ {nullptr};
+
+    std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
+
+    bool shows_data_ {false};
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();

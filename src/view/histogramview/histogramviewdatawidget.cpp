@@ -79,33 +79,33 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
     assert(data_source_);
     setContentsMargins(0, 0, 0, 0);
 
-    QHBoxLayout* layout = new QHBoxLayout();
+    main_layout_ = new QHBoxLayout();
 
-    chart_series_ = new QBarSeries();
+    //    chart_series_ = new QBarSeries();
 
-    chart_ = new QChart();
-    chart_->addSeries(chart_series_);
-    chart_->layout()->setContentsMargins(0, 0, 0, 0);
-    chart_->setBackgroundRoundness(0);
+    //    chart_ = new QChart();
+    //    chart_->addSeries(chart_series_);
+    //    chart_->layout()->setContentsMargins(0, 0, 0, 0);
+    //    chart_->setBackgroundRoundness(0);
 
-    chart_->legend()->setVisible(true);
-    chart_->legend()->setAlignment(Qt::AlignBottom);
+    //    chart_->legend()->setVisible(true);
+    //    chart_->legend()->setAlignment(Qt::AlignBottom);
 
-    chart_view_ = new HistogramViewChartView(this, chart_);
-    chart_view_->setRenderHint(QPainter::Antialiasing);
+    //    chart_view_ = new HistogramViewChartView(this, chart_);
+    //    chart_view_->setRenderHint(QPainter::Antialiasing);
     //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
 
-//    connect (chart_series_, &QBarSeries::clicked,
-//             chart_view_, &HistogramViewChartView::seriesPressedSlot);
-//    connect (chart_series_, &QBarSeries::released,
-//             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
+    //    connect (chart_series_, &QBarSeries::clicked,
+    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
+    //    connect (chart_series_, &QBarSeries::released,
+    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
 
-    connect (chart_view_, &HistogramViewChartView::rectangleSelectedSignal,
-             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+    //    connect (chart_view_, &HistogramViewChartView::rectangleSelectedSignal,
+    //             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
 
-    layout->addWidget(chart_view_);
+    //    layout->addWidget(chart_view_);
 
-    setLayout(layout);
+    setLayout(main_layout_);
 
     colors_["Radar"] = QColor("#00FF00");
     colors_["MLAT"] = QColor("#FF0000");
@@ -122,7 +122,6 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramView* view, HistogramV
 
 HistogramViewDataWidget::~HistogramViewDataWidget()
 {
-    delete chart_view_;
 }
 
 void HistogramViewDataWidget::updateToData()
@@ -152,6 +151,9 @@ void HistogramViewDataWidget::clear ()
 
     bin_size_valid_ = false;
     bin_size_ = 0;
+
+    chart_view_.reset(nullptr);
+    shows_data_ = false;
 }
 
 unsigned int HistogramViewDataWidget::numBins() const
@@ -167,6 +169,17 @@ HistogramViewDataTool HistogramViewDataWidget::selectedTool() const
 QCursor HistogramViewDataWidget::currentCursor() const
 {
     return current_cursor_;
+}
+
+bool HistogramViewDataWidget::showsData() const
+{
+    return shows_data_;
+}
+
+QPixmap HistogramViewDataWidget::renderPixmap()
+{
+    assert (chart_view_);
+    return chart_view_->grab();
 }
 
 void HistogramViewDataWidget::loadingStartedSlot()
@@ -528,22 +541,22 @@ void HistogramViewDataWidget::updateFromData(std::string dbo_name)
                 (data_min_.isValid() && data_max_.isValid() && (data_min < data_min_.toDouble()
                                                                 || data_max > data_max_.toDouble())))
         {
-//            loginf << "UGA up all bin_size_valid " << bin_size_valid_;
+            //            loginf << "UGA up all bin_size_valid " << bin_size_valid_;
 
-//            loginf << " data_min_.isValid() " << data_min_.isValid()
-//                   << " data_min < data_min_ " << (data_min < data_min_.toDouble())
-//                   << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
+            //            loginf << " data_min_.isValid() " << data_min_.isValid()
+            //                   << " data_min < data_min_ " << (data_min < data_min_.toDouble())
+            //                   << " data_min " << data_min << " data_min_ " << data_min_.toString().toStdString();
 
-//            loginf << " data_max_.isValid() " << data_max_.isValid()
-//                   << " data_max > data_max_ " << (data_max > data_max_.toDouble())
-//                   << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
+            //            loginf << " data_max_.isValid() " << data_max_.isValid()
+            //                   << " data_max > data_max_ " << (data_max > data_max_.toDouble())
+            //                   << " data_max " << data_max << " data_max_ " << data_max_.toString().toStdString();
 
             updateFromAllData(); // clear, recalc min/max, update
             return;
         }
 
-//        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
-//               << " bin_size " << bin_size_;
+        //        loginf << "UGA data_min " << data_min << " data_max " << data_max << " num_bins " << num_bins_
+        //               << " bin_size " << bin_size_;
 
         updateCounts<double> (dbo_name, data, selected_vec, data_var);
 
@@ -587,6 +600,9 @@ void HistogramViewDataWidget::updateFromAllData()
 
     data_min_.clear();
     data_max_.clear();
+
+    chart_view_.reset(nullptr);
+    shows_data_ = false;
 
     loginf << "HistogramViewDataWidget: updateFromAllData: num buffers " << buffers_.size();
 
@@ -1090,21 +1106,48 @@ void HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
-    if (chart_x_axis_)
-    {
-        chart_series_->detachAxis(chart_x_axis_);
-        delete chart_x_axis_;
-        chart_x_axis_ = nullptr;
-    }
+    if (chart_view_)
+        chart_view_.reset(nullptr);
 
-    if (chart_y_axis_)
-    {
-        chart_series_->detachAxis(chart_y_axis_);
-        delete chart_y_axis_;
-        chart_y_axis_ = nullptr;
-    }
+    //    if (chart_x_axis_)
+    //    {
+    //        chart_series_->detachAxis(chart_x_axis_);
+    //        delete chart_x_axis_;
+    //        chart_x_axis_ = nullptr;
+    //    }
 
-    chart_series_->clear();
+    //    if (chart_y_axis_)
+    //    {
+    //        chart_series_->detachAxis(chart_y_axis_);
+    //        delete chart_y_axis_;
+    //        chart_y_axis_ = nullptr;
+    //    }
+
+    //chart_series_->clear();
+
+    QBarSeries* chart_series = new QBarSeries();
+
+    QChart* chart = new QChart();
+    chart->addSeries(chart_series);
+    chart->layout()->setContentsMargins(0, 0, 0, 0);
+    chart->setBackgroundRoundness(0);
+
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    chart_view_.reset(new HistogramViewChartView(this, chart));
+    chart_view_->setRenderHint(QPainter::Antialiasing);
+    //chart_view_->setRubberBand(QChartView::RectangleRubberBand);
+
+    //    connect (chart_series_, &QBarSeries::clicked,
+    //             chart_view_, &HistogramViewChartView::seriesPressedSlot);
+    //    connect (chart_series_, &QBarSeries::released,
+    //             chart_view_, &HistogramViewChartView::seriesReleasedSlot);
+
+    connect (chart_view_.get(), &HistogramViewChartView::rectangleSelectedSignal,
+             this, &HistogramViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
+
+    main_layout_->addWidget(chart_view_.get());
 
     bool use_log_scale = view_->useLogScale();
 
@@ -1145,7 +1188,7 @@ void HistogramViewDataWidget::updateChart()
         }
 
         set->setColor(colors_[cnt_it.first]);
-        chart_series_->append(set);
+        chart_series->append(set);
     }
 
     if (selected_counts_.size() || data_null_selected_cnt_)
@@ -1177,7 +1220,7 @@ void HistogramViewDataWidget::updateChart()
         }
 
         set->setColor(Qt::yellow); // darker than yellow #808000
-        chart_series_->append(set);
+        chart_series->append(set);
     }
 
     QStringList categories;
@@ -1189,42 +1232,47 @@ void HistogramViewDataWidget::updateChart()
         categories << "NULL";
     //categories << "Jan" << "Feb" << "Mar" << "Apr" << "May" << "Jun";
 
-    chart_x_axis_ = new QBarCategoryAxis();
+    QBarCategoryAxis* chart_x_axis = new QBarCategoryAxis();
 
     if (view_->showResults())
-        chart_x_axis_->setTitleText((view_->evalResultGrpReq()+":"+view_->evalResultsID()).c_str());
+        chart_x_axis->setTitleText((view_->evalResultGrpReq()+":"+view_->evalResultsID()).c_str());
     else
-        chart_x_axis_->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
+        chart_x_axis->setTitleText((view_->dataVarDBO()+": "+view_->dataVarName()).c_str());
 
-    chart_x_axis_->setLabelsAngle(85);
-    chart_x_axis_->append(categories);
-    chart_->addAxis(chart_x_axis_, Qt::AlignBottom);
-    chart_series_->attachAxis(chart_x_axis_);
+    chart_x_axis->setLabelsAngle(85);
+    chart_x_axis->append(categories);
+    chart->addAxis(chart_x_axis, Qt::AlignBottom);
+    chart_series->attachAxis(chart_x_axis);
+
+    QAbstractAxis* chart_y_axis {nullptr};
 
     if (view_->useLogScale())
     {
-        QLogValueAxis* chart_y_axis = new QLogValueAxis();
+        QLogValueAxis* tmp_chart_y_axis = new QLogValueAxis();
 
-        chart_y_axis->setLabelFormat("%g");
-        chart_y_axis->setBase(10.0);
-        chart_y_axis->setMinorTickCount(-1);
+        tmp_chart_y_axis->setLabelFormat("%g");
+        tmp_chart_y_axis->setBase(10.0);
+        tmp_chart_y_axis->setMinorTickCount(-1);
 
-        chart_y_axis_ = chart_y_axis;
-        chart_y_axis_->setRange(10e-2, max_bin_cnt_);
+        chart_y_axis = tmp_chart_y_axis;
+        chart_y_axis->setRange(10e-2, max_bin_cnt_);
     }
     else
     {
-        chart_y_axis_ = new QValueAxis();
-        chart_y_axis_->setRange(0, max_bin_cnt_);
+        chart_y_axis = new QValueAxis();
+        chart_y_axis->setRange(0, max_bin_cnt_);
     }
+    assert (chart_y_axis);
 
-    chart_y_axis_->setTitleText("Count");
+    chart_y_axis->setTitleText("Count");
 
-    chart_->addAxis(chart_y_axis_, Qt::AlignLeft);
-    chart_series_->attachAxis(chart_y_axis_);
+    chart->addAxis(chart_y_axis, Qt::AlignLeft);
+    chart_series->attachAxis(chart_y_axis);
 
-    chart_->zoomReset();
+    chart->update();
     //chart_->setTitle("Simple barchart example");
+
+    shows_data_ = true;
 
     loginf << "HistogramViewDataWidget: updateChart: done";
 }
@@ -1251,6 +1299,8 @@ void HistogramViewDataWidget::updateResults()
         bin_size_valid_ = false;
         bin_size_ = 0;
 
+        shows_data_ = false;
+
         string eval_grpreq = view_->evalResultGrpReq();
         string eval_id = view_->evalResultsID();
 
@@ -1273,11 +1323,11 @@ void HistogramViewDataWidget::updateResults()
         updateFromResult(result);
     }
 
-//    osg_layer_model_->beginResetModel();
-//    osg_layer_model_->resultsItem().update();
-//    osg_layer_model_->endResetModel();
+    //    osg_layer_model_->beginResetModel();
+    //    osg_layer_model_->resultsItem().update();
+    //    osg_layer_model_->endResetModel();
 
-//    drawSlot();
+    //    drawSlot();
 }
 
 void HistogramViewDataWidget::calculateGlobalMinMax()
@@ -1650,11 +1700,11 @@ void HistogramViewDataWidget::updateCounts(const std::vector<double>& data)
     {
         for (unsigned int bin_cnt = 0; bin_cnt < num_bins_; ++bin_cnt)
         {
-//            if (data_var->representation() != DBOVariable::Representation::STANDARD)
-//                labels_.push_back(data_var->getAsSpecialRepresentationString(
-//                                      data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
-//            else
-                labels_.push_back(std::to_string(data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
+            //            if (data_var->representation() != DBOVariable::Representation::STANDARD)
+            //                labels_.push_back(data_var->getAsSpecialRepresentationString(
+            //                                      data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
+            //            else
+            labels_.push_back(std::to_string(data_min_.toDouble()+bin_cnt*bin_size_+bin_size_/2.0f));
 
         }
     }
@@ -1701,8 +1751,8 @@ void HistogramViewDataWidget::resetZoomSlot()
 {
     loginf << "HistogramViewDataWidget: resetZoomSlot";
 
-    if (chart_)
-        chart_->zoomReset();
+    if (chart_view_ && chart_view_->chart())
+        chart_view_->chart()->zoomReset();
 }
 
 void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsigned int index2)
