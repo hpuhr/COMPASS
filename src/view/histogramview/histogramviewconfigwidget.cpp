@@ -68,6 +68,15 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
         select_var_ = new DBOVariableSelectionWidget();
         select_var_->showMetaVariables(true);
+        select_var_->showDataTypesOnly({PropertyDataType::BOOL,
+                                        PropertyDataType::CHAR,
+                                        PropertyDataType::UCHAR,
+                                        PropertyDataType::INT,
+                                        PropertyDataType::UINT,
+                                        PropertyDataType::LONGINT,
+                                        PropertyDataType::ULONGINT,
+                                        PropertyDataType::FLOAT,
+                                        PropertyDataType::DOUBLE});
         if (view_->hasDataVar())
         {
             if (view_->isDataVarMeta())

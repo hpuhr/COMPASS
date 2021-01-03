@@ -60,6 +60,15 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
 
         select_var_x_ = new DBOVariableSelectionWidget();
         select_var_x_->showMetaVariables(true);
+        select_var_x_->showDataTypesOnly({PropertyDataType::BOOL,
+                                          PropertyDataType::CHAR,
+                                          PropertyDataType::UCHAR,
+                                          PropertyDataType::INT,
+                                          PropertyDataType::UINT,
+                                          PropertyDataType::LONGINT,
+                                          PropertyDataType::ULONGINT,
+                                          PropertyDataType::FLOAT,
+                                          PropertyDataType::DOUBLE});
         if (view_->hasDataVarX())
         {
             if (view_->isDataVarXMeta())
@@ -75,6 +84,15 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotView* view, 
 
         select_var_y_ = new DBOVariableSelectionWidget();
         select_var_y_->showMetaVariables(true);
+        select_var_y_->showDataTypesOnly({PropertyDataType::BOOL,
+                                          PropertyDataType::CHAR,
+                                          PropertyDataType::UCHAR,
+                                          PropertyDataType::INT,
+                                          PropertyDataType::UINT,
+                                          PropertyDataType::LONGINT,
+                                          PropertyDataType::ULONGINT,
+                                          PropertyDataType::FLOAT,
+                                          PropertyDataType::DOUBLE});
         if (view_->hasDataVarY())
         {
             if (view_->isDataVarYMeta())
