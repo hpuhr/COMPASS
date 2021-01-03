@@ -24,7 +24,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ModeAConfig::ModeAConfig(const std::string& class_id, const std::string& instance_id,
+    ModeAPresentConfig::ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
                          : Config(class_id, instance_id, group, standard, eval_man)
     {
@@ -37,24 +37,24 @@ namespace EvaluationRequirement
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
     }
 
-    void ModeAConfig::addGUIElements(QFormLayout* layout)
+    void ModeAPresentConfig::addGUIElements(QFormLayout* layout)
     {
         assert (layout);
 
         Config::addGUIElements(layout);
     }
 
-    ModeAConfigWidget* ModeAConfig::widget()
+    ModeAPresentConfigWidget* ModeAPresentConfig::widget()
     {
         if (!widget_)
-            widget_.reset(new ModeAConfigWidget(*this));
+            widget_.reset(new ModeAPresentConfigWidget(*this));
 
         return widget_.get();
     }
 
-    std::shared_ptr<Base> ModeAConfig::createRequirement()
+    std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
     {
-        shared_ptr<ModeA> req = make_shared<ModeA>(
+        shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
                     use_minimum_probability_present_, minimum_probability_present_,
                     use_maximum_probability_false_, maximum_probability_false_);
@@ -62,52 +62,52 @@ namespace EvaluationRequirement
         return req;
     }
 
-    float ModeAConfig::maxRefTimeDiff() const
+    float ModeAPresentConfig::maxRefTimeDiff() const
     {
         return max_ref_time_diff_;
     }
 
-    void ModeAConfig::maxRefTimeDiff(float value)
+    void ModeAPresentConfig::maxRefTimeDiff(float value)
     {
         max_ref_time_diff_ = value;
     }
 
-    bool ModeAConfig::useMinimumProbabilityPresent() const
+    bool ModeAPresentConfig::useMinimumProbabilityPresent() const
     {
         return use_minimum_probability_present_;
     }
 
-    void ModeAConfig::useMinimumProbabilityPresent(bool value)
+    void ModeAPresentConfig::useMinimumProbabilityPresent(bool value)
     {
         use_minimum_probability_present_ = value;
     }
 
-    float ModeAConfig::minimumProbabilityPresent() const
+    float ModeAPresentConfig::minimumProbabilityPresent() const
     {
         return minimum_probability_present_;
     }
 
-    void ModeAConfig::minimumProbabilityPresent(float value)
+    void ModeAPresentConfig::minimumProbabilityPresent(float value)
     {
         minimum_probability_present_ = value;
     }
 
-    bool ModeAConfig::useMaximumProbabilityFalse() const
+    bool ModeAPresentConfig::useMaximumProbabilityFalse() const
     {
         return use_maximum_probability_false_;
     }
 
-    void ModeAConfig::useMaximumProbabilityFalse(bool value)
+    void ModeAPresentConfig::useMaximumProbabilityFalse(bool value)
     {
         use_maximum_probability_false_ = value;
     }
 
-    float ModeAConfig::maximumProbabilityFalse() const
+    float ModeAPresentConfig::maximumProbabilityFalse() const
     {
         return maximum_probability_false_;
     }
 
-    void ModeAConfig::maximumProbabilityFalse(float value)
+    void ModeAPresentConfig::maximumProbabilityFalse(float value)
     {
         maximum_probability_false_ = value;
     }

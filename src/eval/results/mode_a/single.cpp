@@ -36,21 +36,21 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    SingleModeA::SingleModeA(
+    SingleModeAPresent::SingleModeAPresent(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_updates, int num_no_ref_pos, int num_no_ref_val, int num_pos_outside, int num_pos_inside,
             int num_unknown, int num_correct, int num_false,
             std::vector<EvaluationRequirement::CheckDetail> details)
-        : Single("SingleModeA", result_id, requirement, sector_layer, utn, target, eval_man),
+        : Single("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_val_(num_no_ref_val),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
           num_unknown_(num_unknown),
           num_correct_(num_correct), num_false_(num_false), details_(details)
     {
-        std::shared_ptr<EvaluationRequirement::ModeA> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeA>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
         assert (req);
 
         use_p_present_req_ = req->useMinimumProbabilityPresent();
@@ -62,7 +62,7 @@ namespace EvaluationRequirementResult
         updateProbabilities();
     }
 
-    void SingleModeA::updateProbabilities()
+    void SingleModeAPresent::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
@@ -92,7 +92,7 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleModeA::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAPresent::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "SingleModeA " <<  requirement_->name() <<": addToReport";
 
@@ -105,7 +105,7 @@ namespace EvaluationRequirementResult
         // TODO add requirement description, methods
     }
 
-    void SingleModeA::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
@@ -113,7 +113,7 @@ namespace EvaluationRequirementResult
             addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
     }
 
-    void SingleModeA::addTargetDetailsToTable (
+    void SingleModeAPresent::addTargetDetailsToTable (
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
@@ -140,7 +140,7 @@ namespace EvaluationRequirementResult
          pe_var, pf_var}, this, {utn_});
     }
 
-    void SingleModeA::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -224,7 +224,7 @@ namespace EvaluationRequirementResult
         reportDetails(utn_req_section);
     }
 
-    void SingleModeA::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    void SingleModeAPresent::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
@@ -251,7 +251,7 @@ namespace EvaluationRequirementResult
     }
 
 
-    bool SingleModeA::hasViewableData (
+    bool SingleModeAPresent::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -262,7 +262,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleModeA::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> SingleModeAPresent::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
 
@@ -299,7 +299,7 @@ namespace EvaluationRequirementResult
             return nullptr;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleModeA::getTargetErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> SingleModeAPresent::getTargetErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                     utn_, req_grp_id_, result_id_);
@@ -353,7 +353,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool SingleModeA::hasReference (
+    bool SingleModeAPresent::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -362,7 +362,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string SingleModeA::reference(
+    std::string SingleModeAPresent::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -370,52 +370,52 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    std::shared_ptr<Joined> SingleModeA::createEmptyJoined(const std::string& result_id)
+    std::shared_ptr<Joined> SingleModeAPresent::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedModeA> (result_id, requirement_, sector_layer_, eval_man_);
+        return make_shared<JoinedModeAPresent> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SingleModeA::numNoRefPos() const
+    int SingleModeAPresent::numNoRefPos() const
     {
         return num_no_ref_pos_;
     }
 
-    int SingleModeA::numNoRefValue() const
+    int SingleModeAPresent::numNoRefValue() const
     {
         return num_no_ref_val_;
     }
 
-    int SingleModeA::numPosOutside() const
+    int SingleModeAPresent::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    int SingleModeA::numPosInside() const
+    int SingleModeAPresent::numPosInside() const
     {
         return num_pos_inside_;
     }
 
-    int SingleModeA::numUpdates() const
+    int SingleModeAPresent::numUpdates() const
     {
         return num_updates_;
     }
 
-    int SingleModeA::numUnknown() const
+    int SingleModeAPresent::numUnknown() const
     {
         return num_unknown_;
     }
 
-    int SingleModeA::numCorrect() const
+    int SingleModeAPresent::numCorrect() const
     {
         return num_correct_;
     }
 
-    int SingleModeA::numFalse() const
+    int SingleModeAPresent::numFalse() const
     {
         return num_false_;
     }
 
-    std::vector<EvaluationRequirement::CheckDetail>& SingleModeA::details()
+    std::vector<EvaluationRequirement::CheckDetail>& SingleModeAPresent::details()
     {
         return details_;
     }

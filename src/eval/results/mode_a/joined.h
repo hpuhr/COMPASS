@@ -22,12 +22,12 @@
 
 namespace EvaluationRequirementResult
 {
-    class SingleModeA;
+    class SingleModeAPresent;
 
-    class JoinedModeA : public Joined
+    class JoinedModeAPresent : public Joined
     {
     public:
-        JoinedModeA(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        JoinedModeAPresent(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
                              const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
@@ -71,7 +71,7 @@ namespace EvaluationRequirementResult
         bool has_p_false_ {false};
         float p_false_{0};
 
-        void addToValues (std::shared_ptr<SingleModeA> single_result);
+        void addToValues (std::shared_ptr<SingleModeAPresent> single_result);
         void updateProbabilities();
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

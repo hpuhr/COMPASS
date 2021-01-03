@@ -650,10 +650,10 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         updateCountResult(static_pointer_cast<SingleIdentification>(result));
     else if (result->type() == "JoinedIdentification")
         updateCountResult(static_pointer_cast<JoinedIdentification>(result));
-    else if (result->type() == "SingleModeA")
-        updateCountResult(static_pointer_cast<SingleModeA>(result));
-    else if (result->type() == "JoinedModeA")
-        updateCountResult(static_pointer_cast<JoinedModeA>(result));
+    else if (result->type() == "SingleModeAPresent")
+        updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
+    else if (result->type() == "JoinedModeAPresent")
+        updateCountResult(static_pointer_cast<JoinedModeAPresent>(result));
     else if (result->type() == "SingleModeC")
         updateCountResult(static_pointer_cast<SingleModeC>(result));
     else if (result->type() == "JoinedModeC")
@@ -1009,7 +1009,7 @@ void HistogramViewDataWidget::updateCountResult (
 }
 
 
-void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeA> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: single mode a";
 
@@ -1039,7 +1039,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 }
 
 
-void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeA> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a";
 
@@ -1049,9 +1049,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeA>(result_it));
+        assert (static_pointer_cast<SingleModeAPresent>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeA>(result_it));
+            updateCountResult (static_pointer_cast<SingleModeAPresent>(result_it));
     }
 }
 

@@ -30,7 +30,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-    ModeA::ModeA(const std::string& name, const std::string& short_name, const std::string& group_name,
+    ModeAPresent::ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
                  EvaluationManager& eval_man, float max_ref_time_diff,
                  bool use_minimum_probability_present, float minimum_probability_present,
                  bool use_maximum_probability_false, float maximum_probability_false)
@@ -44,7 +44,7 @@ namespace EvaluationRequirement
 
     }
 
-    std::shared_ptr<EvaluationRequirementResult::Single> ModeA::evaluate (
+    std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer)
     {
@@ -259,33 +259,33 @@ namespace EvaluationRequirement
 
         //assert (details.size() == tst_data.size());
 
-        return make_shared<EvaluationRequirementResult::SingleModeA>(
+        return make_shared<EvaluationRequirementResult::SingleModeAPresent>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
                     num_unknown, num_correct, num_false, details);
     }
 
-    float ModeA::maxRefTimeDiff() const
+    float ModeAPresent::maxRefTimeDiff() const
     {
         return max_ref_time_diff_;
     }
 
-    bool ModeA::useMinimumProbabilityPresent() const
+    bool ModeAPresent::useMinimumProbabilityPresent() const
     {
         return use_minimum_probability_present_;
     }
 
-    float ModeA::minimumProbabilityPresent() const
+    float ModeAPresent::minimumProbabilityPresent() const
     {
         return minimum_probability_present_;
     }
 
-    bool ModeA::useMaximumProbabilityFalse() const
+    bool ModeAPresent::useMaximumProbabilityFalse() const
     {
         return use_maximum_probability_false_;
     }
 
-    float ModeA::maximumProbabilityFalse() const
+    float ModeAPresent::maximumProbabilityFalse() const
     {
         return maximum_probability_false_;
     }

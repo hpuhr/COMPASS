@@ -139,8 +139,8 @@ void Group::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id.compare("EvaluationRequirementModeAConfig") == 0)
     {
-        EvaluationRequirement::ModeAConfig* config =
-                new EvaluationRequirement::ModeAConfig(
+        EvaluationRequirement::ModeAPresentConfig* config =
+                new EvaluationRequirement::ModeAPresentConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 

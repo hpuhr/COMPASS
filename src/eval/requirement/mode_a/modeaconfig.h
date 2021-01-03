@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODEACONFIG_H
-#define EVALUATIONREQUIREMENTMODEACONFIG_H
+#ifndef EVALUATIONREQUIREMENTMODEARESENTCONFIG_H
+#define EVALUATIONREQUIREMENTMODEARESENTCONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/config.h"
@@ -30,14 +30,14 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-    class ModeAConfig : public Config
+    class ModeAPresentConfig : public Config
     {
     public:
-        ModeAConfig(const std::string& class_id, const std::string& instance_id,
+        ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
         virtual void addGUIElements(QFormLayout* layout) override;
-        ModeAConfigWidget* widget() override;
+        ModeAPresentConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float maxRefTimeDiff() const;
@@ -64,9 +64,9 @@ namespace EvaluationRequirement
         bool use_maximum_probability_false_ {true};
         float maximum_probability_false_{0};
 
-        std::unique_ptr<ModeAConfigWidget> widget_;
+        std::unique_ptr<ModeAPresentConfigWidget> widget_;
     };
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODEACONFIG_H
+#endif // EVALUATIONREQUIREMENTMODEARESENTCONFIG_H
