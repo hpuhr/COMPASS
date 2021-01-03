@@ -23,6 +23,7 @@
 #include "files.h"
 #include "global.h"
 #include "metadbovariable.h"
+#include "logger.h"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -315,6 +316,8 @@ void DBOVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDat
 {
     only_data_types_ = only_data_types;
     show_data_types_only_ = true;
+
+    updateMenuEntries();
 }
 
 void DBOVariableSelectionWidget::disableShowDataTypesOnly()
