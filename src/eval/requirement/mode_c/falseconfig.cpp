@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_c/modecconfig.h"
+#include "eval/requirement/mode_c/falseconfig.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base.h"
 

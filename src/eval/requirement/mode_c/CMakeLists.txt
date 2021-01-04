@@ -4,13 +4,13 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/modecconfig.h"
-        "${CMAKE_CURRENT_LIST_DIR}/modecconfigwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/modec.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/false.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/modecconfig.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/modecconfigwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/modec.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/false.cpp"
 )
 
 

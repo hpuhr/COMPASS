@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECCONFIG_H
-#define EVALUATIONREQUIREMENTMODECCONFIG_H
+#ifndef EVALUATIONREQUIREMENTMODECFALSECONFIG_H
+#define EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/config.h"
-#include "eval/requirement/mode_c/modec.h"
-#include "eval/requirement/mode_c/modecconfigwidget.h"
+#include "eval/requirement/mode_c/false.h"
+#include "eval/requirement/mode_c/falseconfigwidget.h"
 
 #include <memory>
 
@@ -74,4 +74,4 @@ namespace EvaluationRequirement
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODECCONFIG_H
+#endif // EVALUATIONREQUIREMENTMODECFALSECONFIG_H

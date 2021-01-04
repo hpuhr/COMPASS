@@ -48,8 +48,8 @@
 #include "eval/results/mode_a/presentjoined.h"
 #include "eval/results/mode_a/falsesingle.h"
 #include "eval/results/mode_a/falsejoined.h"
-#include "eval/results/mode_c/single.h"
-#include "eval/results/mode_c/joined.h"
+#include "eval/results/mode_c/falsesingle.h"
+#include "eval/results/mode_c/falsejoined.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>

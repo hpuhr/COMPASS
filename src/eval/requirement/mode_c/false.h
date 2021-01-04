@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODEC_H
-#define EVALUATIONREQUIREMENTMODEC_H
+#ifndef EVALUATIONREQUIREMENTMODECFALSE_H
+#define EVALUATIONREQUIREMENTMODECFALSE_H
 
 #include "eval/requirement/base.h"
 
@@ -57,4 +57,4 @@ namespace EvaluationRequirement
     };
 
 }
-#endif // EVALUATIONREQUIREMENTMODEC_H
+#endif // EVALUATIONREQUIREMENTMODECFALSE_H

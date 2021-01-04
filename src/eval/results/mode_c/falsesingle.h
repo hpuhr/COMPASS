@@ -15,11 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENIDENTMODECRESULT_H
-#define EVALUATIONREQUIREMENIDENTMODECRESULT_H
+#ifndef EVALUATIONREQUIREMENMODECFALSERESULT_H
+#define EVALUATIONREQUIREMENMODECFALSERESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/mode_c/modec.h"
+#include "eval/requirement/mode_c/false.h"
 #include "eval/requirement/checkdetail.h"
 
 namespace EvaluationRequirementResult
@@ -99,4 +99,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENIDENTMODECRESULT_H
+#endif // EVALUATIONREQUIREMENMODECFALSERESULT_H
