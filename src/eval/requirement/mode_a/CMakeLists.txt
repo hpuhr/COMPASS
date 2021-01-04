@@ -4,13 +4,19 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/modeaconfig.h"
-        "${CMAKE_CURRENT_LIST_DIR}/modeaconfigwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/modea.h"
+        "${CMAKE_CURRENT_LIST_DIR}/presentconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/presentconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/present.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfig.h"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfigwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/false.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/modeaconfig.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/modeaconfigwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/modea.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/presentconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/presentconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/present.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfig.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/falseconfigwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/false.cpp"        
 )
 
 
