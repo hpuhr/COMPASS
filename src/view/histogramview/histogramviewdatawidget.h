@@ -41,24 +41,35 @@ namespace EvaluationRequirementResult
     class Base;
     class SingleExtraData;
     class JoinedExtraData;
+
     class SingleExtraTrack;
     class JoinedExtraTrack;
+
     class SingleDetection;
     class JoinedDetection;
+
     class SinglePositionDistance;
     class JoinedPositionDistance;
+
     class SinglePositionAlong;
     class JoinedPositionAlong;
+
     class SinglePositionAcross;
     class JoinedPositionAcross;
+
     class SinglePositionLatency;
     class JoinedPositionLatency;
+
     class SingleIdentification;
     class JoinedIdentification;
+
     class SingleModeAPresent;
     class JoinedModeAPresent;
     class SingleModeAFalse;
     class JoinedModeAFalse;
+
+    class SingleModeCPresent;
+    class JoinedModeCPresent;
     class SingleModeCFalse;
     class JoinedModeCFalse;
 }
@@ -181,6 +192,8 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCPresent> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result);
 

@@ -26,6 +26,7 @@
 #include "eval/requirement/mode_a/presentconfig.h"
 #include "eval/requirement/mode_a/falseconfig.h"
 #include "eval/requirement/mode_c/falseconfig.h"
+#include "eval/requirement/mode_c/presentconfig.h"
 #include "eval/requirement/extra/dataconfig.h"
 #include "eval/requirement/extra/trackconfig.h"
 #include "logger.h"
@@ -152,6 +153,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::ModeAFalseConfig* config =
                 new EvaluationRequirement::ModeAFalseConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeCPresentConfig") == 0)
+    {
+        EvaluationRequirement::ModeCPresentConfig* config =
+                new EvaluationRequirement::ModeCPresentConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -324,9 +335,13 @@ void Group::showMenu ()
         }
 
         { // mode c
-            QAction* add_pos_action = req_menu->addAction("Mode C False");
-            add_pos_action->setData("EvaluationRequirementModeCFalseConfig");
-            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+            QAction* present_action = req_menu->addAction("Mode C Present");
+            present_action->setData("EvaluationRequirementModeCPresentConfig");
+            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Mode C False");
+            false_action->setData("EvaluationRequirementModeCFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         { // position
