@@ -30,10 +30,6 @@ namespace EvaluationRequirement
     {
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
-        registerParameter("use_minimum_probability_present", &use_minimum_probability_present_, true);
-        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.97);
-
-        registerParameter("use_maximum_probability_false", &use_maximum_probability_false_, true);
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
 
         registerParameter("max_difference", &max_difference_, 100);
@@ -58,8 +54,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<ModeCFalse> req = make_shared<ModeCFalse>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    use_minimum_probability_present_, minimum_probability_present_,
-                    use_maximum_probability_false_, maximum_probability_false_, max_difference_);
+                    maximum_probability_false_, max_difference_);
 
         return req;
     }
@@ -72,36 +67,6 @@ namespace EvaluationRequirement
     void ModeCFalseConfig::maxRefTimeDiff(float value)
     {
         max_ref_time_diff_ = value;
-    }
-
-    bool ModeCFalseConfig::useMinimumProbabilityPresent() const
-    {
-        return use_minimum_probability_present_;
-    }
-
-    void ModeCFalseConfig::useMinimumProbabilityPresent(bool value)
-    {
-        use_minimum_probability_present_ = value;
-    }
-
-    float ModeCFalseConfig::minimumProbabilityPresent() const
-    {
-        return minimum_probability_present_;
-    }
-
-    void ModeCFalseConfig::minimumProbabilityPresent(float value)
-    {
-        minimum_probability_present_ = value;
-    }
-
-    bool ModeCFalseConfig::useMaximumProbabilityFalse() const
-    {
-        return use_maximum_probability_false_;
-    }
-
-    void ModeCFalseConfig::useMaximumProbabilityFalse(bool value)
-    {
-        use_maximum_probability_false_ = value;
     }
 
     float ModeCFalseConfig::maximumProbabilityFalse() const

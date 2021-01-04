@@ -45,10 +45,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
         assert (req);
 
-        use_p_present_req_ = req->useMinimumProbabilityPresent();
-        p_present_min_ = req->minimumProbabilityPresent();
-
-        use_p_false_req_ = req->useMaximumProbabilityFalse();
         p_false_max_ = req->maximumProbabilityFalse();
     }
 
@@ -90,17 +86,11 @@ namespace EvaluationRequirementResult
 
         if (num_correct_+num_false_)
         {
-            p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
-            has_p_present_ = true;
-
             p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
             has_p_false_ = true;
         }
         else
         {
-            has_p_present_ = false;
-            p_present_ = 0;
-
             has_p_false_ = false;
             p_false_ = 0;
         }
@@ -132,27 +122,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
         assert (req);
 
-        // p present
-        {
-            QVariant pe_var;
-
-            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
-
-            string result {"Unknown"};
-
-            if (has_p_present_)
-            {
-                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
-                pe_var = roundf(p_present_ * 10000.0) / 100.0;
-            }
-
-            // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
-            ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                             (requirement_->shortname()+" Present").c_str(),
-                             result_id_.c_str(), {num_correct_+num_false_},
-                             pe_var, condition.c_str(), result.c_str()}, this, {});
-        }
-
         // p false
         {
             QVariant pf_var;
@@ -169,7 +138,7 @@ namespace EvaluationRequirementResult
 
             // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
             ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                             (requirement_->shortname()+" False").c_str(),
+                             requirement_->shortname().c_str(),
                              result_id_.c_str(), {num_correct_+num_false_},
                              pf_var, condition.c_str(), result.c_str()}, this, {});
         }
@@ -203,50 +172,28 @@ namespace EvaluationRequirementResult
 
         // condition
         {
-            QVariant pe_var;
-
-            if (has_p_present_)
-                pe_var = roundf(p_present_ * 10000.0) / 100.0;
-
-            sec_det_table.addRow({"PP [%]", "Probability of Mode 3/A present", pe_var}, this);
-
-            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
-
-            sec_det_table.addRow(
-            {"Condition Present", ("Use: "+to_string(use_p_present_req_)).c_str(), condition.c_str()}, this);
-
-            string result {"Unknown"};
-
-            if (has_p_present_)
-                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
-
-            sec_det_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
-        }
-
-        {
             QVariant pf_var;
 
             if (has_p_false_)
                 pf_var = roundf(p_false_ * 10000.0) / 100.0;
 
-            sec_det_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
+            sec_det_table.addRow({"PF [%]", "Probability of Mode C false", pf_var}, this);
 
             string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
 
             sec_det_table.addRow(
-            {"Condition False", ("Use: "+to_string(use_p_false_req_)).c_str(), condition.c_str()}, this);
+            {"Condition", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_false_)
                 result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
 
-            sec_det_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
+            sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
         // figure
-        if ((has_p_present_ && p_present_ != 1.0)
-                || (has_p_false_ && p_false_ != 0.0))
+        if (has_p_false_ && p_false_ != 0.0)
         {
             sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                      getErrorsViewable());

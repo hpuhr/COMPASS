@@ -36,10 +36,6 @@ namespace EvaluationRequirement
     public slots:
         void maxRefTimeDiffEditSlot(QString value);
 
-        void toogleUseMinProbPresentSlot ();
-        void minProbPresentEditSlot(QString value);
-
-        void toogleUseMaxProbFalseSlot ();
         void maxProbFalseEditSlot(QString value);
 
         void maxDiffEditSlot(QString value);
@@ -54,10 +50,6 @@ namespace EvaluationRequirement
 
         QLineEdit* max_ref_time_diff_edit_{nullptr};
 
-        QCheckBox* min_prob_pres_check_{nullptr};
-        QLineEdit* min_prob_pres_edit_{nullptr};
-
-        QCheckBox* max_prob_false_check_{nullptr};
         QLineEdit* max_prob_false_edit_{nullptr};
 
         QLineEdit* max_diff_edit_{nullptr};

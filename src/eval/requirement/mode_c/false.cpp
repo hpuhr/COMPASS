@@ -32,14 +32,9 @@ namespace EvaluationRequirement
 
     ModeCFalse::ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
                  EvaluationManager& eval_man, float max_ref_time_diff,
-                 bool use_minimum_probability_present, float minimum_probability_present,
-                 bool use_maximum_probability_false, float maximum_probability_false,
-                 float maximum_difference)
+                 float maximum_probability_false, float maximum_difference)
         : Base(name, short_name, group_name, eval_man),
           max_ref_time_diff_(max_ref_time_diff),
-          use_minimum_probability_present_(use_minimum_probability_present),
-          minimum_probability_present_(minimum_probability_present),
-          use_maximum_probability_false_(use_maximum_probability_false),
           maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
     {
 
@@ -50,9 +45,6 @@ namespace EvaluationRequirement
             const SectorLayer& sector_layer)
     {
         logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " min present use " << use_minimum_probability_present_
-               << " prob " << minimum_probability_present_
-               << " max false use " << use_maximum_probability_false_
                << " prob " << maximum_probability_false_;
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -271,19 +263,9 @@ namespace EvaluationRequirement
         return max_ref_time_diff_;
     }
 
-    bool ModeCFalse::useMinimumProbabilityPresent() const
+    float ModeCFalse::maximumDifference() const
     {
-        return use_minimum_probability_present_;
-    }
-
-    float ModeCFalse::minimumProbabilityPresent() const
-    {
-        return minimum_probability_present_;
-    }
-
-    bool ModeCFalse::useMaximumProbabilityFalse() const
-    {
-        return use_maximum_probability_false_;
+        return maximum_difference_;
     }
 
     float ModeCFalse::maximumProbabilityFalse() const
