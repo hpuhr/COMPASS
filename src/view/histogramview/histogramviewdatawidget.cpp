@@ -661,9 +661,9 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
     else if (result->type() == "JoinedModeAFalse")
         updateCountResult(static_pointer_cast<JoinedModeAFalse>(result));
     else if (result->type() == "SingleModeC")
-        updateCountResult(static_pointer_cast<SingleModeC>(result));
+        updateCountResult(static_pointer_cast<SingleModeCFalse>(result));
     else if (result->type() == "JoinedModeC")
-        updateCountResult(static_pointer_cast<JoinedModeC>(result));
+        updateCountResult(static_pointer_cast<JoinedModeCFalse>(result));
     else
         throw runtime_error("HistogramViewDataWidget: updateFromResult: unknown result type");
 
@@ -1105,7 +1105,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 }
 
 
-void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: single mode c";
 
@@ -1135,7 +1135,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 }
 
 
-void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result)
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: joined mode c";
 
@@ -1145,9 +1145,9 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleModeC>(result_it));
+        assert (static_pointer_cast<SingleModeCFalse>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleModeC>(result_it));
+            updateCountResult (static_pointer_cast<SingleModeCFalse>(result_it));
     }
 }
 

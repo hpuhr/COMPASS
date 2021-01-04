@@ -25,10 +25,10 @@
 namespace EvaluationRequirementResult
 {
 
-class SingleModeC : public Single
+class SingleModeCFalse : public Single
 {
 public:
-    SingleModeC(
+    SingleModeCFalse(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,

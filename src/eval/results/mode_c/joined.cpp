@@ -36,13 +36,13 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    JoinedModeC::JoinedModeC(
+    JoinedModeCFalse::JoinedModeCFalse(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
-        : Joined("JoinedModeC", result_id, requirement, sector_layer, eval_man)
+        : Joined("JoinedModeCFalse", result_id, requirement, sector_layer, eval_man)
     {
-        std::shared_ptr<EvaluationRequirement::ModeC> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeC>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeCFalse> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
         assert (req);
 
         use_p_present_req_ = req->useMinimumProbabilityPresent();
@@ -53,18 +53,18 @@ namespace EvaluationRequirementResult
     }
 
 
-    void JoinedModeC::join(std::shared_ptr<Base> other)
+    void JoinedModeCFalse::join(std::shared_ptr<Base> other)
     {
         Joined::join(other);
 
-        std::shared_ptr<SingleModeC> other_sub =
-                std::static_pointer_cast<SingleModeC>(other);
+        std::shared_ptr<SingleModeCFalse> other_sub =
+                std::static_pointer_cast<SingleModeCFalse>(other);
         assert (other_sub);
 
         addToValues(other_sub);
     }
 
-    void JoinedModeC::addToValues (std::shared_ptr<SingleModeC> single_result)
+    void JoinedModeCFalse::addToValues (std::shared_ptr<SingleModeCFalse> single_result)
     {
         assert (single_result);
 
@@ -83,7 +83,7 @@ namespace EvaluationRequirementResult
         updateProbabilities();
     }
 
-    void JoinedModeC::updateProbabilities()
+    void JoinedModeCFalse::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
@@ -106,7 +106,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedModeC::addToReport (
+    void JoinedModeCFalse::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "JoinedModeC " <<  requirement_->name() <<": addToReport";
@@ -123,13 +123,13 @@ namespace EvaluationRequirementResult
         addDetails(root_item);
     }
 
-    void JoinedModeC::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedModeCFalse::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::ModeC> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeC>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeCFalse> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
         assert (req);
 
         // p present
@@ -177,7 +177,7 @@ namespace EvaluationRequirementResult
 
     }
 
-    void JoinedModeC::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedModeCFalse::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
@@ -260,7 +260,7 @@ namespace EvaluationRequirementResult
     }
 
 
-    bool JoinedModeC::hasViewableData (
+    bool JoinedModeCFalse::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA4 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -271,7 +271,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedModeC::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> JoinedModeCFalse::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasViewableData(table, annotation));
@@ -279,7 +279,7 @@ namespace EvaluationRequirementResult
         return getErrorsViewable();
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedModeC::getErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> JoinedModeCFalse::getErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
                 eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -307,7 +307,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool JoinedModeC::hasReference (
+    bool JoinedModeCFalse::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA5 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -318,7 +318,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string JoinedModeC::reference(
+    std::string JoinedModeCFalse::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -327,7 +327,7 @@ namespace EvaluationRequirementResult
         return nullptr;
     }
 
-    void JoinedModeC::updatesToUseChanges()
+    void JoinedModeCFalse::updatesToUseChanges()
     {
         loginf << "JoinedModeC: updatesToUseChanges: prev num_updates " << num_updates_
                << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
@@ -351,8 +351,8 @@ namespace EvaluationRequirementResult
 
         for (auto result_it : results_)
         {
-            std::shared_ptr<SingleModeC> result =
-                    std::static_pointer_cast<SingleModeC>(result_it);
+            std::shared_ptr<SingleModeCFalse> result =
+                    std::static_pointer_cast<SingleModeCFalse>(result_it);
             assert (result);
 
             addToValues(result);

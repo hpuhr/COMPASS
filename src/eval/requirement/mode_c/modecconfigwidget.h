@@ -27,9 +27,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class ModeCConfig;
+    class ModeCFalseConfig;
 
-    class ModeCConfigWidget : public QWidget
+    class ModeCFalseConfigWidget : public QWidget
     {
         Q_OBJECT
 
@@ -45,10 +45,10 @@ namespace EvaluationRequirement
         void maxDiffEditSlot(QString value);
 
     public:
-        ModeCConfigWidget(ModeCConfig& config);
+        ModeCFalseConfigWidget(ModeCFalseConfig& config);
 
     protected:
-        ModeCConfig& config_;
+        ModeCFalseConfig& config_;
 
         QFormLayout* form_layout_ {nullptr};
 

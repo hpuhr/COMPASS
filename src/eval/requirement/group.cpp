@@ -158,10 +158,10 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
     }
-    else if (class_id.compare("EvaluationRequirementModeCConfig") == 0)
+    else if (class_id.compare("EvaluationRequirementModeCFalseConfig") == 0)
     {
-        EvaluationRequirement::ModeCConfig* config =
-                new EvaluationRequirement::ModeCConfig(
+        EvaluationRequirement::ModeCFalseConfig* config =
+                new EvaluationRequirement::ModeCFalseConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -324,8 +324,8 @@ void Group::showMenu ()
         }
 
         { // mode c
-            QAction* add_pos_action = req_menu->addAction("Mode C");
-            add_pos_action->setData("EvaluationRequirementModeCConfig");
+            QAction* add_pos_action = req_menu->addAction("Mode C False");
+            add_pos_action->setData("EvaluationRequirementModeCFalseConfig");
             connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 

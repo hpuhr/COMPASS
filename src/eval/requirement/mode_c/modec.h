@@ -23,10 +23,10 @@
 namespace EvaluationRequirement
 {
 
-    class ModeC : public Base
+    class ModeCFalse : public Base
     {
     public:
-        ModeC(const std::string& name, const std::string& short_name, const std::string& group_name,
+        ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
               EvaluationManager& eval_man, float max_ref_time_diff,
               bool use_minimum_probability_present, float minimum_probability_present,
               bool use_maximum_probability_false, float maximum_probability_false,

@@ -59,8 +59,8 @@ namespace EvaluationRequirementResult
     class JoinedModeAPresent;
     class SingleModeAFalse;
     class JoinedModeAFalse;
-    class SingleModeC;
-    class JoinedModeC;
+    class SingleModeCFalse;
+    class JoinedModeCFalse;
 }
 
 //namespace QtCharts {
@@ -181,8 +181,8 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAFalse> result);
-    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result);
-    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeCFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeCFalse> result);
 
     void calculateGlobalMinMax();
 

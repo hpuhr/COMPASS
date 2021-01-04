@@ -30,14 +30,14 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-    class ModeCConfig : public Config
+    class ModeCFalseConfig : public Config
     {
     public:
-        ModeCConfig(const std::string& class_id, const std::string& instance_id,
+        ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
         virtual void addGUIElements(QFormLayout* layout) override;
-        ModeCConfigWidget* widget() override;
+        ModeCFalseConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float maxRefTimeDiff() const;
@@ -69,7 +69,7 @@ namespace EvaluationRequirement
 
         float max_difference_ {0};
 
-        std::unique_ptr<ModeCConfigWidget> widget_;
+        std::unique_ptr<ModeCFalseConfigWidget> widget_;
     };
 
 }
