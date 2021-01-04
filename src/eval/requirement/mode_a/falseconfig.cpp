@@ -30,10 +30,6 @@ namespace EvaluationRequirement
     {
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
-        registerParameter("use_minimum_probability_present", &use_minimum_probability_present_, true);
-        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
-
-        registerParameter("use_maximum_probability_false", &use_maximum_probability_false_, true);
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
     }
 
@@ -56,8 +52,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<ModeAFalse> req = make_shared<ModeAFalse>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    use_minimum_probability_present_, minimum_probability_present_,
-                    use_maximum_probability_false_, maximum_probability_false_);
+                    maximum_probability_false_);
 
         return req;
     }
@@ -70,36 +65,6 @@ namespace EvaluationRequirement
     void ModeAFalseConfig::maxRefTimeDiff(float value)
     {
         max_ref_time_diff_ = value;
-    }
-
-    bool ModeAFalseConfig::useMinimumProbabilityPresent() const
-    {
-        return use_minimum_probability_present_;
-    }
-
-    void ModeAFalseConfig::useMinimumProbabilityPresent(bool value)
-    {
-        use_minimum_probability_present_ = value;
-    }
-
-    float ModeAFalseConfig::minimumProbabilityPresent() const
-    {
-        return minimum_probability_present_;
-    }
-
-    void ModeAFalseConfig::minimumProbabilityPresent(float value)
-    {
-        minimum_probability_present_ = value;
-    }
-
-    bool ModeAFalseConfig::useMaximumProbabilityFalse() const
-    {
-        return use_maximum_probability_false_;
-    }
-
-    void ModeAFalseConfig::useMaximumProbabilityFalse(bool value)
-    {
-        use_maximum_probability_false_ = value;
     }
 
     float ModeAFalseConfig::maximumProbabilityFalse() const

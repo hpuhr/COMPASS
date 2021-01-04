@@ -58,18 +58,10 @@ namespace EvaluationRequirementResult
         int num_false_ {0};
 
         // min exist
-        bool use_p_present_req_ {false};
         float p_present_min_{0};
 
         bool has_p_present_ {false};
         float p_present_{0};
-
-        // max false
-        bool use_p_false_req_ {false};
-        float p_false_max_{0};
-
-        bool has_p_false_ {false};
-        float p_false_{0};
 
         void addToValues (std::shared_ptr<SingleModeAPresent> single_result);
         void updateProbabilities();

@@ -46,6 +46,8 @@
 #include "eval/results/identification/joined.h"
 #include "eval/results/mode_a/presentsingle.h"
 #include "eval/results/mode_a/presentjoined.h"
+#include "eval/results/mode_a/falsesingle.h"
+#include "eval/results/mode_a/falsejoined.h"
 #include "eval/results/mode_c/single.h"
 #include "eval/results/mode_c/joined.h"
 
@@ -654,6 +656,10 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
     else if (result->type() == "JoinedModeAPresent")
         updateCountResult(static_pointer_cast<JoinedModeAPresent>(result));
+    else if (result->type() == "SingleModeAFalse")
+        updateCountResult(static_pointer_cast<SingleModeAFalse>(result));
+    else if (result->type() == "JoinedModeAFalse")
+        updateCountResult(static_pointer_cast<JoinedModeAFalse>(result));
     else if (result->type() == "SingleModeC")
         updateCountResult(static_pointer_cast<SingleModeC>(result));
     else if (result->type() == "JoinedModeC")
@@ -1011,7 +1017,7 @@ void HistogramViewDataWidget::updateCountResult (
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result)
 {
-    logdbg << "HistogramViewDataWidget: showResult: single mode a";
+    logdbg << "HistogramViewDataWidget: showResult: single mode a present";
 
     assert (result);
 
@@ -1041,7 +1047,7 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
 void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result)
 {
-    logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a";
+    logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a present";
 
     assert (result);
 
@@ -1052,6 +1058,52 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
         assert (static_pointer_cast<SingleModeAPresent>(result_it));
         if (result_it->use())
             updateCountResult (static_pointer_cast<SingleModeAPresent>(result_it));
+    }
+}
+
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: single mode a false";
+
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numNoRefValue());
+        counts_[dbo_name].push_back(result->numUnknown());
+        counts_[dbo_name].push_back(result->numCorrect());
+        counts_[dbo_name].push_back(result->numFalse());
+
+        labels_.push_back("#NoRef");
+        labels_.push_back("#Unknown");
+        labels_.push_back("#Correct");
+        labels_.push_back("#False");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numNoRefValue();
+        counts_[dbo_name].at(1) += result->numUnknown();
+        counts_[dbo_name].at(2) += result->numCorrect();
+        counts_[dbo_name].at(3) += result->numFalse();
+    }
+}
+
+
+void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAFalse> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: joined mode 3/a false";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleModeAFalse>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleModeAFalse>(result_it));
     }
 }
 

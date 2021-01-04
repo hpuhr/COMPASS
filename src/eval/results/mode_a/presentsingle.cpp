@@ -53,11 +53,7 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
         assert (req);
 
-        use_p_present_req_ = req->useMinimumProbabilityPresent();
         p_present_min_ = req->minimumProbabilityPresent();
-
-        use_p_false_req_ = req->useMaximumProbabilityFalse();
-        p_false_max_ = req->maximumProbabilityFalse();
 
         updateProbabilities();
     }
@@ -72,19 +68,12 @@ namespace EvaluationRequirementResult
             p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
             has_p_present_ = true;
 
-            p_false_ = (float)(num_false_)/(float)(num_correct_+num_false_);
-            has_p_false_ = true;
-
             result_usable_ = true;
         }
         else
         {
             has_p_present_ = false;
             p_present_ = 0;
-
-            has_p_false_ = false;
-            p_false_ = 0;
-
 
             result_usable_ = false;
         }
@@ -117,27 +106,23 @@ namespace EvaluationRequirementResult
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
-            section.addTable(table_name, 15,
+            section.addTable(table_name, 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP", "PF"}, true, 13);
+             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP"}, true, 13);
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
         QVariant pe_var;
-        QVariant pf_var;
 
         if (has_p_present_)
             pe_var = roundf(p_present_ * 10000.0) / 100.0;
-
-        if (has_p_false_)
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
          num_updates_, num_no_ref_pos_+num_no_ref_val_, num_unknown_, num_correct_, num_false_,
-         pe_var, pf_var}, this, {utn_});
+         pe_var}, this, {utn_});
     }
 
     void SingleModeAPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -176,7 +161,7 @@ namespace EvaluationRequirementResult
             string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
 
             utn_req_table.addRow(
-            {"Condition Present", ("Use: "+to_string(use_p_present_req_)).c_str(), condition.c_str()}, this);
+            {"Condition Present", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
@@ -186,29 +171,7 @@ namespace EvaluationRequirementResult
             utn_req_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
         }
 
-        {
-            QVariant pf_var;
-
-            if (has_p_false_)
-                pf_var = roundf(p_false_ * 10000.0) / 100.0;
-
-            utn_req_table.addRow({"PF [%]", "Probability of Mode 3/A false", pf_var}, this);
-
-            string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
-
-            utn_req_table.addRow(
-            {"Condition False", ("Use: "+to_string(use_p_false_req_)).c_str(), condition.c_str()}, this);
-
-            string result {"Unknown"};
-
-            if (has_p_false_)
-                result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
-
-            utn_req_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
-        }
-
-        if ((has_p_present_ && p_present_ != 1.0)
-                || (has_p_false_ && p_false_ != 0.0))
+        if (has_p_present_ && p_present_ != 1.0)
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());

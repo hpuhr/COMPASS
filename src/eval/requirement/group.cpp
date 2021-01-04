@@ -169,7 +169,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
     }
     else
-        throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("EvaluationRequirementGroup: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 

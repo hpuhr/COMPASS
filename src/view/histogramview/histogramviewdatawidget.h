@@ -57,6 +57,8 @@ namespace EvaluationRequirementResult
     class JoinedIdentification;
     class SingleModeAPresent;
     class JoinedModeAPresent;
+    class SingleModeAFalse;
+    class JoinedModeAFalse;
     class SingleModeC;
     class JoinedModeC;
 }
@@ -177,6 +179,8 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAFalse> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeC> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeC> result);
 

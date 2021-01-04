@@ -30,11 +30,7 @@ namespace EvaluationRequirement
     {
         registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
 
-        registerParameter("use_minimum_probability_present", &use_minimum_probability_present_, true);
         registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
-
-        registerParameter("use_maximum_probability_false", &use_maximum_probability_false_, true);
-        registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
     }
 
     void ModeAPresentConfig::addGUIElements(QFormLayout* layout)
@@ -56,8 +52,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
                     name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    use_minimum_probability_present_, minimum_probability_present_,
-                    use_maximum_probability_false_, maximum_probability_false_);
+                    minimum_probability_present_);
 
         return req;
     }
@@ -72,16 +67,6 @@ namespace EvaluationRequirement
         max_ref_time_diff_ = value;
     }
 
-    bool ModeAPresentConfig::useMinimumProbabilityPresent() const
-    {
-        return use_minimum_probability_present_;
-    }
-
-    void ModeAPresentConfig::useMinimumProbabilityPresent(bool value)
-    {
-        use_minimum_probability_present_ = value;
-    }
-
     float ModeAPresentConfig::minimumProbabilityPresent() const
     {
         return minimum_probability_present_;
@@ -91,25 +76,4 @@ namespace EvaluationRequirement
     {
         minimum_probability_present_ = value;
     }
-
-    bool ModeAPresentConfig::useMaximumProbabilityFalse() const
-    {
-        return use_maximum_probability_false_;
-    }
-
-    void ModeAPresentConfig::useMaximumProbabilityFalse(bool value)
-    {
-        use_maximum_probability_false_ = value;
-    }
-
-    float ModeAPresentConfig::maximumProbabilityFalse() const
-    {
-        return maximum_probability_false_;
-    }
-
-    void ModeAPresentConfig::maximumProbabilityFalse(float value)
-    {
-        maximum_probability_false_ = value;
-    }
-
 }
