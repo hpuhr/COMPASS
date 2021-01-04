@@ -1025,22 +1025,19 @@ void HistogramViewDataWidget::updateCountResult (std::shared_ptr<EvaluationRequi
 
     if (!counts_.size()) // first
     {
-        counts_[dbo_name].push_back(result->numNoRefValue());
-        counts_[dbo_name].push_back(result->numUnknown());
-        counts_[dbo_name].push_back(result->numCorrect());
-        counts_[dbo_name].push_back(result->numFalse());
+        counts_[dbo_name].push_back(result->numNoRefId());
+        counts_[dbo_name].push_back(result->numPresent());
+        counts_[dbo_name].push_back(result->numMissing());
 
-        labels_.push_back("#NoRef");
-        labels_.push_back("#Unknown");
-        labels_.push_back("#Correct");
-        labels_.push_back("#False");
+        labels_.push_back("#NoRefId");
+        labels_.push_back("#Present");
+        labels_.push_back("#Missing");
     }
     else // add
     {
-        counts_[dbo_name].at(0) += result->numNoRefValue();
-        counts_[dbo_name].at(1) += result->numUnknown();
-        counts_[dbo_name].at(2) += result->numCorrect();
-        counts_[dbo_name].at(3) += result->numFalse();
+        counts_[dbo_name].at(0) += result->numNoRefId();
+        counts_[dbo_name].at(1) += result->numPresent();
+        counts_[dbo_name].at(2) += result->numMissing();
     }
 }
 

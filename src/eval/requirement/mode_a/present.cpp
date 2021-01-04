@@ -54,26 +54,31 @@ namespace EvaluationRequirement
 
         int num_updates {0};
         int num_no_ref_pos {0};
-        int num_no_ref_val {0};
+        //int num_no_ref_val {0};
         int num_pos_outside {0};
         int num_pos_inside {0};
-        int num_unknown {0};
-        int num_correct {0};
-        int num_false {0};
 
-        vector<CheckDetail> details;
+        int num_no_ref_id {0};
+        int num_present_id {0};
+        int num_missing_id {0};
+
+        vector<PresentDetail> details;
         EvaluationTargetPosition pos_current;
-        unsigned int code;
-        bool code_ok;
+        //unsigned int code;
+        //bool code_ok;
 
-        bool ref_exists;
+        bool code_present_ref;
+        bool code_present_tst;
+        bool code_missing;
+
+        //bool ref_exists;
         bool is_inside;
         pair<EvaluationTargetPosition, bool> ret_pos;
         EvaluationTargetPosition ref_pos;
         bool ok;
 
         string comment;
-        bool lower_nok, upper_nok;
+        //bool lower_nok, upper_nok;
 
         bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
         bool skip_detail;
@@ -83,7 +88,7 @@ namespace EvaluationRequirement
 
         for (const auto& tst_id : tst_data)
         {
-            ref_exists = false;
+            //ref_exists = false;
             is_inside = false;
             comment = "";
 
@@ -98,9 +103,9 @@ namespace EvaluationRequirement
             {
                 if (!skip_no_data_details)
                     details.push_back({tod, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "No reference data"});
+                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
+                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                       num_no_ref_id, num_present_id, num_missing_id, "No reference data"});
 
                 ++num_no_ref_pos;
                 continue;
@@ -115,15 +120,13 @@ namespace EvaluationRequirement
             {
                 if (!skip_no_data_details)
                     details.push_back({tod, pos_current,
-                                       false, {}, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "No reference position"});
+                                       false, {}, false, // ref_exists, pos_inside, is_not_ok
+                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                       num_no_ref_id, num_present_id, num_missing_id, "No reference position"});
 
                 ++num_no_ref_pos;
                 continue;
             }
-            ref_exists = true;
-
             has_ground_bit = target_data.hasTstGroundBitForTime(tod);
 
             if (has_ground_bit)
@@ -137,124 +140,80 @@ namespace EvaluationRequirement
             {
                 if (!skip_no_data_details)
                     details.push_back({tod, pos_current,
-                                       ref_exists, is_inside, false, // ref_exists, pos_inside,
-                                       num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                       num_unknown, num_correct, num_false, "Outside sector"});
+                                       true, is_inside, false, // ref_exists, pos_inside, is_not_ok
+                                       num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                       num_no_ref_id, num_present_id, num_missing_id, "Outside sector"});
 
                 ++num_pos_outside;
                 continue;
             }
+
             ++num_pos_inside;
 
-            if (target_data.hasTstModeAForTime(tod))
+            // check if ref code exists
+            code_present_ref = false;
+
+            tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
+
+            if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
             {
-                code = target_data.tstModeAForTime(tod);
-
-                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
-
-                if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+                if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
+                        || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
                 {
-                    if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                            || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
-                    {
-                        ref_exists = true;
-                        code_ok = false;
+                    code_present_ref = true;
+                }
+            }
 
-                        lower_nok = false;
-                        upper_nok = false;
+            code_present_tst = target_data.hasTstModeAForTime(tod);
 
-                        if (ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                        {
-                            code_ok = target_data.refModeAForTime(ref_lower) == code;
-                            lower_nok = !code_ok;
-                        }
+            code_missing = false;
 
-                        if (!code_ok && ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))
-                        {
-                            code_ok = target_data.refModeAForTime(ref_upper) == code;
-                            upper_nok = !code_ok;
-                        }
-
-                        if (code_ok)
-                        {
-                            ++num_correct;
-                            comment = "OK";
-                        }
-                        else
-                        {
-                            ++num_false;
-                            comment = "Not OK:";
-
-                            if (lower_nok)
-                            {
-                                comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference code at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
-                                        + "'";
-                            }
-                            else
-                            {
-                                assert (upper_nok);
-                                comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference code at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
-                                        + "'";
-                            }
-                        }
-                    }
-                    else
-                    {
-                        comment = "No reference data";
-
-                        if (skip_no_data_details)
-                            skip_detail = true;
-
-                        ++num_no_ref_val;
-                    }
+            if (code_present_ref)
+            {
+                if (code_present_tst)
+                {
+                    comment = "OK";
+                    ++num_present_id;
                 }
                 else
                 {
-                    comment = "No reference code";
+                    comment = "Id missing";
+                    ++num_missing_id;
 
-                    if (skip_no_data_details)
-                        skip_detail = true;
-
-                    ++num_no_ref_val;
+                    code_missing = true;
                 }
             }
             else
             {
-                comment = "No test code";
+                comment = "No reference id";
+                ++num_no_ref_id;
 
-                if (skip_no_data_details)
-                    skip_detail = true;
-
-                ++num_unknown;
+                // skip_detail?
             }
 
-            if (!skip_detail)
+            if (!(skip_no_data_details && skip_detail))
                 details.push_back({tod, pos_current,
-                                   ref_exists, is_inside, !code_ok,
-                                   num_updates, num_no_ref_pos+num_no_ref_val, num_pos_inside, num_pos_outside,
-                                   num_unknown, num_correct, num_false, comment});
+                                   true, is_inside, code_missing, // ref_exists, pos_inside, is_not_ok
+                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                   num_no_ref_id, num_present_id, num_missing_id, comment});
         }
 
         logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
-               << " num_no_ref_val " << num_no_ref_val
+               //<< " num_no_ref_val " << num_no_ref_val
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-               << " num_unknown " << num_unknown << " num_correct " << num_correct
-               << " num_false " << num_false;
+               << " num_no_ref_id " << num_no_ref_id << " num_present_id " << num_present_id
+               << " num_missing_id " << num_missing_id;
 
         assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-        assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
+        assert (num_pos_inside == num_no_ref_id+num_present_id+num_missing_id);
 
         //assert (details.size() == tst_data.size());
 
         return make_shared<EvaluationRequirementResult::SingleModeAPresent>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
-                    num_unknown, num_correct, num_false, details);
+                    eval_man_, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
+                    num_no_ref_id, num_present_id, num_missing_id, details);
     }
 
     float ModeAPresent::maxRefTimeDiff() const

@@ -138,7 +138,7 @@ namespace EvaluationRequirementResult
 
             // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
             ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                             (requirement_->shortname()+" False").c_str(),
+                             requirement_->shortname().c_str(),
                              result_id_.c_str(), {num_correct_+num_false_},
                              pf_var, condition.c_str(), result.c_str()}, this, {});
         }
@@ -182,14 +182,14 @@ namespace EvaluationRequirementResult
             string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
 
             sec_det_table.addRow(
-            {"Condition False", "", condition.c_str()}, this);
+            {"Condition", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_false_)
                 result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
 
-            sec_det_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
+            sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
         // figure

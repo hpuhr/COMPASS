@@ -108,7 +108,7 @@ namespace EvaluationRequirementResult
         if (!section.hasTable(table_name))
             section.addTable(table_name, 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13);
+             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13, Qt::DescendingOrder);
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -161,14 +161,14 @@ namespace EvaluationRequirementResult
             string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
 
             utn_req_table.addRow(
-            {"Condition False", "", condition.c_str()}, this);
+            {"Condition", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_false_)
                 result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
 
-            utn_req_table.addRow({"Condition False Fulfilled", "", result.c_str()}, this);
+            utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
         if (has_p_false_ && p_false_ != 0.0)
@@ -191,7 +191,7 @@ namespace EvaluationRequirementResult
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
-            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknwon",
+            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknown",
              "#Correct", "#False", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =

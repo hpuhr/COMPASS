@@ -15,6 +15,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/group.h"
         "${CMAKE_CURRENT_LIST_DIR}/base.h"
         "${CMAKE_CURRENT_LIST_DIR}/checkdetail.h"
+        "${CMAKE_CURRENT_LIST_DIR}/presentdetail.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/group.cpp"

@@ -40,14 +40,14 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref_val, int num_pos_outside, int num_pos_inside,
-            int num_unknown, int num_correct, int num_false,
-            std::vector<EvaluationRequirement::CheckDetail> details)
+            int num_updates, int num_no_ref_pos, int num_pos_outside, int num_pos_inside,
+            int num_no_ref_id, int num_present_id, int num_missing_id,
+            std::vector<EvaluationRequirement::PresentDetail> details)
         : Single("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man),
-          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_val_(num_no_ref_val),
+          num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-          num_unknown_(num_unknown),
-          num_correct_(num_correct), num_false_(num_false), details_(details)
+          num_no_ref_id_(num_no_ref_id),
+          num_present_id_(num_present_id), num_missing_id_(num_missing_id), details_(details)
     {
         std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
                 std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
@@ -61,11 +61,12 @@ namespace EvaluationRequirementResult
     void SingleModeAPresent::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+        assert (num_pos_inside_ == num_no_ref_id_+num_present_id_+num_missing_id_);
 
-        if (num_correct_+num_false_)
+        if (num_no_ref_id_+num_present_id_+num_missing_id_)
         {
-            p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
+            p_present_ = (float)(num_no_ref_id_+num_present_id_)
+                    / (float)(num_no_ref_id_+num_present_id_+num_missing_id_);
             has_p_present_ = true;
 
             result_usable_ = true;
@@ -108,7 +109,7 @@ namespace EvaluationRequirementResult
         if (!section.hasTable(table_name))
             section.addTable(table_name, 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PP"}, true, 13);
+             "#Up", "#NoRef", "#NoRefId", "#Present", "#Missing", "PP"}, true, 13);
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -121,7 +122,7 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-         num_updates_, num_no_ref_pos_+num_no_ref_val_, num_unknown_, num_correct_, num_false_,
+         num_updates_, num_no_ref_pos_, num_no_ref_id_, num_present_id_, num_missing_id_,
          pe_var}, this, {utn_});
     }
 
@@ -139,15 +140,13 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
-                              num_no_ref_pos_+num_no_ref_val_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position", num_no_ref_pos_}, this);
         utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#Unknown [1]", "Number of updates unknown code", num_unknown_}, this);
-        utn_req_table.addRow({"#Correct [1]", "Number of updates with correct code", num_correct_}, this);
-        utn_req_table.addRow({"#False [1]", "Number of updates with false code", num_false_}, this);
+        utn_req_table.addRow({"#NoRefId [1]", "Number of updates without reference code", num_no_ref_id_}, this);
+        utn_req_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_id_}, this);
+        utn_req_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_id_}, this);
 
         // condition
         {
@@ -161,14 +160,14 @@ namespace EvaluationRequirementResult
             string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
 
             utn_req_table.addRow(
-            {"Condition Present", "", condition.c_str()}, this);
+            {"Condition", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_present_)
                 result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
 
-            utn_req_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
+            utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
         if (has_p_present_ && p_present_ != 1.0)
@@ -191,8 +190,8 @@ namespace EvaluationRequirementResult
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
-            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#Unknwon",
-             "#Correct", "#False", "Comment"});
+            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#NoRefId",
+             "#Present", "#Missing", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable(tr_details_table_name_);
@@ -205,8 +204,8 @@ namespace EvaluationRequirementResult
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
              !rq_det_it.is_not_ok_,
              rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
-             rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
+             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_no_ref_id_,
+             rq_det_it.num_present_id_, rq_det_it.num_missing_id_, rq_det_it.comment_.c_str()},
                         this, detail_cnt);
 
             ++detail_cnt;
@@ -245,7 +244,7 @@ namespace EvaluationRequirementResult
                     = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
             assert (viewable_ptr);
 
-            const EvaluationRequirement::CheckDetail& detail = details_.at(detail_cnt);
+            const EvaluationRequirement::PresentDetail& detail = details_.at(detail_cnt);
 
             (*viewable_ptr)["position_latitude"] = detail.pos_tst_.latitude_;
             (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
@@ -343,11 +342,6 @@ namespace EvaluationRequirementResult
         return num_no_ref_pos_;
     }
 
-    int SingleModeAPresent::numNoRefValue() const
-    {
-        return num_no_ref_val_;
-    }
-
     int SingleModeAPresent::numPosOutside() const
     {
         return num_pos_outside_;
@@ -363,22 +357,22 @@ namespace EvaluationRequirementResult
         return num_updates_;
     }
 
-    int SingleModeAPresent::numUnknown() const
+    int SingleModeAPresent::numNoRefId() const
     {
-        return num_unknown_;
+        return num_no_ref_id_;
     }
 
-    int SingleModeAPresent::numCorrect() const
+    int SingleModeAPresent::numPresent() const
     {
-        return num_correct_;
+        return num_present_id_;
     }
 
-    int SingleModeAPresent::numFalse() const
+    int SingleModeAPresent::numMissing() const
     {
-        return num_false_;
+        return num_missing_id_;
     }
 
-    std::vector<EvaluationRequirement::CheckDetail>& SingleModeAPresent::details()
+    std::vector<EvaluationRequirement::PresentDetail>& SingleModeAPresent::details()
     {
         return details_;
     }

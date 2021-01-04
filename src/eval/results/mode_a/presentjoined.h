@@ -50,12 +50,11 @@ namespace EvaluationRequirementResult
     protected:
         int num_updates_ {0};
         int num_no_ref_pos_ {0};
-        int num_no_ref_val_ {0};
         int num_pos_outside_ {0};
         int num_pos_inside_ {0};
-        int num_unknown_ {0};
-        int num_correct_ {0};
-        int num_false_ {0};
+        int num_no_ref_id_ {0}; // !ref
+        int num_present_id_ {0}; // ref + tst
+        int num_missing_id_ {0}; // ref + !tst
 
         // min exist
         float p_present_min_{0};

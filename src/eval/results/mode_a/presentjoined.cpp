@@ -68,12 +68,11 @@ namespace EvaluationRequirementResult
 
         num_updates_ += single_result->numUpdates();
         num_no_ref_pos_ += single_result->numNoRefPos();
-        num_no_ref_val_ += single_result->numNoRefValue();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
-        num_unknown_ += single_result->numUnknown();
-        num_correct_ += single_result->numCorrect();
-        num_false_ += single_result->numFalse();
+        num_no_ref_id_ += single_result->numNoRefId();
+        num_present_id_ += single_result->numPresent();
+        num_missing_id_ += single_result->numMissing();
 
         updateProbabilities();
     }
@@ -81,11 +80,12 @@ namespace EvaluationRequirementResult
     void JoinedModeAPresent::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
+        assert (num_pos_inside_ == num_no_ref_id_+num_present_id_+num_missing_id_);
 
-        if (num_correct_+num_false_)
+        if (num_no_ref_id_+num_present_id_+num_missing_id_)
         {
-            p_present_ = (float)(num_correct_+num_false_)/(float)(num_correct_+num_false_+num_unknown_);
+            p_present_ = (float)(num_no_ref_id_+num_present_id_)
+                    / (float)(num_no_ref_id_+num_present_id_+num_missing_id_);
             has_p_present_ = true;
         }
         else
@@ -137,8 +137,8 @@ namespace EvaluationRequirementResult
 
             // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
             ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                             (requirement_->shortname()+" Present").c_str(),
-                             result_id_.c_str(), {num_correct_+num_false_},
+                             requirement_->shortname().c_str(),
+                             result_id_.c_str(), {num_no_ref_id_+num_present_id_+num_missing_id_},
                              pe_var, condition.c_str(), result.c_str()}, this, {});
         }
 
@@ -158,15 +158,13 @@ namespace EvaluationRequirementResult
 
         sec_det_table.addRow({"Use", "To be used in results", use_}, this);
         sec_det_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
-                              num_no_ref_pos_+num_no_ref_val_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position", num_no_ref_pos_}, this);
         sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
         sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        sec_det_table.addRow({"#Unknown [1]", "Number of updates unknown code", num_unknown_}, this);
-        sec_det_table.addRow({"#Correct [1]", "Number of updates with correct code", num_correct_}, this);
-        sec_det_table.addRow({"#False [1]", "Number of updates with false code", num_false_}, this);
+        sec_det_table.addRow({"#NoRefId [1]", "Number of updates without reference code", num_no_ref_id_}, this);
+        sec_det_table.addRow({"#Present [1]", "Number of updates with present tst code", num_present_id_}, this);
+        sec_det_table.addRow({"#Missing [1]", "Number of updates with missing tst code", num_missing_id_}, this);
 
         // condition
         {
@@ -180,14 +178,14 @@ namespace EvaluationRequirementResult
             string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
 
             sec_det_table.addRow(
-            {"Condition Present", "", condition.c_str()}, this);
+            {"Condition", "", condition.c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_present_)
                 result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
 
-            sec_det_table.addRow({"Condition Present Fulfilled", "", result.c_str()}, this);
+            sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
         // figure
@@ -275,9 +273,9 @@ namespace EvaluationRequirementResult
     void JoinedModeAPresent::updatesToUseChanges()
     {
         loginf << "JoinedModeA: updatesToUseChanges: prev num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
-               << " num_unknown_id " << num_unknown_
-               << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
+               << " num_no_ref_pos " << num_no_ref_pos_
+               << " num_no_ref_id " << num_no_ref_id_
+               << " num_present_id " << num_present_id_ << " num_missing_id " << num_missing_id_;
 
 //        if (has_pid_)
 //            loginf << "JoinedModeA: updatesToUseChanges: prev result " << result_id_
@@ -287,12 +285,11 @@ namespace EvaluationRequirementResult
 
         num_updates_ = 0;
         num_no_ref_pos_ = 0;
-        num_no_ref_val_ = 0;
         num_pos_outside_ = 0;
         num_pos_inside_ = 0;
-        num_unknown_ = 0;
-        num_correct_ = 0;
-        num_false_ = 0;
+        num_no_ref_id_ = 0;
+        num_present_id_ = 0;
+        num_missing_id_ = 0;
 
         for (auto result_it : results_)
         {
@@ -304,9 +301,9 @@ namespace EvaluationRequirementResult
         }
 
         loginf << "JoinedModeA: updatesToUseChanges: updt num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_val_
-               << " num_unknown_id " << num_unknown_
-               << " num_correct_id " << num_correct_ << " num_false_id " << num_false_;
+               << " num_no_ref_pos " << num_no_ref_pos_
+               << " num_no_ref_id " << num_no_ref_id_
+               << " num_present_id " << num_present_id_ << " num_missing_id " << num_missing_id_;
 
 //        if (has_pid_)
 //            loginf << "JoinedModeA: updatesToUseChanges: updt result " << result_id_
