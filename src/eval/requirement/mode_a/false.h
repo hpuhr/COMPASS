@@ -15,18 +15,18 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODEARESENT_H
-#define EVALUATIONREQUIREMENTMODEARESENT_H
+#ifndef EVALUATIONREQUIREMENTMODEAFALSE_H
+#define EVALUATIONREQUIREMENTMODEAFALSE_H
 
 #include "eval/requirement/base.h"
 
 namespace EvaluationRequirement
 {
 
-    class ModeAPresent : public Base
+    class ModeAFalse : public Base
     {
     public:
-        ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
+        ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
               EvaluationManager& eval_man, float max_ref_time_diff,
               bool use_minimum_probability_present, float minimum_probability_present,
               bool use_maximum_probability_false, float maximum_probability_false);
@@ -54,4 +54,4 @@ namespace EvaluationRequirement
     };
 
 }
-#endif // EVALUATIONREQUIREMENTMODEARESENT_H
+#endif // EVALUATIONREQUIREMENTMODEAFALSE_H

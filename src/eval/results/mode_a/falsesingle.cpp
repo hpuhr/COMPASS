@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/mode_a/single.h"
-#include "eval/results/mode_a/joined.h"
+#include "eval/results/mode_a/falsesingle.h"
+#include "eval/results/mode_a/falsejoined.h"
 #include "eval/requirement/base.h"
-#include "eval/requirement/mode_a/modea.h"
+#include "eval/requirement/mode_a/false.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -36,21 +36,21 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    SingleModeAPresent::SingleModeAPresent(
+    SingleModeAFalse::SingleModeAFalse(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             int num_updates, int num_no_ref_pos, int num_no_ref_val, int num_pos_outside, int num_pos_inside,
             int num_unknown, int num_correct, int num_false,
             std::vector<EvaluationRequirement::CheckDetail> details)
-        : Single("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man),
+        : Single("SingleModeAFalse", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_val_(num_no_ref_val),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
           num_unknown_(num_unknown),
           num_correct_(num_correct), num_false_(num_false), details_(details)
     {
-        std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
+        std::shared_ptr<EvaluationRequirement::ModeAFalse> req =
+                std::static_pointer_cast<EvaluationRequirement::ModeAFalse>(requirement_);
         assert (req);
 
         use_p_present_req_ = req->useMinimumProbabilityPresent();
@@ -62,7 +62,7 @@ namespace EvaluationRequirementResult
         updateProbabilities();
     }
 
-    void SingleModeAPresent::updateProbabilities()
+    void SingleModeAFalse::updateProbabilities()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_val_+num_unknown_+num_correct_+num_false_);
@@ -92,7 +92,7 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleModeAPresent::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAFalse::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "SingleModeA " <<  requirement_->name() <<": addToReport";
 
@@ -105,7 +105,7 @@ namespace EvaluationRequirementResult
         // TODO add requirement description, methods
     }
 
-    void SingleModeAPresent::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAFalse::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
@@ -113,7 +113,7 @@ namespace EvaluationRequirementResult
             addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
     }
 
-    void SingleModeAPresent::addTargetDetailsToTable (
+    void SingleModeAFalse::addTargetDetailsToTable (
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
@@ -140,7 +140,7 @@ namespace EvaluationRequirementResult
          pe_var, pf_var}, this, {utn_});
     }
 
-    void SingleModeAPresent::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleModeAFalse::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
 
@@ -224,7 +224,7 @@ namespace EvaluationRequirementResult
         reportDetails(utn_req_section);
     }
 
-    void SingleModeAPresent::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    void SingleModeAFalse::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 11,
@@ -251,7 +251,7 @@ namespace EvaluationRequirementResult
     }
 
 
-    bool SingleModeAPresent::hasViewableData (
+    bool SingleModeAFalse::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -262,7 +262,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleModeAPresent::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> SingleModeAFalse::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
 
@@ -299,7 +299,7 @@ namespace EvaluationRequirementResult
             return nullptr;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleModeAPresent::getTargetErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> SingleModeAFalse::getTargetErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                     utn_, req_grp_id_, result_id_);
@@ -353,7 +353,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool SingleModeAPresent::hasReference (
+    bool SingleModeAFalse::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -362,7 +362,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string SingleModeAPresent::reference(
+    std::string SingleModeAFalse::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -370,52 +370,52 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    std::shared_ptr<Joined> SingleModeAPresent::createEmptyJoined(const std::string& result_id)
+    std::shared_ptr<Joined> SingleModeAFalse::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedModeAPresent> (result_id, requirement_, sector_layer_, eval_man_);
+        return make_shared<JoinedModeAFalse> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SingleModeAPresent::numNoRefPos() const
+    int SingleModeAFalse::numNoRefPos() const
     {
         return num_no_ref_pos_;
     }
 
-    int SingleModeAPresent::numNoRefValue() const
+    int SingleModeAFalse::numNoRefValue() const
     {
         return num_no_ref_val_;
     }
 
-    int SingleModeAPresent::numPosOutside() const
+    int SingleModeAFalse::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    int SingleModeAPresent::numPosInside() const
+    int SingleModeAFalse::numPosInside() const
     {
         return num_pos_inside_;
     }
 
-    int SingleModeAPresent::numUpdates() const
+    int SingleModeAFalse::numUpdates() const
     {
         return num_updates_;
     }
 
-    int SingleModeAPresent::numUnknown() const
+    int SingleModeAFalse::numUnknown() const
     {
         return num_unknown_;
     }
 
-    int SingleModeAPresent::numCorrect() const
+    int SingleModeAFalse::numCorrect() const
     {
         return num_correct_;
     }
 
-    int SingleModeAPresent::numFalse() const
+    int SingleModeAFalse::numFalse() const
     {
         return num_false_;
     }
 
-    std::vector<EvaluationRequirement::CheckDetail>& SingleModeAPresent::details()
+    std::vector<EvaluationRequirement::CheckDetail>& SingleModeAFalse::details()
     {
         return details_;
     }

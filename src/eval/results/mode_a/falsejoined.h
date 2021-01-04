@@ -15,19 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JOINEVALUATIONREQUIREMENTMODEARESULT_H
-#define JOINEVALUATIONREQUIREMENTMODEARESULT_H
+#ifndef JOINEVALUATIONREQUIREMENTMODEAFALSERESULT_H
+#define JOINEVALUATIONREQUIREMENTMODEAFALSERESULT_H
 
 #include "eval/results/joined.h"
 
 namespace EvaluationRequirementResult
 {
-    class SingleModeAPresent;
+    class SingleModeAFalse;
 
-    class JoinedModeAPresent : public Joined
+    class JoinedModeAFalse : public Joined
     {
     public:
-        JoinedModeAPresent(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        JoinedModeAFalse(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
                              const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
@@ -71,7 +71,7 @@ namespace EvaluationRequirementResult
         bool has_p_false_ {false};
         float p_false_{0};
 
-        void addToValues (std::shared_ptr<SingleModeAPresent> single_result);
+        void addToValues (std::shared_ptr<SingleModeAFalse> single_result);
         void updateProbabilities();
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

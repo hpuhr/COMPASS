@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/mode_a/single.h"
-#include "eval/results/mode_a/joined.h"
+#include "eval/results/mode_a/presentsingle.h"
+#include "eval/results/mode_a/presentjoined.h"
 #include "eval/requirement/base.h"
-#include "eval/requirement/mode_a/modea.h"
+#include "eval/requirement/mode_a/present.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

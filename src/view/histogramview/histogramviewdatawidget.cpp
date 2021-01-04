@@ -44,8 +44,8 @@
 #include "eval/results/position/latencyjoined.h"
 #include "eval/results/identification/single.h"
 #include "eval/results/identification/joined.h"
-#include "eval/results/mode_a/single.h"
-#include "eval/results/mode_a/joined.h"
+#include "eval/results/mode_a/presentsingle.h"
+#include "eval/results/mode_a/presentjoined.h"
 #include "eval/results/mode_c/single.h"
 #include "eval/results/mode_c/joined.h"
 

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_a/modeaconfigwidget.h"
-#include "eval/requirement/mode_a/modeaconfig.h"
+#include "eval/requirement/mode_a/falseconfigwidget.h"
+#include "eval/requirement/mode_a/falseconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
@@ -29,7 +29,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ModeAPresentConfigWidget::ModeAPresentConfigWidget(ModeAPresentConfig& config)
+    ModeAFalseConfigWidget::ModeAFalseConfigWidget(ModeAFalseConfig& config)
             : QWidget(), config_(config)
     {
         form_layout_ = new QFormLayout();
@@ -40,7 +40,7 @@ namespace EvaluationRequirement
         max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
         max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
         connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
-                this, &ModeAPresentConfigWidget::maxRefTimeDiffEditSlot);
+                this, &ModeAFalseConfigWidget::maxRefTimeDiffEditSlot);
 
         form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
 
@@ -48,13 +48,13 @@ namespace EvaluationRequirement
         min_prob_pres_check_ = new QCheckBox();
         min_prob_pres_check_->setChecked(config_.useMinimumProbabilityPresent());
         connect(min_prob_pres_check_, &QCheckBox::clicked,
-                this, &ModeAPresentConfigWidget::toogleUseMinProbPresentSlot);
+                this, &ModeAFalseConfigWidget::toogleUseMinProbPresentSlot);
         form_layout_->addRow("Use Present Minimum Probability", min_prob_pres_check_);
 
         min_prob_pres_edit_ = new QLineEdit(QString::number(config_.minimumProbabilityPresent()));
         min_prob_pres_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(min_prob_pres_edit_, &QLineEdit::textEdited,
-                this, &ModeAPresentConfigWidget::minProbPresentEditSlot);
+                this, &ModeAFalseConfigWidget::minProbPresentEditSlot);
 
         form_layout_->addRow("Present Minimum Probability [1]", min_prob_pres_edit_);
 
@@ -62,20 +62,20 @@ namespace EvaluationRequirement
         max_prob_false_check_ = new QCheckBox();
         max_prob_false_check_->setChecked(config_.useMaximumProbabilityFalse());
         connect(max_prob_false_check_, &QCheckBox::clicked,
-                this, &ModeAPresentConfigWidget::toogleUseMaxProbFalseSlot);
+                this, &ModeAFalseConfigWidget::toogleUseMaxProbFalseSlot);
         form_layout_->addRow("Use False Maximum Probability", max_prob_false_check_);
 
         max_prob_false_edit_ = new QLineEdit(QString::number(config_.maximumProbabilityFalse()));
         max_prob_false_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(max_prob_false_edit_, &QLineEdit::textEdited,
-                this, &ModeAPresentConfigWidget::maxProbFalseEditSlot);
+                this, &ModeAFalseConfigWidget::maxProbFalseEditSlot);
 
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
 
         setLayout(form_layout_);
     }
 
-    void ModeAPresentConfigWidget::maxRefTimeDiffEditSlot(QString value)
+    void ModeAFalseConfigWidget::maxRefTimeDiffEditSlot(QString value)
     {
         loginf << "ModeAConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
 
@@ -89,14 +89,14 @@ namespace EvaluationRequirement
     }
 
 
-    void ModeAPresentConfigWidget::toogleUseMinProbPresentSlot ()
+    void ModeAFalseConfigWidget::toogleUseMinProbPresentSlot ()
     {
         assert (min_prob_pres_check_);
         config_.useMinimumProbabilityPresent(min_prob_pres_check_->checkState() == Qt::Checked);
     }
 
 
-    void ModeAPresentConfigWidget::minProbPresentEditSlot(QString value)
+    void ModeAFalseConfigWidget::minProbPresentEditSlot(QString value)
     {
         loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
 
@@ -109,14 +109,14 @@ namespace EvaluationRequirement
             loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: invalid value";
     }
 
-    void ModeAPresentConfigWidget::toogleUseMaxProbFalseSlot ()
+    void ModeAFalseConfigWidget::toogleUseMaxProbFalseSlot ()
     {
         assert (max_prob_false_check_);
         config_.useMaximumProbabilityFalse(max_prob_false_check_->checkState() == Qt::Checked);
     }
 
 
-    void ModeAPresentConfigWidget::maxProbFalseEditSlot(QString value)
+    void ModeAFalseConfigWidget::maxProbFalseEditSlot(QString value)
     {
         loginf << "EvaluationRequirementModeAConfigWidget: maxProbFalseEditSlot: value " << value.toStdString();
 

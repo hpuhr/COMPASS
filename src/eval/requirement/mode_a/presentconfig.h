@@ -20,8 +20,8 @@
 
 #include "configurable.h"
 #include "eval/requirement/config.h"
-#include "eval/requirement/mode_a/modea.h"
-#include "eval/requirement/mode_a/modeaconfigwidget.h"
+#include "eval/requirement/mode_a/present.h"
+#include "eval/requirement/mode_a/presentconfigwidget.h"
 
 #include <memory>
 

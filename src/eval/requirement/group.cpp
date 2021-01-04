@@ -23,7 +23,8 @@
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
 #include "eval/requirement/identification/identificationconfig.h"
-#include "eval/requirement/mode_a/modeaconfig.h"
+#include "eval/requirement/mode_a/presentconfig.h"
+#include "eval/requirement/mode_a/falseconfig.h"
 #include "eval/requirement/mode_c/modecconfig.h"
 #include "eval/requirement/extra/dataconfig.h"
 #include "eval/requirement/extra/trackconfig.h"
@@ -137,10 +138,20 @@ void Group::generateSubConfigurable(const std::string& class_id,
         assert(!hasRequirementConfig(config->name()));
         configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
     }
-    else if (class_id.compare("EvaluationRequirementModeAConfig") == 0)
+    else if (class_id.compare("EvaluationRequirementModeAPresentConfig") == 0)
     {
         EvaluationRequirement::ModeAPresentConfig* config =
                 new EvaluationRequirement::ModeAPresentConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeAFalseConfig") == 0)
+    {
+        EvaluationRequirement::ModeAFalseConfig* config =
+                new EvaluationRequirement::ModeAFalseConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -303,9 +314,13 @@ void Group::showMenu ()
         }
 
         { // mode 3/a
-            QAction* add_pos_action = req_menu->addAction("Mode 3/A");
-            add_pos_action->setData("EvaluationRequirementModeAConfig");
-            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+            QAction* present_action = req_menu->addAction("Mode 3/A Present");
+            present_action->setData("EvaluationRequirementModeAPresentConfig");
+            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Mode 3/A False");
+            false_action->setData("EvaluationRequirementModeAFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         { // mode c

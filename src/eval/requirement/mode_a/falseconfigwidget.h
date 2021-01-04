@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODEAPRESENTCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTMODEAPRESENTCONFIGWIDGET_H
+#ifndef EVALUATIONREQUIREMENTMODEAFALSECONFIGWIDGET_H
+#define EVALUATIONREQUIREMENTMODEAFALSECONFIGWIDGET_H
 
 #include <QWidget>
 
@@ -27,9 +27,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class ModeAPresentConfig;
+    class ModeAFalseConfig;
 
-    class ModeAPresentConfigWidget : public QWidget
+    class ModeAFalseConfigWidget : public QWidget
     {
         Q_OBJECT
 
@@ -43,10 +43,10 @@ namespace EvaluationRequirement
         void maxProbFalseEditSlot(QString value);
 
     public:
-        ModeAPresentConfigWidget(ModeAPresentConfig& config);
+        ModeAFalseConfigWidget(ModeAFalseConfig& config);
 
     protected:
-        ModeAPresentConfig& config_;
+        ModeAFalseConfig& config_;
 
         QFormLayout* form_layout_ {nullptr};
 
@@ -61,4 +61,4 @@ namespace EvaluationRequirement
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODEARESENTCONFIGWIDGET_H
+#endif // EVALUATIONREQUIREMENTMODEAFALSECONFIGWIDGET_H

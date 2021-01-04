@@ -15,20 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENIDENTMODEARESULT_H
-#define EVALUATIONREQUIREMENIDENTMODEARESULT_H
+#ifndef EVALUATIONREQUIREMENTMODEAFALSERESULT_H
+#define EVALUATIONREQUIREMENTMODEAFALSERESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/mode_a/modea.h"
+#include "eval/requirement/mode_a/false.h"
 #include "eval/requirement/checkdetail.h"
 
 namespace EvaluationRequirementResult
 {
 
-class SingleModeAPresent : public Single
+class SingleModeAFalse : public Single
 {
 public:
-    SingleModeAPresent(
+    SingleModeAFalse(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
@@ -99,4 +99,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENIDENTMODEARESULT_H
+#endif // EVALUATIONREQUIREMENTMODEAFALSERESULT_H

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_a/modeaconfigwidget.h"
-#include "eval/requirement/mode_a/modeaconfig.h"
+#include "eval/requirement/mode_a/presentconfigwidget.h"
+#include "eval/requirement/mode_a/presentconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
