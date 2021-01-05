@@ -40,14 +40,6 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     form_layout_->addRow("Update Interval [s]", update_interval_edit_);
 
-    // max ref time diff
-    max_ref_time_diff_edit_ = new QLineEdit(QString::number(config().maxRefTimeDiff()));
-    max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
-    connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
-            this, &DetectionConfigWidget::maxRefTimeDiffEditSlot);
-
-    form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
-
     // prob
     minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
     minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
@@ -99,19 +91,6 @@ void DetectionConfigWidget::updateIntervalEditSlot(QString value)
         config().updateInterval(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: invalid value";
-}
-
-void DetectionConfigWidget::maxRefTimeDiffEditSlot(QString value)
-{
-    loginf << "EvaluationRequirementDetectionConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().maxRefTimeDiff(val);
-    else
-        loginf << "EvaluationRequirementDetectionConfigWidget: maxRefTimeDiffEditSlot: invalid value";
 }
 
 void DetectionConfigWidget::minimumProbEditSlot(QString value)

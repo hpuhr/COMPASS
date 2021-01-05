@@ -36,7 +36,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
         shared_ptr<Identification> req = make_shared<Identification>(
-                    name_, short_name_, group_.name(), eval_man_, minimum_probability_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_);
 
         return req;
     }

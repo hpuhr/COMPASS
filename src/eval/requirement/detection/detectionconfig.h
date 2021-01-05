@@ -45,9 +45,6 @@ namespace EvaluationRequirement
         float updateInterval() const;
         void updateInterval(float value);
 
-        float maxRefTimeDiff() const;
-        void maxRefTimeDiff(float value);
-
         float minimumProbability() const;
         void minimumProbability(float value);
 
@@ -65,8 +62,6 @@ namespace EvaluationRequirement
 
     protected:
         float update_interval_s_{0};
-
-        float max_ref_time_diff_ {0};
 
         float minimum_probability_{0};
 

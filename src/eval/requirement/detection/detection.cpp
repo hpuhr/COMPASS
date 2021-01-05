@@ -32,11 +32,11 @@ namespace EvaluationRequirement
 
     Detection::Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man,
-            float update_interval_s, float max_ref_time_diff, float minimum_probability,
+            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+            float update_interval_s, float minimum_probability,
             bool use_miss_tolerance, float miss_tolerance_s)
-        : Base(name, short_name, group_name, eval_man), update_interval_s_(update_interval_s),
-          max_ref_time_diff_(max_ref_time_diff), minimum_probability_(minimum_probability),
+        : Base(name, short_name, group_name, prob, prob_check_type, eval_man), update_interval_s_(update_interval_s),
+          minimum_probability_(minimum_probability),
           use_miss_tolerance_(use_miss_tolerance),
           miss_tolerance_s_(miss_tolerance_s)
     {
@@ -46,11 +46,6 @@ namespace EvaluationRequirement
     float Detection::updateInterval() const
     {
         return update_interval_s_;
-    }
-
-    float Detection::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
     }
 
     float Detection::minimumProbability() const
@@ -81,6 +76,8 @@ namespace EvaluationRequirement
         logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                << " update_interval " << update_interval_s_ << " minimum_probability " << minimum_probability_
                << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
+
+        float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
         // create ref time periods
         TimePeriodCollection ref_periods;
@@ -124,7 +121,7 @@ namespace EvaluationRequirement
                     if (inside)
                     {
                         // extend last time period, if possible, or finish last and create new one
-                        if (ref_periods.lastPeriod().isCloseToEnd(tod, max_ref_time_diff_)) // 4.9
+                        if (ref_periods.lastPeriod().isCloseToEnd(tod, max_ref_time_diff)) // 4.9
                             ref_periods.lastPeriod().extend(tod);
                         else
                             ref_periods.add({tod, tod});
@@ -331,7 +328,7 @@ namespace EvaluationRequirement
             // is inside period
             period_index = ref_periods.getPeriodIndex(tod);
 
-            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
             ref_pos = ret_pos.first;
             ok = ret_pos.second;

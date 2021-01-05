@@ -18,11 +18,12 @@
 #ifndef EVALUATIONREQUIREMENTBASECONFIG_H
 #define EVALUATIONREQUIREMENTBASECONFIG_H
 
-#include <QObject>
-
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
 #include "eval/requirement/base/baseconfigwidget.h"
+#include "eval/requirement/base/checktype.h"
+
+#include <QObject>
 
 class Group;
 class EvaluationStandard;
@@ -34,50 +35,59 @@ class EvaluationManager;
 
 namespace EvaluationRequirement
 {
-    class Base;
+class Base;
 
-    class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
-    {
-        Q_OBJECT
+class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
+{
+    Q_OBJECT
 
-    public:
-        BaseConfig(const std::string& class_id, const std::string& instance_id,
-                                    Group& group, EvaluationStandard& standard,
-                                    EvaluationManager& eval_man);
-        virtual ~BaseConfig();
+public:
+    BaseConfig(const std::string& class_id, const std::string& instance_id,
+               Group& group, EvaluationStandard& standard,
+               EvaluationManager& eval_man);
+    virtual ~BaseConfig();
 
-        virtual void generateSubConfigurable(const std::string& class_id,
-                                             const std::string& instance_id) override;
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
-        std::string name() const;
-        void name(const std::string& name);
+    std::string name() const;
+    void name(const std::string& name);
 
-        bool hasShortName () const;
-        std::string shortName() const;
-        void shortName(const std::string& short_name);
+    bool hasShortName () const;
+    std::string shortName() const;
+    void shortName(const std::string& short_name);
 
-        virtual EvaluationStandardTreeItem *child(int row) override;
-        virtual int childCount() const override;
-        virtual int columnCount() const override;
-        virtual QVariant data(int column) const override;
-        virtual int row() const override;
+    float prob() const;
+    void prob(float value);
 
-        BaseConfigWidget* widget();
-        virtual std::shared_ptr<Base> createRequirement() = 0;
+    CHECK_TYPE probCheckType() const;
+    void probCheckType(const CHECK_TYPE& prob_type);
 
-    protected:
-        Group& group_;
-        EvaluationStandard& standard_;
-        EvaluationManager& eval_man_;
+    virtual EvaluationStandardTreeItem *child(int row) override;
+    virtual int childCount() const override;
+    virtual int columnCount() const override;
+    virtual QVariant data(int column) const override;
+    virtual int row() const override;
 
-        std::string name_;
-        std::string short_name_;
+    BaseConfigWidget* widget();
+    virtual std::shared_ptr<Base> createRequirement() = 0;
 
-        std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
+protected:
+    Group& group_;
+    EvaluationStandard& standard_;
+    EvaluationManager& eval_man_;
 
-        virtual void checkSubConfigurables() override;
-        virtual void createWidget(); // creates BaseConfigWidget, override to change
-    };
+    std::string name_;
+    std::string short_name_;
+
+    float prob_ {0};
+    CHECK_TYPE prob_check_type_ {CHECK_TYPE::MIN};
+
+    std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
+
+    virtual void checkSubConfigurables() override;
+    virtual void createWidget(); // creates BaseConfigWidget, override to change
+};
 
 }
 

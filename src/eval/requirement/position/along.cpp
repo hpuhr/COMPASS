@@ -34,9 +34,9 @@ namespace EvaluationRequirement
 {
 
 PositionAlong::PositionAlong(const std::string& name, const std::string& short_name, const std::string& group_name,
-                                         EvaluationManager& eval_man,
-                                         float max_abs_value, float minimum_probability)
-    : Base(name, short_name, group_name, eval_man),
+                             float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+                             float max_abs_value, float minimum_probability)
+    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
       max_abs_value_(max_abs_value), minimum_probability_(minimum_probability)
 {
 }
@@ -245,11 +245,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         values.push_back(d_along);
     }
 
-//        logdbg << "EvaluationRequirementPositionAlong '" << name_ << "': evaluate: utn " << target_data.utn_
-//               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
-//               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-//               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
-//               << " num_distances " << num_distances;
+    //        logdbg << "EvaluationRequirementPositionAlong '" << name_ << "': evaluate: utn " << target_data.utn_
+    //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+    //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
+    //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
+    //               << " num_distances " << num_distances;
 
     assert (num_no_ref <= num_pos);
 

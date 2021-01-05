@@ -12,6 +12,7 @@ namespace EvaluationRequirement
 {
 
 class BaseConfig;
+class CheckTypeComboBox;
 
 class BaseConfigWidget : public QWidget
 {
@@ -22,6 +23,8 @@ signals:
 public slots:
     void changedNameSlot(const QString& value);
     void changedShortNameSlot(const QString& value);
+    void changedProbabilitySlot(const QString& value);
+    void changedTypeSlot();
 
 public:
     BaseConfigWidget(BaseConfig& cfg);
@@ -31,6 +34,8 @@ protected:
     BaseConfig& config_;
 
     QFormLayout* form_layout_ {nullptr};
+
+    CheckTypeComboBox* check_type_box_ {nullptr};
 };
 
 }

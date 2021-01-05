@@ -43,7 +43,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ExtraDataConfig::createRequirement()
     {
         shared_ptr<ExtraData> req = make_shared<ExtraData>(
-                    name_, short_name_, group_.name(), eval_man_, min_duration_,
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
                     min_num_updates_, ignore_primary_only_, maximum_probability_);
 
         return req;

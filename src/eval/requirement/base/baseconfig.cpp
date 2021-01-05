@@ -36,6 +36,10 @@ BaseConfig::BaseConfig(
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");
 
+    registerParameter("prob", &prob_, 0.9);
+    registerParameter("prob_check_type", (unsigned int*)&prob_check_type_, (unsigned int)CHECK_TYPE::MIN);
+
+
     assert (name_.size());
     assert (short_name_.size());
 
@@ -120,6 +124,26 @@ void BaseConfig::shortName(const std::string& short_name)
 std::string BaseConfig::shortName() const
 {
     return short_name_;
+}
+
+float BaseConfig::prob() const
+{
+    return prob_;
+}
+
+void BaseConfig::prob(float value)
+{
+    prob_ = value;
+}
+
+CHECK_TYPE BaseConfig::probCheckType() const
+{
+    return prob_check_type_;
+}
+
+void BaseConfig::probCheckType(const CHECK_TYPE& prob_type)
+{
+    prob_check_type_ = prob_type;
 }
 
 }

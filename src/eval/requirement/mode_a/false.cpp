@@ -31,8 +31,8 @@ namespace EvaluationRequirement
 {
 
     ModeAFalse::ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                 EvaluationManager& eval_man, float maximum_probability_false)
-        : Base(name, short_name, group_name, eval_man),
+                 float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false)
+        : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
           maximum_probability_false_(maximum_probability_false)
     {
     }

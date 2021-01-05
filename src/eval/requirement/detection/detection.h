@@ -62,13 +62,11 @@ class Detection : public Base
 public:
     Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man,
-            float update_interval_s, float max_ref_time_diff, float minimum_probability,
+            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+            float update_interval_s, float minimum_probability,
             bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;
-
-    float maxRefTimeDiff() const;
 
     float minimumProbability() const;
 
@@ -84,8 +82,6 @@ public:
 
 protected:
     float update_interval_s_{0};
-
-    float max_ref_time_diff_ {0};
 
     float minimum_probability_{0};
 

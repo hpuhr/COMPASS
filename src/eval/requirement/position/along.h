@@ -29,7 +29,7 @@ class PositionAlong : public Base
 public:
     PositionAlong(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man,
+            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
             float max_abs_value, float minimum_probability);
 
     float maxAbsValue() const;

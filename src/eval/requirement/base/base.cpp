@@ -22,9 +22,10 @@ namespace EvaluationRequirement
 
 bool Base::in_appimage_ {getenv("APPDIR") != nullptr};
 
-Base::Base(const std::string& name, const std::string& short_name,
-                                             const std::string& group_name, EvaluationManager& eval_man)
-    : name_(name), short_name_(short_name), group_name_(group_name), eval_man_(eval_man)
+Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
+           float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man)
+    : name_(name), short_name_(short_name), group_name_(group_name),
+      prob_(prob), prob_check_type_(prob_check_type), eval_man_(eval_man)
 {
 
 }
@@ -54,14 +55,9 @@ float Base::prob() const
     return prob_;
 }
 
-PROB_TYPE Base::probType() const
+CHECK_TYPE Base::probCheckType() const
 {
-    return prob_type_;
-}
-
-void Base::probType(const PROB_TYPE& prob_type)
-{
-    prob_type_ = prob_type;
+    return prob_check_type_;
 }
 
 }

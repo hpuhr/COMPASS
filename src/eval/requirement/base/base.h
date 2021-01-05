@@ -18,6 +18,8 @@
 #ifndef EVALUATIONREQUIREMENT_H
 #define EVALUATIONREQUIREMENT_H
 
+#include "eval/requirement/base/checktype.h"
+
 #include <string>
 #include <memory>
 
@@ -32,16 +34,12 @@ namespace EvaluationRequirementResult {
 namespace EvaluationRequirement
 {
 
-enum PROB_TYPE {
-    MIN=0, // minimum probability
-    MAX // maximum probability
-};
 
 class Base
 {
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-         EvaluationManager& eval_man);
+         float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man);
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -55,9 +53,7 @@ public:
 
     float prob() const;
 
-    PROB_TYPE probType() const;
-    void probType(const PROB_TYPE& prob_type);
-    std::string probName() const;
+    CHECK_TYPE probCheckType() const;
 
 protected:
     static bool in_appimage_;
@@ -66,11 +62,11 @@ protected:
     std::string short_name_;
     std::string group_name_;
 
-    EvaluationManager& eval_man_;
-
     float prob_ {0};
-    PROB_TYPE prob_type_ {PROB_TYPE::MIN};
-    std::string prob_name_{"Minimum Probability [1]"};
+    CHECK_TYPE prob_check_type_ {CHECK_TYPE::MIN};
+    //std::string prob_name_{"Minimum Probability [1]"};
+
+    EvaluationManager& eval_man_;
 };
 
 }

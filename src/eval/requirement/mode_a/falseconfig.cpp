@@ -34,7 +34,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ModeAFalseConfig::createRequirement()
     {
         shared_ptr<ModeAFalse> req = make_shared<ModeAFalse>(
-                    name_, short_name_, group_.name(), eval_man_, maximum_probability_false_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, maximum_probability_false_);
 
         return req;
     }

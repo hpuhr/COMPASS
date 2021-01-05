@@ -23,22 +23,22 @@
 namespace EvaluationRequirement
 {
 
-    class ModeAPresent : public Base
-    {
-    public:
-        ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
-              EvaluationManager& eval_man, float minimum_probability_present);
+class ModeAPresent : public Base
+{
+public:
+    ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
+                 float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float minimum_probability_present);
 
-        virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-                const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-                const SectorLayer& sector_layer) override;
+    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
+            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+            const SectorLayer& sector_layer) override;
 
-        float minimumProbabilityPresent() const;
+    float minimumProbabilityPresent() const;
 
-    protected:
-        float minimum_probability_present_{0};
+protected:
+    float minimum_probability_present_{0};
 
-    };
+};
 
 }
 #endif // EVALUATIONREQUIREMENTMODEARESENT_H

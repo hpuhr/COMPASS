@@ -34,7 +34,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
     {
         shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
-                    name_, short_name_, group_.name(), eval_man_, minimum_probability_present_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_present_);
 
         return req;
     }

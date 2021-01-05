@@ -23,21 +23,21 @@
 namespace EvaluationRequirement
 {
 
-    class ModeAFalse : public Base
-    {
-    public:
-        ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-              EvaluationManager& eval_man, float max_ref_time_diff);
+class ModeAFalse : public Base
+{
+public:
+    ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
+               float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float max_ref_time_diff);
 
-        virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
-                const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
-                const SectorLayer& sector_layer) override;
+    virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
+            const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
+            const SectorLayer& sector_layer) override;
 
-        float maximumProbabilityFalse() const;
+    float maximumProbabilityFalse() const;
 
-    protected:
-        float maximum_probability_false_{0};
-    };
+protected:
+    float maximum_probability_false_{0};
+};
 
 }
 #endif // EVALUATIONREQUIREMENTMODEAFALSE_H

@@ -42,7 +42,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> PositionLatencyConfig::createRequirement()
     {
         shared_ptr<PositionLatency> req = make_shared<PositionLatency>(
-                    name_, short_name_, group_.name(), eval_man_,
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
                     max_abs_value_, minimum_probability_);
 
         return req;

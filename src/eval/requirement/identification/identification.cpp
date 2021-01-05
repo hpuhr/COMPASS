@@ -32,8 +32,8 @@ namespace EvaluationRequirement
 
     Identification::Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float minimum_probability)
-        : Base(name, short_name, group_name, eval_man),
+            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float minimum_probability)
+        : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
           minimum_probability_(minimum_probability)
     {
 
