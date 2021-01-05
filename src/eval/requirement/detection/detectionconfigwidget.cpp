@@ -40,14 +40,6 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     form_layout_->addRow("Update Interval [s]", update_interval_edit_);
 
-    // prob
-    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
-    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-    connect(minimum_prob_edit_, &QLineEdit::textEdited,
-            this, &DetectionConfigWidget::minimumProbEditSlot);
-
-    form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
-
     // max gap
 //    use_max_gap_check_ = new QCheckBox ();
 //    use_max_gap_check_->setChecked(config_.useMaxGapInterval());
@@ -91,19 +83,6 @@ void DetectionConfigWidget::updateIntervalEditSlot(QString value)
         config().updateInterval(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: invalid value";
-}
-
-void DetectionConfigWidget::minimumProbEditSlot(QString value)
-{
-    loginf << "EvaluationRequirementDetectionConfigWidget: minimumProbEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().minimumProbability(val);
-    else
-        loginf << "EvaluationRequirementDetectionConfigWidget: minimumProbEditSlot: invalid value";
 }
 
 //void DetectionConfigWidget::toggleUseMaxGapSlot()

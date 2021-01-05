@@ -34,13 +34,11 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
-        void minimumProbEditSlot(QString value);
 
     public:
         IdentificationConfigWidget(IdentificationConfig& cfg);
 
     protected:
-        QLineEdit* minimum_prob_edit_{nullptr};
 
         IdentificationConfig& config();
     };

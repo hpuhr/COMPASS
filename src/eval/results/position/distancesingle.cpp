@@ -247,14 +247,12 @@ namespace EvaluationRequirementResult
 
             utn_req_table.addRow({"PDOK [%]", "Probability of acceptable distance", p_min_var}, this);
 
-            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-            utn_req_table.addRow({"Condition Distance", {}, condition.c_str()}, this);
+            utn_req_table.addRow({"Condition Distance", {}, req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_min_)
-                result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_min_);
 
             utn_req_table.addRow({"Condition Distance Fulfilled", "", result.c_str()}, this);
         }

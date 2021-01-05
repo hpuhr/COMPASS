@@ -28,25 +28,14 @@ namespace EvaluationRequirement
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
                          : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
     }
 
     std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
     {
         shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_present_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
         return req;
-    }
-
-    float ModeAPresentConfig::minimumProbabilityPresent() const
-    {
-        return minimum_probability_present_;
-    }
-
-    void ModeAPresentConfig::minimumProbabilityPresent(float value)
-    {
-        minimum_probability_present_ = value;
     }
 
     void ModeAPresentConfig::createWidget()

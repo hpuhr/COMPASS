@@ -247,14 +247,12 @@ namespace EvaluationRequirementResult
 
             utn_req_table.addRow({"PALOK [%]", "Probability of acceptable along-track error", p_min_var}, this);
 
-            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-            utn_req_table.addRow({"Condition Along", {}, condition.c_str()}, this);
+            utn_req_table.addRow({"Condition Along", {}, req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_min_)
-                result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_min_);
 
             utn_req_table.addRow({"Condition Along Fulfilled", "", result.c_str()}, this);
         }

@@ -16,6 +16,10 @@
  */
 
 #include "eval/requirement/base/base.h"
+#include "stringconv.h"
+
+using namespace std;
+using namespace Utils;
 
 namespace EvaluationRequirement
 {
@@ -58,6 +62,26 @@ float Base::prob() const
 CHECK_TYPE Base::probCheckType() const
 {
     return prob_check_type_;
+}
+
+std::string Base::getConditionStr () const
+{
+    if (prob_check_type_ == CHECK_TYPE::MIN)
+        return ">= "+String::percentToString(prob_ * 100.0);
+    else // max
+        return "<= "+String::percentToString(prob_ * 100.0);
+}
+
+std::string Base::getResultConditionStr (float prob) const
+{
+    bool result;
+
+    if (prob_check_type_ == CHECK_TYPE::MIN)
+        result = prob >= prob_;
+    else // max
+        result = prob <= prob_;
+
+    return result ? "Passed" : "Failed";;
 }
 
 }

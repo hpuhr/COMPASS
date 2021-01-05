@@ -49,12 +49,6 @@ namespace EvaluationRequirementResult
           num_no_ref_id_(num_no_ref_id),
           num_present_id_(num_present_id), num_missing_id_(num_missing_id), details_(details)
     {
-        std::shared_ptr<EvaluationRequirement::ModeCPresent> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeCPresent>(requirement_);
-        assert (req);
-
-        p_present_min_ = req->minimumProbabilityPresent();
-
         updateProbabilities();
     }
 
@@ -150,6 +144,10 @@ namespace EvaluationRequirementResult
 
         // condition
         {
+            std::shared_ptr<EvaluationRequirement::ModeCPresent> req =
+                    std::static_pointer_cast<EvaluationRequirement::ModeCPresent>(requirement_);
+            assert (req);
+
             QVariant pe_var;
 
             if (has_p_present_)
@@ -157,15 +155,13 @@ namespace EvaluationRequirementResult
 
             utn_req_table.addRow({"PP [%]", "Probability of Mode C present", pe_var}, this);
 
-            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
-
             utn_req_table.addRow(
-            {"Condition", "", condition.c_str()}, this);
+            {"Condition", "", req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_present_)
-                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_present_);
 
             utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }

@@ -31,9 +31,8 @@ namespace EvaluationRequirement
 {
 
 ModeAPresent::ModeAPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
-                           float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float minimum_probability_present)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      minimum_probability_present_(minimum_probability_present)
+                           float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man)
+    : Base(name, short_name, group_name, prob, prob_check_type, eval_man)
 {
 
 }
@@ -42,8 +41,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " min prob " << minimum_probability_present_;
+    logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
@@ -217,8 +215,4 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeAPresent::evaluate (
                 num_no_ref_id, num_present_id, num_missing_id, details);
 }
 
-float ModeAPresent::minimumProbabilityPresent() const
-{
-    return minimum_probability_present_;
-}
 }

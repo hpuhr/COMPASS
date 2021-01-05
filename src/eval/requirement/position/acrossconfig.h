@@ -33,8 +33,7 @@ class PositionAcrossConfig : public BaseConfig
 {
 public:
     PositionAcrossConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_ma);
+                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
     virtual ~PositionAcrossConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -42,12 +41,8 @@ public:
     float maxAbsValue() const;
     void maxAbsValue(float value);
 
-    float minimumProbability() const;
-    void minimumProbability(float value);
-
 protected:
     float max_abs_value_ {0};
-    float minimum_probability_{0};
 
     virtual void createWidget() override;
 };

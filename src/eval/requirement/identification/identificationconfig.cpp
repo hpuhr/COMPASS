@@ -30,25 +30,14 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
         : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
 
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
         shared_ptr<Identification> req = make_shared<Identification>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
         return req;
-    }
-
-    float IdentificationConfig::minimumProbability() const
-    {
-        return minimum_probability_;
-    }
-
-    void IdentificationConfig::minimumProbability(float value)
-    {
-        minimum_probability_ = value;
     }
 
     void IdentificationConfig::createWidget()

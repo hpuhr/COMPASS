@@ -49,12 +49,6 @@ namespace EvaluationRequirementResult
           num_unknown_(num_unknown),
           num_correct_(num_correct), num_false_(num_false), details_(details)
     {
-        std::shared_ptr<EvaluationRequirement::ModeCFalse> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
-        assert (req);
-
-        p_false_max_ = req->maximumProbabilityFalse();
-
         updateProbabilities();
     }
 
@@ -173,6 +167,10 @@ namespace EvaluationRequirementResult
         // condition
 
         {
+            std::shared_ptr<EvaluationRequirement::ModeCFalse> req =
+                    std::static_pointer_cast<EvaluationRequirement::ModeCFalse>(requirement_);
+            assert (req);
+
             QVariant pf_var;
 
             if (has_p_false_)
@@ -180,15 +178,13 @@ namespace EvaluationRequirementResult
 
             utn_req_table.addRow({"PF [%]", "Probability of Mode C false", pf_var}, this);
 
-            string condition = "<= "+String::percentToString(p_false_max_ * 100.0);
-
             utn_req_table.addRow(
-            {"Condition", "", condition.c_str()}, this);
+            {"Condition", "", req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_false_)
-                result = p_false_ <= p_false_max_ ? "Passed" : "Failed";
+                result = req-> getResultConditionStr(p_false_);
 
             utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }

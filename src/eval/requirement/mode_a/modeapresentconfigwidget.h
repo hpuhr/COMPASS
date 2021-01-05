@@ -27,23 +27,21 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class ModeAPresentConfig;
+class ModeAPresentConfig;
 
-    class ModeAPresentConfigWidget : public BaseConfigWidget
-    {
-        Q_OBJECT
+class ModeAPresentConfigWidget : public BaseConfigWidget
+{
+    Q_OBJECT
 
-    public slots:
-        void minProbPresentEditSlot(QString value);
+public slots:
 
-    public:
-        ModeAPresentConfigWidget(ModeAPresentConfig& cfg);
+public:
+    ModeAPresentConfigWidget(ModeAPresentConfig& cfg);
 
-    protected:
-        QLineEdit* min_prob_pres_edit_{nullptr};
+protected:
 
-        ModeAPresentConfig& config();
-    };
+    ModeAPresentConfig& config();
+};
 
 }
 

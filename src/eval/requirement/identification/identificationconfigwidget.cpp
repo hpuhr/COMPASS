@@ -32,26 +32,6 @@ namespace EvaluationRequirement
     IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& cfg)
         : BaseConfigWidget(cfg)
     {
-        // prob
-        minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
-        minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-        connect(minimum_prob_edit_, &QLineEdit::textEdited,
-                this, &IdentificationConfigWidget::minimumProbEditSlot);
-
-        form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
-    }
-
-    void IdentificationConfigWidget::minimumProbEditSlot(QString value)
-    {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: minimumProbEditSlot: value " << value.toStdString();
-
-        bool ok;
-        float val = value.toFloat(&ok);
-
-        if (ok)
-            config().minimumProbability(val);
-        else
-            loginf << "EvaluationRequirementIdentificationConfigWidget: minimumProbEditSlot: invalid value";
     }
 
     IdentificationConfig& IdentificationConfigWidget::config()

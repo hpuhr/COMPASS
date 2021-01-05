@@ -35,14 +35,12 @@ namespace EvaluationRequirement
 
     public slots:
         void maxAbsValueEditSlot(QString value);
-        void minimumProbEditSlot(QString value);
 
     public:
         PositionDistanceConfigWidget(PositionDistanceConfig& cfg);
 
     protected:
         QLineEdit* max_abs_value_edit_{nullptr};
-        QLineEdit* minimum_prob_edit_{nullptr};
 
         PositionDistanceConfig& config();
     };

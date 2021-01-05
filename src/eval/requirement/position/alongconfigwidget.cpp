@@ -37,14 +37,6 @@ PositionAlongConfigWidget::PositionAlongConfigWidget(PositionAlongConfig& cfg)
             this, &PositionAlongConfigWidget::maxAbsValueEditSlot);
 
     form_layout_->addRow("Maximum Absolute Value [m]", max_abs_value_edit_);
-
-    // prob
-    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
-    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-    connect(minimum_prob_edit_, &QLineEdit::textEdited,
-            this, &PositionAlongConfigWidget::minimumProbEditSlot);
-
-    form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 }
 
 void PositionAlongConfigWidget::maxAbsValueEditSlot(QString value)
@@ -58,19 +50,6 @@ void PositionAlongConfigWidget::maxAbsValueEditSlot(QString value)
         config().maxAbsValue(val);
     else
         loginf << "PositionAlongConfigWidget: maxDistanceEditSlot: invalid value";
-}
-
-void PositionAlongConfigWidget::PositionAlongConfigWidget::minimumProbEditSlot(QString value)
-{
-    loginf << "PositionAlongConfigWidget: maximumProbEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().minimumProbability(val);
-    else
-        loginf << "PositionAlongConfigWidget: maximumProbEditSlot: invalid value";
 }
 
 PositionAlongConfig& PositionAlongConfigWidget::config()

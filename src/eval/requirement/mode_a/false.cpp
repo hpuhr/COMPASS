@@ -31,9 +31,8 @@ namespace EvaluationRequirement
 {
 
     ModeAFalse::ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                 float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false)
-        : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-          maximum_probability_false_(maximum_probability_false)
+                 float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man)
+        : Base(name, short_name, group_name, prob, prob_check_type, eval_man)
     {
     }
 
@@ -41,8 +40,7 @@ namespace EvaluationRequirement
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer)
     {
-        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " max prob " << maximum_probability_false_;
+        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_;
 
         float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
@@ -257,8 +255,4 @@ namespace EvaluationRequirement
                     num_unknown, num_correct, num_false, details);
     }
 
-    float ModeAFalse::maximumProbabilityFalse() const
-    {
-        return maximum_probability_false_;
-    }
 }

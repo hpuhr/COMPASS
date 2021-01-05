@@ -41,11 +41,6 @@ namespace EvaluationRequirementResult
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
         : Joined("JoinedModeAPresent", result_id, requirement, sector_layer, eval_man)
     {
-        std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
-                std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
-        assert (req);
-
-        p_present_min_ = req->minimumProbabilityPresent();
     }
 
     void JoinedModeAPresent::join(std::shared_ptr<Base> other)
@@ -123,15 +118,17 @@ namespace EvaluationRequirementResult
 
         // p present
         {
-            QVariant pe_var;
+            std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
+                    std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
+            assert (req);
 
-            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
+            QVariant pe_var;
 
             string result {"Unknown"};
 
             if (has_p_present_)
             {
-                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_present_);
                 pe_var = roundf(p_present_ * 10000.0) / 100.0;
             }
 
@@ -139,7 +136,7 @@ namespace EvaluationRequirementResult
             ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                              requirement_->shortname().c_str(),
                              result_id_.c_str(), {num_no_ref_id_+num_present_id_+num_missing_id_},
-                             pe_var, condition.c_str(), result.c_str()}, this, {});
+                             pe_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
         }
 
     }
@@ -168,6 +165,10 @@ namespace EvaluationRequirementResult
 
         // condition
         {
+            std::shared_ptr<EvaluationRequirement::ModeAPresent> req =
+                    std::static_pointer_cast<EvaluationRequirement::ModeAPresent>(requirement_);
+            assert (req);
+
             QVariant pe_var;
 
             if (has_p_present_)
@@ -175,15 +176,13 @@ namespace EvaluationRequirementResult
 
             sec_det_table.addRow({"PP [%]", "Probability of Mode 3/A present", pe_var}, this);
 
-            string condition = ">= "+String::percentToString(p_present_min_ * 100.0);
-
             sec_det_table.addRow(
-            {"Condition", "", condition.c_str()}, this);
+            {"Condition", "", req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_present_)
-                result = p_present_ >= p_present_min_ ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_present_);
 
             sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }

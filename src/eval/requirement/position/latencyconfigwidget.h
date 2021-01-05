@@ -35,14 +35,12 @@ namespace EvaluationRequirement
 
     public slots:
         void maxAbsValueEditSlot(QString value);
-        void minimumProbEditSlot(QString value);
 
     public:
         PositionLatencyConfigWidget(PositionLatencyConfig& cfg);
 
     protected:
         QLineEdit* max_abs_value_edit_{nullptr};
-        QLineEdit* minimum_prob_edit_{nullptr};
 
         PositionLatencyConfig& config();
     };

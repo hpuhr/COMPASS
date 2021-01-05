@@ -30,22 +30,18 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-    class ModeAPresentConfig : public BaseConfig
-    {
-    public:
-        ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
-                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+class ModeAPresentConfig : public BaseConfig
+{
+public:
+    ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
+                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        float minimumProbabilityPresent() const;
-        void minimumProbabilityPresent(float value);
+protected:
 
-    protected:
-        float minimum_probability_present_{0};
-
-        virtual void createWidget() override;
-    };
+    virtual void createWidget() override;
+};
 
 }
 

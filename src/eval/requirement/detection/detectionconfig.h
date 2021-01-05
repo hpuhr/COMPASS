@@ -32,47 +32,41 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class DetectionConfig : public BaseConfig
-    {
-    public:
-        DetectionConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_man);
-        virtual ~DetectionConfig();
+class DetectionConfig : public BaseConfig
+{
+public:
+    DetectionConfig(const std::string& class_id, const std::string& instance_id,
+                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+    virtual ~DetectionConfig();
 
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        float updateInterval() const;
-        void updateInterval(float value);
+    float updateInterval() const;
+    void updateInterval(float value);
 
-        float minimumProbability() const;
-        void minimumProbability(float value);
+    //        bool useMaxGapInterval() const;
+    //        void useMaxGapInterval(bool value);
 
-//        bool useMaxGapInterval() const;
-//        void useMaxGapInterval(bool value);
+    //        float maxGapInterval() const;
+    //        void maxGapInterval(float value);
 
-//        float maxGapInterval() const;
-//        void maxGapInterval(float value);
+    bool useMissTolerance() const;
+    void useMissTolerance(bool value);
 
-        bool useMissTolerance() const;
-        void useMissTolerance(bool value);
+    float missTolerance() const;
+    void missTolerance(float value);
 
-        float missTolerance() const;
-        void missTolerance(float value);
+protected:
+    float update_interval_s_{0};
 
-    protected:
-        float update_interval_s_{0};
+    //        bool use_max_gap_interval_{true};
+    //        float max_gap_interval_s_{0};
 
-        float minimum_probability_{0};
+    bool use_miss_tolerance_{false};
+    float miss_tolerance_s_{0};
 
-//        bool use_max_gap_interval_{true};
-//        float max_gap_interval_s_{0};
-
-        bool use_miss_tolerance_{false};
-        float miss_tolerance_s_{0};
-
-        virtual void createWidget() override;
-    };
+    virtual void createWidget() override;
+};
 
 }
 

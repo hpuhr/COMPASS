@@ -28,25 +28,15 @@ namespace EvaluationRequirement
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
                          : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
+
     }
 
     std::shared_ptr<Base> ModeAFalseConfig::createRequirement()
     {
         shared_ptr<ModeAFalse> req = make_shared<ModeAFalse>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, maximum_probability_false_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
         return req;
-    }
-
-    float ModeAFalseConfig::maximumProbabilityFalse() const
-    {
-        return maximum_probability_false_;
-    }
-
-    void ModeAFalseConfig::maximumProbabilityFalse(float value)
-    {
-        maximum_probability_false_ = value;
     }
 
     void ModeAFalseConfig::createWidget()

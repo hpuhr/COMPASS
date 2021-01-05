@@ -141,8 +141,6 @@ void JoinedPositionLatency::addToOverviewTable(std::shared_ptr<EvaluationResults
             std::static_pointer_cast<EvaluationRequirement::PositionLatency>(requirement_);
     assert (req);
 
-    string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
     QVariant p_min_var;
 
     string result {"Unknown"};
@@ -151,14 +149,14 @@ void JoinedPositionLatency::addToOverviewTable(std::shared_ptr<EvaluationResults
     {
         p_min_var = String::percentToString(p_min_ * 100.0).c_str();
 
-        result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
+        result = req->getResultConditionStr(p_min_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                      +(requirement_->shortname()+" Latency").c_str(),
                      result_id_.c_str(), {num_value_ok_+num_value_nok_},
-                     p_min_var, condition.c_str(), result.c_str()}, this, {});
+                     p_min_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
 void JoinedPositionLatency::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -216,14 +214,12 @@ void JoinedPositionLatency::addDetails(std::shared_ptr<EvaluationResultsReport::
 
         sec_det_table.addRow({"PLTOK [%]", "Probability of acceptable latency", p_min_var}, this);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-        sec_det_table.addRow({"Condition Latency", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition Latency", {}, req->getConditionStr().c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_p_min_)
-            result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req->getResultConditionStr(p_min_);
 
         sec_det_table.addRow({"Condition Latency Fulfilled", "", result.c_str()}, this);
     }

@@ -55,6 +55,9 @@ public:
 
     CHECK_TYPE probCheckType() const;
 
+    std::string getConditionStr () const;
+    std::string getResultConditionStr (float prob) const;
+
 protected:
     static bool in_appimage_;
 

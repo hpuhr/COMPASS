@@ -33,7 +33,6 @@ namespace EvaluationRequirement
         registerParameter("min_duration", &min_duration_, 60.0);
         registerParameter("min_num_updates", &min_num_updates_, 10);
         registerParameter("ignore_primary_only", &ignore_primary_only_, true);
-        registerParameter("maximum_probability", &maximum_probability_, 0.0);
     }
 
     ExtraTrackConfig::~ExtraTrackConfig()
@@ -45,7 +44,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(
                     name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
-                    min_num_updates_, ignore_primary_only_, maximum_probability_);
+                    min_num_updates_, ignore_primary_only_);
 
         return req;
     }
@@ -78,16 +77,6 @@ namespace EvaluationRequirement
     void ExtraTrackConfig::ignorePrimaryOnly(bool value)
     {
         ignore_primary_only_ = value;
-    }
-
-    float ExtraTrackConfig::maximumProbability() const
-    {
-        return maximum_probability_;
-    }
-
-    void ExtraTrackConfig::maximumProbability(float value)
-    {
-        maximum_probability_ = value;
     }
 
     void ExtraTrackConfig::createWidget()

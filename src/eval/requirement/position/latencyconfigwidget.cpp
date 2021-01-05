@@ -40,14 +40,6 @@ PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& 
             this, &PositionLatencyConfigWidget::maxAbsValueEditSlot);
 
     form_layout_->addRow("Maximum Absolute Value [s]", max_abs_value_edit_);
-
-    // prob
-    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
-    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-    connect(minimum_prob_edit_, &QLineEdit::textEdited,
-            this, &PositionLatencyConfigWidget::minimumProbEditSlot);
-
-    form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 }
 
 void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
@@ -63,19 +55,6 @@ void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
     }
     else
         loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: invalid value";
-}
-
-void PositionLatencyConfigWidget::PositionLatencyConfigWidget::minimumProbEditSlot(QString value)
-{
-    loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().minimumProbability(val);
-    else
-        loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: invalid value";
 }
 
 PositionLatencyConfig& PositionLatencyConfigWidget::config()

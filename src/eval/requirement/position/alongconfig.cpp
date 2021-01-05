@@ -31,7 +31,6 @@ namespace EvaluationRequirement
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("max_abs_value", &max_abs_value_, 50.0);
-        registerParameter("minimum_probability", &minimum_probability_, 0.9);
     }
 
     PositionAlongConfig::~PositionAlongConfig()
@@ -43,7 +42,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<PositionAlong> req = make_shared<PositionAlong>(
                     name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    max_abs_value_, minimum_probability_);
+                    max_abs_value_);
 
         return req;
     }
@@ -53,19 +52,9 @@ namespace EvaluationRequirement
         return max_abs_value_;
     }
 
-    float PositionAlongConfig::minimumProbability() const
-    {
-        return minimum_probability_;
-    }
-
     void PositionAlongConfig::maxAbsValue(float value)
     {
         max_abs_value_ = value;
-    }
-
-    void PositionAlongConfig::minimumProbability(float value)
-    {
-        minimum_probability_ = value;
     }
 
     void PositionAlongConfig::createWidget()

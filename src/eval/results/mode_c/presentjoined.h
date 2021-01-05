@@ -56,9 +56,6 @@ namespace EvaluationRequirementResult
         int num_present_id_ {0}; // ref + tst
         int num_missing_id_ {0}; // ref + !tst
 
-        // min exist
-        float p_present_min_{0};
-
         bool has_p_present_ {false};
         float p_present_{0};
 

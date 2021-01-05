@@ -31,7 +31,6 @@ namespace EvaluationRequirement
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("max_abs_value", &max_abs_value_, 50.0);
-        registerParameter("minimum_probability", &minimum_probability_, 0.9);
     }
 
     PositionDistanceConfig::~PositionDistanceConfig()
@@ -42,8 +41,7 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> PositionDistanceConfig::createRequirement()
     {
         shared_ptr<PositionDistance> req = make_shared<PositionDistance>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    max_abs_value_, minimum_probability_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, max_abs_value_);
 
         return req;
     }
@@ -53,19 +51,9 @@ namespace EvaluationRequirement
         return max_abs_value_;
     }
 
-    float PositionDistanceConfig::minimumProbability() const
-    {
-        return minimum_probability_;
-    }
-
     void PositionDistanceConfig::maxAbsValue(float value)
     {
         max_abs_value_ = value;
-    }
-
-    void PositionDistanceConfig::minimumProbability(float value)
-    {
-        minimum_probability_ = value;
     }
 
     void PositionDistanceConfig::createWidget()

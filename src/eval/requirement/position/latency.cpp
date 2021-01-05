@@ -35,10 +35,8 @@ namespace EvaluationRequirement
 
 PositionLatency::PositionLatency(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
-        float max_abs_value, float minimum_probability)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      max_abs_value_(max_abs_value), minimum_probability_(minimum_probability)
+        float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value)
+    : Base(name, short_name, group_name, prob, prob_check_type, eval_man), max_abs_value_(max_abs_value)
 {
 
 }
@@ -48,18 +46,12 @@ float PositionLatency::maxAbsValue() const
     return max_abs_value_;
 }
 
-
-float PositionLatency::minimumProbability() const
-{
-    return minimum_probability_;
-}
-
 std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " max_abs_value " << max_abs_value_ << " minimum_probability " << minimum_probability_;
+           << " max_abs_value " << max_abs_value_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 

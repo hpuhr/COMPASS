@@ -72,9 +72,6 @@ protected:
     int num_correct_ {0};
     int num_false_ {0};
 
-    // max false
-    float p_false_max_{0};
-
     bool has_p_false_ {false};
     float p_false_{0};
 

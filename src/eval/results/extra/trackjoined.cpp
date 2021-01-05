@@ -114,8 +114,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
         assert (req);
 
-        string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
-
         // pd
         QVariant prob_var;
 
@@ -125,14 +123,14 @@ namespace EvaluationRequirementResult
         {
             prob_var = String::percentToString(prob_ * 100.0).c_str();
 
-            result = prob_ <= req->maximumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(prob_);
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                          requirement_->shortname().c_str(),
                          result_id_.c_str(), {num_extra_+num_ok_},
-                         prob_var, condition.c_str(), result.c_str()}, this, {});
+                         prob_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }
 
@@ -157,8 +155,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::ExtraTrack>(requirement_);
         assert (req);
 
-        string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
-
         // pd
         QVariant prob_var;
 
@@ -168,11 +164,11 @@ namespace EvaluationRequirementResult
         {
             prob_var = String::percentToString(prob_ * 100.0).c_str();
 
-            result = prob_ <= req->maximumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(prob_);
         }
 
         sec_det_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
-        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
         sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
         // figure

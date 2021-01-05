@@ -152,14 +152,12 @@ void SingleDetection::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepor
             std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
     assert (req);
 
-    string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-    utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
+    utn_req_table.addRow({"Condition", "", req->getConditionStr().c_str()}, this);
 
     string result {"Unknown"};
 
     if (has_pd_)
-        result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
+        result = req-> getResultConditionStr(pd_);
 
     utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

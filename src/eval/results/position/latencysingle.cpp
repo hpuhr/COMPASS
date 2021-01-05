@@ -247,14 +247,12 @@ namespace EvaluationRequirementResult
 
             utn_req_table.addRow({"PLTOK [%]", "Probability of acceptable latency", p_min_var}, this);
 
-            string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-            utn_req_table.addRow({"Condition Latency", {}, condition.c_str()}, this);
+            utn_req_table.addRow({"Condition Latency", {}, req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_min_)
-                result = p_min_ >= req->minimumProbability() ? "Passed" : "Failed";
+                result = req->getResultConditionStr(p_min_);
 
             utn_req_table.addRow({"Condition Latency Fulfilled", "", result.c_str()}, this);
         }

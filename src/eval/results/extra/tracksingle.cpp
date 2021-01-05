@@ -151,14 +151,12 @@ void SingleExtraTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRepo
 
         utn_req_table.addRow({"PEx [%]", "Probability of update with extra track", prob_var}, this);
 
-        string condition = "<= "+String::percentToString(req->maximumProbability() * 100.0);
-
-        utn_req_table.addRow({"Condition", {}, condition.c_str()}, this);
+        utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_prob_)
-            result = prob_ <= req->maximumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(prob_);
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }

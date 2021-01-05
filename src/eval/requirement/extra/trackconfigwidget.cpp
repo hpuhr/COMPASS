@@ -55,14 +55,6 @@ ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& cfg)
             this, &ExtraTrackConfigWidget::toggleIgnorePrimaryOnlySlot);
 
     form_layout_->addRow("Ignore Primary Only", ignore_primary_only_check_);
-
-    // prob
-    maximum_probability_edit_ = new QLineEdit(QString::number(config().maximumProbability()));
-    maximum_probability_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-    connect(maximum_probability_edit_, &QLineEdit::textEdited,
-            this, &ExtraTrackConfigWidget::maximumProbEditSlot);
-
-    form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
 }
 
 void ExtraTrackConfigWidget::minDurationEditSlot(QString value)
@@ -97,19 +89,6 @@ void ExtraTrackConfigWidget::toggleIgnorePrimaryOnlySlot()
 
     assert (ignore_primary_only_check_);
     config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
-}
-
-void ExtraTrackConfigWidget::maximumProbEditSlot(QString value)
-{
-    loginf << "TrackConfigWidget: maximumProbEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().maximumProbability(val);
-    else
-        loginf << "TrackConfigWidget: maximumProbEditSlot: invalid value";
 }
 
 ExtraTrackConfig& ExtraTrackConfigWidget::config()

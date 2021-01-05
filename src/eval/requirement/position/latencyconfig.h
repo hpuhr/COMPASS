@@ -42,12 +42,8 @@ public:
     float maxAbsValue() const;
     void maxAbsValue(float value);
 
-    float minimumProbability() const;
-    void minimumProbability(float value);
-
 protected:
     float max_abs_value_ {0};
-    float minimum_probability_{0};
 
     virtual void createWidget() override;
 };

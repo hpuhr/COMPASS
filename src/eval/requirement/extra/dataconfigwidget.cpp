@@ -55,14 +55,6 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
             this, &ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot);
 
     form_layout_->addRow("Ignore Primary Only", ignore_primary_only_check_);
-
-    // prob
-    maximum_probability_edit_ = new QLineEdit(QString::number(config().maximumProbability()));
-    maximum_probability_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-    connect(maximum_probability_edit_, &QLineEdit::textEdited,
-            this, &ExtraDataConfigWidget::maximumProbEditSlot);
-
-    form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
 }
 
 void ExtraDataConfigWidget::minDurationEditSlot(QString value)
@@ -97,19 +89,6 @@ void ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot()
 
     assert (ignore_primary_only_check_);
     config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
-}
-
-void ExtraDataConfigWidget::maximumProbEditSlot(QString value)
-{
-    loginf << "ExtraDataConfigWidget: maximumProbEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().maximumProbability(val);
-    else
-        loginf << "ExtraDataConfigWidget: maximumProbEditSlot: invalid value";
 }
 
 ExtraDataConfig& ExtraDataConfigWidget::config()

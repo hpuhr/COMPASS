@@ -29,11 +29,9 @@ class PositionAlong : public Base
 public:
     PositionAlong(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
-            float max_abs_value, float minimum_probability);
+            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value);
 
     float maxAbsValue() const;
-    float minimumProbability() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -42,7 +40,6 @@ public:
 
 protected:
     float max_abs_value_ {0};
-    float minimum_probability_{0};
 };
 
 }

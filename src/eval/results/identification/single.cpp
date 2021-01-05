@@ -170,14 +170,12 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
-        utn_req_table.addRow({"Condition", "", condition.c_str()}, this);
+        utn_req_table.addRow({"Condition", "", req->getConditionStr().c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_pid_)
-            result = pid_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(pid_);
 
         utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
 

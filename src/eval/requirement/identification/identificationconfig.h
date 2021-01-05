@@ -40,11 +40,7 @@ namespace EvaluationRequirement
 
         std::shared_ptr<Base> createRequirement() override;
 
-        float minimumProbability() const;
-        void minimumProbability(float value);
-
     protected:
-        float minimum_probability_{0};
 
         virtual void createWidget() override;
     };

@@ -51,14 +51,10 @@ namespace EvaluationRequirement
         bool ignorePrimaryOnly() const;
         void ignorePrimaryOnly(bool value);
 
-        float maximumProbability() const;
-        void maximumProbability(float value);
-
     protected:
         float min_duration_{0};
         unsigned int min_num_updates_ {0};
         bool ignore_primary_only_ {true};
-        float maximum_probability_{0};
 
         virtual void createWidget() override;
     };

@@ -37,7 +37,6 @@ namespace EvaluationRequirement
         void minDurationEditSlot(QString value);
         void minNumUpdatesEditSlot(QString value);
         void toggleIgnorePrimaryOnlySlot();
-        void maximumProbEditSlot(QString value);
 
     public:
         ExtraDataConfigWidget(ExtraDataConfig& cfg);
@@ -46,7 +45,6 @@ namespace EvaluationRequirement
         QLineEdit* min_duration_edit_{nullptr};
         QLineEdit* min_num_updates_edit_{nullptr};
         QCheckBox* ignore_primary_only_check_{nullptr};
-        QLineEdit* maximum_probability_edit_{nullptr};
 
         ExtraDataConfig& config();
     };

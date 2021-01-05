@@ -35,11 +35,9 @@ namespace EvaluationRequirement
 ExtraTrack::ExtraTrack(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
-        float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
-        float maximum_probability)
+        float min_duration, unsigned int min_num_updates, bool ignore_primary_only)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man), min_duration_(min_duration),
-      min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only),
-      maximum_probability_(maximum_probability)
+      min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only)
 {
 
 }
@@ -59,18 +57,13 @@ bool ExtraTrack::ignorePrimaryOnly() const
     return ignore_primary_only_;
 }
 
-float ExtraTrack::maximumProbability() const
-{
-    return maximum_probability_;
-}
-
 std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementResultTrack '" << name_ << "': evaluate: utn " << target_data.utn_
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
-           << " ignore_primary_only " << ignore_primary_only_ << " maximum_probability " << maximum_probability_;
+           << " ignore_primary_only " << ignore_primary_only_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 

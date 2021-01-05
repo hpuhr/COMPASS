@@ -132,8 +132,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
         // pd
         QVariant pd_var;
 
@@ -143,14 +141,14 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pid_ * 100.0).c_str();
 
-            result = pid_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(pid_);
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                          requirement_->shortname().c_str(),
                          result_id_.c_str(), {num_correct_id_+num_false_id_},
-                         pd_var, condition.c_str(), result.c_str()}, this, {});
+                         pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     }
 
     void JoinedIdentification::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -181,8 +179,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
         // pd
         QVariant pd_var;
 
@@ -192,11 +188,11 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pid_ * 100.0).c_str();
 
-            result = pid_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(pid_);
         }
 
         sec_det_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
-        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
         sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
         // figure
