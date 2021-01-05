@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_c/presentconfigwidget.h"
-#include "eval/requirement/mode_c/presentconfig.h"
+#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
+#include "eval/requirement/mode_a/presentconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
@@ -29,21 +29,21 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-ModeCPresentConfigWidget::ModeCPresentConfigWidget(ModeCPresentConfig& cfg)
+ModeAPresentConfigWidget::ModeAPresentConfigWidget(ModeAPresentConfig& cfg)
     : BaseConfigWidget(cfg)
 {
     // prob
     min_prob_pres_edit_ = new QLineEdit(QString::number(config().minimumProbabilityPresent()));
     min_prob_pres_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
     connect(min_prob_pres_edit_, &QLineEdit::textEdited,
-            this, &ModeCPresentConfigWidget::minProbPresentEditSlot);
+            this, &ModeAPresentConfigWidget::minProbPresentEditSlot);
 
     form_layout_->addRow("Present Minimum Probability [1]", min_prob_pres_edit_);
 }
 
-void ModeCPresentConfigWidget::minProbPresentEditSlot(QString value)
+void ModeAPresentConfigWidget::minProbPresentEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementModeCConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
+    loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -51,15 +51,16 @@ void ModeCPresentConfigWidget::minProbPresentEditSlot(QString value)
     if (ok)
         config().minimumProbabilityPresent(val);
     else
-        loginf << "EvaluationRequirementModeCConfigWidget: minProbPresentEditSlot: invalid value";
+        loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: invalid value";
 }
 
-ModeCPresentConfig& ModeCPresentConfigWidget::config()
+ModeAPresentConfig& ModeAPresentConfigWidget::config()
 {
-    ModeCPresentConfig* config = dynamic_cast<ModeCPresentConfig*>(&config_);
+    ModeAPresentConfig* config = dynamic_cast<ModeAPresentConfig*>(&config_);
     assert (config);
 
     return *config;
 }
+
 
 }

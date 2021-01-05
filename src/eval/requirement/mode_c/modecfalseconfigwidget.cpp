@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/mode_c/falseconfigwidget.h"
+#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 #include "eval/requirement/mode_c/falseconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
@@ -35,16 +35,16 @@ namespace EvaluationRequirement
         // false prob
         max_prob_false_edit_ = new QLineEdit(QString::number(config().maximumProbabilityFalse()));
         max_prob_false_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-        connect(max_prob_false_edit_, &QLineEdit::textEdited,
-                this, &ModeCFalseConfigWidget::maxProbFalseEditSlot);
+//        connect(max_prob_false_edit_, &QLineEdit::textEdited,
+//                this, &ModeCFalseConfigWidget::maxProbFalseEditSlot);
 
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
 
         // max diff
         max_diff_edit_ = new QLineEdit(QString::number(config().maxDifference()));
         max_diff_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
-        connect(max_diff_edit_, &QLineEdit::textEdited,
-                this, &ModeCFalseConfigWidget::maxDiffEditSlot);
+//        connect(max_diff_edit_, &QLineEdit::textEdited,
+//                this, &ModeCFalseConfigWidget::maxDiffEditSlot);
 
         form_layout_->addRow("Maximum Difference [ft]", max_diff_edit_);
     }

@@ -42,6 +42,7 @@ class Base
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
          EvaluationManager& eval_man);
+    virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,

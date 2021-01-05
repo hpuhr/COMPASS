@@ -16,7 +16,6 @@
  */
 
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "logger.h"
 

@@ -15,13 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECRESENTCONFIG_H
-#define EVALUATIONREQUIREMENTMODECRESENTCONFIG_H
+#ifndef EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
+#define EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/mode_c/present.h"
-#include "eval/requirement/mode_c/presentconfigwidget.h"
 
 #include <memory>
 
@@ -49,4 +48,4 @@ namespace EvaluationRequirement
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODECRESENTCONFIG_H
+#endif // EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H

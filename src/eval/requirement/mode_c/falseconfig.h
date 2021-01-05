@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/mode_c/false.h"
-#include "eval/requirement/mode_c/falseconfigwidget.h"
+#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 
 #include <memory>
 

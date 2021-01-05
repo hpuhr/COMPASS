@@ -22,6 +22,7 @@
 
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class Group;
 class EvaluationStandard;
@@ -34,7 +35,6 @@ class EvaluationManager;
 namespace EvaluationRequirement
 {
     class Base;
-    class BaseConfigWidget;
 
     class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
     {

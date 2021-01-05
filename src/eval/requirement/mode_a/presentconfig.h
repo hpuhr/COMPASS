@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/mode_a/present.h"
-#include "eval/requirement/mode_a/presentconfigwidget.h"
+#include "eval/requirement/mode_a/modeapresentconfigwidget.h"
 
 #include <memory>
 

@@ -29,6 +29,11 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     setLayout(form_layout_);
 }
 
+BaseConfigWidget::~BaseConfigWidget()
+{
+
+}
+
 void BaseConfigWidget::changedNameSlot(const QString& value)
 {
     string value_str = value.toStdString();

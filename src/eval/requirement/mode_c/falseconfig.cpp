@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/mode_c/falseconfig.h"
+#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 

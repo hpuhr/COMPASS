@@ -25,6 +25,7 @@ public slots:
 
 public:
     BaseConfigWidget(BaseConfig& cfg);
+    virtual ~BaseConfigWidget();
 
 protected:
     BaseConfig& config_;

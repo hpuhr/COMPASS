@@ -29,6 +29,11 @@ Base::Base(const std::string& name, const std::string& short_name,
 
 }
 
+Base::~Base()
+{
+
+}
+
 std::string Base::name() const
 {
     return name_;
