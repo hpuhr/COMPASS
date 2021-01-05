@@ -31,21 +31,6 @@ namespace EvaluationRequirement
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
     }
 
-//    void ModeAFalseConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    ModeAFalseConfigWidget* ModeAFalseConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new ModeAFalseConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> ModeAFalseConfig::createRequirement()
     {
         shared_ptr<ModeAFalse> req = make_shared<ModeAFalse>(

@@ -38,8 +38,6 @@ namespace EvaluationRequirement
                              Group& group, EvaluationStandard& standard,
                              EvaluationManager& eval_man);
 
-//        virtual void addGUIElements(QFormLayout* layout) override;
-//        IdentificationConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float minimumProbability() const;
@@ -49,8 +47,6 @@ namespace EvaluationRequirement
         float minimum_probability_{0};
 
         virtual void createWidget() override;
-
-        //std::unique_ptr<IdentificationConfigWidget> widget_;
     };
 
 }

@@ -30,10 +30,6 @@ namespace EvaluationRequirement
 PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfig& cfg)
     : BaseConfigWidget(cfg)
 {
-//    form_layout_ = new QFormLayout();
-
-//    config_.addGUIElements(form_layout_);
-
     // max dist
     max_abs_value_edit_ = new QLineEdit(QString::number(config().maxAbsValue()));
     max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
@@ -49,8 +45,6 @@ PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfi
             this, &PositionDistanceConfigWidget::minimumProbEditSlot);
 
     form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
-
-    //setLayout(form_layout_);
 }
 
 void PositionDistanceConfigWidget::maxAbsValueEditSlot(QString value)

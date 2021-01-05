@@ -33,21 +33,6 @@ namespace EvaluationRequirement
         registerParameter("max_difference", &max_difference_, 100);
     }
 
-//    void ModeCFalseConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    ModeCFalseConfigWidget* ModeCFalseConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new ModeCFalseConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> ModeCFalseConfig::createRequirement()
     {
         shared_ptr<ModeCFalse> req = make_shared<ModeCFalse>(

@@ -43,10 +43,6 @@ namespace EvaluationRequirement
         ExtraTrackConfigWidget(ExtraTrackConfig& cfg);
 
     protected:
-        //ExtraTrackConfig& config_;
-
-        //QFormLayout* form_layout_ {nullptr};
-
         QLineEdit* min_duration_edit_{nullptr};
         QLineEdit* min_num_updates_edit_{nullptr};
         QCheckBox* ignore_primary_only_check_{nullptr};

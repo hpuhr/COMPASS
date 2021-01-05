@@ -32,10 +32,6 @@ namespace EvaluationRequirement
     ModeAFalseConfigWidget::ModeAFalseConfigWidget(ModeAFalseConfig& cfg)
             : BaseConfigWidget(cfg)
     {
-//        form_layout_ = new QFormLayout();
-
-//        config_.addGUIElements(form_layout_);
-
         // false prob
         max_prob_false_edit_ = new QLineEdit(QString::number(config().maximumProbabilityFalse()));
         max_prob_false_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
@@ -43,8 +39,6 @@ namespace EvaluationRequirement
                 this, &ModeAFalseConfigWidget::maxProbFalseEditSlot);
 
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
-
-        //setLayout(form_layout_);
     }
 
     void ModeAFalseConfigWidget::maxProbFalseEditSlot(QString value)

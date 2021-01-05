@@ -39,21 +39,6 @@ namespace EvaluationRequirement
 
     }
 
-//    void PositionLatencyConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    PositionLatencyConfigWidget* PositionLatencyConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new PositionLatencyConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> PositionLatencyConfig::createRequirement()
     {
         shared_ptr<PositionLatency> req = make_shared<PositionLatency>(

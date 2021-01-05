@@ -40,10 +40,6 @@ namespace EvaluationRequirement
         ModeCPresentConfigWidget(ModeCPresentConfig& cfg);
 
     protected:
-        //ModeCPresentConfig& config_;
-
-        //QFormLayout* form_layout_ {nullptr};
-
         QLineEdit* min_prob_pres_edit_{nullptr};
 
         ModeCPresentConfig& config();

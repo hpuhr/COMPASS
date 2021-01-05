@@ -39,21 +39,6 @@ namespace EvaluationRequirement
 
     }
 
-//    void PositionAcrossConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    PositionAcrossConfigWidget* PositionAcrossConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new PositionAcrossConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> PositionAcrossConfig::createRequirement()
     {
         shared_ptr<PositionAcross> req = make_shared<PositionAcross>(

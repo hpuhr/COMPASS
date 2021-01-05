@@ -40,10 +40,6 @@ namespace EvaluationRequirement
         IdentificationConfigWidget(IdentificationConfig& cfg);
 
     protected:
-        //IdentificationConfig& config_;
-
-        //QFormLayout* form_layout_ {nullptr};
-
         QLineEdit* minimum_prob_edit_{nullptr};
 
         IdentificationConfig& config();

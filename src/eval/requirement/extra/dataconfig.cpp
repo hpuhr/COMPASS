@@ -40,21 +40,6 @@ namespace EvaluationRequirement
     {
     }
 
-//    void ExtraDataConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    ExtraDataConfigWidget* ExtraDataConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new ExtraDataConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> ExtraDataConfig::createRequirement()
     {
         shared_ptr<ExtraData> req = make_shared<ExtraData>(

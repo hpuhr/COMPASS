@@ -48,10 +48,6 @@ public:
     DetectionConfigWidget(DetectionConfig& cfg);
 
 protected:
-    //DetectionConfig& config_;
-
-    //QFormLayout* form_layout_ {nullptr};
-
     QLineEdit* update_interval_edit_{nullptr};
     QLineEdit* max_ref_time_diff_edit_{nullptr};
     QLineEdit* minimum_prob_edit_{nullptr};

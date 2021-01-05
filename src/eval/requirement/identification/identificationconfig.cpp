@@ -33,21 +33,6 @@ namespace EvaluationRequirement
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
 
-//    void IdentificationConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    IdentificationConfigWidget* IdentificationConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new IdentificationConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
         shared_ptr<Identification> req = make_shared<Identification>(

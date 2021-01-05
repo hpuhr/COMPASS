@@ -62,7 +62,6 @@ namespace EvaluationRequirement
         virtual QVariant data(int column) const override;
         virtual int row() const override;
 
-        //virtual void addGUIElements(QFormLayout* layout);
         BaseConfigWidget* widget();
         virtual std::shared_ptr<Base> createRequirement() = 0;
 

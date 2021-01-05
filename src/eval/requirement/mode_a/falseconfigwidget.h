@@ -40,10 +40,6 @@ namespace EvaluationRequirement
         ModeAFalseConfigWidget(ModeAFalseConfig& cfg);
 
     protected:
-        //ModeAFalseConfig& config_;
-
-        //QFormLayout* form_layout_ {nullptr};
-
         QLineEdit* max_prob_false_edit_{nullptr};
 
         ModeAFalseConfig& config();

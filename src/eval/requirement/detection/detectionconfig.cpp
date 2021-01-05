@@ -49,21 +49,6 @@ namespace EvaluationRequirement
 
     }
 
-//    void DetectionConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    DetectionConfigWidget* DetectionConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new DetectionConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> DetectionConfig::createRequirement()
     {
         shared_ptr<Detection> req = make_shared<Detection>(

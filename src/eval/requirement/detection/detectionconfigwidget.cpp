@@ -32,10 +32,6 @@ namespace EvaluationRequirement
 DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     : BaseConfigWidget(cfg)
 {
-    //form_layout_ = new QFormLayout();
-
-    //config_.addGUIElements(form_layout_);
-
     // ui
     update_interval_edit_ = new QLineEdit(QString::number(config().updateInterval()));
     update_interval_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
@@ -89,8 +85,6 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
             this, &DetectionConfigWidget::missToleranceEditSlot);
 
     form_layout_->addRow("Miss Tolerance [s]", miss_tolerance_edit_);
-
-    //setLayout(form_layout_);
 }
 
 

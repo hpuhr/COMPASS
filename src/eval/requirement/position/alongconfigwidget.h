@@ -41,12 +41,8 @@ namespace EvaluationRequirement
         PositionAlongConfigWidget(PositionAlongConfig& cfg);
 
     protected:
-        //PositionAlongConfig& config_;
-
         QLineEdit* max_abs_value_edit_{nullptr};
         QLineEdit* minimum_prob_edit_{nullptr};
-
-        //QFormLayout* form_layout_ {nullptr};
 
         PositionAlongConfig& config();
     };

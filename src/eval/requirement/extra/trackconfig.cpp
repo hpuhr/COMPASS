@@ -41,21 +41,6 @@ namespace EvaluationRequirement
 
     }
 
-//    void ExtraTrackConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    ExtraTrackConfigWidget* ExtraTrackConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new ExtraTrackConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> ExtraTrackConfig::createRequirement()
     {
         shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(

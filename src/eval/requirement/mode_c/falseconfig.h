@@ -36,8 +36,6 @@ namespace EvaluationRequirement
         ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
-//        virtual void addGUIElements(QFormLayout* layout) override;
-//        ModeCFalseConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float maximumProbabilityFalse() const;
@@ -50,8 +48,6 @@ namespace EvaluationRequirement
         float maximum_probability_false_{0};
 
         float max_difference_ {0};
-
-        //std::unique_ptr<ModeCFalseConfigWidget> widget_;
 
         virtual void createWidget() override;
 

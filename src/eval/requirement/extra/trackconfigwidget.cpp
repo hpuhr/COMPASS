@@ -32,10 +32,6 @@ namespace EvaluationRequirement
 ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& cfg)
     : BaseConfigWidget(cfg)
 {
-//    form_layout_ = new QFormLayout();
-
-//    config_.addGUIElements(form_layout_);
-
     // min_duration
     min_duration_edit_ = new QLineEdit(QString::number(config().minDuration()));
     min_duration_edit_->setValidator(new QDoubleValidator(0.1, 3000.0, 1, this));
@@ -67,8 +63,6 @@ ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& cfg)
             this, &ExtraTrackConfigWidget::maximumProbEditSlot);
 
     form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
-
-    //setLayout(form_layout_);
 }
 
 void ExtraTrackConfigWidget::minDurationEditSlot(QString value)

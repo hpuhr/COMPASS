@@ -45,7 +45,6 @@ BaseConfig::BaseConfig(
 
 BaseConfig::~BaseConfig()
 {
-    //delete widget_;
 }
 
 
@@ -63,21 +62,6 @@ std::string BaseConfig::name() const
 void BaseConfig::checkSubConfigurables()
 {
 }
-
-//void BaseConfig::addGUIElements(QFormLayout* layout)
-//{
-//    assert (layout);
-
-//    QLineEdit* name_edit = new QLineEdit (name_.c_str());
-//    connect(name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedNameSlot);
-
-//    layout->addRow("Name", name_edit);
-
-//    QLineEdit* short_name_edit = new QLineEdit (short_name_.c_str());
-//    connect(short_name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedShortNameSlot);
-
-//    layout->addRow("Short Name", short_name_edit);
-//}
 
 BaseConfigWidget* BaseConfig::widget()
 {

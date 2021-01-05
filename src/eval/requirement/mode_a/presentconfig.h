@@ -36,8 +36,6 @@ namespace EvaluationRequirement
         ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
-//        virtual void addGUIElements(QFormLayout* layout) override;
-//        ModeAPresentConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float minimumProbabilityPresent() const;
@@ -45,8 +43,6 @@ namespace EvaluationRequirement
 
     protected:
         float minimum_probability_present_{0};
-
-        //std::unique_ptr<ModeAPresentConfigWidget> widget_;
 
         virtual void createWidget() override;
     };

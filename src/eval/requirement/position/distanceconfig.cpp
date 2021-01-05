@@ -39,21 +39,6 @@ namespace EvaluationRequirement
 
     }
 
-//    void PositionDistanceConfig::addGUIElements(QFormLayout* layout)
-//    {
-//        assert (layout);
-
-//        BaseConfig::addGUIElements(layout);
-//    }
-
-//    PositionDistanceConfigWidget* PositionDistanceConfig::widget()
-//    {
-//        if (!widget_)
-//            widget_.reset(new PositionDistanceConfigWidget(*this));
-
-//        return widget_.get();
-//    }
-
     std::shared_ptr<Base> PositionDistanceConfig::createRequirement()
     {
         shared_ptr<PositionDistance> req = make_shared<PositionDistance>(
