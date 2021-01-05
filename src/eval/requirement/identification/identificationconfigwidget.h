@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONCONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class IdentificationConfig;
 
-    class IdentificationConfigWidget : public QWidget
+    class IdentificationConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -37,14 +37,16 @@ namespace EvaluationRequirement
         void minimumProbEditSlot(QString value);
 
     public:
-        IdentificationConfigWidget(IdentificationConfig& config);
+        IdentificationConfigWidget(IdentificationConfig& cfg);
 
     protected:
-        IdentificationConfig& config_;
+        //IdentificationConfig& config_;
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
 
         QLineEdit* minimum_prob_edit_{nullptr};
+
+        IdentificationConfig& config();
     };
 
 }

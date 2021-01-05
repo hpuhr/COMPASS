@@ -39,20 +39,20 @@ namespace EvaluationRequirement
 
     }
 
-    void PositionLatencyConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void PositionLatencyConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    PositionLatencyConfigWidget* PositionLatencyConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new PositionLatencyConfigWidget(*this));
+//    PositionLatencyConfigWidget* PositionLatencyConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new PositionLatencyConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> PositionLatencyConfig::createRequirement()
     {
@@ -81,5 +81,12 @@ namespace EvaluationRequirement
     void PositionLatencyConfig::minimumProbability(float value)
     {
         minimum_probability_ = value;
+    }
+
+    void PositionLatencyConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new PositionLatencyConfigWidget(*this));
+        assert (widget_);
     }
 }

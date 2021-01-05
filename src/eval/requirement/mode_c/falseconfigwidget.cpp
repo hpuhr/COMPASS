@@ -29,15 +29,15 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ModeCFalseConfigWidget::ModeCFalseConfigWidget(ModeCFalseConfig& config)
-            : QWidget(), config_(config)
+    ModeCFalseConfigWidget::ModeCFalseConfigWidget(ModeCFalseConfig& cfg)
+    : BaseConfigWidget(cfg)
     {
-        form_layout_ = new QFormLayout();
+        //form_layout_ = new QFormLayout();
 
-        config_.addGUIElements(form_layout_);
+        //config_.addGUIElements(form_layout_);
 
         // false prob
-        max_prob_false_edit_ = new QLineEdit(QString::number(config_.maximumProbabilityFalse()));
+        max_prob_false_edit_ = new QLineEdit(QString::number(config().maximumProbabilityFalse()));
         max_prob_false_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(max_prob_false_edit_, &QLineEdit::textEdited,
                 this, &ModeCFalseConfigWidget::maxProbFalseEditSlot);
@@ -45,14 +45,14 @@ namespace EvaluationRequirement
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
 
         // max diff
-        max_diff_edit_ = new QLineEdit(QString::number(config_.maxDifference()));
+        max_diff_edit_ = new QLineEdit(QString::number(config().maxDifference()));
         max_diff_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
         connect(max_diff_edit_, &QLineEdit::textEdited,
                 this, &ModeCFalseConfigWidget::maxDiffEditSlot);
 
         form_layout_->addRow("Maximum Difference [ft]", max_diff_edit_);
 
-        setLayout(form_layout_);
+        //setLayout(form_layout_);
     }
 
     void ModeCFalseConfigWidget::maxProbFalseEditSlot(QString value)
@@ -63,7 +63,7 @@ namespace EvaluationRequirement
         float val = value.toFloat(&ok);
 
         if (ok)
-            config_.maximumProbabilityFalse(val);
+            config().maximumProbabilityFalse(val);
         else
             loginf << "EvaluationRequirementModeCConfigWidget: maxProbFalseEditSlot: invalid value";
     }
@@ -76,9 +76,17 @@ namespace EvaluationRequirement
         float val = value.toFloat(&ok);
 
         if (ok)
-            config_.maxDifference(val);
+            config().maxDifference(val);
         else
             loginf << "EvaluationRequirementModeCConfigWidget: maxDiffEditSlot: invalid value";
+    }
+
+    ModeCFalseConfig& ModeCFalseConfigWidget::config()
+    {
+        ModeCFalseConfig* config = dynamic_cast<ModeCFalseConfig*>(&config_);
+        assert (config);
+
+        return *config;
     }
 
 }

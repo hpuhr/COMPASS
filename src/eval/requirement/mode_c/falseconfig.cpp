@@ -33,20 +33,20 @@ namespace EvaluationRequirement
         registerParameter("max_difference", &max_difference_, 100);
     }
 
-    void ModeCFalseConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void ModeCFalseConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    ModeCFalseConfigWidget* ModeCFalseConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new ModeCFalseConfigWidget(*this));
+//    ModeCFalseConfigWidget* ModeCFalseConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new ModeCFalseConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> ModeCFalseConfig::createRequirement()
     {
@@ -74,6 +74,13 @@ namespace EvaluationRequirement
     void ModeCFalseConfig::maxDifference(float value)
     {
         max_difference_ = value;
+    }
+
+    void ModeCFalseConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new ModeCFalseConfigWidget(*this));
+        assert (widget_);
     }
     
 }

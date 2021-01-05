@@ -29,22 +29,22 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& config)
-        : QWidget(), config_(config)
+    IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& cfg)
+        : BaseConfigWidget(cfg)
     {
-        form_layout_ = new QFormLayout();
+//        form_layout_ = new QFormLayout();
 
-        config_.addGUIElements(form_layout_);
+//        config_.addGUIElements(form_layout_);
 
         // prob
-        minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
+        minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
         minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
         connect(minimum_prob_edit_, &QLineEdit::textEdited,
                 this, &IdentificationConfigWidget::minimumProbEditSlot);
 
         form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 
-        setLayout(form_layout_);
+        //setLayout(form_layout_);
     }
 
     void IdentificationConfigWidget::minimumProbEditSlot(QString value)
@@ -55,9 +55,17 @@ namespace EvaluationRequirement
         float val = value.toFloat(&ok);
 
         if (ok)
-            config_.minimumProbability(val);
+            config().minimumProbability(val);
         else
             loginf << "EvaluationRequirementIdentificationConfigWidget: minimumProbEditSlot: invalid value";
+    }
+
+    IdentificationConfig& IdentificationConfigWidget::config()
+    {
+        IdentificationConfig* config = dynamic_cast<IdentificationConfig*>(&config_);
+        assert (config);
+
+        return *config;
     }
 
 }

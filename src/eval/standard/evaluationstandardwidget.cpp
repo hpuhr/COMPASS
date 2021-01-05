@@ -19,6 +19,7 @@
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/baseconfigwidget.h"
 #include "logger.h"
 
 #include <QVBoxLayout>

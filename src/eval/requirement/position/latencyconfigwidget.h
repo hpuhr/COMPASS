@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class PositionLatencyConfig;
 
-    class PositionLatencyConfigWidget : public QWidget
+    class PositionLatencyConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -38,15 +38,17 @@ namespace EvaluationRequirement
         void minimumProbEditSlot(QString value);
 
     public:
-        PositionLatencyConfigWidget(PositionLatencyConfig& config);
+        PositionLatencyConfigWidget(PositionLatencyConfig& cfg);
 
     protected:
-        PositionLatencyConfig& config_;
+        //PositionLatencyConfig& config_;
 
         QLineEdit* max_abs_value_edit_{nullptr};
         QLineEdit* minimum_prob_edit_{nullptr};
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
+
+        PositionLatencyConfig& config();
     };
 
 }

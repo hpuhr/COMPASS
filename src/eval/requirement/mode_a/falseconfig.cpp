@@ -31,20 +31,20 @@ namespace EvaluationRequirement
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
     }
 
-    void ModeAFalseConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void ModeAFalseConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    ModeAFalseConfigWidget* ModeAFalseConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new ModeAFalseConfigWidget(*this));
+//    ModeAFalseConfigWidget* ModeAFalseConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new ModeAFalseConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> ModeAFalseConfig::createRequirement()
     {
@@ -62,6 +62,13 @@ namespace EvaluationRequirement
     void ModeAFalseConfig::maximumProbabilityFalse(float value)
     {
         maximum_probability_false_ = value;
+    }
+
+    void ModeAFalseConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new ModeAFalseConfigWidget(*this));
+        assert (widget_);
     }
 
 }

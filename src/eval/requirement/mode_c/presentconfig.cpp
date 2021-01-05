@@ -31,20 +31,20 @@ namespace EvaluationRequirement
         registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
     }
 
-    void ModeCPresentConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void ModeCPresentConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    ModeCPresentConfigWidget* ModeCPresentConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new ModeCPresentConfigWidget(*this));
+//    ModeCPresentConfigWidget* ModeCPresentConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new ModeCPresentConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> ModeCPresentConfig::createRequirement()
     {
@@ -63,5 +63,12 @@ namespace EvaluationRequirement
     void ModeCPresentConfig::minimumProbabilityPresent(float value)
     {
         minimum_probability_present_ = value;
+    }
+
+    void ModeCPresentConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new ModeCPresentConfigWidget(*this));
+        assert (widget_);
     }
 }

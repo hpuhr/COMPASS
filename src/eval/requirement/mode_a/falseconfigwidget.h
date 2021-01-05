@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTMODEAFALSECONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTMODEAFALSECONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class ModeAFalseConfig;
 
-    class ModeAFalseConfigWidget : public QWidget
+    class ModeAFalseConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -37,14 +37,16 @@ namespace EvaluationRequirement
         void maxProbFalseEditSlot(QString value);
 
     public:
-        ModeAFalseConfigWidget(ModeAFalseConfig& config);
+        ModeAFalseConfigWidget(ModeAFalseConfig& cfg);
 
     protected:
-        ModeAFalseConfig& config_;
+        //ModeAFalseConfig& config_;
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
 
         QLineEdit* max_prob_false_edit_{nullptr};
+
+        ModeAFalseConfig& config();
     };
 
 }

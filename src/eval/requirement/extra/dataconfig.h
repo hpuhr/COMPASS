@@ -40,8 +40,8 @@ namespace EvaluationRequirement
                         EvaluationManager& eval_man);
         virtual ~ExtraDataConfig();
 
-        virtual void addGUIElements(QFormLayout* layout) override;
-        ExtraDataConfigWidget* widget() override;
+        //virtual void addGUIElements(QFormLayout* layout) override;
+        //ExtraDataConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float minDuration() const;
@@ -62,7 +62,9 @@ namespace EvaluationRequirement
         bool ignore_primary_only_ {true};
         float maximum_probability_{0};
 
-        std::unique_ptr<ExtraDataConfigWidget> widget_;
+        virtual void createWidget() override;
+
+        //std::unique_ptr<ExtraDataConfigWidget> widget_;
     };
 
 }

@@ -29,15 +29,15 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& config)
-    : QWidget(), config_(config)
+ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
+    : BaseConfigWidget(cfg)
 {
-    form_layout_ = new QFormLayout();
+    //form_layout_ = new QFormLayout();
 
-    config_.addGUIElements(form_layout_);
+    //config_.addGUIElements(form_layout_);
 
     // min_duration
-    min_duration_edit_ = new QLineEdit(QString::number(config_.minDuration()));
+    min_duration_edit_ = new QLineEdit(QString::number(config().minDuration()));
     min_duration_edit_->setValidator(new QDoubleValidator(0.1, 3000.0, 1, this));
     connect(min_duration_edit_, &QLineEdit::textEdited,
             this, &ExtraDataConfigWidget::minDurationEditSlot);
@@ -45,7 +45,7 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& config)
     form_layout_->addRow("Minimum Duration [s]", min_duration_edit_);
 
     // min_num_updates
-    min_num_updates_edit_ = new QLineEdit(QString::number(config_.minNumUpdates()));
+    min_num_updates_edit_ = new QLineEdit(QString::number(config().minNumUpdates()));
     min_num_updates_edit_->setValidator(new QDoubleValidator(0, 300, 0, this));
     connect(min_num_updates_edit_, &QLineEdit::textEdited,
             this, &ExtraDataConfigWidget::minNumUpdatesEditSlot);
@@ -54,21 +54,21 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& config)
 
     // ignore_primary_only
     ignore_primary_only_check_ = new QCheckBox ();
-    ignore_primary_only_check_->setChecked(config_.ignorePrimaryOnly());
+    ignore_primary_only_check_->setChecked(config().ignorePrimaryOnly());
     connect(ignore_primary_only_check_, &QCheckBox::clicked,
             this, &ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot);
 
     form_layout_->addRow("Ignore Primary Only", ignore_primary_only_check_);
 
     // prob
-    maximum_probability_edit_ = new QLineEdit(QString::number(config_.maximumProbability()));
+    maximum_probability_edit_ = new QLineEdit(QString::number(config().maximumProbability()));
     maximum_probability_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
     connect(maximum_probability_edit_, &QLineEdit::textEdited,
             this, &ExtraDataConfigWidget::maximumProbEditSlot);
 
     form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
 
-    setLayout(form_layout_);
+    //setLayout(form_layout_);
 }
 
 void ExtraDataConfigWidget::minDurationEditSlot(QString value)
@@ -79,7 +79,7 @@ void ExtraDataConfigWidget::minDurationEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.minDuration(val);
+        config().minDuration(val);
     else
         loginf << "ExtraDataConfigWidget: minDurationEditSlot: invalid value";
 }
@@ -92,7 +92,7 @@ void ExtraDataConfigWidget::minNumUpdatesEditSlot(QString value)
     unsigned int val = value.toUInt(&ok);
 
     if (ok)
-        config_.minNumUpdates(val);
+        config().minNumUpdates(val);
     else
         loginf << "ExtraDataConfigWidget: minNumUpdatesEditSlot: invalid value";
 }
@@ -102,7 +102,7 @@ void ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot()
     loginf << "ExtraDataConfigWidget: toggleIgnorePrimaryOnlySlot";
 
     assert (ignore_primary_only_check_);
-    config_.ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
+    config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
 }
 
 void ExtraDataConfigWidget::maximumProbEditSlot(QString value)
@@ -113,9 +113,17 @@ void ExtraDataConfigWidget::maximumProbEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.maximumProbability(val);
+        config().maximumProbability(val);
     else
         loginf << "ExtraDataConfigWidget: maximumProbEditSlot: invalid value";
+}
+
+ExtraDataConfig& ExtraDataConfigWidget::config()
+{
+    ExtraDataConfig* config = dynamic_cast<ExtraDataConfig*>(&config_);
+    assert (config);
+
+    return *config;
 }
 
 }

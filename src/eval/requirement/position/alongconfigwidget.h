@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONALONGCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTPOSITIONALONGCONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class PositionAlongConfig;
 
-    class PositionAlongConfigWidget : public QWidget
+    class PositionAlongConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -38,15 +38,17 @@ namespace EvaluationRequirement
         void minimumProbEditSlot(QString value);
 
     public:
-        PositionAlongConfigWidget(PositionAlongConfig& config);
+        PositionAlongConfigWidget(PositionAlongConfig& cfg);
 
     protected:
-        PositionAlongConfig& config_;
+        //PositionAlongConfig& config_;
 
         QLineEdit* max_abs_value_edit_{nullptr};
         QLineEdit* minimum_prob_edit_{nullptr};
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
+
+        PositionAlongConfig& config();
     };
 
 }

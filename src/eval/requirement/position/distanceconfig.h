@@ -37,8 +37,8 @@ public:
                         EvaluationManager& eval_ma);
     virtual ~PositionDistanceConfig();
 
-    virtual void addGUIElements(QFormLayout* layout) override;
-    PositionDistanceConfigWidget* widget() override;
+//    virtual void addGUIElements(QFormLayout* layout) override;
+//    PositionDistanceConfigWidget* widget() override;
     std::shared_ptr<Base> createRequirement() override;
 
     float maxAbsValue() const;
@@ -51,7 +51,9 @@ protected:
     float max_abs_value_ {0};
     float minimum_probability_{0};
 
-    std::unique_ptr<PositionDistanceConfigWidget> widget_;
+    virtual void createWidget() override;
+
+    //std::unique_ptr<PositionDistanceConfigWidget> widget_;
 };
 
 }

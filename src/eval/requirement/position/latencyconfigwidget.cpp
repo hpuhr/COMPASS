@@ -30,58 +30,66 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-    PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& config)
-        : QWidget(), config_(config)
+PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& cfg)
+    : BaseConfigWidget(cfg)
+{
+//    form_layout_ = new QFormLayout();
+
+//    config_.addGUIElements(form_layout_);
+
+    // max dist
+    max_abs_value_edit_ = new QLineEdit(String::timeStringFromDouble(config().maxAbsValue()).c_str());
+    //max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    connect(max_abs_value_edit_, &QLineEdit::textEdited,
+            this, &PositionLatencyConfigWidget::maxAbsValueEditSlot);
+
+    form_layout_->addRow("Maximum Absolute Value [s]", max_abs_value_edit_);
+
+    // prob
+    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
+    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
+    connect(minimum_prob_edit_, &QLineEdit::textEdited,
+            this, &PositionLatencyConfigWidget::minimumProbEditSlot);
+
+    form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
+
+    //setLayout(form_layout_);
+}
+
+void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
+{
+    loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = String::timeFromString(value.toStdString(), &ok);
+
+    if (ok)
     {
-        form_layout_ = new QFormLayout();
-
-        config_.addGUIElements(form_layout_);
-
-        // max dist
-        max_abs_value_edit_ = new QLineEdit(String::timeStringFromDouble(config_.maxAbsValue()).c_str());
-        //max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
-        connect(max_abs_value_edit_, &QLineEdit::textEdited,
-                this, &PositionLatencyConfigWidget::maxAbsValueEditSlot);
-
-        form_layout_->addRow("Maximum Absolute Value [s]", max_abs_value_edit_);
-
-        // prob
-        minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
-        minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-        connect(minimum_prob_edit_, &QLineEdit::textEdited,
-                this, &PositionLatencyConfigWidget::minimumProbEditSlot);
-
-        form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
-
-        setLayout(form_layout_);
+        config().maxAbsValue(val);
     }
+    else
+        loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: invalid value";
+}
 
-    void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
-    {
-        loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
+void PositionLatencyConfigWidget::PositionLatencyConfigWidget::minimumProbEditSlot(QString value)
+{
+    loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: value " << value.toStdString();
 
-        bool ok;
-        float val = String::timeFromString(value.toStdString(), &ok);
+    bool ok;
+    float val = value.toFloat(&ok);
 
-        if (ok)
-        {
-            config_.maxAbsValue(val);
-        }
-        else
-            loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: invalid value";
-    }
+    if (ok)
+        config().minimumProbability(val);
+    else
+        loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: invalid value";
+}
 
-    void PositionLatencyConfigWidget::PositionLatencyConfigWidget::minimumProbEditSlot(QString value)
-    {
-        loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: value " << value.toStdString();
+PositionLatencyConfig& PositionLatencyConfigWidget::config()
+{
+    PositionLatencyConfig* config = dynamic_cast<PositionLatencyConfig*>(&config_);
+    assert (config);
 
-        bool ok;
-        float val = value.toFloat(&ok);
-
-        if (ok)
-            config_.minimumProbability(val);
-        else
-            loginf << "PositionLatencyConfigWidget: maximumProbEditSlot: invalid value";
-    }
+    return *config;
+}
 
 }

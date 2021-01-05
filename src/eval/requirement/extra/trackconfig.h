@@ -40,8 +40,8 @@ namespace EvaluationRequirement
                         EvaluationManager& eval_man);
         virtual ~ExtraTrackConfig();
 
-        virtual void addGUIElements(QFormLayout* layout) override;
-        ExtraTrackConfigWidget* widget() override;
+//        virtual void addGUIElements(QFormLayout* layout) override;
+//        ExtraTrackConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float minDuration() const;
@@ -62,7 +62,9 @@ namespace EvaluationRequirement
         bool ignore_primary_only_ {true};
         float maximum_probability_{0};
 
-        std::unique_ptr<ExtraTrackConfigWidget> widget_;
+        virtual void createWidget() override;
+
+        //std::unique_ptr<ExtraTrackConfigWidget> widget_;
     };
 
 }

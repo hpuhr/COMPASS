@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTCONFIG_H
-#define EVALUATIONREQUIREMENTCONFIG_H
+#ifndef EVALUATIONREQUIREMENTBASECONFIG_H
+#define EVALUATIONREQUIREMENTBASECONFIG_H
 
 #include <QObject>
 
@@ -33,18 +33,12 @@ class EvaluationManager;
 
 namespace EvaluationRequirement
 {
-
     class Base;
+    class BaseConfigWidget;
 
     class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
     {
         Q_OBJECT
-
-    signals:
-
-    public slots:
-        void changedNameSlot(const QString& value);
-        void changedShortNameSlot(const QString& value);
 
     public:
         BaseConfig(const std::string& class_id, const std::string& instance_id,
@@ -68,7 +62,8 @@ namespace EvaluationRequirement
         virtual QVariant data(int column) const override;
         virtual int row() const override;
 
-        virtual QWidget* widget() = 0;
+        //virtual void addGUIElements(QFormLayout* layout);
+        BaseConfigWidget* widget();
         virtual std::shared_ptr<Base> createRequirement() = 0;
 
     protected:
@@ -79,11 +74,12 @@ namespace EvaluationRequirement
         std::string name_;
         std::string short_name_;
 
-        virtual void checkSubConfigurables() override;
+        std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
 
-        virtual void addGUIElements(QFormLayout* layout);
+        virtual void checkSubConfigurables() override;
+        virtual void createWidget(); // creates BaseConfigWidget, override to change
     };
 
 }
 
-#endif // EVALUATIONREQUIREMENTCONFIG_H
+#endif // EVALUATIONREQUIREMENTBASECONFIG_H

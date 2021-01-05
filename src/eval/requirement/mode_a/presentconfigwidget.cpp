@@ -29,34 +29,44 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    ModeAPresentConfigWidget::ModeAPresentConfigWidget(ModeAPresentConfig& config)
-            : QWidget(), config_(config)
-    {
-        form_layout_ = new QFormLayout();
+ModeAPresentConfigWidget::ModeAPresentConfigWidget(ModeAPresentConfig& cfg)
+    : BaseConfigWidget(cfg)
+{
+//    form_layout_ = new QFormLayout();
 
-        config_.addGUIElements(form_layout_);
+//    config_.addGUIElements(form_layout_);
 
-        // prob
-        min_prob_pres_edit_ = new QLineEdit(QString::number(config_.minimumProbabilityPresent()));
-        min_prob_pres_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-        connect(min_prob_pres_edit_, &QLineEdit::textEdited,
-                this, &ModeAPresentConfigWidget::minProbPresentEditSlot);
+    // prob
+    min_prob_pres_edit_ = new QLineEdit(QString::number(config().minimumProbabilityPresent()));
+    min_prob_pres_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
+    connect(min_prob_pres_edit_, &QLineEdit::textEdited,
+            this, &ModeAPresentConfigWidget::minProbPresentEditSlot);
 
-        form_layout_->addRow("Present Minimum Probability [1]", min_prob_pres_edit_);
+    form_layout_->addRow("Present Minimum Probability [1]", min_prob_pres_edit_);
 
-        setLayout(form_layout_);
-    }
+    //setLayout(form_layout_);
+}
 
-    void ModeAPresentConfigWidget::minProbPresentEditSlot(QString value)
-    {
-        loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
+void ModeAPresentConfigWidget::minProbPresentEditSlot(QString value)
+{
+    loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
 
-        bool ok;
-        float val = value.toFloat(&ok);
+    bool ok;
+    float val = value.toFloat(&ok);
 
-        if (ok)
-            config_.minimumProbabilityPresent(val);
-        else
-            loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: invalid value";
-    }
+    if (ok)
+        config().minimumProbabilityPresent(val);
+    else
+        loginf << "EvaluationRequirementModeAConfigWidget: minProbPresentEditSlot: invalid value";
+}
+
+ModeAPresentConfig& ModeAPresentConfigWidget::config()
+{
+    ModeAPresentConfig* config = dynamic_cast<ModeAPresentConfig*>(&config_);
+    assert (config);
+
+    return *config;
+}
+
+
 }

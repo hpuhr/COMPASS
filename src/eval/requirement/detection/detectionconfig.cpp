@@ -49,20 +49,20 @@ namespace EvaluationRequirement
 
     }
 
-    void DetectionConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void DetectionConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    DetectionConfigWidget* DetectionConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new DetectionConfigWidget(*this));
+//    DetectionConfigWidget* DetectionConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new DetectionConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> DetectionConfig::createRequirement()
     {
@@ -143,6 +143,13 @@ namespace EvaluationRequirement
     void DetectionConfig::missTolerance(float value)
     {
         miss_tolerance_s_ = value;
+    }
+
+    void DetectionConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new DetectionConfigWidget(*this));
+        assert (widget_);
     }
 
 }

@@ -1,11 +1,37 @@
-#ifndef BASECONFIGWIDGET_H
-#define BASECONFIGWIDGET_H
+#ifndef  EVALUATIONREQUIREMENTBASECONFIGWIDGET_H
+#define  EVALUATIONREQUIREMENTBASECONFIGWIDGET_H
 
+#include <QWidget>
 
-class BaseConfigWidget
+class QLineEdit;
+class QCheckBox;
+
+class QFormLayout;
+
+namespace EvaluationRequirement
 {
+
+class BaseConfig;
+
+class BaseConfigWidget : public QWidget
+{
+    Q_OBJECT
+
+signals:
+
+public slots:
+    void changedNameSlot(const QString& value);
+    void changedShortNameSlot(const QString& value);
+
 public:
-    BaseConfigWidget();
+    BaseConfigWidget(BaseConfig& cfg);
+
+protected:
+    BaseConfig& config_;
+
+    QFormLayout* form_layout_ {nullptr};
 };
 
-#endif // BASECONFIGWIDGET_H
+}
+
+#endif //  EVALUATIONREQUIREMENTBASECONFIGWIDGET_H

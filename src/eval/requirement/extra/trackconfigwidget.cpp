@@ -29,15 +29,15 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& config)
-    : QWidget(), config_(config)
+ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& cfg)
+    : BaseConfigWidget(cfg)
 {
-    form_layout_ = new QFormLayout();
+//    form_layout_ = new QFormLayout();
 
-    config_.addGUIElements(form_layout_);
+//    config_.addGUIElements(form_layout_);
 
     // min_duration
-    min_duration_edit_ = new QLineEdit(QString::number(config_.minDuration()));
+    min_duration_edit_ = new QLineEdit(QString::number(config().minDuration()));
     min_duration_edit_->setValidator(new QDoubleValidator(0.1, 3000.0, 1, this));
     connect(min_duration_edit_, &QLineEdit::textEdited,
             this, &ExtraTrackConfigWidget::minDurationEditSlot);
@@ -45,7 +45,7 @@ ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& config)
     form_layout_->addRow("Minimum Duration [s]", min_duration_edit_);
 
     // min_num_updates
-    min_num_updates_edit_ = new QLineEdit(QString::number(config_.minNumUpdates()));
+    min_num_updates_edit_ = new QLineEdit(QString::number(config().minNumUpdates()));
     min_num_updates_edit_->setValidator(new QDoubleValidator(0, 300, 0, this));
     connect(min_num_updates_edit_, &QLineEdit::textEdited,
             this, &ExtraTrackConfigWidget::minNumUpdatesEditSlot);
@@ -54,21 +54,21 @@ ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& config)
 
     // ignore_primary_only
     ignore_primary_only_check_ = new QCheckBox ();
-    ignore_primary_only_check_->setChecked(config_.ignorePrimaryOnly());
+    ignore_primary_only_check_->setChecked(config().ignorePrimaryOnly());
     connect(ignore_primary_only_check_, &QCheckBox::clicked,
             this, &ExtraTrackConfigWidget::toggleIgnorePrimaryOnlySlot);
 
     form_layout_->addRow("Ignore Primary Only", ignore_primary_only_check_);
 
     // prob
-    maximum_probability_edit_ = new QLineEdit(QString::number(config_.maximumProbability()));
+    maximum_probability_edit_ = new QLineEdit(QString::number(config().maximumProbability()));
     maximum_probability_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
     connect(maximum_probability_edit_, &QLineEdit::textEdited,
             this, &ExtraTrackConfigWidget::maximumProbEditSlot);
 
     form_layout_->addRow("Maximum Probability [0-1]", maximum_probability_edit_);
 
-    setLayout(form_layout_);
+    //setLayout(form_layout_);
 }
 
 void ExtraTrackConfigWidget::minDurationEditSlot(QString value)
@@ -79,7 +79,7 @@ void ExtraTrackConfigWidget::minDurationEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.minDuration(val);
+        config().minDuration(val);
     else
         loginf << "TrackConfigWidget: minDurationEditSlot: invalid value";
 }
@@ -92,7 +92,7 @@ void ExtraTrackConfigWidget::minNumUpdatesEditSlot(QString value)
     unsigned int val = value.toUInt(&ok);
 
     if (ok)
-        config_.minNumUpdates(val);
+        config().minNumUpdates(val);
     else
         loginf << "TrackConfigWidget: minNumUpdatesEditSlot: invalid value";
 }
@@ -102,7 +102,7 @@ void ExtraTrackConfigWidget::toggleIgnorePrimaryOnlySlot()
     loginf << "TrackConfigWidget: toggleIgnorePrimaryOnlySlot";
 
     assert (ignore_primary_only_check_);
-    config_.ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
+    config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);
 }
 
 void ExtraTrackConfigWidget::maximumProbEditSlot(QString value)
@@ -113,9 +113,18 @@ void ExtraTrackConfigWidget::maximumProbEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.maximumProbability(val);
+        config().maximumProbability(val);
     else
         loginf << "TrackConfigWidget: maximumProbEditSlot: invalid value";
 }
 
+ExtraTrackConfig& ExtraTrackConfigWidget::config()
+{
+    ExtraTrackConfig* config = dynamic_cast<ExtraTrackConfig*>(&config_);
+    assert (config);
+
+    return *config;
 }
+
+}
+

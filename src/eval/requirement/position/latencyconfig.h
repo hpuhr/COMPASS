@@ -37,8 +37,8 @@ public:
                         EvaluationManager& eval_ma);
     virtual ~PositionLatencyConfig();
 
-    virtual void addGUIElements(QFormLayout* layout) override;
-    PositionLatencyConfigWidget* widget() override;
+//    virtual void addGUIElements(QFormLayout* layout) override;
+//    PositionLatencyConfigWidget* widget() override;
     std::shared_ptr<Base> createRequirement() override;
 
     float maxAbsValue() const;
@@ -51,7 +51,9 @@ protected:
     float max_abs_value_ {0};
     float minimum_probability_{0};
 
-    std::unique_ptr<PositionLatencyConfigWidget> widget_;
+    virtual void createWidget() override;
+
+    //std::unique_ptr<PositionLatencyConfigWidget> widget_;
 };
 
 }

@@ -27,56 +27,64 @@
 namespace EvaluationRequirement
 {
 
-    PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfig& config)
-        : QWidget(), config_(config)
-    {
-        form_layout_ = new QFormLayout();
+PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfig& cfg)
+    : BaseConfigWidget(cfg)
+{
+//    form_layout_ = new QFormLayout();
 
-        config_.addGUIElements(form_layout_);
+//    config_.addGUIElements(form_layout_);
 
-        // max dist
-        max_abs_value_edit_ = new QLineEdit(QString::number(config_.maxAbsValue()));
-        max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
-        connect(max_abs_value_edit_, &QLineEdit::textEdited,
-                this, &PositionDistanceConfigWidget::maxAbsValueEditSlot);
+    // max dist
+    max_abs_value_edit_ = new QLineEdit(QString::number(config().maxAbsValue()));
+    max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    connect(max_abs_value_edit_, &QLineEdit::textEdited,
+            this, &PositionDistanceConfigWidget::maxAbsValueEditSlot);
 
-        form_layout_->addRow("Maximum Absolute Value [m]", max_abs_value_edit_);
+    form_layout_->addRow("Maximum Absolute Value [m]", max_abs_value_edit_);
 
-        // prob
-        minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
-        minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-        connect(minimum_prob_edit_, &QLineEdit::textEdited,
-                this, &PositionDistanceConfigWidget::minimumProbEditSlot);
+    // prob
+    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
+    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
+    connect(minimum_prob_edit_, &QLineEdit::textEdited,
+            this, &PositionDistanceConfigWidget::minimumProbEditSlot);
 
-        form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
+    form_layout_->addRow("Minimum Probability [1]", minimum_prob_edit_);
 
-        setLayout(form_layout_);
-    }
+    //setLayout(form_layout_);
+}
 
-    void PositionDistanceConfigWidget::maxAbsValueEditSlot(QString value)
-    {
-        loginf << "PositionDistanceConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
+void PositionDistanceConfigWidget::maxAbsValueEditSlot(QString value)
+{
+    loginf << "PositionDistanceConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
 
-        bool ok;
-        float val = value.toFloat(&ok);
+    bool ok;
+    float val = value.toFloat(&ok);
 
-        if (ok)
-            config_.maxAbsValue(val);
-        else
-            loginf << "PositionDistanceConfigWidget: maxDistanceEditSlot: invalid value";
-    }
+    if (ok)
+        config().maxAbsValue(val);
+    else
+        loginf << "PositionDistanceConfigWidget: maxDistanceEditSlot: invalid value";
+}
 
-    void PositionDistanceConfigWidget::PositionDistanceConfigWidget::minimumProbEditSlot(QString value)
-    {
-        loginf << "PositionDistanceConfigWidget: maximumProbEditSlot: value " << value.toStdString();
+void PositionDistanceConfigWidget::PositionDistanceConfigWidget::minimumProbEditSlot(QString value)
+{
+    loginf << "PositionDistanceConfigWidget: maximumProbEditSlot: value " << value.toStdString();
 
-        bool ok;
-        float val = value.toFloat(&ok);
+    bool ok;
+    float val = value.toFloat(&ok);
 
-        if (ok)
-            config_.minimumProbability(val);
-        else
-            loginf << "PositionDistanceConfigWidget: maximumProbEditSlot: invalid value";
-    }
+    if (ok)
+        config().minimumProbability(val);
+    else
+        loginf << "PositionDistanceConfigWidget: maximumProbEditSlot: invalid value";
+}
+
+PositionDistanceConfig& PositionDistanceConfigWidget::config()
+{
+    PositionDistanceConfig* config = dynamic_cast<PositionDistanceConfig*>(&config_);
+    assert (config);
+
+    return *config;
+}
 
 }

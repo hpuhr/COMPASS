@@ -29,15 +29,15 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
-    : QWidget(), config_(config)
+DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
+    : BaseConfigWidget(cfg)
 {
-    form_layout_ = new QFormLayout();
+    //form_layout_ = new QFormLayout();
 
-    config_.addGUIElements(form_layout_);
+    //config_.addGUIElements(form_layout_);
 
     // ui
-    update_interval_edit_ = new QLineEdit(QString::number(config_.updateInterval()));
+    update_interval_edit_ = new QLineEdit(QString::number(config().updateInterval()));
     update_interval_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
     connect(update_interval_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::updateIntervalEditSlot);
@@ -45,7 +45,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
     form_layout_->addRow("Update Interval [s]", update_interval_edit_);
 
     // max ref time diff
-    max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
+    max_ref_time_diff_edit_ = new QLineEdit(QString::number(config().maxRefTimeDiff()));
     max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
     connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::maxRefTimeDiffEditSlot);
@@ -53,7 +53,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
     form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
 
     // prob
-    minimum_prob_edit_ = new QLineEdit(QString::number(config_.minimumProbability()));
+    minimum_prob_edit_ = new QLineEdit(QString::number(config().minimumProbability()));
     minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
     connect(minimum_prob_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::minimumProbEditSlot);
@@ -77,20 +77,20 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& config)
 
     // miss tolerance
     use_miss_tolerance_check_ = new QCheckBox ();
-    use_miss_tolerance_check_->setChecked(config_.useMissTolerance());
+    use_miss_tolerance_check_->setChecked(config().useMissTolerance());
     connect(use_miss_tolerance_check_, &QCheckBox::clicked,
             this, &DetectionConfigWidget::toggleUseMissToleranceSlot);
 
     form_layout_->addRow("Use Miss Tolerance", use_miss_tolerance_check_);
 
-    miss_tolerance_edit_ = new QLineEdit(QString::number(config_.missTolerance()));
+    miss_tolerance_edit_ = new QLineEdit(QString::number(config().missTolerance()));
     miss_tolerance_edit_->setValidator(new QDoubleValidator(0.01, 1.0, 3, this));
     connect(miss_tolerance_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::missToleranceEditSlot);
 
     form_layout_->addRow("Miss Tolerance [s]", miss_tolerance_edit_);
 
-    setLayout(form_layout_);
+    //setLayout(form_layout_);
 }
 
 
@@ -102,7 +102,7 @@ void DetectionConfigWidget::updateIntervalEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.updateInterval(val);
+        config().updateInterval(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: invalid value";
 }
@@ -115,7 +115,7 @@ void DetectionConfigWidget::maxRefTimeDiffEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.maxRefTimeDiff(val);
+        config().maxRefTimeDiff(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: maxRefTimeDiffEditSlot: invalid value";
 }
@@ -128,7 +128,7 @@ void DetectionConfigWidget::minimumProbEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.minimumProbability(val);
+        config().minimumProbability(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: minimumProbEditSlot: invalid value";
 }
@@ -158,7 +158,7 @@ void DetectionConfigWidget::toggleUseMissToleranceSlot()
     loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMissToleranceSlot";
 
     assert (use_miss_tolerance_check_);
-    config_.useMissTolerance(use_miss_tolerance_check_->checkState() == Qt::Checked);
+    config().useMissTolerance(use_miss_tolerance_check_->checkState() == Qt::Checked);
 }
 void DetectionConfigWidget::missToleranceEditSlot(QString value)
 {
@@ -168,9 +168,17 @@ void DetectionConfigWidget::missToleranceEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config_.missTolerance(val);
+        config().missTolerance(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: missToleranceEditSlot: invalid value";
+}
+
+DetectionConfig& DetectionConfigWidget::config()
+{
+    DetectionConfig* config = dynamic_cast<DetectionConfig*>(&config_);
+    assert (config);
+
+    return *config;
 }
 
 }

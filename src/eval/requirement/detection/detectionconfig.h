@@ -40,8 +40,8 @@ namespace EvaluationRequirement
                         EvaluationManager& eval_man);
         virtual ~DetectionConfig();
 
-        virtual void addGUIElements(QFormLayout* layout) override;
-        DetectionConfigWidget* widget() override;
+        //virtual void addGUIElements(QFormLayout* layout) override;
+        //DetectionConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
         float updateInterval() const;
@@ -78,7 +78,9 @@ namespace EvaluationRequirement
         bool use_miss_tolerance_{false};
         float miss_tolerance_s_{0};
 
-        std::unique_ptr<DetectionConfigWidget> widget_;
+        virtual void createWidget() override;
+
+        //std::unique_ptr<DetectionConfigWidget> widget_;
     };
 
 }

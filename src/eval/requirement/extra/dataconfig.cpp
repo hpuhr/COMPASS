@@ -38,23 +38,22 @@ namespace EvaluationRequirement
 
     ExtraDataConfig::~ExtraDataConfig()
     {
-
     }
 
-    void ExtraDataConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void ExtraDataConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    ExtraDataConfigWidget* ExtraDataConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new ExtraDataConfigWidget(*this));
+//    ExtraDataConfigWidget* ExtraDataConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new ExtraDataConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> ExtraDataConfig::createRequirement()
     {
@@ -103,5 +102,12 @@ namespace EvaluationRequirement
     void ExtraDataConfig::maximumProbability(float value)
     {
         maximum_probability_ = value;
+    }
+
+    void ExtraDataConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new ExtraDataConfigWidget(*this));
+        assert (widget_);
     }
 }

@@ -39,20 +39,20 @@ namespace EvaluationRequirement
 
     }
 
-    void PositionDistanceConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void PositionDistanceConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    PositionDistanceConfigWidget* PositionDistanceConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new PositionDistanceConfigWidget(*this));
+//    PositionDistanceConfigWidget* PositionDistanceConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new PositionDistanceConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> PositionDistanceConfig::createRequirement()
     {
@@ -81,5 +81,12 @@ namespace EvaluationRequirement
     void PositionDistanceConfig::minimumProbability(float value)
     {
         minimum_probability_ = value;
+    }
+
+    void PositionDistanceConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new PositionDistanceConfigWidget(*this));
+        assert (widget_);
     }
 }

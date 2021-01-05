@@ -39,20 +39,20 @@ namespace EvaluationRequirement
 
     }
 
-    void PositionAcrossConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void PositionAcrossConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    PositionAcrossConfigWidget* PositionAcrossConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new PositionAcrossConfigWidget(*this));
+//    PositionAcrossConfigWidget* PositionAcrossConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new PositionAcrossConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> PositionAcrossConfig::createRequirement()
     {
@@ -81,5 +81,12 @@ namespace EvaluationRequirement
     void PositionAcrossConfig::minimumProbability(float value)
     {
         minimum_probability_ = value;
+    }
+
+    void PositionAcrossConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new PositionAcrossConfigWidget(*this));
+        assert (widget_);
     }
 }

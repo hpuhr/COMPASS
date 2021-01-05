@@ -33,20 +33,20 @@ namespace EvaluationRequirement
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
 
-    void IdentificationConfig::addGUIElements(QFormLayout* layout)
-    {
-        assert (layout);
+//    void IdentificationConfig::addGUIElements(QFormLayout* layout)
+//    {
+//        assert (layout);
 
-        BaseConfig::addGUIElements(layout);
-    }
+//        BaseConfig::addGUIElements(layout);
+//    }
 
-    IdentificationConfigWidget* IdentificationConfig::widget()
-    {
-        if (!widget_)
-            widget_.reset(new IdentificationConfigWidget(*this));
+//    IdentificationConfigWidget* IdentificationConfig::widget()
+//    {
+//        if (!widget_)
+//            widget_.reset(new IdentificationConfigWidget(*this));
 
-        return widget_.get();
-    }
+//        return widget_.get();
+//    }
 
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
@@ -64,5 +64,12 @@ namespace EvaluationRequirement
     void IdentificationConfig::minimumProbability(float value)
     {
         minimum_probability_ = value;
+    }
+
+    void IdentificationConfig::createWidget()
+    {
+        assert (!widget_);
+        widget_.reset(new IdentificationConfigWidget(*this));
+        assert (widget_);
     }
 }

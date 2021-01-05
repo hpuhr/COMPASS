@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "logger.h"
 
@@ -44,12 +45,12 @@ BaseConfig::BaseConfig(
 
 BaseConfig::~BaseConfig()
 {
-
+    //delete widget_;
 }
 
 
 void BaseConfig::generateSubConfigurable(const std::string& class_id,
-                                                          const std::string& instance_id)
+                                         const std::string& instance_id)
 {
     assert(false);
 }
@@ -63,19 +64,37 @@ void BaseConfig::checkSubConfigurables()
 {
 }
 
-void BaseConfig::addGUIElements(QFormLayout* layout)
+//void BaseConfig::addGUIElements(QFormLayout* layout)
+//{
+//    assert (layout);
+
+//    QLineEdit* name_edit = new QLineEdit (name_.c_str());
+//    connect(name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedNameSlot);
+
+//    layout->addRow("Name", name_edit);
+
+//    QLineEdit* short_name_edit = new QLineEdit (short_name_.c_str());
+//    connect(short_name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedShortNameSlot);
+
+//    layout->addRow("Short Name", short_name_edit);
+//}
+
+BaseConfigWidget* BaseConfig::widget()
 {
-    assert (layout);
+    if (!widget_)
+    {
+        createWidget();
+        assert (widget_);
+    }
 
-    QLineEdit* name_edit = new QLineEdit (name_.c_str());
-    connect(name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedNameSlot);
+    return widget_.get();
+}
 
-    layout->addRow("Name", name_edit);
-
-    QLineEdit* short_name_edit = new QLineEdit (short_name_.c_str());
-    connect(short_name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedShortNameSlot);
-
-    layout->addRow("Short Name", short_name_edit);
+void BaseConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new BaseConfigWidget(*this));
+    assert (widget_);
 }
 
 EvaluationStandardTreeItem* BaseConfig::child(int row)
@@ -103,24 +122,6 @@ QVariant BaseConfig::data(int column) const
 int BaseConfig::row() const
 {
     return 0;
-}
-
-void BaseConfig::changedNameSlot(const QString& value)
-{
-    string value_str = value.toStdString();
-
-    loginf << "EvaluationRequirementConfig: changedNameSlot: name '" << value_str << "'";
-
-    name_ = value_str;
-}
-
-void BaseConfig::changedShortNameSlot(const QString& value)
-{
-    string value_str = value.toStdString();
-
-    loginf << "EvaluationRequirementConfig: changedShortNameSlot: name '" << value_str << "'";
-
-    short_name_ = value_str;
 }
 
 void BaseConfig::name(const std::string& name)

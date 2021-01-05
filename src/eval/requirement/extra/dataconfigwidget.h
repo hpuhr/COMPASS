@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTEXTRADATACONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTEXTRADATACONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class ExtraDataConfig;
 
-    class ExtraDataConfigWidget : public QWidget
+    class ExtraDataConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -40,17 +40,19 @@ namespace EvaluationRequirement
         void maximumProbEditSlot(QString value);
 
     public:
-        ExtraDataConfigWidget(ExtraDataConfig& config);
+        ExtraDataConfigWidget(ExtraDataConfig& cfg);
 
     protected:
-        ExtraDataConfig& config_;
+        //ExtraDataConfig& config_;
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
 
         QLineEdit* min_duration_edit_{nullptr};
         QLineEdit* min_num_updates_edit_{nullptr};
         QCheckBox* ignore_primary_only_check_{nullptr};
         QLineEdit* maximum_probability_edit_{nullptr};
+
+        ExtraDataConfig& config();
     };
 
 }

@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTMODECPRESENTCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTMODECPRESENTCONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -29,7 +29,7 @@ namespace EvaluationRequirement
 {
     class ModeCPresentConfig;
 
-    class ModeCPresentConfigWidget : public QWidget
+    class ModeCPresentConfigWidget : public BaseConfigWidget
     {
         Q_OBJECT
 
@@ -37,14 +37,16 @@ namespace EvaluationRequirement
         void minProbPresentEditSlot(QString value);
 
     public:
-        ModeCPresentConfigWidget(ModeCPresentConfig& config);
+        ModeCPresentConfigWidget(ModeCPresentConfig& cfg);
 
     protected:
-        ModeCPresentConfig& config_;
+        //ModeCPresentConfig& config_;
 
-        QFormLayout* form_layout_ {nullptr};
+        //QFormLayout* form_layout_ {nullptr};
 
         QLineEdit* min_prob_pres_edit_{nullptr};
+
+        ModeCPresentConfig& config();
     };
 
 }
