@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONLATENCY_H
 #define EVALUATIONREQUIREMENPOSITIONLATENCY_H
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement

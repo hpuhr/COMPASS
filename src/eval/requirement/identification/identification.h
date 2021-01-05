@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATION_H
 #define EVALUATIONREQUIREMENTIDENTIFICATION_H
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 namespace EvaluationRequirement
 {

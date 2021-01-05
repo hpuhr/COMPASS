@@ -16,7 +16,7 @@
  */
 
 #include "eval/results/base.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"

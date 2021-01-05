@@ -17,7 +17,7 @@
 
 #include "eval/results/extra/datasingle.h"
 #include "eval/results/extra/datajoined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/extra/data.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"

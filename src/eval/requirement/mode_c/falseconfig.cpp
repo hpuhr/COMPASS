@@ -17,7 +17,7 @@
 
 #include "eval/requirement/mode_c/falseconfig.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 using namespace std;
 
@@ -26,7 +26,7 @@ namespace EvaluationRequirement
 
     ModeCFalseConfig::ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-                         : Config(class_id, instance_id, group, standard, eval_man)
+                         : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
 
@@ -37,7 +37,7 @@ namespace EvaluationRequirement
     {
         assert (layout);
 
-        Config::addGUIElements(layout);
+        BaseConfig::addGUIElements(layout);
     }
 
     ModeCFalseConfigWidget* ModeCFalseConfig::widget()

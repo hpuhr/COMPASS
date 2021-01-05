@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTEXTRADATA_H
 #define EVALUATIONREQUIREMENTEXTRADATA_H
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "evaluationtargetposition.h"
 
 #include <QVariant>

@@ -18,7 +18,7 @@
 #include "eval/requirement/identification/identificationconfig.h"
 #include "eval/requirement/identification/identificationconfigwidget.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 using namespace std;
 
@@ -28,7 +28,7 @@ namespace EvaluationRequirement
     IdentificationConfig::IdentificationConfig(
             const std::string& class_id, const std::string& instance_id,
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-        : Config(class_id, instance_id, group, standard, eval_man)
+        : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
@@ -37,7 +37,7 @@ namespace EvaluationRequirement
     {
         assert (layout);
 
-        Config::addGUIElements(layout);
+        BaseConfig::addGUIElements(layout);
     }
 
     IdentificationConfigWidget* IdentificationConfig::widget()

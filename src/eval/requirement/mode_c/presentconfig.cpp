@@ -17,7 +17,7 @@
 
 #include "eval/requirement/mode_c/presentconfig.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 using namespace std;
 
@@ -26,7 +26,7 @@ namespace EvaluationRequirement
 
     ModeCPresentConfig::ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-                         : Config(class_id, instance_id, group, standard, eval_man)
+                         : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
     }
@@ -35,7 +35,7 @@ namespace EvaluationRequirement
     {
         assert (layout);
 
-        Config::addGUIElements(layout);
+        BaseConfig::addGUIElements(layout);
     }
 
     ModeCPresentConfigWidget* ModeCPresentConfig::widget()

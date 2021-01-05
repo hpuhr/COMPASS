@@ -17,7 +17,7 @@
 
 #include "eval/results/extra/trackjoined.h"
 #include "eval/results/extra/tracksingle.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/extra/track.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"

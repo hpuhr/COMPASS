@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENPOSITIONACROSS_H
 #define EVALUATIONREQUIREMENPOSITIONACROSS_H
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/position/detail.h"
 
 namespace EvaluationRequirement

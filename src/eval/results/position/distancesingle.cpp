@@ -17,7 +17,7 @@
 
 #include "eval/results/position/distancesingle.h"
 #include "eval/results/position/distancejoined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/position/distance.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"

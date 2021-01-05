@@ -17,7 +17,7 @@
 
 #include "eval/results/position/acrosssingle.h"
 #include "eval/results/position/acrossjoined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/position/across.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"

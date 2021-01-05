@@ -67,7 +67,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementExtraTrackConfig") == 0)
     {
@@ -77,7 +77,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
     {
@@ -87,7 +87,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementPositionDistanceConfig") == 0)
     {
@@ -97,7 +97,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementPositionAlongConfig") == 0)
     {
@@ -107,7 +107,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementPositionAcrossConfig") == 0)
     {
@@ -117,7 +117,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementPositionLatencyConfig") == 0)
     {
@@ -127,7 +127,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementIdentificationConfig") == 0)
     {
@@ -137,7 +137,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementModeAPresentConfig") == 0)
     {
@@ -147,7 +147,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementModeAFalseConfig") == 0)
     {
@@ -157,7 +157,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementModeCPresentConfig") == 0)
     {
@@ -167,7 +167,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else if (class_id.compare("EvaluationRequirementModeCFalseConfig") == 0)
     {
@@ -177,7 +177,7 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else
         throw std::runtime_error("EvaluationRequirementGroup: generateSubConfigurable: unknown class_id " +
@@ -193,7 +193,7 @@ std::string Group::name() const
 bool Group::hasRequirementConfig (const std::string& name)
 {
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-       [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+       [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
 
     return iter != configs_.end();
 }
@@ -225,12 +225,12 @@ void Group::addRequirementConfig (const std::string& class_id, const std::string
     emit configsChangedSignal();
 }
 
-EvaluationRequirement::Config& Group::requirementConfig (const std::string& name)
+EvaluationRequirement::BaseConfig& Group::requirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
 
     return **iter;
 }
@@ -240,7 +240,7 @@ void Group::removeRequirementConfig (const std::string& name)
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
 
     assert (iter != configs_.end());
 
@@ -470,7 +470,7 @@ void Group::deleteRequirementSlot()
 void Group::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
-         [](const unique_ptr<EvaluationRequirement::Config>&a, const unique_ptr<EvaluationRequirement::Config>& b) -> bool
+         [](const unique_ptr<EvaluationRequirement::BaseConfig>&a, const unique_ptr<EvaluationRequirement::BaseConfig>& b) -> bool
     {
         return a->name() > b->name();
     });

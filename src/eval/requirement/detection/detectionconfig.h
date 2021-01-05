@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/detection/detection.h"
 
@@ -32,7 +32,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class DetectionConfig : public Config
+    class DetectionConfig : public BaseConfig
     {
     public:
         DetectionConfig(const std::string& class_id, const std::string& instance_id,

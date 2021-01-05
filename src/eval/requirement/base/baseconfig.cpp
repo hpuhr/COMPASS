@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/group.h"
 #include "logger.h"
 
@@ -27,7 +27,7 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-Config::Config(
+BaseConfig::BaseConfig(
         const std::string& class_id, const std::string& instance_id,
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
@@ -42,70 +42,70 @@ Config::Config(
     createSubConfigurables();
 }
 
-Config::~Config()
+BaseConfig::~BaseConfig()
 {
 
 }
 
 
-void Config::generateSubConfigurable(const std::string& class_id,
+void BaseConfig::generateSubConfigurable(const std::string& class_id,
                                                           const std::string& instance_id)
 {
     assert(false);
 }
 
-std::string Config::name() const
+std::string BaseConfig::name() const
 {
     return name_;
 }
 
-void Config::checkSubConfigurables()
+void BaseConfig::checkSubConfigurables()
 {
 }
 
-void Config::addGUIElements(QFormLayout* layout)
+void BaseConfig::addGUIElements(QFormLayout* layout)
 {
     assert (layout);
 
     QLineEdit* name_edit = new QLineEdit (name_.c_str());
-    connect(name_edit, &QLineEdit::textEdited, this, &Config::changedNameSlot);
+    connect(name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedNameSlot);
 
     layout->addRow("Name", name_edit);
 
     QLineEdit* short_name_edit = new QLineEdit (short_name_.c_str());
-    connect(short_name_edit, &QLineEdit::textEdited, this, &Config::changedShortNameSlot);
+    connect(short_name_edit, &QLineEdit::textEdited, this, &BaseConfig::changedShortNameSlot);
 
     layout->addRow("Short Name", short_name_edit);
 }
 
-EvaluationStandardTreeItem* Config::child(int row)
+EvaluationStandardTreeItem* BaseConfig::child(int row)
 {
     return nullptr;
 }
 
-int Config::childCount() const
+int BaseConfig::childCount() const
 {
     return 0;
 }
 
-int Config::columnCount() const
+int BaseConfig::columnCount() const
 {
     return 1;
 }
 
-QVariant Config::data(int column) const
+QVariant BaseConfig::data(int column) const
 {
     assert (column == 0);
 
     return name_.c_str();
 }
 
-int Config::row() const
+int BaseConfig::row() const
 {
     return 0;
 }
 
-void Config::changedNameSlot(const QString& value)
+void BaseConfig::changedNameSlot(const QString& value)
 {
     string value_str = value.toStdString();
 
@@ -114,7 +114,7 @@ void Config::changedNameSlot(const QString& value)
     name_ = value_str;
 }
 
-void Config::changedShortNameSlot(const QString& value)
+void BaseConfig::changedShortNameSlot(const QString& value)
 {
     string value_str = value.toStdString();
 
@@ -123,17 +123,17 @@ void Config::changedShortNameSlot(const QString& value)
     short_name_ = value_str;
 }
 
-void Config::name(const std::string& name)
+void BaseConfig::name(const std::string& name)
 {
     name_ = name;
 }
 
-void Config::shortName(const std::string& short_name)
+void BaseConfig::shortName(const std::string& short_name)
 {
     short_name_ = short_name;
 }
 
-std::string Config::shortName() const
+std::string BaseConfig::shortName() const
 {
     return short_name_;
 }

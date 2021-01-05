@@ -21,7 +21,7 @@
 #include "evaluationstandard.h"
 #include "evaluationstandardwidget.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbobject.h"

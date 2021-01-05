@@ -18,7 +18,7 @@
 #include "eval/requirement/extra/dataconfig.h"
 #include "eval/requirement/extra/dataconfigwidget.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 using namespace std;
 
@@ -28,7 +28,7 @@ namespace EvaluationRequirement
     ExtraDataConfig::ExtraDataConfig(
             const std::string& class_id, const std::string& instance_id,
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-        : Config(class_id, instance_id, group, standard, eval_man)
+        : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
         registerParameter("min_duration", &min_duration_, 60.0);
         registerParameter("min_num_updates", &min_num_updates_, 10);
@@ -45,7 +45,7 @@ namespace EvaluationRequirement
     {
         assert (layout);
 
-        Config::addGUIElements(layout);
+        BaseConfig::addGUIElements(layout);
     }
 
     ExtraDataConfigWidget* ExtraDataConfig::widget()

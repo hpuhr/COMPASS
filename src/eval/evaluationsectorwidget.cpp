@@ -21,7 +21,7 @@
 #include "sector.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 
 #include <QLabel>
 #include <QCheckBox>

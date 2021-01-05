@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTION_H
 #define EVALUATIONREQUIREMENTDETECTION_H
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "evaluationtargetposition.h"
 
 #include <QVariant>

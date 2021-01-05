@@ -18,7 +18,7 @@
 #include "evaluationstandardwidget.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -91,12 +91,12 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 
         group->showMenu();
     }
-    else if (dynamic_cast<EvaluationRequirement::Config*>(item))
+    else if (dynamic_cast<EvaluationRequirement::BaseConfig*>(item))
     {
         loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
 
-        EvaluationRequirement::Config* config =
-                dynamic_cast<EvaluationRequirement::Config*>(item);
+        EvaluationRequirement::BaseConfig* config =
+                dynamic_cast<EvaluationRequirement::BaseConfig*>(item);
 
         showRequirementWidget(config->widget());
     }

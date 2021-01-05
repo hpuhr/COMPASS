@@ -17,7 +17,7 @@
 
 #include "eval/results/detection/single.h"
 #include "eval/results/detection/joined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/detection/detection.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"

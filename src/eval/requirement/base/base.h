@@ -32,11 +32,16 @@ namespace EvaluationRequirementResult {
 namespace EvaluationRequirement
 {
 
+enum PROB_TYPE {
+    MIN=0, // minimum probability
+    MAX // maximum probability
+};
+
 class Base
 {
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-                          EvaluationManager& eval_man);
+         EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -47,6 +52,12 @@ public:
     std::string shortname() const;
     std::string groupName() const;
 
+    float prob() const;
+
+    PROB_TYPE probType() const;
+    void probType(const PROB_TYPE& prob_type);
+    std::string probName() const;
+
 protected:
     static bool in_appimage_;
 
@@ -55,6 +66,10 @@ protected:
     std::string group_name_;
 
     EvaluationManager& eval_man_;
+
+    float prob_ {0};
+    PROB_TYPE prob_type_ {PROB_TYPE::MIN};
+    std::string prob_name_{"Minimum Probability [1]"};
 };
 
 }

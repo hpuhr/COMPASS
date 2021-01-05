@@ -17,7 +17,7 @@
 
 #include "eval/results/position/alongsingle.h"
 #include "eval/results/position/alongjoined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

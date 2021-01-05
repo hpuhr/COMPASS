@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 
 namespace EvaluationRequirement
 {
@@ -42,6 +42,21 @@ std::string Base::shortname() const
 std::string Base::groupName() const
 {
     return group_name_;
+}
+
+float Base::prob() const
+{
+    return prob_;
+}
+
+PROB_TYPE Base::probType() const
+{
+    return prob_type_;
+}
+
+void Base::probType(const PROB_TYPE& prob_type)
+{
+    prob_type_ = prob_type;
 }
 
 }

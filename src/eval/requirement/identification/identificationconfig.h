@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTIDENTIFICATIONCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/identification/identification.h"
 #include "eval/requirement/identification/identificationconfigwidget.h"
 
@@ -31,7 +31,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class IdentificationConfig : public Config
+    class IdentificationConfig : public BaseConfig
     {
     public:
         IdentificationConfig(const std::string& class_id, const std::string& instance_id,

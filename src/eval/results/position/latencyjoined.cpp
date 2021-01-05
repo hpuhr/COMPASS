@@ -17,7 +17,7 @@
 
 #include "eval/results/position/latencysingle.h"
 #include "eval/results/position/latencyjoined.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"

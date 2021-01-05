@@ -19,7 +19,7 @@
 #define EVALUATIONRESULTSGENERATOR_H
 
 #include "eval/results/report/treemodel.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/results/base.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgeneratorwidget.h"

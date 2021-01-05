@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTEXTRADATACONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/extra/dataconfigwidget.h"
 #include "eval/requirement/extra/data.h"
 
@@ -32,7 +32,7 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class ExtraDataConfig : public Config
+    class ExtraDataConfig : public BaseConfig
     {
     public:
         ExtraDataConfig(const std::string& class_id, const std::string& instance_id,

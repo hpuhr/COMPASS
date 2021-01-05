@@ -17,7 +17,7 @@
 
 #include "eval/results/joined.h"
 #include "eval/results/report/sectioncontenttable.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "sectorlayer.h"
 
 namespace EvaluationRequirementResult

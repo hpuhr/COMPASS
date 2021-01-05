@@ -36,7 +36,7 @@ namespace EvaluationRequirement
 
     class Base;
 
-    class Config : public QObject, public Configurable, public EvaluationStandardTreeItem
+    class BaseConfig : public QObject, public Configurable, public EvaluationStandardTreeItem
     {
         Q_OBJECT
 
@@ -47,10 +47,10 @@ namespace EvaluationRequirement
         void changedShortNameSlot(const QString& value);
 
     public:
-        Config(const std::string& class_id, const std::string& instance_id,
+        BaseConfig(const std::string& class_id, const std::string& instance_id,
                                     Group& group, EvaluationStandard& standard,
                                     EvaluationManager& eval_man);
-        virtual ~Config();
+        virtual ~BaseConfig();
 
         virtual void generateSubConfigurable(const std::string& class_id,
                                              const std::string& instance_id) override;
