@@ -33,6 +33,7 @@
 #include <QStackedWidget>
 #include <QFrame>
 #include <QTreeView>
+#include <QFormLayout>
 
 using namespace std;
 
@@ -93,6 +94,21 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
     if (eval_man_.hasCurrentStandard())
         updateStandardStack();
+
+    // some cfg
+    {
+        QFormLayout* form_layout = new QFormLayout();
+
+        // max ref time diff
+        max_ref_time_diff_edit_ = new QLineEdit(QString::number(eval_man_.maxRefTimeDiff()));
+        max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
+        connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
+                this, &EvaluationStandardTabWidget::maxRefTimeDiffEditSlot);
+
+        form_layout->addRow("Reference Maximum Time Difference [s]", max_ref_time_diff_edit_);
+
+        main_layout->addLayout(form_layout);
+    }
 
     // connections
     connect (&eval_man_, &EvaluationManager::standardsChangedSignal,
@@ -196,4 +212,17 @@ void EvaluationStandardTabWidget::updateStandardStack()
         standards_widget_->addWidget(standard.widget());
 
     standards_widget_->setCurrentWidget(standard.widget());
+}
+
+void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
+{
+    loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        eval_man_.maxRefTimeDiff(val);
+    else
+        loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: invalid value";
 }

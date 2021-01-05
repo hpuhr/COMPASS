@@ -36,13 +36,7 @@ namespace EvaluationRequirement
 
         config_.addGUIElements(form_layout_);
 
-        // max ref time diff
-        max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
-        max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
-        connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
-                this, &ModeAFalseConfigWidget::maxRefTimeDiffEditSlot);
 
-        form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
 
         // false prob
         max_prob_false_edit_ = new QLineEdit(QString::number(config_.maximumProbabilityFalse()));
@@ -53,19 +47,6 @@ namespace EvaluationRequirement
         form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
 
         setLayout(form_layout_);
-    }
-
-    void ModeAFalseConfigWidget::maxRefTimeDiffEditSlot(QString value)
-    {
-        loginf << "ModeAConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
-
-        bool ok;
-        float val = value.toFloat(&ok);
-
-        if (ok)
-            config_.maxRefTimeDiff(val);
-        else
-            loginf << "ModeAConfigWidget: maxRefTimeDiffEditSlot: invalid value";
     }
 
     void ModeAFalseConfigWidget::maxProbFalseEditSlot(QString value)

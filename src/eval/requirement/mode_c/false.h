@@ -27,22 +27,17 @@ namespace EvaluationRequirement
     {
     public:
         ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-              EvaluationManager& eval_man, float max_ref_time_diff,
-              float maximum_probability_false, float maximum_difference);
+              EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference);
 
         virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
                 const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
                 const SectorLayer& sector_layer) override;
-
-        float maxRefTimeDiff() const;
 
         float maximumDifference() const;
 
         float maximumProbabilityFalse() const;
 
     protected:
-        float max_ref_time_diff_ {0};
-
         float maximum_probability_false_{0};
 
         float maximum_difference_ {0};

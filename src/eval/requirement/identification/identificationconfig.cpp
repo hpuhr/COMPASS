@@ -30,7 +30,6 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
         : Config(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
         registerParameter("minimum_probability", &minimum_probability_, 0.99);
     }
 
@@ -52,20 +51,9 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
         shared_ptr<Identification> req = make_shared<Identification>(
-                    name_, short_name_, group_.name(), eval_man_,
-                    max_ref_time_diff_, minimum_probability_);
+                    name_, short_name_, group_.name(), eval_man_, minimum_probability_);
 
         return req;
-    }
-
-    float IdentificationConfig::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
-    }
-
-    void IdentificationConfig::maxRefTimeDiff(float value)
-    {
-        max_ref_time_diff_ = value;
     }
 
     float IdentificationConfig::minimumProbability() const

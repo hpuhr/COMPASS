@@ -27,9 +27,8 @@ namespace EvaluationRequirement
     public:
         Identification(
                 const std::string& name, const std::string& short_name, const std::string& group_name,
-                EvaluationManager& eval_man, float max_ref_time_diff, float minimum_probability);
+                EvaluationManager& eval_man, float minimum_probability);
 
-        float maxRefTimeDiff() const;
         float minimumProbability() const;
 
         virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -37,7 +36,6 @@ namespace EvaluationRequirement
                 const SectorLayer& sector_layer) override;
 
     protected:
-        float max_ref_time_diff_ {0};
         float minimum_probability_{0};
     };
 

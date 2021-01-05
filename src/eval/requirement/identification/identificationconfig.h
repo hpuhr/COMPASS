@@ -42,14 +42,10 @@ namespace EvaluationRequirement
         IdentificationConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
-        float maxRefTimeDiff() const;
-        void maxRefTimeDiff(float value);
-
         float minimumProbability() const;
         void minimumProbability(float value);
 
     protected:
-        float max_ref_time_diff_ {0};
         float minimum_probability_{0};
 
         std::unique_ptr<IdentificationConfigWidget> widget_;

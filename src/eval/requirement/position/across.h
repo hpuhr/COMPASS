@@ -29,10 +29,8 @@ class PositionAcross : public Base
 public:
     PositionAcross(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man,
-            float max_time_diff, float max_abs_value, float minimum_probability);
+            EvaluationManager& eval_man, float max_abs_value, float minimum_probability);
 
-    float maxRefTimeDiff() const;
     float maxAbsValue() const;
     float minimumProbability() const;
 
@@ -42,8 +40,6 @@ public:
 
 
 protected:
-
-    float max_ref_time_diff_ {0};
     float max_abs_value_ {0};
     float minimum_probability_{0};
 };

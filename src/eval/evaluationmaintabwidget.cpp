@@ -28,6 +28,7 @@
 #include <QLabel>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QLineEdit>
 
 EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
                                                  EvaluationManagerWidget& man_widget)

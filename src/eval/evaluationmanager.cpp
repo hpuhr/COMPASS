@@ -91,6 +91,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
     registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
 
+    registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
+
     // load filter
     registerParameter("use_load_filter", &use_load_filter_, false);
 
@@ -2458,5 +2460,15 @@ void EvaluationManager::useASDBFilter(bool value)
     use_adsb_filter_ = value;
 }
 
+float EvaluationManager::maxRefTimeDiff() const
+{
+    return max_ref_time_diff_;
+}
 
+void EvaluationManager::maxRefTimeDiff(float value)
+{
+    loginf << "EvaluationManager: maxRefTimeDiff: value " << value;
+
+    max_ref_time_diff_ = value;
+}
 

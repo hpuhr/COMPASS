@@ -28,8 +28,6 @@ namespace EvaluationRequirement
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
                          : Config(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
-
         registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
     }
 
@@ -51,21 +49,11 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ModeCPresentConfig::createRequirement()
     {
         shared_ptr<ModeCPresent> req = make_shared<ModeCPresent>(
-                    name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    minimum_probability_present_);
+                    name_, short_name_, group_.name(), eval_man_, minimum_probability_present_);
 
         return req;
     }
 
-    float ModeCPresentConfig::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
-    }
-
-    void ModeCPresentConfig::maxRefTimeDiff(float value)
-    {
-        max_ref_time_diff_ = value;
-    }
 
     float ModeCPresentConfig::minimumProbabilityPresent() const
     {

@@ -34,8 +34,6 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
-        void maxRefTimeDiffEditSlot(QString value);
-
         void maxProbFalseEditSlot(QString value);
 
     public:
@@ -45,8 +43,6 @@ namespace EvaluationRequirement
         ModeAFalseConfig& config_;
 
         QFormLayout* form_layout_ {nullptr};
-
-        QLineEdit* max_ref_time_diff_edit_{nullptr};
 
         QLineEdit* max_prob_false_edit_{nullptr};
     };

@@ -40,15 +40,10 @@ namespace EvaluationRequirement
         ModeAFalseConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
-        float maxRefTimeDiff() const;
-        void maxRefTimeDiff(float value);
-
         float maximumProbabilityFalse() const;
         void maximumProbabilityFalse(float value);
 
     protected:
-        float max_ref_time_diff_ {0};
-
         float maximum_probability_false_{0};
 
         std::unique_ptr<ModeAFalseConfigWidget> widget_;

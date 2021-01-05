@@ -31,12 +31,10 @@ namespace EvaluationRequirement
 {
 
     ModeAFalse::ModeAFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                 EvaluationManager& eval_man, float max_ref_time_diff, float maximum_probability_false)
+                 EvaluationManager& eval_man, float maximum_probability_false)
         : Base(name, short_name, group_name, eval_man),
-          max_ref_time_diff_(max_ref_time_diff),
           maximum_probability_false_(maximum_probability_false)
     {
-
     }
 
     std::shared_ptr<EvaluationRequirementResult::Single> ModeAFalse::evaluate (
@@ -45,6 +43,8 @@ namespace EvaluationRequirement
     {
         logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
                << " max prob " << maximum_probability_false_;
+
+        float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
@@ -94,7 +94,7 @@ namespace EvaluationRequirement
             tod = tst_id.first;
             pos_current = target_data.tstPosForTime(tod);
 
-            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
+            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
             {
                 if (!skip_no_data_details)
                     details.push_back({tod, pos_current,
@@ -106,7 +106,7 @@ namespace EvaluationRequirement
                 continue;
             }
 
-            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
             ref_pos = ret_pos.first;
             ok = ret_pos.second;
@@ -150,7 +150,7 @@ namespace EvaluationRequirement
             {
                 code = target_data.tstModeAForTime(tod);
 
-                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
+                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
 
                 if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
                 {
@@ -255,11 +255,6 @@ namespace EvaluationRequirement
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
                     num_unknown, num_correct, num_false, details);
-    }
-
-    float ModeAFalse::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
     }
 
     float ModeAFalse::maximumProbabilityFalse() const

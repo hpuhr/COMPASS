@@ -40,15 +40,10 @@ namespace EvaluationRequirement
         ModeCPresentConfigWidget* widget() override;
         std::shared_ptr<Base> createRequirement() override;
 
-        float maxRefTimeDiff() const;
-        void maxRefTimeDiff(float value);
-
         float minimumProbabilityPresent() const;
         void minimumProbabilityPresent(float value);
 
     protected:
-        float max_ref_time_diff_ {0};
-
         float minimum_probability_present_{0};
 
         std::unique_ptr<ModeCPresentConfigWidget> widget_;

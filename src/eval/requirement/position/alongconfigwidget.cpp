@@ -34,15 +34,6 @@ namespace EvaluationRequirement
 
         config_.addGUIElements(form_layout_);
 
-        // max ref time diff
-        max_ref_time_diff_edit_ = new QLineEdit(QString::number(config_.maxRefTimeDiff()));
-        max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
-        connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
-                this, &PositionAlongConfigWidget::maxRefTimeDiffEditSlot);
-
-        form_layout_->addRow("Maximum Reference Time Difference [s]", max_ref_time_diff_edit_);
-
-
         // max dist
         max_abs_value_edit_ = new QLineEdit(QString::number(config_.maxAbsValue()));
         max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
@@ -61,20 +52,6 @@ namespace EvaluationRequirement
 
         setLayout(form_layout_);
     }
-
-    void PositionAlongConfigWidget::maxRefTimeDiffEditSlot(QString value)
-    {
-        loginf << "PositionAlongConfigWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
-
-        bool ok;
-        float val = value.toFloat(&ok);
-
-        if (ok)
-            config_.maxRefTimeDiff(val);
-        else
-            loginf << "PositionAlongConfigWidget: maxRefTimeDiffEditSlot: invalid value";
-    }
-
 
     void PositionAlongConfigWidget::maxAbsValueEditSlot(QString value)
     {

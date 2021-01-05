@@ -310,6 +310,9 @@ public:
     bool useASDBFilter() const;
     void useASDBFilter(bool value);
 
+    float maxRefTimeDiff() const;
+    void maxRefTimeDiff(float value);
+
 protected:
     COMPASS& compass_;
 
@@ -335,6 +338,8 @@ protected:
     std::string current_standard_;
     nlohmann::json configs_;
     std::string current_config_name_;
+
+    float max_ref_time_diff_ {0};
 
     // utn filter stuff
     bool update_results_ {true}; // to supress updating of results during bulk operations

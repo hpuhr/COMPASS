@@ -35,9 +35,9 @@ namespace EvaluationRequirement
 
 PositionDistance::PositionDistance(const std::string& name, const std::string& short_name, const std::string& group_name,
                                          EvaluationManager& eval_man,
-                                         float max_ref_time_diff, float max_abs_value, float minimum_probability)
+                                         float max_abs_value, float minimum_probability)
     : Base(name, short_name, group_name, eval_man),
-      max_ref_time_diff_(max_ref_time_diff), max_abs_value_(max_abs_value), minimum_probability_(minimum_probability)
+      max_abs_value_(max_abs_value), minimum_probability_(minimum_probability)
 {
 
 }
@@ -59,6 +59,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 {
     logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_ << " minimum_probability " << minimum_probability_;
+
+    float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
@@ -112,7 +114,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         value_ok = true;
 
-        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
+        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 details.push_back({tod, tst_pos,
@@ -126,7 +128,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
         ref_pos = ret_pos.first;
         ok = ret_pos.second;
@@ -248,11 +250,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
                 values, details);
-}
-
-float PositionDistance::maxRefTimeDiff() const
-{
-    return max_ref_time_diff_;
 }
 
 }

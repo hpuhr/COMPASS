@@ -28,8 +28,6 @@ namespace EvaluationRequirement
                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
                          : Config(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
-
         registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
 
         registerParameter("max_difference", &max_difference_, 100);
@@ -53,20 +51,9 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> ModeCFalseConfig::createRequirement()
     {
         shared_ptr<ModeCFalse> req = make_shared<ModeCFalse>(
-                    name_, short_name_, group_.name(), eval_man_, max_ref_time_diff_,
-                    maximum_probability_false_, max_difference_);
+                    name_, short_name_, group_.name(), eval_man_, maximum_probability_false_, max_difference_);
 
         return req;
-    }
-
-    float ModeCFalseConfig::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
-    }
-
-    void ModeCFalseConfig::maxRefTimeDiff(float value)
-    {
-        max_ref_time_diff_ = value;
     }
 
     float ModeCFalseConfig::maximumProbabilityFalse() const

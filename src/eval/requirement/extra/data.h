@@ -53,7 +53,7 @@ public:
     ExtraData(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             EvaluationManager& eval_man,
-            float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
+            float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
             float maximum_probability);
 
     float minDuration() const;
@@ -69,8 +69,6 @@ public:
             const SectorLayer& sector_layer) override;
 
 protected:
-    float max_ref_time_diff_ {0};
-
     float min_duration_{0};
     unsigned int min_num_updates_ {0};
     bool ignore_primary_only_ {true};

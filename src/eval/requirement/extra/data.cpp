@@ -33,9 +33,9 @@ namespace EvaluationRequirement
 ExtraData::ExtraData(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
-        float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
+        float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
         float maximum_probability)
-    : Base(name, short_name, group_name, eval_man), max_ref_time_diff_(max_ref_time_diff), min_duration_(min_duration),
+    : Base(name, short_name, group_name, eval_man), min_duration_(min_duration),
       min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only),
       maximum_probability_(maximum_probability)
 {
@@ -70,6 +70,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " maximum_probability " << maximum_probability_;
 
+    float max_ref_time_diff = eval_man_.maxRefTimeDiff();
     bool ignore = false;
 
     // create ref time periods, irrespective of inside
@@ -111,7 +112,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             // not first, was_inside is valid
 
             // extend last time period, if possible, or finish last and create new one
-            if (ref_periods.lastPeriod().isCloseToEnd(tod, max_ref_time_diff_)) // 4.9
+            if (ref_periods.lastPeriod().isCloseToEnd(tod, max_ref_time_diff)) // 4.9
                 ref_periods.lastPeriod().extend(tod);
             else
                 ref_periods.add({tod, tod});

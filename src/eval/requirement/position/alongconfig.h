@@ -47,11 +47,7 @@ public:
     float minimumProbability() const;
     void minimumProbability(float value);
 
-    float maxRefTimeDiff() const;
-    void maxRefTimeDiff(float value);
-
 protected:
-    float max_ref_time_diff_ {0};
     float max_abs_value_ {0};
     float minimum_probability_{0};
 

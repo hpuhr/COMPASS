@@ -30,7 +30,6 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : Config(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
         registerParameter("max_abs_value", &max_abs_value_, 50.0);
         registerParameter("minimum_probability", &minimum_probability_, 0.9);
     }
@@ -59,7 +58,7 @@ namespace EvaluationRequirement
     {
         shared_ptr<PositionAlong> req = make_shared<PositionAlong>(
                     name_, short_name_, group_.name(), eval_man_,
-                    max_ref_time_diff_, max_abs_value_, minimum_probability_);
+                    max_abs_value_, minimum_probability_);
 
         return req;
     }
@@ -82,15 +81,5 @@ namespace EvaluationRequirement
     void PositionAlongConfig::minimumProbability(float value)
     {
         minimum_probability_ = value;
-    }
-
-    float PositionAlongConfig::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
-    }
-
-    void PositionAlongConfig::maxRefTimeDiff(float value)
-    {
-        max_ref_time_diff_ = value;
     }
 }

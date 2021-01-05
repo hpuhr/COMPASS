@@ -32,18 +32,12 @@ namespace EvaluationRequirement
 
     Identification::Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            EvaluationManager& eval_man, float max_ref_time_diff, float minimum_probability)
+            EvaluationManager& eval_man, float minimum_probability)
         : Base(name, short_name, group_name, eval_man),
-          max_ref_time_diff_(max_ref_time_diff), minimum_probability_(minimum_probability)
+          minimum_probability_(minimum_probability)
     {
 
     }
-
-    float Identification::maxRefTimeDiff() const
-    {
-        return max_ref_time_diff_;
-    }
-
 
     float Identification::minimumProbability() const
     {
@@ -56,6 +50,8 @@ namespace EvaluationRequirement
     {
         logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " minimum_probability " << minimum_probability_;
+
+        float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
@@ -105,7 +101,7 @@ namespace EvaluationRequirement
             tod = tst_id.first;
             pos_current = target_data.tstPosForTime(tod);
 
-            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
+            if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
             {
                 if (!skip_no_data_details)
                     details.push_back({tod, pos_current,
@@ -117,7 +113,7 @@ namespace EvaluationRequirement
                 continue;
             }
 
-            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff_);
+            ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
             ref_pos = ret_pos.first;
             ok = ret_pos.second;
@@ -161,7 +157,7 @@ namespace EvaluationRequirement
             {
                 callsign = target_data.tstCallsignForTime(tod);
 
-                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff_);
+                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
 
                 if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
                 {

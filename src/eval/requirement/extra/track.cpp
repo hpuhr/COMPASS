@@ -35,9 +35,9 @@ namespace EvaluationRequirement
 ExtraTrack::ExtraTrack(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         EvaluationManager& eval_man,
-        float max_ref_time_diff, float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
+        float min_duration, unsigned int min_num_updates, bool ignore_primary_only,
         float maximum_probability)
-    : Base(name, short_name, group_name, eval_man), max_ref_time_diff_(max_ref_time_diff), min_duration_(min_duration),
+    : Base(name, short_name, group_name, eval_man), min_duration_(min_duration),
       min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only),
       maximum_probability_(maximum_probability)
 {
@@ -72,6 +72,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " maximum_probability " << maximum_probability_;
 
+    float max_ref_time_diff = eval_man_.maxRefTimeDiff();
+
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
     float tod{0};
@@ -94,7 +96,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         tod = tst_id.first;
         tst_pos = target_data.tstPosForTime(tod);
 
-        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff_))
+        if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
             continue;
 
         has_ground_bit = target_data.hasTstGroundBitForTime(tod);
