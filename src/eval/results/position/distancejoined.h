@@ -57,8 +57,8 @@ namespace EvaluationRequirementResult
         unsigned int num_no_ref_ {0};
         unsigned int num_pos_outside_ {0};
         unsigned int num_pos_inside_ {0};
-        unsigned int num_value_ok_ {0};
-        unsigned int num_value_nok_ {0};
+        unsigned int num_comp_failed_ {0};
+        unsigned int num_comp_passed_ {0};
 
         vector<double> values_;
 
@@ -68,7 +68,7 @@ namespace EvaluationRequirementResult
         double value_var_ {0};
 
         bool has_p_min_ {false};
-        float p_min_{0};
+        float p_passed_{0};
 
         void addToValues (std::shared_ptr<SinglePositionDistance> single_result);
         void update();

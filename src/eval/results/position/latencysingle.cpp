@@ -292,9 +292,9 @@ namespace EvaluationRequirementResult
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
              rq_det_it.value_,  // "DLatency"
-             rq_det_it.value_ok_, // DLatencyOK"
-             rq_det_it.num_value_ok_, // "#LTOK",
-             rq_det_it.num_value_nok_, // "#LTNOK"
+             rq_det_it.check_passed_, // DLatencyOK"
+             rq_det_it.num_check_failed_, // "#LTOK",
+             rq_det_it.num_check_passed_, // "#LTNOK"
              rq_det_it.comment_.c_str()}, // "Comment"
                         this, detail_cnt);
 
@@ -341,7 +341,7 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_window_longitude"] = 0.02;
             (*viewable_ptr)["time"] = detail.tod_;
 
-            if (!detail.value_ok_)
+            if (!detail.check_passed_)
                 (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
 
             return viewable_ptr;
@@ -360,7 +360,7 @@ namespace EvaluationRequirementResult
 
         for (auto& detail_it : details_)
         {
-            if (detail_it.value_ok_)
+            if (detail_it.check_passed_)
                 continue;
 
             if (has_pos)

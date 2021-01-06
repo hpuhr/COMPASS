@@ -18,12 +18,12 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     form_layout_ = new QFormLayout();
 
     QLineEdit* name_edit = new QLineEdit (config_.name().c_str());
-    connect(name_edit, &QLineEdit::textEdited, this, &BaseConfigWidget::changedNameSlot);
+    connect(name_edit, &QLineEdit::editingFinished, this, &BaseConfigWidget::changedNameSlot);
 
     form_layout_->addRow("Name", name_edit);
 
     QLineEdit* short_name_edit = new QLineEdit (config_.shortName().c_str());
-    connect(short_name_edit, &QLineEdit::textEdited, this, &BaseConfigWidget::changedShortNameSlot);
+    connect(short_name_edit, &QLineEdit::editingFinished, this, &BaseConfigWidget::changedShortNameSlot);
 
     form_layout_->addRow("Short Name", short_name_edit);
 
@@ -50,22 +50,34 @@ BaseConfigWidget::~BaseConfigWidget()
 
 }
 
-void BaseConfigWidget::changedNameSlot(const QString& value)
+void BaseConfigWidget::changedNameSlot()
 {
-    string value_str = value.toStdString();
+    QLineEdit* edit = dynamic_cast<QLineEdit*>(sender());
+    assert (edit);
+
+    string value_str = edit->text().toStdString();
 
     loginf << "BaseConfigWidget: changedNameSlot: name '" << value_str << "'";
 
-
+    if (value_str.size())
+        config_.name(value_str);
+    else
+        logerr << "BaseConfigWidget: changedNameSlot: impossible name '" << value_str << "'";
 }
 
-void BaseConfigWidget::changedShortNameSlot(const QString& value)
+void BaseConfigWidget::changedShortNameSlot()
 {
-    string value_str = value.toStdString();
+    QLineEdit* edit = dynamic_cast<QLineEdit*>(sender());
+    assert (edit);
+
+    string value_str = edit->text().toStdString();
 
     loginf << "BaseConfigWidget: changedShortNameSlot: name '" << value_str << "'";
 
-    config_.shortName(value_str);
+    if (value_str.size())
+        config_.shortName(value_str);
+    else
+        logerr << "BaseConfigWidget: changedShortNameSlot: impossible name '" << value_str << "'";
 }
 
 void BaseConfigWidget::changedProbabilitySlot(const QString& value)

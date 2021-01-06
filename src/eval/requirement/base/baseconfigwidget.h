@@ -21,8 +21,8 @@ class BaseConfigWidget : public QWidget
 signals:
 
 public slots:
-    void changedNameSlot(const QString& value);
-    void changedShortNameSlot(const QString& value);
+    void changedNameSlot();
+    void changedShortNameSlot();
     void changedProbabilitySlot(const QString& value);
     void changedTypeSlot();
 

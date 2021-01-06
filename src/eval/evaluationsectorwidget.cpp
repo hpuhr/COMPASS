@@ -73,7 +73,7 @@ void EvaluationSectorWidget::update()
 
             for (auto& req_grp_it : std)
             {
-                const string& requirement_group_name = req_grp_it.first;
+                const string& requirement_group_name = req_grp_it->name();
 
                 QCheckBox* check = new QCheckBox(requirement_group_name.c_str());
                 check->setChecked(eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));

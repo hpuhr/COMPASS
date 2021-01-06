@@ -293,7 +293,7 @@ void EvaluationManager::loadData ()
 
             for (auto& req_group_it : standard)
             {
-                const string& requirement_group_name = req_group_it.first;
+                const string& requirement_group_name = req_group_it->name();
 
                 if (!useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                     continue; // skip if not used
@@ -1164,7 +1164,7 @@ std::vector<std::string> EvaluationManager::currentRequirementNames()
     {
         for (auto& req_grp_it : currentStandard())
         {
-            for (auto& req_it : *req_grp_it.second)
+            for (auto& req_it : *req_grp_it)
             {
                 if (find(names.begin(), names.end(), req_it->name()) == names.end())
                     names.push_back(req_it->name());

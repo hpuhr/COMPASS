@@ -30,10 +30,12 @@ public:
     PositionDistance(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            float dist_abs_value, COMPARISON_TYPE dist_abs_value_check_type);
+            float threshold_value, COMPARISON_TYPE threshold_value_check_type,
+            bool failed_values_of_interest);
 
-    float distAbsValuse() const;
-    COMPARISON_TYPE distAbsValueCheckType() const;
+    float thresholdValue() const;
+    COMPARISON_TYPE thresholdValueCheckType() const;
+    bool failedValuesOfInterest() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -41,8 +43,9 @@ public:
 
 
 protected:
-    float dist_abs_value_ {0};
-    COMPARISON_TYPE dist_abs_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
+    float threshold_value_ {0};
+    COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
+    bool failed_values_of_interest_ {true};
 };
 
 }

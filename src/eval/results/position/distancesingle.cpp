@@ -44,12 +44,12 @@ namespace EvaluationRequirementResult
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_pos, unsigned int num_no_ref,
             unsigned int num_pos_outside, unsigned int num_pos_inside,
-            unsigned int num_value_ok, unsigned int num_value_nok,
+            unsigned int num_comp_failed, unsigned int num_comp_passed,
             vector<double> values,
             std::vector<EvaluationRequirement::PositionDetail> details)
         : Single("SinglePositionDistance", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-          num_pos_inside_(num_pos_inside), num_value_ok_(num_value_ok), num_value_nok_(num_value_nok),
+          num_pos_inside_(num_pos_inside), num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
           values_(values), details_(details)
     {
         update();
@@ -61,7 +61,7 @@ namespace EvaluationRequirementResult
         assert (num_no_ref_ <= num_pos_);
         assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-        assert (values_.size() == num_value_ok_+num_value_nok_);
+        assert (values_.size() == num_comp_failed_+num_comp_passed_);
 
         unsigned int num_distances = values_.size();
 
@@ -76,8 +76,8 @@ namespace EvaluationRequirementResult
                 value_var_ += pow(val - value_avg_, 2);
             value_var_ /= (float)num_distances;
 
-            assert (num_value_ok_ <= num_distances);
-            p_min_ = (float)num_value_ok_/(float)num_distances;
+            assert (num_comp_failed_ <= num_distances);
+            p_passed_ = (float)num_comp_passed_/(float)num_distances;
             has_p_min_ = true;
 
             result_usable_ = true;
@@ -90,7 +90,7 @@ namespace EvaluationRequirementResult
             value_var_ = 0;
 
             has_p_min_ = false;
-            p_min_ = 0;
+            p_passed_ = 0;
 
             result_usable_ = false;
         }
@@ -135,16 +135,25 @@ namespace EvaluationRequirementResult
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
+        {
+            Qt::SortOrder order = Qt::AscendingOrder;
+
+            if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
+                    || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
+                order = Qt::DescendingOrder;
+
+
             section.addTable(table_name, 15,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "DMin", "DMax", "DAvg", "DSDev", "#DOK", "#DNOK", "PDOK"}, true, 14);
+             "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "PCP"}, true, 14, order);
+        }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
         QVariant p_min_var;
 
         if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+            p_min_var = roundf(p_passed_ * 10000.0) / 100.0;
 
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
@@ -154,8 +163,8 @@ namespace EvaluationRequirementResult
          Number::round(value_max_,2), // "DMax"
          Number::round(value_avg_,2), // "DAvg"
          Number::round(sqrt(value_var_),2), // "DSDev"
-         num_value_ok_, // "#DOK"
-         num_value_nok_, // "#DNOK"
+         num_comp_failed_, // "#DOK"
+         num_comp_passed_, // "#DNOK"
          p_min_var}, // "PDOK"
                     this, {utn_});
     }
@@ -164,17 +173,25 @@ namespace EvaluationRequirementResult
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
+        {
+            Qt::SortOrder order = Qt::AscendingOrder;
+
+            if(req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN
+                    || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
+                order = Qt::DescendingOrder;
+
             section.addTable(table_name, 18,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "DMin", "DMax", "DAvg", "DSDev", "#DOK", "#DNOK", "PDOK",
-             "MOPS", "NUCp/NIC", "NACp"}, true, 14);
+             "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "PCP",
+             "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
+        }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
-        QVariant p_min_var;
+        QVariant prob_var;
 
         if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+            prob_var = roundf(p_passed_ * 10000.0) / 100.0;
 
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
@@ -188,9 +205,9 @@ namespace EvaluationRequirementResult
          Number::round(value_max_,2), // "DMax"
          Number::round(value_avg_,2), // "DAvg"
          Number::round(sqrt(value_var_),2), // "DSDev"
-         num_value_ok_, // "#DOK"
-         num_value_nok_, // "#DNOK"
-         p_min_var, // "PDOK"
+         num_comp_failed_, // "#DOK"
+         num_comp_passed_, // "#DNOK"
+         prob_var, // "PDOK"
          target_->mopsVersionsStr().c_str(), // "MOPS"
          target_->nucpNicStr().c_str(), // "NUCp/NIC"
          target_->nacpStr().c_str()}, // "NACp"
@@ -234,30 +251,30 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
         utn_req_table.addRow({"DVar [m]", "Variance of distance",
                               String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-        utn_req_table.addRow({"#DOK [1]", "Number of updates with distance", num_value_ok_}, this);
-        utn_req_table.addRow({"#DNOK [1]", "Number of updates with unacceptable distance ", num_value_nok_},
+        utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
+        utn_req_table.addRow({"#CP [1]", "Number of updates with  passed comparison", num_comp_passed_},
                              this);
 
         // condition
         {
-            QVariant p_min_var;
+            QVariant p_passed_var;
 
             if (has_p_min_)
-                p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+                p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
 
-            utn_req_table.addRow({"PDOK [%]", "Probability of acceptable distance", p_min_var}, this);
+            utn_req_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
-            utn_req_table.addRow({"Condition Distance", {}, req->getConditionStr().c_str()}, this);
+            utn_req_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
             string result {"Unknown"};
 
             if (has_p_min_)
-                result = req->getResultConditionStr(p_min_);
+                result = req->getResultConditionStr(p_passed_);
 
-            utn_req_table.addRow({"Condition Distance Fulfilled", "", result.c_str()}, this);
+            utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
-        if (has_p_min_ && p_min_ != 1.0)
+        if (has_p_min_ && p_passed_ != 1.0) // TODO
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());
@@ -277,9 +294,7 @@ namespace EvaluationRequirementResult
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 8,
-            {"ToD", "NoRef", "PosInside",
-             "DDistance", "DDistanceOK", "#DOK", "#DNOK",
-             "Comment"});
+            {"ToD", "NoRef", "PosInside", "Distance", "CP", "#CF", "#CP", "Comment"});
 
         EvaluationResultsReport::SectionContentTable& utn_req_details_table =
                 utn_req_section.getTable(tr_details_table_name_);
@@ -291,10 +306,10 @@ namespace EvaluationRequirementResult
             utn_req_details_table.addRow(
             {String::timeStringFromDouble(rq_det_it.tod_).c_str(),
              !rq_det_it.has_ref_pos_, rq_det_it.pos_inside_,
-             rq_det_it.value_,  // "DDistance"
-             rq_det_it.value_ok_, // DDistanceOK"
-             rq_det_it.num_value_ok_, // "#DOK",
-             rq_det_it.num_value_nok_, // "#DNOK"
+             rq_det_it.value_,  // "Distance"
+             rq_det_it.check_passed_, // CP"
+             rq_det_it.num_check_failed_, // "#CF",
+             rq_det_it.num_check_passed_, // "#CP"
              rq_det_it.comment_.c_str()}, // "Comment"
                         this, detail_cnt);
 
@@ -341,7 +356,7 @@ namespace EvaluationRequirementResult
             (*viewable_ptr)["position_window_longitude"] = 0.02;
             (*viewable_ptr)["time"] = detail.tod_;
 
-            if (!detail.value_ok_)
+            if (!detail.check_passed_)
                 (*viewable_ptr)["evaluation_results"]["highlight_details"] = vector<unsigned int>{detail_cnt};
 
             return viewable_ptr;
@@ -358,9 +373,12 @@ namespace EvaluationRequirementResult
         bool has_pos = false;
         double lat_min, lat_max, lon_min, lon_max;
 
+        bool failed_values_of_interest = req()->failedValuesOfInterest();
+
         for (auto& detail_it : details_)
         {
-            if (detail_it.value_ok_)
+            if ((failed_values_of_interest && detail_it.check_passed_)
+                    || (!failed_values_of_interest && !detail_it.check_passed_))
                 continue;
 
             if (has_pos)
@@ -430,14 +448,14 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    unsigned int SinglePositionDistance::numValueOk() const
+    unsigned int SinglePositionDistance::numCompFailed() const
     {
-        return num_value_ok_;
+        return num_comp_failed_;
     }
 
-    unsigned int SinglePositionDistance::numValueNOk() const
+    unsigned int SinglePositionDistance::numCompPassed() const
     {
-        return num_value_nok_;
+        return num_comp_passed_;
     }
 
 
@@ -475,4 +493,13 @@ namespace EvaluationRequirementResult
     {
         return details_;
     }
+
+    EvaluationRequirement::PositionDistance* SinglePositionDistance::req ()
+    {
+        EvaluationRequirement::PositionDistance* req =
+                dynamic_cast<EvaluationRequirement::PositionDistance*>(requirement_.get());
+        assert (req);
+        return req;
+    }
+
 }

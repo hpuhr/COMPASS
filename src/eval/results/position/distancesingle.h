@@ -34,7 +34,7 @@ public:
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_pos, unsigned int num_no_ref,
             unsigned int num_pos_outside, unsigned int num_pos_inside,
-            unsigned int num_value_ok, unsigned int num_value_nok,
+            unsigned int num_comp_failed, unsigned int num_comp_passed,
             vector<double> values,
             std::vector<EvaluationRequirement::PositionDetail> details);
 
@@ -46,8 +46,8 @@ public:
     unsigned int numNoRef() const;
     unsigned int numPosOutside() const;
     unsigned int numPosInside() const;
-    unsigned int numValueOk() const;
-    unsigned int numValueNOk() const;
+    unsigned int numCompFailed() const;
+    unsigned int numCompPassed() const;
 
     const vector<double>& values() const;
 
@@ -63,14 +63,15 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
+    EvaluationRequirement::PositionDistance* req ();
 
 protected:
     unsigned int num_pos_ {0};
     unsigned int num_no_ref_ {0};
     unsigned int num_pos_outside_ {0};
     unsigned int num_pos_inside_ {0};
-    unsigned int num_value_ok_ {0};
-    unsigned int num_value_nok_ {0};
+    unsigned int num_comp_failed_ {0};
+    unsigned int num_comp_passed_ {0};
 
     vector<double> values_;
 
@@ -80,7 +81,7 @@ protected:
     double value_var_ {0};
 
     bool has_p_min_ {false};
-    float p_min_{0};
+    float p_passed_{0};
 
     std::vector<EvaluationRequirement::PositionDetail> details_;
 

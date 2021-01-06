@@ -38,15 +38,19 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float distAbsValuse() const;
-    void distAbsValuse(float value);
+    float thresholdValue() const;
+    void thresholdValue(float value);
 
-    COMPARISON_TYPE distAbsValueCheckType() const;
-    void distAbsValueCheckType(const COMPARISON_TYPE& type);
+    COMPARISON_TYPE thresholdValueCheckType() const;
+    void thresholdValueCheckType(const COMPARISON_TYPE& type);
+
+    bool failedValuesOfInterest() const;
+    void failedValuesOfInterest(bool value);
 
 protected:
-    float dist_abs_value_ {0};
-    COMPARISON_TYPE dist_abs_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
+    float threshold_value_ {0};
+    COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
+    bool failed_values_of_interest_ {true};
 
     virtual void createWidget() override;
 };

@@ -98,4 +98,19 @@ std::string Base::getResultConditionStr (float prob) const
     return result ? "Passed" : "Failed";;
 }
 
+bool Base::compareValue (double val, double threshold, COMPARISON_TYPE check_type)
+{
+    if (check_type == COMPARISON_TYPE::LESS_THAN)
+        return val < threshold;
+    else if (check_type == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
+        return val <= threshold;
+    else if (check_type == COMPARISON_TYPE::GREATER_THAN)
+        return val > threshold;
+    else if (check_type == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+        return val >= threshold;
+    else
+        throw std::runtime_error("EvaluationRequiretBase: compareValue: unknown type '"
+                                 +to_string(check_type)+"'");
+}
+
 }

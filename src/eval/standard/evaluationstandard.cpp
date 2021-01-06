@@ -59,8 +59,11 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
         Group* group = new Group(class_id, instance_id, *this, eval_man_);
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
-        assert(groups_.find(group->name()) == groups_.end());
-        groups_[group->name()].reset(group);
+        groups_.emplace_back(group);
+        //assert(groups_.find(group->name()) == groups_.end());
+        //groups_[group->name()].reset(group);
+
+        connect (group, &Group::configsChangedSignal, this, &EvaluationStandard::groupsChangedSlot);
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -74,7 +77,12 @@ std::string EvaluationStandard::name() const
 
 bool EvaluationStandard::hasGroup (const std::string& name)
 {
-    return groups_.count(name);
+    //return groups_.count(name);
+
+    auto iter = std::find_if(groups_.begin(), groups_.end(),
+        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
+
+    return iter != groups_.end();
 }
 
 void EvaluationStandard::addGroup (const std::string& name)
@@ -96,28 +104,36 @@ void EvaluationStandard::addGroup (const std::string& name)
     if (widget_)
         endModelReset();
 
-    emit groupsChangedSignal();
+    //emit groupsChangedSignal();
 }
 
 Group& EvaluationStandard::group (const std::string& name)
 {
     assert (hasGroup(name));
-    return *groups_.at(name);
+
+    auto iter = std::find_if(groups_.begin(), groups_.end(),
+        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
+
+    assert (iter != groups_.end());
+
+    return *iter->get();
 }
 
 void EvaluationStandard::removeGroup (const std::string& name)
 {
     assert (hasGroup(name));
 
-    if (widget_)
-        beginModelReset();
+    auto iter = std::find_if(groups_.begin(), groups_.end(),
+        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
 
-    groups_.erase(name);
+    assert (iter != groups_.end());
+
+    groups_.erase(iter);
 
     if (widget_)
         endModelReset();
 
-    emit groupsChangedSignal();
+    //emit groupsChangedSignal();
 }
 
 EvaluationStandardWidget* EvaluationStandard::widget()
@@ -143,7 +159,7 @@ EvaluationStandardTreeItem* EvaluationStandard::child(int row)
 
     assert (group_it != groups_.end());
 
-    return group_it->second.get();
+    return group_it->get();
 }
 
 int EvaluationStandard::childCount() const
@@ -223,6 +239,17 @@ void EvaluationStandard::addGroupSlot()
 
         loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot: added " << name << ", "
                << groups_.size() << " groups" ;
+    }
+}
+
+void EvaluationStandard::groupsChangedSlot()
+{
+    loginf << "EvaluationStandard: groupsChangedSlot";
+
+    if (widget_)
+    {
+        beginModelReset();
+        endModelReset();
     }
 }
 

@@ -91,13 +91,13 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
-            const string& requirement_group_name = req_group_it.first;
+            const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            num_req_evals += req_group_it.second->size() * data.size(); // num reqs * num target
-            num_req_evals += req_group_it.second->size(); // num reqs for sector sum
+            num_req_evals += req_group_it->size() * data.size(); // num reqs * num target
+            num_req_evals += req_group_it->size(); // num reqs for sector sum
         }
     }
 
@@ -141,18 +141,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
-            const string& requirement_group_name = req_group_it.first;
+            const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
-                   << " group " << req_group_it.first;
+                   << " group " << requirement_group_name;
 
-            for (auto& req_cfg_it : *req_group_it.second)
+            for (auto& req_cfg_it : *req_group_it)
             {
                 loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
-                       << " group " << req_group_it.first
+                       << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
@@ -175,10 +175,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
-                             +":\n Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
+                             +":\n Requirement: "+req_group_it->name()+":"+req_cfg_it->name()).c_str());
                 postprocess_dialog.setValue(eval_cnt);
 
-                logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
+                logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it->name()
                        << " req '" << req_cfg_it->name() << "'";
 
                 while (!task_done)
@@ -206,7 +206,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                         postprocess_dialog.setLabelText(
                                     ("Sector Layer "+sector_layer_name
-                                     +":\n  "+req_group_it.first+": "+req_cfg_it->name()
+                                     +":\n  "+req_group_it->name()+": "+req_cfg_it->name()
                                      +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
                                      +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
                                      +" (estimated)").c_str());

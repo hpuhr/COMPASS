@@ -69,8 +69,8 @@ void JoinedPositionDistance::addToValues (std::shared_ptr<SinglePositionDistance
     num_no_ref_ += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
     num_pos_inside_ += single_result->numPosInside();
-    num_value_ok_ += single_result->numValueOk();
-    num_value_nok_ += single_result->numValueNOk();
+    num_comp_failed_ += single_result->numCompFailed();
+    num_comp_passed_ += single_result->numCompPassed();
 
     const vector<double>& other_values = single_result->values();
 
@@ -84,7 +84,7 @@ void JoinedPositionDistance::update()
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_value_ok_+num_value_nok_);
+    assert (values_.size() == num_comp_failed_+num_comp_passed_);
 
     unsigned int num_distances = values_.size();
 
@@ -99,8 +99,8 @@ void JoinedPositionDistance::update()
             value_var_ += pow(val - value_avg_, 2);
         value_var_ /= (float)num_distances;
 
-        assert (num_value_ok_ <= num_distances);
-        p_min_ = (float)num_value_ok_/(float)num_distances;
+        assert (num_comp_failed_ <= num_distances);
+        p_passed_ = (float)num_comp_passed_/(float)num_distances;
         has_p_min_ = true;
     }
     else
@@ -111,7 +111,7 @@ void JoinedPositionDistance::update()
         value_var_ = 0;
 
         has_p_min_ = false;
-        p_min_ = 0;
+        p_passed_ = 0;
     }
 }
 
@@ -141,22 +141,22 @@ void JoinedPositionDistance::addToOverviewTable(std::shared_ptr<EvaluationResult
             std::static_pointer_cast<EvaluationRequirement::PositionDistance>(requirement_);
     assert (req);
 
-    QVariant p_min_var;
+    QVariant p_passed_var;
 
     string result {"Unknown"};
 
     if (has_p_min_)
     {
-        p_min_var = String::percentToString(p_min_ * 100.0).c_str();
+        p_passed_var = String::percentToString(p_passed_ * 100.0).c_str();
 
-        result = req->getResultConditionStr(p_min_);
+        result = req->getResultConditionStr(p_passed_);
     }
 
     // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
     ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
-                     +(requirement_->shortname()+" Distance").c_str(),
-                     result_id_.c_str(), {num_value_ok_+num_value_nok_},
-                     p_min_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
+                     +(requirement_->shortname()).c_str(),
+                     result_id_.c_str(), {num_comp_failed_+num_comp_passed_},
+                     p_passed_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
 }
 
 void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -200,32 +200,32 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
     sec_det_table.addRow({"DVar [m]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
-    sec_det_table.addRow({"#DOK [1]", "Number of updates with distance", num_value_ok_}, this);
-    sec_det_table.addRow({"#DNOK [1]", "Number of updates with unacceptable distance ", num_value_nok_},
+    sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
+    sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
                          this);
 
 
     // condition
     {
-        QVariant p_min_var;
+        QVariant p_passed_var;
 
         if (has_p_min_)
-            p_min_var = roundf(p_min_ * 10000.0) / 100.0;
+            p_passed_var = roundf(p_passed_ * 10000.0) / 100.0;
 
-        sec_det_table.addRow({"PDOK [%]", "Probability of acceptable distance", p_min_var}, this);
+        sec_det_table.addRow({"PCP [%]", "Probability of passed comparison", p_passed_var}, this);
 
-        sec_det_table.addRow({"Condition Distance", {}, req->getConditionStr().c_str()}, this);
+        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
         string result {"Unknown"};
 
         if (has_p_min_)
-            result = req->getResultConditionStr(p_min_);
+            result = req->getResultConditionStr(p_passed_);
 
-        sec_det_table.addRow({"Condition Distance Fulfilled", "", result.c_str()}, this);
+        sec_det_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
     }
 
     // figure
-    if (has_p_min_ && p_min_ != 1.0)
+    if (has_p_min_ && p_passed_ != 1.0) // TODO
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                  getErrorsViewable());
@@ -307,8 +307,8 @@ void JoinedPositionDistance::updatesToUseChanges()
     num_no_ref_ = 0;
     num_pos_outside_ = 0;
     num_pos_inside_ = 0;
-    num_value_ok_ = 0;
-    num_value_nok_ = 0;
+    num_comp_failed_ = 0;
+    num_comp_passed_ = 0;
 
     values_.clear();
 

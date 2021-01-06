@@ -36,21 +36,28 @@ namespace EvaluationRequirement
 PositionDistance::PositionDistance(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        float dist_abs_value, COMPARISON_TYPE dist_abs_value_check_type)
+        float threshold_value, COMPARISON_TYPE threshold_value_check_type,
+        bool failed_values_of_interest)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      dist_abs_value_(dist_abs_value), dist_abs_value_check_type_(dist_abs_value_check_type)
+      threshold_value_(threshold_value), threshold_value_check_type_(threshold_value_check_type),
+      failed_values_of_interest_(failed_values_of_interest)
 {
 
 }
 
-float PositionDistance::distAbsValuse() const
+float PositionDistance::thresholdValue() const
 {
-    return dist_abs_value_;
+    return threshold_value_;
 }
 
-COMPARISON_TYPE PositionDistance::distAbsValueCheckType() const
+COMPARISON_TYPE PositionDistance::thresholdValueCheckType() const
 {
-    return dist_abs_value_check_type_;
+    return threshold_value_check_type_;
+}
+
+bool PositionDistance::failedValuesOfInterest() const
+{
+    return failed_values_of_interest_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate (
@@ -58,7 +65,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " dist_abs_value " << dist_abs_value_ << " dist_abs_value_check_type " << dist_abs_value_check_type_;
+           << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
@@ -69,8 +76,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
     unsigned int num_pos_calc_errors {0};
-    unsigned int num_value_ok {0};
-    unsigned int num_value_nok {0};
+    unsigned int num_comp_failed {0};
+    unsigned int num_comp_passed {0};
 
     std::vector<EvaluationRequirement::PositionDetail> details;
 
@@ -93,7 +100,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     EvaluationTargetPosition ref_pos;
     bool ok;
 
-    bool value_ok;
+    bool comp_passed;
 
     unsigned int num_distances {0};
     string comment;
@@ -112,16 +119,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         tod = tst_id.first;
         tst_pos = target_data.tstPosForTime(tod);
 
-        value_ok = true;
+        comp_passed = false;
 
         if (!target_data.hasRefDataForTime (tod, max_ref_time_diff))
         {
             if (!skip_no_data_details)
                 details.push_back({tod, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, value_ok, // pos_inside, value, value_ok,
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_value_ok, num_value_nok,
+                                   num_comp_failed, num_comp_passed,
                                    "No reference data"});
 
             ++num_no_ref;
@@ -138,9 +145,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             if (!skip_no_data_details)
                 details.push_back({tod, tst_pos,
                                    false, {}, // has_ref_pos, ref_pos
-                                   {}, {}, value_ok, // pos_inside, value, value_ok
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_value_ok, num_value_nok,
+                                   num_comp_failed, num_comp_passed,
                                    "No reference position"});
 
             ++num_no_ref;
@@ -161,9 +168,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             if (!skip_no_data_details)
                 details.push_back({tod, tst_pos,
                                    true, ref_pos, // has_ref_pos, ref_pos
-                                   is_inside, {}, value_ok, // pos_inside, value, value_ok
+                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                                   num_value_ok, num_value_nok,
+                                   num_comp_failed, num_comp_passed,
                                    "Outside sector"});
             ++num_pos_outside;
             continue;
@@ -190,9 +197,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         {
             details.push_back({tod, tst_pos,
                                true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, value_ok, // pos_inside, value, value_ok
+                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
                                num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_value_ok, num_value_nok,
+                               num_comp_failed, num_comp_passed,
                                "Position transformation error"});
             ++num_pos_calc_errors;
             continue;
@@ -202,40 +209,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         ++num_distances;
 
-//        if (dist_abs_value_check_type_ == COMPARISON_TYPE::LESS_THAN) // TODO
-//        {
-            if (fabs(distance) > dist_abs_value_)
-            {
-                value_ok = false;
-                ++num_value_nok;
-                comment = "Distance not OK";
-            }
-            else
-            {
-                ++num_value_ok;
-                comment = "";
-            }
-//        }
-//        else // max
-//        {
-//            if (fabs(distance) < dist_abs_value_)
-//            {
-//                value_ok = false;
-//                ++num_value_nok;
-//                comment = "Distance not OK";
-//            }
-//            else
-//            {
-//                ++num_value_ok;
-//                comment = "";
-//            }
-//        }
+        if (compareValue(fabs(distance), threshold_value_, threshold_value_check_type_))
+        {
+            comp_passed = true;
+            ++num_comp_passed;
+            comment = "Passed";
+        }
+        else
+        {
+            ++num_comp_failed;
+            comment = "Failed";
+        }
 
         details.push_back({tod, tst_pos,
                            true, ref_pos,
-                           is_inside, distance, value_ok, // pos_inside, value, value_ok
+                           is_inside, distance, comp_passed, // pos_inside, value, check_passed
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                           num_value_ok, num_value_nok,
+                           num_comp_failed, num_comp_passed,
                            comment});
 
         values.push_back(distance);
@@ -258,14 +248,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_value_ok+num_value_nok);
+    assert (num_distances == num_comp_failed+num_comp_passed);
     assert (num_distances == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok,
+                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
                 values, details);
 }
 

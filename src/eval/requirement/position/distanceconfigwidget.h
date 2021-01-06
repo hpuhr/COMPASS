@@ -20,6 +20,8 @@
 
 #include "eval/requirement/base/baseconfigwidget.h"
 
+class ComparisonTypeComboBox;
+
 class QLineEdit;
 class QCheckBox;
 
@@ -34,13 +36,17 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
-        void maxAbsValueEditSlot(QString value);
+        void thresholdValueEditSlot(QString value);
+        void changedThresholdValueCheckTypeSlot();
+        void toggleFailedValuesOfInterestSlot();
 
     public:
         PositionDistanceConfigWidget(PositionDistanceConfig& cfg);
 
     protected:
-        QLineEdit* max_abs_value_edit_{nullptr};
+        QLineEdit* threshold_value_edit_{nullptr};
+        ComparisonTypeComboBox* threshold_value_check_type_box_ {nullptr};
+        QCheckBox* failed_values_of_interest_check_{nullptr};
 
         PositionDistanceConfig& config();
     };

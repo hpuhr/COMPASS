@@ -36,11 +36,12 @@ class EvaluationStandard : public QObject, public Configurable, public Evaluatio
 {
     Q_OBJECT
 
-signals:
-    void groupsChangedSignal();
+//signals:
+//    void groupsChangedSignal();
 
 public slots:
     void addGroupSlot();
+    void groupsChangedSlot();
 
 public:
     EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationManager& eval_man);
@@ -57,7 +58,7 @@ public:
     void removeGroup (const std::string& name);
 
     using EvaluationRequirementGroupIterator =
-    typename std::map<std::string, std::unique_ptr<Group>>::iterator;
+    typename std::vector<std::unique_ptr<Group>>::iterator;
 
     EvaluationRequirementGroupIterator begin() { return groups_.begin(); }
     EvaluationRequirementGroupIterator end() { return groups_.end(); }
@@ -85,7 +86,7 @@ protected:
 
     std::unique_ptr<EvaluationStandardWidget> widget_;
 
-    std::map<std::string, std::unique_ptr<Group>> groups_;
+    std::vector<std::unique_ptr<Group>> groups_;
 
     QMenu menu_;
 

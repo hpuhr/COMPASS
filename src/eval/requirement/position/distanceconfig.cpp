@@ -30,9 +30,10 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_abs_value", &dist_abs_value_, 50.0);
-        registerParameter("dist_abs_value_check_type", (unsigned int*)&dist_abs_value_check_type_,
+        registerParameter("threshold_value", &threshold_value_, 50.0);
+        registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
                           (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);
+        registerParameter("failed_values_of_interest", &failed_values_of_interest_, true);
     }
 
     PositionDistanceConfig::~PositionDistanceConfig()
@@ -44,29 +45,39 @@ namespace EvaluationRequirement
     {
         shared_ptr<PositionDistance> req = make_shared<PositionDistance>(
                     name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    dist_abs_value_, dist_abs_value_check_type_);
+                    threshold_value_, threshold_value_check_type_, failed_values_of_interest_);
 
         return req;
     }
 
-    float PositionDistanceConfig::distAbsValuse() const
+    float PositionDistanceConfig::thresholdValue() const
     {
-        return dist_abs_value_;
+        return threshold_value_;
     }
 
-    void PositionDistanceConfig::distAbsValuse(float value)
+    void PositionDistanceConfig::thresholdValue(float value)
     {
-        dist_abs_value_ = value;
+        threshold_value_ = value;
     }
     
-    COMPARISON_TYPE PositionDistanceConfig::distAbsValueCheckType() const
+    COMPARISON_TYPE PositionDistanceConfig::thresholdValueCheckType() const
     {
-        return dist_abs_value_check_type_;
+        return threshold_value_check_type_;
     }
     
-    void PositionDistanceConfig::distAbsValueCheckType(const COMPARISON_TYPE &type)
+    void PositionDistanceConfig::thresholdValueCheckType(const COMPARISON_TYPE &type)
     {
-        dist_abs_value_check_type_ = type;
+        threshold_value_check_type_ = type;
+    }
+
+    bool PositionDistanceConfig::failedValuesOfInterest() const
+    {
+        return failed_values_of_interest_;
+    }
+
+    void PositionDistanceConfig::failedValuesOfInterest(bool value)
+    {
+        failed_values_of_interest_ = value;
     }
     
     void PositionDistanceConfig::createWidget()

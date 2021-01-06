@@ -70,6 +70,8 @@ protected:
     //std::string prob_name_{"Minimum Probability [1]"};
 
     EvaluationManager& eval_man_;
+
+    bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
 };
 
 }

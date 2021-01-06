@@ -114,11 +114,17 @@ int BaseConfig::row() const
 
 void BaseConfig::name(const std::string& name)
 {
+    loginf << "BaseConfig: name: value '" << name << "'";
+
     name_ = name;
+
+    emit group_.configsChangedSignal();
 }
 
 void BaseConfig::shortName(const std::string& short_name)
 {
+    loginf << "BaseConfig: shortName: value '" << short_name << "'";
+
     short_name_ = short_name;
 }
 
