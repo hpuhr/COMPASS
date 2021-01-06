@@ -38,11 +38,15 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float maxAbsValue() const;
-    void maxAbsValue(float value);
+    float distAbsValuse() const;
+    void distAbsValuse(float value);
+
+    COMPARISON_TYPE distAbsValueCheckType() const;
+    void distAbsValueCheckType(const COMPARISON_TYPE& type);
 
 protected:
-    float max_abs_value_ {0};
+    float dist_abs_value_ {0};
+    COMPARISON_TYPE dist_abs_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 
     virtual void createWidget() override;
 };

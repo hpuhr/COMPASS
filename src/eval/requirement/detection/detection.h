@@ -62,7 +62,7 @@ class Detection : public Base
 public:
     Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             float update_interval_s, bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;

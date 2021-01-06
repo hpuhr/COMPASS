@@ -27,7 +27,7 @@ namespace EvaluationRequirement
 bool Base::in_appimage_ {getenv("APPDIR") != nullptr};
 
 Base::Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-           float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man)
+           float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
     : name_(name), short_name_(short_name), group_name_(group_name),
       prob_(prob), prob_check_type_(prob_check_type), eval_man_(eval_man)
 {
@@ -59,27 +59,41 @@ float Base::prob() const
     return prob_;
 }
 
-CHECK_TYPE Base::probCheckType() const
+COMPARISON_TYPE Base::probCheckType() const
 {
     return prob_check_type_;
 }
 
 std::string Base::getConditionStr () const
 {
-    if (prob_check_type_ == CHECK_TYPE::MIN)
-        return ">= "+String::percentToString(prob_ * 100.0);
-    else // max
+    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
+        return "< "+String::percentToString(prob_ * 100.0);
+    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
         return "<= "+String::percentToString(prob_ * 100.0);
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
+        return "> "+String::percentToString(prob_ * 100.0);
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+        return ">= "+String::percentToString(prob_ * 100.0);
+    else
+        throw std::runtime_error("EvaluationRequiretBase: getConditionStr: unknown type '"
+                                 +to_string(prob_check_type_)+"'");
 }
 
 std::string Base::getResultConditionStr (float prob) const
 {
     bool result;
 
-    if (prob_check_type_ == CHECK_TYPE::MIN)
-        result = prob >= prob_;
-    else // max
+    if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
+        result = prob < prob_;
+    else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
         result = prob <= prob_;
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
+        result = prob > prob_;
+    else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
+        result = prob >= prob_;
+    else
+        throw std::runtime_error("EvaluationRequiretBase: getResultConditionStr: unknown type '"
+                                 +to_string(prob_check_type_)+"'");
 
     return result ? "Passed" : "Failed";;
 }

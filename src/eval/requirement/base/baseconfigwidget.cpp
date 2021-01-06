@@ -1,6 +1,6 @@
 #include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/base/checktypecombobox.h"
+#include "eval/requirement/base/comparisontypecombobox.h"
 #include "logger.h"
 
 #include <QLineEdit>
@@ -37,9 +37,9 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     form_layout_->addRow("Probability [1]", minimum_prob_edit_);
 
     // prob check type
-    check_type_box_ = new CheckTypeComboBox();
+    check_type_box_ = new ComparisonTypeComboBox();
     check_type_box_->setType(config_.probCheckType());
-    connect(check_type_box_, &CheckTypeComboBox::changedTypeSignal, this, &BaseConfigWidget::changedTypeSlot);
+    connect(check_type_box_, &ComparisonTypeComboBox::changedTypeSignal, this, &BaseConfigWidget::changedTypeSlot);
     form_layout_->addRow("Probability Check Type", check_type_box_);
 
     setLayout(form_layout_);

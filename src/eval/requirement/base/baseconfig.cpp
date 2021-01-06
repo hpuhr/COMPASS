@@ -37,7 +37,8 @@ BaseConfig::BaseConfig(
     registerParameter("short_name", &short_name_, "");
 
     registerParameter("prob", &prob_, 0.9);
-    registerParameter("prob_check_type", (unsigned int*)&prob_check_type_, (unsigned int)CHECK_TYPE::MIN);
+    registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
+                      (unsigned int)COMPARISON_TYPE::GREATER_THAN_OR_EUQAL);
 
 
     assert (name_.size());
@@ -136,12 +137,12 @@ void BaseConfig::prob(float value)
     prob_ = value;
 }
 
-CHECK_TYPE BaseConfig::probCheckType() const
+COMPARISON_TYPE BaseConfig::probCheckType() const
 {
     return prob_check_type_;
 }
 
-void BaseConfig::probCheckType(const CHECK_TYPE& prob_type)
+void BaseConfig::probCheckType(const COMPARISON_TYPE& prob_type)
 {
     prob_check_type_ = prob_type;
 }

@@ -12,7 +12,7 @@ namespace EvaluationRequirement
 {
 
 class BaseConfig;
-class CheckTypeComboBox;
+class ComparisonTypeComboBox;
 
 class BaseConfigWidget : public QWidget
 {
@@ -35,7 +35,7 @@ protected:
 
     QFormLayout* form_layout_ {nullptr};
 
-    CheckTypeComboBox* check_type_box_ {nullptr};
+    ComparisonTypeComboBox* check_type_box_ {nullptr};
 };
 
 }

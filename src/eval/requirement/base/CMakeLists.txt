@@ -4,8 +4,8 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/checktype.h"
-        "${CMAKE_CURRENT_LIST_DIR}/checktypecombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/comparisontype.h"
+        "${CMAKE_CURRENT_LIST_DIR}/comparisontypecombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/base.h"
         "${CMAKE_CURRENT_LIST_DIR}/baseconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/baseconfigwidget.h"

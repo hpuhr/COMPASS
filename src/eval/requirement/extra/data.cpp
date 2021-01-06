@@ -32,7 +32,7 @@ namespace EvaluationRequirement
 
 ExtraData::ExtraData(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         float min_duration, unsigned int min_num_updates, bool ignore_primary_only)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man), min_duration_(min_duration),
       min_num_updates_(min_num_updates), ignore_primary_only_(ignore_primary_only)

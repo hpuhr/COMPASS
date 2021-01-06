@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENT_H
 #define EVALUATIONREQUIREMENT_H
 
-#include "eval/requirement/base/checktype.h"
+#include "eval/requirement/base/comparisontype.h"
 
 #include <string>
 #include <memory>
@@ -39,7 +39,7 @@ class Base
 {
 public:
     Base(const std::string& name, const std::string& short_name, const std::string& group_name,
-         float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man);
+         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -53,7 +53,7 @@ public:
 
     float prob() const;
 
-    CHECK_TYPE probCheckType() const;
+    COMPARISON_TYPE probCheckType() const;
 
     std::string getConditionStr () const;
     std::string getResultConditionStr (float prob) const;
@@ -66,7 +66,7 @@ protected:
     std::string group_name_;
 
     float prob_ {0};
-    CHECK_TYPE prob_check_type_ {CHECK_TYPE::MIN};
+    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
     //std::string prob_name_{"Minimum Probability [1]"};
 
     EvaluationManager& eval_man_;

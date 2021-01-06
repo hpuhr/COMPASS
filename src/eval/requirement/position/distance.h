@@ -29,10 +29,11 @@ class PositionDistance : public Base
 public:
     PositionDistance(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
-            float max_abs_value);
+            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            float dist_abs_value, COMPARISON_TYPE dist_abs_value_check_type);
 
-    float maxAbsValue() const;
+    float distAbsValuse() const;
+    COMPARISON_TYPE distAbsValueCheckType() const;
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -40,7 +41,8 @@ public:
 
 
 protected:
-    float max_abs_value_ {0};
+    float dist_abs_value_ {0};
+    COMPARISON_TYPE dist_abs_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 };
 
 }

@@ -30,7 +30,9 @@ namespace EvaluationRequirement
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
-        registerParameter("max_abs_value", &max_abs_value_, 50.0);
+        registerParameter("max_abs_value", &dist_abs_value_, 50.0);
+        registerParameter("dist_abs_value_check_type", (unsigned int*)&dist_abs_value_check_type_,
+                          (unsigned int) COMPARISON_TYPE::LESS_THAN_OR_EQUAL);
     }
 
     PositionDistanceConfig::~PositionDistanceConfig()
@@ -41,21 +43,32 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> PositionDistanceConfig::createRequirement()
     {
         shared_ptr<PositionDistance> req = make_shared<PositionDistance>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, max_abs_value_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                    dist_abs_value_, dist_abs_value_check_type_);
 
         return req;
     }
 
-    float PositionDistanceConfig::maxAbsValue() const
+    float PositionDistanceConfig::distAbsValuse() const
     {
-        return max_abs_value_;
+        return dist_abs_value_;
     }
 
-    void PositionDistanceConfig::maxAbsValue(float value)
+    void PositionDistanceConfig::distAbsValuse(float value)
     {
-        max_abs_value_ = value;
+        dist_abs_value_ = value;
     }
-
+    
+    COMPARISON_TYPE PositionDistanceConfig::distAbsValueCheckType() const
+    {
+        return dist_abs_value_check_type_;
+    }
+    
+    void PositionDistanceConfig::distAbsValueCheckType(const COMPARISON_TYPE &type)
+    {
+        dist_abs_value_check_type_ = type;
+    }
+    
     void PositionDistanceConfig::createWidget()
     {
         assert (!widget_);

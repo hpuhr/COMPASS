@@ -31,7 +31,7 @@ PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfi
     : BaseConfigWidget(cfg)
 {
     // max dist
-    max_abs_value_edit_ = new QLineEdit(QString::number(config().maxAbsValue()));
+    max_abs_value_edit_ = new QLineEdit(QString::number(config().distAbsValuse()));
     max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
     connect(max_abs_value_edit_, &QLineEdit::textEdited,
             this, &PositionDistanceConfigWidget::maxAbsValueEditSlot);
@@ -47,7 +47,7 @@ void PositionDistanceConfigWidget::maxAbsValueEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        config().maxAbsValue(val);
+        config().distAbsValuse(val);
     else
         loginf << "PositionDistanceConfigWidget: maxDistanceEditSlot: invalid value";
 }

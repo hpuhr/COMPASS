@@ -52,7 +52,7 @@ class ExtraData : public Base
 public:
     ExtraData(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man,
+            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             float min_duration, unsigned int min_num_updates, bool ignore_primary_only);
 
     float minDuration() const;

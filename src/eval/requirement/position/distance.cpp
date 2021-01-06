@@ -35,15 +35,22 @@ namespace EvaluationRequirement
 
 PositionDistance::PositionDistance(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        float prob, CHECK_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value)
-    : Base(name, short_name, group_name, prob, prob_check_type, eval_man), max_abs_value_(max_abs_value)
+        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        float dist_abs_value, COMPARISON_TYPE dist_abs_value_check_type)
+    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+      dist_abs_value_(dist_abs_value), dist_abs_value_check_type_(dist_abs_value_check_type)
 {
 
 }
 
-float PositionDistance::maxAbsValue() const
+float PositionDistance::distAbsValuse() const
 {
-    return max_abs_value_;
+    return dist_abs_value_;
+}
+
+COMPARISON_TYPE PositionDistance::distAbsValueCheckType() const
+{
+    return dist_abs_value_check_type_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate (
@@ -51,7 +58,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " max_abs_value " << max_abs_value_;
+           << " dist_abs_value " << dist_abs_value_ << " dist_abs_value_check_type " << dist_abs_value_check_type_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
@@ -195,17 +202,34 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
         ++num_distances;
 
-        if (fabs(distance) > max_abs_value_)
-        {
-            value_ok = false;
-            ++num_value_nok;
-            comment = "Distance not OK";
-        }
-        else
-        {
-            ++num_value_ok;
-            comment = "";
-        }
+//        if (dist_abs_value_check_type_ == COMPARISON_TYPE::LESS_THAN) // TODO
+//        {
+            if (fabs(distance) > dist_abs_value_)
+            {
+                value_ok = false;
+                ++num_value_nok;
+                comment = "Distance not OK";
+            }
+            else
+            {
+                ++num_value_ok;
+                comment = "";
+            }
+//        }
+//        else // max
+//        {
+//            if (fabs(distance) < dist_abs_value_)
+//            {
+//                value_ok = false;
+//                ++num_value_nok;
+//                comment = "Distance not OK";
+//            }
+//            else
+//            {
+//                ++num_value_ok;
+//                comment = "";
+//            }
+//        }
 
         details.push_back({tod, tst_pos,
                            true, ref_pos,

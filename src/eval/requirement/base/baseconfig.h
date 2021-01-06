@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
 #include "eval/requirement/base/baseconfigwidget.h"
-#include "eval/requirement/base/checktype.h"
+#include "eval/requirement/base/comparisontype.h"
 
 #include <QObject>
 
@@ -60,8 +60,8 @@ public:
     float prob() const;
     void prob(float value);
 
-    CHECK_TYPE probCheckType() const;
-    void probCheckType(const CHECK_TYPE& prob_type);
+    COMPARISON_TYPE probCheckType() const;
+    void probCheckType(const COMPARISON_TYPE& prob_type);
 
     virtual EvaluationStandardTreeItem *child(int row) override;
     virtual int childCount() const override;
@@ -81,7 +81,7 @@ protected:
     std::string short_name_;
 
     float prob_ {0};
-    CHECK_TYPE prob_check_type_ {CHECK_TYPE::MIN};
+    COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};
 
     std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
 
