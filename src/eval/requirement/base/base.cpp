@@ -185,6 +185,77 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
         return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
 }
 
+std::pair<ValueComparisonResult, std::string> Base::compareTa (
+        float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
+{
+    if (target_data.hasTstTAForTime(tod))
+    {
+        unsigned int value = target_data.tstTAForTime(tod);
+
+        float ref_lower{0}, ref_upper{0};
+        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
+
+        bool value_ok;
+        bool lower_nok, upper_nok;
+
+        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+        {
+            if ((ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
+                    || (ref_upper != -1 && target_data.hasRefTAForTime(ref_upper))) // ref value(s) exist
+            {
+                value_ok = false;
+
+                lower_nok = false;
+                upper_nok = false;
+
+                if (ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
+                {
+                    value_ok = target_data.refTAForTime(ref_lower) == value;
+                    lower_nok = !value_ok;
+                }
+
+                if (!value_ok && ref_upper != -1 && target_data.hasRefTAForTime(ref_upper))
+                {
+                    value_ok = target_data.refTAForTime(ref_upper) == value;
+                    upper_nok = !value_ok;
+                }
+
+                if (value_ok)
+                    return {ValueComparisonResult::Same, "OK"};
+                else
+                {
+                    string comment = "Not OK:";
+
+                    if (lower_nok)
+                    {
+                        comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
+                                +"' ref value at "+String::timeStringFromDouble(ref_lower)
+                                + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_lower))
+                                + "'";
+                    }
+                    else
+                    {
+                        assert (upper_nok);
+                        comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
+                                +"' ref value at "+String::timeStringFromDouble(ref_upper)
+                                + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_upper))
+                                + "'";
+                    }
+
+                    return {ValueComparisonResult::Different, comment};
+                }
+            }
+            else
+                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
+        }
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    }
+    else
+        return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
+}
+
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
         float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
 {

@@ -32,13 +32,6 @@ namespace EvaluationRequirement
     IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& cfg)
         : BaseConfigWidget(cfg)
     {
-//        QCheckBox* require_correctness_check_{nullptr};
-        require_correctness_check_ = new QCheckBox ();
-        require_correctness_check_->setChecked(config().requireCorrectness());
-        connect(require_correctness_check_, &QCheckBox::clicked,
-                this, &IdentificationConfigWidget::toggleRequireCorrectnessSlot);
-        form_layout_->addRow("Require Correctness", require_correctness_check_);
-
         //        QCheckBox* require_correctness_of_all_check_{nullptr};
         require_correctness_of_all_check_ = new QCheckBox ();
         require_correctness_of_all_check_->setChecked(config().requireCorrectnessOfAll());
@@ -70,15 +63,6 @@ namespace EvaluationRequirement
                 this, &IdentificationConfigWidget::toggleUseMsTiSlot);
         form_layout_->addRow("Use Mode S Target Identification", use_ms_ti_check_);
 
-
-    }
-
-    void IdentificationConfigWidget::toggleRequireCorrectnessSlot()
-    {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleRequireCorrectnessSlot";
-
-        assert (require_correctness_check_);
-        config().requireCorrectness(require_correctness_check_->checkState() == Qt::Checked);
 
     }
 

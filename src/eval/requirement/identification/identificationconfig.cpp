@@ -36,22 +36,12 @@ namespace EvaluationRequirement
     {
         shared_ptr<Identification> req = make_shared<Identification>(
                     name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    require_correctness_, require_correctness_of_all_,
+                    require_correctness_of_all_,
                     use_mode_a_, use_ms_ta_, use_ms_ti_);
 
         return req;
     }
     
-    bool IdentificationConfig::requireCorrectness() const
-    {
-        return require_correctness_;
-    }
-
-    void IdentificationConfig::requireCorrectness(bool value)
-    {
-        require_correctness_ = value;
-    }
-
     bool IdentificationConfig::requireCorrectnessOfAll() const
     {
         return require_correctness_of_all_;

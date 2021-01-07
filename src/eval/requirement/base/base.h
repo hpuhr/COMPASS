@@ -83,6 +83,8 @@ protected:
 
     std::pair<ValueComparisonResult, std::string> compareTi (float tod, const EvaluationTargetData& target_data,
                                                              float max_ref_time_diff); // tod tst
+    std::pair<ValueComparisonResult, std::string> compareTa (float tod, const EvaluationTargetData& target_data,
+                                                             float max_ref_time_diff); // tod tst
     std::pair<ValueComparisonResult, std::string> compareModeA (float tod, const EvaluationTargetData& target_data,
                                                              float max_ref_time_diff); // tod tst
     std::pair<ValueComparisonResult, std::string> compareModeC (float tod, const EvaluationTargetData& target_data,

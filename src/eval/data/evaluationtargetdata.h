@@ -137,6 +137,9 @@ public:
     bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
     int refModeCForTime (float tod) const;
 
+    bool hasRefTAForTime (float tod) const;
+    unsigned int refTAForTime (float tod) const;
+
     // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
@@ -153,6 +156,9 @@ public:
 
     bool hasTstGroundBitForTime (float tod) const; // only if set
     bool tstGroundBitForTime (float tod) const; // true is on ground
+
+    bool hasTstTAForTime (float tod) const;
+    unsigned int tstTAForTime (float tod) const;
 
     std::pair<bool,bool> tstGroundBitForTimeInterpolated (float tod) const; // has gbs, gbs true
 

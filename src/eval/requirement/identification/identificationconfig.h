@@ -40,9 +40,6 @@ namespace EvaluationRequirement
 
         std::shared_ptr<Base> createRequirement() override;
 
-        bool requireCorrectness() const;
-        void requireCorrectness(bool value);
-
         bool requireCorrectnessOfAll() const;
         void requireCorrectnessOfAll(bool value);
 
@@ -56,11 +53,7 @@ namespace EvaluationRequirement
         void useMsTi(bool value);
 
     protected:
-        // true: correct (not false) only, false: present is ok
-        bool require_correctness_ {false};
-
         // true: all must be correct (not false), false: at least one must be correct (not false)
-        // for require_correctness_ true only
         bool require_correctness_of_all_ {false};
 
         // mode a ssr code

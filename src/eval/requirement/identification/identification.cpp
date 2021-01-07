@@ -17,7 +17,7 @@
 
 #include "eval/requirement/identification/identification.h"
 #include "eval/results/identification/single.h"
-#include "eval/requirement/checkdetail.h"
+#include "eval/requirement/correctnessdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
@@ -33,10 +33,9 @@ namespace EvaluationRequirement
 Identification::Identification(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        bool require_correctness, bool require_correctness_of_all,
-        bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
+        bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-      require_correctness_(require_correctness), require_correctness_of_all_(require_correctness_of_all),
+      require_correctness_of_all_(require_correctness_of_all),
       use_mode_a_(use_mode_a), use_ms_ta_(use_ms_ta), use_ms_ti_(use_ms_ti)
 {
 
@@ -54,19 +53,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
 
     float tod{0};
 
-    int num_updates {0};
-    int num_no_ref_pos {0};
-    int num_no_ref_id {0};
-    int num_pos_outside {0};
-    int num_pos_inside {0};
-    int num_unknown_id {0};
-    int num_correct_id {0};
-    int num_false_id {0};
+    unsigned int num_updates {0};
+    unsigned int num_no_ref_pos {0};
+    unsigned int num_no_ref_id {0};
+    unsigned int num_pos_outside {0};
+    unsigned int num_pos_inside {0};
+    unsigned int num_correct {0};
+    unsigned int num_not_correct {0};
 
-    vector<CheckDetail> details;
+    vector<CorrectnessDetail> details;
     EvaluationTargetPosition pos_current;
-    string callsign;
-    bool callsign_ok;
 
     bool ref_exists;
     bool is_inside;
@@ -82,7 +78,21 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
-    ValueComparisonResult cmp_res;
+    ValueComparisonResult cmp_res_ti;
+    string cmp_res_ti_comment;
+    bool ti_correct_failed;
+
+    ValueComparisonResult cmp_res_ta;
+    string cmp_res_ta_comment;
+    bool ta_correct_failed;
+
+    ValueComparisonResult cmp_res_ma;
+    string cmp_res_ma_comment;
+    bool ma_correct_failed;
+
+    bool any_correct;
+    bool all_correct;
+    bool result_ok;
 
     for (const auto& tst_id : tst_data)
     {
@@ -101,9 +111,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         {
             if (!skip_no_data_details)
                 details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "No reference data"});
+                                   false, {}, false, // ref_exists, pos_inside, is_not_correct
+                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                   num_correct, num_not_correct, "No reference data"});
 
             ++num_no_ref_pos;
             continue;
@@ -118,9 +128,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         {
             if (!skip_no_data_details)
                 details.push_back({tod, pos_current,
-                                   false, {}, false, // ref_exists, pos_inside,
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "No reference position"});
+                                   false, {}, false, // ref_exists, pos_inside, is_not_correct
+                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                   num_correct, num_not_correct, "No reference position"});
 
             ++num_no_ref_pos;
             continue;
@@ -140,61 +150,82 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         {
             if (!skip_no_data_details)
                 details.push_back({tod, pos_current,
-                                   ref_exists, is_inside, false, // ref_exists, pos_inside,
+                                   ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
                                    num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                                   num_unknown_id, num_correct_id, num_false_id, "Outside sector"});
+                                   num_correct, num_not_correct, "Outside sector"});
 
             ++num_pos_outside;
             continue;
         }
         ++num_pos_inside;
 
-        callsign_ok = true;
-        tie(cmp_res, comment) = compareTi(tod, target_data, max_ref_time_diff);
 
-        if (cmp_res == ValueComparisonResult::Unknown_NoRefData)
-        {
-            if (skip_no_data_details)
-                skip_detail = true;
+        tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tod, target_data, max_ref_time_diff);
+        tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tod, target_data, max_ref_time_diff);
+        tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tod, target_data, max_ref_time_diff);
 
-            ++num_no_ref_id;
-        }
-        else if (cmp_res == ValueComparisonResult::Unknown_NoTstData)
-        {
-            if (skip_no_data_details)
-                skip_detail = true;
+        any_correct = false;
+        all_correct = true;
 
-            ++num_unknown_id;
-        }
-        else if (cmp_res == ValueComparisonResult::Same)
+        if (use_ms_ti_)
         {
-            ++num_correct_id;
+            ti_correct_failed = cmp_res_ti == ValueComparisonResult::Unknown_NoTstData
+                    || cmp_res_ti == ValueComparisonResult::Different;
+
+            any_correct |= !ti_correct_failed;
+            all_correct &= !ti_correct_failed;
         }
-        else if (cmp_res == ValueComparisonResult::Different)
+
+        if (use_ms_ta_)
         {
-            callsign_ok = false;
-            ++num_false_id;
+            ta_correct_failed = cmp_res_ta == ValueComparisonResult::Unknown_NoTstData
+                    || cmp_res_ta == ValueComparisonResult::Different;
+
+            any_correct |= !ta_correct_failed;
+            all_correct &= !ta_correct_failed;
         }
+
+        if (use_mode_a_)
+        {
+            ma_correct_failed = cmp_res_ma == ValueComparisonResult::Unknown_NoTstData
+                    || cmp_res_ma == ValueComparisonResult::Different;
+
+            any_correct |= !ma_correct_failed;
+            all_correct &= !ma_correct_failed;
+        }
+
+        if (!use_ms_ti_ && !use_ms_ta_ && !use_mode_a_)
+            all_correct = false; // if none is used, set to false
+
+        if (require_correctness_of_all_)
+        {
+            result_ok = all_correct;
+        }
+        else // one correct ok
+        {
+            result_ok = any_correct;
+        }
+
+        if (result_ok)
+            ++num_correct;
         else
-            throw runtime_error("EvaluationRequirementIdentification: evaluate: unknown compare result "
-                                +to_string(cmp_res));
+            ++num_not_correct;
 
         if (!skip_detail)
             details.push_back({tod, pos_current,
-                               ref_exists, is_inside, !callsign_ok,
-                               num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
-                               num_unknown_id, num_correct_id, num_false_id, comment});
+                               ref_exists, is_inside, !result_ok,
+                               num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                               num_correct, num_not_correct, comment});
     }
 
     logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_id " << num_no_ref_id
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-           << " num_unknown_id " << num_unknown_id << " num_correct_id " << num_correct_id
-           << " num_false_id " << num_false_id;
+           << " num_correct " << num_correct << " num_not_correct " << num_not_correct;
 
     assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_id+num_unknown_id+num_correct_id+num_false_id);
+    assert (num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
 
     //assert (details.size() == tst_data.size());
 
@@ -212,12 +243,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
     return make_shared<EvaluationRequirementResult::SingleIdentification>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
-                num_unknown_id, num_correct_id, num_false_id, details);
-}
-
-bool Identification::requireCorrectness() const
-{
-    return require_correctness_;
+                num_correct, num_not_correct, details);
 }
 
 bool Identification::requireCorrectnessOfAll() const

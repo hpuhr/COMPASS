@@ -20,7 +20,7 @@
 
 #include "eval/results/single.h"
 #include "eval/requirement/identification/identification.h"
-#include "eval/requirement/checkdetail.h"
+#include "eval/requirement/correctnessdetail.h"
 
 namespace EvaluationRequirementResult
 {
@@ -32,25 +32,25 @@ public:
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
-            int num_unknown_id, int num_correct_id, int num_false_id,
-            std::vector<EvaluationRequirement::CheckDetail> details);
+            unsigned int num_updates, unsigned int num_no_ref_pos, unsigned int num_no_ref_id,
+            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_correct, unsigned int num_not_correct,
+            std::vector<EvaluationRequirement::CorrectnessDetail> details);
 
     //irtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
-    int numUpdates() const;
-    int numNoRefPos() const;
-    int numNoRefId() const;
-    int numPosOutside() const;
-    int numPosInside() const;
-    int numUnknownId() const;
-    int numCorrectId() const;
-    int numFalseId() const;
+    unsigned int numUpdates() const;
+    unsigned int numNoRefPos() const;
+    unsigned int numNoRefId() const;
+    unsigned int numPosOutside() const;
+    unsigned int numPosInside() const;
+    unsigned int numCorrect() const;
+    unsigned int numNotCorrect() const;
 
-    std::vector<EvaluationRequirement::CheckDetail>& details();
+    std::vector<EvaluationRequirement::CorrectnessDetail>& details();
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -64,19 +64,18 @@ public:
 
 
 protected:
-    int num_updates_ {0};
-    int num_no_ref_pos_ {0};
-    int num_no_ref_id_ {0};
-    int num_pos_outside_ {0};
-    int num_pos_inside_ {0};
-    int num_unknown_id_ {0};
-    int num_correct_id_ {0};
-    int num_false_id_ {0};
+    unsigned int num_updates_ {0};
+    unsigned int num_no_ref_pos_ {0};
+    unsigned int num_no_ref_id_ {0};
+    unsigned int num_pos_outside_ {0};
+    unsigned int num_pos_inside_ {0};
+    unsigned int num_correct_ {0};
+    unsigned int num_not_correct_ {0};
 
     bool has_pid_ {false};
     float pid_{0};
 
-    std::vector<EvaluationRequirement::CheckDetail> details_;
+    std::vector<EvaluationRequirement::CorrectnessDetail> details_;
 
     void updatePID();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

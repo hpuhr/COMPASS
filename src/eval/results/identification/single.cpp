@@ -40,14 +40,14 @@ namespace EvaluationRequirementResult
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
-            int num_updates, int num_no_ref_pos, int num_no_ref_id, int num_pos_outside, int num_pos_inside,
-            int num_unknown_id, int num_correct_id, int num_false_id,
-            std::vector<EvaluationRequirement::CheckDetail> details)
+            unsigned int num_updates, unsigned int num_no_ref_pos, unsigned int num_no_ref_id,
+            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_correct, unsigned int num_not_correct,
+            std::vector<EvaluationRequirement::CorrectnessDetail> details)
         : Single("SingleIdentification", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
-          num_unknown_id_(num_unknown_id),
-          num_correct_id_(num_correct_id), num_false_id_(num_false_id), details_(details)
+          num_correct_(num_correct), num_not_correct_(num_not_correct), details_(details)
     {
         updatePID();
     }
@@ -55,11 +55,11 @@ namespace EvaluationRequirementResult
     void SingleIdentification::updatePID()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
+        assert (num_pos_inside_ == num_no_ref_id_+num_correct_+num_not_correct_);
 
-        if (num_correct_id_+num_false_id_)
+        if (num_correct_+num_not_correct_)
         {
-            pid_ = (float)num_correct_id_/(float)(num_correct_id_+num_false_id_);
+            pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
             has_pid_ = true;
 
             result_usable_ = true;
@@ -116,9 +116,9 @@ namespace EvaluationRequirementResult
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
-            section.addTable(table_name, 14,
+            section.addTable(table_name, 13,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#UID", "#CID", "#FID", "PID"}, true, 13);
+             "#Up", "#NoRef", "#CID", "#NCID", "PID"}, true, 12);
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
@@ -131,7 +131,7 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
-         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_unknown_id_, num_correct_id_, num_false_id_,
+         num_updates_, num_no_ref_pos_+num_no_ref_id_, num_correct_, num_not_correct_,
          pd_var}, this, {utn_});
     }
 
@@ -160,9 +160,8 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        utn_req_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
-        utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
-        utn_req_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
+        utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_}, this);
+        utn_req_table.addRow({"#NCID [1]", "Number of updates with no correct identification", num_not_correct_}, this);
         utn_req_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
 
         // condition
@@ -197,27 +196,27 @@ namespace EvaluationRequirementResult
 
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-        if (!utn_req_section.hasTable(tr_details_table_name_))
-            utn_req_section.addTable(tr_details_table_name_, 11,
-            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
+//        if (!utn_req_section.hasTable(tr_details_table_name_))
+//            utn_req_section.addTable(tr_details_table_name_, 11,
+//            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
 
-        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-                utn_req_section.getTable(tr_details_table_name_);
+//        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+//                utn_req_section.getTable(tr_details_table_name_);
 
-        unsigned int detail_cnt = 0;
+//        unsigned int detail_cnt = 0;
 
-        for (auto& rq_det_it : details_)
-        {
-            utn_req_details_table.addRow(
-            {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
-             !rq_det_it.is_not_ok_,
-             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
-             rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
-                        this, detail_cnt);
+//        for (auto& rq_det_it : details_)
+//        {
+//            utn_req_details_table.addRow(
+//            {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
+//             !rq_det_it.is_not_ok_,
+//             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
+//             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
+//             rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
+//                        this, detail_cnt);
 
-            ++detail_cnt;
-        }
+//            ++detail_cnt;
+//        }
     }
 
 
@@ -252,7 +251,7 @@ namespace EvaluationRequirementResult
                     = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
             assert (viewable_ptr);
 
-            const EvaluationRequirement::CheckDetail& detail = details_.at(detail_cnt);
+            const EvaluationRequirement::CorrectnessDetail& detail = details_.at(detail_cnt);
 
             (*viewable_ptr)["position_latitude"] = detail.pos_tst_.latitude_;
             (*viewable_ptr)["position_longitude"] = detail.pos_tst_.longitude_;
@@ -279,7 +278,7 @@ namespace EvaluationRequirementResult
 
         for (auto& detail_it : details_)
         {
-            if (!detail_it.is_not_ok_)
+            if (!detail_it.is_not_correct_)
                 continue;
 
             if (has_pos)
@@ -345,47 +344,42 @@ namespace EvaluationRequirementResult
         return make_shared<JoinedIdentification> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    int SingleIdentification::numNoRefPos() const
+    unsigned int SingleIdentification::numNoRefPos() const
     {
         return num_no_ref_pos_;
     }
 
-    int SingleIdentification::numNoRefId() const
+    unsigned int SingleIdentification::numNoRefId() const
     {
         return num_no_ref_id_;
     }
 
-    int SingleIdentification::numPosOutside() const
+    unsigned int SingleIdentification::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    int SingleIdentification::numPosInside() const
+    unsigned int SingleIdentification::numPosInside() const
     {
         return num_pos_inside_;
     }
 
-    int SingleIdentification::numUpdates() const
+    unsigned int SingleIdentification::numUpdates() const
     {
         return num_updates_;
     }
 
-    int SingleIdentification::numUnknownId() const
+    unsigned int SingleIdentification::numCorrect() const
     {
-        return num_unknown_id_;
+        return num_correct_;
     }
 
-    int SingleIdentification::numCorrectId() const
+    unsigned int SingleIdentification::numNotCorrect() const
     {
-        return num_correct_id_;
+        return num_not_correct_;
     }
 
-    int SingleIdentification::numFalseId() const
-    {
-        return num_false_id_;
-    }
-
-    std::vector<EvaluationRequirement::CheckDetail>& SingleIdentification::details()
+    std::vector<EvaluationRequirement::CorrectnessDetail>& SingleIdentification::details()
     {
         return details_;
     }

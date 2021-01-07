@@ -22,20 +22,18 @@
 
 namespace EvaluationRequirement
 {
+
 class Identification : public Base
 {
 public:
     Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            bool require_correctness, bool require_correctness_of_all,
-            bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
+            bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
-
-    bool requireCorrectness() const;
 
     bool requireCorrectnessOfAll() const;
 
@@ -47,11 +45,7 @@ public:
 
 
 protected:
-    // true: correct (not false) only, false: present is ok
-    bool require_correctness_ {false};
-
     // true: all must be correct (not false), false: at least one must be correct (not false)
-    // for require_correctness_ true only
     bool require_correctness_of_all_ {false};
 
     // mode a ssr code

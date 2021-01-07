@@ -67,9 +67,8 @@ namespace EvaluationRequirementResult
         num_no_ref_id_ += single_result->numNoRefId();
         num_pos_outside_ += single_result->numPosOutside();
         num_pos_inside_ += single_result->numPosInside();
-        num_unknown_id_ += single_result->numUnknownId();
-        num_correct_id_ += single_result->numCorrectId();
-        num_false_id_ += single_result->numFalseId();
+        num_correct_ += single_result->numCorrect();
+        num_not_correct_ += single_result->numNotCorrect();
 
         updatePID();
     }
@@ -77,11 +76,11 @@ namespace EvaluationRequirementResult
     void JoinedIdentification::updatePID()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-        assert (num_pos_inside_ == num_no_ref_id_+num_unknown_id_+num_correct_id_+num_false_id_);
+        assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
 
-        if (num_correct_id_+num_false_id_)
+        if (num_correct_+num_not_correct_)
         {
-            pid_ = (float)num_correct_id_/(float)(num_correct_id_+num_false_id_);
+            pid_ = (float)num_correct_/(float)(num_correct_+num_not_correct_);
             has_pid_ = true;
         }
         else
@@ -147,7 +146,7 @@ namespace EvaluationRequirementResult
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
         ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
                          requirement_->shortname().c_str(),
-                         result_id_.c_str(), {num_correct_id_+num_false_id_},
+                         result_id_.c_str(), {num_correct_+num_not_correct_},
                          pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     }
 
@@ -170,9 +169,8 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
         sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-        sec_det_table.addRow({"#UID [1]", "Number of updates unknown identification", num_unknown_id_}, this);
-        sec_det_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_id_}, this);
-        sec_det_table.addRow({"#FID [1]", "Number of updates with false identification", num_false_id_}, this);
+        sec_det_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_}, this);
+        sec_det_table.addRow({"#NCID [1]", "Number of updates with no correct identification", num_not_correct_}, this);
 
         // condition
         std::shared_ptr<EvaluationRequirement::Identification> req =
@@ -279,25 +277,13 @@ namespace EvaluationRequirementResult
 
     void JoinedIdentification::updatesToUseChanges()
     {
-        loginf << "JoinedIdentification: updatesToUseChanges: prev num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
-               << " num_unknown_id " << num_unknown_id_
-               << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
-
-        if (has_pid_)
-            loginf << "JoinedIdentification: updatesToUseChanges: prev result " << result_id_
-                   << " pid " << 100.0 * pid_;
-        else
-            loginf << "JoinedIdentification: updatesToUseChanges: prev result " << result_id_ << " has no data";
-
         num_updates_ = 0;
         num_no_ref_pos_ = 0;
         num_no_ref_id_ = 0;
         num_pos_outside_ = 0;
         num_pos_inside_ = 0;
-        num_unknown_id_ = 0;
-        num_correct_id_ = 0;
-        num_false_id_ = 0;
+        num_correct_ = 0;
+        num_not_correct_ = 0;
 
         for (auto result_it : results_)
         {
@@ -307,17 +293,6 @@ namespace EvaluationRequirementResult
 
             addToValues(result);
         }
-
-        loginf << "JoinedIdentification: updatesToUseChanges: updt num_updates " << num_updates_
-               << " num_no_ref_pos " << num_no_ref_pos_ << " num_no_ref_id " << num_no_ref_id_
-               << " num_unknown_id " << num_unknown_id_
-               << " num_correct_id " << num_correct_id_ << " num_false_id " << num_false_id_;
-
-        if (has_pid_)
-            loginf << "JoinedIdentification: updatesToUseChanges: updt result " << result_id_
-                   << " pid " << 100.0 * pid_;
-        else
-            loginf << "JoinedIdentification: updatesToUseChanges: updt result " << result_id_ << " has no data";
     }
 
 }

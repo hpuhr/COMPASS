@@ -986,21 +986,18 @@ void HistogramViewDataWidget::updateCountResult (
     if (!counts_.size()) // first
     {
         counts_[dbo_name].push_back(result->numNoRefId());
-        counts_[dbo_name].push_back(result->numUnknownId());
-        counts_[dbo_name].push_back(result->numCorrectId());
-        counts_[dbo_name].push_back(result->numFalseId());
+        counts_[dbo_name].push_back(result->numCorrect());
+        counts_[dbo_name].push_back(result->numNotCorrect());
 
         labels_.push_back("#NoRef");
-        labels_.push_back("#UID");
         labels_.push_back("#CID");
-        labels_.push_back("#FID");
+        labels_.push_back("#NCID");
     }
     else // add
     {
         counts_[dbo_name].at(0) += result->numNoRefId();
-        counts_[dbo_name].at(1) += result->numUnknownId();
-        counts_[dbo_name].at(2) += result->numCorrectId();
-        counts_[dbo_name].at(3) += result->numFalseId();
+        counts_[dbo_name].at(1) += result->numCorrect();
+        counts_[dbo_name].at(2) += result->numNotCorrect();
     }
 }
 

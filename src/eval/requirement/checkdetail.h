@@ -1,5 +1,5 @@
-#ifndef CHECKDETAIL_H
-#define CHECKDETAIL_H
+#ifndef EVALUATIONREQUIREMENTCHECKDETAIL_H
+#define EVALUATIONREQUIREMENTCHECKDETAIL_H
 
 #include "evaluationtargetposition.h"
 
@@ -44,4 +44,4 @@ namespace EvaluationRequirement
     };
 }
 
-#endif // CHECKDETAIL_H
+#endif // EVALUATIONREQUIREMENTCHECKDETAIL_H

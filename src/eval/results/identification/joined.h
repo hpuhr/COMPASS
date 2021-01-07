@@ -48,14 +48,13 @@ namespace EvaluationRequirementResult
                 const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
 
     protected:
-        int num_updates_ {0};
-        int num_no_ref_pos_ {0};
-        int num_no_ref_id_ {0};
-        int num_pos_outside_ {0};
-        int num_pos_inside_ {0};
-        int num_unknown_id_ {0};
-        int num_correct_id_ {0};
-        int num_false_id_ {0};
+        unsigned int num_updates_ {0};
+        unsigned int num_no_ref_pos_ {0};
+        unsigned int num_no_ref_id_ {0};
+        unsigned int num_pos_outside_ {0};
+        unsigned int num_pos_inside_ {0};
+        unsigned int num_correct_ {0};
+        unsigned int num_not_correct_ {0};
 
         bool has_pid_ {false};
         float pid_{0};

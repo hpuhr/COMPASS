@@ -34,7 +34,6 @@ class IdentificationConfigWidget : public BaseConfigWidget
     Q_OBJECT
 
 public slots:
-    void toggleRequireCorrectnessSlot();
     void toggleRequireCorrectnessOfAllSlot();
 
     void toggleUseModeASlot();
@@ -46,7 +45,6 @@ public:
     IdentificationConfigWidget(IdentificationConfig& cfg);
 
 protected:
-    QCheckBox* require_correctness_check_{nullptr};
     QCheckBox* require_correctness_of_all_check_{nullptr};
 
     // mode a ssr code

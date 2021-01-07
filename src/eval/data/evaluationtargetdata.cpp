@@ -749,6 +749,39 @@ int EvaluationTargetData::refModeCForTime (float tod) const
     return modec_vec.get(index);
 }
 
+bool EvaluationTargetData::hasRefTAForTime (float tod) const
+{
+    if (!ref_data_.count(tod))
+        return false;
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->ref_target_address_name_.size()
+            && !eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).isNull(index))
+        return true;
+
+    return false;
+}
+
+unsigned int EvaluationTargetData::refTAForTime (float tod) const
+{
+    assert (hasRefTAForTime(tod));
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    assert (!eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).isNull(index));
+
+    return eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).get(index);
+}
+
 bool EvaluationTargetData::hasTstPosForTime (float tod) const
 {
     return tst_data_.count(tod);
@@ -1002,9 +1035,6 @@ bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on g
 {
     assert (hasTstGroundBitForTime(tod));
 
-    if (!tst_data_.count(tod))
-        return false;
-
     auto it_pair = tst_data_.equal_range(tod);
 
     assert (it_pair.first != tst_data_.end());
@@ -1017,6 +1047,39 @@ bool EvaluationTargetData::tstGroundBitForTime (float tod) const // true is on g
         return true;
 
     return false;
+}
+
+bool EvaluationTargetData::hasTstTAForTime (float tod) const
+{
+    if (!tst_data_.count(tod))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->tst_target_address_name_.size()
+            && !eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).isNull(index))
+        return true;
+
+    return false;
+}
+
+unsigned int EvaluationTargetData::tstTAForTime (float tod) const
+{
+    assert (hasTstTAForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    assert (!eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).isNull(index));
+
+    return eval_data_->tst_buffer_->get<int>(eval_data_->tst_target_address_name_).get(index);
 }
 
  // has gbs, gbs true
