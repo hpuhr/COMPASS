@@ -28,11 +28,19 @@ class EvaluationManager;
 class SectorLayer;
 
 namespace EvaluationRequirementResult {
-    class Single;
+class Single;
 }
 
 namespace EvaluationRequirement
 {
+
+enum ValueComparisonResult
+{
+    Unknown_NoRefData=0,
+    Unknown_NoTstData,
+    Same,
+    Different
+};
 
 
 class Base
@@ -72,6 +80,9 @@ protected:
     EvaluationManager& eval_man_;
 
     bool compareValue (double val, double threshold, COMPARISON_TYPE check_type);
+
+    std::pair<ValueComparisonResult, std::string> compareTi (float tod, const EvaluationTargetData& target_data,
+                                                             float max_ref_time_diff); // tod tst
 };
 
 }

@@ -16,6 +16,7 @@
  */
 
 #include "eval/requirement/base/base.h"
+#include "evaluationdata.h"
 #include "stringconv.h"
 
 using namespace std;
@@ -111,6 +112,78 @@ bool Base::compareValue (double val, double threshold, COMPARISON_TYPE check_typ
     else
         throw std::runtime_error("EvaluationRequiretBase: compareValue: unknown type '"
                                  +to_string(check_type)+"'");
+}
+
+std::pair<ValueComparisonResult, std::string> Base::compareTi (
+        float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
+{
+    if (target_data.hasTstCallsignForTime(tod))
+    {
+        string callsign = target_data.tstCallsignForTime(tod);
+
+        float ref_lower{0}, ref_upper{0};
+        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
+
+        bool ref_exists, callsign_ok;
+        bool lower_nok, upper_nok;
+
+        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+        {
+            if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
+                    || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
+            {
+                ref_exists = true;
+                callsign_ok = false;
+
+                lower_nok = false;
+                upper_nok = false;
+
+                if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
+                {
+                    callsign_ok = target_data.refCallsignForTime(ref_lower) == callsign;
+                    lower_nok = !callsign_ok;
+                }
+
+                if (!callsign_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
+                {
+                    callsign_ok = target_data.refCallsignForTime(ref_upper) == callsign;
+                    upper_nok = !callsign_ok;
+                }
+
+                if (callsign_ok)
+                    return {ValueComparisonResult::Same, "OK"};
+                else
+                {
+                    string comment = "Not OK:";
+
+                    if (lower_nok)
+                    {
+                        comment += " test id '"+target_data.tstCallsignForTime(tod)
+                                +"' ref id at "+String::timeStringFromDouble(ref_lower)
+                                + "  '"+target_data.refCallsignForTime(ref_lower)
+                                + "'";
+                    }
+                    else
+                    {
+                        assert (upper_nok);
+                        comment += " test id '"+target_data.tstCallsignForTime(tod)
+                                +"' ref id at "+String::timeStringFromDouble(ref_upper)
+                                + "  '"+target_data.refCallsignForTime(ref_upper)
+                                + "'";
+                    }
+
+                    return {ValueComparisonResult::Different, comment};
+                }
+            }
+            else
+                return {ValueComparisonResult::Unknown_NoRefData, "No ref id"};
+
+        }
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref id"};
+    }
+    else
+        return {ValueComparisonResult::Unknown_NoTstData, "No test id"};
 }
 
 }

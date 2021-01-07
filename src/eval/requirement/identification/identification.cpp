@@ -85,6 +85,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
     bool has_ground_bit;
     bool ground_bit_set;
 
+    ValueComparisonResult cmp_res;
+
     for (const auto& tst_id : tst_data)
     {
         ref_exists = false;
@@ -150,91 +152,35 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         }
         ++num_pos_inside;
 
-        if (target_data.hasTstCallsignForTime(tod))
+        callsign_ok = true;
+        tie(cmp_res, comment) = compareTi(tod, target_data, max_ref_time_diff);
+
+        if (cmp_res == ValueComparisonResult::Unknown_NoRefData)
         {
-            callsign = target_data.tstCallsignForTime(tod);
+            if (skip_no_data_details)
+                skip_detail = true;
 
-            tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
-            if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
-            {
-                if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                        || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
-                {
-                    ref_exists = true;
-                    callsign_ok = false;
-
-                    lower_nok = false;
-                    upper_nok = false;
-
-                    if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                    {
-                        callsign_ok = target_data.refCallsignForTime(ref_lower) == callsign;
-                        lower_nok = !callsign_ok;
-                    }
-
-                    if (!callsign_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
-                    {
-                        callsign_ok = target_data.refCallsignForTime(ref_upper) == callsign;
-                        upper_nok = !callsign_ok;
-                    }
-
-                    if (callsign_ok)
-                    {
-                        ++num_correct_id;
-                        comment = "OK";
-                    }
-                    else
-                    {
-                        ++num_false_id;
-                        comment = "Not OK:";
-
-                        if (lower_nok)
-                        {
-                            comment += " test id '"+target_data.tstCallsignForTime(tod)
-                                    +"' reference id at "+String::timeStringFromDouble(ref_lower)
-                                    + "  '"+target_data.refCallsignForTime(ref_lower)
-                                    + "'";
-                        }
-                        else
-                        {
-                            assert (upper_nok);
-                            comment += " test id '"+target_data.tstCallsignForTime(tod)
-                                    +"' reference id at "+String::timeStringFromDouble(ref_upper)
-                                    + "  '"+target_data.refCallsignForTime(ref_upper)
-                                    + "'";
-                        }
-                    }
-                }
-                else
-                {
-                    comment = "No reference data";
-
-                    if (skip_no_data_details)
-                        skip_detail = true;
-
-                    ++num_no_ref_id;
-                }
-            }
-            else
-            {
-                comment = "No reference identification";
-
-                if (skip_no_data_details)
-                    skip_detail = true;
-
-                ++num_no_ref_id;
-            }
+            ++num_no_ref_id;
         }
-        else
+        else if (cmp_res == ValueComparisonResult::Unknown_NoTstData)
         {
-            comment = "No test identification";
-
             if (skip_no_data_details)
                 skip_detail = true;
 
             ++num_unknown_id;
         }
+        else if (cmp_res == ValueComparisonResult::Same)
+        {
+            ++num_correct_id;
+        }
+        else if (cmp_res == ValueComparisonResult::Different)
+        {
+            callsign_ok = false;
+            ++num_false_id;
+        }
+        else
+            throw runtime_error("EvaluationRequirementIdentification: evaluate: unknown compare result "
+                                +to_string(cmp_res));
 
         if (!skip_detail)
             details.push_back({tod, pos_current,
@@ -295,78 +241,6 @@ bool Identification::useMsTa() const
 bool Identification::useMsTi() const
 {
     return use_ms_ti_;
-}
-
-std::pair<ValueComparisonResult, std::string> Identification::compareTi (
-        float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
-{
-    if (target_data.hasTstCallsignForTime(tod))
-    {
-        string callsign = target_data.tstCallsignForTime(tod);
-
-        float ref_lower{0}, ref_upper{0};
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
-        bool ref_exists, callsign_ok;
-        bool lower_nok, upper_nok;
-
-        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
-        {
-            if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                    || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
-            {
-                ref_exists = true;
-                callsign_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                {
-                    callsign_ok = target_data.refCallsignForTime(ref_lower) == callsign;
-                    lower_nok = !callsign_ok;
-                }
-
-                if (!callsign_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
-                {
-                    callsign_ok = target_data.refCallsignForTime(ref_upper) == callsign;
-                    upper_nok = !callsign_ok;
-                }
-
-                if (callsign_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " test id '"+target_data.tstCallsignForTime(tod)
-                                +"' ref id at "+String::timeStringFromDouble(ref_lower)
-                                + "  '"+target_data.refCallsignForTime(ref_lower)
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " test id '"+target_data.tstCallsignForTime(tod)
-                                +"' ref id at "+String::timeStringFromDouble(ref_upper)
-                                + "  '"+target_data.refCallsignForTime(ref_upper)
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
-            }
-            else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref id"};
-
-        }
-        else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref id"};
-    }
-    else
-        return {ValueComparisonResult::Unknown_NoTstData, "No test id"};
 }
 
 }
