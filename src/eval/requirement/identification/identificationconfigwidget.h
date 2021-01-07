@@ -27,21 +27,38 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class IdentificationConfig;
+class IdentificationConfig;
 
-    class IdentificationConfigWidget : public BaseConfigWidget
-    {
-        Q_OBJECT
+class IdentificationConfigWidget : public BaseConfigWidget
+{
+    Q_OBJECT
 
-    public slots:
+public slots:
+    void toggleRequireCorrectnessSlot();
+    void toggleRequireCorrectnessOfAllSlot();
 
-    public:
-        IdentificationConfigWidget(IdentificationConfig& cfg);
+    void toggleUseModeASlot();
+    void toggleUseMsTaSlot();
+    void toggleUseMsTiSlot();
 
-    protected:
 
-        IdentificationConfig& config();
-    };
+public:
+    IdentificationConfigWidget(IdentificationConfig& cfg);
+
+protected:
+    QCheckBox* require_correctness_check_{nullptr};
+    QCheckBox* require_correctness_of_all_check_{nullptr};
+
+    // mode a ssr code
+    QCheckBox* use_mode_a_check_{nullptr};
+    // 24-bit mode s address
+    QCheckBox* use_ms_ta_check_{nullptr};
+    // downlinked aircraft identification
+    QCheckBox* use_ms_ti_check_{nullptr};
+
+
+    IdentificationConfig& config();
+};
 
 }
 

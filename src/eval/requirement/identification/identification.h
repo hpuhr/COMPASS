@@ -22,18 +22,55 @@
 
 namespace EvaluationRequirement
 {
+enum ValueComparisonResult
+{
+    Unknown_NoRefData=0,
+    Unknown_NoTstData,
+    Same,
+    Different
+};
+
 class Identification : public Base
 {
 public:
     Identification(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
+            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            bool require_correctness, bool require_correctness_of_all,
+            bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    bool requireCorrectness() const;
+
+    bool requireCorrectnessOfAll() const;
+
+    bool useModeA() const;
+
+    bool useMsTa() const;
+
+    bool useMsTi() const;
+
+
 protected:
+    // true: correct (not false) only, false: present is ok
+    bool require_correctness_ {false};
+
+    // true: all must be correct (not false), false: at least one must be correct (not false)
+    // for require_correctness_ true only
+    bool require_correctness_of_all_ {false};
+
+    // mode a ssr code
+    bool use_mode_a_ {true};
+    // 24-bit mode s address
+    bool use_ms_ta_ {true};
+    // downlinked aircraft identification
+    bool use_ms_ti_ {true};
+
+    std::pair<ValueComparisonResult, std::string> compareTi (float tod, const EvaluationTargetData& target_data,
+                                                             float max_ref_time_diff); // tod tst
 };
 
 }

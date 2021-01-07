@@ -40,7 +40,35 @@ namespace EvaluationRequirement
 
         std::shared_ptr<Base> createRequirement() override;
 
+        bool requireCorrectness() const;
+        void requireCorrectness(bool value);
+
+        bool requireCorrectnessOfAll() const;
+        void requireCorrectnessOfAll(bool value);
+
+        bool useModeA() const;
+        void useModeA(bool value);
+
+        bool useMsTa() const;
+        void useMsTa(bool value);
+
+        bool useMsTi() const;
+        void useMsTi(bool value);
+
     protected:
+        // true: correct (not false) only, false: present is ok
+        bool require_correctness_ {false};
+
+        // true: all must be correct (not false), false: at least one must be correct (not false)
+        // for require_correctness_ true only
+        bool require_correctness_of_all_ {false};
+
+        // mode a ssr code
+        bool use_mode_a_ {true};
+        // 24-bit mode s address
+        bool use_ms_ta_ {true};
+        // downlinked aircraft identification
+        bool use_ms_ti_ {true};
 
         virtual void createWidget() override;
     };

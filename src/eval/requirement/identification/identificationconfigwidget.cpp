@@ -32,6 +32,89 @@ namespace EvaluationRequirement
     IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& cfg)
         : BaseConfigWidget(cfg)
     {
+//        QCheckBox* require_correctness_check_{nullptr};
+        require_correctness_check_ = new QCheckBox ();
+        require_correctness_check_->setChecked(config().requireCorrectness());
+        connect(require_correctness_check_, &QCheckBox::clicked,
+                this, &IdentificationConfigWidget::toggleRequireCorrectnessSlot);
+        form_layout_->addRow("Require Correctness", require_correctness_check_);
+
+        //        QCheckBox* require_correctness_of_all_check_{nullptr};
+        require_correctness_of_all_check_ = new QCheckBox ();
+        require_correctness_of_all_check_->setChecked(config().requireCorrectnessOfAll());
+        connect(require_correctness_of_all_check_, &QCheckBox::clicked,
+                this, &IdentificationConfigWidget::toggleRequireCorrectnessOfAllSlot);
+        form_layout_->addRow("Require Correctness of All", require_correctness_of_all_check_);
+
+        // mode a ssr code
+        use_mode_a_check_ = new QCheckBox ();
+        use_mode_a_check_->setChecked(config().useModeA());
+        connect(use_mode_a_check_, &QCheckBox::clicked,
+                this, &IdentificationConfigWidget::toggleUseModeASlot);
+        form_layout_->addRow("Use Mode 3/A Code", use_mode_a_check_);
+
+        // 24-bit mode s address
+        //QCheckBox* use_ms_ta_check_{nullptr};
+        use_ms_ta_check_ = new QCheckBox ();
+        use_ms_ta_check_->setChecked(config().useMsTa());
+        connect(use_ms_ta_check_, &QCheckBox::clicked,
+                this, &IdentificationConfigWidget::toggleUseMsTaSlot);
+        form_layout_->addRow("Use Mode S Target Address", use_ms_ta_check_);
+
+
+        // downlinked aircraft identification
+        //QCheckBox* use_ms_ti_check_{nullptr};
+        use_ms_ti_check_ = new QCheckBox ();
+        use_ms_ti_check_->setChecked(config().useMsTi());
+        connect(use_ms_ti_check_, &QCheckBox::clicked,
+                this, &IdentificationConfigWidget::toggleUseMsTiSlot);
+        form_layout_->addRow("Use Mode S Target Identification", use_ms_ti_check_);
+
+
+    }
+
+    void IdentificationConfigWidget::toggleRequireCorrectnessSlot()
+    {
+        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleRequireCorrectnessSlot";
+
+        assert (require_correctness_check_);
+        config().requireCorrectness(require_correctness_check_->checkState() == Qt::Checked);
+
+    }
+
+    void IdentificationConfigWidget::toggleRequireCorrectnessOfAllSlot()
+    {
+        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleRequireCorrectnessOfAllSlot";
+
+        assert (require_correctness_of_all_check_);
+        config().requireCorrectnessOfAll(require_correctness_of_all_check_->checkState() == Qt::Checked);
+
+    }
+
+    void IdentificationConfigWidget::toggleUseModeASlot()
+    {
+        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseModeASlot";
+
+        assert (use_mode_a_check_);
+        config().useModeA(use_mode_a_check_->checkState() == Qt::Checked);
+    }
+
+    void IdentificationConfigWidget::toggleUseMsTaSlot()
+    {
+        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTaSlot";
+
+        assert (use_ms_ta_check_);
+        config().useMsTa(use_ms_ta_check_->checkState() == Qt::Checked);
+
+    }
+
+    void IdentificationConfigWidget::toggleUseMsTiSlot()
+    {
+        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTiSlot";
+
+        assert (use_ms_ti_check_);
+        config().useMsTi(use_ms_ti_check_->checkState() == Qt::Checked);
+
     }
 
     IdentificationConfig& IdentificationConfigWidget::config()

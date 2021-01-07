@@ -35,11 +35,63 @@ namespace EvaluationRequirement
     std::shared_ptr<Base> IdentificationConfig::createRequirement()
     {
         shared_ptr<Identification> req = make_shared<Identification>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                    require_correctness_, require_correctness_of_all_,
+                    use_mode_a_, use_ms_ta_, use_ms_ti_);
 
         return req;
     }
+    
+    bool IdentificationConfig::requireCorrectness() const
+    {
+        return require_correctness_;
+    }
 
+    void IdentificationConfig::requireCorrectness(bool value)
+    {
+        require_correctness_ = value;
+    }
+
+    bool IdentificationConfig::requireCorrectnessOfAll() const
+    {
+        return require_correctness_of_all_;
+    }
+
+    void IdentificationConfig::requireCorrectnessOfAll(bool value)
+    {
+        require_correctness_of_all_ = value;
+    }
+
+    bool IdentificationConfig::useModeA() const
+    {
+        return use_mode_a_;
+    }
+    
+    void IdentificationConfig::useModeA(bool value)
+    {
+        use_mode_a_ = value;
+    }
+    
+    bool IdentificationConfig::useMsTa() const
+    {
+        return use_ms_ta_;
+    }
+    
+    void IdentificationConfig::useMsTa(bool value)
+    {
+        use_ms_ta_ = value;
+    }
+    
+    bool IdentificationConfig::useMsTi() const
+    {
+        return use_ms_ti_;
+    }
+    
+    void IdentificationConfig::useMsTi(bool value)
+    {
+        use_ms_ti_ = value;
+    }
+    
     void IdentificationConfig::createWidget()
     {
         assert (!widget_);
