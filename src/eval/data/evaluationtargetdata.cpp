@@ -733,7 +733,7 @@ bool EvaluationTargetData::hasRefModeCForTime (float tod) const
     return true;
 }
 
-unsigned int EvaluationTargetData::refModeCForTime (float tod) const
+int EvaluationTargetData::refModeCForTime (float tod) const
 {
     assert (hasRefModeCForTime(tod));
 
@@ -1065,7 +1065,7 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
 }
 
 
-unsigned int EvaluationTargetData::tstModeCForTime (float tod) const
+int EvaluationTargetData::tstModeCForTime (float tod) const
 {
     assert (hasTstModeCForTime(tod));
 
@@ -1073,7 +1073,7 @@ unsigned int EvaluationTargetData::tstModeCForTime (float tod) const
 
     assert (it_pair.first != tst_data_.end());
 
-    unsigned int index = it_pair.first->second;
+    int index = it_pair.first->second;
 
     NullableVector<int>& modec_vec = eval_data_->tst_buffer_->get<int>(eval_data_->tst_modec_name_);
     assert (!modec_vec.isNull(index));

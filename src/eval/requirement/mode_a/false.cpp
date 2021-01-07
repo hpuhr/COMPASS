@@ -40,15 +40,13 @@ namespace EvaluationRequirement
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer)
     {
-        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_;
+        logdbg << "EvaluationRequirementModeAFalse '" << name_ << "': evaluate: utn " << target_data.utn_;
 
         float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
         const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
         float tod{0};
-
-        float ref_lower{0}, ref_upper{0};
 
         int num_updates {0};
         int num_no_ref_pos {0};
@@ -61,7 +59,6 @@ namespace EvaluationRequirement
 
         vector<CheckDetail> details;
         EvaluationTargetPosition pos_current;
-        unsigned int code;
         bool code_ok;
 
         bool ref_exists;
@@ -70,8 +67,8 @@ namespace EvaluationRequirement
         EvaluationTargetPosition ref_pos;
         bool ok;
 
+        ValueComparisonResult cmp_res;
         string comment;
-        bool lower_nok, upper_nok;
 
         bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
         bool skip_detail;
@@ -144,91 +141,35 @@ namespace EvaluationRequirement
             }
             ++num_pos_inside;
 
-            if (target_data.hasTstModeAForTime(tod))
+            tie(cmp_res, comment) = compareModeA(tod, target_data, max_ref_time_diff);
+
+            code_ok = true;
+            if (cmp_res == ValueComparisonResult::Unknown_NoRefData)
             {
-                code = target_data.tstModeAForTime(tod);
+                if (skip_no_data_details)
+                    skip_detail = true;
 
-                tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
-                if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
-                {
-                    if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                            || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
-                    {
-                        ref_exists = true;
-                        code_ok = false;
-
-                        lower_nok = false;
-                        upper_nok = false;
-
-                        if (ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                        {
-                            code_ok = target_data.refModeAForTime(ref_lower) == code;
-                            lower_nok = !code_ok;
-                        }
-
-                        if (!code_ok && ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))
-                        {
-                            code_ok = target_data.refModeAForTime(ref_upper) == code;
-                            upper_nok = !code_ok;
-                        }
-
-                        if (code_ok)
-                        {
-                            ++num_correct;
-                            comment = "OK";
-                        }
-                        else
-                        {
-                            ++num_false;
-                            comment = "Not OK:";
-
-                            if (lower_nok)
-                            {
-                                comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference code at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
-                                        + "'";
-                            }
-                            else
-                            {
-                                assert (upper_nok);
-                                comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                        +"' reference code at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                        +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
-                                        + "'";
-                            }
-                        }
-                    }
-                    else
-                    {
-                        comment = "No reference data";
-
-                        if (skip_no_data_details)
-                            skip_detail = true;
-
-                        ++num_no_ref_val;
-                    }
-                }
-                else
-                {
-                    comment = "No reference code";
-
-                    if (skip_no_data_details)
-                        skip_detail = true;
-
-                    ++num_no_ref_val;
-                }
+                ++num_no_ref_val;
             }
-            else
+            else if (cmp_res == ValueComparisonResult::Unknown_NoTstData)
             {
-                comment = "No test code";
-
                 if (skip_no_data_details)
                     skip_detail = true;
 
                 ++num_unknown;
             }
+            else if (cmp_res == ValueComparisonResult::Same)
+            {
+                ++num_correct;
+            }
+            else if (cmp_res == ValueComparisonResult::Different)
+            {
+                code_ok = false;
+                ++num_false;
+            }
+            else
+                throw runtime_error("EvaluationRequirementModeAFalse: evaluate: unknown compare result "
+                                    +to_string(cmp_res));
 
             if (!skip_detail)
                 details.push_back({tod, pos_current,
@@ -237,7 +178,7 @@ namespace EvaluationRequirement
                                    num_unknown, num_correct, num_false, comment});
         }
 
-        logdbg << "EvaluationRequirementModeA '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "EvaluationRequirementModeAFalse '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
                << " num_no_ref_val " << num_no_ref_val
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside

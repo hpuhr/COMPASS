@@ -135,7 +135,7 @@ public:
     unsigned int refModeAForTime (float tod) const;
 
     bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
-    unsigned int refModeCForTime (float tod) const;
+    int refModeCForTime (float tod) const;
 
     // test
     bool hasTstPosForTime (float tod) const;
@@ -149,7 +149,7 @@ public:
     unsigned int tstModeAForTime (float tod) const;
 
     bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
-    unsigned int tstModeCForTime (float tod) const;
+    int tstModeCForTime (float tod) const;
 
     bool hasTstGroundBitForTime (float tod) const; // only if set
     bool tstGroundBitForTime (float tod) const; // true is on ground

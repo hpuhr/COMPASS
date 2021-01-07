@@ -42,7 +42,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
            << " prob " << maximum_probability_false_;
 
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
@@ -50,8 +50,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
     float tod{0};
-
-    float ref_lower{0}, ref_upper{0};
 
     int num_updates {0};
     int num_no_ref_pos {0};
@@ -64,7 +62,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
 
     vector<CheckDetail> details;
     EvaluationTargetPosition pos_current;
-    float code;
     bool code_ok;
 
     bool ref_exists;
@@ -73,8 +70,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     EvaluationTargetPosition ref_pos;
     bool ok;
 
+    ValueComparisonResult cmp_res;
     string comment;
-    bool lower_nok, upper_nok;
 
     bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
     bool skip_detail;
@@ -147,91 +144,35 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         }
         ++num_pos_inside;
 
-        if (target_data.hasTstModeCForTime(tod))
+        tie(cmp_res, comment) = compareModeC(tod, target_data, max_ref_time_diff, maximum_difference_);
+
+        code_ok = true;
+        if (cmp_res == ValueComparisonResult::Unknown_NoRefData)
         {
-            code = target_data.tstModeCForTime(tod);
+            if (skip_no_data_details)
+                skip_detail = true;
 
-            tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
-            if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
-            {
-                if ((ref_lower != -1 && target_data.hasRefModeCForTime(ref_lower))
-                        || (ref_upper != -1 && target_data.hasRefModeCForTime(ref_upper))) // ref value(s) exist
-                {
-                    ref_exists = true;
-                    code_ok = false;
-
-                    lower_nok = false;
-                    upper_nok = false;
-
-                    if (ref_lower != -1 && target_data.hasRefModeCForTime(ref_lower))
-                    {
-                        code_ok = fabs(target_data.refModeCForTime(ref_lower) - code) <= maximum_difference_;
-                        lower_nok = !code_ok;
-                    }
-
-                    if (!code_ok && ref_upper != -1 && target_data.hasRefModeCForTime(ref_upper))
-                    {
-                        code_ok = fabs(target_data.refModeCForTime(ref_upper) - code) <= maximum_difference_;
-                        upper_nok = !code_ok;
-                    }
-
-                    if (code_ok)
-                    {
-                        ++num_correct;
-                        comment = "OK";
-                    }
-                    else
-                    {
-                        ++num_false;
-                        comment = "Not OK:";
-
-                        if (lower_nok)
-                        {
-                            comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                    +"' reference code at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                    +String::octStringFromInt(target_data.refModeCForTime(ref_lower), 4, '0')
-                                    + "'";
-                        }
-                        else
-                        {
-                            assert (upper_nok);
-                            comment += " test code '"+String::octStringFromInt(code, 4, '0')
-                                    +"' reference code at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                    +String::octStringFromInt(target_data.refModeCForTime(ref_upper), 4, '0')
-                                    + "'";
-                        }
-                    }
-                }
-                else
-                {
-                    comment = "No reference data";
-
-                    if (skip_no_data_details)
-                        skip_detail = true;
-
-                    ++num_no_ref_val;
-                }
-            }
-            else
-            {
-                comment = "No reference code";
-
-                if (skip_no_data_details)
-                    skip_detail = true;
-
-                ++num_no_ref_val;
-            }
+            ++num_no_ref_val;
         }
-        else
+        else if (cmp_res == ValueComparisonResult::Unknown_NoTstData)
         {
-            comment = "No test code";
-
             if (skip_no_data_details)
                 skip_detail = true;
 
             ++num_unknown;
         }
+        else if (cmp_res == ValueComparisonResult::Same)
+        {
+            ++num_correct;
+        }
+        else if (cmp_res == ValueComparisonResult::Different)
+        {
+            code_ok = false;
+            ++num_false;
+        }
+        else
+            throw runtime_error("EvaluationRequirementModeCFalse: evaluate: unknown compare result "
+                                +to_string(cmp_res));
 
         if (!skip_detail)
             details.push_back({tod, pos_current,
@@ -240,7 +181,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
                                num_unknown, num_correct, num_false, comment});
     }
 
-    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_val " << num_no_ref_val
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside

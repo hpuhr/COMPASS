@@ -54,8 +54,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
 
     float tod{0};
 
-    float ref_lower{0}, ref_upper{0};
-
     int num_updates {0};
     int num_no_ref_pos {0};
     int num_no_ref_id {0};
@@ -77,7 +75,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
     bool ok;
 
     string comment;
-    bool lower_nok, upper_nok;
 
     bool skip_no_data_details = eval_man_.resultsGenerator().skipNoDataDetails();
     bool skip_detail;
