@@ -47,6 +47,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
 {
     logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_;
 
+    if (target_data.isPrimaryOnly())
+    {
+        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+               << " ignored since primary only";
+
+        return make_shared<EvaluationRequirementResult::SingleIdentification>(
+                    "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
+                    eval_man_, 0, 0, 0, 0, 0, 0, 0, vector<CorrectnessDetail>{});
+    }
+
     float max_ref_time_diff = eval_man_.maxRefTimeDiff();
 
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
@@ -172,6 +182,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
             ti_correct_failed = cmp_res_ti == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ti == ValueComparisonResult::Different;
 
+            if (ti_correct_failed)
+                comment += "Id value failed";
+
             any_correct |= !ti_correct_failed;
             all_correct &= !ti_correct_failed;
         }
@@ -181,6 +194,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
             ta_correct_failed = cmp_res_ta == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ta == ValueComparisonResult::Different;
 
+            if (ta_correct_failed)
+            {
+                if (comment.size())
+                    comment += ", addr value failed";
+                else
+                    comment += "MS Addr value failed";
+            }
+
             any_correct |= !ta_correct_failed;
             all_correct &= !ta_correct_failed;
         }
@@ -189,6 +210,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         {
             ma_correct_failed = cmp_res_ma == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ma == ValueComparisonResult::Different;
+
+            if (ma_correct_failed)
+            {
+                if (comment.size())
+                    comment += ", mode A value failed";
+                else
+                    comment += "Mode A value failed";
+            }
 
             any_correct |= !ma_correct_failed;
             all_correct &= !ma_correct_failed;
@@ -226,19 +255,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
 
     assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
     assert (num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
-
-    //assert (details.size() == tst_data.size());
-
-    //        if (num_correct_id+num_false_id)
-    //        {
-    //            float pid = (float)num_correct_id/(float)(num_correct_id+num_false_id);
-
-    //            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
-    //                   << " pid " << String::percentToString(100.0 * pid) << " passed " << (pid >= minimum_probability_);
-    //        }
-    //        else
-    //            logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
-    //                   << " no data for pid";
 
     return make_shared<EvaluationRequirementResult::SingleIdentification>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

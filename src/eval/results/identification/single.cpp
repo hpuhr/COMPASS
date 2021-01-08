@@ -75,22 +75,6 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-//    void SingleIdentification::print()
-//    {
-//        std::shared_ptr<EvaluationRequirement::Identification> req =
-//                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
-//        assert (req);
-
-//        if (has_pid_)
-//            loginf << "SingleIdentification: print: req. name " << req->name()
-//                   << " utn " << utn_
-//                   << " pid " << String::percentToString(100.0 * pid_)
-//                   << " passed " << (pid_ >= req->minimumProbability());
-//        else
-//            loginf << "SingleIdentification: print: req. name " << req->name()
-//                   << " utn " << utn_ << " has no data";
-//    }
-
     void SingleIdentification::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "SingleIdentification " <<  requirement_->name() <<": addToReport";
@@ -196,29 +180,28 @@ namespace EvaluationRequirementResult
 
     void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
-//        if (!utn_req_section.hasTable(tr_details_table_name_))
-//            utn_req_section.addTable(tr_details_table_name_, 11,
-//            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#UID", "#CID", "#FID", "Comment"});
+        if (!utn_req_section.hasTable(tr_details_table_name_))
+            utn_req_section.addTable(tr_details_table_name_, 10,
+            {"ToD", "Ref", "Ok", "#Up", "#NoRef", "#PosInside", "#PosOutside", "#CID", "#NCID", "Comment"});
 
-//        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-//                utn_req_section.getTable(tr_details_table_name_);
+        EvaluationResultsReport::SectionContentTable& utn_req_details_table =
+                utn_req_section.getTable(tr_details_table_name_);
 
-//        unsigned int detail_cnt = 0;
+        unsigned int detail_cnt = 0;
 
-//        for (auto& rq_det_it : details_)
-//        {
-//            utn_req_details_table.addRow(
-//            {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
-//             !rq_det_it.is_not_ok_,
-//             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
-//             rq_det_it.num_inside_, rq_det_it.num_outside_, rq_det_it.num_unknown_id_,
-//             rq_det_it.num_correct_id_, rq_det_it.num_false_id_, rq_det_it.comment_.c_str()},
-//                        this, detail_cnt);
+        for (auto& rq_det_it : details_)
+        {
+            utn_req_details_table.addRow(
+            {String::timeStringFromDouble(rq_det_it.tod_).c_str(), rq_det_it.ref_exists_,
+             !rq_det_it.is_not_correct_,
+             rq_det_it.num_updates_, rq_det_it.num_no_ref_,
+             rq_det_it.num_inside_, rq_det_it.num_outside_,
+             rq_det_it.num_correct_, rq_det_it.num_not_correct_, rq_det_it.comment_.c_str()},
+                        this, detail_cnt);
 
-//            ++detail_cnt;
-//        }
+            ++detail_cnt;
+        }
     }
-
 
     bool SingleIdentification::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
