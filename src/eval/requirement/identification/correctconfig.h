@@ -15,13 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCONFIG_H
-#define EVALUATIONREQUIREMENTIDENTIFICATIONCONFIG_H
+#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIG_H
+#define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIG_H
 
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/identification/identification.h"
-#include "eval/requirement/identification/identificationconfigwidget.h"
+#include "eval/requirement/identification/correct.h"
+#include "eval/requirement/identification/correctconfigwidget.h"
 
 #include <memory>
 
@@ -31,10 +31,10 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class IdentificationConfig : public BaseConfig
+    class IdentificationCorrectConfig : public BaseConfig
     {
     public:
-        IdentificationConfig(const std::string& class_id, const std::string& instance_id,
+        IdentificationCorrectConfig(const std::string& class_id, const std::string& instance_id,
                              Group& group, EvaluationStandard& standard,
                              EvaluationManager& eval_man);
 

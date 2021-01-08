@@ -15,18 +15,18 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTIDENTIFICATION_H
-#define EVALUATIONREQUIREMENTIDENTIFICATION_H
+#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
+#define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
 
 #include "eval/requirement/base/base.h"
 
 namespace EvaluationRequirement
 {
 
-class Identification : public Base
+class IdentificationCorrect : public Base
 {
 public:
-    Identification(
+    IdentificationCorrect(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
@@ -57,4 +57,4 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTDETECTION_H
+#endif // EVALUATIONREQUIREMENTDETECTIONCORRECT_H

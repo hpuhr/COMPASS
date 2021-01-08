@@ -42,8 +42,8 @@
 #include "eval/results/position/acrossjoined.h"
 #include "eval/results/position/latencysingle.h"
 #include "eval/results/position/latencyjoined.h"
-#include "eval/results/identification/single.h"
-#include "eval/results/identification/joined.h"
+#include "eval/results/identification/correctsingle.h"
+#include "eval/results/identification/correctjoined.h"
 #include "eval/results/mode_a/presentsingle.h"
 #include "eval/results/mode_a/presentjoined.h"
 #include "eval/results/mode_a/falsesingle.h"
@@ -650,10 +650,10 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         updateCountResult(static_pointer_cast<SinglePositionLatency>(result));
     else if (result->type() == "JoinedPositionLatency")
         updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
-    else if (result->type() == "SingleIdentification")
-        updateCountResult(static_pointer_cast<SingleIdentification>(result));
-    else if (result->type() == "JoinedIdentification")
-        updateCountResult(static_pointer_cast<JoinedIdentification>(result));
+    else if (result->type() == "SingleIdentificationCorrect")
+        updateCountResult(static_pointer_cast<SingleIdentificationCorrect>(result));
+    else if (result->type() == "JoinedIdentificationCorrect")
+        updateCountResult(static_pointer_cast<JoinedIdentificationCorrect>(result));
 
     else if (result->type() == "SingleModeAPresent")
         updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
@@ -975,7 +975,7 @@ void HistogramViewDataWidget::updateCountResult (
 
 
 void HistogramViewDataWidget::updateCountResult (
-        std::shared_ptr<EvaluationRequirementResult::SingleIdentification> result)
+        std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result)
 {
     logdbg << "HistogramViewDataWidget: showResult: single identification";
 
@@ -1003,7 +1003,7 @@ void HistogramViewDataWidget::updateCountResult (
 
 
 void HistogramViewDataWidget::updateCountResult (
-        std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result)
+        std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result)
 {
     logdbg << "HistogramViewDataWidget: updateFromResult: joined identification";
 
@@ -1013,9 +1013,9 @@ void HistogramViewDataWidget::updateCountResult (
 
     for (auto& result_it : results)
     {
-        assert (static_pointer_cast<SingleIdentification>(result_it));
+        assert (static_pointer_cast<SingleIdentificationCorrect>(result_it));
         if (result_it->use())
-            updateCountResult (static_pointer_cast<SingleIdentification>(result_it));
+            updateCountResult (static_pointer_cast<SingleIdentificationCorrect>(result_it));
     }
 }
 

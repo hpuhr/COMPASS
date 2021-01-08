@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/identification/identificationconfig.h"
-#include "eval/requirement/identification/identificationconfigwidget.h"
+#include "eval/requirement/identification/correctconfig.h"
+#include "eval/requirement/identification/correctconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 
@@ -25,16 +25,16 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    IdentificationConfig::IdentificationConfig(
+    IdentificationCorrectConfig::IdentificationCorrectConfig(
             const std::string& class_id, const std::string& instance_id,
             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
         : BaseConfig(class_id, instance_id, group, standard, eval_man)
     {
     }
 
-    std::shared_ptr<Base> IdentificationConfig::createRequirement()
+    std::shared_ptr<Base> IdentificationCorrectConfig::createRequirement()
     {
-        shared_ptr<Identification> req = make_shared<Identification>(
+        shared_ptr<IdentificationCorrect> req = make_shared<IdentificationCorrect>(
                     name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
                     require_correctness_of_all_,
                     use_mode_a_, use_ms_ta_, use_ms_ti_);
@@ -42,50 +42,50 @@ namespace EvaluationRequirement
         return req;
     }
     
-    bool IdentificationConfig::requireCorrectnessOfAll() const
+    bool IdentificationCorrectConfig::requireCorrectnessOfAll() const
     {
         return require_correctness_of_all_;
     }
 
-    void IdentificationConfig::requireCorrectnessOfAll(bool value)
+    void IdentificationCorrectConfig::requireCorrectnessOfAll(bool value)
     {
         require_correctness_of_all_ = value;
     }
 
-    bool IdentificationConfig::useModeA() const
+    bool IdentificationCorrectConfig::useModeA() const
     {
         return use_mode_a_;
     }
     
-    void IdentificationConfig::useModeA(bool value)
+    void IdentificationCorrectConfig::useModeA(bool value)
     {
         use_mode_a_ = value;
     }
     
-    bool IdentificationConfig::useMsTa() const
+    bool IdentificationCorrectConfig::useMsTa() const
     {
         return use_ms_ta_;
     }
     
-    void IdentificationConfig::useMsTa(bool value)
+    void IdentificationCorrectConfig::useMsTa(bool value)
     {
         use_ms_ta_ = value;
     }
     
-    bool IdentificationConfig::useMsTi() const
+    bool IdentificationCorrectConfig::useMsTi() const
     {
         return use_ms_ti_;
     }
     
-    void IdentificationConfig::useMsTi(bool value)
+    void IdentificationCorrectConfig::useMsTi(bool value)
     {
         use_ms_ti_ = value;
     }
     
-    void IdentificationConfig::createWidget()
+    void IdentificationCorrectConfig::createWidget()
     {
         assert (!widget_);
-        widget_.reset(new IdentificationConfigWidget(*this));
+        widget_.reset(new IdentificationCorrectConfigWidget(*this));
         assert (widget_);
     }
 }

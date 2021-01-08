@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/identification/single.h"
-#include "eval/results/identification/joined.h"
+#include "eval/results/identification/correctsingle.h"
+#include "eval/results/identification/correctjoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/identification/identification.h"
+#include "eval/requirement/identification/correct.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -36,7 +36,7 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    SingleIdentification::SingleIdentification(
+    SingleIdentificationCorrect::SingleIdentificationCorrect(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
@@ -44,7 +44,7 @@ namespace EvaluationRequirementResult
             unsigned int num_pos_outside, unsigned int num_pos_inside,
             unsigned int num_correct, unsigned int num_not_correct,
             std::vector<EvaluationRequirement::CorrectnessDetail> details)
-        : Single("SingleIdentification", result_id, requirement, sector_layer, utn, target, eval_man),
+        : Single("SingleIdentificationCorrect", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_no_ref_pos_(num_no_ref_pos), num_no_ref_id_(num_no_ref_id),
           num_pos_outside_(num_pos_outside), num_pos_inside_(num_pos_inside),
           num_correct_(num_correct), num_not_correct_(num_not_correct), details_(details)
@@ -52,7 +52,7 @@ namespace EvaluationRequirementResult
         updatePID();
     }
 
-    void SingleIdentification::updatePID()
+    void SingleIdentificationCorrect::updatePID()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_id_+num_correct_+num_not_correct_);
@@ -75,7 +75,7 @@ namespace EvaluationRequirementResult
         updateUseFromTarget();
     }
 
-    void SingleIdentification::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleIdentificationCorrect::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "SingleIdentification " <<  requirement_->name() <<": addToReport";
 
@@ -88,7 +88,7 @@ namespace EvaluationRequirementResult
         // TODO add requirement description, methods
     }
 
-    void SingleIdentification::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleIdentificationCorrect::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         addTargetDetailsToTable(getRequirementSection(root_item), target_table_name_);
 
@@ -96,7 +96,7 @@ namespace EvaluationRequirementResult
             addTargetDetailsToTable(root_item->getSection(getRequirementSumSectionID()), target_table_name_);
     }
 
-    void SingleIdentification::addTargetDetailsToTable (
+    void SingleIdentificationCorrect::addTargetDetailsToTable (
             EvaluationResultsReport::Section& section, const std::string& table_name)
     {
         if (!section.hasTable(table_name))
@@ -119,7 +119,7 @@ namespace EvaluationRequirementResult
          pd_var}, this, {utn_});
     }
 
-    void SingleIdentification::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void SingleIdentificationCorrect::addTargetDetailsToReport(shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         QVariant pd_var;
 
@@ -149,8 +149,8 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"POK [%]", "Probability of correct identification", pd_var}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        std::shared_ptr<EvaluationRequirement::IdentificationCorrect> req =
+                std::static_pointer_cast<EvaluationRequirement::IdentificationCorrect>(requirement_);
         assert (req);
 
         utn_req_table.addRow({"Condition", "", req->getConditionStr().c_str()}, this);
@@ -178,7 +178,7 @@ namespace EvaluationRequirementResult
         reportDetails(utn_req_section);
     }
 
-    void SingleIdentification::reportDetails(EvaluationResultsReport::Section& utn_req_section)
+    void SingleIdentificationCorrect::reportDetails(EvaluationResultsReport::Section& utn_req_section)
     {
         if (!utn_req_section.hasTable(tr_details_table_name_))
             utn_req_section.addTable(tr_details_table_name_, 10,
@@ -203,7 +203,7 @@ namespace EvaluationRequirementResult
         }
     }
 
-    bool SingleIdentification::hasViewableData (
+    bool SingleIdentificationCorrect::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -214,7 +214,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleIdentification::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
 
@@ -251,7 +251,7 @@ namespace EvaluationRequirementResult
             return nullptr;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> SingleIdentification::getTargetErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> SingleIdentificationCorrect::getTargetErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr = eval_man_.getViewableForEvaluation(
                     utn_, req_grp_id_, result_id_);
@@ -305,7 +305,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool SingleIdentification::hasReference (
+    bool SingleIdentificationCorrect::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
@@ -314,7 +314,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string SingleIdentification::reference(
+    std::string SingleIdentificationCorrect::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -322,47 +322,47 @@ namespace EvaluationRequirementResult
         return "Report:Results:"+getTargetRequirementSectionID();
     }
 
-    std::shared_ptr<Joined> SingleIdentification::createEmptyJoined(const std::string& result_id)
+    std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)
     {
-        return make_shared<JoinedIdentification> (result_id, requirement_, sector_layer_, eval_man_);
+        return make_shared<JoinedIdentificationCorrect> (result_id, requirement_, sector_layer_, eval_man_);
     }
 
-    unsigned int SingleIdentification::numNoRefPos() const
+    unsigned int SingleIdentificationCorrect::numNoRefPos() const
     {
         return num_no_ref_pos_;
     }
 
-    unsigned int SingleIdentification::numNoRefId() const
+    unsigned int SingleIdentificationCorrect::numNoRefId() const
     {
         return num_no_ref_id_;
     }
 
-    unsigned int SingleIdentification::numPosOutside() const
+    unsigned int SingleIdentificationCorrect::numPosOutside() const
     {
         return num_pos_outside_;
     }
 
-    unsigned int SingleIdentification::numPosInside() const
+    unsigned int SingleIdentificationCorrect::numPosInside() const
     {
         return num_pos_inside_;
     }
 
-    unsigned int SingleIdentification::numUpdates() const
+    unsigned int SingleIdentificationCorrect::numUpdates() const
     {
         return num_updates_;
     }
 
-    unsigned int SingleIdentification::numCorrect() const
+    unsigned int SingleIdentificationCorrect::numCorrect() const
     {
         return num_correct_;
     }
 
-    unsigned int SingleIdentification::numNotCorrect() const
+    unsigned int SingleIdentificationCorrect::numNotCorrect() const
     {
         return num_not_correct_;
     }
 
-    std::vector<EvaluationRequirement::CorrectnessDetail>& SingleIdentification::details()
+    std::vector<EvaluationRequirement::CorrectnessDetail>& SingleIdentificationCorrect::details()
     {
         return details_;
     }

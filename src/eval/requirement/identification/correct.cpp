@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/identification/identification.h"
-#include "eval/results/identification/single.h"
+#include "eval/requirement/identification/correct.h"
+#include "eval/results/identification/correctsingle.h"
 #include "eval/requirement/correctnessdetail.h"
 #include "evaluationdata.h"
 #include "evaluationmanager.h"
@@ -30,7 +30,7 @@ using namespace Utils;
 namespace EvaluationRequirement
 {
 
-Identification::Identification(
+IdentificationCorrect::IdentificationCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
         bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti)
@@ -41,7 +41,7 @@ Identification::Identification(
 
 }
 
-std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
+std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
@@ -52,7 +52,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
         logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
                << " ignored since primary only";
 
-        return make_shared<EvaluationRequirementResult::SingleIdentification>(
+        return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, 0, 0, 0, 0, 0, 0, 0, vector<CorrectnessDetail>{});
     }
@@ -256,28 +256,28 @@ std::shared_ptr<EvaluationRequirementResult::Single> Identification::evaluate (
     assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
     assert (num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
 
-    return make_shared<EvaluationRequirementResult::SingleIdentification>(
+    return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
                 num_correct, num_not_correct, details);
 }
 
-bool Identification::requireCorrectnessOfAll() const
+bool IdentificationCorrect::requireCorrectnessOfAll() const
 {
     return require_correctness_of_all_;
 }
 
-bool Identification::useModeA() const
+bool IdentificationCorrect::useModeA() const
 {
     return use_mode_a_;
 }
 
-bool Identification::useMsTa() const
+bool IdentificationCorrect::useMsTa() const
 {
     return use_ms_ta_;
 }
 
-bool Identification::useMsTi() const
+bool IdentificationCorrect::useMsTi() const
 {
     return use_ms_ti_;
 }

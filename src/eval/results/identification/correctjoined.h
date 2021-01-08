@@ -15,19 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JOINEVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
-#define JOINEVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
+#ifndef JOINEVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H
+#define JOINEVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H
 
 #include "eval/results/joined.h"
 
 namespace EvaluationRequirementResult
 {
-    class SingleIdentification;
+    class SingleIdentificationCorrect;
 
-    class JoinedIdentification : public Joined
+    class JoinedIdentificationCorrect : public Joined
     {
     public:
-        JoinedIdentification(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
+        JoinedIdentificationCorrect(const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
                              const SectorLayer& sector_layer, EvaluationManager& eval_man);
 
         virtual void join(std::shared_ptr<Base> other) override;
@@ -59,7 +59,7 @@ namespace EvaluationRequirementResult
         bool has_pid_ {false};
         float pid_{0};
 
-        void addToValues (std::shared_ptr<SingleIdentification> single_result);
+        void addToValues (std::shared_ptr<SingleIdentificationCorrect> single_result);
         void updatePID();
         void addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
         void addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -69,4 +69,4 @@ namespace EvaluationRequirementResult
 
 }
 
-#endif // JOINEVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
+#endif // JOINEVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H

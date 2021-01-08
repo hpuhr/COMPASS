@@ -15,20 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
-#define EVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
+#ifndef EVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H
+#define EVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H
 
 #include "eval/results/single.h"
-#include "eval/requirement/identification/identification.h"
+#include "eval/requirement/identification/correct.h"
 #include "eval/requirement/correctnessdetail.h"
 
 namespace EvaluationRequirementResult
 {
 
-class SingleIdentification : public Single
+class SingleIdentificationCorrect : public Single
 {
 public:
-    SingleIdentification(
+    SingleIdentificationCorrect(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
@@ -88,4 +88,4 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENIDENTIFICATIONRESULT_H
+#endif // EVALUATIONREQUIREMENIDENTIFICATIONCORRECTRESULT_H

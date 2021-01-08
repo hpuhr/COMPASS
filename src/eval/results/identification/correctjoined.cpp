@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/results/identification/single.h"
-#include "eval/results/identification/joined.h"
+#include "eval/results/identification/correctsingle.h"
+#include "eval/results/identification/correctjoined.h"
 #include "eval/requirement/base/base.h"
-#include "eval/requirement/identification/identification.h"
+#include "eval/requirement/identification/correct.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
 #include "eval/results/report/rootitem.h"
@@ -36,26 +36,26 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-    JoinedIdentification::JoinedIdentification(
+    JoinedIdentificationCorrect::JoinedIdentificationCorrect(
             const std::string& result_id, std::shared_ptr<EvaluationRequirement::Base> requirement,
             const SectorLayer& sector_layer, EvaluationManager& eval_man)
-        : Joined("JoinedIdentification", result_id, requirement, sector_layer, eval_man)
+        : Joined("JoinedIdentificationCorrect", result_id, requirement, sector_layer, eval_man)
     {
     }
 
 
-    void JoinedIdentification::join(std::shared_ptr<Base> other)
+    void JoinedIdentificationCorrect::join(std::shared_ptr<Base> other)
     {
         Joined::join(other);
 
-        std::shared_ptr<SingleIdentification> other_sub =
-                std::static_pointer_cast<SingleIdentification>(other);
+        std::shared_ptr<SingleIdentificationCorrect> other_sub =
+                std::static_pointer_cast<SingleIdentificationCorrect>(other);
         assert (other_sub);
 
         addToValues(other_sub);
     }
 
-    void JoinedIdentification::addToValues (std::shared_ptr<SingleIdentification> single_result)
+    void JoinedIdentificationCorrect::addToValues (std::shared_ptr<SingleIdentificationCorrect> single_result)
     {
         assert (single_result);
 
@@ -73,7 +73,7 @@ namespace EvaluationRequirementResult
         updatePID();
     }
 
-    void JoinedIdentification::updatePID()
+    void JoinedIdentificationCorrect::updatePID()
     {
         assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
         assert (num_pos_inside_ == num_no_ref_id_+ num_correct_+num_not_correct_);
@@ -105,7 +105,7 @@ namespace EvaluationRequirementResult
 //                   << " has no data";
 //    }
 
-    void JoinedIdentification::addToReport (
+    void JoinedIdentificationCorrect::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         logdbg << "JoinedIdentification " <<  requirement_->name() <<": addToReport";
@@ -122,13 +122,13 @@ namespace EvaluationRequirementResult
         addDetails(root_item);
     }
 
-    void JoinedIdentification::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedIdentificationCorrect::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        std::shared_ptr<EvaluationRequirement::IdentificationCorrect> req =
+                std::static_pointer_cast<EvaluationRequirement::IdentificationCorrect>(requirement_);
         assert (req);
 
         // pd
@@ -150,7 +150,7 @@ namespace EvaluationRequirementResult
                          pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
     }
 
-    void JoinedIdentification::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    void JoinedIdentificationCorrect::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
         EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
 
@@ -173,8 +173,8 @@ namespace EvaluationRequirementResult
         sec_det_table.addRow({"#NCID [1]", "Number of updates with no correct identification", num_not_correct_}, this);
 
         // condition
-        std::shared_ptr<EvaluationRequirement::Identification> req =
-                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
+        std::shared_ptr<EvaluationRequirement::IdentificationCorrect> req =
+                std::static_pointer_cast<EvaluationRequirement::IdentificationCorrect>(requirement_);
         assert (req);
 
         // pd
@@ -208,7 +208,7 @@ namespace EvaluationRequirementResult
     }
 
 
-    bool JoinedIdentification::hasViewableData (
+    bool JoinedIdentificationCorrect::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA4 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -219,7 +219,7 @@ namespace EvaluationRequirementResult
             return false;
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedIdentification::viewableData(
+    std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationCorrect::viewableData(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasViewableData(table, annotation));
@@ -227,7 +227,7 @@ namespace EvaluationRequirementResult
         return getErrorsViewable();
     }
 
-    std::unique_ptr<nlohmann::json::object_t> JoinedIdentification::getErrorsViewable ()
+    std::unique_ptr<nlohmann::json::object_t> JoinedIdentificationCorrect::getErrorsViewable ()
     {
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr =
                 eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
@@ -255,7 +255,7 @@ namespace EvaluationRequirementResult
         return viewable_ptr;
     }
 
-    bool JoinedIdentification::hasReference (
+    bool JoinedIdentificationCorrect::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         //loginf << "UGA5 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
@@ -266,7 +266,7 @@ namespace EvaluationRequirementResult
             return false;;
     }
 
-    std::string JoinedIdentification::reference(
+    std::string JoinedIdentificationCorrect::reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
         assert (hasReference(table, annotation));
@@ -275,7 +275,7 @@ namespace EvaluationRequirementResult
         return nullptr;
     }
 
-    void JoinedIdentification::updatesToUseChanges()
+    void JoinedIdentificationCorrect::updatesToUseChanges()
     {
         num_updates_ = 0;
         num_no_ref_pos_ = 0;
@@ -287,8 +287,8 @@ namespace EvaluationRequirementResult
 
         for (auto result_it : results_)
         {
-            std::shared_ptr<SingleIdentification> result =
-                    std::static_pointer_cast<SingleIdentification>(result_it);
+            std::shared_ptr<SingleIdentificationCorrect> result =
+                    std::static_pointer_cast<SingleIdentificationCorrect>(result_it);
             assert (result);
 
             addToValues(result);

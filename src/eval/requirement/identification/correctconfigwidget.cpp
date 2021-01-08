@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/identification/identificationconfigwidget.h"
-#include "eval/requirement/identification/identificationconfig.h"
+#include "eval/requirement/identification/correctconfigwidget.h"
+#include "eval/requirement/identification/correctconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
@@ -29,21 +29,21 @@ using namespace std;
 namespace EvaluationRequirement
 {
 
-    IdentificationConfigWidget::IdentificationConfigWidget(IdentificationConfig& cfg)
+    IdentificationCorrectConfigWidget::IdentificationCorrectConfigWidget(IdentificationCorrectConfig& cfg)
         : BaseConfigWidget(cfg)
     {
         //        QCheckBox* require_correctness_of_all_check_{nullptr};
         require_correctness_of_all_check_ = new QCheckBox ();
         require_correctness_of_all_check_->setChecked(config().requireCorrectnessOfAll());
         connect(require_correctness_of_all_check_, &QCheckBox::clicked,
-                this, &IdentificationConfigWidget::toggleRequireCorrectnessOfAllSlot);
+                this, &IdentificationCorrectConfigWidget::toggleRequireCorrectnessOfAllSlot);
         form_layout_->addRow("Require Correctness of All", require_correctness_of_all_check_);
 
         // mode a ssr code
         use_mode_a_check_ = new QCheckBox ();
         use_mode_a_check_->setChecked(config().useModeA());
         connect(use_mode_a_check_, &QCheckBox::clicked,
-                this, &IdentificationConfigWidget::toggleUseModeASlot);
+                this, &IdentificationCorrectConfigWidget::toggleUseModeASlot);
         form_layout_->addRow("Use Mode 3/A Code", use_mode_a_check_);
 
         // 24-bit mode s address
@@ -51,7 +51,7 @@ namespace EvaluationRequirement
         use_ms_ta_check_ = new QCheckBox ();
         use_ms_ta_check_->setChecked(config().useMsTa());
         connect(use_ms_ta_check_, &QCheckBox::clicked,
-                this, &IdentificationConfigWidget::toggleUseMsTaSlot);
+                this, &IdentificationCorrectConfigWidget::toggleUseMsTaSlot);
         form_layout_->addRow("Use Mode S Target Address", use_ms_ta_check_);
 
 
@@ -60,13 +60,13 @@ namespace EvaluationRequirement
         use_ms_ti_check_ = new QCheckBox ();
         use_ms_ti_check_->setChecked(config().useMsTi());
         connect(use_ms_ti_check_, &QCheckBox::clicked,
-                this, &IdentificationConfigWidget::toggleUseMsTiSlot);
+                this, &IdentificationCorrectConfigWidget::toggleUseMsTiSlot);
         form_layout_->addRow("Use Mode S Target Identification", use_ms_ti_check_);
 
 
     }
 
-    void IdentificationConfigWidget::toggleRequireCorrectnessOfAllSlot()
+    void IdentificationCorrectConfigWidget::toggleRequireCorrectnessOfAllSlot()
     {
         loginf << "EvaluationRequirementIdentificationConfigWidget: toggleRequireCorrectnessOfAllSlot";
 
@@ -75,7 +75,7 @@ namespace EvaluationRequirement
 
     }
 
-    void IdentificationConfigWidget::toggleUseModeASlot()
+    void IdentificationCorrectConfigWidget::toggleUseModeASlot()
     {
         loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseModeASlot";
 
@@ -83,7 +83,7 @@ namespace EvaluationRequirement
         config().useModeA(use_mode_a_check_->checkState() == Qt::Checked);
     }
 
-    void IdentificationConfigWidget::toggleUseMsTaSlot()
+    void IdentificationCorrectConfigWidget::toggleUseMsTaSlot()
     {
         loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTaSlot";
 
@@ -92,7 +92,7 @@ namespace EvaluationRequirement
 
     }
 
-    void IdentificationConfigWidget::toggleUseMsTiSlot()
+    void IdentificationCorrectConfigWidget::toggleUseMsTiSlot()
     {
         loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTiSlot";
 
@@ -101,9 +101,9 @@ namespace EvaluationRequirement
 
     }
 
-    IdentificationConfig& IdentificationConfigWidget::config()
+    IdentificationCorrectConfig& IdentificationCorrectConfigWidget::config()
     {
-        IdentificationConfig* config = dynamic_cast<IdentificationConfig*>(&config_);
+        IdentificationCorrectConfig* config = dynamic_cast<IdentificationCorrectConfig*>(&config_);
         assert (config);
 
         return *config;

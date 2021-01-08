@@ -60,8 +60,8 @@ namespace EvaluationRequirementResult
     class SinglePositionLatency;
     class JoinedPositionLatency;
 
-    class SingleIdentification;
-    class JoinedIdentification;
+    class SingleIdentificationCorrect;
+    class JoinedIdentificationCorrect;
 
     class SingleModeAPresent;
     class JoinedModeAPresent;
@@ -186,8 +186,8 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result);
-    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentification> result);
-    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentification> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result);

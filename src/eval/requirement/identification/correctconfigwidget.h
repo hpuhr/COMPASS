@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTIDENTIFICATIONCONFIGWIDGET_H
+#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIGWIDGET_H
+#define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIGWIDGET_H
 
 #include "eval/requirement/base/baseconfigwidget.h"
 
@@ -27,9 +27,9 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-class IdentificationConfig;
+class IdentificationCorrectConfig;
 
-class IdentificationConfigWidget : public BaseConfigWidget
+class IdentificationCorrectConfigWidget : public BaseConfigWidget
 {
     Q_OBJECT
 
@@ -42,7 +42,7 @@ public slots:
 
 
 public:
-    IdentificationConfigWidget(IdentificationConfig& cfg);
+    IdentificationCorrectConfigWidget(IdentificationCorrectConfig& cfg);
 
 protected:
     QCheckBox* require_correctness_of_all_check_{nullptr};
@@ -55,9 +55,9 @@ protected:
     QCheckBox* use_ms_ti_check_{nullptr};
 
 
-    IdentificationConfig& config();
+    IdentificationCorrectConfig& config();
 };
 
 }
 
-#endif // EVALUATIONREQUIREMENTIDENTIFICATIONCONFIGWIDGET_H
+#endif // EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIGWIDGET_H
