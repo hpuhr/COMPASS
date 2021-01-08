@@ -62,6 +62,8 @@ namespace EvaluationRequirementResult
 
     class SingleIdentificationCorrect;
     class JoinedIdentificationCorrect;
+    class SingleIdentificationFalse;
+    class JoinedIdentificationFalse;
 
     class SingleModeAPresent;
     class JoinedModeAPresent;
@@ -176,8 +178,10 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraData> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleExtraTrack> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedExtraTrack> result);
+
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleDetection> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedDetection> result);
+
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionDistance> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionDistance> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionAlong> result);
@@ -186,8 +190,12 @@ protected:
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionAcross> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SinglePositionLatency> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedPositionLatency> result);
+
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleIdentificationFalse> result);
+    void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationFalse> result);
+
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::JoinedModeAPresent> result);
     void updateCountResult (std::shared_ptr<EvaluationRequirementResult::SingleModeAFalse> result);

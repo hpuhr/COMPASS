@@ -42,8 +42,12 @@
 #include "eval/results/position/acrossjoined.h"
 #include "eval/results/position/latencysingle.h"
 #include "eval/results/position/latencyjoined.h"
+
 #include "eval/results/identification/correctsingle.h"
 #include "eval/results/identification/correctjoined.h"
+#include "eval/results/identification/falsesingle.h"
+#include "eval/results/identification/falsejoined.h"
+
 #include "eval/results/mode_a/presentsingle.h"
 #include "eval/results/mode_a/presentjoined.h"
 #include "eval/results/mode_a/falsesingle.h"
@@ -650,10 +654,15 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
         updateCountResult(static_pointer_cast<SinglePositionLatency>(result));
     else if (result->type() == "JoinedPositionLatency")
         updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
+
     else if (result->type() == "SingleIdentificationCorrect")
         updateCountResult(static_pointer_cast<SingleIdentificationCorrect>(result));
     else if (result->type() == "JoinedIdentificationCorrect")
         updateCountResult(static_pointer_cast<JoinedIdentificationCorrect>(result));
+    else if (result->type() == "SingleIdentificationFalse")
+        updateCountResult(static_pointer_cast<SingleIdentificationFalse>(result));
+    else if (result->type() == "JoinedIdentificationFalse")
+        updateCountResult(static_pointer_cast<JoinedIdentificationFalse>(result));
 
     else if (result->type() == "SingleModeAPresent")
         updateCountResult(static_pointer_cast<SingleModeAPresent>(result));
@@ -977,7 +986,7 @@ void HistogramViewDataWidget::updateCountResult (
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::SingleIdentificationCorrect> result)
 {
-    logdbg << "HistogramViewDataWidget: showResult: single identification";
+    logdbg << "HistogramViewDataWidget: showResult: single identification correct";
 
     assert (result);
 
@@ -1005,7 +1014,7 @@ void HistogramViewDataWidget::updateCountResult (
 void HistogramViewDataWidget::updateCountResult (
         std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationCorrect> result)
 {
-    logdbg << "HistogramViewDataWidget: updateFromResult: joined identification";
+    logdbg << "HistogramViewDataWidget: updateFromResult: joined identification correct";
 
     assert (result);
 
@@ -1016,6 +1025,54 @@ void HistogramViewDataWidget::updateCountResult (
         assert (static_pointer_cast<SingleIdentificationCorrect>(result_it));
         if (result_it->use())
             updateCountResult (static_pointer_cast<SingleIdentificationCorrect>(result_it));
+    }
+}
+
+void HistogramViewDataWidget::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::SingleIdentificationFalse> result)
+{
+    logdbg << "HistogramViewDataWidget: showResult: single identification false";
+
+    assert (result);
+
+    string dbo_name = COMPASS::instance().evaluationManager().dboNameTst();
+
+    if (!counts_.size()) // first
+    {
+        counts_[dbo_name].push_back(result->numNoRefValue());
+        counts_[dbo_name].push_back(result->numUnknown());
+        counts_[dbo_name].push_back(result->numCorrect());
+        counts_[dbo_name].push_back(result->numFalse());
+
+        labels_.push_back("#NoRef");
+        labels_.push_back("#Unknown");
+        labels_.push_back("#Correct");
+        labels_.push_back("#False");
+    }
+    else // add
+    {
+        counts_[dbo_name].at(0) += result->numNoRefValue();
+        counts_[dbo_name].at(1) += result->numUnknown();
+        counts_[dbo_name].at(2) += result->numCorrect();
+        counts_[dbo_name].at(3) += result->numFalse();
+    }
+}
+
+
+void HistogramViewDataWidget::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedIdentificationFalse> result)
+{
+    logdbg << "HistogramViewDataWidget: updateFromResult: joined identification false";
+
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleIdentificationFalse>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleIdentificationFalse>(result_it));
     }
 }
 

@@ -23,6 +23,7 @@
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
 #include "eval/requirement/identification/correctconfig.h"
+#include "eval/requirement/identification/falseconfig.h"
 #include "eval/requirement/mode_a/presentconfig.h"
 #include "eval/requirement/mode_a/falseconfig.h"
 #include "eval/requirement/mode_c/falseconfig.h"
@@ -133,6 +134,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::IdentificationCorrectConfig* config =
                 new EvaluationRequirement::IdentificationCorrectConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementIdentificationFalseConfig") == 0)
+    {
+        EvaluationRequirement::IdentificationFalseConfig* config =
+                new EvaluationRequirement::IdentificationFalseConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -319,9 +330,13 @@ void Group::showMenu ()
         }
 
         { // identification
-            QAction* add_pos_action = req_menu->addAction("Identification Correct");
-            add_pos_action->setData("EvaluationRequirementIdentificationCorrectConfig");
-            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+            QAction* correct_action = req_menu->addAction("Identification Correct");
+            correct_action->setData("EvaluationRequirementIdentificationCorrectConfig");
+            connect(correct_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Identification False");
+            false_action->setData("EvaluationRequirementIdentificationFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         { // mode 3/a

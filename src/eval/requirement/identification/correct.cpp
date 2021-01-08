@@ -169,7 +169,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         }
         ++num_pos_inside;
 
-
         tie(cmp_res_ti, cmp_res_ti_comment) = compareTi(tod, target_data, max_ref_time_diff);
         tie(cmp_res_ta, cmp_res_ta_comment) = compareTa(tod, target_data, max_ref_time_diff);
         tie(cmp_res_ma, cmp_res_ma_comment) = compareModeA(tod, target_data, max_ref_time_diff);
