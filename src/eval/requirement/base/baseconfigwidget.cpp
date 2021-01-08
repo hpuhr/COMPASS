@@ -28,9 +28,8 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     form_layout_->addRow("Short Name", short_name_edit);
 
     // prob
-
     QLineEdit* minimum_prob_edit_ = new QLineEdit(QString::number(config_.prob()));
-    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
+    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0000001, 1.0, 8, this));
     connect(minimum_prob_edit_, &QLineEdit::textEdited,
             this, &BaseConfigWidget::changedProbabilitySlot);
 

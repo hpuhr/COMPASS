@@ -33,8 +33,12 @@ namespace EvaluationRequirement
 Detection::Detection(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-        float update_interval_s, bool use_miss_tolerance, float miss_tolerance_s)
+        float update_interval_s, bool use_min_gap_length, float min_gap_length_s,
+        bool use_max_gap_length, float max_gap_length_s,
+        bool use_miss_tolerance, float miss_tolerance_s)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man), update_interval_s_(update_interval_s),
+      use_min_gap_length_(use_min_gap_length), min_gap_length_s_(min_gap_length_s),
+      use_max_gap_length_(use_max_gap_length), max_gap_length_s_(max_gap_length_s),
       use_miss_tolerance_(use_miss_tolerance), miss_tolerance_s_(miss_tolerance_s)
 {
 
@@ -43,6 +47,25 @@ Detection::Detection(
 float Detection::updateInterval() const
 {
     return update_interval_s_;
+}
+bool Detection::useMinGapLength() const
+{
+    return use_min_gap_length_;
+}
+
+float Detection::minGapLength() const
+{
+    return min_gap_length_s_;
+}
+
+bool Detection::useMaxGapLength() const
+{
+    return use_max_gap_length_;
+}
+
+float Detection::maxGapLength() const
+{
+    return max_gap_length_s_;
 }
 
 bool Detection::useMissTolerance() const
@@ -491,7 +514,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (isMiss(d_tod))
             {
-                sum_missed_uis += floor(d_tod/update_interval_s_);
+                sum_missed_uis += floor(d_tod/update_interval_s_); // TODO substract miss_tolerance_s_?
 
                 logdbg << "EvaluationRequirementDetection '" << name_
                        << "': evaluate: utn " << target_data.utn_
@@ -566,8 +589,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 bool Detection::isMiss (float d_tod)
 {
     if (use_miss_tolerance_)
-        return d_tod > (update_interval_s_ + miss_tolerance_s_);
-    else
-        return d_tod > update_interval_s_;
+        d_tod -= miss_tolerance_s_;
+
+    if (use_min_gap_length_ && d_tod < min_gap_length_s_) // supress gaps smaller as min gap length
+        return false;
+
+    if (use_max_gap_length_ && d_tod > max_gap_length_s_) // supress gaps larger as max gap length
+        return false;
+
+    return d_tod > update_interval_s_;
 }
 }

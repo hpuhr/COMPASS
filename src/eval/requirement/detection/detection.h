@@ -63,9 +63,21 @@ public:
     Detection(
             const std::string& name, const std::string& short_name, const std::string& group_name,
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            float update_interval_s, bool use_miss_tolerance, float miss_tolerance_s);
+            float update_interval_s,
+            bool use_min_gap_length, float min_gap_length_s,
+            bool use_max_gap_length, float max_gap_length_s,
+            bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;
+
+    bool useMinGapLength() const;
+
+    float minGapLength() const;
+
+    bool useMaxGapLength() const;
+
+    float maxGapLength() const;
+    void maxGapLength(float value);
 
     bool useMissTolerance() const;
 
@@ -79,6 +91,12 @@ public:
 
 protected:
     float update_interval_s_{0};
+
+    bool use_min_gap_length_ {false};
+    float min_gap_length_s_{0};
+
+    bool use_max_gap_length_ {false};
+    float max_gap_length_s_{0};
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};

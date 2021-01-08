@@ -41,14 +41,20 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
+    bool useMinGapLength() const;
+    void useMinGapLength(bool value);
+
+    float minGapLength() const;
+    void minGapLength(float value);
+
+    bool useMaxGapLength() const;
+    void useMaxGapLength(bool value);
+
+    float maxGapLength() const;
+    void maxGapLength(float value);
+
     float updateInterval() const;
     void updateInterval(float value);
-
-    //        bool useMaxGapInterval() const;
-    //        void useMaxGapInterval(bool value);
-
-    //        float maxGapInterval() const;
-    //        void maxGapInterval(float value);
 
     bool useMissTolerance() const;
     void useMissTolerance(bool value);
@@ -59,8 +65,11 @@ public:
 protected:
     float update_interval_s_{0};
 
-    //        bool use_max_gap_interval_{true};
-    //        float max_gap_interval_s_{0};
+    bool use_min_gap_length_ {false};
+    float min_gap_length_s_{0};
+
+    bool use_max_gap_length_ {false};
+    float max_gap_length_s_{0};
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};

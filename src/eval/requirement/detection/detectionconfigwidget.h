@@ -36,8 +36,11 @@ class DetectionConfigWidget : public BaseConfigWidget
 public slots:
     void updateIntervalEditSlot(QString value);
 
-    //        void toggleUseMaxGapSlot();
-    //        void maxGapEditSlot(QString value);
+    void toggleUseMinGapLengthSlot();
+    void minGapLengthEditSlot(QString value);
+
+    void toggleUseMaxGapLengthSlot();
+    void maxGapLengthEditSlot(QString value);
 
     void toggleUseMissToleranceSlot();
     void missToleranceEditSlot(QString value);
@@ -48,8 +51,11 @@ public:
 protected:
     QLineEdit* update_interval_edit_{nullptr};
 
-    //QCheckBox* use_max_gap_check_{nullptr};
-    //QLineEdit* max_gap_interval_edit_{nullptr};
+    QCheckBox* use_min_gap_length_check_{nullptr};
+    QLineEdit* min_gap_length_edit_{nullptr};
+
+    QCheckBox* use_max_gap_length_check_{nullptr};
+    QLineEdit* max_gap_length_edit_{nullptr};
 
     QCheckBox* use_miss_tolerance_check_{nullptr};
     QLineEdit* miss_tolerance_edit_{nullptr};
