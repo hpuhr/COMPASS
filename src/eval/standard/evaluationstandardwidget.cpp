@@ -27,6 +27,8 @@
 #include <QHBoxLayout>
 #include <QStackedWidget>
 #include <QScrollArea>
+#include <QSplitter>
+#include <QSettings>
 
 using namespace std;
 
@@ -35,7 +37,10 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QHBoxLayout* req_layout = new QHBoxLayout();
+    splitter_ = new QSplitter();
+    splitter_->setOrientation(Qt::Horizontal);
+
+    //QHBoxLayout* req_layout = new QHBoxLayout();
 
     tree_view_.reset(new QTreeView());
     tree_view_->setModel(&standard_model_);
@@ -44,7 +49,8 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
 
     connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationStandardWidget::itemClickedSlot);
 
-    req_layout->addWidget(tree_view_.get());
+    splitter_->addWidget(tree_view_.get());
+    //req_layout->addWidget(tree_view_.get());
 
     // requirements stack
     QScrollArea* scroll_area = new QScrollArea();
@@ -53,12 +59,28 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
     requirements_widget_ = new QStackedWidget();
 
     scroll_area->setWidget(requirements_widget_);
-    req_layout->addWidget(scroll_area, 1);
 
-    main_layout->addLayout(req_layout);
+    splitter_->addWidget(scroll_area);
+
+    splitter_->setStretchFactor(1, 1);
+    //req_layout->addWidget(scroll_area, 1);
+
+    QSettings settings("COMPASS", ("EvalStandardWidget"+standard_.name()).c_str());
+    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+
+    //main_layout->addLayout(req_layout);
+    main_layout->addWidget(splitter_);
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
+}
+
+EvaluationStandardWidget::~EvaluationStandardWidget()
+{
+    assert (splitter_);
+
+    QSettings settings("COMPASS", ("EvalStandardWidget"+standard_.name()).c_str());
+    settings.setValue("splitterSizes", splitter_->saveState());
 }
 
 EvaluationStandardTreeModel& EvaluationStandardWidget::model()

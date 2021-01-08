@@ -30,6 +30,7 @@ class EvaluationStandard;
 
 class QTreeView;
 class QStackedWidget;
+class QSplitter;
 
 class EvaluationStandardWidget : public QWidget
 {
@@ -40,6 +41,7 @@ public slots:
 
 public:
     EvaluationStandardWidget(EvaluationStandard& standard);
+    virtual ~EvaluationStandardWidget();
 
     EvaluationStandardTreeModel& model();
     void expandAll();
@@ -51,6 +53,8 @@ protected:
 
     EvaluationStandardTreeModel standard_model_;
     std::unique_ptr<QTreeView> tree_view_;
+
+    QSplitter* splitter_ {nullptr};
 
     QStackedWidget* requirements_widget_{nullptr};
 };
