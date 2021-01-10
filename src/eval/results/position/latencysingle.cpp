@@ -232,7 +232,7 @@ namespace EvaluationRequirementResult
                               String::timeStringFromDouble(value_avg_,2).c_str()}, this);
         utn_req_table.addRow({"LTSDev [s]", "Standard Deviation of latency",
                               String::timeStringFromDouble(sqrt(value_var_),2).c_str()}, this);
-        utn_req_table.addRow({"LTVar [s]", "Variance of latency",
+        utn_req_table.addRow({"LTVar [s^2]", "Variance of latency",
                               String::timeStringFromDouble(value_var_,2).c_str()}, this);
         utn_req_table.addRow({"#LTOK [1]", "Number of updates with latency", num_value_ok_}, this);
         utn_req_table.addRow({"#LTNOK [1]", "Number of updates with unacceptable latency ", num_value_nok_},

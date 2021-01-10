@@ -198,7 +198,7 @@ void JoinedPositionLatency::addDetails(std::shared_ptr<EvaluationResultsReport::
                           String::timeStringFromDouble(value_avg_,2).c_str()}, this);
     sec_det_table.addRow({"LTSDev [s]", "Standard Deviation of latency",
                           String::timeStringFromDouble(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"LTVar [s]", "Variance of latency",
+    sec_det_table.addRow({"LTVar [s^2]", "Variance of latency",
                           String::timeStringFromDouble(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#LTOK [1]", "Number of updates with latency", num_value_ok_}, this);
     sec_det_table.addRow({"#LTNOK [1]", "Number of updates with unacceptable latency ", num_value_nok_},

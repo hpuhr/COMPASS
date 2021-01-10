@@ -249,7 +249,7 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
         utn_req_table.addRow({"DSDev [m]", "Standard Deviation of distance",
                               String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-        utn_req_table.addRow({"DVar [m]", "Variance of distance",
+        utn_req_table.addRow({"DVar [m^2]", "Variance of distance",
                               String::doubleToStringPrecision(value_var_,2).c_str()}, this);
         utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
         utn_req_table.addRow({"#CP [1]", "Number of updates with  passed comparison", num_comp_passed_},

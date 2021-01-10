@@ -92,6 +92,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
+    float tmp_threshold_value;
+
     std::vector<EvaluationRequirement::SpeedDetail> details;
 
     float tod{0};
@@ -225,12 +227,16 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         }
 
         tst_spd_ms = target_data.tstMeasuredSpeedForTime (tod);
-
         spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
+
+        if (use_percent_if_higher_ && tst_spd_ms * threshold_percent_ > threshold_value_) // use percent based threshold
+            tmp_threshold_value = tst_spd_ms * threshold_percent_;
+        else
+            tmp_threshold_value = threshold_value_;
 
         ++num_speeds;
 
-        if (compareValue(spd_diff, threshold_value_, threshold_value_check_type_))
+        if (compareValue(spd_diff, tmp_threshold_value, threshold_value_check_type_))
         {
             comp_passed = true;
             ++num_comp_passed;

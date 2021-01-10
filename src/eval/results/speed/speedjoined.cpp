@@ -192,15 +192,15 @@ void JoinedSpeed::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> 
     sec_det_table.addRow({"#NoTstData [1]", "Number of updates without tst speed data", num_no_tst_value_}, this);
 
     // along
-    sec_det_table.addRow({"DMin [m]", "Minimum of speed",
+    sec_det_table.addRow({"OMin [m/s]", "Minimum of speed",
                           String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-    sec_det_table.addRow({"DMax [m]", "Maximum of speed",
+    sec_det_table.addRow({"OMax [m/s]", "Maximum of speed",
                           String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-    sec_det_table.addRow({"DAvg [m]", "Average of speed",
+    sec_det_table.addRow({"OAvg [m/s]", "Average of speed",
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-    sec_det_table.addRow({"DSDev [m]", "Standard Deviation of speed",
+    sec_det_table.addRow({"OSDev [m/s]", "Standard Deviation of speed",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"DVar [m]", "Variance of speed",
+    sec_det_table.addRow({"OVar [m^2/s^2]", "Variance of speed",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
@@ -348,7 +348,7 @@ void JoinedSpeed::exportAsCSV()
 
         if (output_file)
         {
-            output_file << "speed\n";
+            output_file << "speed_offset\n";
             unsigned int size = values_.size();
 
             for (unsigned int cnt=0; cnt < size; ++cnt)

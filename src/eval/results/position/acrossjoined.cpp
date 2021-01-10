@@ -196,7 +196,7 @@ void JoinedPositionAcross::addDetails(std::shared_ptr<EvaluationResultsReport::R
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
     sec_det_table.addRow({"ACSDev [m]", "Standard Deviation of across-track error",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"ACVar [m]", "Variance of across-track error",
+    sec_det_table.addRow({"ACVar [m^2]", "Variance of across-track error",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#ACOK [1]", "Number of updates with across-track error", num_value_ok_}, this);
     sec_det_table.addRow({"#ACNOK [1]", "Number of updates with unacceptable across-track error ", num_value_nok_},

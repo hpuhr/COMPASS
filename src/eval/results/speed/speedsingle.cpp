@@ -146,7 +146,7 @@ namespace EvaluationRequirementResult
 
             section.addTable(table_name, 15,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "PCP"}, true, 14, order);
+             "OMin", "OMax", "OAvg", "OSDev", "#CF", "#CP", "PCP"}, true, 14, order);
         }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -183,7 +183,7 @@ namespace EvaluationRequirementResult
 
             section.addTable(table_name, 18,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "DMin", "DMax", "DAvg", "DSDev", "#CF", "#CP", "PCP",
+             "OMin", "OMax", "OAvg", "OSDev", "#CF", "#CP", "PCP",
              "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
         }
 
@@ -243,15 +243,15 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#NoTstData [1]", "Number of updates without tst speed data", num_no_tst_value_}, this);
 
         // along
-        utn_req_table.addRow({"DMin [m]", "Minimum of speed",
+        utn_req_table.addRow({"OMin [m/s]", "Minimum of speed offset",
                               String::doubleToStringPrecision(value_min_,2).c_str()}, this);
-        utn_req_table.addRow({"DMax [m]", "Maximum of speed",
+        utn_req_table.addRow({"OMax [m/s]", "Maximum of speed offset",
                               String::doubleToStringPrecision(value_max_,2).c_str()}, this);
-        utn_req_table.addRow({"DAvg [m]", "Average of speed",
+        utn_req_table.addRow({"OAvg [m/s]", "Average of speed offset",
                               String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
-        utn_req_table.addRow({"DSDev [m]", "Standard Deviation of speed",
+        utn_req_table.addRow({"OSDev [m/s]", "Standard Deviation of speed offset",
                               String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-        utn_req_table.addRow({"DVar [m]", "Variance of speed",
+        utn_req_table.addRow({"OVar [m^2/s^2]", "Variance of speed offset",
                               String::doubleToStringPrecision(value_var_,2).c_str()}, this);
         utn_req_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
         utn_req_table.addRow({"#CP [1]", "Number of updates with  passed comparison", num_comp_passed_},

@@ -198,7 +198,7 @@ void JoinedPositionAlong::addDetails(std::shared_ptr<EvaluationResultsReport::Ro
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
     sec_det_table.addRow({"ALSDev [m]", "Standard Deviation of along-track error",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"ALVar [m]", "Variance of along-track error",
+    sec_det_table.addRow({"ALVar [m^2]", "Variance of along-track error",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_value_ok_}, this);
     sec_det_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_value_nok_},

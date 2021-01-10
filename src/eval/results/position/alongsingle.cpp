@@ -232,7 +232,7 @@ namespace EvaluationRequirementResult
                               String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
         utn_req_table.addRow({"ALSDev [m]", "Standard Deviation of along-track error",
                               String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-        utn_req_table.addRow({"ALVar [m]", "Variance of along-track error",
+        utn_req_table.addRow({"ALVar [m^2]", "Variance of along-track error",
                               String::doubleToStringPrecision(value_var_,2).c_str()}, this);
         utn_req_table.addRow({"#ALOK [1]", "Number of updates with along-track error", num_value_ok_}, this);
         utn_req_table.addRow({"#ALNOK [1]", "Number of updates with unacceptable along-track error ", num_value_nok_},

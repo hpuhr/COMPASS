@@ -37,13 +37,13 @@ SpeedConfigWidget::SpeedConfigWidget(SpeedConfig& cfg)
     connect(threshold_value_edit_, &QLineEdit::textEdited,
             this, &SpeedConfigWidget::thresholdValueEditSlot);
 
-    form_layout_->addRow("Threshold Value [m]", threshold_value_edit_);
+    form_layout_->addRow("Speed Offset Value [m/s]", threshold_value_edit_);
 
     // use percent threshold if higher
     use_percent_if_higher_check_ = new QCheckBox ();
-    use_percent_if_higher_check_->setChecked(config().failedValuesOfInterest());
+    use_percent_if_higher_check_->setChecked(config().usePercentIfHigher());
     connect(use_percent_if_higher_check_, &QCheckBox::clicked,
-            this, &SpeedConfigWidget::toggleFailedValuesOfInterestSlot);
+            this, &SpeedConfigWidget::toggleUsePercentIfHigherSlot);
 
     form_layout_->addRow("Use Percent Threshold if Higher", use_percent_if_higher_check_);
 

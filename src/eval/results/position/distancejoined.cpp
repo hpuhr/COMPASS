@@ -198,7 +198,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
                           String::doubleToStringPrecision(value_avg_,2).c_str()}, this);
     sec_det_table.addRow({"DSDev [m]", "Standard Deviation of distance",
                           String::doubleToStringPrecision(sqrt(value_var_),2).c_str()}, this);
-    sec_det_table.addRow({"DVar [m]", "Variance of distance",
+    sec_det_table.addRow({"DVar [m^2]", "Variance of distance",
                           String::doubleToStringPrecision(value_var_,2).c_str()}, this);
     sec_det_table.addRow({"#CF [1]", "Number of updates with failed comparison", num_comp_failed_}, this);
     sec_det_table.addRow({"#CP [1]", "Number of updates with passed comparison ", num_comp_passed_},
