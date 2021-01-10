@@ -22,6 +22,7 @@
 #include "eval/requirement/position/alongconfig.h"
 #include "eval/requirement/position/acrossconfig.h"
 #include "eval/requirement/position/latencyconfig.h"
+#include "eval/requirement/speed/speedconfig.h"
 #include "eval/requirement/identification/correctconfig.h"
 #include "eval/requirement/identification/falseconfig.h"
 #include "eval/requirement/mode_a/presentconfig.h"
@@ -124,6 +125,16 @@ void Group::generateSubConfigurable(const std::string& class_id,
     {
         EvaluationRequirement::PositionLatencyConfig* config =
                 new EvaluationRequirement::PositionLatencyConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementSpeedConfig") == 0)
+    {
+        EvaluationRequirement::SpeedConfig* config =
+                new EvaluationRequirement::SpeedConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
@@ -376,6 +387,12 @@ void Group::showMenu ()
             latency_action->setData("EvaluationRequirementPositionLatencyConfig");
             connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
+        }
+
+        { // spd
+            QAction* md_action = req_menu->addAction("Speed");
+            md_action->setData("EvaluationRequirementSpeedConfig");
+            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         {

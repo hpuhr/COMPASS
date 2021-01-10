@@ -94,6 +94,28 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
     if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
         ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
 
+    // speed & track_angle
+    if (dbo_name == "ADSB")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        ref_spd_x_ms_name_ = "velocity_vx_ms";
+        ref_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        ref_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "heading_deg";
+    }
+
     set<int> active_srcs = eval_man_.activeDataSourcesRef();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());
     unsigned int num_skipped {0};
@@ -209,6 +231,28 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     // track num
     if (object_manager.metaVariable("track_num").existsIn(dbo_name))
         tst_track_num_name_ = object_manager.metaVariable("track_num").getFor(dbo_name).name();
+
+    // speed & track_angle
+    if (dbo_name == "ADSB")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        tst_spd_x_ms_name_ = "velocity_vx_ms";
+        tst_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        tst_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "heading_deg";
+    }
 
     set<int> active_srcs = eval_man_.activeDataSourcesTst();
     bool use_active_srcs = (eval_man_.dboNameRef() == eval_man_.dboNameTst());

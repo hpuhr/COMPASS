@@ -33,7 +33,7 @@ public:
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_pos, unsigned int num_no_ref,
-            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_no_tst_value,
             unsigned int num_comp_failed, unsigned int num_comp_passed,
             vector<double> values,
             std::vector<EvaluationRequirement::SpeedDetail> details);
@@ -46,6 +46,7 @@ public:
     unsigned int numNoRef() const;
     unsigned int numPosOutside() const;
     unsigned int numPosInside() const;
+    unsigned int numNoTstValues() const;
     unsigned int numCompFailed() const;
     unsigned int numCompPassed() const;
 
@@ -70,6 +71,7 @@ protected:
     unsigned int num_no_ref_ {0};
     unsigned int num_pos_outside_ {0};
     unsigned int num_pos_inside_ {0};
+    unsigned int num_no_tst_value_ {0};
     unsigned int num_comp_failed_ {0};
     unsigned int num_comp_passed_ {0};
 

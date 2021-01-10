@@ -398,7 +398,7 @@ std::pair<EvaluationTargetPosition, bool>  EvaluationTargetData::interpolatedRef
     return {{}, false};
 }
 
-std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefSpdForTime (
+std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRefPosBasedSpdForTime (
         float tod, float d_max) const
 {
     assert (test_data_mappings_.count(tod));
@@ -442,7 +442,7 @@ std::pair<EvaluationTargetVelocity, bool>  EvaluationTargetData::interpolatedRef
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
 
-        return {mapping.spd_ref_, true};
+        return {mapping.posbased_spd_ref_, true};
     }
 
     return {{}, false};
@@ -1127,6 +1127,89 @@ unsigned int EvaluationTargetData::tstTrackNumForTime (float tod) const
     return eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_num_name_).get(index);
 }
 
+bool EvaluationTargetData::hasTstMeasuredSpeedForTime (float tod) const
+{
+    if (!eval_data_->tst_spd_ground_speed_kts_name_.size()
+            && (!eval_data_->tst_spd_x_ms_name_.size() || !eval_data_->tst_spd_y_ms_name_.size()))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->tst_spd_ground_speed_kts_name_.size())
+        return !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_ground_speed_kts_name_).isNull(index);
+    else
+        return !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).isNull(index)
+                && !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).isNull(index);
+}
+
+float EvaluationTargetData::tstMeasuredSpeedForTime (float tod) const // m/s
+{
+    assert (hasTstMeasuredSpeedForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->tst_spd_ground_speed_kts_name_.size())
+    {
+        return eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_ground_speed_kts_name_).get(index) * KNOTS2M_S;
+    }
+    else
+    {
+        double v_x_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).get(index);
+        double v_y_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).get(index);
+
+        return sqrt(pow(v_x_ms, 2) + pow(v_y_ms, 2));
+    }
+}
+
+bool EvaluationTargetData::hasTstMeasuredTrackAngleForTime (float tod) const
+{
+    if (!eval_data_->tst_spd_track_angle_deg_name_.size()
+            && (!eval_data_->tst_spd_x_ms_name_.size() || !eval_data_->tst_spd_y_ms_name_.size()))
+        return false;
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->tst_spd_track_angle_deg_name_.size())
+        return !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_track_angle_deg_name_).isNull(index);
+    else
+        return !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).isNull(index)
+                && !eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).isNull(index);
+}
+
+float EvaluationTargetData::tstMeasuredTrackAngleForTime (float tod) const // deg
+{
+    assert (hasTstMeasuredTrackAngleForTime(tod));
+
+    auto it_pair = tst_data_.equal_range(tod);
+
+    assert (it_pair.first != tst_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->tst_spd_track_angle_deg_name_.size())
+    {
+        return eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_track_angle_deg_name_).get(index);
+    }
+    else
+    {
+        double v_x_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_x_ms_name_).get(index);
+        double v_y_ms = eval_data_->tst_buffer_->get<double>(eval_data_->tst_spd_y_ms_name_).get(index);
+
+        return atan2(v_y_ms,v_x_ms);
+    }
+}
 
 int EvaluationTargetData::tstModeCForTime (float tod) const
 {
@@ -1715,10 +1798,10 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
             mapping.has_ref_pos_ = true;
             mapping.pos_ref_ = pos1;
 
-            mapping.spd_ref_.x_ = NAN;
-            mapping.spd_ref_.y_ = NAN;
-            mapping.spd_ref_.track_angle_ = NAN;
-            mapping.spd_ref_.speed_ = NAN;
+            mapping.posbased_spd_ref_.x_ = NAN;
+            mapping.posbased_spd_ref_.y_ = NAN;
+            mapping.posbased_spd_ref_.track_angle_ = NAN;
+            mapping.posbased_spd_ref_.speed_ = NAN;
         }
         else
         {
@@ -1832,10 +1915,10 @@ void EvaluationTargetData::addRefPositiosToMapping (TstDataMapping& mapping) con
 //                    else
                     mapping.pos_ref_ = EvaluationTargetPosition(x_pos, y_pos, has_altitude, true, altitude);
 
-                    mapping.spd_ref_.x_ = v_x;
-                    mapping.spd_ref_.y_ = v_y;
-                    mapping.spd_ref_.track_angle_ = atan2(v_y,v_x);
-                    mapping.spd_ref_.speed_ = sqrt(pow(v_x, 2) + pow(v_y, 2));
+                    mapping.posbased_spd_ref_.x_ = v_x;
+                    mapping.posbased_spd_ref_.y_ = v_y;
+                    mapping.posbased_spd_ref_.track_angle_ = atan2(v_y,v_x);
+                    mapping.posbased_spd_ref_.speed_ = sqrt(pow(v_x, 2) + pow(v_y, 2));
                 }
             }
         }

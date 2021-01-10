@@ -43,6 +43,9 @@
 #include "eval/results/position/latencysingle.h"
 #include "eval/results/position/latencyjoined.h"
 
+#include "eval/results/speed/speedjoined.h"
+#include "eval/results/speed/speedsingle.h"
+
 #include "eval/results/identification/correctsingle.h"
 #include "eval/results/identification/correctjoined.h"
 #include "eval/results/identification/falsesingle.h"
@@ -655,6 +658,11 @@ void HistogramViewDataWidget::updateFromResult(std::shared_ptr<EvaluationRequire
     else if (result->type() == "JoinedPositionLatency")
         updateCountResult(static_pointer_cast<JoinedPositionLatency>(result));
 
+    else if (result->type() == "SingleSpeed")
+        updateCountResult(static_pointer_cast<SingleSpeed>(result));
+    else if (result->type() == "JoinedSpeed")
+        updateCountResult(static_pointer_cast<JoinedSpeed>(result));
+
     else if (result->type() == "SingleIdentificationCorrect")
         updateCountResult(static_pointer_cast<SingleIdentificationCorrect>(result));
     else if (result->type() == "JoinedIdentificationCorrect")
@@ -979,6 +987,32 @@ void HistogramViewDataWidget::updateCountResult (
 
         if (single_result->use())
             updateCounts (single_result->values());
+    }
+}
+
+void HistogramViewDataWidget::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::SingleSpeed> result)
+{
+    assert (result);
+
+    const vector<double>& values = result->values(); // distance values
+
+    updateMinMax (values);
+    updateCounts(values);
+}
+
+void HistogramViewDataWidget::updateCountResult (
+        std::shared_ptr<EvaluationRequirementResult::JoinedSpeed> result)
+{
+    assert (result);
+
+    std::vector<std::shared_ptr<Base>>& results = result->results();
+
+    for (auto& result_it : results)
+    {
+        assert (static_pointer_cast<SingleSpeed>(result_it));
+        if (result_it->use())
+            updateCountResult (static_pointer_cast<SingleSpeed>(result_it));
     }
 }
 

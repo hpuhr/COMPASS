@@ -43,13 +43,14 @@ namespace EvaluationRequirementResult
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_pos, unsigned int num_no_ref,
-            unsigned int num_pos_outside, unsigned int num_pos_inside,
+            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_no_tst_value,
             unsigned int num_comp_failed, unsigned int num_comp_passed,
             vector<double> values,
             std::vector<EvaluationRequirement::SpeedDetail> details)
         : Single("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man),
           num_pos_(num_pos), num_no_ref_(num_no_ref), num_pos_outside_(num_pos_outside),
-          num_pos_inside_(num_pos_inside), num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
+          num_pos_inside_(num_pos_inside), num_no_tst_value_(num_no_tst_value),
+          num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
           values_(values), details_(details)
     {
         update();
@@ -59,7 +60,7 @@ namespace EvaluationRequirementResult
     void SingleSpeed::update()
     {
         assert (num_no_ref_ <= num_pos_);
-        assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+        assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_+num_no_tst_value_);
 
         assert (values_.size() == num_comp_failed_+num_comp_passed_);
 
@@ -239,6 +240,7 @@ namespace EvaluationRequirementResult
         utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference speeds", num_no_ref_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+        utn_req_table.addRow({"#NoTstData [1]", "Number of updates without tst speed data", num_no_tst_value_}, this);
 
         // along
         utn_req_table.addRow({"DMin [m]", "Minimum of speed",
@@ -472,6 +474,11 @@ namespace EvaluationRequirementResult
     unsigned int SingleSpeed::numPosInside() const
     {
         return num_pos_inside_;
+    }
+
+    unsigned int SingleSpeed::numNoTstValues() const
+    {
+        return num_no_tst_value_;
     }
 
     std::shared_ptr<Joined> SingleSpeed::createEmptyJoined(const std::string& result_id)

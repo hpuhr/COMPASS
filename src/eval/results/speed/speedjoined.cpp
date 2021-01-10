@@ -69,6 +69,7 @@ void JoinedSpeed::addToValues (std::shared_ptr<SingleSpeed> single_result)
     num_no_ref_ += single_result->numNoRef();
     num_pos_outside_ += single_result->numPosOutside();
     num_pos_inside_ += single_result->numPosInside();
+    num_no_tst_value_ += single_result->numNoTstValues();
     num_comp_failed_ += single_result->numCompFailed();
     num_comp_passed_ += single_result->numCompPassed();
 
@@ -84,7 +85,7 @@ void JoinedSpeed::update()
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_comp_failed_+num_comp_passed_);
+    assert (values_.size() == num_comp_failed_+num_comp_passed_+num_no_tst_value_);
 
     unsigned int num_speeds = values_.size();
 
@@ -188,6 +189,7 @@ void JoinedSpeed::addDetails(std::shared_ptr<EvaluationResultsReport::RootItem> 
     sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference speeds", num_no_ref_}, this);
     sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+    sec_det_table.addRow({"#NoTstData [1]", "Number of updates without tst speed data", num_no_tst_value_}, this);
 
     // along
     sec_det_table.addRow({"DMin [m]", "Minimum of speed",
@@ -307,6 +309,7 @@ void JoinedSpeed::updatesToUseChanges()
     num_no_ref_ = 0;
     num_pos_outside_ = 0;
     num_pos_inside_ = 0;
+    num_no_tst_value_ = 0;
     num_comp_failed_ = 0;
     num_comp_passed_ = 0;
 

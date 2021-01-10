@@ -610,14 +610,36 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     if (object_man.metaVariable("track_num").existsIn(dbo_name))
         read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
 
+    DBObject& db_object = object_man.object(dbo_name);
+
     if (dbo_name == "ADSB")
     {
-        DBObject& obj = object_man.object("ADSB");
-
-        read_set.add(obj.variable("ground_bit"));
+        read_set.add(db_object.variable("ground_bit"));
         //            read_set.add(obj.variable("nac_p"));
         //            read_set.add(obj.variable("nucp_nic"));
         //            read_set.add(obj.variable("sil"));
+    }
+
+    // speed & heading
+    if (dbo_name == "ADSB")
+    {
+        read_set.add(db_object.variable("groundspeed_kt")); // double
+        read_set.add(db_object.variable("track_angle_deg")); // double
+    }
+    else if (dbo_name == "MLAT")
+    {
+        read_set.add(db_object.variable("velocity_vx_ms")); // double
+        read_set.add(db_object.variable("velocity_vy_ms")); // double
+    }
+    else if (dbo_name == "Radar")
+    {
+        read_set.add(db_object.variable("track_groundspeed_kt")); // double
+        read_set.add(db_object.variable("track_heading_deg")); // double
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        read_set.add(db_object.variable("groundspeed_kt")); // double
+        read_set.add(db_object.variable("heading_deg")); // double
     }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));

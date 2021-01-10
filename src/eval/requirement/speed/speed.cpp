@@ -88,6 +88,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
     unsigned int num_pos_calc_errors {0};
+    unsigned int num_no_tst_value {0};
     unsigned int num_comp_failed {0};
     unsigned int num_comp_passed {0};
 
@@ -104,13 +105,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     EvaluationTargetPosition tst_pos;
 
-    double x_pos, y_pos;
-    double speed;
+    //double x_pos, y_pos;
+    //double speed;
 
     bool is_inside;
-    pair<EvaluationTargetPosition, bool> ret_pos;
+    //pair<EvaluationTargetPosition, bool> ret_pos;
     EvaluationTargetPosition ref_pos;
     bool ok;
+
+    //pair<EvaluationTargetVelocity, bool> ret_spd;
+    EvaluationTargetVelocity ref_spd;
+    float tst_spd_ms;
+    float spd_diff;
 
     bool comp_passed;
 
@@ -147,10 +153,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
             continue;
         }
 
-        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
-
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
         if (!ok)
         {
@@ -160,7 +163,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
                                    {}, {}, comp_passed, // pos_inside, value, check_passed
                                    num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                                    num_comp_failed, num_comp_passed,
-                                   "No reference speed"});
+                                   "No reference position"});
 
             ++num_no_ref;
             continue;
@@ -189,39 +192,45 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
         }
         ++num_pos_inside;
 
-        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+        tie (ref_spd, ok) = target_data.interpolatedRefPosBasedSpdForTime(tod, max_ref_time_diff);
 
-        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-        if (in_appimage_) // inside appimage
-        {
-            x_pos = tst_pos.longitude_;
-            y_pos = tst_pos.latitude_;
-        }
-        else
-        {
-            x_pos = tst_pos.latitude_;
-            y_pos = tst_pos.longitude_;
-        }
-
-        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
         if (!ok)
         {
-            details.push_back({tod, tst_pos,
-                               true, ref_pos, // has_ref_pos, ref_pos
-                               is_inside, {}, comp_passed, // pos_inside, value, check_passed
-                               num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-                               num_comp_failed, num_comp_passed,
-                               "Position transformation error"});
-            ++num_pos_calc_errors;
+            if (!skip_no_data_details)
+                details.push_back({tod, tst_pos,
+                                   false, {}, // has_ref_pos, ref_pos
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_comp_failed, num_comp_passed,
+                                   "No reference speed"});
+
+            ++num_no_ref;
             continue;
         }
 
-        speed = sqrt(pow(x_pos,2)+pow(y_pos,2));
+        // ref_spd ok
+
+        if (!target_data.hasTstMeasuredSpeedForTime(tod))
+        {
+            if (!skip_no_data_details)
+                details.push_back({tod, tst_pos,
+                                   false, {}, // has_ref_pos, ref_pos
+                                   {}, {}, comp_passed, // pos_inside, value, check_passed
+                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+                                   num_comp_failed, num_comp_passed,
+                                   "No tst speed"});
+
+            ++num_no_tst_value;
+            continue;
+        }
+
+        tst_spd_ms = target_data.tstMeasuredSpeedForTime (tod);
+
+        spd_diff = fabs(ref_spd.speed_ - tst_spd_ms);
 
         ++num_speeds;
 
-        if (compareValue(fabs(speed), threshold_value_, threshold_value_check_type_))
+        if (compareValue(spd_diff, threshold_value_, threshold_value_check_type_))
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -235,12 +244,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
         details.push_back({tod, tst_pos,
                            true, ref_pos,
-                           is_inside, speed, comp_passed, // pos_inside, value, check_passed
+                           is_inside, spd_diff, comp_passed, // pos_inside, value, check_passed
                            num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                            num_comp_failed, num_comp_passed,
                            comment});
 
-        values.push_back(speed);
+        values.push_back(spd_diff);
     }
 
     //        logdbg << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -260,14 +269,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_speeds == num_comp_failed+num_comp_passed);
+    assert (num_speeds == num_comp_failed + num_comp_passed + num_no_tst_value);
     assert (num_speeds == values.size());
 
     //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SingleSpeed>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_failed, num_comp_passed,
+                eval_man_, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value,
+                num_comp_failed, num_comp_passed,
                 values, details);
 }
 

@@ -49,7 +49,7 @@ public:
 
     bool has_ref_pos_ {false};
     EvaluationTargetPosition pos_ref_;
-    EvaluationTargetVelocity spd_ref_;
+    EvaluationTargetVelocity posbased_spd_ref_;
 };
 
 class DataMappingTimes // mapping to respective tst data
@@ -120,11 +120,11 @@ public:
     std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
     // bool ok
-    std::pair<EvaluationTargetVelocity, bool> interpolatedRefSpdForTime (float tod, float d_max) const;
+    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (float tod, float d_max) const;
 
     bool hasRefPosForTime (float tod) const;
     EvaluationTargetPosition refPosForTime (float tod) const;
-    EvaluationTargetVelocity refSpdForTime (float tod) const;
+    EvaluationTargetVelocity refPosBasedSpdForTime (float tod) const;
     std::pair<bool, float> estimateRefAltitude (float tod, unsigned int index) const;
     // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
@@ -165,7 +165,12 @@ public:
     bool hasTstTrackNumForTime (float tod) const;
     unsigned int tstTrackNumForTime (float tod) const;
 
-    // nullptr if none
+    // speed, track angle
+    bool hasTstMeasuredSpeedForTime (float tod) const;
+    float tstMeasuredSpeedForTime (float tod) const; // m/s
+
+    bool hasTstMeasuredTrackAngleForTime (float tod) const;
+    float tstMeasuredTrackAngleForTime (float tod) const; // deg
 
     double latitudeMin() const;
     double latitudeMax() const;

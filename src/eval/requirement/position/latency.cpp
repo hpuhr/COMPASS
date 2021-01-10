@@ -142,7 +142,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
             continue;
         }
 
-        ret_spd = target_data.interpolatedRefSpdForTime(tod, max_ref_time_diff);
+        ret_spd = target_data.interpolatedRefPosBasedSpdForTime(tod, max_ref_time_diff);
 
         ref_spd = ret_spd.first;
         assert (ret_pos.second); // must be set of ref pos exists

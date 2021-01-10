@@ -57,6 +57,7 @@ namespace EvaluationRequirementResult
         unsigned int num_no_ref_ {0};
         unsigned int num_pos_outside_ {0};
         unsigned int num_pos_inside_ {0};
+        unsigned int num_no_tst_value_ {0};
         unsigned int num_comp_failed_ {0};
         unsigned int num_comp_passed_ {0};
 
