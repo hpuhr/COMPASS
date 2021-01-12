@@ -138,6 +138,7 @@ class HistogramViewDataWidget : public QWidget
     QCursor currentCursor() const;
 
     bool showsData() const;
+    bool dataNotInBuffer() const;
 
     QPixmap renderPixmap();
 
@@ -173,6 +174,7 @@ protected:
     std::unique_ptr<QtCharts::HistogramViewChartView> chart_view_;
 
     bool shows_data_ {false};
+    bool data_not_in_buffer_ {false};
 
     void updateFromData(std::string dbo_name);
     void updateFromAllData();

@@ -219,6 +219,8 @@ DBOVariable& HistogramView::dataVar()
 
 void HistogramView::dataVar (DBOVariable& var)
 {
+    loginf << "HistogramView: dataVar: dbo " << var.dboName() << " name " << var.name();
+
     data_var_dbo_ = var.dboName();
     data_var_name_ = var.name();
     assert (hasDataVar());
@@ -226,6 +228,9 @@ void HistogramView::dataVar (DBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updateToData();
+
+    if (widget_->getDataWidget()->dataNotInBuffer())
+        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
 MetaDBOVariable& HistogramView::metaDataVar()
@@ -238,6 +243,8 @@ MetaDBOVariable& HistogramView::metaDataVar()
 
 void HistogramView::metaDataVar (MetaDBOVariable& var)
 {
+    loginf << "HistogramView: metaDataVar: name " << var.name();
+
     data_var_dbo_ = META_OBJECT_NAME;
     data_var_name_ = var.name();
     assert (hasDataVar());
@@ -245,6 +252,9 @@ void HistogramView::metaDataVar (MetaDBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updateToData();
+
+    if (widget_->getDataWidget()->dataNotInBuffer())
+        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
 }
 
 
@@ -385,6 +395,7 @@ void HistogramView::allLoadingDoneSlot()
     assert(widget_);
 
     widget_->configWidget()->setDisabled(false);
+    widget_->configWidget()->setStatus("", false);
 
     if (current_view_point_ && current_view_point_->data().contains("evaluation_results"))
     {

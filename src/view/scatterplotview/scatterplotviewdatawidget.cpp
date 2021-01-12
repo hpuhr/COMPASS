@@ -90,7 +90,11 @@ void ScatterPlotViewDataWidget::updatePlot()
     rec_num_values_.clear();
 
     chart_view_.reset(nullptr);
+
     shows_data_ = false;
+    x_var_not_in_buffer_ = false;
+    y_var_not_in_buffer_ = false;
+    nan_value_cnt_ = 0;
 
     updateFromAllData();
     updateMinMax();
@@ -112,7 +116,11 @@ void ScatterPlotViewDataWidget::clear ()
     rec_num_values_.clear();
 
     chart_view_.reset(nullptr);
+
     shows_data_ = false;
+    x_var_not_in_buffer_ = false;
+    y_var_not_in_buffer_ = false;
+    nan_value_cnt_ = 0;
 }
 
 ScatterPlotViewDataTool ScatterPlotViewDataWidget::selectedTool() const
@@ -130,12 +138,28 @@ bool ScatterPlotViewDataWidget::showsData() const
     return shows_data_;
 }
 
+bool ScatterPlotViewDataWidget::xVarNotInBuffer() const
+{
+    return x_var_not_in_buffer_;
+}
+
+bool ScatterPlotViewDataWidget::yVarNotInBuffer() const
+{
+    return y_var_not_in_buffer_;
+}
+
+
 QPixmap ScatterPlotViewDataWidget::renderPixmap()
 {
     assert (chart_view_);
     return chart_view_->grab();
     //QPixmap p (chart_view_->size());
     //chart_view_->render(&p);
+}
+
+unsigned int ScatterPlotViewDataWidget::nullValueCnt() const
+{
+    return nan_value_cnt_;
 }
 
 void ScatterPlotViewDataWidget::loadingStartedSlot()
@@ -196,6 +220,7 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
     else
         logdbg << "ScatterPlotViewDataWidget: updateDataSlot: " << dbo_name
                << " update not possible";
+
 
     logdbg << "ScatterPlotViewDataWidget: updateDataSlot: after x " << x_values_[dbo_name].size()
            << " y " << y_values_[dbo_name].size();
@@ -341,55 +366,109 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
     {
     case PropertyDataType::BOOL:
     {
-        return buffer->has<bool>(current_var_name);
+        if (!buffer->has<bool>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::CHAR:
     {
-        return buffer->has<char>(current_var_name);
+        if (!buffer->has<char>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::UCHAR:
     {
-        return buffer->has<unsigned char>(current_var_name);
+        if (!buffer->has<unsigned char>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::INT:
     {
-        return buffer->has<int>(current_var_name);
+        if (!buffer->has<int>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::UINT:
     {
-        return buffer->has<unsigned int>(current_var_name);
+        if (!buffer->has<unsigned int>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::LONGINT:
     {
-        return buffer->has<long int>(current_var_name);
+        if (!buffer->has<long int>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::ULONGINT:
     {
-        return buffer->has<unsigned long>(current_var_name);
+        if (!buffer->has<unsigned long>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::FLOAT:
     {
-        return buffer->has<float>(current_var_name);
+        if (!buffer->has<float>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::DOUBLE:
     {
-        return buffer->has<double>(current_var_name);
+        if (!buffer->has<double>(current_var_name))
+        {
+            x_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
@@ -458,6 +537,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<bool>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -474,6 +554,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<char>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -490,6 +571,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned char>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -506,6 +588,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -522,6 +605,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -538,6 +622,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<long int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -554,6 +639,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned long>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -570,6 +656,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<float>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -586,6 +673,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<double>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -602,6 +690,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
         if (!buffer->has<string>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataX: buffer does not contain " << current_var_name;
+            x_var_not_in_buffer_ = true;
             return;
         }
 
@@ -655,55 +744,109 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
     {
     case PropertyDataType::BOOL:
     {
-        return buffer->has<bool>(current_var_name);
+        if (!buffer->has<bool>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::CHAR:
     {
-        return buffer->has<char>(current_var_name);
+        if (!buffer->has<char>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::UCHAR:
     {
-        return buffer->has<unsigned char>(current_var_name);
+        if (!buffer->has<unsigned char>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::INT:
     {
-        return buffer->has<int>(current_var_name);
+        if (!buffer->has<int>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::UINT:
     {
-        return buffer->has<unsigned int>(current_var_name);
+        if (!buffer->has<unsigned int>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::LONGINT:
     {
-        return buffer->has<long int>(current_var_name);
+        if (!buffer->has<long int>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::ULONGINT:
     {
-        return buffer->has<unsigned long>(current_var_name);
+        if (!buffer->has<unsigned long>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::FLOAT:
     {
-        return buffer->has<float>(current_var_name);
+        if (!buffer->has<float>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
     case PropertyDataType::DOUBLE:
     {
-        return buffer->has<double>(current_var_name);
+        if (!buffer->has<double>(current_var_name))
+        {
+            y_var_not_in_buffer_ = true;
+            return false;
+        }
+        else
+            return true;
 
         break;
     }
@@ -772,6 +915,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<bool>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -788,6 +932,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<char>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -804,6 +949,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned char>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -820,6 +966,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -836,6 +983,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -852,6 +1000,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<long int>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -868,6 +1017,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<unsigned long>(current_var_name))
         {
             loginf << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -884,6 +1034,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<float>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -900,6 +1051,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<double>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -916,6 +1068,7 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
         if (!buffer->has<string>(current_var_name))
         {
             logdbg << "ScatterPlotViewDataWidget: updateFromDataY: buffer does not contain " << current_var_name;
+            y_var_not_in_buffer_ = true;
             return;
         }
 
@@ -1069,6 +1222,7 @@ void ScatterPlotViewDataWidget::updateChart()
 
     QScatterSeries* selected_chart_series {nullptr};
     unsigned int value_cnt {0};
+    nan_value_cnt_ = 0;
     unsigned int selected_cnt {0};
 
     for (auto& data : x_values_)
@@ -1114,6 +1268,8 @@ void ScatterPlotViewDataWidget::updateChart()
                     ++sum_cnt;
                 }
             }
+            else
+                ++nan_value_cnt_;
         }
 
         if (!value_cnt)

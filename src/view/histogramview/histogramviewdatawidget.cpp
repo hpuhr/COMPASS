@@ -165,6 +165,7 @@ void HistogramViewDataWidget::clear ()
 
     chart_view_.reset(nullptr);
     shows_data_ = false;
+    data_not_in_buffer_ = false;
 }
 
 unsigned int HistogramViewDataWidget::numBins() const
@@ -191,6 +192,11 @@ QPixmap HistogramViewDataWidget::renderPixmap()
 {
     assert (chart_view_);
     return chart_view_->grab();
+}
+
+bool HistogramViewDataWidget::dataNotInBuffer() const
+{
+    return data_not_in_buffer_;
 }
 
 void HistogramViewDataWidget::loadingStartedSlot()
@@ -614,6 +620,7 @@ void HistogramViewDataWidget::updateFromAllData()
 
     chart_view_.reset(nullptr);
     shows_data_ = false;
+    data_not_in_buffer_ = false;
 
     loginf << "HistogramViewDataWidget: updateFromAllData: num buffers " << buffers_.size();
 
@@ -1489,6 +1496,7 @@ void HistogramViewDataWidget::updateResults()
         bin_size_ = 0;
 
         shows_data_ = false;
+        data_not_in_buffer_ = false;
 
         string eval_grpreq = view_->evalResultGrpReq();
         string eval_id = view_->evalResultsID();
@@ -1559,7 +1567,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<bool>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1574,7 +1584,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<char>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1588,7 +1600,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<unsigned char>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1602,7 +1616,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<int>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1616,7 +1632,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<unsigned int>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1630,7 +1648,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<long int>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1644,7 +1664,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<unsigned long>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1658,7 +1680,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<float>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1672,7 +1696,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<double>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 
@@ -1686,7 +1712,9 @@ void HistogramViewDataWidget::calculateGlobalMinMax()
         {
             if (!buffer->has<string>(current_var_name))
             {
-                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain " << current_var_name;
+                loginf << "HistogramViewDataWidget: calculateGlobalMinMax: buffer does not contain "
+                       << current_var_name;
+                data_not_in_buffer_ = true;
                 return;
             }
 

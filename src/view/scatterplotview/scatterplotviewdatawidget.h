@@ -93,8 +93,12 @@ class ScatterPlotViewDataWidget : public QWidget
     QCursor currentCursor() const;
 
     bool showsData() const;
+    bool xVarNotInBuffer() const;
+    bool yVarNotInBuffer() const;
 
     QPixmap renderPixmap();
+
+    unsigned int nullValueCnt() const;
 
 protected:
     ScatterPlotView* view_{nullptr};
@@ -128,6 +132,10 @@ protected:
     std::unique_ptr<QtCharts::ScatterPlotViewChartView> chart_view_ {nullptr};
 
     bool shows_data_ {false};
+    bool x_var_not_in_buffer_ {false};
+    bool y_var_not_in_buffer_ {false};
+
+    unsigned int nan_value_cnt_ {0};
 
     bool canUpdateFromDataX(std::string dbo_name);
     void updateFromDataX(std::string dbo_name, unsigned int current_size);

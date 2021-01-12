@@ -23,11 +23,13 @@
 #include "dbovariable.h"
 
 class DBOVariableOrderedSetWidget;
-class QCheckBox;
+class DBOVariableSelectionWidget;
 class ScatterPlotView;
+
+class QCheckBox;
 class QLineEdit;
 class QPushButton;
-class DBOVariableSelectionWidget;
+class QLabel;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
@@ -51,12 +53,15 @@ class ScatterPlotViewConfigWidget : public QWidget
     ScatterPlotViewConfigWidget(ScatterPlotView* view, QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
+    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
+
   protected:
     ScatterPlotView* view_;
 
     DBOVariableSelectionWidget* select_var_x_ {nullptr};
     DBOVariableSelectionWidget* select_var_y_ {nullptr};
 
+    QLabel* status_label_ {nullptr};
     QPushButton* reload_button_{nullptr};
 };
 

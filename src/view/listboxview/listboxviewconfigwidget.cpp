@@ -79,6 +79,14 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
 
     vlayout->addStretch();
 
+    QFont font_status;
+    font_status.setItalic(true);
+
+    status_label_ = new QLabel();
+    status_label_->setFont(font_status);
+    status_label_->setVisible(false);
+    vlayout->addWidget(status_label_);
+
     update_button_ = new QPushButton("Reload");
     connect(update_button_, &QPushButton::clicked, this,
             &ListBoxViewConfigWidget::reloadRequestedSlot);
@@ -89,6 +97,19 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() {}
+
+void ListBoxViewConfigWidget::setStatus (const std::string& status, bool visible, QColor color)
+{
+    assert (status_label_);
+    status_label_->setText(status.c_str());
+    //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
+
+    QPalette palette = status_label_->palette();
+    palette.setColor(status_label_->foregroundRole(), color);
+    status_label_->setPalette(palette);
+
+    status_label_->setVisible(visible);
+}
 
 void ListBoxViewConfigWidget::toggleShowOnlySeletedSlot()
 {

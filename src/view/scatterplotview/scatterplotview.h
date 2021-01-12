@@ -104,6 +104,8 @@ protected:
 
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
+
+    void updateStatus();
 };
 
 #endif /* SCATTERPLOTVIEW_H_ */

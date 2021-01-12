@@ -62,6 +62,8 @@ class HistogramViewConfigWidget : public QWidget
 
     void updateEvalConfig();
 
+    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
+
   protected:
     HistogramView* view_;
 
@@ -77,6 +79,7 @@ class HistogramViewConfigWidget : public QWidget
     QCheckBox* log_check_ {nullptr};
     //QPushButton* export_button_{nullptr};
 
+    QLabel* status_label_ {nullptr};
     QPushButton* reload_button_{nullptr};
 };
 

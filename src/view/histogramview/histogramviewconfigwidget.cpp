@@ -139,12 +139,22 @@ HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidge
 
     vlayout->addWidget(tab_widget);
 
+    QFont font_status;
+    font_status.setItalic(true);
+
+    status_label_ = new QLabel();
+    status_label_->setFont(font_status);
+    status_label_->setVisible(false);
+    vlayout->addWidget(status_label_);
+
     reload_button_ = new QPushButton("Reload");
     connect(reload_button_, &QPushButton::clicked, this,
             &HistogramViewConfigWidget::reloadRequestedSlot);
     vlayout->addWidget(reload_button_);
 
     setLayout(vlayout);
+
+    setStatus("No Data Loaded", true);
 }
 
 HistogramViewConfigWidget::~HistogramViewConfigWidget() {}
@@ -236,6 +246,19 @@ void HistogramViewConfigWidget::updateEvalConfig()
     selected_var_check_->setChecked(!view_->showResults());
 }
 
+void HistogramViewConfigWidget::setStatus (const std::string& status, bool visible, QColor color)
+{
+    assert (status_label_);
+    status_label_->setText(status.c_str());
+    //status_label_->setStyleSheet("QLabel { color : "+color.name()+"; }");
+
+    QPalette palette = status_label_->palette();
+    palette.setColor(status_label_->foregroundRole(), color);
+    status_label_->setPalette(palette);
+
+    status_label_->setVisible(visible);
+}
+
 void HistogramViewConfigWidget::reloadRequestedSlot()
 {
     emit reloadRequestedSignal();
@@ -244,4 +267,6 @@ void HistogramViewConfigWidget::reloadRequestedSlot()
 void HistogramViewConfigWidget::loadingStartedSlot()
 {
     setDisabled(true); // reenabled in view
+
+    setStatus("Loading Data", true);
 }

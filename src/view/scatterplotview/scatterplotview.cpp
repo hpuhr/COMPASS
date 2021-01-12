@@ -31,6 +31,8 @@
 #include "viewselection.h"
 #include "latexvisitor.h"
 
+using namespace std;
+
 ScatterPlotView::ScatterPlotView(const std::string& class_id, const std::string& instance_id,
                              ViewContainer* w, ViewManager& view_manager)
     : View(class_id, instance_id, w, view_manager)
@@ -241,6 +243,8 @@ void ScatterPlotView::dataVarX (DBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updatePlot();
+
+    updateStatus();
 }
 
 MetaDBOVariable& ScatterPlotView::metaDataVarX()
@@ -260,6 +264,8 @@ void ScatterPlotView::metaDataVarX (MetaDBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updatePlot();
+
+    updateStatus();
 }
 
 
@@ -308,6 +314,8 @@ void ScatterPlotView::dataVarY (DBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updatePlot();
+
+    updateStatus();
 }
 
 MetaDBOVariable& ScatterPlotView::metaDataVarY()
@@ -327,6 +335,8 @@ void ScatterPlotView::metaDataVarY (MetaDBOVariable& var)
 
     assert (widget_);
     widget_->getDataWidget()->updatePlot();
+
+    updateStatus();
 }
 
 
@@ -379,6 +389,19 @@ void ScatterPlotView::allLoadingDoneSlot()
     assert(widget_);
 
     widget_->configWidget()->setDisabled(false);
+    widget_->configWidget()->setStatus("", false);
+
     getDataWidget()->loadingDoneSlot(); // updates plot
+
+    updateStatus();
+}
+
+void ScatterPlotView::updateStatus()
+{
+    if (widget_->getDataWidget()->xVarNotInBuffer() || widget_->getDataWidget()->yVarNotInBuffer())
+        widget_->configWidget()->setStatus("Reload Required", true, Qt::red);
+    else
+        widget_->configWidget()->setStatus(
+                    "Loaded with "+to_string(widget_->getDataWidget()->nullValueCnt())+" NULL values", true);
 }
 
