@@ -90,6 +90,8 @@ void JobManager::run()
 {
     logdbg << "JobManager: run: start";
 
+    //boost::posix_time::ptime log_time_ = boost::posix_time::microsec_clock::local_time();
+
     while (1)
     {
         if (stop_requested_ && !hasAnyJobs())
@@ -115,6 +117,12 @@ void JobManager::run()
 
         // QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
+
+//        if ((boost::posix_time::microsec_clock::local_time() - log_time_).total_seconds() > 1)
+//        {
+//            loginf << "JobManager: run: jobs " << numJobs() << " db " << numDBJobs();
+//            log_time_ = boost::posix_time::microsec_clock::local_time();
+//        }
     }
 
     assert(!hasBlockingJobs());

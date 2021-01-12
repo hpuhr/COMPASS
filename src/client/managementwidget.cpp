@@ -62,21 +62,21 @@ ManagementWidget::ManagementWidget() : QWidget()
     FilterManagerWidget* filman_widget = COMPASS::instance().filterManager().widget();
     filman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     filman_widget->setLineWidth(frame_width);
-    hlayout->addWidget(filman_widget, 1);
+    hlayout->addWidget(filman_widget, 2);
 
-    QVBoxLayout* right_layout = new QVBoxLayout();
+    //QVBoxLayout* right_layout = new QVBoxLayout();
 
 //    ViewManagerWidget* viewman_widget = COMPASS::instance().viewManager().widget();
 //    viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
 //    viewman_widget->setLineWidth(frame_width);
 //    right_layout->addWidget(viewman_widget);
 
-    JobManagerWidget* jobman_widget = JobManager::instance().widget();
-    jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    jobman_widget->setLineWidth(frame_width);
-    right_layout->addWidget(jobman_widget);
+//    JobManagerWidget* jobman_widget = JobManager::instance().widget();
+//    jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    jobman_widget->setLineWidth(frame_width);
+//    right_layout->addWidget(jobman_widget);
 
-    hlayout->addLayout(right_layout, 1);
+    //hlayout->addLayout(right_layout, 1);
 
     setLayout(vlayout);
 }

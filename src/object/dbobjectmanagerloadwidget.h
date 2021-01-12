@@ -24,11 +24,12 @@
 class DBObject;
 class DBObjectWidget;
 class DBObjectManager;
+//class DBOVariableSelectionWidget;
+
 class QVBoxLayout;
 class QPushButton;
 class QCheckBox;
 class QLineEdit;
-class DBOVariableSelectionWidget;
 class QLabel;
 
 /**
@@ -40,11 +41,11 @@ class DBObjectManagerLoadWidget : public QFrame
 
   public slots:
     /// @brief Called when the order-by variable was changed
-    void orderVariableChanged();
+    //void orderVariableChanged();
     /// @brief Called when the use order checkbox is un/checked
-    void toggleUseOrder();
+    //void toggleUseOrder();
     /// @brief Called when order ascending checkbox is un/checked
-    void toggleOrderAscending();
+    //void toggleOrderAscending();
 
     void toggleUseFilters();
     void toggleUseLimit();
@@ -73,11 +74,13 @@ class DBObjectManagerLoadWidget : public QFrame
     QLabel* associations_label_{nullptr};
 
     QCheckBox* filters_check_{nullptr};
-    QCheckBox* order_check_{nullptr};
-    QCheckBox* order_ascending_check_{nullptr};
+    //QCheckBox* order_check_{nullptr};
+    //QCheckBox* order_ascending_check_{nullptr};
     /// Order-by variable selection widget
-    DBOVariableSelectionWidget* order_variable_widget_{nullptr};
+    //DBOVariableSelectionWidget* order_variable_widget_{nullptr};
     QCheckBox* limit_check_{nullptr};
+
+    QWidget* limit_widget_{nullptr};
     /// Limit minimum edit field
     QLineEdit* limit_min_edit_{nullptr};
     /// Limit maximum edit field
