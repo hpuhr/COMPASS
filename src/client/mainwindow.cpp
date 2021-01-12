@@ -27,7 +27,7 @@
 #include "global.h"
 #include "jobmanager.h"
 #include "logger.h"
-#include "managementwidget.h"
+#include "mainloadwidget.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
@@ -88,7 +88,7 @@ MainWindow::MainWindow()
     connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
 
     // management widget
-    management_widget_ = new ManagementWidget();
+    management_widget_ = new MainLoadWidget();
 
     setCentralWidget(tab_widget_);
 

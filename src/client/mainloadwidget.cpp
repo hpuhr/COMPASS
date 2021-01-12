@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "managementwidget.h"
+#include "mainloadwidget.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -36,7 +36,7 @@
 #include "viewmanager.h"
 #include "viewmanagerwidget.h"
 
-ManagementWidget::ManagementWidget() : QWidget()
+MainLoadWidget::MainLoadWidget() : QWidget()
 {
     QVBoxLayout* vlayout = new QVBoxLayout();
     QHBoxLayout* hlayout = new QHBoxLayout();
@@ -81,9 +81,9 @@ ManagementWidget::ManagementWidget() : QWidget()
     setLayout(vlayout);
 }
 
-ManagementWidget::~ManagementWidget() {}
+MainLoadWidget::~MainLoadWidget() {}
 
-void ManagementWidget::resizeEvent(QResizeEvent* event)
+void MainLoadWidget::resizeEvent(QResizeEvent* event)
 {
     logdbg << "ManagementWidget: resizeEvent";
     //  int tmp_width = event->size().width();

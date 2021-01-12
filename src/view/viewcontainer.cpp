@@ -24,7 +24,7 @@
 #include "histogramview.h"
 #include "scatterplotview.h"
 #include "logger.h"
-#include "managementwidget.h"
+//#include "mainloadwidget.h"
 #include "stringconv.h"
 #include "view.h"
 #include "viewcontainer.h"

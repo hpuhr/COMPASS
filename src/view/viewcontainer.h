@@ -23,7 +23,7 @@
 
 #include "configurable.h"
 
-class ManagementWidget;
+class MainLoadWidget;
 class View;
 class ViewManager;
 class QHBoxLayout;

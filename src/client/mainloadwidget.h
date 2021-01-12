@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef MANAGEMENTWIDGET_H_
-#define MANAGEMENTWIDGET_H_
+#ifndef MAINLOADWIDGET_H_
+#define MAINLOADWIDGET_H_
 
 #include <QWidget>
 
@@ -25,15 +25,15 @@
 // class WorkerThreadWidget;
 // class ViewsWidget;
 
-class ManagementWidget : public QWidget
+class MainLoadWidget : public QWidget
 {
     Q_OBJECT
 
   public slots:
 
   public:
-    ManagementWidget();
-    virtual ~ManagementWidget();
+    MainLoadWidget();
+    virtual ~MainLoadWidget();
 
   protected:
     //  DBInfoWidget *db_info_;
@@ -45,4 +45,4 @@ class ManagementWidget : public QWidget
     virtual void resizeEvent(QResizeEvent* event);
 };
 
-#endif /* MANAGMENTWIDGET_H_ */
+#endif /* MAINLOADWIDGET_H_ */
