@@ -208,9 +208,10 @@ void EvaluationManager::loadData ()
 
     QApplication::restoreOverrideCursor();
 
+    FilterManager& fil_man = COMPASS::instance().filterManager();
+
     // set use filters
-    object_man.useFilters(true);
-    object_man.loadWidget()->updateUseFilters();
+    fil_man.useFilters(true);
 
     // clear data
     data_.clear();
@@ -223,7 +224,7 @@ void EvaluationManager::loadData ()
     }
 
     // set ref data sources filters
-    FilterManager& fil_man = COMPASS::instance().filterManager();
+
 
     fil_man.disableAllFilters();
 

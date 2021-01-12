@@ -71,17 +71,11 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     updateSlot();
 
-    QFrame* line = new QFrame(this);
-    line->setFrameShape(QFrame::HLine);  // Horizontal line
-    line->setFrameShadow(QFrame::Sunken);
-    line->setLineWidth(1);
-    main_layout->addWidget(line);
-
-    // use filters stuff
-    filters_check_ = new QCheckBox("Use Filters");
-    filters_check_->setChecked(object_manager_.useFilters());
-    connect(filters_check_, &QCheckBox::clicked, this, &DBObjectManagerLoadWidget::toggleUseFilters);
-    main_layout->addWidget(filters_check_);
+//    QFrame* line = new QFrame(this);
+//    line->setFrameShape(QFrame::HLine);  // Horizontal line
+//    line->setFrameShadow(QFrame::Sunken);
+//    line->setLineWidth(1);
+//    main_layout->addWidget(line);
 
 //    QFrame* line2 = new QFrame(this);
 //    line2->setFrameShape(QFrame::HLine);  // Horizontal line
@@ -154,7 +148,6 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 
     main_layout->addWidget(limit_widget_);
 
-
     // load
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &DBObjectManagerLoadWidget::loadButtonSlot);
@@ -164,15 +157,6 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager& object_man
 }
 
 DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget() {}
-
-void DBObjectManagerLoadWidget::toggleUseFilters()
-{
-    assert(filters_check_);
-
-    bool checked = filters_check_->checkState() == Qt::Checked;
-    logdbg << "DBObjectManagerLoadWidget: toggleUseFilters: setting use limit to " << checked;
-    object_manager_.useFilters(checked);
-}
 
 //void DBObjectManagerLoadWidget::toggleUseOrder()
 //{
@@ -275,12 +259,6 @@ void DBObjectManagerLoadWidget::loadingDone()
     loading_ = false;
     load_button_->setText("Load");
     load_button_->setDisabled(false);
-}
-
-void DBObjectManagerLoadWidget::updateUseFilters ()
-{
-    assert (filters_check_);
-    filters_check_->setChecked(object_manager_.useFilters());
 }
 
 void DBObjectManagerLoadWidget::updateSlot()

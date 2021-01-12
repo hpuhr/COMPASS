@@ -45,21 +45,25 @@ class ViewableDataConfig;
 class FilterManager : public QObject, public Configurable
 {
     Q_OBJECT
-  signals:
+signals:
     void changedFiltersSignal();
 
-  public slots:
+public slots:
     void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 
     void unshowViewPointSlot (const ViewableDataConfig* vp);
     void showViewPointSlot (const ViewableDataConfig* vp);
 
-  public:
+
+public:
     /// @brief Constructor
     FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     /// @brief Destructor
     virtual ~FilterManager();
+
+    bool useFilters() const;
+    void useFilters(bool useFilters);
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
     std::string getSQLCondition(const std::string& dbo_name,
@@ -87,9 +91,10 @@ class FilterManager : public QObject, public Configurable
 
     DataSourcesFilter* getDataSourcesFilter (const std::string& dbo_name);
 
-  protected:
+protected:
     /// Database definition, resets if changed
     std::string db_id_;
+    bool use_filters_{false};
 
     FilterManagerWidget* widget_{nullptr};
 

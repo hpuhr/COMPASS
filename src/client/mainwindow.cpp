@@ -168,7 +168,7 @@ void MainWindow::startSlot()
         obj_it.second->closeWidget();
 
     assert(management_widget_);
-    tab_widget_->addTab(management_widget_, "Management");
+    tab_widget_->addTab(management_widget_, "Load");
 
 //    start_time = boost::posix_time::microsec_clock::local_time();
 //    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)

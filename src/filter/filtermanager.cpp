@@ -44,6 +44,7 @@ FilterManager::FilterManager(const std::string& class_id, const std::string& ins
 {
     logdbg << "FilterManager: constructor";
 
+    registerParameter("use_filters", &use_filters_, false);
     registerParameter("db_id", &db_id_, "");
 }
 
@@ -58,6 +59,20 @@ FilterManager::~FilterManager()
         delete widget_;
         widget_ = nullptr;
     }
+}
+
+bool FilterManager::useFilters() const
+{
+    return use_filters_;
+}
+
+void FilterManager::useFilters(bool use_filters)
+{
+    use_filters_ = use_filters;
+    loginf << "FilterManager: useFilters: " << use_filters_;
+
+    if (widget_)
+        widget_->updateUseFilters();
 }
 
 void FilterManager::generateSubConfigurable(const std::string& class_id,
@@ -391,7 +406,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     }
 
     // add filters
-    obj_man.useFilters(data.contains("filters"));
+    use_filters_ = data.contains("filters");
 
     if (data.contains("filters"))
     {
@@ -443,7 +458,7 @@ void FilterManager::setConfigInViewPoint (nlohmann::json& data)
     }
 
     // add filters
-    if (obj_man.useFilters())
+    if (use_filters_)
     {
         data["filters"] = json::object();
         json& filters = data.at("filters");

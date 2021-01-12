@@ -47,7 +47,6 @@ class DBObjectManagerLoadWidget : public QFrame
     /// @brief Called when order ascending checkbox is un/checked
     //void toggleOrderAscending();
 
-    void toggleUseFilters();
     void toggleUseLimit();
     /// @brief Called when limit minimum is changed
     void limitMinChanged();
@@ -65,15 +64,12 @@ class DBObjectManagerLoadWidget : public QFrame
 
     void loadingDone();
 
-    void updateUseFilters ();
-
   private:
     DBObjectManager& object_manager_;
     QVBoxLayout* info_layout_{nullptr};
 
     QLabel* associations_label_{nullptr};
 
-    QCheckBox* filters_check_{nullptr};
     //QCheckBox* order_check_{nullptr};
     //QCheckBox* order_ascending_check_{nullptr};
     /// Order-by variable selection widget
