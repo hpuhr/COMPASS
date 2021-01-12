@@ -72,20 +72,13 @@ void AllBufferTableWidget::clear()
     model_->clearData();
 }
 
-void AllBufferTableWidget::show(
-        std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
+void AllBufferTableWidget::show(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
-    assert(buffer);
-
-    logdbg << "AllBufferTableWidget: show: buffer size " << buffer->size() << " properties "
-           << buffer->properties().size();
     assert(table_);
     assert(model_);
 
-    model_->setData(buffer);
+    model_->setData(buffers);
     table_->resizeColumnsToContents();
-
-    logdbg << " AllBufferTableWidget: show: end";
 }
 
 void AllBufferTableWidget::exportSlot(bool overwrite)

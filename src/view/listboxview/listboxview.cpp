@@ -73,6 +73,8 @@ bool ListBoxView::init()
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
     connect(&object_man, &DBObjectManager::allLoadingDoneSignal, this, &ListBoxView::allLoadingDoneSlot);
+    connect(&object_man, &DBObjectManager::allLoadingDoneSignal,
+            widget_->getDataWidget(), &ListBoxViewDataWidget::loadingDoneSlot);
 
     connect(data_source_, &ListBoxViewDataSource::loadingStartedSignal, widget_->getDataWidget(),
             &ListBoxViewDataWidget::loadingStartedSlot);
@@ -238,6 +240,7 @@ void ListBoxView::allLoadingDoneSlot()
 {
     loginf << "ListBoxView: allLoadingDoneSlot";
     assert(widget_);
-    widget_->getDataWidget()->selectFirstSelectedRow();
+    widget_->configWidget()->setStatus("", false);
+    //widget_->getDataWidget()->selectFirstSelectedRow();
 }
 

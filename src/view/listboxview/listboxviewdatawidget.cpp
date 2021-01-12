@@ -99,6 +99,8 @@ void ListBoxViewDataWidget::clearTables()
 
 void ListBoxViewDataWidget::loadingStartedSlot()
 {
+    buffers_.clear();
+
     if (all_buffer_table_widget_)
         all_buffer_table_widget_->clear();
 
@@ -110,13 +112,30 @@ void ListBoxViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr<Buf
 {
     logdbg << "ListBoxViewDataWidget: updateTables: start";
 
-    assert(all_buffer_table_widget_);
-    all_buffer_table_widget_->show(buffer);
+//    assert(all_buffer_table_widget_);
+//    all_buffer_table_widget_->show(buffer);
 
-    assert(buffer_tables_.count(object.name()) > 0);
-    buffer_tables_.at(object.name())->show(buffer);
+//    assert(buffer_tables_.count(object.name()) > 0);
+//    buffer_tables_.at(object.name())->show(buffer);
+
+    buffers_[object.name()] = buffer;
+
 
     logdbg << "ListBoxViewDataWidget: updateTables: end";
+}
+
+void ListBoxViewDataWidget::loadingDoneSlot()
+{
+    assert(all_buffer_table_widget_);
+    all_buffer_table_widget_->show(buffers_);
+
+    for (auto& buf_it : buffers_)
+    {
+        assert(buffer_tables_.count(buf_it.first) > 0);
+        buffer_tables_.at(buf_it.first)->show(buf_it.second);
+    }
+
+    selectFirstSelectedRow();
 }
 
 void ListBoxViewDataWidget::exportDataSlot(bool overwrite)

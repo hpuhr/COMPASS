@@ -94,6 +94,8 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
     vlayout->addWidget(update_button_);
 
     setLayout(vlayout);
+
+    setStatus("No Data Loaded", true);
 }
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget() {}
@@ -194,4 +196,5 @@ void ListBoxViewConfigWidget::loadingStartedSlot()
     reload_needed_ = false;
 
     updateUpdateButton();
+    setStatus("Loading Data", true);
 }

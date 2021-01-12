@@ -2000,6 +2000,12 @@ void HistogramViewDataWidget::rectangleSelectedSlot (unsigned int index1, unsign
     if (view_->showResults())
     {
         loginf << "HistogramViewDataWidget: rectangleSelectedSlot: selection of evalution results not available";
+
+        QMessageBox m_warning(QMessageBox::Warning, "Selection Not Possible",
+                              "Selection of evaluation results is not yet implemented.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
         return;
     }
 
