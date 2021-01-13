@@ -544,7 +544,7 @@ void EvaluationManager::evaluate ()
 bool EvaluationManager::canGenerateReport ()
 {
     assert (initialized_);
-    return evaluated_;
+    return evaluated_ && hasResults();
 }
 
 void EvaluationManager::generateReport ()
