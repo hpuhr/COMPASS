@@ -41,12 +41,15 @@ EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man)
 
 void EvaluationSectorWidget::update()
 {
+    logdbg << "EvaluationSectorWidget: update";
+
     assert (grid_layout_);
 
     QLayoutItem* child;
     while ((child = grid_layout_->takeAt(0)) != 0)
     {
-        grid_layout_->removeItem(child);
+        if (child->widget())
+            delete child->widget();
         delete child;
     }
 
@@ -88,6 +91,8 @@ void EvaluationSectorWidget::update()
             ++row;
         }
     }
+
+    logdbg << "EvaluationSectorWidget: update: done";
 }
 
 void EvaluationSectorWidget::toggleUseGroupSlot()
