@@ -313,6 +313,9 @@ void Sector::createPolygon()
     for (auto& point_it : points_)
         ring->addPoint(point_it.first, point_it.second);
 
+    if (*points_.begin() != *points_.rbegin())
+        ring->addPoint(points_.begin()->first, points_.begin()->second); // close if not not closed
+
     ogr_polygon_->addRingDirectly(ring);
 }
 
