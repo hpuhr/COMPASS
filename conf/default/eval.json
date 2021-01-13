@@ -39,10 +39,36 @@
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.949999988079071,
                                             "miss_tolerance": 0.9990000128746033,
-                                            "name": "Probability of Detection",
+                                            "name": "Detection",
                                             "short_name": "PD",
-                                            "update_interval": 2.0,
+                                            "update_interval": 4.0,
                                             "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementExtraDataConfig": {
+                                    "EvaluationRequirementExtraUTNsConfigExtraData0": {
+                                        "parameters": {
+                                            "ignore_primary_only": true,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability": 0.0,
+                                            "min_duration": 60.0,
+                                            "min_num_updates": 10,
+                                            "name": "Extra Data",
+                                            "short_name": "ED"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementExtraTrackConfig": {
+                                    "EvaluationRequirementExtraTrackConfigExtra Track0": {
+                                        "parameters": {
+                                            "ignore_primary_only": true,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability": 0.0,
+                                            "min_duration": 60.0,
+                                            "min_num_updates": 10,
+                                            "name": "Extra Track",
+                                            "short_name": "ET"
                                         }
                                     }
                                 },
@@ -51,19 +77,79 @@
                                         "parameters": {
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.9900000095367432,
-                                            "name": "Probability of Correct Identification",
+                                            "name": "Correct Identification",
                                             "short_name": "PCID"
                                         }
                                     }
                                 },
-                                "EvaluationRequirementPositionMaxDistanceConfig": {
-                                    "EvaluationRequirementPositionMaxDistanceConfigHorizontal Position Accuracy0": {
+                                "EvaluationRequirementModeAConfig": {
+                                    "EvaluationRequirementModeAConfigMode A0": {
                                         "parameters": {
-                                            "max_distance": 140.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability_false": 0.009999999776482582,
+                                            "minimum_probability_present": 0.9800000190734863,
+                                            "name": "Mode A",
+                                            "short_name": "MA",
+                                            "use_maximum_probability_false": true,
+                                            "use_minimum_probability_present": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCConfig": {
+                                    "EvaluationRequirementModeCConfigMode C0": {
+                                        "parameters": {
+                                            "max_difference": 100.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability_false": 0.009999999776482582,
+                                            "minimum_probability_present": 0.9700000286102295,
+                                            "name": "Mode C",
+                                            "short_name": "MC",
+                                            "use_maximum_probability_false": true,
+                                            "use_minimum_probability_present": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAcrossConfig": {
+                                    "EvaluationRequirementPositionAcrossConfigAcross0": {
+                                        "parameters": {
+                                            "max_abs_value": 70.0,
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.8999999761581421,
-                                            "name": "Horizontal Position Accuracy",
+                                            "name": "Across",
+                                            "short_name": "AC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAlongConfig": {
+                                    "EvaluationRequirementPositionAlongConfigAlong0": {
+                                        "parameters": {
+                                            "max_abs_value": 70.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Along",
+                                            "short_name": "AL"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigPosition Error0": {
+                                        "parameters": {
+                                            "max_abs_value": 70.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Position Error",
                                             "short_name": "HPA"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionLatencyConfig": {
+                                    "EvaluationRequirementPositionLatencyConfigLatency0": {
+                                        "parameters": {
+                                            "max_abs_value": 0.10000000149011612,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Latency",
+                                            "short_name": "LT"
                                         }
                                     }
                                 }

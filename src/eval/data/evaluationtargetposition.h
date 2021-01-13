@@ -22,13 +22,16 @@ class EvaluationTargetPosition
 {
 public:
     EvaluationTargetPosition() {}
-    EvaluationTargetPosition(double latitude, double longitude, bool has_altitude, float altitude)
-        : latitude_(latitude), longitude_(longitude), has_altitude_(has_altitude), altitude_(altitude)
+    EvaluationTargetPosition(double latitude, double longitude, bool has_altitude, bool altitude_calculated,
+                             float altitude)
+        : latitude_(latitude), longitude_(longitude), has_altitude_(has_altitude),
+          altitude_calculated_(altitude_calculated), altitude_(altitude)
     {}
 
     double latitude_ {0};
     double longitude_ {0};
     bool has_altitude_ {false};
+    bool altitude_calculated_ {false}; // indicates if secondary or derived
     float altitude_ {0};
 };
 

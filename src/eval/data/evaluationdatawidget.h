@@ -23,6 +23,7 @@
 class EvaluationData;
 class EvaluationManager;
 
+class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
 
@@ -31,6 +32,12 @@ class EvaluationDataWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void actionTriggeredSlot(QAction* action);
+    void useAllSlot();
+    void useNoneSlot();
+    void clearCommentsSlot();
+    void filterSlot();
+
     void customContextMenuSlot(const QPoint& p);
     void showFullUTNSlot ();
     void showSurroundingDataSlot ();
@@ -44,6 +51,8 @@ public:
 protected:
     EvaluationData& eval_data_;
     EvaluationManager& eval_man_;
+
+    QToolBar* toolbar_ {nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

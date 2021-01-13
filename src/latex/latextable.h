@@ -37,6 +37,8 @@ public:
 
     void setWideTable(bool wide_table);
 
+    static unsigned int num_max_rows_;
+
 protected:
     std::string name_;
     unsigned int num_columns_;
@@ -48,6 +50,7 @@ protected:
     std::vector<std::vector<std::string>> rows_;
 
     std::string getLine (const std::vector<std::string>& row, bool bold=false);
+    std::string getPointsLine ();
 };
 
 #endif // LATEXTABLE_H

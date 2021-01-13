@@ -101,9 +101,6 @@ class DBObjectManager : public QObject, public Configurable
     unsigned int limitMax() const;
     void limitMax(unsigned int limitMax);
 
-    bool useFilters() const;
-    void useFilters(bool useFilters);
-
     bool useOrder() const;
     void useOrder(bool useOrder);
 
@@ -140,7 +137,6 @@ class DBObjectManager : public QObject, public Configurable
 
   protected:
     COMPASS& compass_;
-    bool use_filters_{false};
 
     bool use_order_{false};
     bool use_order_ascending_{false};

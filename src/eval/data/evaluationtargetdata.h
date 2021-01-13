@@ -19,12 +19,22 @@
 #define EVALUATIONTARGETDATA_H
 
 #include "evaluationtargetposition.h"
+#include "evaluationtargetvelocity.h"
+#include "projection/transformation.h"
 
 #include <map>
 #include <memory>
 #include <vector>
+#include <set>
+#include <string>
 
 class Buffer;
+class EvaluationData;
+class EvaluationManager;
+//class Transformation;
+
+//class OGRSpatialReference;
+//class OGRCoordinateTransformation;
 
 class TstDataMapping // mapping to respective ref data
 {
@@ -39,21 +49,29 @@ public:
 
     bool has_ref_pos_ {false};
     EvaluationTargetPosition pos_ref_;
+    EvaluationTargetVelocity posbased_spd_ref_;
+};
+
+class DataMappingTimes // mapping to respective tst data
+{
+public:
+    float tod_ {0}; // tod of test
+
+    bool has_other1_ {false};
+    float tod_other1_ {0};
+
+    bool has_other2_ {false};
+    float tod_other2_ {0};
 };
 
 class EvaluationTargetData
 {
 public:
-    EvaluationTargetData(unsigned int utn);
+    EvaluationTargetData();
+    EvaluationTargetData(unsigned int utn, EvaluationData& eval_data, EvaluationManager& eval_man);
+    virtual ~EvaluationTargetData();
 
-    bool hasRefBuffer () const;
-    void setRefBuffer (std::shared_ptr<Buffer> buffer);
     void addRefIndex (float tod, unsigned int index);
-    std::shared_ptr<Buffer> refBuffer() const;
-
-    bool hasTstBuffer () const;
-    void setTstBuffer (std::shared_ptr<Buffer> buffer);
-    std::shared_ptr<Buffer> tstBuffer() const;
     void addTstIndex (float tod, unsigned int index);
 
     bool hasData() const;
@@ -72,6 +90,7 @@ public:
     std::string timeBeginStr() const;
     float timeEnd() const;
     std::string timeEndStr() const;
+    float timeDuration() const;
 
     std::vector<std::string> callsigns() const;
     std::string callsignsStr() const;
@@ -88,6 +107,8 @@ public:
     int modeCMax() const;
     std::string modeCMaxStr() const;
 
+    bool isPrimaryOnly () const;
+
     bool use() const;
     void use(bool use);
 
@@ -99,22 +120,57 @@ public:
     std::pair<float, float> refTimesFor (float tod, float d_max) const; // lower/upper times, -1 if not existing
     std::pair<EvaluationTargetPosition, bool> interpolatedRefPosForTime (float tod, float d_max) const;
     // bool ok
+    std::pair<EvaluationTargetVelocity, bool> interpolatedRefPosBasedSpdForTime (float tod, float d_max) const;
 
     bool hasRefPosForTime (float tod) const;
     EvaluationTargetPosition refPosForTime (float tod) const;
+    EvaluationTargetVelocity refPosBasedSpdForTime (float tod) const;
+    std::pair<bool, float> estimateRefAltitude (float tod, unsigned int index) const;
+    // estimate ref baro alt at tod,index TODO should be replaced by real altitude reconstructor
 
     bool hasRefCallsignForTime (float tod) const;
     std::string refCallsignForTime (float tod) const;
 
-    // test
+    bool hasRefModeAForTime (float tod) const; // only if set, is v, not g
+    unsigned int refModeAForTime (float tod) const;
 
+    bool hasRefModeCForTime (float tod) const; // only if set, is v, not g
+    int refModeCForTime (float tod) const;
+
+    bool hasRefTAForTime (float tod) const;
+    unsigned int refTAForTime (float tod) const;
+
+    // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;
+    std::pair<bool, float> estimateTstAltitude (float tod, unsigned int index) const;
 
     bool hasTstCallsignForTime (float tod) const;
     std::string tstCallsignForTime (float tod) const;
 
-    // nullptr if none
+    bool hasTstModeAForTime (float tod) const; // only if set, is v, not g
+    unsigned int tstModeAForTime (float tod) const;
+
+    bool hasTstModeCForTime (float tod) const; // only if set, is v, not g
+    int tstModeCForTime (float tod) const;
+
+    bool hasTstGroundBitForTime (float tod) const; // only if set
+    bool tstGroundBitForTime (float tod) const; // true is on ground
+
+    bool hasTstTAForTime (float tod) const;
+    unsigned int tstTAForTime (float tod) const;
+
+    std::pair<bool,bool> tstGroundBitForTimeInterpolated (float tod) const; // has gbs, gbs true
+
+    bool hasTstTrackNumForTime (float tod) const;
+    unsigned int tstTrackNumForTime (float tod) const;
+
+    // speed, track angle
+    bool hasTstMeasuredSpeedForTime (float tod) const;
+    float tstMeasuredSpeedForTime (float tod) const; // m/s
+
+    bool hasTstMeasuredTrackAngleForTime (float tod) const;
+    float tstMeasuredTrackAngleForTime (float tod) const; // deg
 
     double latitudeMin() const;
     double latitudeMax() const;
@@ -123,8 +179,20 @@ public:
 
     bool hasPos() const;
 
+    bool hasADSBInfo() const;
+    std::set<unsigned int> mopsVersions() const;
+    std::string mopsVersionsStr() const;
+
+    bool hasNucpNic() const;
+    std::string nucpNicStr() const;
+    bool hasNacp() const;
+    std::string nacpStr() const;
+
 protected:
-    static bool in_appimage_;
+    //static bool in_appimage_;
+
+    EvaluationData* eval_data_ {nullptr};
+    EvaluationManager* eval_man_ {nullptr};
 
     bool use_ {true};
 
@@ -133,19 +201,6 @@ protected:
 
     std::multimap<float, unsigned int> tst_data_; // tod -> index
     mutable std::vector<unsigned int> tst_indexes_;
-
-    std::shared_ptr<Buffer> ref_buffer_;
-    std::string ref_latitude_name_;
-    std::string ref_longitude_name_;
-    std::string ref_altitude_name_;
-    std::string ref_callsign_name_;
-
-
-    std::shared_ptr<Buffer> tst_buffer_;
-    std::string tst_latitude_name_;
-    std::string tst_longitude_name_;
-    std::string tst_altitude_name_;
-    std::string tst_callsign_name_;
 
     mutable std::vector<std::string> callsigns_;
     mutable std::vector<unsigned int> target_addresses_;
@@ -162,18 +217,34 @@ protected:
     mutable double longitude_min_ {0};
     mutable double longitude_max_ {0};
 
+    mutable bool has_adsb_info_ {false};
+    mutable std::set<unsigned int> mops_versions_;
+    mutable bool has_nucp_nic_ {false};
+    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
+    mutable bool has_nacp {false};
+    mutable unsigned int min_nacp_, max_nacp_;
+
     mutable std::map<float, TstDataMapping> test_data_mappings_;
+
+//    std::unique_ptr<OGRSpatialReference> wgs84_;
+//    mutable std::unique_ptr<OGRSpatialReference> local_;
+    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart_;
+    //mutable std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo_;
+    mutable Transformation trafo_;
 
     void updateCallsigns() const;
     void updateTargetAddresses() const;
     void updateModeACodes() const;
     void updateModeCMinMax() const;
     void updatePositionMinMax() const;
+    //void updateADSBInfo() const;
 
     void calculateTestDataMappings() const;
     TstDataMapping calculateTestDataMapping(float tod) const; // test tod
     void addRefPositiosToMapping (TstDataMapping& mapping) const;
     void addRefPositiosToMappingFast (TstDataMapping& mapping) const;
+
+    DataMappingTimes findTstTimes(float tod_ref) const; // ref tod
 };
 
 #endif // EVALUATIONTARGETDATA_H

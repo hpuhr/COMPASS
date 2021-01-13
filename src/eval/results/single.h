@@ -36,7 +36,6 @@ namespace EvaluationRequirementResult
         virtual bool isSingle() const override { return true; }
         virtual bool isJoined() const override { return false; }
 
-        virtual void print() = 0;
         virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
         virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
@@ -47,6 +46,7 @@ namespace EvaluationRequirementResult
         void updateUseFromTarget ();
 
         const static std::string tr_details_table_name_;
+        const static std::string target_table_name_;
 
     protected:
         unsigned int utn_; // used to generate result
@@ -56,6 +56,8 @@ namespace EvaluationRequirementResult
 
         std::string getTargetSectionID();
         std::string getTargetRequirementSectionID();
+
+        virtual std::string getRequirementSectionID () override;
 
         void addCommonDetails (shared_ptr<EvaluationResultsReport::RootItem> root_item);
     };

@@ -8,7 +8,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "5")
-SET(CPACK_PACKAGE_VERSION_PATCH "6")
+SET(CPACK_PACKAGE_VERSION_PATCH "7")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -24,6 +24,7 @@ add_definitions ( -UNDEBUG -Wall -std=c++11)
 find_package(Qt5Widgets)
 find_package(Qt5Core)
 find_package(Qt5OpenGL)
+find_package(Qt5Charts)
 
 message("Qt Widgets version: ${Qt5Widgets_VERSION}")
 
@@ -120,6 +121,7 @@ include_directories (
     ${PROJECT_BINARY_DIR}/include
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5OpenGL_INCLUDE_DIRS}
+    ${Qt5Charts_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${SQLITE3_INCLUDE_DIR}
     ${MYSQL_INCLUDE_DIR}
@@ -153,6 +155,7 @@ target_link_libraries ( compass optimized
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL
+    Qt5::Charts
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}

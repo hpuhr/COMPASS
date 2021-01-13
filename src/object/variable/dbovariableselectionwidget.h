@@ -18,6 +18,8 @@
 #ifndef DBOVARIABLESELECTIONWIDGET_H
 #define DBOVARIABLESELECTIONWIDGET_H
 
+#include "property.h"
+
 #include <QFrame>
 #include <QMenu>
 
@@ -89,6 +91,9 @@ class DBOVariableSelectionWidget : public QFrame
     bool showExistingInDBOnly() const;
     void showExistingInDBOnly(bool show);
 
+    void showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types);
+    void disableShowDataTypesOnly();
+
   private:
     /// Variable type information
     QLabel* object_label_{nullptr};
@@ -110,8 +115,13 @@ class DBOVariableSelectionWidget : public QFrame
     bool show_dbo_only_{false};
     std::string only_dbo_name_;
 
+    bool show_data_types_only_{false};
+    std::vector<PropertyDataType> only_data_types_;
+
     /// @brief Updates selection menu entries
     void updateMenuEntries();
+
+    bool showDataType(PropertyDataType type);
 };
 
 #endif  // DBOVARIABLESELECTIONWIDGET_H

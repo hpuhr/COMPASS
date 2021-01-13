@@ -109,6 +109,7 @@ class DBConnection : public QObject, public Configurable
 
     virtual std::string status() const = 0;
     virtual std::string identifier() const = 0;
+    virtual std::string shortIdentifier() const = 0;
     virtual std::string type() const = 0;
 
     bool ready() { return connection_ready_; }

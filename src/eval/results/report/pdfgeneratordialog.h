@@ -20,7 +20,6 @@
 
 #include <QDialog>
 
-
 class QPushButton;
 class QLabel;
 class QProgressBar;
@@ -30,7 +29,6 @@ class QCheckBox;
 namespace EvaluationResultsReport
 {
     class PDFGenerator;
-
 
     class PDFGeneratorDialog : public QDialog
     {
@@ -47,6 +45,8 @@ namespace EvaluationResultsReport
         void waitOnMapLoadingEditedSlot(bool checked);
         void includeTargetDetailsEditedSlot(bool checked);
         void includeTargetTRDetailsEditedSlot(bool checked);
+        void numMaxTableRowsEditedSlot(const QString& text);
+        void numMaxTableColWidthEditedSlot(const QString& text);
 
         void runPDFLatexChangedSlot (bool checked);
         void openPDFChangedSlot (bool checked);
@@ -80,6 +80,9 @@ namespace EvaluationResultsReport
 
         QCheckBox* include_target_details_check_ {nullptr};
         QCheckBox* include_target_tr_details_check_ {nullptr};
+
+        QLineEdit* num_max_table_rows_edit_ {nullptr};
+        QLineEdit* num_max_table_col_width_edit_ {nullptr};
 
         QCheckBox* wait_on_map_loading_check_ {nullptr};
 

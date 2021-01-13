@@ -76,6 +76,7 @@ class NullableVector
     NullableVector<T>& operator*=(double factor);
 
     std::set<T> distinctValues(unsigned int index = 0);
+    std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
 
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
                                                                      unsigned int to_index);
@@ -524,6 +525,33 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
     }
 
     return values;
+}
+
+template <class T>
+std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
+{
+    bool set = false;
+    T min, max;
+
+    for (; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            if (!set)
+            {
+                min = data_.at(index);
+                max = data_.at(index);
+                set = true;
+            }
+            else
+            {
+                min = std::min(min, data_.at(index));
+                max = std::max(max, data_.at(index));
+            }
+        }
+    }
+
+    return std::tuple<bool,T,T> {set, min, max};
 }
 
 template <class T>

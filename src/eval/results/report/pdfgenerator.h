@@ -76,6 +76,12 @@ namespace EvaluationResultsReport
         bool includeTargetTRDetails() const;
         void includeTargetTRDetails(bool value);
 
+        unsigned int numMaxTableRows() const;
+        void numMaxTableRows(unsigned int value);
+
+        unsigned int numMaxTableColWidth() const;
+        void numMaxTableColWidth(unsigned int value);
+
     protected:
         EvaluationManager& eval_man_;
 
@@ -89,6 +95,9 @@ namespace EvaluationResultsReport
 
         bool include_target_details_ {false};
         bool include_target_tr_details_ {false};
+
+        unsigned int num_max_table_rows_ {1000};
+        unsigned int num_max_table_col_width_ {18};
 
         bool wait_on_map_loading_ {true};
 

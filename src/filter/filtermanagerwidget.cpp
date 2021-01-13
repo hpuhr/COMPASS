@@ -17,16 +17,9 @@
 
 #include "filtermanagerwidget.h"
 
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QInputDialog>
-#include <QLabel>
-#include <QPushButton>
-#include <QStackedWidget>
-#include <QVBoxLayout>
-
 #include "dbfilter.h"
 #include "dbfilterwidget.h"
+#include "datasourcesfilter.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "dbschemawidget.h"
@@ -36,6 +29,15 @@
 #include "global.h"
 #include "logger.h"
 #include "metadbtable.h"
+
+#include <QComboBox>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QVBoxLayout>
+#include <QCheckBox>
 
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
                                          Qt::WindowFlags f)
@@ -57,8 +59,26 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
     filter_label->setFont(font_bold);
     layout->addWidget(filter_label);
 
-    filter_layout_ = new QVBoxLayout();
-    layout->addLayout(filter_layout_);
+    // use filters stuff
+    filters_check_ = new QCheckBox("Use Filters");
+    filters_check_->setChecked(filter_manager_.useFilters());
+    connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
+    layout->addWidget(filters_check_);
+
+    QHBoxLayout* filter_layout = new QHBoxLayout();
+
+    QVBoxLayout* ds_filter_parent_layout = new QVBoxLayout();
+    ds_filter_layout_ = new QVBoxLayout();
+
+    ds_filter_parent_layout->addLayout(ds_filter_layout_);
+    ds_filter_parent_layout->addStretch();
+
+    filter_layout->addLayout(ds_filter_parent_layout);
+
+    other_filter_layout_ = new QVBoxLayout();
+    filter_layout->addLayout(other_filter_layout_);
+
+    layout->addLayout(filter_layout);
 
     layout->addStretch();
 
@@ -84,6 +104,22 @@ FilterManagerWidget::~FilterManagerWidget()
     }
 }
 
+void FilterManagerWidget::toggleUseFilters()
+{
+    assert(filters_check_);
+
+    bool checked = filters_check_->checkState() == Qt::Checked;
+    logdbg << "FilterManagerWidget: toggleUseFilters: setting use limit to " << checked;
+    filter_manager_.useFilters(checked);
+}
+
+void FilterManagerWidget::updateUseFilters ()
+{
+    assert (filters_check_);
+    filters_check_->setChecked(filter_manager_.useFilters());
+}
+
+
 void FilterManagerWidget::addFilterSlot()
 {
     assert(!filter_generator_widget_);
@@ -96,19 +132,25 @@ void FilterManagerWidget::addFilterSlot()
 
 void FilterManagerWidget::updateFiltersSlot()
 {
-    assert(filter_layout_);
+    assert(ds_filter_layout_);
 
     QLayoutItem* child;
-    while ((child = filter_layout_->takeAt(0)) != 0)
-    {
-        filter_layout_->removeItem(child);
-    }
+    while ((child = ds_filter_layout_->takeAt(0)) != 0)
+        ds_filter_layout_->removeItem(child);
+
+    assert(other_filter_layout_);
+    while ((child = other_filter_layout_->takeAt(0)) != 0)
+        other_filter_layout_->removeItem(child);
 
     std::vector<DBFilter*>& filters = filter_manager_.filters();
     for (auto it : filters)
     {
         loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
-        filter_layout_->addWidget(it->widget());
+
+        if (dynamic_cast<DataSourcesFilter*>(it))
+            ds_filter_layout_->addWidget(it->widget());
+        else
+            other_filter_layout_->addWidget(it->widget());
     }
 }
 

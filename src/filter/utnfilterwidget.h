@@ -24,7 +24,7 @@
 class QLabel;
 class QLineEdit;
 
-class UTNFilterWidget  : public DBFilterWidget
+class UTNFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
 

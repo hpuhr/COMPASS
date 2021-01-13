@@ -916,7 +916,28 @@ std::string DBOVariable::getDataSourcesAsString(const std::string& value) const
         }
         // not found, return original
     }
+
+    // search for data sources in other dbos
+    for (auto& dbo_it : COMPASS::instance().objectManager())
+    {
+        if (dbo_it.second->hasDataSources())
+        {
+            for (auto ds_it = dbo_it.second->dsBegin(); ds_it != dbo_it.second->dsEnd(); ++ds_it)
+            {
+                if (std::to_string(ds_it->first) == value)
+                {
+                    if (ds_it->second.hasShortName())
+                        return ds_it->second.shortName();
+                    else
+                        return ds_it->second.name();
+                }
+            }
+            // not found, return original
+        }
+    }
+
     // has no datasources, return original
+    //loginf << "DBOVariable: getDataSourcesAsString: ds '" << value << "' not found";
 
     return value;
 }

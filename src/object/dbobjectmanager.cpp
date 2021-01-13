@@ -31,6 +31,7 @@
 #include "viewmanager.h"
 #include "jobmanager.h"
 #include "evaluationmanager.h"
+#include "filtermanager.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -45,8 +46,6 @@ DBObjectManager::DBObjectManager(const std::string& class_id, const std::string&
     : Configurable(class_id, instance_id, compass, "db_object.json"), compass_(*compass)
 {
     logdbg << "DBObjectManager: constructor: creating subconfigurables";
-
-    registerParameter("use_filters", &use_filters_, false);
 
     registerParameter("use_order", &use_order_, false);
     registerParameter("use_order_ascending", &use_order_ascending_, false);
@@ -242,17 +241,6 @@ void DBObjectManager::limitMax(unsigned int limit_max)
     loginf << "DBObjectManager: limitMax: " << limit_max_;
 }
 
-bool DBObjectManager::useFilters() const { return use_filters_; }
-
-void DBObjectManager::useFilters(bool use_filters)
-{
-    use_filters_ = use_filters;
-    loginf << "DBObjectManager: useFilters: " << use_filters_;
-
-    if (load_widget_)
-        load_widget_->updateUseFilters();
-}
-
 bool DBObjectManager::useOrder() const { return use_order_; }
 
 void DBObjectManager::useOrder(bool use_order) { use_order_ = use_order; }
@@ -359,21 +347,35 @@ void DBObjectManager::loadSlot()
     QMessageBox* msg_box = new QMessageBox();
     msg_box->setWindowTitle("Loading Associations");
     msg_box->setStandardButtons(QMessageBox::NoButton);
-    msg_box->show();
+
+    bool shown = false;
 
     for (auto& object : objects_)
     {
         object.second->clearData();  // clear previous data
 
-        if (object.second->loadable())
+        msg_box->setText(("Processing DBObject "+object.first).c_str());
+
+        if (has_associations_ && object.second->loadable() && !object.second->associationsLoaded())
+        {
+            if (!shown)
+            {
+                msg_box->show();
+                shown = true;
+            }
+
             object.second->loadAssociationsIfRequired();
+
+            while (!object.second->associationsLoaded())
+            {
+                QCoreApplication::processEvents();
+                QThread::msleep(1);
+            }
+        }
     }
 
     msg_box->close();
     delete msg_box;
-
-    QApplication::restoreOverrideCursor();
-
 
     while (JobManager::instance().hasDBJobs())
     {
@@ -420,7 +422,8 @@ void DBObjectManager::loadSlot()
 
             // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable
             // *order_variable, bool use_order_ascending, const std::string &limit_str="")
-            object.second->load(read_set, use_filters_, use_order_, variable, use_order_ascending_,
+            object.second->load(read_set, COMPASS::instance().filterManager().useFilters(),
+                                use_order_, variable, use_order_ascending_,
                                 limit_str);
 
             load_job_created = true;
@@ -513,6 +516,8 @@ void DBObjectManager::finishLoading()
 
     if (load_widget_)
         load_widget_->loadingDone();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)

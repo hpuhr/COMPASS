@@ -29,6 +29,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QSurfaceFormat>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -55,6 +56,18 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     setlocale(LC_ALL, "C");
 
     tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
+
+//    QSurfaceFormat format;
+//    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
+//    format.setRedBufferSize(8);
+//    format.setGreenBufferSize(8);
+//    format.setBlueBufferSize(8);
+//    format.setAlphaBufferSize(8);
+//    format.setDepthBufferSize(32); //24
+//    format.setStencilBufferSize(8);
+//    format.setSwapInterval(0);
+//    format.setSamples(8);
+//    QSurfaceFormat::setDefaultFormat(format);
 
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;

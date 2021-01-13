@@ -147,15 +147,15 @@ public:
     typedef std::map<std::string,
       std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
 
-    ResultIterator begin() { return results_gen_.begin(); }
-    ResultIterator end() { return results_gen_.end(); }
+    ResultIterator begin();
+    ResultIterator end();
 
-    bool hasResults() { return results_gen_.results().size(); }
+    bool hasResults();
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results()
-    const { return results_gen_.results(); } ;
+    const;
 
-    void setUseTargetData (unsigned int utn, bool value);
-    void updateResultsToUseChangeOf (unsigned int utn);
+    //void setUseTargetData (unsigned int utn, bool value);
+    void updateResultsToChanges ();
     void showFullUTN (unsigned int utn);
     void showSurroundingData (unsigned int utn);
 
@@ -167,6 +167,151 @@ public:
                                               const std::string& req_name);
 
     EvaluationResultsReport::PDFGenerator& pdfGenerator() const;
+
+    bool useUTN (unsigned int utn);
+    void useUTN (unsigned int utn, bool value, bool update_td, bool update_res=true); // update target data
+    void useAllUTNs (bool value);
+    void clearUTNComments ();
+    void filterUTNs ();
+
+    std::string utnComment (unsigned int utn);
+    void utnComment (unsigned int utn, std::string value, bool update_td); // update target data
+
+    bool removeShortTargets() const;
+    void removeShortTargets(bool value);
+
+    unsigned int removeShortTargetsMinUpdates() const;
+    void removeShortTargetsMinUpdates(unsigned int value);
+
+    double removeShortTargetsMinDuration() const;
+    void removeShortTargetsMinDuration(double value);
+
+    bool removePsrOnlyTargets() const;
+    void removePsrOnlyTargets(bool value);
+
+    bool removeModeACodes() const;
+    void removeModeACodes(bool value);
+
+    std::string removeModeACodeValues() const;
+    std::set<std::pair<int,int>> removeModeACodeData() const; // single ma,-1 or range ma1,ma2
+    void removeModeACodeValues(const std::string& value);
+
+    bool removeTargetAddresses() const;
+    void removeTargetAddresses(bool value);
+
+    std::string removeTargetAddressValues() const;
+    std::set<unsigned int> removeTargetAddressData() const;
+    void removeTargetAddressValues(const std::string& value);
+
+    bool removeModeACOnlys() const;
+    void removeModeACOnlys(bool value);
+
+    bool removeNotDetectedDBOs() const;
+    void removeNotDetectedDBOs(bool value);
+
+    bool removeNotDetectedDBO(const std::string& dbo_name) const;
+    void removeNotDetectedDBOs(const std::string& dbo_name, bool value);
+
+    bool hasADSBInfo() const;
+    bool hasADSBInfo(unsigned int ta) const;
+    std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+            std::tuple<bool, unsigned int, unsigned int>> adsbInfo(unsigned int ta) const;
+
+    bool loadOnlySectorData() const;
+    void loadOnlySectorData(bool value);
+
+    bool useV0() const;
+    void useV0(bool value);
+
+    bool useV1() const;
+    void useV1(bool value);
+
+    bool useV2() const;
+    void useV2(bool value);
+
+    // nucp
+    bool useMinNUCP() const;
+    void useMinNUCP(bool value);
+
+    unsigned int minNUCP() const;
+    void minNUCP(unsigned int value);
+
+    bool useMaxNUCP() const;
+    void useMaxNUCP(bool value);
+
+    unsigned int maxNUCP() const;
+    void maxNUCP(unsigned int value);
+
+    // nic
+    bool useMinNIC() const;
+    void useMinNIC(bool value);
+
+    unsigned int minNIC() const;
+    void minNIC(unsigned int value);
+
+    bool useMaxNIC() const;
+    void useMaxNIC(bool value);
+
+    unsigned int maxNIC() const;
+    void maxNIC(unsigned int value);
+
+    // nacp
+    bool useMinNACp() const;
+    void useMinNACp(bool value);
+
+    unsigned int minNACp() const;
+    void minNACp(unsigned int value);
+
+    bool useMaxNACp() const;
+    void useMaxNACp(bool value);
+
+    unsigned int maxNACp() const;
+    void maxNACp(unsigned int value);
+
+    // sil v1
+    bool useMinSILv1() const;
+    void useMinSILv1(bool value);
+
+    unsigned int minSILv1() const;
+    void minSILv1(unsigned int value);
+
+    bool useMaxSILv1() const;
+    void useMaxSILv1(bool value);
+
+    unsigned int maxSILv1() const;
+    void maxSILv1(unsigned int value);
+
+    // sil v2
+    bool useMinSILv2() const;
+    void useMinSILv2(bool value);
+
+    unsigned int minSILv2() const;
+    void minSILv2(unsigned int value);
+
+    bool useMaxSILv2() const;
+    void useMaxSILv2(bool value);
+
+    unsigned int maxSILv2() const;
+    void maxSILv2(unsigned int value);
+
+    // other
+    bool useLoadFilter() const;
+    void useLoadFilter(bool value);
+
+    bool useTimeFilter() const;
+    void useTimeFilter(bool value);
+
+    float loadTimeBegin() const;
+    void loadTimeBegin(float value);
+
+    float loadTimeEnd() const;
+    void loadTimeEnd(float value);
+
+    bool useASDBFilter() const;
+    void useASDBFilter(bool value);
+
+    float maxRefTimeDiff() const;
+    void maxRefTimeDiff(float value);
 
 protected:
     COMPASS& compass_;
@@ -191,6 +336,84 @@ protected:
     nlohmann::json active_sources_tst_;
 
     std::string current_standard_;
+    nlohmann::json configs_;
+    std::string current_config_name_;
+
+    float max_ref_time_diff_ {0};
+
+    // utn filter stuff
+    bool update_results_ {true}; // to supress updating of results during bulk operations
+
+    bool remove_short_targets_ {true};
+    unsigned int remove_short_targets_min_updates_ {10};
+    double remove_short_targets_min_duration_ {60.0};
+
+    bool remove_psr_only_targets_ {true};
+    bool remove_modeac_onlys_ {false};
+
+    bool remove_mode_a_codes_{false};
+    std::string remove_mode_a_code_values_;
+
+    bool remove_target_addresses_{false};
+    std::string remove_target_address_values_;
+
+    bool remove_not_detected_dbos_{false};
+    nlohmann::json remove_not_detected_dbo_values_;
+
+    bool load_only_sector_data_ {true};
+
+    bool min_max_pos_set_ {false};
+    double latitude_min_ {0};
+    double latitude_max_ {0};
+    double longitude_min_ {0};
+    double longitude_max_ {0};
+
+    // load filter
+    bool use_load_filter_ {false};
+
+    bool use_time_filter_ {false};
+    float load_time_begin_ {0};
+    float load_time_end_ {0};
+
+    bool use_adsb_filter_ {false};
+    bool use_v0_ {false};
+    bool use_v1_ {false};
+    bool use_v2_ {false};
+
+    // nucp
+    bool use_min_nucp_ {false};
+    unsigned int min_nucp_ {0};
+
+    bool use_max_nucp_ {false};
+    unsigned int max_nucp_ {0};
+
+    // nic
+    bool use_min_nic_ {false};
+    unsigned int min_nic_ {0};
+
+    bool use_max_nic_ {false};
+    unsigned int max_nic_ {0};
+
+    // nacp
+    bool use_min_nacp_ {false};
+    unsigned int min_nacp_ {0};
+
+    bool use_max_nacp_ {false};
+    unsigned int max_nacp_ {0};
+
+    // sil v1
+    bool use_min_sil_v1_ {false};
+    unsigned int min_sil_v1_ {0};
+
+    bool use_max_sil_v1_ {false};
+    unsigned int max_sil_v1_ {0};
+
+    // sil v2
+    bool use_min_sil_v2_ {false};
+    unsigned int min_sil_v2_ {0};
+
+    bool use_max_sil_v2_ {false};
+    unsigned int max_sil_v2_ {0};
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
@@ -201,10 +424,14 @@ protected:
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use
 
     EvaluationData data_;
-    EvaluationResultsGenerator results_gen_;
+    std::unique_ptr<EvaluationResultsGenerator> results_gen_;
     std::unique_ptr<EvaluationResultsReport::PDFGenerator> pdf_gen_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
+    bool has_adsb_info_ {false};
+    std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+        std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
     virtual void checkSubConfigurables() override;
 

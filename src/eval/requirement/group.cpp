@@ -18,8 +18,19 @@
 #include "eval/requirement/group.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/detection/detectionconfig.h"
-#include "eval/requirement/position/positionmaxdistanceconfig.h"
-#include "eval/requirement/identification/identificationconfig.h"
+#include "eval/requirement/position/distanceconfig.h"
+#include "eval/requirement/position/alongconfig.h"
+#include "eval/requirement/position/acrossconfig.h"
+#include "eval/requirement/position/latencyconfig.h"
+#include "eval/requirement/speed/speedconfig.h"
+#include "eval/requirement/identification/correctconfig.h"
+#include "eval/requirement/identification/falseconfig.h"
+#include "eval/requirement/mode_a/presentconfig.h"
+#include "eval/requirement/mode_a/falseconfig.h"
+#include "eval/requirement/mode_c/falseconfig.h"
+#include "eval/requirement/mode_c/presentconfig.h"
+#include "eval/requirement/extra/dataconfig.h"
+#include "eval/requirement/extra/trackconfig.h"
 #include "logger.h"
 
 #include <QInputDialog>
@@ -50,7 +61,27 @@ Group::~Group()
 void Group::generateSubConfigurable(const std::string& class_id,
                                                          const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
+    if (class_id.compare("EvaluationRequirementExtraDataConfig") == 0)
+    {
+        EvaluationRequirement::ExtraDataConfig* config =
+                new EvaluationRequirement::ExtraDataConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementExtraTrackConfig") == 0)
+    {
+        EvaluationRequirement::ExtraTrackConfig* config =
+                new EvaluationRequirement::ExtraTrackConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementDetectionConfig") == 0)
     {
         EvaluationRequirement::DetectionConfig* config =
                 new EvaluationRequirement::DetectionConfig(
@@ -58,30 +89,120 @@ void Group::generateSubConfigurable(const std::string& class_id,
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
-    else if (class_id.compare("EvaluationRequirementPositionMaxDistanceConfig") == 0)
+    else if (class_id.compare("EvaluationRequirementPositionDistanceConfig") == 0)
     {
-        EvaluationRequirement::PositionMaxDistanceConfig* config =
-                new EvaluationRequirement::PositionMaxDistanceConfig(
+        EvaluationRequirement::PositionDistanceConfig* config =
+                new EvaluationRequirement::PositionDistanceConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
-    else if (class_id.compare("EvaluationRequirementIdentificationConfig") == 0)
+    else if (class_id.compare("EvaluationRequirementPositionAlongConfig") == 0)
     {
-        EvaluationRequirement::IdentificationConfig* config =
-                new EvaluationRequirement::IdentificationConfig(
+        EvaluationRequirement::PositionAlongConfig* config =
+                new EvaluationRequirement::PositionAlongConfig(
                     class_id, instance_id, *this, standard_, eval_man_);
         logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
 
         assert(!hasRequirementConfig(config->name()));
-        configs_.push_back(std::unique_ptr<EvaluationRequirement::Config>(config));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementPositionAcrossConfig") == 0)
+    {
+        EvaluationRequirement::PositionAcrossConfig* config =
+                new EvaluationRequirement::PositionAcrossConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementPositionLatencyConfig") == 0)
+    {
+        EvaluationRequirement::PositionLatencyConfig* config =
+                new EvaluationRequirement::PositionLatencyConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementSpeedConfig") == 0)
+    {
+        EvaluationRequirement::SpeedConfig* config =
+                new EvaluationRequirement::SpeedConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementIdentificationCorrectConfig") == 0)
+    {
+        EvaluationRequirement::IdentificationCorrectConfig* config =
+                new EvaluationRequirement::IdentificationCorrectConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementIdentificationFalseConfig") == 0)
+    {
+        EvaluationRequirement::IdentificationFalseConfig* config =
+                new EvaluationRequirement::IdentificationFalseConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeAPresentConfig") == 0)
+    {
+        EvaluationRequirement::ModeAPresentConfig* config =
+                new EvaluationRequirement::ModeAPresentConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeAFalseConfig") == 0)
+    {
+        EvaluationRequirement::ModeAFalseConfig* config =
+                new EvaluationRequirement::ModeAFalseConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeCPresentConfig") == 0)
+    {
+        EvaluationRequirement::ModeCPresentConfig* config =
+                new EvaluationRequirement::ModeCPresentConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
+    }
+    else if (class_id.compare("EvaluationRequirementModeCFalseConfig") == 0)
+    {
+        EvaluationRequirement::ModeCFalseConfig* config =
+                new EvaluationRequirement::ModeCFalseConfig(
+                    class_id, instance_id, *this, standard_, eval_man_);
+        logdbg << "EvaluationRequirementGroup: generateSubConfigurable: adding config " << config->name();
+
+        assert(!hasRequirementConfig(config->name()));
+        configs_.push_back(std::unique_ptr<EvaluationRequirement::BaseConfig>(config));
     }
     else
-        throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
+        throw std::runtime_error("EvaluationRequirementGroup: generateSubConfigurable: unknown class_id " +
                                  class_id);
 }
 
@@ -94,7 +215,7 @@ std::string Group::name() const
 bool Group::hasRequirementConfig (const std::string& name)
 {
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-       [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+       [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
 
     return iter != configs_.end();
 }
@@ -126,12 +247,12 @@ void Group::addRequirementConfig (const std::string& class_id, const std::string
     emit configsChangedSignal();
 }
 
-EvaluationRequirement::Config& Group::requirementConfig (const std::string& name)
+EvaluationRequirement::BaseConfig& Group::requirementConfig (const std::string& name)
 {
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
 
     return **iter;
 }
@@ -141,9 +262,15 @@ void Group::removeRequirementConfig (const std::string& name)
     assert (hasRequirementConfig(name));
 
     auto iter = std::find_if(configs_.begin(), configs_.end(),
-                             [&name](const unique_ptr<EvaluationRequirement::Config>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<EvaluationRequirement::BaseConfig>& x) { return x->name() == name;});
+
+    assert (iter != configs_.end());
+
+    standard_.beginModelReset();
 
     configs_.erase(iter);
+
+    standard_.endModelReset();
 
     emit configsChangedSignal();
 }
@@ -193,7 +320,19 @@ void Group::showMenu ()
         connect(del_action, &QAction::triggered, this, &Group::deleteGroupSlot);
 
         // requirements
-        QMenu* req_menu = menu.addMenu("Add Requirement");;
+        QMenu* req_menu = menu.addMenu("Add Requirement");
+
+        { // extra data
+            QAction* add_det_action = req_menu->addAction("Extra Data");
+            add_det_action->setData("EvaluationRequirementExtraDataConfig");
+            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // extra track
+            QAction* add_det_action = req_menu->addAction("Extra Track");
+            add_det_action->setData("EvaluationRequirementExtraTrackConfig");
+            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
 
         { // detection
             QAction* add_det_action = req_menu->addAction("Detection");
@@ -202,15 +341,69 @@ void Group::showMenu ()
         }
 
         { // identification
-            QAction* add_pos_action = req_menu->addAction("Identification");
-            add_pos_action->setData("EvaluationRequirementIdentificationConfig");
-            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+            QAction* correct_action = req_menu->addAction("Identification Correct");
+            correct_action->setData("EvaluationRequirementIdentificationCorrectConfig");
+            connect(correct_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Identification False");
+            false_action->setData("EvaluationRequirementIdentificationFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // mode 3/a
+            QAction* present_action = req_menu->addAction("Mode 3/A Present");
+            present_action->setData("EvaluationRequirementModeAPresentConfig");
+            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Mode 3/A False");
+            false_action->setData("EvaluationRequirementModeAFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        { // mode c
+            QAction* present_action = req_menu->addAction("Mode C Present");
+            present_action->setData("EvaluationRequirementModeCPresentConfig");
+            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* false_action = req_menu->addAction("Mode C False");
+            false_action->setData("EvaluationRequirementModeCFalseConfig");
+            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
         { // position
-            QAction* add_pos_action = req_menu->addAction("Position");
-            add_pos_action->setData("EvaluationRequirementPositionMaxDistanceConfig");
-            connect(add_pos_action, &QAction::triggered, this, &Group::addRequirementSlot);
+            QAction* md_action = req_menu->addAction("Position Distance");
+            md_action->setData("EvaluationRequirementPositionDistanceConfig");
+            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* along_action = req_menu->addAction("Position Along");
+            along_action->setData("EvaluationRequirementPositionAlongConfig");
+            connect(along_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* across_action = req_menu->addAction("Position Across");
+            across_action->setData("EvaluationRequirementPositionAcrossConfig");
+            connect(across_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+            QAction* latency_action = req_menu->addAction("Position Latency");
+            latency_action->setData("EvaluationRequirementPositionLatencyConfig");
+            connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
+
+        }
+
+        { // spd
+            QAction* md_action = req_menu->addAction("Speed");
+            md_action->setData("EvaluationRequirementSpeedConfig");
+            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        }
+
+        {
+            QMenu* del_menu = menu.addMenu("Delete Requirement");
+
+            for (auto& cfg_it : configs_)
+            {
+                QAction* action = del_menu->addAction(cfg_it->name().c_str());
+                action->setData(cfg_it->name().c_str());
+                connect(action, &QAction::triggered, this, &Group::deleteRequirementSlot);
+            }
         }
 
     }
@@ -284,10 +477,32 @@ void Group::addRequirementSlot()
     addRequirementConfig(class_id, req_name, req_short_name);
 }
 
+void Group::deleteRequirementSlot()
+{
+    loginf << "EvaluationRequirementGroup " << name_ << ": deleteRequirementSlot";
+
+    QAction* action = dynamic_cast<QAction*>(QObject::sender());
+    assert (action);
+
+    QVariant data = action->data();
+    assert (data.isValid());
+
+    string name = data.toString().toStdString();
+
+    QMessageBox::StandardButton reply;
+      reply = QMessageBox::question(nullptr, "Delete Requirement", ("Confirm to delete requirement '"+name+"'").c_str(),
+                                    QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::Yes)
+      {
+        removeRequirementConfig(name);
+      }
+}
+
+
 void Group::sortConfigs()
 {
     sort(configs_.begin(), configs_.end(),
-         [](const unique_ptr<EvaluationRequirement::Config>&a, const unique_ptr<EvaluationRequirement::Config>& b) -> bool
+         [](const unique_ptr<EvaluationRequirement::BaseConfig>&a, const unique_ptr<EvaluationRequirement::BaseConfig>& b) -> bool
     {
         return a->name() > b->name();
     });

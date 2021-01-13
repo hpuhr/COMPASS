@@ -8114,6 +8114,84 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_ES_AGE": {
+                            "parameters": {
+                                "comment": "Age of the last 1090 Extended Squitter ADS-B report used to update the track [I062/340]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_ES_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_LU_DS_ID": {
+                            "parameters": {
+                                "comment": "Last updating DATA SOURCE ID",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "TRACK_LU_DS_ID",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "smallint",
+                                "unit": ""
+                            }
+                        },
+                        "TRACK_LU_SAC": {
+                            "parameters": {
+                                "comment": "Last updating ASTERIX System Area Code [I062/340]",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "TRACK_LU_SAC",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "tinyint",
+                                "unit": ""
+                            }
+                        },
+                        "TRACK_LU_SIC": {
+                            "parameters": {
+                                "comment": "Last updating System Identification Code [I062/340]",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "TRACK_LU_SIC",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "tinyint",
+                                "unit": ""
+                            }
+                        },
+                        "TRACK_MDS_AGE": {
+                            "parameters": {
+                                "comment": "Age of the last Mode S detection used to update the track [I062/290]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MDS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_MLT_AGE": {
+                            "parameters": {
+                                "comment": "Age of the last MLT detection [I062/290]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MLT_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_NUM": {
                             "parameters": {
                                 "comment": "Track number [I030/050 SYSTEM TRACK NUMBER, I062/040]",
@@ -8129,15 +8207,15 @@
                         },
                         "TRACK_PSR_AGE": {
                             "parameters": {
-                                "comment": " ",
+                                "comment": "Age of the last primary detection used to update the track [I062/290]",
                                 "data_format": "",
-                                "dimension": "",
+                                "dimension": "Time",
                                 "is_key": false,
                                 "name": "TRACK_PSR_AGE",
                                 "number_conversion_type": "",
                                 "special_null": "",
-                                "type": "enum",
-                                "unit": ""
+                                "type": "double",
+                                "unit": "Second"
                             }
                         },
                         "TRACK_SLANT_CORR_TYPE": {
@@ -8151,6 +8229,19 @@
                                 "special_null": "",
                                 "type": "tinyint",
                                 "unit": ""
+                            }
+                        },
+                        "TRACK_SSR_AGE": {
+                            "parameters": {
+                                "comment": "Age of the last secondary detection used to update the track [I062/290]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_SSR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
                             }
                         },
                         "TRANSPONDER_DELAY_CORR": {

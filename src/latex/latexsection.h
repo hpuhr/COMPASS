@@ -22,7 +22,8 @@
 
 enum class LatexSectionLevel
 {
-    SECTION=0,
+    CHAPTER=0,
+    SECTION,
     SUBSECTION,
     SUBSUBSECTION,
     PARAGRAPH,

@@ -19,7 +19,7 @@
 #define EVALUATIONREQUIREMENTDETECTIONCONFIG_H
 
 #include "configurable.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/detection/detection.h"
 
@@ -32,54 +32,50 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class DetectionConfig : public Config
-    {
-    public:
-        DetectionConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_man);
-        virtual ~DetectionConfig();
+class DetectionConfig : public BaseConfig
+{
+public:
+    DetectionConfig(const std::string& class_id, const std::string& instance_id,
+                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+    virtual ~DetectionConfig();
 
-        virtual void addGUIElements(QFormLayout* layout) override;
-        DetectionConfigWidget* widget() override;
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        float updateInterval() const;
-        void updateInterval(float value);
+    bool useMinGapLength() const;
+    void useMinGapLength(bool value);
 
-        float maxRefTimeDiff() const;
-        void maxRefTimeDiff(float value);
+    float minGapLength() const;
+    void minGapLength(float value);
 
-        float minimumProbability() const;
-        void minimumProbability(float value);
+    bool useMaxGapLength() const;
+    void useMaxGapLength(bool value);
 
-//        bool useMaxGapInterval() const;
-//        void useMaxGapInterval(bool value);
+    float maxGapLength() const;
+    void maxGapLength(float value);
 
-//        float maxGapInterval() const;
-//        void maxGapInterval(float value);
+    float updateInterval() const;
+    void updateInterval(float value);
 
-        bool useMissTolerance() const;
-        void useMissTolerance(bool value);
+    bool useMissTolerance() const;
+    void useMissTolerance(bool value);
 
-        float missTolerance() const;
-        void missTolerance(float value);
+    float missTolerance() const;
+    void missTolerance(float value);
 
-    protected:
-        float update_interval_s_{0};
+protected:
+    float update_interval_s_{0};
 
-        float max_ref_time_diff_ {0};
+    bool use_min_gap_length_ {false};
+    float min_gap_length_s_{0};
 
-        float minimum_probability_{0};
+    bool use_max_gap_length_ {false};
+    float max_gap_length_s_{0};
 
-//        bool use_max_gap_interval_{true};
-//        float max_gap_interval_s_{0};
+    bool use_miss_tolerance_{false};
+    float miss_tolerance_s_{0};
 
-        bool use_miss_tolerance_{false};
-        float miss_tolerance_s_{0};
-
-        std::unique_ptr<DetectionConfigWidget> widget_;
-    };
+    virtual void createWidget() override;
+};
 
 }
 

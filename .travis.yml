@@ -33,7 +33,7 @@ compiler:
 # - clang
 
 before_install:
-  - sudo add-apt-repository -y ppa:beineri/opt-qt58-trusty
+  - sudo add-apt-repository -y ppa:beineri/opt-qt592-trusty
   - sudo add-apt-repository -y ppa:ubuntugis/ppa
   - sudo apt-get -q update
 
@@ -41,8 +41,8 @@ before_install:
 install:
  - sudo apt-get --only-upgrade install libgdal-dev
 #qt
- - sudo apt-get install qt58base # qt58svg qt58charts-no-lgpl qt58xmlpatterns
- - source /opt/qt58/bin/qt58-env.sh
+ - sudo apt-get install qt59base qt59charts-no-lgpl # see https://launchpad.net/~beineri/+archive/ubuntu/opt-qt592-trusty
+ - source /opt/qt59/bin/qt59-env.sh
 # NemaTode install
  - wget https://github.com/ckgt/NemaTode/archive/master.zip
  - unzip master.zip

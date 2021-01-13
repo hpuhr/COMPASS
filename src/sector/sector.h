@@ -67,7 +67,7 @@ public:
 
     void save();
 
-    bool isInside(const EvaluationTargetPosition& pos) const;
+    bool isInside(const EvaluationTargetPosition& pos, bool has_ground_bit, bool ground_bit_set) const;
 
     std::pair<double, double> getMinMaxLatitude() const;
     std::pair<double, double> getMinMaxLongitude() const;

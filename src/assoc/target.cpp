@@ -6,16 +6,16 @@
 #include <cassert>
 #include <sstream>
 
-#include <ogr_spatialref.h>
+//#include <ogr_spatialref.h>
 
 using namespace std;
 using namespace Utils;
 
 namespace Association
 {
-    bool Target::in_appimage_ {getenv("APPDIR")};
-    double Target::max_time_diff_ {15.0};
-    double Target::max_altitude_diff_ {300.0};
+    bool Target::in_appimage_ {getenv("APPDIR") != nullptr};
+//    double Target::max_time_diff_ {15.0};
+//    double Target::max_altitude_diff_ {300.0};
 
     Target::Target(unsigned int utn, bool tmp)
         : utn_(utn), tmp_(tmp)
@@ -172,7 +172,9 @@ namespace Association
 
     bool Target::isTimeInside (float tod) const
     {
-        assert (has_tod_);
+        if (!has_tod_)
+            return false;
+
         return tod >= tod_min_ && tod <= tod_max_;
     }
 
@@ -308,35 +310,40 @@ namespace Association
             return {{}, false};
         }
 
-        OGRSpatialReference wgs84;
-        wgs84.SetWellKnownGeogCS("WGS84");
-        OGRSpatialReference local;
-        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
+//        OGRSpatialReference wgs84;
+//        wgs84.SetWellKnownGeogCS("WGS84");
+//        OGRSpatialReference local;
+//        local.SetStereographic(pos1.latitude_, pos1.longitude_, 1.0, 0.0, 0.0);
 
         logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
         logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
-        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-        assert (ogr_geo2cart);
-        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
-        assert (ogr_cart2geo);
+//        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+//        assert (ogr_geo2cart);
+//        std::unique_ptr<OGRCoordinateTransformation> ogr_cart2geo {OGRCreateCoordinateTransformation(&local, &wgs84)};
+//        assert (ogr_cart2geo);
 
+        bool ok;
         double x_pos, y_pos;
 
-        if (in_appimage_) // inside appimage
-        {
-            x_pos = pos2.longitude_;
-            y_pos = pos2.latitude_;
-        }
-        else
-        {
-            x_pos = pos2.latitude_;
-            y_pos = pos2.longitude_;
-        }
+//        if (in_appimage_) // inside appimage
+//        {
+//            x_pos = pos2.longitude_;
+//            y_pos = pos2.latitude_;
+//        }
+//        else
+//        {
+//            x_pos = pos2.latitude_;
+//            y_pos = pos2.longitude_;
+//        }
 
         logdbg << "Target: interpolatedPosForTime: geo2cart";
-        bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-        if (!ret)
+        //bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+        tie(ok, x_pos, y_pos) = trafo_.distanceCart(
+                    pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
+
+        if (!ok)
         {
             logerr << "Target: interpolatedPosForTime: error with latitude " << pos2.latitude_
                    << " longitude " << pos2.longitude_;
@@ -360,11 +367,13 @@ namespace Association
 
         logdbg << "Target: interpolatedPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
 
-        ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
+        tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
+
+        //ret = ogr_cart2geo->Transform(1, &x_pos, &y_pos);
 
         // x_pos long, y_pos lat
 
-        logdbg << "Target: interpolatedPosForTime: interpolated lat " << y_pos << " long " << x_pos;
+        logdbg << "Target: interpolatedPosForTime: interpolated lat " << x_pos << " long " << y_pos;
 
         // calculate altitude
         bool has_altitude = false;
@@ -392,10 +401,10 @@ namespace Association
                << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
                << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-        if (in_appimage_) // inside appimage
-            return {{y_pos, x_pos, has_altitude, altitude}, true};
-        else
-            return {{x_pos, y_pos, has_altitude, altitude}, true};
+//        if (in_appimage_) // inside appimage
+//            return {{y_pos, x_pos, has_altitude, true, altitude}, true};
+//        else
+            return {{x_pos, y_pos, has_altitude, true, altitude}, true};
     }
 
     std::pair<EvaluationTargetPosition, bool> Target::interpolatedPosForTimeFast (float tod, float d_max) const
@@ -424,7 +433,6 @@ namespace Association
             logwrn << "Target: interpolatedPosForTimeFast: ref has same time twice";
             return {{}, false};
         }
-
 
         double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
         double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
@@ -466,7 +474,7 @@ namespace Association
                << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
                << " interpolated has alt " << has_altitude << " alt " << altitude;
 
-        return {{int_lat, int_long, has_altitude, altitude}, true};
+        return {{int_lat, int_long, has_altitude, true, altitude}, true};
     }
 
     bool Target::hasDataForExactTime (float tod) const
@@ -539,7 +547,8 @@ namespace Association
         return overlap_duration / targets_min_duration;
     }
 
-    std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (Target& other) const
+    std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (
+            Target& other, float max_time_diff) const
     {
         vector<float> unknown;
         vector<float> same;
@@ -552,7 +561,7 @@ namespace Association
         {
             tod = tr_it->tod_;
 
-            cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod);
+            cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod, max_time_diff);
 
             if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
@@ -564,17 +573,17 @@ namespace Association
 
         assert (assoc_trs_.size() == unknown.size()+same.size()+different.size());
 
-        return {unknown, same, different};
+        return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod)
+    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff)
     {
-        if (!hasDataForTime(tod, max_time_diff_))
+        if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
 
         float lower, upper;
 
-        tie(lower, upper) = timesFor(tod, max_time_diff_);
+        tie(lower, upper) = timesFor(tod, max_time_diff);
 
         if (lower == -1 && upper == -1)
             return CompareResult::UNKNOWN;
@@ -634,7 +643,7 @@ namespace Association
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
-            Target& other, const std::vector<float>& timestamps) const
+            Target& other, const std::vector<float>& timestamps, float max_time_diff, float max_alt_diff) const
     {
         vector<float> unknown;
         vector<float> same;
@@ -651,7 +660,7 @@ namespace Association
             tr = &dataForExactTime (tod);
             tod = ts_it;
 
-            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod);
+            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod, max_time_diff, max_alt_diff);
 
             if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
@@ -663,17 +672,18 @@ namespace Association
 
         assert (timestamps.size() == unknown.size()+same.size()+different.size());
 
-        return {unknown, same, different};
+        return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod)
+    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod,
+                                            float max_time_diff, float max_alt_diff)
     {
-        if (!hasDataForTime(tod, max_time_diff_))
+        if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
 
         float lower, upper;
 
-        tie(lower, upper) = timesFor(tod, max_time_diff_);
+        tie(lower, upper) = timesFor(tod, max_time_diff);
 
         if (lower == -1 && upper == -1)
             return CompareResult::UNKNOWN;
@@ -696,7 +706,7 @@ namespace Association
             if (!ref1.has_mc_)
                 return CompareResult::DIFFERENT;  // mode c here, but none in other
 
-            if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)) // is same
+            if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)) // is same
                 return CompareResult::SAME;
             else
                 return CompareResult::DIFFERENT;
@@ -723,8 +733,8 @@ namespace Association
         if (!ref1.has_mc_ && !ref2.has_mc_)
             return CompareResult::DIFFERENT; // mode c here, but none in other
 
-        if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_altitude_diff_)
-                || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_altitude_diff_)) // one of them is same
+        if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)
+                || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_alt_diff)) // one of them is same
         {
             return CompareResult::SAME;
         }
@@ -745,9 +755,11 @@ namespace Association
         double latitude_prev {0};
         double longitude_prev {0};
 
-        OGRSpatialReference wgs84;
-        wgs84.SetWellKnownGeogCS("WGS84");
-        OGRSpatialReference local;
+//        OGRSpatialReference wgs84;
+//        wgs84.SetWellKnownGeogCS("WGS84");
+//        OGRSpatialReference local;
+
+        Transformation trafo;
 
         double x_pos, y_pos;
         bool ok;
@@ -782,23 +794,26 @@ namespace Association
             d_t = tod - tod_prev;
             assert (d_t >= 0);
 
-            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
+//            local.SetStereographic(latitude, longitude, 1.0, 0.0, 0.0);
 
-            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
-            assert (ogr_geo2cart);
+//            std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart {OGRCreateCoordinateTransformation(&wgs84, &local)};
+//            assert (ogr_geo2cart);
 
-            if (in_appimage_) // inside appimage
-            {
-                x_pos = longitude_prev;
-                y_pos = latitude_prev;
-            }
-            else
-            {
-                x_pos = latitude_prev;
-                y_pos = longitude_prev;
-            }
+//            if (in_appimage_) // inside appimage
+//            {
+//                x_pos = longitude_prev;
+//                y_pos = latitude_prev;
+//            }
+//            else
+//            {
+//                x_pos = latitude_prev;
+//                y_pos = longitude_prev;
+//            }
 
-            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+//            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+            tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                        latitude, longitude, latitude_prev, longitude_prev);
 
             if (!ok)
                 continue;

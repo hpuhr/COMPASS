@@ -19,18 +19,18 @@
 #define EVALUATIONRESULTSGENERATOR_H
 
 #include "eval/results/report/treemodel.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
+#include "eval/results/base.h"
 #include "evaluationdata.h"
+#include "evaluationresultsgeneratorwidget.h"
 #include "sectorlayer.h"
+#include "logger.h"
+#include "configurable.h"
 
 #include <tbb/tbb.h>
 
 class EvaluationManager;
 class EvaluationStandard;
-
-//namespace EvaluationRequirement {
-//    class Base;
-//}
 
 namespace EvaluationRequirementResult
 {
@@ -46,8 +46,9 @@ public:
                  EvaluationData& data,
                  std::shared_ptr<EvaluationRequirement::Base> req,
                  const SectorLayer& sector_layer,
-                 std::vector<bool>& done_flags, bool single_thread)
-        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer), done_flags_(done_flags),
+                 std::vector<bool>& done_flags, bool& task_done, bool single_thread)
+        : results_(results), utns_(utns), data_(data), req_(req), sector_layer_(sector_layer),
+          done_flags_(done_flags), task_done_(task_done),
           single_thread_(single_thread)
     {
     }
@@ -55,7 +56,10 @@ public:
     /*override*/ tbb::task* execute() {
         // Do the job
 
+        loginf << "EvaluateTask: execute: starting";
+
         unsigned int num_utns = utns_.size();
+        assert (done_flags_.size() == num_utns);
 
         if (single_thread_)
         {
@@ -74,6 +78,12 @@ public:
             });
         }
 
+        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+            assert (results_[utn_cnt]);
+
+        loginf << "EvaluateTask: execute: done";
+        task_done_ = true;
+
         return NULL; // or a pointer to a new task to be executed immediately
     }
 
@@ -84,13 +94,19 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> req_;
     const SectorLayer& sector_layer_;
     std::vector<bool>& done_flags_;
+    bool& task_done_;
     bool single_thread_;
 };
 
-class EvaluationResultsGenerator
+class EvaluationResultsGenerator : public Configurable
 {
 public:
-    EvaluationResultsGenerator(EvaluationManager& eval_man);
+    EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
+                               EvaluationManager& eval_man);
+    virtual ~EvaluationResultsGenerator();
+
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 
     void evaluate (EvaluationData& data, EvaluationStandard& standard);
 
@@ -105,19 +121,39 @@ public:
     const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results ()
     const { return results_; } ;
 
-    void updateToUseChangeOf (unsigned int utn);
+    void updateToChanges();
 
     void generateResultsReportGUI();
-    void generateResultsReportPDF();
+
+    void clear();
+
+    bool splitResultsByMOPS() const;
+    void splitResultsByMOPS(bool value);
+
+    bool showAdsbInfo() const;
+    void showAdsbInfo(bool value);
+
+    bool skipNoDataDetails() const;
+    void skipNoDataDetails(bool value);
+
+    EvaluationResultsGeneratorWidget& widget();
 
 protected:
     EvaluationManager& eval_man_;
+
+    std::unique_ptr<EvaluationResultsGeneratorWidget> widget_;
+
+    bool skip_no_data_details_ {true};
+    bool split_results_by_mops_ {false};
+    bool show_adsb_info_ {false};
 
     EvaluationResultsReport::TreeModel results_model_;
 
     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
     std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
+
+    virtual void checkSubConfigurables() override;
 };
 
 #endif // EVALUATIONRESULTSGENERATOR_H

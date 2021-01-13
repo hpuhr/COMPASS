@@ -30,7 +30,7 @@ class EvaluationStandard;
 class EvaluationManager;
 
 namespace EvaluationRequirement {
-class Config;
+class BaseConfig;
 }
 
 class Group : public QObject, public Configurable, public EvaluationStandardTreeItem
@@ -43,7 +43,7 @@ signals:
 public slots:
     void deleteGroupSlot();
     void addRequirementSlot();
-
+    void deleteRequirementSlot();
 
 public:
     Group(const std::string& class_id, const std::string& instance_id,
@@ -57,11 +57,11 @@ public:
 
     bool hasRequirementConfig (const std::string& name);
     void addRequirementConfig (const std::string& class_id, const std::string& name, const std::string& short_name);
-    EvaluationRequirement::Config& requirementConfig (const std::string& name);
+    EvaluationRequirement::BaseConfig& requirementConfig (const std::string& name);
     void removeRequirementConfig (const std::string& name);
 
     using EvaluationRequirementConfigIterator =
-    typename std::vector<std::unique_ptr<EvaluationRequirement::Config>>::iterator;
+    typename std::vector<std::unique_ptr<EvaluationRequirement::BaseConfig>>::iterator;
 
     EvaluationRequirementConfigIterator begin() { return configs_.begin(); }
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
@@ -80,7 +80,7 @@ protected:
     EvaluationManager& eval_man_;
     std::string name_;
 
-    std::vector<std::unique_ptr<EvaluationRequirement::Config>> configs_;
+    std::vector<std::unique_ptr<EvaluationRequirement::BaseConfig>> configs_;
 
     virtual void checkSubConfigurables() override;
 

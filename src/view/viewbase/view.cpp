@@ -74,7 +74,7 @@ View::~View()
         view_manager_.unregisterView(this);
 
     // remove view from container widget first, then delete it
-    container_->removeView(this);
+    //container_->removeView(this);
     delete central_widget_;
 }
 
@@ -92,7 +92,7 @@ bool View::init()
     view_manager_.registerView(this);
 
     // add view to container widget
-    container_->addView(this);
+    //container_->addView(this);
 
     return true;
 }

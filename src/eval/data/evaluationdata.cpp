@@ -19,8 +19,12 @@
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
 #include "dbobject.h"
+#include "dbovariable.h"
+#include "metadbovariable.h"
 #include "buffer.h"
 #include "stringconv.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
 
 #include <QApplication>
 #include <QThread>
@@ -50,6 +54,66 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         unassociated_ref_cnt_ = buffer->size();
 
         return;
+    }
+
+    assert (!ref_buffer_);
+    ref_buffer_ = buffer;
+
+    // preset variable names
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+
+    string dbo_name = ref_buffer_->dboName();
+
+    ref_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    ref_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    ref_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
+    ref_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    // mc
+    ref_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
+        ref_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
+        ref_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
+
+
+    if (dbo_name == "Tracker")
+    {
+        has_ref_altitude_secondary_ = true;
+        ref_altitude_secondary_name_ = "tracked_alt_baro_ft";
+    }
+
+    // m3a
+    ref_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        ref_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
+
+    // speed & track_angle
+    if (dbo_name == "ADSB")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        ref_spd_x_ms_name_ = "velocity_vx_ms";
+        ref_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        ref_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        ref_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        ref_spd_track_angle_deg_name_ = "heading_deg";
     }
 
     set<int> active_srcs = eval_man_.activeDataSourcesRef();
@@ -95,15 +159,16 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it});
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
 
-            if (!targetData(utn_it).hasRefBuffer())
-                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
+            //            if (!targetData(utn_it).hasRefBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setRefBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addRefIndex(tod, cnt); });
 
@@ -113,7 +178,7 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
 
     loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
            << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
-              << " num_skipped " << num_skipped;
+           << " num_skipped " << num_skipped;
 }
 
 void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buffer)
@@ -126,6 +191,67 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         unassociated_tst_cnt_ = buffer->size();
 
         return;
+    }
+
+    assert (!tst_buffer_);
+    tst_buffer_ = buffer;
+
+    DBObjectManager& object_manager = COMPASS::instance().objectManager();
+
+    string dbo_name = tst_buffer_->dboName();
+
+    tst_latitude_name_ = object_manager.metaVariable("pos_lat_deg").getFor(dbo_name).name();
+    tst_longitude_name_ = object_manager.metaVariable("pos_long_deg").getFor(dbo_name).name();
+    tst_target_address_name_ = object_manager.metaVariable("target_addr").getFor(dbo_name).name();
+    tst_callsign_name_ = object_manager.metaVariable("callsign").getFor(dbo_name).name();
+
+    // m3a
+    tst_modea_name_ = object_manager.metaVariable("mode3a_code").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_g").existsIn(dbo_name))
+        tst_modea_g_name_ = object_manager.metaVariable("mode3a_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
+        tst_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
+
+    // mc
+    tst_modec_name_ = object_manager.metaVariable("modec_code_ft").getFor(dbo_name).name();
+    if (object_manager.metaVariable("modec_g").existsIn(dbo_name))
+        tst_modec_g_name_ = object_manager.metaVariable("modec_g").getFor(dbo_name).name();
+
+    if (object_manager.metaVariable("modec_v").existsIn(dbo_name))
+        tst_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
+
+    // ground bit
+    if (object.name() == "ADSB")
+    {
+        tst_ground_bit_name_ = "ground_bit";
+    }
+
+    // track num
+    if (object_manager.metaVariable("track_num").existsIn(dbo_name))
+        tst_track_num_name_ = object_manager.metaVariable("track_num").getFor(dbo_name).name();
+
+    // speed & track_angle
+    if (dbo_name == "ADSB")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_angle_deg";
+    }
+    else if (dbo_name == "MLAT")
+    {
+        tst_spd_x_ms_name_ = "velocity_vx_ms";
+        tst_spd_y_ms_name_ = "velocity_vy_ms";
+    }
+    else if (dbo_name == "Radar")
+    {
+        tst_spd_ground_speed_kts_name_ = "track_groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "track_heading_deg";
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
+        tst_spd_track_angle_deg_name_ = "heading_deg";
     }
 
     set<int> active_srcs = eval_man_.activeDataSourcesTst();
@@ -171,15 +297,17 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         for (auto utn_it : utn_vec)
         {
             if (!hasTargetData(utn_it))
-                target_data_.push_back({utn_it});
+                //target_data_.emplace(target_data_.end(), utn_it, *this, eval_man_);
+                target_data_.push_back({utn_it, *this, eval_man_});
+                //target_data_.emplace_back(utn_it, *this, eval_man_);
 
             assert (hasTargetData(utn_it));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn_it);
             auto index_it = target_data_.project<0>(tr_tag_it);  // get iterator for random access
 
-            if (!targetData(utn_it).hasTstBuffer())
-                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
+            //            if (!targetData(utn_it).hasTstBuffer())
+            //                target_data_.modify(index_it, [buffer](EvaluationTargetData& t) { t.setTstBuffer(buffer); });
 
             target_data_.modify(index_it, [tod, cnt](EvaluationTargetData& t) { t.addTstIndex(tod, cnt); });
 
@@ -233,58 +361,74 @@ void EvaluationData::finalize ()
     string remaining_time_str;
 
     EvaluateTargetsFinalizeTask* t = new (tbb::task::allocate_root()) EvaluateTargetsFinalizeTask(
-                target_data_, done_flags);
+                target_data_, done_flags, done);
     tbb::task::enqueue(*t);
+
+    postprocess_dialog_.setValue(0);
+
+    boost::posix_time::ptime last_elapsed_time = boost::posix_time::microsec_clock::local_time();
+    elapsed_time = boost::posix_time::microsec_clock::local_time();
+    unsigned int last_tmp_done_cnt = 0;
+
+    boost::posix_time::time_duration tmp_time_diff;
+    double tmp_elapsed_time_s;
 
     while (!done)
     {
-        done = true;
         tmp_done_cnt = 0;
 
         for (auto done_it : done_flags)
         {
-            if (!done_it)
-                done = false;
-            else
+            if (done_it)
                 tmp_done_cnt++;
         }
 
         assert (tmp_done_cnt <= num_targets);
 
-        elapsed_time = boost::posix_time::microsec_clock::local_time();
+        if (tmp_done_cnt && tmp_done_cnt != last_tmp_done_cnt)
+        {
+            elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-        time_diff = elapsed_time - start_time;
-        elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+            time_diff = elapsed_time - start_time;
+            elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-        time_per_eval = elapsed_time_s/(double)(tmp_done_cnt);
-        remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
+            tmp_time_diff = elapsed_time - last_elapsed_time;
+            tmp_elapsed_time_s = tmp_time_diff.total_milliseconds() / 1000.0;
 
-//        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
-//               << " elapsed_time_s " << elapsed_time_s;
+            time_per_eval = 0.95*time_per_eval + 0.05*(tmp_elapsed_time_s/(double)(tmp_done_cnt-last_tmp_done_cnt));
+            // halfnhalf
+            remaining_time_s = (double)(num_targets-tmp_done_cnt)*time_per_eval;
 
-        postprocess_dialog_.setLabelText(
-                    ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                     +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
-                     +" (estimated)").c_str());
+            //        loginf << " UGA num_targets " << num_targets << " tmp_done_cnt " << tmp_done_cnt
+            //               << " elapsed_time_s " << elapsed_time_s;
 
-        postprocess_dialog_.setValue(tmp_done_cnt);
+            postprocess_dialog_.setLabelText(
+                        ("Elapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                         +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                         +" (estimated)").c_str());
+
+            postprocess_dialog_.setValue(tmp_done_cnt);
+
+            last_tmp_done_cnt = tmp_done_cnt;
+            last_elapsed_time = elapsed_time;
+        }
 
         if (!done)
         {
             QCoreApplication::processEvents();
-            QThread::msleep(100);
+            QThread::msleep(200);
         }
     }
 
-//    unsigned int num_targets = target_data_.size();
+    //    unsigned int num_targets = target_data_.size();
 
-//    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
-//    {
-//        target_data_[cnt].finalize();
-//    });
+    //    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+    //    {
+    //        target_data_[cnt].finalize();
+    //    });
 
-//    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-//        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
+    //    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+    //        target_data_.modify(target_it, [&](EvaluationTargetData& t) { t.finalize(); });
 
     finalized_ = true;
 
@@ -314,6 +458,9 @@ void EvaluationData::clear()
 {
     beginResetModel();
 
+    ref_buffer_ = nullptr;
+    tst_buffer_ = nullptr;
+
     target_data_.clear();
     finalized_ = false;
 
@@ -342,13 +489,26 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
                     const EvaluationTargetData& target = target_data_.at(index.row());
 
-                    if (target.use())
+                    if (eval_man_.useUTN(target.utn_))
                         return Qt::Checked;
                     else
                         return Qt::Unchecked;
                 }
                 else
                     return QVariant();
+            }
+        case Qt::BackgroundRole:
+            {
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
+
+                const EvaluationTargetData& target = target_data_.at(index.row());
+
+                if (!target.use())
+                    return QBrush(Qt::lightGray);
+                else
+                    return QVariant();
+
             }
         case Qt::DisplayRole:
         case Qt::EditRole:
@@ -372,6 +532,10 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                 else if (col_name == "UTN")
                 {
                     return target.utn_;
+                }
+                else if (col_name == "Comment")
+                {
+                    return eval_man_.utnComment(target.utn_).c_str();
                 }
                 else if (col_name == "Begin")
                 {
@@ -453,6 +617,14 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
                     const EvaluationTargetData& target = target_data_.at(index.row());
                     return target.utn_;
                 }
+                else if (index.column() == 2) // comment
+                {
+                    assert (index.row() >= 0);
+                    assert (index.row() < target_data_.size());
+
+                    const EvaluationTargetData& target = target_data_.at(index.row());
+                    return ("comment_"+to_string(target.utn_)).c_str();
+                }
             }
         default:
             {
@@ -466,7 +638,6 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
         assert (index.row() >= 0);
@@ -474,20 +645,24 @@ bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, in
 
         auto it = target_data_.begin()+index.row();
 
-        if ((Qt::CheckState)value.toInt() == Qt::Checked)
-        {
-            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << true;
+        bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
+        loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
 
-            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(true); });
-            return true;
-        }
-        else
-        {
-            loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << false;
+        eval_man_.useUTN(it->utn_, checked, false);
+        target_data_.modify(it, [value,checked](EvaluationTargetData& p) { p.use(checked); });
 
-            target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
-            return true;
-        }
+        emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
+        return true;
+    }
+    else if (role == Qt::EditRole && index.column() == 2) // comment
+    {
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
+
+        auto it = target_data_.begin()+index.row();
+        eval_man_.utnComment(it->utn_, value.toString().toStdString(), false);
+        //target_data_.modify(it, [value](EvaluationTargetData& p) { p.use(false); });
+        return true;
     }
 
     return false;
@@ -546,6 +721,10 @@ Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
         //        flags |= Qt::ItemIsEditable;
         // flags |= Qt::ItemIsSelectable;
     }
+    else if (index.column() == 2)
+    {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
     else
         return QAbstractItemModel::flags(index);
 }
@@ -570,15 +749,77 @@ void EvaluationData::setUseTargetData (unsigned int utn, bool value)
     assert (hasTargetData(utn));
 
     QModelIndexList items = match(
-                        index(0, 0),
-                        Qt::UserRole,
-                        QVariant(utn),
-                        1, // look *
-                        Qt::MatchExactly); // look *
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(utn),
+                1, // look *
+                Qt::MatchExactly); // look *
 
     assert (items.size() == 1);
 
     setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+}
+
+void EvaluationData::setUseAllTargetData (bool value)
+{
+    loginf << "EvaluationData: setUseAllTargetData: value " << value;
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    beginResetModel();
+
+    eval_man_.useAllUTNs(value);
+
+    endResetModel();
+
+    QApplication::restoreOverrideCursor();
+}
+
+void EvaluationData::clearComments ()
+{
+    loginf << "EvaluationData: clearComments";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    beginResetModel();
+
+    eval_man_.clearUTNComments();
+
+    endResetModel();
+
+    QApplication::restoreOverrideCursor();
+}
+
+void EvaluationData::setUseByFilter ()
+{
+    loginf << "EvaluationData: setUseByFilter";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    beginResetModel();
+
+    eval_man_.filterUTNs();
+
+    endResetModel();
+
+    QApplication::restoreOverrideCursor();
+}
+
+void EvaluationData::setTargetDataComment (unsigned int utn, std::string comment)
+{
+    loginf << "EvaluationData: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+
+    assert (hasTargetData(utn));
+
+    QModelIndexList items = match(
+                index(0, 0),
+                Qt::UserRole,
+                QVariant(("comment_"+to_string(utn)).c_str()),
+                1, // look *
+                Qt::MatchExactly); // look *
+
+    if (items.size() == 1)
+        setData(items.at(0), comment.c_str(), Qt::CheckStateRole);
 }
 
 EvaluationDataWidget* EvaluationData::widget()
@@ -587,4 +828,12 @@ EvaluationDataWidget* EvaluationData::widget()
         widget_.reset(new EvaluationDataWidget(*this, eval_man_));
 
     return widget_.get();
+}
+
+EvaluationDataFilterDialog& EvaluationData::dialog()
+{
+    if (!dialog_)
+        dialog_.reset(new EvaluationDataFilterDialog(*this, eval_man_));
+
+    return *dialog_;
 }

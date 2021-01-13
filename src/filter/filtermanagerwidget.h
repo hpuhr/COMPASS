@@ -25,6 +25,7 @@ class FilterGeneratorWidget;
 
 class QPushButton;
 class QVBoxLayout;
+class QCheckBox;
 
 class FilterManagerWidget : public QFrame
 {
@@ -33,11 +34,15 @@ class FilterManagerWidget : public QFrame
   signals:
 
   public slots:
+    void toggleUseFilters();
+
     void addFilterSlot();
     void updateFiltersSlot();
     void filterWidgetActionSlot(bool result);
 
     void databaseOpenedSlot();
+
+    void updateUseFilters ();
 
   public:
     explicit FilterManagerWidget(FilterManager& manager, QWidget* parent = 0,
@@ -49,7 +54,9 @@ class FilterManagerWidget : public QFrame
 
     FilterGeneratorWidget* filter_generator_widget_;
 
-    QVBoxLayout* filter_layout_;
+    QCheckBox* filters_check_{nullptr};
+    QVBoxLayout* ds_filter_layout_;
+    QVBoxLayout* other_filter_layout_;
 
     QPushButton* add_button_;
 };

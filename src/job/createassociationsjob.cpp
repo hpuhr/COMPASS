@@ -25,15 +25,19 @@
 #include "metadbovariable.h"
 #include "dbovariable.h"
 #include "stringconv.h"
+#include "projection/transformation.h"
+#include "evaluationmanager.h"
 
-#include <ogr_spatialref.h>
+//#include <ogr_spatialref.h>
 
 #include <tbb/tbb.h>
+
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using namespace Utils;
 
-bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR")};
+bool CreateAssociationsJob::in_appimage_ {getenv("APPDIR") != nullptr};
 
 CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInterface& db_interface,
                                              std::map<std::string, std::shared_ptr<Buffer>> buffers)
@@ -47,8 +51,8 @@ void CreateAssociationsJob::run()
 {
     logdbg << "CreateAssociationsJob: run: start";
 
-    Association::Target::max_time_diff_ = max_time_diff_;
-    Association::Target::max_altitude_diff_ = max_altitude_diff_;
+    //    Association::Target::max_time_diff_ = max_time_diff_;
+    //    Association::Target::max_altitude_diff_ = max_altitude_diff_;
 
     started_ = true;
 
@@ -330,6 +334,10 @@ void CreateAssociationsJob::createTrackerUTNS()
 
         DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+        bool clean_dubious_utns = task_.cleanDubiousUtns();
+        bool mark_dubious_utns_unused = task_.markDubiousUtnsUnused();
+        bool comment_dubious_utns = task_.commentDubiousUtns();
+
         // create utn for all tracks
         for (auto& ds_it : ds_id_trs) // ds_id->trs
         {
@@ -431,14 +439,61 @@ void CreateAssociationsJob::createTrackerUTNS()
                 continue;
             }
 
-            loginf << "CreateAssociationsJob: createTrackerUTNS: creating utns for ds_id " << ds_it.first;
+            loginf << "CreateAssociationsJob: createTrackerUTNS: cleaning new utns for ds_id " << ds_it.first;
+
+            emit statusSignal(("Cleaning new "+ds_name+" UTNs").c_str());
+
+            vector<unsigned int> index_to_utn;
+            unsigned int targets_size = tracker_targets.size();
+            for (auto& t_it : tracker_targets)
+                index_to_utn.push_back(t_it.first);
+
+            tbb::parallel_for(uint(0), targets_size, [&](unsigned int cnt)
+            {
+                tracker_targets.at(index_to_utn.at(cnt)).calculateSpeeds();
+            });
+
+            float max_speed_kts = task_.maxSpeedTrackerKts();
+
+            for (auto& target_it : tracker_targets)
+            {
+                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
+                {
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: new target dubious "
+                           << target_it.second.utn_ << ": calculateSpeeds: min "
+                           << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                           << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                           << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+
+                    if (clean_dubious_utns)
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: new target removing non-mode s"
+                                  " target reports";
+                        target_it.second.removeNonModeSTRs();
+
+                        target_it.second.calculateSpeeds();
+
+                        if (target_it.second.has_speed_)
+                            loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned new target "
+                                   << target_it.second.utn_ << ": calculateSpeeds: min "
+                                   << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                                   << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                                   << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                                   << " kts";
+                    }
+                }
+            }
+
+            loginf << "CreateAssociationsJob: createTrackerUTNS: creating new utns for ds_id " << ds_it.first;
+
+            emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
 
             // tracker_targets exist, tie them together by mode s address
 
             int tmp_utn;
 
             float done_ratio;
-            unsigned int targets_size = tracker_targets.size();
+
             unsigned int target_cnt = 0;
 
             while (tracker_targets.size())
@@ -452,19 +507,22 @@ void CreateAssociationsJob::createTrackerUTNS()
                 auto tmp_target = tracker_targets.begin();
                 assert (tmp_target != tracker_targets.end());
 
-                logdbg << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
-
-                tmp_utn = findUTNForTarget(tmp_target->second);
-
-                logdbg << "CreateAssociationsJob: createTrackerUTNS: tmp utn " << tmp_target->first
-                       << " tmp_utn " << tmp_utn;
-
-                if (tmp_utn == -1) // none found, create new target
-                    addTarget(tmp_target->second);
-                else // attach to existing target
+                if (tmp_target->second.has_tod_)
                 {
-                    assert (targets_.count(tmp_utn));
-                    targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
+                    logdbg << "CreateAssociationsJob: createTrackerUTNS: creating utn for tmp utn " << tmp_target->first;
+
+                    tmp_utn = findUTNForTrackerTarget(tmp_target->second);
+
+                    logdbg << "CreateAssociationsJob: createTrackerUTNS: tmp utn " << tmp_target->first
+                           << " tmp_utn " << tmp_utn;
+
+                    if (tmp_utn == -1) // none found, create new target
+                        addTarget(tmp_target->second);
+                    else // attach to existing target
+                    {
+                        assert (targets_.count(tmp_utn));
+                        targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
+                    }
                 }
 
                 tracker_targets.erase(tmp_target);
@@ -472,46 +530,72 @@ void CreateAssociationsJob::createTrackerUTNS()
 
             loginf << "CreateAssociationsJob: createTrackerUTNS: processing ds_id " << ds_it.first << " done";
 
-            emit statusSignal(("Checking "+ds_name+" UTNs").c_str());
-
-            tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+            if (clean_dubious_utns || mark_dubious_utns_unused || comment_dubious_utns)
             {
-                targets_.at(cnt).calculateSpeeds();
-            });
+                emit statusSignal(("Checking "+ds_name+" UTNs").c_str());
 
-            vector <unsigned int> still_dubious;
-
-            for (auto& target_it : targets_)
-            {
-                if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
+                tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
                 {
-                    loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
-                           << target_it.second.utn_ << ": calculateSpeeds: min "
-                           << String::doubleToStringPrecision(target_it.second.speed_min_,2)
-                           << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
-                           << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                    targets_.at(cnt).calculateSpeeds();
+                });
 
-                    loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
-                    target_it.second.removeNonModeSTRs();
-                    target_it.second.calculateSpeeds();
+                vector <unsigned int> still_dubious;
 
-                    if (target_it.second.has_speed_)
-                        loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned target "
+                for (auto& target_it : targets_)
+                {
+                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
+                    {
+                        loginf << "CreateAssociationsJob: createTrackerUTNS: target dubious "
                                << target_it.second.utn_ << ": calculateSpeeds: min "
                                << String::doubleToStringPrecision(target_it.second.speed_min_,2)
                                << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
-                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2) << " kts";
+                               << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                               << " kts";
 
-                    if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts_)
-                        still_dubious.push_back(target_it.second.utn_);
+                        if (clean_dubious_utns)
+                        {
+                            loginf << "CreateAssociationsJob: createTrackerUTNS: removing non-mode s target reports";
+                            target_it.second.removeNonModeSTRs();
+
+                            if (!target_it.second.has_tod_)
+                            {
+                                loginf << "CreateAssociationsJob: createTrackerUTNS: empty target utn "
+                                       << target_it.second.utn_;
+                                continue;
+                            }
+
+                            target_it.second.calculateSpeeds();
+
+                            if (target_it.second.has_speed_)
+                                loginf << "CreateAssociationsJob: createTrackerUTNS: cleaned target "
+                                       << target_it.second.utn_ << ": calculateSpeeds: min "
+                                       << String::doubleToStringPrecision(target_it.second.speed_min_,2)
+                                       << " avg " << String::doubleToStringPrecision(target_it.second.speed_avg_,2)
+                                       << " max " << String::doubleToStringPrecision(target_it.second.speed_max_,2)
+                                       << " kts";
+                        }
+
+                        if (target_it.second.has_speed_ && target_it.second.speed_max_ > max_speed_kts)
+                            still_dubious.push_back(target_it.second.utn_);
+                    }
+                }
+
+                EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+                for (unsigned int utn : still_dubious)
+                {
+                    loginf << "CreateAssociationsJob: createTrackerUTNS: target " << utn << " still dubious"
+                           <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
+                            << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
+                            << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
+
+                    if (mark_dubious_utns_unused)
+                        eval_man.useUTN(utn, false, false, false);
+
+                    if (comment_dubious_utns)
+                        eval_man.utnComment(utn, "Dubious Association", false);
                 }
             }
-
-            for (unsigned int utn : still_dubious)
-                loginf << "CreateAssociationsJob: createTrackerUTNS: target " << utn << " still dubious"
-                       <<  " speed min " << String::doubleToStringPrecision(targets_.at(utn).speed_min_,2)
-                        << " avg " << String::doubleToStringPrecision(targets_.at(utn).speed_avg_,2)
-                        << " max " << String::doubleToStringPrecision(targets_.at(utn).speed_max_,2) << " kts";
         }
     }
     else
@@ -523,41 +607,25 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 {
     loginf << "CreateAssociationsJob: createNonTrackerUTNS";
 
-    int tmp_utn;
-
-    unsigned int num_trs = 0;
+    unsigned int num_data_sources = 0;
 
     for (auto& dbo_it : target_reports_)
     {
         if (dbo_it.first == "Tracker") // already associated
             continue;
 
-        for (auto& ds_it : dbo_it.second) // ds_id -> trs
-            num_trs += ds_it.second.size();
+        num_data_sources += dbo_it.second.size();
     }
 
-    unsigned int tr_cnt = 0;
-    float done_ratio;
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
+    const bool associate_non_mode_s = task_.associateNonModeS();
+    const double max_time_diff_sensor = task_.maxTimeDiffSensor();
+    const double max_altitude_diff_sensor = task_.maxAltitudeDiffSensor();
+    const double max_distance_acceptable_sensor = task_.maxDistanceAcceptableSensor();
 
-    float tod;
-    vector<tuple<bool, unsigned int, double>> results;
-    // usable, utn, distance
-
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime elapsed_time;
-
-    start_time = boost::posix_time::microsec_clock::local_time();
-
-    boost::posix_time::time_duration time_diff;
-    double elapsed_time_s;
-    double time_per_eval, remaining_time_s;
-
-    string remaining_time_str;
-
-    vector<pair<unsigned int, Association::TargetReport*>> association_todos;
+    unsigned int ds_cnt = 0;
+    unsigned int done_perc;
 
     for (auto& dbo_it : target_reports_)
     {
@@ -566,152 +634,134 @@ void CreateAssociationsJob::createNonTrackerUTNS()
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs
         {
-            for (auto& tr_it : ds_it.second)
+            assert (num_data_sources);
+            done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
+
+            string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNS ("+to_string(done_perc)+"%)").c_str());
+
+            std::vector<Association::TargetReport>& target_reports = ds_it.second;
+            unsigned int num_target_reports = target_reports.size();
+            vector<int> tmp_assoc_utns; // tr_cnt -> utn
+            tmp_assoc_utns.resize(num_target_reports);
+
+            map<unsigned int, vector<Association::TargetReport*>> create_todos; // ta -> trs
+            boost::mutex create_todos_mutex;
+
+            //for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt)
+            tbb::parallel_for(uint(0), num_target_reports, [&](unsigned int tr_cnt)
             {
-                if (tr_cnt % 50000 == 0)
-                {
-                    assert (tr_cnt <= num_trs);
+                Association::TargetReport& tr_it = target_reports[tr_cnt];
 
-                    elapsed_time = boost::posix_time::microsec_clock::local_time();
+                tmp_assoc_utns[tr_cnt] = -1; // set as not associated
 
-                    time_diff = elapsed_time - start_time;
-                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
-
-                    time_per_eval = elapsed_time_s/tr_cnt;
-                    remaining_time_s = (double)(num_trs-tr_cnt)*time_per_eval;
-
-                    done_ratio = (float)tr_cnt / (float)num_trs;
-                    emit statusSignal(("Creating "+dbo_it.first+" UTNS ("
-                                       +String::percentToString(100.0*done_ratio)+"%)"
-                                       +" Remaining: "+String::timeStringFromDouble(remaining_time_s, false)).c_str());
-
-                    //start_time = boost::posix_time::microsec_clock::local_time();
-                }
-
-                ++tr_cnt;
+                int tmp_utn;
 
                 tmp_utn = findUTNForTargetReport(tr_it);
 
                 if (tmp_utn != -1) // existing target found
                 {
                     assert (targets_.count(tmp_utn));
-                    //targets_.at(tmp_utn).addAssociated(&tr_it);
-                    association_todos.push_back({tmp_utn, &tr_it});
-                    continue;
+                    //association_todos.push_back({tmp_utn, &tr_it});
+                    tmp_assoc_utns[tr_cnt] = tmp_utn;
+                    return;
                 }
 
                 if (tr_it.has_ta_)
                 {
-                    addTargetByTargetReport(tr_it);
-                    continue;
+                    //addTargetByTargetReport(tr_it);
+
+                    boost::mutex::scoped_lock lock(create_todos_mutex);
+                    create_todos[tr_it.ta_].push_back(&tr_it);
+
+                    return;
                 }
 
                 // tr non mode s
 
-                if (!associate_ac_non_trackers_)
-                    continue;
+                if (!associate_non_mode_s)
+                    return;
+
+                float tod;
+                vector<tuple<bool, unsigned int, double>> results;
+                // usable, utn, distance
 
                 results.resize(utn_cnt_);
 
                 tod = tr_it.tod_;
 
+                EvaluationTargetPosition tst_pos;
+
+                tst_pos.latitude_ = tr_it.latitude_;
+                tst_pos.longitude_ = tr_it.longitude_;
+                tst_pos.has_altitude_ = tr_it.has_mc_;
+                tst_pos.altitude_ = tr_it.mc_;
+
+                FixedTransformation trafo (tst_pos.latitude_, tst_pos.longitude_);
+
                 //loginf << "UGA: checking tr a/c/pos";
 
-                tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+                double x_pos, y_pos;
+                double distance;
+
+                EvaluationTargetPosition ref_pos;
+                bool ok;
+
+                for (unsigned int target_cnt=0; target_cnt < utn_cnt_; ++target_cnt)
                 {
-                    Association::Target& other = targets_.at(cnt);
+                    Association::Target& other = targets_.at(target_cnt);
 
-                    results[cnt] = {false, other.utn_, 0};
+                    results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
-                    if (!(tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
-                    {
-                        if (other.isTimeInside(tod))
-                        {
-                            // check mode a code
-                            Association::CompareResult ma_res = other.compareModeACode(
-                                        tr_it.has_ma_, tr_it.ma_, tod);
+                    if ((tr_it.has_ta_ && other.hasTA())) // only try if not both mode s
+                        continue;
 
-                            if (ma_res == Association::CompareResult::SAME)
-                            {
-                                //loginf << "UGA3 same mode a";
+                    if (!other.isTimeInside(tod))
+                        continue;
 
-                                // check mode c code
+                    // check mode a code
+                    Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod,
+                                                                               max_time_diff_sensor);
 
-                                Association::CompareResult mc_res = other.compareModeCCode(
-                                            tr_it.has_mc_, tr_it.mc_, tod);
+                    if (ma_res != Association::CompareResult::SAME)
+                        continue;
+                    //loginf << "UGA3 same mode a";
 
-                                if (mc_res == Association::CompareResult::SAME)
-                                {
-                                    //loginf << "UGA3 same mode c";
+                    // check mode c code
+                    Association::CompareResult mc_res = other.compareModeCCode(
+                                tr_it.has_mc_, tr_it.mc_, tod,
+                                max_time_diff_sensor, max_altitude_diff_sensor);
 
-                                    // check positions
+                    if (mc_res != Association::CompareResult::SAME)
+                        continue;
 
-                                    OGRSpatialReference local;
+                    // check positions
 
-                                    std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_sensor);
 
-                                    EvaluationTargetPosition tst_pos;
+                    //                    if (ok &&
+                    //                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
+                    //                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
+                    //                             <= max_distance_acceptable_sensors_wgs_))
+                    //                    {
 
-                                    tst_pos.latitude_ = tr_it.latitude_;
-                                    tst_pos.longitude_ = tr_it.longitude_;
-                                    tst_pos.has_altitude_ = tr_it.has_mc_;
-                                    tst_pos.altitude_ = tr_it.mc_;
+                    tie(ok, x_pos, y_pos) = trafo.distanceCart(ref_pos.latitude_, ref_pos.longitude_);
 
-                                    double x_pos, y_pos;
-                                    double distance;
+                    if (!ok)
+                        continue;
 
-                                    EvaluationTargetPosition ref_pos;
-                                    bool ok;
+                    distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                                    tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod, max_time_diff_);
+                    //loginf << "UGA3 distance " << distance;
 
-                                    //     double wgs_dist = sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-                                    //          +pow(ref_pos.longitude_-tst_pos.longitude_, 2));
-
-                                    if (ok &&
-                                            (sqrt(pow(ref_pos.latitude_-tst_pos.latitude_, 2)
-                                                  +pow(ref_pos.longitude_-tst_pos.longitude_, 2))
-                                             <= max_distance_acceptable_sensors_wgs_))
-                                    {
-                                        local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
-
-                                        ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-                                        if (in_appimage_) // inside appimage
-                                        {
-                                            x_pos = tst_pos.longitude_;
-                                            y_pos = tst_pos.latitude_;
-                                        }
-                                        else
-                                        {
-                                            x_pos = tst_pos.latitude_;
-                                            y_pos = tst_pos.longitude_;
-                                        }
-
-                                        ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
-
-                                        if (ok)
-                                        {
-                                            distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
-
-                                            //loginf << "UGA3 distance " << distance;
-
-                                            if (distance < max_distance_acceptable_sensors_)
-                                            {
-                                                results[cnt] = {true, other.utn_, distance};
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
+                    if (distance < max_distance_acceptable_sensor)
+                        results[target_cnt] = tuple<bool, unsigned int, double>(true, other.utn_, distance);
+                    //                    }
+                }
 
                 // find best match
                 bool usable;
                 unsigned int other_utn;
-                double distance;
 
                 bool first = true;
                 unsigned int best_other_utn;
@@ -736,16 +786,44 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                 if (!first)
                 {
                     //targets_.at(best_other_utn).addAssociated(&tr_it);
-                    association_todos.push_back({best_other_utn, &tr_it});
+                    //association_todos.push_back({best_other_utn, &tr_it});
+                    tmp_assoc_utns[tr_cnt] = best_other_utn;
                 }
+            });
+
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" Associations ("
+                               +to_string(done_perc)+"%)").c_str());
+
+            // create associations
+            int tmp_utn;
+            for (unsigned int tr_cnt=0; tr_cnt < num_target_reports; ++tr_cnt) // tr_cnt -> utn
+            {
+                tmp_utn = tmp_assoc_utns.at(tr_cnt);
+                if (tmp_utn != -1)
+                    targets_.at(tmp_utn).addAssociated(&target_reports.at(tr_cnt));
             }
+
+            // create new targets
+            for (auto& todo_it : create_todos) // ta -> trs
+            {
+                vector<Association::TargetReport*>& trs = todo_it.second;
+                assert (trs.size());
+
+                unsigned int new_utn = utn_cnt_;
+                addTargetByTargetReport(*trs.at(0));
+
+                for (unsigned int tr_cnt=1; tr_cnt < trs.size(); ++tr_cnt)
+                    targets_.at(new_utn).addAssociated(trs.at(tr_cnt));
+            }
+
+            ++ds_cnt;
         }
     }
 
-    emit statusSignal("Adding Associations");
+    //    emit statusSignal("Adding Associations");
 
-    for (auto& assoc_it : association_todos)
-        targets_.at(assoc_it.first).addAssociated(assoc_it.second);
+    //    for (auto& assoc_it : association_todos)
+    //        targets_.at(assoc_it.first).addAssociated(assoc_it.second);
 }
 
 void CreateAssociationsJob::createAssociations()
@@ -770,7 +848,7 @@ void CreateAssociationsJob::createAssociations()
     }
 }
 
-int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
+int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& target)
 // tries to find existing utn for target, -1 if failed
 {
     int tmp_utn = findUTNForTargetByTA(target);
@@ -782,18 +860,28 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
     //if (target.hasMA() && target.hasMA(3599))
     logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
 
-    OGRSpatialReference wgs84;
-    wgs84.SetWellKnownGeogCS("WGS84");
+    //    OGRSpatialReference wgs84;
+    //    wgs84.SetWellKnownGeogCS("WGS84");
 
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
     results.resize(utn_cnt_);
 
+    const double prob_min_time_overlap_tracker = task_.probMinTimeOverlapTracker();
+    const double max_time_diff_tracker = task_.maxTimeDiffTracker();
+    const unsigned int min_updates_tracker = task_.minUpdatesTracker();
+    const double max_altitude_diff_tracker = task_.maxAltitudeDiffTracker();
+    const unsigned int max_positions_dubious_tracker = task_.maxPositionsDubiousTracker();
+    const double max_distance_quit_tracker = task_.maxDistanceQuitTracker();
+    const double max_distance_dubious_tracker = task_.maxDistanceDubiousTracker();
+    const double max_distance_acceptable_tracker = task_.maxDistanceAcceptableTracker();
+
     tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
     {
         Association::Target& other = targets_.at(cnt);
+        Transformation trafo;
 
-        results[cnt] = {false, other.utn_, 0, 0};
+        results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {
@@ -802,20 +890,20 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                    << " other " << other.utn_
                    << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
 
-            if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_)
+            if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_tracker)
             {
                 vector<float> ma_unknown;
                 vector<float> ma_same;
                 vector<float> ma_different;
 
-                tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other);
+                tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
 
                 //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                 logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
                        << " other " << other.utn_
                        << " ma same " << ma_same.size() << " diff " << ma_different.size();
 
-                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_)
+                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_tracker)
                 {
                     // check mode c codes
 
@@ -823,7 +911,8 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                     vector<float> mc_same;
                     vector<float> mc_different;
 
-                    tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(other, ma_same);
+                    tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
+                                other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker);
 
                     //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                     logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
@@ -831,7 +920,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                            << " ma same " << ma_same.size() << " diff " << ma_different.size()
                            << " mc same " << mc_same.size() << " diff " << mc_different.size();
 
-                    if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_)
+                    if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_tracker)
                     {
                         // check positions
 
@@ -840,9 +929,9 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
 
                         unsigned int pos_dubious_cnt {0};
 
-                        OGRSpatialReference local;
+                        //                        OGRSpatialReference local;
 
-                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
+                        //                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
                         EvaluationTargetPosition tst_pos;
 
@@ -857,37 +946,41 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             assert (target.hasDataForExactTime(tod_it));
                             tst_pos = target.posForExactTime(tod_it);
 
-                            tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod_it, max_time_diff_);
+                            tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod_it, max_time_diff_tracker);
 
                             if (!ok)
                                 continue;
 
-                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
+                            //                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
 
-                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
+                            //                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
 
-                            if (in_appimage_) // inside appimage
-                            {
-                                x_pos = tst_pos.longitude_;
-                                y_pos = tst_pos.latitude_;
-                            }
-                            else
-                            {
-                                x_pos = tst_pos.latitude_;
-                                y_pos = tst_pos.longitude_;
-                            }
+                            //                            if (in_appimage_) // inside appimage
+                            //                            {
+                            //                                x_pos = tst_pos.longitude_;
+                            //                                y_pos = tst_pos.latitude_;
+                            //                            }
+                            //                            else
+                            //                            {
+                            //                                x_pos = tst_pos.latitude_;
+                            //                                y_pos = tst_pos.longitude_;
+                            //                            }
 
-                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                            //                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+
+                            tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                                        ref_pos.latitude_, ref_pos.longitude_,
+                                        tst_pos.latitude_, tst_pos.longitude_);
 
                             if (!ok)
                                 continue;
 
                             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                            if (distance > max_distance_dubious_)
+                            if (distance > max_distance_dubious_tracker)
                                 ++pos_dubious_cnt;
 
-                            if (distance > max_distance_quit_ || pos_dubious_cnt > max_positions_dubious_)
+                            if (distance > max_distance_quit_tracker || pos_dubious_cnt > max_positions_dubious_tracker)
                                 // too far or dubious, quit
                             {
                                 same_distances.clear();
@@ -900,17 +993,18 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
                             distances_sum += distance;
                         }
 
-                        if (same_distances.size() >= min_updates_)
+                        if (same_distances.size() >= min_updates_tracker)
                         {
                             double distance_avg = distances_sum / (float) same_distances.size();
 
-                            if (distance_avg < max_distance_acceptable_trackers_)
+                            if (distance_avg < max_distance_acceptable_tracker)
                             {
                                 //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
                                 logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
                                        << " next utn " << utn_cnt_ << " dist avg " << distance_avg
                                        << " num " << same_distances.size();
-                                results[cnt] = {true, other.utn_, same_distances.size(), distance_avg};
+                                results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
+                                            true, other.utn_, same_distances.size(), distance_avg);
                             }
                         }
                     }
@@ -944,7 +1038,7 @@ int CreateAssociationsJob::findUTNForTarget (const Association::Target& target)
         if (!usable)
             continue;
 
-        score = (double)num_updates*(max_distance_acceptable_trackers_-distance_avg);
+        score = (double)num_updates*(max_distance_acceptable_tracker-distance_avg);
 
         if (first || score > best_score)
         {
@@ -998,7 +1092,6 @@ int CreateAssociationsJob::findUTNForTargetReport (const Association::TargetRepo
     // check in ta lookup map
     if (tr.has_ta_ && ta_2_utn_.count(tr.ta_))
         return ta_2_utn_.at(tr.ta_);
-
 
     return -1;
 }

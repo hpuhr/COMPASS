@@ -23,10 +23,12 @@
 #include "dbovariable.h"
 
 class DBOVariableOrderedSetWidget;
-class QCheckBox;
 class ListBoxView;
+
+class QCheckBox;
 class QLineEdit;
 class QPushButton;
+class QLabel;
 
 /**
  * @brief Widget with configuration elements for a ListBoxView
@@ -60,6 +62,8 @@ class ListBoxViewConfigWidget : public QWidget
     /// @brief Destructor
     virtual ~ListBoxViewConfigWidget();
 
+    void setStatus (const std::string& status, bool visible, QColor color = Qt::black);
+
   protected:
     /// Base view
     ListBoxView* view_;
@@ -74,6 +78,7 @@ class ListBoxViewConfigWidget : public QWidget
 
     QPushButton* export_button_{nullptr};
 
+    QLabel* status_label_ {nullptr};
     QPushButton* update_button_{nullptr};
     bool reload_needed_{false};
 

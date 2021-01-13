@@ -24,7 +24,11 @@
 
 class ViewPoint;
 class ListBoxView;
+class HistogramView;
+#if USE_EXPERIMENTAL_SOURCE == true
 class OSGView;
+#endif
+class ScatterPlotView;
 class LatexDocument;
 
 namespace EvaluationResultsReport
@@ -39,13 +43,16 @@ class LatexVisitor
 {
 public:
     LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot,
-                 bool include_target_details, bool include_target_tr_details, bool wait_on_map_loading);
+                 bool include_target_details, bool include_target_tr_details, unsigned int max_table_col_width,
+                 bool wait_on_map_loading);
 
     virtual void visit(const ViewPoint* e);
     virtual void visit(ListBoxView* e);
+    virtual void visit(HistogramView* e);
 #if USE_EXPERIMENTAL_SOURCE == true
     virtual void visit(OSGView* e);
 #endif
+    virtual void visit(ScatterPlotView* e);
 
     virtual void visit(const EvaluationResultsReport::Section* e);
     virtual void visit(const EvaluationResultsReport::SectionContentTable* e);
@@ -62,6 +69,7 @@ protected:
     bool add_overview_screenshot_ {true};
     bool include_target_details_ {false};
     bool include_target_tr_details_ {false};
+    unsigned int max_table_col_width_ {24};
     bool wait_on_map_loading_ {true};
 
     bool ignore_listbox_views_ {false};

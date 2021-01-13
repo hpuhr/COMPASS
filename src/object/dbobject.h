@@ -258,6 +258,7 @@ class DBObject : public QObject, public Configurable
     // association stuff
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
+    bool associationsLoaded() const;
     bool hasAssociations();
     void addAssociation(unsigned int rec_num, unsigned int utn, bool has_src, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }
@@ -266,7 +267,8 @@ class DBObject : public QObject, public Configurable
 
     void updateToDatabaseContent();
 
-  protected:
+
+protected:
     COMPASS& compass_;
     DBObjectManager& manager_;
     /// DBO name

@@ -79,11 +79,13 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
 ViewContainerWidget::~ViewContainerWidget()
 {
-    logdbg << "ViewContainerWidget: destructor";
+    loginf << "ViewContainerWidget: dtor";
 
     assert(view_container_);
     delete view_container_;
     view_container_ = nullptr;
+
+    loginf << "ViewContainerWidget: dtor: done";
 }
 
 void ViewContainerWidget::generateSubConfigurable(const std::string& class_id,

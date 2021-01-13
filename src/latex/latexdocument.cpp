@@ -54,7 +54,7 @@ std::string LatexDocument::toString()
 {
     stringstream ss;
 
-    ss << R"(\documentclass[twoside,a4paper]{article}
+    ss << R"(\documentclass[twoside,a4paper]{report}
           \usepackage{geometry}
           \geometry{legalpaper, margin=1.5cm}
 

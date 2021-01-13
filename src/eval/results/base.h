@@ -51,7 +51,6 @@ public:
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
-    virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     std::string type() const;
@@ -74,6 +73,8 @@ public:
     virtual std::string reference(
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation);
 
+    const static std::string req_overview_table_name_;
+
 protected:
     std::string type_;
     std::string result_id_;
@@ -89,7 +90,8 @@ protected:
     EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-    std::string getRequirementSectionID ();
+    virtual std::string getRequirementSectionID ();
+    virtual std::string getRequirementSumSectionID ();
 
     EvaluationResultsReport::Section& getRequirementSection (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item);

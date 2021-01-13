@@ -44,8 +44,8 @@ DBInterfaceInfoWidget::DBInterfaceInfoWidget(DBInterface& interface, QWidget* pa
     layout_ = new QVBoxLayout();
     setLayout(layout_);
 
-    connect(&interface_, SIGNAL(databaseContentChangedSignal()), this,
-            SLOT(databaseContentChangedSlot()));
+    connect(&interface_, SIGNAL(databaseContentChangedSignal()),
+            this, SLOT(databaseContentChangedSlot()));
 }
 
 DBInterfaceInfoWidget::~DBInterfaceInfoWidget() {}
@@ -54,5 +54,5 @@ void DBInterfaceInfoWidget::databaseContentChangedSlot()
 {
     assert(layout_);
     layout_->addWidget(interface_.connection().infoWidget());
-    layout_->addStretch();
+    //layout_->addStretch();
 }

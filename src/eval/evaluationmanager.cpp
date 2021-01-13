@@ -21,7 +21,7 @@
 #include "evaluationstandard.h"
 #include "evaluationstandardwidget.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 #include "compass.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -39,10 +39,14 @@
 #include "viewmanager.h"
 #include "stringconv.h"
 #include "dbovariableorderedset.h"
+#include "dbconnection.h"
 
 #include "json.hpp"
 
 #include <QTabWidget>
+#include <QApplication>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -54,7 +58,7 @@ using namespace std;
 using namespace nlohmann;
 
 EvaluationManager::EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this), results_gen_(*this)
+    : Configurable(class_id, instance_id, compass, "eval.json"), compass_(*compass), data_(*this)
 {
     registerParameter("dbo_name_ref", &dbo_name_ref_, "RefTraj");
     registerParameter("active_sources_ref", &active_sources_ref_, json::object());
@@ -64,8 +68,77 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("current_standard", &current_standard_, "");
 
+    registerParameter("configs", &configs_, json::object());
+
     registerParameter("use_grp_in_sector", &use_grp_in_sector_, json::object());
     registerParameter("use_requirement", &use_requirement_, json::object());
+
+    // remove utn stuff
+    // shorts
+    registerParameter("remove_short_targets", &remove_short_targets_, true);
+    registerParameter("remove_short_targets_min_updates", &remove_short_targets_min_updates_, 10);
+    registerParameter("remove_short_targets_min_duration", &remove_short_targets_min_duration_, 60.0);
+    // psr
+    registerParameter("remove_psr_only_targets", &remove_psr_only_targets_, true);
+    // ma
+    registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
+    registerParameter("remove_mode_a_codes", &remove_mode_a_codes_, false);
+    registerParameter("remove_mode_a_code_values", &remove_mode_a_code_values_, "7000,7777");
+    // ta
+    registerParameter("remove_mode_target_addresses", &remove_target_addresses_, false);
+    registerParameter("remove_target_address_vales", &remove_target_address_values_, "");
+    // dbo
+    registerParameter("remove_not_detected_dbos", &remove_not_detected_dbos_, false);
+    registerParameter("remove_not_detected_dbo_values", &remove_not_detected_dbo_values_, json::object());
+
+    registerParameter("max_ref_time_diff", &max_ref_time_diff_, 4.0);
+
+    // load filter
+    registerParameter("use_load_filter", &use_load_filter_, false);
+
+    registerParameter("use_time_filter", &use_time_filter_, false);
+    registerParameter("load_time_begin", &load_time_begin_, 0);
+    registerParameter("load_time_end", &load_time_end_, 0);
+
+    registerParameter("use_adsb_filter", &use_adsb_filter_, false);
+    registerParameter("use_v0", &use_v0_, true);
+    registerParameter("use_v1", &use_v1_, true);
+    registerParameter("use_v2", &use_v2_, true);
+
+    // nucp
+    registerParameter("use_min_nucp", &use_min_nucp_, true);
+    registerParameter("min_nucp", &min_nucp_, 4);
+
+    registerParameter("use_max_nucp", &use_max_nucp_, true);
+    registerParameter("max_nucp", &max_nucp_, 4);
+
+    // nic
+    registerParameter("use_min_nic", &use_min_nic_, true);
+    registerParameter("min_nic", &min_nic_, 5);
+
+    registerParameter("use_max_nic", &use_max_nic_, true);
+    registerParameter("max_nic", &max_nic_, 5);
+
+    // nacp
+    registerParameter("use_min_nacp", &use_min_nacp_, true);
+    registerParameter("min_nacp", &min_nacp_, 5);
+
+    registerParameter("use_max_nacp", &use_max_nacp_, true);
+    registerParameter("max_nacp", &max_nacp_, 5);
+
+    // sil v1
+    registerParameter("use_min_sil_v1", &use_min_sil_v1_, true);
+    registerParameter("min_sil_v1", &min_sil_v1_, 2);
+
+    registerParameter("use_max_sil_v1", &use_max_sil_v1_, true);
+    registerParameter("max_sil_v1", &max_sil_v1_, 2);
+
+    // sil v2
+    registerParameter("use_min_sil_v2", &use_min_sil_v2_, true);
+    registerParameter("min_sil_v2", &min_sil_v2_, 4);
+
+    registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
+    registerParameter("max_sil_v2", &max_sil_v2_, 4);
 
     createSubConfigurables();
 }
@@ -100,17 +173,45 @@ void EvaluationManager::loadData ()
 
     assert (initialized_);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    // remove previous stuff
+    if (viewable_data_cfg_)
+    {
+        COMPASS::instance().viewManager().unsetCurrentViewPoint();
+        viewable_data_cfg_ = nullptr;
+    }
+
+    results_gen_->clear();
+
     reference_data_loaded_ = false;
     test_data_loaded_ = false;
     data_loaded_ = false;
 
     evaluated_ = false;
 
+    if (widget_)
+        widget_->updateButtons();
+
+    emit resultsChangedSignal();
+
+    // actually load
+
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
+    // load adsb mops versions in a hacky way
+    if (object_man.object("ADSB").hasData() && !has_adsb_info_)
+    {
+        adsb_info_ = COMPASS::instance().interface().queryADSBInfo();
+        has_adsb_info_ = true;
+    }
+
+    QApplication::restoreOverrideCursor();
+
+    FilterManager& fil_man = COMPASS::instance().filterManager();
+
     // set use filters
-    object_man.useFilters(true);
-    object_man.loadWidget()->updateUseFilters();
+    fil_man.useFilters(true);
 
     // clear data
     data_.clear();
@@ -123,7 +224,7 @@ void EvaluationManager::loadData ()
     }
 
     // set ref data sources filters
-    FilterManager& fil_man = COMPASS::instance().filterManager();
+
 
     fil_man.disableAllFilters();
 
@@ -170,6 +271,145 @@ void EvaluationManager::loadData ()
         filter->widget()->update();
     }
 
+    // position data
+    if (load_only_sector_data_ && hasCurrentStandard())
+    {
+        assert (fil_man.hasFilter("Position"));
+        DBFilter* pos_fil = fil_man.getFilter("Position");
+
+        pos_fil->setActive(true);
+
+        json fil_cond;
+
+        bool first = true;
+        double lat_min, lat_max, long_min, long_max;
+        double tmp_lat_min, tmp_lat_max, tmp_long_min, tmp_long_max;
+
+        EvaluationStandard& standard = currentStandard();
+
+        std::vector<std::shared_ptr<SectorLayer>>& sector_layers = sectorsLayers();
+        for (auto& sec_it : sector_layers)
+        {
+            const string& sector_layer_name = sec_it->name();
+
+            for (auto& req_group_it : standard)
+            {
+                const string& requirement_group_name = req_group_it->name();
+
+                if (!useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+                    continue; // skip if not used
+
+                if (first)
+                {
+                    tie(lat_min, lat_max) = sec_it->getMinMaxLatitude();
+                    tie(long_min, long_max) = sec_it->getMinMaxLongitude();
+                    first = false;
+                }
+                else
+                {
+                    tie(tmp_lat_min, tmp_lat_max) = sec_it->getMinMaxLatitude();
+                    tie(tmp_long_min, tmp_long_max) = sec_it->getMinMaxLongitude();
+
+                    lat_min = min(lat_min, tmp_lat_min);
+                    lat_max = max(lat_max, tmp_lat_max);
+                    long_min = min(long_min, tmp_long_min);
+                    long_max = max(long_max, tmp_long_max);
+                }
+            }
+        }
+
+        //        lat_min = 46.49;
+        //        lat_max = 49.16;
+        //        long_min = 11.39;
+        //        long_max = 17.43;
+
+        if (!first)
+        {
+            latitude_min_ = lat_min-0.2;
+            latitude_max_ = lat_max+0.2;
+            longitude_min_ = long_min-0.2;
+            longitude_max_ = long_max+0.2;
+            min_max_pos_set_ = true;
+
+            fil_cond["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+            fil_cond["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+            fil_cond["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+            fil_cond["Position"]["Longitude Minimum"] = to_string(longitude_min_);
+
+            pos_fil->loadViewPointConditions(fil_cond);
+
+        }
+        else
+            min_max_pos_set_ = false;
+    }
+    else
+        min_max_pos_set_ = false;
+
+    // other filters
+    if (use_load_filter_)
+    {
+        if (use_time_filter_)
+        {
+            assert (fil_man.hasFilter("Time of Day"));
+            DBFilter* fil = fil_man.getFilter("Time of Day");
+
+            fil->setActive(true);
+
+            json filter;
+
+            filter["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(load_time_begin_);
+            filter["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(load_time_end_);
+
+            fil->loadViewPointConditions(filter);
+        }
+
+
+        if (use_adsb_filter_)
+        {
+            assert (fil_man.hasFilter("ADSB Quality"));
+            DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
+
+            adsb_fil->setActive(true);
+
+            json filter;
+
+            filter["ADSB Quality"]["use_v0"] = use_v0_;
+            filter["ADSB Quality"]["use_v1"] = use_v1_;
+            filter["ADSB Quality"]["use_v2"] = use_v2_;
+
+            // nucp
+            filter["ADSB Quality"]["use_min_nucp"] = use_min_nucp_;
+            filter["ADSB Quality"]["min_nucp"] = min_nucp_;
+            filter["ADSB Quality"]["use_max_nucp"] = use_max_nucp_;
+            filter["ADSB Quality"]["max_nucp"] = max_nucp_;
+
+            // nic
+            filter["ADSB Quality"]["use_min_nic"] = use_min_nic_;
+            filter["ADSB Quality"]["min_nic"] = min_nic_;
+            filter["ADSB Quality"]["use_max_nic"] = use_max_nic_;
+            filter["ADSB Quality"]["max_nic"] = max_nic_;
+
+            // nacp
+            filter["ADSB Quality"]["use_min_nacp"] = use_min_nacp_;
+            filter["ADSB Quality"]["min_nacp"] = min_nacp_;
+            filter["ADSB Quality"]["use_max_nacp"] = use_max_nacp_;
+            filter["ADSB Quality"]["max_nacp"] = max_nacp_;
+
+            // sil v1
+            filter["ADSB Quality"]["use_min_sil_v1"] = use_min_sil_v1_;
+            filter["ADSB Quality"]["min_sil_v1"] = min_sil_v1_;
+            filter["ADSB Quality"]["use_max_sil_v1"] = use_max_sil_v1_;
+            filter["ADSB Quality"]["max_sil_v1"] = max_sil_v1_;
+
+            // sil v2
+            filter["ADSB Quality"]["use_min_sil_v2"] = use_min_sil_v2_;
+            filter["ADSB Quality"]["min_sil_v2"] = min_sil_v2_;
+            filter["ADSB Quality"]["use_max_sil_v2"] = use_max_sil_v2_;
+            filter["ADSB Quality"]["max_sil_v2"] = max_sil_v2_;
+
+            adsb_fil->loadViewPointConditions(filter);
+        }
+    }
 
     // reference data
     {
@@ -277,7 +517,18 @@ void EvaluationManager::evaluate ()
     assert (data_loaded_);
     assert (hasCurrentStandard());
 
-    results_gen_.evaluate(data_, currentStandard());
+    // clean previous
+    results_gen_->clear();
+
+    evaluated_ = false;
+
+    if (widget_)
+        widget_->updateButtons();
+
+    emit resultsChangedSignal();
+
+    // eval
+    results_gen_->evaluate(data_, currentStandard());
 
     evaluated_ = true;
 
@@ -286,6 +537,8 @@ void EvaluationManager::evaluate ()
         widget_->updateButtons();
         widget_->expandResults();
     }
+
+    emit resultsChangedSignal();
 }
 
 bool EvaluationManager::canGenerateReport ()
@@ -323,6 +576,8 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
 {
     loginf << "EvaluationManager: addVariables: dbo_name " << dbo_name;
 
+    // TODO add required variables from standard requirements
+
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     read_set.add(object_man.metaVariable("rec_num").getFor(dbo_name));
@@ -331,10 +586,62 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     read_set.add(object_man.metaVariable("pos_lat_deg").getFor(dbo_name));
     read_set.add(object_man.metaVariable("pos_long_deg").getFor(dbo_name));
     read_set.add(object_man.metaVariable("target_addr").getFor(dbo_name));
+
+    // flight level
     read_set.add(object_man.metaVariable("modec_code_ft").getFor(dbo_name));
+
+    if (object_man.metaVariable("modec_g").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("modec_g").getFor(dbo_name));
+
+    if (object_man.metaVariable("modec_v").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("modec_v").getFor(dbo_name));
+
+    if (dbo_name_ref_ == dbo_name && dbo_name_ref_ == "Tracker")
+        read_set.add(object_man.object("Tracker").variable("tracked_alt_baro_ft"));
+
+    // m3a
     read_set.add(object_man.metaVariable("mode3a_code").getFor(dbo_name));
 
-    // TODO add required variables from standard requirements
+    if (object_man.metaVariable("mode3a_g").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("mode3a_g").getFor(dbo_name));
+
+    if (object_man.metaVariable("mode3a_v").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("mode3a_v").getFor(dbo_name));
+
+    if (object_man.metaVariable("track_num").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("track_num").getFor(dbo_name));
+
+    DBObject& db_object = object_man.object(dbo_name);
+
+    if (dbo_name == "ADSB")
+    {
+        read_set.add(db_object.variable("ground_bit"));
+        //            read_set.add(obj.variable("nac_p"));
+        //            read_set.add(obj.variable("nucp_nic"));
+        //            read_set.add(obj.variable("sil"));
+    }
+
+    // speed & heading
+    if (dbo_name == "ADSB")
+    {
+        read_set.add(db_object.variable("groundspeed_kt")); // double
+        read_set.add(db_object.variable("track_angle_deg")); // double
+    }
+    else if (dbo_name == "MLAT")
+    {
+        read_set.add(db_object.variable("velocity_vx_ms")); // double
+        read_set.add(db_object.variable("velocity_vy_ms")); // double
+    }
+    else if (dbo_name == "Radar")
+    {
+        read_set.add(db_object.variable("track_groundspeed_kt")); // double
+        read_set.add(db_object.variable("track_heading_deg")); // double
+    }
+    else if (dbo_name == "Tracker" || dbo_name == "RefTraj")
+    {
+        read_set.add(db_object.variable("groundspeed_kt")); // double
+        read_set.add(db_object.variable("heading_deg")); // double
+    }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));
     //        read_set.add(object_man.metaVariable("heading_deg").getFor(dbo_name_ref_));
@@ -356,6 +663,12 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         assert(standards_.find(standard->name()) == standards_.end());
 
         standards_[standard->name()].reset(standard);
+    }
+    else if (class_id == "EvaluationResultsGenerator")
+    {
+        assert (!results_gen_);
+        results_gen_.reset(new EvaluationResultsGenerator(class_id, instance_id, *this));
+        assert (results_gen_);
     }
     else if (class_id == "EvaluationResultsReportPDFGenerator")
     {
@@ -379,6 +692,10 @@ EvaluationManagerWidget* EvaluationManager::widget()
 
 void EvaluationManager::checkSubConfigurables()
 {
+    if (!results_gen_)
+        generateSubConfigurable("EvaluationResultsGenerator", "EvaluationResultsGenerator0");
+    assert (results_gen_);
+
     if (!pdf_gen_)
         generateSubConfigurable("EvaluationResultsReportPDFGenerator", "EvaluationResultsReportPDFGenerator0");
 
@@ -870,7 +1187,7 @@ std::vector<std::string> EvaluationManager::currentRequirementNames()
     {
         for (auto& req_grp_it : currentStandard())
         {
-            for (auto& req_it : *req_grp_it.second)
+            for (auto& req_it : *req_grp_it)
             {
                 if (find(names.begin(), names.end(), req_it->name()) == names.end())
                     names.push_back(req_it->name());
@@ -883,7 +1200,8 @@ std::vector<std::string> EvaluationManager::currentRequirementNames()
 
 EvaluationResultsGenerator& EvaluationManager::resultsGenerator()
 {
-    return results_gen_;
+    assert (results_gen_);
+    return *results_gen_;
 }
 
 bool EvaluationManager::sectorsLoaded() const
@@ -896,7 +1214,7 @@ void EvaluationManager::updateReferenceDBO()
     loginf << "EvaluationManager: updateReferenceDBO";
     
     data_sources_ref_.clear();
-    active_sources_ref_.clear();
+    //active_sources_ref_.clear();
     
     if (!hasValidReferenceDBO())
         return;
@@ -922,11 +1240,12 @@ void EvaluationManager::updateReferenceDataSources()
     {
         if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
         {
-            if (!active_sources_ref_.contains(to_string(ds_it->first)))
-                active_sources_ref_[to_string(ds_it->first)] = true; // init with default true
+            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
+                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t& active = active_sources_ref_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active
+                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_ref_.emplace(std::piecewise_construct,
                                       std::forward_as_tuple(ds_it->first),  // args for key
@@ -968,7 +1287,7 @@ void EvaluationManager::updateTestDBO()
     loginf << "EvaluationManager: updateTestDBO";
 
     data_sources_tst_.clear();
-    active_sources_tst_.clear();
+    //active_sources_tst_.clear();
 
     if (!hasValidTestDBO())
         return;
@@ -994,11 +1313,12 @@ void EvaluationManager::updateTestDataSources()
     {
         if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
         {
-            if (!active_sources_tst_.contains(to_string(ds_it->first)))
-                active_sources_tst_[to_string(ds_it->first)] = true; // init with default true
+            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
+                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
 
             // needed for old compiler
-            json::boolean_t& active = active_sources_tst_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+            json::boolean_t& active =
+                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
 
             data_sources_tst_.emplace(std::piecewise_construct,
                                       std::forward_as_tuple(ds_it->first),  // args for key
@@ -1100,19 +1420,43 @@ void EvaluationManager::showResultId (const std::string& id)
     widget_->showResultId(id);
 }
 
-void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
-{
-    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
 
-    data_.setUseTargetData(utn, value);
-    updateResultsToUseChangeOf(utn);
+EvaluationManager::ResultIterator EvaluationManager::begin()
+{
+    assert (results_gen_);
+    return results_gen_->begin();
+}
+EvaluationManager::ResultIterator EvaluationManager::end()
+{
+    assert (results_gen_);
+    return results_gen_->end();
 }
 
-void EvaluationManager::updateResultsToUseChangeOf (unsigned int utn)
+bool EvaluationManager::hasResults()
+{
+    assert (results_gen_);
+    return results_gen_->results().size();
+}
+const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>&
+EvaluationManager::results() const
+{
+    assert (results_gen_);
+    return results_gen_->results(); }
+;
+
+//void EvaluationManager::setUseTargetData (unsigned int utn, bool value)
+//{
+//    loginf << "EvaluationManager: setUseTargetData: utn " << utn << " use " << value;
+
+//    data_.setUseTargetData(utn, value);
+//    updateResultsToUseChangeOf(utn);
+//}
+
+void EvaluationManager::updateResultsToChanges ()
 {
     if (evaluated_)
     {
-        results_gen_.updateToUseChangeOf(utn);
+        results_gen_->updateToChanges();
 
         if (widget_)
         {
@@ -1150,47 +1494,47 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     if (time_end > 24*60*60)
         time_end = 24*60*60;
 
-//    "Time of Day": {
-//    "Time of Day Maximum": "05:56:32.297",
-//    "Time of Day Minimum": "05:44:58.445"
-//    },
+    //    "Time of Day": {
+    //    "Time of Day Maximum": "05:56:32.297",
+    //    "Time of Day Minimum": "05:44:58.445"
+    //    },
 
     data["filters"]["Time of Day"]["Time of Day Maximum"] = String::timeStringFromDouble(time_end);
     data["filters"]["Time of Day"]["Time of Day Minimum"] = String::timeStringFromDouble(time_begin);
 
-//    "Target Address": {
-//    "Target Address Values": "FEFE10"
-//    },
+    //    "Target Address": {
+    //    "Target Address Values": "FEFE10"
+    //    },
     if (target_data.targetAddresses().size())
         data["filters"]["Target Address"]["Target Address Values"] = target_data.targetAddressesStr()+",NULL";
 
-//    "Mode 3/A Code": {
-//    "Mode 3/A Code Values": "7000"
-//    }
+    //    "Mode 3/A Code": {
+    //    "Mode 3/A Code Values": "7000"
+    //    }
 
     if (target_data.modeACodes().size())
         data["filters"]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
 
-//    "filters": {
-//    "Barometric Altitude": {
-//    "Barometric Altitude Maxmimum": "43000",
-//    "Barometric Altitude Minimum": "500"
-//    },
+    //    "filters": {
+    //    "Barometric Altitude": {
+    //    "Barometric Altitude Maxmimum": "43000",
+    //    "Barometric Altitude Minimum": "500"
+    //    },
 
-//    if (target_data.hasModeC())
-//    {
-//        float alt_min = target_data.modeCMin();
-//        alt_min -= 300;
-//        float alt_max = target_data.modeCMax();
-//        alt_max += 300;
-//    }
+    //    if (target_data.hasModeC())
+    //    {
+    //        float alt_min = target_data.modeCMin();
+    //        alt_min -= 300;
+    //        float alt_max = target_data.modeCMax();
+    //        alt_max += 300;
+    //    }
 
-//    "Position": {
-//    "Latitude Maximum": "50.78493920733",
-//    "Latitude Minimum": "44.31547147615",
-//    "Longitude Maximum": "20.76559892354",
-//    "Longitude Minimum": "8.5801592186"
-//    }
+    //    "Position": {
+    //    "Latitude Maximum": "50.78493920733",
+    //    "Latitude Minimum": "44.31547147615",
+    //    "Longitude Maximum": "20.76559892354",
+    //    "Longitude Minimum": "8.5801592186"
+    //    }
 
     if (target_data.hasPos())
     {
@@ -1246,6 +1590,506 @@ EvaluationResultsReport::PDFGenerator& EvaluationManager::pdfGenerator() const
     return *pdf_gen_;
 }
 
+bool EvaluationManager::useUTN (unsigned int utn)
+{
+    logdbg << "EvaluationManager: useUTN: utn " << utn;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+
+    if (!configs_[current_config_name_]["utns"].contains(utn_str)
+            || !configs_[current_config_name_]["utns"].at(utn_str).contains("use"))
+        return true;
+    else
+        return configs_[current_config_name_]["utns"][utn_str]["use"];
+}
+
+void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bool update_res)
+{
+    logdbg << "EvaluationManager: useUTN: utn " << utn << " value " << value
+           << " update_td " << update_td;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+    configs_[current_config_name_]["utns"][utn_str]["use"] = value;
+
+    if (update_td)
+        data_.setUseTargetData(utn, value);
+
+    if (update_res && update_results_)
+        updateResultsToChanges();
+}
+
+void EvaluationManager::useAllUTNs (bool value)
+{
+    loginf << "EvaluationManager: useAllUTNs: value " << value;
+
+    update_results_ = false;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    set<unsigned int> already_set;
+
+    // set those already loaded, and remember them
+    for (auto& target_it : data_)
+    {
+        useUTN(target_it.utn_, value, true);
+        already_set.insert(target_it.utn_);
+    }
+
+
+    // set those only existing in config
+    string utn_str;
+    unsigned int utn;
+
+    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
+    {
+        utn_str = utn_it.first;
+        utn = stoul(utn_str);
+
+        //loginf << "EvaluationManager: useAllUTNs: utn_str '" << utn_str << "' utn '" << utn << "' value " << value;
+
+        if (!already_set.count(utn))
+            configs_[current_config_name_]["utns"][utn_str]["use"] = value;
+    }
+
+    update_results_ = true;
+    updateResultsToChanges();
+}
+
+void EvaluationManager::clearUTNComments ()
+{
+    loginf << "EvaluationManager: clearUTNComments";
+
+    update_results_ = false;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    set<unsigned int> already_set;
+
+    // set those already loaded, and remember them
+    for (auto& target_it : data_)
+    {
+        utnComment(target_it.utn_, "", true);
+        already_set.insert(target_it.utn_);
+    }
+
+    // set those only existing in config
+    string utn_str;
+    unsigned int utn;
+
+    for (auto& utn_it : configs_[current_config_name_]["utns"].get<json::object_t>())
+    {
+        utn_str = utn_it.first;
+        utn = stoul(utn_str);
+
+        //loginf << "EvaluationManager: clearUTNComments: utn_str '" << utn_str << "' utn '" << utn << "'";
+
+        if (!already_set.count(utn))
+            configs_[current_config_name_]["utns"][utn_str]["comment"] = "";
+    }
+
+    update_results_ = true;
+}
+
+
+void EvaluationManager::filterUTNs ()
+{
+    loginf << "EvaluationManager: filterUTNs";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    update_results_ = false;
+
+    DBObjectManager& dbo_man = COMPASS::instance().objectManager();
+
+    map<string, set<unsigned int>> associated_utns;
+
+    if (remove_not_detected_dbos_) // prepare associations
+    {
+        if (dbo_man.hasAssociations())
+        {
+            for (auto& dbo_it : dbo_man)
+            {
+                if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+                        && remove_not_detected_dbo_values_.at(dbo_it.first) == true)
+                {
+                    associated_utns[dbo_it.first] = dbo_it.second->associations().getAllUTNS();
+                }
+            }
+        }
+    }
+
+    bool use;
+    string comment;
+
+    std::set<std::pair<int,int>> remove_mode_as = removeModeACodeData();
+    std::set<unsigned int> remove_tas = removeTargetAddressData();
+
+    for (auto& target_it : data_)
+    {
+        if (!target_it.use())
+            continue;
+
+        use = true; // must be true here
+        comment = "";
+
+        if (remove_short_targets_
+                && (target_it.numUpdates() < remove_short_targets_min_updates_
+                    || target_it.timeDuration() < remove_short_targets_min_duration_))
+        {
+            use = false;
+            comment = "Short track";
+        }
+
+        if (use && remove_psr_only_targets_)
+        {
+            if (!target_it.callsigns().size()
+                    && !target_it.targetAddresses().size()
+                    && !target_it.modeACodes().size()
+                    && !target_it.hasModeC())
+            {
+                use = false;
+                comment = "Primary only";
+            }
+        }
+
+        if (use && remove_modeac_onlys_)
+        {
+            if (!target_it.callsigns().size()
+                    && !target_it.targetAddresses().size())
+            {
+                use = false;
+                comment = "Mode A/C only";
+            }
+        }
+
+        if (use && remove_mode_a_codes_)
+        {
+            for (auto t_ma : target_it.modeACodes())
+            {
+                for (auto& r_ma_p : remove_mode_as)
+                {
+                    if (r_ma_p.second == -1) // single
+                    {
+                        if (t_ma == r_ma_p.first)
+                        {
+                            use = false;
+                            comment = "Mode A";
+                            break;
+                        }
+                    }
+                    else // pair
+                    {
+                        if (t_ma >= r_ma_p.first && t_ma <= r_ma_p.second)
+                        {
+                            use = false;
+                            comment = "Mode A";
+                            break;
+                        }
+                    }
+                }
+
+                if (!use) // already removed
+                    break;
+            }
+        }
+
+        if (use && remove_target_addresses_)
+        {
+            for (auto t_ta : target_it.targetAddresses())
+            {
+                if (remove_tas.count(t_ta))
+                {
+                    use = false;
+                    comment = "Target Address";
+                    break;
+                }
+            }
+        }
+
+        if (use && remove_not_detected_dbos_) // prepare associations
+        {
+            if (dbo_man.hasAssociations())
+            {
+                for (auto& dbo_it : dbo_man)
+                {
+                    if (remove_not_detected_dbo_values_.contains(dbo_it.first)
+                            && remove_not_detected_dbo_values_.at(dbo_it.first) == true // removed if not detected
+                            && associated_utns.count(dbo_it.first) // have associations
+                            && !associated_utns.at(dbo_it.first).count(target_it.utn_)) // not detected
+                    {
+                        use = false; // remove it
+                        comment = "Not Detected by "+dbo_it.first;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!use)
+        {
+            logdbg << "EvaluationManager: filterUTNs: removing " << target_it.utn_ << " comment '" << comment << "'";
+            useUTN (target_it.utn_, use, true);
+            utnComment(target_it.utn_, comment, false);
+        }
+    }
+
+    update_results_ = true;
+    updateResultsToChanges();
+
+    QApplication::restoreOverrideCursor();
+}
+
+std::string EvaluationManager::utnComment (unsigned int utn)
+{
+    logdbg << "EvaluationManager: utnComment: utn " << utn;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+
+    if (!configs_[current_config_name_]["utns"].contains(utn_str)
+            || !configs_[current_config_name_]["utns"].at(utn_str).contains("comment"))
+        return "";
+    else
+        return configs_[current_config_name_]["utns"][utn_str]["comment"];
+}
+
+void EvaluationManager::utnComment (unsigned int utn, std::string value, bool update_td)
+{
+    logdbg << "EvaluationManager: utnComment: utn " << utn << " value '" << value << "'"
+           << " update_td " << update_td;
+
+    if (!current_config_name_.size())
+        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+
+    string utn_str = to_string(utn);
+    configs_[current_config_name_]["utns"][utn_str]["comment"] = value;
+
+    if (update_td)
+        data_.setTargetDataComment(utn, value);
+}
+
+bool EvaluationManager::removeShortTargets() const
+{
+    return remove_short_targets_;
+}
+
+void EvaluationManager::removeShortTargets(bool value)
+{
+    loginf << "EvaluationManager: removeShortTargets: value " << value;
+
+    remove_short_targets_ = value;
+}
+
+unsigned int EvaluationManager::removeShortTargetsMinUpdates() const
+{
+    return remove_short_targets_min_updates_;
+}
+
+void EvaluationManager::removeShortTargetsMinUpdates(unsigned int value)
+{
+    loginf << "EvaluationManager: removeShortTargetsMinUpdates: value " << value;
+
+    remove_short_targets_min_updates_ = value;
+}
+
+double EvaluationManager::removeShortTargetsMinDuration() const
+{
+    return remove_short_targets_min_duration_;
+}
+
+void EvaluationManager::removeShortTargetsMinDuration(double value)
+{
+    loginf << "EvaluationManager: removeShortTargetsMinDuration: value " << value;
+
+    remove_short_targets_min_duration_ = value;
+}
+
+bool EvaluationManager::removePsrOnlyTargets() const
+{
+    return remove_psr_only_targets_;
+}
+
+void EvaluationManager::removePsrOnlyTargets(bool value)
+{
+    loginf << "EvaluationManager: removePsrOnlyTargets: value " << value;
+
+    remove_psr_only_targets_ = value;
+}
+
+std::string EvaluationManager::removeModeACodeValues() const
+{
+    return remove_mode_a_code_values_;
+}
+
+std::set<std::pair<int,int>> EvaluationManager::removeModeACodeData() const // single ma,-1 or range ma1,ma2
+{
+    std::set<std::pair<int,int>> data;
+
+    vector<string> parts = String::split(remove_mode_a_code_values_, ',');
+
+    for (auto& part_it : parts)
+    {
+        if (part_it.find("-") != std::string::npos) // range
+        {
+            vector<string> sub_parts = String::split(part_it, '-');
+
+            if (sub_parts.size() != 2)
+            {
+                logwrn << "EvaluationManager: removeModeACodeData: not able to parse range '" << part_it << "'";
+                continue;
+            }
+
+            int val1 = String::intFromOctalString(sub_parts.at(0));
+            int val2 = String::intFromOctalString(sub_parts.at(1));
+
+            data.insert({val1, val2});
+        }
+        else // single value
+        {
+            int val1 = String::intFromOctalString(part_it);
+            data.insert({val1, -1});
+        }
+    }
+
+    return data;
+}
+
+void EvaluationManager::removeModeACodeValues(const std::string& value)
+{
+    loginf << "EvaluationManager: removeModeACodeValues: value '" << value << "'";
+
+    remove_mode_a_code_values_ = value;
+}
+
+std::string EvaluationManager::removeTargetAddressValues() const
+{
+    return remove_target_address_values_;
+}
+
+std::set<unsigned int> EvaluationManager::removeTargetAddressData() const
+{
+    std::set<unsigned int>  data;
+
+    vector<string> parts = String::split(remove_target_address_values_, ',');
+
+    for (auto& part_it : parts)
+    {
+        int val1 = String::intFromHexString(part_it);
+        data.insert(val1);
+    }
+
+    return data;
+}
+
+void EvaluationManager::removeTargetAddressValues(const std::string& value)
+{
+    loginf << "EvaluationManager: removeTargetAddressValues: value '" << value << "'";
+
+    remove_target_address_values_ = value;
+}
+
+bool EvaluationManager::removeModeACOnlys() const
+{
+    return remove_modeac_onlys_;
+}
+
+void EvaluationManager::removeModeACOnlys(bool value)
+{
+    loginf << "EvaluationManager: removeModeACOnlys: value " << value;
+    remove_modeac_onlys_ = value;
+}
+
+bool EvaluationManager::removeNotDetectedDBOs() const
+{
+    return remove_not_detected_dbos_;
+}
+
+void EvaluationManager::removeNotDetectedDBOs(bool value)
+{
+    loginf << "EvaluationManager: removeNotDetectedDBOs: value " << value;
+
+    remove_not_detected_dbos_ = value;
+}
+
+bool EvaluationManager::removeNotDetectedDBO(const std::string& dbo_name) const
+{
+    if (!remove_not_detected_dbo_values_.contains(dbo_name))
+        return false;
+
+    return remove_not_detected_dbo_values_.at(dbo_name);
+}
+
+void EvaluationManager::removeNotDetectedDBOs(const std::string& dbo_name, bool value)
+{
+    loginf << "EvaluationManager: removeNotDetectedDBOs: dbo " << dbo_name << " value " << value;
+
+    remove_not_detected_dbo_values_[dbo_name] = value;
+}
+
+bool EvaluationManager::hasADSBInfo() const
+{
+    return has_adsb_info_;
+}
+
+bool EvaluationManager::hasADSBInfo(unsigned int ta) const
+{
+    assert (has_adsb_info_);
+    return adsb_info_.count(ta);
+}
+
+std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
+std::tuple<bool, unsigned int, unsigned int>> EvaluationManager::adsbInfo(unsigned int ta) const
+{
+    assert (has_adsb_info_);
+    assert (adsb_info_.count(ta));
+
+    return adsb_info_.at(ta);
+}
+
+bool EvaluationManager::loadOnlySectorData() const
+{
+    return load_only_sector_data_;
+}
+
+void EvaluationManager::loadOnlySectorData(bool value)
+{
+    load_only_sector_data_ = value;
+}
+
+bool EvaluationManager::removeTargetAddresses() const
+{
+    return remove_target_addresses_;
+}
+
+void EvaluationManager::removeTargetAddresses(bool value)
+{
+    loginf << "EvaluationManager: removeTargetAddresses: value " << value;
+
+    remove_target_addresses_ = value;
+}
+
+bool EvaluationManager::removeModeACodes() const
+{
+    return remove_mode_a_codes_;
+}
+
+void EvaluationManager::removeModeACodes(bool value)
+{
+    loginf << "EvaluationManager: removeModeACodes: value " << value;
+
+    remove_mode_a_codes_ = value;
+}
+
 nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
 {
     nlohmann::json data;
@@ -1261,26 +2105,62 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
     //    }
     //    }
 
-    data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
-
-    // ref srcs
+    if (dbo_name_ref_ != dbo_name_tst_)
     {
-        vector<unsigned int> active_ref_srcs;
+        data["db_objects"] = vector<string>{dbo_name_ref_, dbo_name_tst_};
 
-        for (auto& ds_it : data_sources_ref_)
-            active_ref_srcs.push_back(ds_it.first);
+        // ref srcs
+        {
+            vector<unsigned int> active_ref_srcs;
 
-        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
+            for (auto& ds_it : data_sources_ref_)
+                if (ds_it.second.isActive())
+                    active_ref_srcs.push_back(ds_it.first);
+
+            data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_ref_srcs;
+        }
+
+        // tst srcs
+        {
+            vector<unsigned int> active_tst_srcs;
+
+            for (auto& ds_it : data_sources_tst_)
+                if (ds_it.second.isActive())
+                    active_tst_srcs.push_back(ds_it.first);
+
+            data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
+        }
+
+    }
+    else
+    {
+        data["db_objects"] = vector<string>{dbo_name_ref_};
+
+        vector<unsigned int> active_srcs;
+
+        // ref srcs
+        {
+            for (auto& ds_it : data_sources_ref_)
+                if (ds_it.second.isActive())
+                    active_srcs.push_back(ds_it.first);
+        }
+
+        // tst srcs
+        {
+            for (auto& ds_it : data_sources_tst_)
+                if (ds_it.second.isActive())
+                    active_srcs.push_back(ds_it.first);
+        }
+
+        data["filters"][dbo_name_ref_+" Data Sources"]["active_sources"] = active_srcs;
     }
 
-    // tst srcs
+    if (load_only_sector_data_ && min_max_pos_set_)
     {
-        vector<unsigned int> active_tst_srcs;
-
-        for (auto& ds_it : data_sources_tst_)
-            active_tst_srcs.push_back(ds_it.first);
-
-        data["filters"][dbo_name_tst_+" Data Sources"]["active_sources"] = active_tst_srcs;
+        data["filters"]["Position"]["Latitude Maximum"] = to_string(latitude_max_);
+        data["filters"]["Position"]["Latitude Minimum"] = to_string(latitude_min_);
+        data["filters"]["Position"]["Longitude Maximum"] = to_string(longitude_max_);
+        data["filters"]["Position"]["Longitude Minimum"] = to_string(longitude_min_);
     }
 
     return data;
@@ -1294,3 +2174,324 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableNoDataConfig ()
 
     return data;
 }
+
+bool EvaluationManager::useV0() const
+{
+    return use_v0_;
+}
+
+void EvaluationManager::useV0(bool value)
+{
+    loginf << "EvaluationManager: useV0: value " << value;
+    use_v0_ = value;
+}
+
+bool EvaluationManager::useV1() const
+{
+    return use_v1_;
+}
+
+void EvaluationManager::useV1(bool value)
+{
+    loginf << "EvaluationManager: useV1: value " << value;
+    use_v1_ = value;
+}
+
+bool EvaluationManager::useV2() const
+{
+    return use_v2_;
+}
+
+void EvaluationManager::useV2(bool value)
+{
+    loginf << "EvaluationManager: useV2: value " << value;
+    use_v2_ = value;
+}
+
+bool EvaluationManager::useMinNUCP() const
+{
+    return use_min_nucp_;
+}
+
+void EvaluationManager::useMinNUCP(bool value)
+{
+    loginf << "EvaluationManager: useMinNUCP: value " << value;
+    use_min_nucp_ = value;
+}
+
+unsigned int EvaluationManager::minNUCP() const
+{
+    return min_nucp_;
+}
+
+void EvaluationManager::minNUCP(unsigned int value)
+{
+    loginf << "EvaluationManager: minNUCP: value " << value;
+    min_nucp_ = value;
+}
+
+bool EvaluationManager::useMinNIC() const
+{
+    return use_min_nic_;
+}
+
+void EvaluationManager::useMinNIC(bool value)
+{
+    loginf << "EvaluationManager: useMinNIC: value " << value;
+    use_min_nic_ = value;
+}
+
+unsigned int EvaluationManager::minNIC() const
+{
+    return min_nic_;
+}
+
+void EvaluationManager::minNIC(unsigned int value)
+{
+    loginf << "EvaluationManager: minNIC: value " << value;
+    min_nic_ = value;
+}
+
+bool EvaluationManager::useMinNACp() const
+{
+    return use_min_nacp_;
+}
+
+void EvaluationManager::useMinNACp(bool value)
+{
+    loginf << "EvaluationManager: useMinNACp: value " << value;
+    use_min_nacp_ = value;
+}
+
+unsigned int EvaluationManager::minNACp() const
+{
+    return min_nacp_;
+}
+
+void EvaluationManager::minNACp(unsigned int value)
+{
+    loginf << "EvaluationManager: minNACp: value " << value;
+    min_nacp_ = value;
+}
+
+bool EvaluationManager::useMinSILv1() const
+{
+    return use_min_sil_v1_;
+}
+
+void EvaluationManager::useMinSILv1(bool value)
+{
+    loginf << "EvaluationManager: useMinSILv1: value " << value;
+    use_min_sil_v1_ = value;
+}
+
+unsigned int EvaluationManager::minSILv1() const
+{
+    return min_sil_v1_;
+}
+
+void EvaluationManager::minSILv1(unsigned int value)
+{
+    loginf << "EvaluationManager: minSILv1: value " << value;
+    min_sil_v1_ = value;
+}
+
+bool EvaluationManager::useMinSILv2() const
+{
+    return use_min_sil_v2_;
+}
+
+void EvaluationManager::useMinSILv2(bool value)
+{
+    loginf << "EvaluationManager: useMinSILv2: value " << value;
+    use_min_sil_v2_ = value;
+}
+
+unsigned int EvaluationManager::minSILv2() const
+{
+    return min_sil_v2_;
+}
+
+void EvaluationManager::minSILv2(unsigned int value)
+{
+    loginf << "EvaluationManager: minSILv2: value " << value;
+    min_sil_v2_ = value;
+}
+
+bool EvaluationManager::useMaxNUCP() const
+{
+    return use_max_nucp_;
+}
+
+void EvaluationManager::useMaxNUCP(bool value)
+{
+    loginf << "EvaluationManager: useMaxNUCP: value " << value;
+    use_max_nucp_ = value;
+}
+
+unsigned int EvaluationManager::maxNUCP() const
+{
+    return max_nucp_;
+}
+
+void EvaluationManager::maxNUCP(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNUCP: value " << value;
+    max_nucp_ = value;
+}
+
+bool EvaluationManager::useMaxNIC() const
+{
+    return use_max_nic_;
+}
+
+void EvaluationManager::useMaxNIC(bool value)
+{
+    loginf << "EvaluationManager: useMaxNIC: value " << value;
+    use_max_nic_ = value;
+}
+
+unsigned int EvaluationManager::maxNIC() const
+{
+    return max_nic_;
+}
+
+void EvaluationManager::maxNIC(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNIC: value " << value;
+    max_nic_ = value;
+}
+
+bool EvaluationManager::useMaxNACp() const
+{
+    return use_max_nacp_;
+}
+
+void EvaluationManager::useMaxNACp(bool value)
+{
+    loginf << "EvaluationManager: useMaxNACp: value " << value;
+    use_max_nacp_ = value;
+}
+
+unsigned int EvaluationManager::maxNACp() const
+{
+    return max_nacp_;
+}
+
+void EvaluationManager::maxNACp(unsigned int value)
+{
+    loginf << "EvaluationManager: maxNACp: value " << value;
+    max_nacp_ = value;
+}
+
+bool EvaluationManager::useMaxSILv1() const
+{
+    return use_max_sil_v1_;
+}
+
+void EvaluationManager::useMaxSILv1(bool value)
+{
+    loginf << "EvaluationManager: useMaxSILv1: value " << value;
+    use_max_sil_v1_ = value;
+}
+
+unsigned int EvaluationManager::maxSILv1() const
+{
+    return max_sil_v1_;
+}
+
+void EvaluationManager::maxSILv1(unsigned int value)
+{
+    loginf << "EvaluationManager: maxSILv1: value " << value;
+    max_sil_v1_ = value;
+}
+
+bool EvaluationManager::useMaxSILv2() const
+{
+    return use_max_sil_v2_;
+}
+
+void EvaluationManager::useMaxSILv2(bool value)
+{
+    loginf << "EvaluationManager: useMaxSILv2: value " << value;
+    use_max_sil_v2_ = value;
+}
+
+unsigned int EvaluationManager::maxSILv2() const
+{
+    return max_sil_v2_;
+}
+
+void EvaluationManager::maxSILv2(unsigned int value)
+{
+    loginf << "EvaluationManager: maxSILv2: value " << value;
+    max_sil_v2_ = value;
+}
+
+bool EvaluationManager::useLoadFilter() const
+{
+    return use_load_filter_;
+}
+
+void EvaluationManager::useLoadFilter(bool value)
+{
+    loginf << "EvaluationManager: useLoadFilter: value " << value;
+    use_load_filter_ = value;
+}
+
+bool EvaluationManager::useTimeFilter() const
+{
+    return use_time_filter_;
+}
+
+void EvaluationManager::useTimeFilter(bool value)
+{
+    loginf << "EvaluationManager: useTimeFilter: value " << value;
+    use_time_filter_ = value;
+}
+
+float EvaluationManager::loadTimeBegin() const
+{
+    return load_time_begin_;
+}
+
+void EvaluationManager::loadTimeBegin(float value)
+{
+    loginf << "EvaluationManager: loadTimeBegin: value " << value;
+    load_time_begin_ = value;
+}
+
+float EvaluationManager::loadTimeEnd() const
+{
+    return load_time_end_;
+}
+
+void EvaluationManager::loadTimeEnd(float value)
+{
+    loginf << "EvaluationManager: loadTimeEnd: value " << value;
+    load_time_end_ = value;
+}
+
+bool EvaluationManager::useASDBFilter() const
+{
+    return use_adsb_filter_;
+}
+
+void EvaluationManager::useASDBFilter(bool value)
+{
+    loginf << "EvaluationManager: useASDBFilter: value " << value;
+    use_adsb_filter_ = value;
+}
+
+float EvaluationManager::maxRefTimeDiff() const
+{
+    return max_ref_time_diff_;
+}
+
+void EvaluationManager::maxRefTimeDiff(float value)
+{
+    loginf << "EvaluationManager: maxRefTimeDiff: value " << value;
+
+    max_ref_time_diff_ = value;
+}
+

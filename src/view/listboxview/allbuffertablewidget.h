@@ -69,7 +69,7 @@ class AllBufferTableWidget : public QWidget
 
     void clear();
     /// @brief Shows Buffer content in table
-    void show(std::shared_ptr<Buffer> buffer);
+    void show(std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
     void resetModel();
     void updateToSelection();

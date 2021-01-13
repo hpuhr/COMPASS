@@ -61,6 +61,34 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
     registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
     registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
     registerParameter("longitude_var_str", &longitude_var_str_, "pos_long_deg");
+
+    // common
+    registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
+    registerParameter("clean_dubious_utns", &clean_dubious_utns_, true);
+    registerParameter("mark_dubious_utns_unused", &mark_dubious_utns_unused_, false);
+    registerParameter("comment_dubious_utns", &comment_dubious_utns_, true);
+
+    // tracker stuff
+    registerParameter("max_time_diff_tracker", &max_time_diff_tracker_, 15.0);
+
+    registerParameter("max_distance_quit_tracker", &max_distance_quit_tracker_, 10*NM2M); // kb 5nm
+    registerParameter("max_distance_dubious_tracker", &max_distance_dubious_tracker_, 3*NM2M); //kb 2.5? 2.5 lowest
+    registerParameter("max_positions_dubious_tracker", &max_positions_dubious_tracker_, 5);
+
+    registerParameter("max_distance_acceptable_tracker", &max_distance_acceptable_tracker_, NM2M/2.0);
+    registerParameter("max_altitude_diff_tracker", &max_altitude_diff_tracker_, 300.0);
+
+    registerParameter("min_updates_tracker", &min_updates_tracker_, 2); // kb 3!!!
+    registerParameter("prob_min_time_overlap_tracker", &prob_min_time_overlap_tracker_, 0.5); //kb 0.7
+    registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000);
+
+    // sensor
+    registerParameter("max_time_diff_sensor", &max_time_diff_sensor_, 15.0);
+    registerParameter("max_distance_acceptable_sensor", &max_distance_acceptable_sensor_, 2*NM2M);
+    registerParameter("max_altitude_diff_sensor", &max_altitude_diff_sensor_, 300.0);
+
+    // target id? kb: nope
+    // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
 }
 
 CreateAssociationsTask::~CreateAssociationsTask() {}
@@ -241,6 +269,182 @@ void CreateAssociationsTask::run()
     status_dialog_->show();
 }
 
+double CreateAssociationsTask::maxTimeDiffTracker() const
+{
+    return max_time_diff_tracker_;
+}
+
+void CreateAssociationsTask::maxTimeDiffTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxTimeDiffTracker: value " << value;
+    max_time_diff_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxTimeDiffSensor() const
+{
+    return max_time_diff_sensor_;
+}
+
+void CreateAssociationsTask::maxTimeDiffSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxTimeDiffSensor: value " << value;
+    max_time_diff_sensor_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceQuitTracker() const
+{
+    return max_distance_quit_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceQuitTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceQuitTracker: value " << value;
+    max_distance_quit_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceDubiousTracker() const
+{
+    return max_distance_dubious_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceDubiousTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceDubiousTracker: value " << value;
+    max_distance_dubious_tracker_ = value;
+}
+
+unsigned int CreateAssociationsTask::maxPositionsDubiousTracker() const
+{
+    return max_positions_dubious_tracker_;
+}
+
+void CreateAssociationsTask::maxPositionsDubiousTracker(unsigned int value)
+{
+    loginf << "CreateAssociationsTask: maxPositionsDubiousTracker: value " << value;
+    max_positions_dubious_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceAcceptableTracker() const
+{
+    return max_distance_acceptable_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceAcceptableTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceAcceptableTracker: value " << value;
+    max_distance_acceptable_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceAcceptableSensor() const
+{
+    return max_distance_acceptable_sensor_;
+}
+
+void CreateAssociationsTask::maxDistanceAcceptableSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceAcceptableSensor: value " << value;
+    max_distance_acceptable_sensor_ = value;
+}
+
+double CreateAssociationsTask::maxAltitudeDiffTracker() const
+{
+    return max_altitude_diff_tracker_;
+}
+
+void CreateAssociationsTask::maxAltitudeDiffTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxAltitudeDiffTracker: value " << value;
+    max_altitude_diff_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxAltitudeDiffSensor() const
+{
+    return max_altitude_diff_sensor_;
+}
+
+void CreateAssociationsTask::maxAltitudeDiffSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxAltitudeDiffSensor: value " << value;
+    max_altitude_diff_sensor_ = value;
+}
+
+double CreateAssociationsTask::probMinTimeOverlapTracker() const
+{
+    return prob_min_time_overlap_tracker_;
+}
+
+void CreateAssociationsTask::probMinTimeOverlapTracker(double value)
+{
+    loginf << "CreateAssociationsTask: probMinTimeOverlapTracker: value " << value;
+    prob_min_time_overlap_tracker_ = value;
+}
+
+unsigned int CreateAssociationsTask::minUpdatesTracker() const
+{
+    return min_updates_tracker_;
+}
+
+void CreateAssociationsTask::minUpdatesTracker(unsigned int value)
+{
+    loginf << "CreateAssociationsTask: minUpdatesTracker: value " << value;
+    min_updates_tracker_ = value;
+}
+
+bool CreateAssociationsTask::associateNonModeS() const
+{
+    return associate_non_mode_s_;
+}
+
+void CreateAssociationsTask::associateNonModeS(bool value)
+{
+    loginf << "CreateAssociationsTask: associateNonModeS: value " << value;
+    associate_non_mode_s_ = value;
+}
+
+double CreateAssociationsTask::maxSpeedTrackerKts() const
+{
+    return max_speed_tracker_kts_;
+}
+
+void CreateAssociationsTask::maxSpeedTrackerKts(double value)
+{
+    loginf << "CreateAssociationsTask: maxSpeedTrackerKts: value " << value;
+    max_speed_tracker_kts_ = value;
+}
+
+bool CreateAssociationsTask::cleanDubiousUtns() const
+{
+    return clean_dubious_utns_;
+}
+
+void CreateAssociationsTask::cleanDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: cleanDubiousUtns: value " << value;
+    clean_dubious_utns_ = value;
+}
+
+bool CreateAssociationsTask::markDubiousUtnsUnused() const
+{
+    return mark_dubious_utns_unused_;
+}
+
+void CreateAssociationsTask::markDubiousUtnsUnused(bool value)
+{
+    loginf << "CreateAssociationsTask: markDubiousUtnsUnused: value " << value;
+    mark_dubious_utns_unused_ = value;
+}
+
+bool CreateAssociationsTask::commentDubiousUtns() const
+{
+    return comment_dubious_utns_;
+}
+
+void CreateAssociationsTask::commentDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: commentDubiousUtns: value " << value;
+    comment_dubious_utns_ = value;
+}
+
 void CreateAssociationsTask::newDataSlot(DBObject& object)
 {
 }
@@ -355,60 +559,6 @@ void CreateAssociationsTask::closeStatusDialogSlot()
     status_dialog_->close();
     status_dialog_ = nullptr;
 }
-
-//std::string CreateAssociationsTask::keyVarStr() const { return key_var_str_; }
-
-//void CreateAssociationsTask::keyVarStr(const std::string& var_str)
-//{
-//    loginf << "CreateAssociationsTask: keyVarStr: '" << var_str << "'";
-
-//    key_var_str_ = var_str;
-//}
-
-//std::string CreateAssociationsTask::dsIdVarStr() const { return ds_id_var_str_; }
-
-//std::string CreateAssociationsTask::targetAddrVarStr() const { return target_addr_var_str_; }
-
-//void CreateAssociationsTask::targetAddrVarStr(const std::string& var_str)
-//{
-//    loginf << "CreateAssociationsTask: targetAddrVarStr: '" << var_str << "'";
-
-//    target_addr_var_str_ = var_str;
-//}
-
-//std::string CreateAssociationsTask::todVarStr() const { return tod_var_str_; }
-
-//void CreateAssociationsTask::todVarStr(const std::string& var_str)
-//{
-//    loginf << "CreateAssociationsTask: todVarStr: '" << var_str << "'";
-
-//    tod_var_str_ = var_str;
-//}
-
-//std::string CreateAssociationsTask::targetIdVarStr() const
-//{
-//    return target_id_var_str_;
-//}
-
-//std::string CreateAssociationsTask::mode3AVarStr() const
-//{
-//    return mode_3a_var_str_;
-//}
-
-//std::string CreateAssociationsTask::modeCVarStr() const
-//{
-//    return mode_c_var_str_;
-//}
-
-//std::string CreateAssociationsTask::latitudeVarStr() const
-//{
-//    return latitude_var_str_;
-//}
-
-//std::string CreateAssociationsTask::longitudeVarStr() const
-//{
-//    return longitude_var_str_;
-//}
 
 MetaDBOVariable* CreateAssociationsTask::keyVar() const
 {
