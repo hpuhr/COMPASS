@@ -29,35 +29,37 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class SpeedConfig;
+class SpeedConfig;
 
-    class SpeedConfigWidget : public BaseConfigWidget
-    {
-        Q_OBJECT
+class SpeedConfigWidget : public BaseConfigWidget
+{
+    Q_OBJECT
 
-    public slots:
-        void thresholdValueEditSlot(QString value);
+public slots:
+    void thresholdValueEditSlot(QString value);
 
-        void toggleUsePercentIfHigherSlot();
-        void thresholdPercentEditSlot(QString value);
+    void toggleUsePercentIfHigherSlot();
+    void thresholdPercentEditSlot(QString value);
 
-        void changedThresholdValueCheckTypeSlot();
-        void toggleFailedValuesOfInterestSlot();
+    void changedThresholdValueCheckTypeSlot();
+    void toggleFailedValuesOfInterestSlot();
 
-    public:
-        SpeedConfigWidget(SpeedConfig& cfg);
+public:
+    SpeedConfigWidget(SpeedConfig& cfg);
 
-    protected:
-        QLineEdit* threshold_value_edit_{nullptr};
+protected:
+    QLineEdit* threshold_value_edit_{nullptr};
 
-        QCheckBox* use_percent_if_higher_check_{nullptr};
-        QLineEdit* threshold_percent_edit_{nullptr};
+    QCheckBox* use_percent_if_higher_check_{nullptr};
+    QLineEdit* threshold_percent_edit_{nullptr};
 
-        ComparisonTypeComboBox* threshold_value_check_type_box_ {nullptr};
-        QCheckBox* failed_values_of_interest_check_{nullptr};
+    ComparisonTypeComboBox* threshold_value_check_type_box_ {nullptr};
+    QCheckBox* failed_values_of_interest_check_{nullptr};
 
-        SpeedConfig& config();
-    };
+    SpeedConfig& config();
+
+    void updateActive();
+};
 
 }
 

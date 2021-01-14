@@ -35,6 +35,7 @@ BaseConfig::BaseConfig(
 {
     registerParameter("name", &name_, "");
     registerParameter("short_name", &short_name_, "");
+    registerParameter("comment", &comment_, "");
 
     registerParameter("prob", &prob_, 0.9);
     registerParameter("prob_check_type", (unsigned int*)&prob_check_type_,
@@ -76,6 +77,16 @@ BaseConfigWidget* BaseConfig::widget()
     }
 
     return widget_.get();
+}
+
+std::string BaseConfig::comment() const
+{
+    return comment_;
+}
+
+void BaseConfig::comment(const std::string &comment)
+{
+    comment_ = comment;
 }
 
 void BaseConfig::createWidget()

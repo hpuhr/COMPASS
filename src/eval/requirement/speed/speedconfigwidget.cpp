@@ -69,6 +69,8 @@ SpeedConfigWidget::SpeedConfigWidget(SpeedConfig& cfg)
             this, &SpeedConfigWidget::toggleFailedValuesOfInterestSlot);
 
     form_layout_->addRow("Failed Values are of Interest", failed_values_of_interest_check_);
+
+    updateActive();
 }
 
 void SpeedConfigWidget::thresholdValueEditSlot(QString value)
@@ -90,6 +92,8 @@ void SpeedConfigWidget::toggleUsePercentIfHigherSlot()
 
     assert (use_percent_if_higher_check_);
     config().usePercentIfHigher(use_percent_if_higher_check_->checkState() == Qt::Checked);
+
+    updateActive();
 }
 
 void SpeedConfigWidget::thresholdPercentEditSlot(QString value)
@@ -128,5 +132,12 @@ SpeedConfig& SpeedConfigWidget::config()
 
     return *config;
 }
+
+void SpeedConfigWidget::updateActive()
+{
+    assert (threshold_percent_edit_);
+    threshold_percent_edit_->setEnabled(config().usePercentIfHigher());
+}
+
 
 }

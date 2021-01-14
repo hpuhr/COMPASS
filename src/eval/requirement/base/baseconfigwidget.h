@@ -23,6 +23,7 @@ signals:
 public slots:
     void changedNameSlot();
     void changedShortNameSlot();
+    void changedCommentSlot();
     void changedProbabilitySlot(const QString& value);
     void changedTypeSlot();
 

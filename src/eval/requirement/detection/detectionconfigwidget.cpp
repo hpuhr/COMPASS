@@ -84,6 +84,8 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
             this, &DetectionConfigWidget::missToleranceEditSlot);
 
     form_layout_->addRow("Miss Tolerance [s]", miss_tolerance_edit_);
+
+    updateActive();
 }
 
 
@@ -107,6 +109,8 @@ void DetectionConfigWidget::toggleUseMinGapLengthSlot()
 
     assert (use_min_gap_length_check_);
     config().useMinGapLength(use_min_gap_length_check_->checkState() == Qt::Checked);
+
+    updateActive();
 }
 void DetectionConfigWidget::minGapLengthEditSlot(QString value)
 {
@@ -128,6 +132,8 @@ void DetectionConfigWidget::toggleUseMaxGapLengthSlot()
 
     assert (use_max_gap_length_check_);
     config().useMaxGapLength(use_max_gap_length_check_->checkState() == Qt::Checked);
+
+    updateActive();
 }
 void DetectionConfigWidget::maxGapLengthEditSlot(QString value)
 {
@@ -149,6 +155,8 @@ void DetectionConfigWidget::toggleUseMissToleranceSlot()
 
     assert (use_miss_tolerance_check_);
     config().useMissTolerance(use_miss_tolerance_check_->checkState() == Qt::Checked);
+
+    updateActive();
 }
 void DetectionConfigWidget::missToleranceEditSlot(QString value)
 {
@@ -169,6 +177,18 @@ DetectionConfig& DetectionConfigWidget::config()
     assert (config);
 
     return *config;
+}
+
+void DetectionConfigWidget::updateActive()
+{
+    assert (min_gap_length_edit_);
+    min_gap_length_edit_->setEnabled(config().useMinGapLength());
+
+    assert (max_gap_length_edit_);
+    max_gap_length_edit_->setEnabled(config().useMaxGapLength());
+
+    assert (miss_tolerance_edit_);
+    miss_tolerance_edit_->setEnabled(config().useMissTolerance());
 }
 
 }

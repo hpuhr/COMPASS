@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QPlainTextEdit>
 
 using namespace std;
 
@@ -15,6 +16,8 @@ namespace EvaluationRequirement
 BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     : QWidget(), config_(cfg)
 {
+    QVBoxLayout* main_layout = new QVBoxLayout();
+
     form_layout_ = new QFormLayout();
 
     QLineEdit* name_edit = new QLineEdit (config_.name().c_str());
@@ -26,6 +29,18 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     connect(short_name_edit, &QLineEdit::editingFinished, this, &BaseConfigWidget::changedShortNameSlot);
 
     form_layout_->addRow("Short Name", short_name_edit);
+
+    // comment
+    QPlainTextEdit* comment_edit = new QPlainTextEdit (config_.comment().c_str());
+    QFontMetrics fm (comment_edit->document()->defaultFont());
+    QMargins margins = comment_edit->contentsMargins ();
+    int height = fm.lineSpacing () * 5 +
+            (comment_edit->document()->documentMargin() + comment_edit->frameWidth())*2 +
+            margins.top() + margins.bottom();
+    comment_edit->setFixedHeight (height);
+    connect(comment_edit, &QPlainTextEdit::textChanged, this, &BaseConfigWidget::changedCommentSlot);
+
+    form_layout_->addRow("Comment", comment_edit);
 
     // prob
     QLineEdit* minimum_prob_edit_ = new QLineEdit(QString::number(config_.prob()));
@@ -41,7 +56,11 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     connect(check_type_box_, &ComparisonTypeComboBox::changedTypeSignal, this, &BaseConfigWidget::changedTypeSlot);
     form_layout_->addRow("Probability Check Type", check_type_box_);
 
-    setLayout(form_layout_);
+    main_layout->addLayout(form_layout_);
+
+    main_layout->addStretch();
+
+    setLayout(main_layout);
 }
 
 BaseConfigWidget::~BaseConfigWidget()
@@ -79,6 +98,18 @@ void BaseConfigWidget::changedShortNameSlot()
         logerr << "BaseConfigWidget: changedShortNameSlot: impossible name '" << value_str << "'";
 }
 
+void BaseConfigWidget::changedCommentSlot()
+{
+    QPlainTextEdit* edit = dynamic_cast<QPlainTextEdit*>(sender());
+    assert (edit);
+
+    string value_str = edit->toPlainText().toStdString();
+
+    logdbg << "BaseConfigWidget: changedCommentSlot: comment '" << value_str << "'";
+
+    config_.comment(value_str);
+}
+
 void BaseConfigWidget::changedProbabilitySlot(const QString& value)
 {
     loginf << "BaseConfigWidget: changedProbabilitySlot: value " << value.toStdString();
@@ -95,9 +126,8 @@ void BaseConfigWidget::changedProbabilitySlot(const QString& value)
 void BaseConfigWidget::changedTypeSlot()
 {
     assert (check_type_box_);
-    loginf << "BaseConfigWidget: changedProbabilitySlot: value " << check_type_box_->getType();
+    logdbg << "BaseConfigWidget: changedProbabilitySlot: value " << check_type_box_->getType();
     config_.probCheckType(check_type_box_->getType());
 }
-
 
 }

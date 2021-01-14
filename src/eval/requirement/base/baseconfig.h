@@ -72,6 +72,9 @@ public:
     BaseConfigWidget* widget();
     virtual std::shared_ptr<Base> createRequirement() = 0;
 
+    std::string comment() const;
+    void comment(const std::string& comment);
+
 protected:
     Group& group_;
     EvaluationStandard& standard_;
@@ -79,6 +82,7 @@ protected:
 
     std::string name_;
     std::string short_name_;
+    std::string comment_;
 
     float prob_ {0};
     COMPARISON_TYPE prob_check_type_ {COMPARISON_TYPE::GREATER_THAN_OR_EUQAL};

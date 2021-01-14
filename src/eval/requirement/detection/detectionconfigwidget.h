@@ -61,6 +61,8 @@ protected:
     QLineEdit* miss_tolerance_edit_{nullptr};
 
     DetectionConfig& config();
+
+    void updateActive();
 };
 
 }
