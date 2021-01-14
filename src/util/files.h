@@ -52,7 +52,7 @@ void deleteFolder(const std::string& path);
 
 std::string getDirectoryFromPath (const std::string& path);
 std::string getFilenameFromPath (const std::string& path);
-void createMissingDirectories(const std::string& path);
+bool createMissingDirectories(const std::string& path); // true if successful
 
 }  // namespace Files
 }  // namespace Utils

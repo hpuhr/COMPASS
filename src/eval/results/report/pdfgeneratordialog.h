@@ -36,8 +36,8 @@ namespace EvaluationResultsReport
 
     public slots:
         void setPathSlot ();
-        void pathEditedSlot (const QString& text);
-        void filenameEditedSlot(const QString& text);
+        void pathEditedSlot ();
+        void filenameEditedSlot();
 
         void authorEditedSlot (const QString& text);
         void abstractEditedSlot(const QString& text);

@@ -133,208 +133,234 @@ void PDFGenerator::run ()
     assert (dialog_);
     dialog_->setRunning(true);
 
-    LatexDocument doc (report_path_, report_filename_);
-    doc.title("OpenATS COMPASS Evaluation Report");
+    try
+    {
 
-    if (author_.size())
-        doc.author(author_);
+        LatexDocument doc (report_path_, report_filename_);
+        doc.title("OpenATS COMPASS Evaluation Report");
 
-    if (abstract_.size())
-        doc.abstract(abstract_);
+        if (author_.size())
+            doc.author(author_);
 
-    LatexTable::num_max_rows_ = num_max_table_rows_;
-    LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
-                          num_max_table_col_width_, wait_on_map_loading_);
+        if (abstract_.size())
+            doc.abstract(abstract_);
 
-    cancel_ = false;
-    running_ = true;
-    pdf_created_ = false;
+        LatexTable::num_max_rows_ = num_max_table_rows_;
+        LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
+                              num_max_table_col_width_, wait_on_map_loading_);
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        cancel_ = false;
+        running_ = true;
+        pdf_created_ = false;
 
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime stop_time;
-    boost::posix_time::time_duration time_diff;
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    //boost::posix_time::ptime vp_start_time;
+        boost::posix_time::ptime start_time;
+        boost::posix_time::ptime stop_time;
+        boost::posix_time::time_duration time_diff;
 
-    start_time = boost::posix_time::microsec_clock::local_time();
+        //boost::posix_time::ptime vp_start_time;
 
-    assert (eval_man_.hasResults());
-    std::shared_ptr<Section> root_section = eval_man_.resultsGenerator().resultsModel().rootItem()->rootSection();
+        start_time = boost::posix_time::microsec_clock::local_time();
 
-    string status_str, elapsed_time_str, remaining_time_str;
+        assert (eval_man_.hasResults());
+        std::shared_ptr<Section> root_section = eval_man_.resultsGenerator().resultsModel().rootItem()->rootSection();
 
-    // create sections
-    vector<shared_ptr<Section>> sections;
-    sections.push_back(root_section);
-    root_section->addSectionsFlat(sections, include_target_details_);
+        string status_str, elapsed_time_str, remaining_time_str;
 
-    unsigned int num_sections = sections.size();
+        // create sections
+        vector<shared_ptr<Section>> sections;
+        sections.push_back(root_section);
+        root_section->addSectionsFlat(sections, include_target_details_);
 
-    unsigned int vp_cnt = 0;
-    double ms;
-    double ms_per_sec;
+        unsigned int num_sections = sections.size();
+
+        unsigned int vp_cnt = 0;
+        double ms;
+        double ms_per_sec;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    OSGView::instant_display_ = true;
+        OSGView::instant_display_ = true;
 #endif
 
-    for (auto& sec_it : sections)
-    {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents();
-
-        if (cancel_)
+        for (auto& sec_it : sections)
         {
-            loginf << "EvaluationResultsReportPDFGenerator: run: cancel";
-            break;
-        }
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
 
-        sec_it->accept(visitor);
+            if (cancel_)
+            {
+                loginf << "EvaluationResultsReportPDFGenerator: run: cancel";
+                break;
+            }
 
-        // update status
-        stop_time = boost::posix_time::microsec_clock::local_time();
-
-        time_diff = stop_time - start_time;
-        ms = time_diff.total_milliseconds();
-        elapsed_time_str =
-                String::timeStringFromDouble(ms / 1000.0, false);
-
-        status_str = "Writing section "+to_string(vp_cnt+1)+"/"+to_string(num_sections);
-
-        if (vp_cnt && ms > 0)
-        {
-            ms_per_sec = ms/(double)vp_cnt;
-
-            remaining_time_str = String::timeStringFromDouble((num_sections-vp_cnt) * ms_per_sec / 1000.0, false);
-
-            loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
-                   << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
-        }
-        else
-        {
-            loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
-                   << " done after " << elapsed_time_str;
-
-        }
-
-        dialog_->setElapsedTime(elapsed_time_str);
-        dialog_->setProgress(0, num_sections, vp_cnt);
-        dialog_->setStatus(status_str);
-        dialog_->setRemainingTime(remaining_time_str);
-
-        ++vp_cnt;
-    }
-
-    if (cancel_)
-    {
-        dialog_->setProgress(0, num_sections, 0);
-        dialog_->setStatus("Writing section cancelled");
-        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    }
-    else // proceed
-    {
-        dialog_->setProgress(0, num_sections, num_sections);
-        dialog_->setStatus("Writing sections done");
-        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        doc.write();
-
-        if (run_pdflatex_)
-        {
-            std::string command_out;
-            std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
-                    +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
-
-            loginf << "ViewPointsReportGenerator: run: running pdflatex";
-            dialog_->setStatus("Running pdflatex");
-            dialog_->setRemainingTime("");
-
-            //while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-            logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
-
-            command_out = System::exec(command);
-
-            logdbg << "ViewPointsReportGenerator: run: cmd done";
+            sec_it->accept(visitor);
 
             // update status
             stop_time = boost::posix_time::microsec_clock::local_time();
 
             time_diff = stop_time - start_time;
             ms = time_diff.total_milliseconds();
-            elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
-            dialog_->setElapsedTime(elapsed_time_str);
+            elapsed_time_str =
+                    String::timeStringFromDouble(ms / 1000.0, false);
 
-            unsigned int run_cnt=0;
+            status_str = "Writing section "+to_string(vp_cnt+1)+"/"+to_string(num_sections);
 
-            while (run_cnt < 3 || (command_out.find("Rerun to get outlines right") != std::string::npos
-                                   || command_out.find("Rerun to get cross-references right") != std::string::npos))
+            if (vp_cnt && ms > 0)
             {
-                loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
-                dialog_->setStatus("Re-running pdflatex");
+                ms_per_sec = ms/(double)vp_cnt;
 
-                //                while (QCoreApplication::hasPendingEvents())
+                remaining_time_str = String::timeStringFromDouble((num_sections-vp_cnt) * ms_per_sec / 1000.0, false);
+
+                loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
+                       << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
+            }
+            else
+            {
+                loginf << "EvaluationResultsReportPDFGenerator: run: section " << sec_it->heading()
+                       << " done after " << elapsed_time_str;
+
+            }
+
+            dialog_->setElapsedTime(elapsed_time_str);
+            dialog_->setProgress(0, num_sections, vp_cnt);
+            dialog_->setStatus(status_str);
+            dialog_->setRemainingTime(remaining_time_str);
+
+            ++vp_cnt;
+        }
+
+        if (cancel_)
+        {
+            dialog_->setProgress(0, num_sections, 0);
+            dialog_->setStatus("Writing section cancelled");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else // proceed
+        {
+            dialog_->setProgress(0, num_sections, num_sections);
+            dialog_->setStatus("Writing sections done");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
+            doc.write();
+
+            if (run_pdflatex_)
+            {
+                std::string command_out;
+                std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
+                        +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
+
+                loginf << "EvaluationResultsReportPDFGenerator: run: running pdflatex";
+                dialog_->setStatus("Running pdflatex");
+                dialog_->setRemainingTime("");
+
+                //while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                logdbg << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
+
                 command_out = System::exec(command);
+
+                logdbg << "EvaluationResultsReportPDFGenerator: run: cmd done";
+
+                // update status
+                stop_time = boost::posix_time::microsec_clock::local_time();
 
                 time_diff = stop_time - start_time;
                 ms = time_diff.total_milliseconds();
                 elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
                 dialog_->setElapsedTime(elapsed_time_str);
 
-                logdbg << "ViewPointsReportGenerator: run: re-run done";
+                unsigned int run_cnt=0;
 
-                ++run_cnt;
-            }
-
-            loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
-
-            if (!command_out.size()) // no warnings
-            {
-                pdf_created_ = true;
-
-                dialog_->setStatus("Running pdflatex done");
-
-                if (open_created_pdf_)
+                while (run_cnt < 3 || (command_out.find("Rerun to get outlines right") != std::string::npos
+                                       || command_out.find("Rerun to get cross-references right") != std::string::npos))
                 {
-                    std::string fullpath = report_path_+report_filename_;
+                    loginf << "EvaluationResultsReportPDFGenerator: run: re-running pdflatex";
+                    dialog_->setStatus("Re-running pdflatex");
 
-                    if (String::hasEnding(fullpath, ".tex"))
+                    //                while (QCoreApplication::hasPendingEvents())
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                    command_out = System::exec(command);
+
+                    time_diff = stop_time - start_time;
+                    ms = time_diff.total_milliseconds();
+                    elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+                    dialog_->setElapsedTime(elapsed_time_str);
+
+                    logdbg << "EvaluationResultsReportPDFGenerator: run: re-run done";
+
+                    ++run_cnt;
+                }
+
+                loginf << "EvaluationResultsReportPDFGenerator: run: result '" << command_out << "'";
+
+                if (!command_out.size()) // no warnings
+                {
+                    pdf_created_ = true;
+
+                    dialog_->setStatus("Running pdflatex done");
+
+                    if (open_created_pdf_)
                     {
-                        String::replace(fullpath, ".tex", ".pdf");
+                        std::string fullpath = report_path_+report_filename_;
 
-                        loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+                        if (String::hasEnding(fullpath, ".tex"))
+                        {
+                            String::replace(fullpath, ".tex", ".pdf");
 
-                        QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                            loginf << "EvaluationResultsReportPDFGenerator: run: opening '" << fullpath << "'";
+
+                            QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                        }
+                        else
+                            logerr << "EvaluationResultsReportPDFGenerator: run: opening not possible since wrong file ending";
                     }
-                    else
-                        logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
+                }
+                else // show warnings
+                {
+                    QMessageBox msgBox;
+                    msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
+                    msgBox.exec();
                 }
             }
-            else // show warnings
-            {
-                QMessageBox msgBox;
-                msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
-                msgBox.exec();
-            }
         }
+
+        dialog_->setRunning(false);
+        dialog_->close();
+
+        QApplication::restoreOverrideCursor();
+
+        running_ = false;
+
     }
-    dialog_->setRunning(false);
-    dialog_->close();
+    catch (exception& e)
+    {
+        logwrn << "EvaluationResultsReportPDFGenerator: run: caught exception '" << e.what() << "'";
 
-    QApplication::restoreOverrideCursor();
+        dialog_->setProgress(0, 1, 0);
+        dialog_->setStatus("Writing report failed");
+        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-    running_ = false;
+        dialog_->setRunning(false);
+        dialog_->close();
+
+        QApplication::restoreOverrideCursor();
+
+        running_ = false;
+
+        QMessageBox m_warning(QMessageBox::Warning, "Export PDF Failed",
+                              (string("Error message:\n")+e.what()).c_str(),
+                              QMessageBox::Ok);
+        m_warning.exec();
+    }
 }
 
 void PDFGenerator::cancel ()

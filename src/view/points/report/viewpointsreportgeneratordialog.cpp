@@ -31,6 +31,8 @@
 #include <QCheckBox>
 #include <QFileDialog>
 
+using namespace std;
+
 ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
                                                                  QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), generator_(generator)
@@ -63,7 +65,7 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
 
         directory_edit_ = new QLineEdit ();
         directory_edit_->setText(generator_.reportPath().c_str());
-        connect(directory_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::pathEditedSlot);
+        connect(directory_edit_, &QLineEdit::editingFinished, this, &ViewPointsReportGeneratorDialog::pathEditedSlot);
         config_grid->addWidget(directory_edit_, row, 1);
 
         ++row;
@@ -71,7 +73,7 @@ ViewPointsReportGeneratorDialog::ViewPointsReportGeneratorDialog(ViewPointsRepor
 
         filename_edit_ = new QLineEdit();
         filename_edit_->setText(generator_.reportFilename().c_str());
-        connect(filename_edit_, &QLineEdit::textEdited, this, &ViewPointsReportGeneratorDialog::filenameEditedSlot);
+        connect(filename_edit_, &QLineEdit::editingFinished, this, &ViewPointsReportGeneratorDialog::filenameEditedSlot);
         config_grid->addWidget(filename_edit_, row, 1);
 
         ++row;
@@ -263,14 +265,24 @@ void ViewPointsReportGeneratorDialog::setPathSlot ()
     }
 }
 
-void ViewPointsReportGeneratorDialog::pathEditedSlot (const QString& text)
+void ViewPointsReportGeneratorDialog::pathEditedSlot ()
 {
-    generator_.reportPath(text.toStdString());
+    assert (directory_edit_);
+
+    string tmp = directory_edit_->text().toStdString();
+    if (*(tmp.rbegin()) != '/')
+    {
+        tmp += "/";
+        directory_edit_->setText(tmp.c_str());
+    }
+
+    generator_.reportPath(tmp);
 }
 
-void ViewPointsReportGeneratorDialog::filenameEditedSlot(const QString& text)
+void ViewPointsReportGeneratorDialog::filenameEditedSlot()
 {
-    generator_.reportFilename(text.toStdString());
+    assert (filename_edit_);
+    generator_.reportFilename(filename_edit_->text().toStdString());
 }
 
 void ViewPointsReportGeneratorDialog::authorEditedSlot (const QString& text)

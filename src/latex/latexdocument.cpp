@@ -42,7 +42,11 @@ void LatexDocument::write()
 {
     loginf << "LatexDocument: write: path '" << path_ << "' filename '" << filename_ << "'";
 
-    Files::createMissingDirectories(path_);
+    bool ret = Files::createMissingDirectories(path_);
+
+    if (!ret)
+        throw runtime_error("LatexDocument: write: unable to create directories for '"+path_+"'");
+
     ofstream file (path_+filename_);
 
     file << toString();

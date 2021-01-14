@@ -360,7 +360,12 @@ void LatexVisitor::visit(HistogramView* e)
 
     if (!screenshot_folder_created_)
     {
-        Files::createMissingDirectories(screenshot_path);
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: HistogramView: unable to create directories for '"
+                                +screenshot_path+"'");
+
         screenshot_folder_created_ = true;
     }
 
@@ -381,8 +386,13 @@ void LatexVisitor::visit(HistogramView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
-    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
-    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: HistogramView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 
     LatexSection& sec = report_.getSection(current_section_name_);
@@ -403,7 +413,12 @@ void LatexVisitor::visit(OSGView* e)
 
     if (!screenshot_folder_created_)
     {
-        Files::createMissingDirectories(screenshot_path);
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+                                +screenshot_path+"'");
+
         screenshot_folder_created_ = true;
     }
 
@@ -425,8 +440,13 @@ void LatexVisitor::visit(OSGView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
-    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
-    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 
     LatexSection& sec = report_.getSection(current_section_name_);
@@ -467,7 +487,12 @@ void LatexVisitor::visit(ScatterPlotView* e)
 
     if (!screenshot_folder_created_)
     {
-        Files::createMissingDirectories(screenshot_path);
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: ScatterPlotView: unable to create directories for '"
+                                +screenshot_path+"'");
+
         screenshot_folder_created_ = true;
     }
 
@@ -488,8 +513,13 @@ void LatexVisitor::visit(ScatterPlotView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
-    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
-    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: ScatterPlotView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 
     LatexSection& sec = report_.getSection(current_section_name_);
