@@ -120,13 +120,15 @@ public:
     bool hasCurrentStandard();
     std::string currentStandardName() const; // can return empty string, indicating no standard
     void currentStandardName(const std::string& current_standard);
+    void renameCurrentStandard (const std::string& new_name);
+    void copyCurrentStandard (const std::string& new_name);
     EvaluationStandard& currentStandard();
 
     bool hasStandard(const std::string& name);
     void addStandard(const std::string& name);
     void deleteCurrentStandard();
 
-    using EvaluationStandardIterator = typename std::map<std::string, std::unique_ptr<EvaluationStandard>>::iterator;
+    using EvaluationStandardIterator = typename std::vector<std::unique_ptr<EvaluationStandard>>::iterator;
     EvaluationStandardIterator standardsBegin() { return standards_.begin(); }
     EvaluationStandardIterator standardsEnd() { return standards_.end(); }
     unsigned int standardsSize () { return standards_.size(); };
@@ -418,7 +420,7 @@ protected:
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
-    std::map<std::string, std::unique_ptr<EvaluationStandard>> standards_;
+    std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
     nlohmann::json use_requirement_; // standard_name->req_grp_name->req_grp_name->bool use

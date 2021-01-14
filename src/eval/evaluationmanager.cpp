@@ -660,9 +660,16 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         EvaluationStandard* standard = new EvaluationStandard(class_id, instance_id, *this);
         logdbg << "EvaluationManager: generateSubConfigurable: adding standard " << standard->name();
 
-        assert(standards_.find(standard->name()) == standards_.end());
+        assert(!hasStandard(standard->name()));
 
-        standards_[standard->name()].reset(standard);
+        standards_.push_back(std::unique_ptr<EvaluationStandard>(standard));
+
+        // resort by name
+        sort(standards_.begin(), standards_.end(),
+            [](const std::unique_ptr<EvaluationStandard>& a, const std::unique_ptr<EvaluationStandard>& b) -> bool
+        {
+            return a->name() > b->name();
+        });
     }
     else if (class_id == "EvaluationResultsGenerator")
     {
@@ -1136,16 +1143,64 @@ void EvaluationManager::currentStandardName(const std::string& current_standard)
         widget_->updateButtons();
 }
 
+void EvaluationManager::renameCurrentStandard (const std::string& new_name)
+{
+    loginf << "EvaluationManager: renameCurrentStandard: new name '" << new_name << "'";
+
+    assert (hasCurrentStandard());
+    assert (!hasStandard(new_name));
+
+    currentStandard().name(new_name);
+    current_standard_ = new_name;
+
+    emit standardsChangedSignal();
+    emit currentStandardChangedSignal();
+}
+
+void EvaluationManager::copyCurrentStandard (const std::string& new_name)
+{
+    loginf << "EvaluationManager: renameCurrentStandard: new name '" << new_name << "'";
+
+    assert (hasCurrentStandard());
+    assert (!hasStandard(new_name));
+
+    //Configuration new_config = currentStandard().configuration();
+
+    nlohmann::json current_json_cfg;
+    currentStandard().configuration().generateJSON(current_json_cfg);
+    current_json_cfg["parameters"]["name"] = new_name;
+
+    Configuration& config = addNewSubConfiguration("EvaluationStandard");
+    config.parseJSONConfig(current_json_cfg);
+    //config.addParameterString("name", new_name);
+    generateSubConfigurable("EvaluationStandard", config.getInstanceId());
+
+    current_standard_ = new_name;
+
+    emit standardsChangedSignal();
+    emit currentStandardChangedSignal();
+}
+
 EvaluationStandard& EvaluationManager::currentStandard()
 {
     assert (hasCurrentStandard());
 
-    return *standards_.at(current_standard_).get();
+    string name = current_standard_;
+
+    auto iter = std::find_if(standards_.begin(), standards_.end(),
+       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+
+    assert (iter != standards_.end());
+
+    return *iter->get();
 }
 
 bool EvaluationManager::hasStandard(const std::string& name)
 {
-    return standards_.count(name);
+    auto iter = std::find_if(standards_.begin(), standards_.end(),
+       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+
+    return iter != standards_.end();
 }
 
 void EvaluationManager::addStandard(const std::string& name)
@@ -1172,7 +1227,14 @@ void EvaluationManager::deleteCurrentStandard()
 
     assert (hasCurrentStandard());
 
-    standards_.erase(current_standard_);
+    string name = current_standard_;
+
+    auto iter = std::find_if(standards_.begin(), standards_.end(),
+       [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
+
+    assert (iter != standards_.end());
+
+    standards_.erase(iter);
 
     emit standardsChangedSignal();
 

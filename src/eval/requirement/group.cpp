@@ -438,9 +438,12 @@ void Group::addRequirementSlot()
                                   tr("Specify a (unique) requirement name:"), QLineEdit::Normal,
                                   "", &ok);
 
+    if (!ok)
+        return;
+
     std::string req_name;
 
-    if (ok && !text.isEmpty())
+    if (!text.isEmpty())
     {
         req_name = text.toStdString();
         if (!req_name.size())
@@ -466,15 +469,24 @@ void Group::addRequirementSlot()
                                   tr("Specify a requirement short name:"), QLineEdit::Normal,
                                   "", &ok);
 
-    if (ok && !text.isEmpty())
-    {
+    if (!ok)
+        return;
+
+    if (!text.isEmpty())
         req_short_name = text.toStdString();
-    }
 
     loginf << "EvaluationRequirementGroup " << name_ << ": addRequirementSlot: class_id " << class_id
            << " req_name '" << req_name << "' req_short_name '" << req_short_name << "'";
 
-    addRequirementConfig(class_id, req_name, req_short_name);
+    if (req_name.size() && req_short_name.size())
+        addRequirementConfig(class_id, req_name, req_short_name);
+    else
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Adding Requirement Failed",
+                              "Requirement has to have a non-empty name and short name.", QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
 }
 
 void Group::deleteRequirementSlot()

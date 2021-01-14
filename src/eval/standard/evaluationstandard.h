@@ -51,6 +51,8 @@ public:
                                          const std::string& instance_id) override;
 
     std::string name() const;
+    void name(const std::string &name);
+
 
     bool hasGroup (const std::string& name);
     void addGroup (const std::string& name);

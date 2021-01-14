@@ -40,6 +40,8 @@ private slots:
     void changedCurrentStandardSlot(); // eval man
 
     void addStandardSlot ();
+    void renameStandardSlot ();
+    void copyStandardSlot ();
     void removeStandardSlot ();
 
     void maxRefTimeDiffEditSlot(QString value);

@@ -59,9 +59,9 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
         Group* group = new Group(class_id, instance_id, *this, eval_man_);
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
+        assert (!hasGroup(group->name()));
+
         groups_.emplace_back(group);
-        //assert(groups_.find(group->name()) == groups_.end());
-        //groups_[group->name()].reset(group);
 
         connect (group, &Group::configsChangedSignal, this, &EvaluationStandard::groupsChangedSlot);
     }
@@ -77,8 +77,6 @@ std::string EvaluationStandard::name() const
 
 bool EvaluationStandard::hasGroup (const std::string& name)
 {
-    //return groups_.count(name);
-
     auto iter = std::find_if(groups_.begin(), groups_.end(),
         [&name](const unique_ptr<Group>& x) { return x->name() == name;});
 
@@ -203,6 +201,11 @@ void EvaluationStandard::endModelReset()
 {
     widget()->model().endReset();
     widget()->expandAll();
+}
+
+void EvaluationStandard::name(const std::string &name)
+{
+    name_ = name;
 }
 
 
