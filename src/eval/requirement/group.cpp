@@ -40,6 +40,25 @@
 
 using namespace std;
 
+const std::map<std::string, std::string> Group::requirement_type_mapping_
+{
+    {"EvaluationRequirementExtraDataConfig", "Extra Data"},
+    {"EvaluationRequirementExtraTrackConfig", "Extra Track"},
+    {"EvaluationRequirementDetectionConfig", "Detection"},
+    {"EvaluationRequirementIdentificationCorrectConfig", "Identification Correct"},
+    {"EvaluationRequirementIdentificationFalseConfig", "Identification False"},
+    {"EvaluationRequirementModeAPresentConfig", "Mode 3/A Present"},
+    {"EvaluationRequirementModeAFalseConfig", "Mode 3/A False"},
+    {"EvaluationRequirementModeCPresentConfig", "Mode C Present"},
+    {"EvaluationRequirementModeCFalseConfig", "Mode C False"},
+    {"EvaluationRequirementPositionDistanceConfig", "Position Distance"},
+    {"EvaluationRequirementPositionAlongConfig", "Position Along"},
+    {"EvaluationRequirementPositionAcrossConfig", "Position Across"},
+    {"EvaluationRequirementPositionLatencyConfig", "Position Latency"},
+    {"EvaluationRequirementSpeedConfig", "Speed"}
+};
+
+
 Group::Group(const std::string& class_id, const std::string& instance_id,
                                                        EvaluationStandard& standard, EvaluationManager& eval_man)
     : Configurable(class_id, instance_id, &standard), EvaluationStandardTreeItem(&standard), standard_(standard),
@@ -322,78 +341,85 @@ void Group::showMenu ()
         // requirements
         QMenu* req_menu = menu.addMenu("Add Requirement");
 
-        { // extra data
-            QAction* add_det_action = req_menu->addAction("Extra Data");
-            add_det_action->setData("EvaluationRequirementExtraDataConfig");
-            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+        for (auto& req_it : requirement_type_mapping_)
+        {
+            QAction* action = req_menu->addAction(req_it.second.c_str());
+            action->setData(req_it.first.c_str());
+            connect(action, &QAction::triggered, this, &Group::addRequirementSlot);
         }
 
-        { // extra track
-            QAction* add_det_action = req_menu->addAction("Extra Track");
-            add_det_action->setData("EvaluationRequirementExtraTrackConfig");
-            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        { // extra data
+//            QAction* add_det_action = req_menu->addAction("Extra Data");
+//            add_det_action->setData("EvaluationRequirementExtraDataConfig");
+//            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-        { // detection
-            QAction* add_det_action = req_menu->addAction("Detection");
-            add_det_action->setData("EvaluationRequirementDetectionConfig");
-            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        { // extra track
+//            QAction* add_det_action = req_menu->addAction("Extra Track");
+//            add_det_action->setData("EvaluationRequirementExtraTrackConfig");
+//            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-        { // identification
-            QAction* correct_action = req_menu->addAction("Identification Correct");
-            correct_action->setData("EvaluationRequirementIdentificationCorrectConfig");
-            connect(correct_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        { // detection
+//            QAction* add_det_action = req_menu->addAction("Detection");
+//            add_det_action->setData("EvaluationRequirementDetectionConfig");
+//            connect(add_det_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-            QAction* false_action = req_menu->addAction("Identification False");
-            false_action->setData("EvaluationRequirementIdentificationFalseConfig");
-            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        { // identification
+//            QAction* correct_action = req_menu->addAction("Identification Correct");
+//            correct_action->setData("EvaluationRequirementIdentificationCorrectConfig");
+//            connect(correct_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-        { // mode 3/a
-            QAction* present_action = req_menu->addAction("Mode 3/A Present");
-            present_action->setData("EvaluationRequirementModeAPresentConfig");
-            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//            QAction* false_action = req_menu->addAction("Identification False");
+//            false_action->setData("EvaluationRequirementIdentificationFalseConfig");
+//            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-            QAction* false_action = req_menu->addAction("Mode 3/A False");
-            false_action->setData("EvaluationRequirementModeAFalseConfig");
-            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        { // mode 3/a
+//            QAction* present_action = req_menu->addAction("Mode 3/A Present");
+//            present_action->setData("EvaluationRequirementModeAPresentConfig");
+//            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-        { // mode c
-            QAction* present_action = req_menu->addAction("Mode C Present");
-            present_action->setData("EvaluationRequirementModeCPresentConfig");
-            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//            QAction* false_action = req_menu->addAction("Mode 3/A False");
+//            false_action->setData("EvaluationRequirementModeAFalseConfig");
+//            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-            QAction* false_action = req_menu->addAction("Mode C False");
-            false_action->setData("EvaluationRequirementModeCFalseConfig");
-            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        { // mode c
+//            QAction* present_action = req_menu->addAction("Mode C Present");
+//            present_action->setData("EvaluationRequirementModeCPresentConfig");
+//            connect(present_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-        { // position
-            QAction* md_action = req_menu->addAction("Position Distance");
-            md_action->setData("EvaluationRequirementPositionDistanceConfig");
-            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//            QAction* false_action = req_menu->addAction("Mode C False");
+//            false_action->setData("EvaluationRequirementModeCFalseConfig");
+//            connect(false_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
-            QAction* along_action = req_menu->addAction("Position Along");
-            along_action->setData("EvaluationRequirementPositionAlongConfig");
-            connect(along_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        { // position
+//            QAction* md_action = req_menu->addAction("Position Distance");
+//            md_action->setData("EvaluationRequirementPositionDistanceConfig");
+//            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-            QAction* across_action = req_menu->addAction("Position Across");
-            across_action->setData("EvaluationRequirementPositionAcrossConfig");
-            connect(across_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//            QAction* along_action = req_menu->addAction("Position Along");
+//            along_action->setData("EvaluationRequirementPositionAlongConfig");
+//            connect(along_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-            QAction* latency_action = req_menu->addAction("Position Latency");
-            latency_action->setData("EvaluationRequirementPositionLatencyConfig");
-            connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//            QAction* across_action = req_menu->addAction("Position Across");
+//            across_action->setData("EvaluationRequirementPositionAcrossConfig");
+//            connect(across_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-        }
+//            QAction* latency_action = req_menu->addAction("Position Latency");
+//            latency_action->setData("EvaluationRequirementPositionLatencyConfig");
+//            connect(latency_action, &QAction::triggered, this, &Group::addRequirementSlot);
 
-        { // spd
-            QAction* md_action = req_menu->addAction("Speed");
-            md_action->setData("EvaluationRequirementSpeedConfig");
-            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
-        }
+//        }
+
+//        { // spd
+//            QAction* md_action = req_menu->addAction("Speed");
+//            md_action->setData("EvaluationRequirementSpeedConfig");
+//            connect(md_action, &QAction::triggered, this, &Group::addRequirementSlot);
+//        }
 
         {
             QMenu* del_menu = menu.addMenu("Delete Requirement");

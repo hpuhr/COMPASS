@@ -75,6 +75,8 @@ public:
 
     void showMenu ();
 
+    static const std::map<std::string, std::string> requirement_type_mapping_;
+
 protected:
     EvaluationStandard& standard_;
     EvaluationManager& eval_man_;

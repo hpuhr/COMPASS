@@ -1,8 +1,10 @@
 #include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/comparisontypecombobox.h"
+#include "eval/requirement/group.h"
 #include "logger.h"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QFormLayout>
 #include <QCheckBox>
@@ -19,6 +21,10 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     form_layout_ = new QFormLayout();
+
+    assert (Group::requirement_type_mapping_.count(config_.classId()));
+    form_layout_->addRow("Requirement Type",
+                         new QLabel(Group::requirement_type_mapping_.at(config_.classId()).c_str()));
 
     QLineEdit* name_edit = new QLineEdit (config_.name().c_str());
     connect(name_edit, &QLineEdit::editingFinished, this, &BaseConfigWidget::changedNameSlot);
