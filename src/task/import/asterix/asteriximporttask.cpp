@@ -86,7 +86,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     createSubConfigurables();
 
-    std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "/jasterix_definitions";
+    std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
     loginf << "ASTERIXImportTask: constructor: jasterix definition path '"
            << jasterix_definition_path << "'";
@@ -198,7 +198,7 @@ TaskWidget* ASTERIXImportTask::widget()
 
 void ASTERIXImportTask::refreshjASTERIX()
 {
-    std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "/jasterix_definitions";
+    std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
     loginf << "ASTERIXImportTask: refreshjASTERIX: jasterix definition path '"
            << jasterix_definition_path << "'";

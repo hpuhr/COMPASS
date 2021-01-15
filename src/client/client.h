@@ -45,22 +45,22 @@ class Client : public QApplication
     std::string system_install_path_;
     bool quit_requested_{false};
 
-    bool config_and_data_reset_wanted_{false};
+    bool home_subdir_deletion_wanted_{false};
+    bool config_and_data_copy_wanted_{false};
 
-    bool config_and_data_exists_{false};
-    bool config_and_data_copied_{false};
+    //bool config_and_data_exists_{false};
+    //bool config_and_data_copied_{false};
 
-    bool upgrade_needed_{false};
-    bool config_and_data_deletion_wanted_{false};
+    //bool upgrade_needed_{false};
 
     void checkAndSetupConfig();
 
     void checkNeededActions();
     void performNeededActions();
 
-    void deleteConfigurationAndData();
+    void deleteCompleteHomeSubDir();
     void copyConfigurationAndData();
-    void copyConfiguration();
+    //void copyConfiguration();
 
   protected:
     std::unique_ptr<MainWindow> main_window_;

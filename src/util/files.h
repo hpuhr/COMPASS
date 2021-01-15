@@ -27,11 +27,14 @@ static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::strin
 static const std::string HOME_PATH = QDir::homePath().toStdString();
 
 static const std::string HOME_SUBDIRECTORY = HOME_PATH + "/.compass/";
+static const std::string OSGEARTH_CACHE_SUBDIRECTORY = HOME_SUBDIRECTORY + "osgearth_cache/";
+static const std::string HOME_VERSION_SUBDIRECTORY = HOME_SUBDIRECTORY + VERSION+"/";
+
 static const std::string CONF_SUBDIRECTORY = "conf/";
 static const std::string DATA_SUBDIRECTORY = "data/";
 
-static const std::string HOME_CONF_DIRECTORY = HOME_SUBDIRECTORY + CONF_SUBDIRECTORY;
-static const std::string HOME_DATA_DIRECTORY = HOME_SUBDIRECTORY + DATA_SUBDIRECTORY;
+static const std::string HOME_CONF_DIRECTORY = HOME_VERSION_SUBDIRECTORY + CONF_SUBDIRECTORY;
+static const std::string HOME_DATA_DIRECTORY = HOME_VERSION_SUBDIRECTORY + DATA_SUBDIRECTORY;
 
 extern std::string CURRENT_CONF_DIRECTORY;
 
