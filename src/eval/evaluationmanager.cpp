@@ -140,6 +140,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
     registerParameter("max_sil_v2", &max_sil_v2_, 4);
 
+
+    registerParameter("warning_shown", &warning_shown_, false);
+
     createSubConfigurables();
 }
 
@@ -2555,5 +2558,15 @@ void EvaluationManager::maxRefTimeDiff(float value)
     loginf << "EvaluationManager: maxRefTimeDiff: value " << value;
 
     max_ref_time_diff_ = value;
+}
+
+bool EvaluationManager::warningShown() const
+{
+    return warning_shown_;
+}
+
+void EvaluationManager::warningShown(bool warning_shown)
+{
+    warning_shown_ = warning_shown;
 }
 

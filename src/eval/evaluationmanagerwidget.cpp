@@ -44,6 +44,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTimer>
 
 EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
     : QWidget(nullptr), eval_man_(eval_man)
@@ -126,6 +127,17 @@ void EvaluationManagerWidget::reshowLastResultId()
 void EvaluationManagerWidget::loadDataSlot()
 {
     loginf << "EvaluationManagerWidget: loadDataSlot";
+
+    if (!eval_man_.warningShown())
+    {
+        QMessageBox* mbox = new QMessageBox;
+        mbox->setWindowTitle(tr("Warning"));
+        mbox->setText("Please note that the Evaluation feature is currently not verified and should be used"
+                      " for testing/validation purposes only.");
+        mbox->exec();
+
+        eval_man_.warningShown(true);
+    }
 
     eval_man_.loadData();
 }

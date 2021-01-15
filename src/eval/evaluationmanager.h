@@ -315,6 +315,9 @@ public:
     float maxRefTimeDiff() const;
     void maxRefTimeDiff(float value);
 
+    bool warningShown() const;
+    void warningShown(bool warning_shown);
+
 protected:
     COMPASS& compass_;
 
@@ -416,6 +419,8 @@ protected:
 
     bool use_max_sil_v2_ {false};
     unsigned int max_sil_v2_ {0};
+
+    bool warning_shown_ {false};
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
