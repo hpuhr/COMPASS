@@ -57,17 +57,24 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
+    //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
 //    QSurfaceFormat format;
-//    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
-//    format.setRedBufferSize(8);
-//    format.setGreenBufferSize(8);
-//    format.setBlueBufferSize(8);
-//    format.setAlphaBufferSize(8);
-//    format.setDepthBufferSize(32); //24
-//    format.setStencilBufferSize(8);
-//    format.setSwapInterval(0);
-//    format.setSamples(8);
-//    QSurfaceFormat::setDefaultFormat(format);
+//    format.setRenderableType(QSurfaceFormat::OpenGL);
+//    format.setProfile(QSurfaceFormat::CoreProfile);
+//    format.setVersion(3,3);
+
+    //    QSurfaceFormat format;
+    //    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
+    //    format.setRedBufferSize(8);
+    //    format.setGreenBufferSize(8);
+    //    format.setBlueBufferSize(8);
+    //    format.setAlphaBufferSize(8);
+    //    format.setDepthBufferSize(32); //24
+    //    format.setStencilBufferSize(8);
+    //    format.setSwapInterval(0);
+    //    format.setSamples(8);
+    // QSurfaceFormat::setDefaultFormat(format);
 
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;
@@ -94,32 +101,32 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     desc.add_options()("help", "produce help message")
             ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
             ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename),
-                "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
+             "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
-                "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+             "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("import_view_points", po::value<std::string>(&import_view_points_filename),
-                "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-#if USE_JASTERIX
+             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+        #if USE_JASTERIX
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
-                "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-#endif
+             "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+        #endif
             ("import_json", po::value<std::string>(&import_json_filename),
-                "imports JSON file with given filename, e.g. '/data/file1.json'")
+             "imports JSON file with given filename, e.g. '/data/file1.json'")
             ("json_schema", po::value<std::string>(&import_json_schema),
-                "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-                "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-                "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("associate_data", po::bool_switch(&associate_data), "associate target reports")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-                "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("evaluate", po::bool_switch(&evaluate), "run evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-                "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -192,13 +199,13 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         task_man.loadData(load_data);
 
     if (export_view_points_report_filename.size())
-            task_man.exportViewPointsReportFile(export_view_points_report_filename);
+        task_man.exportViewPointsReportFile(export_view_points_report_filename);
 
     if (evaluate)
         task_man.evaluate(true);
 
     if (export_eval_report_filename.size())
-            task_man.exportEvalReportFile(export_eval_report_filename);
+        task_man.exportEvalReportFile(export_eval_report_filename);
 
     if (quit)
         task_man.quit(quit);
@@ -372,7 +379,7 @@ void Client::checkNeededActions()
 
     if (current_cfg_subdir_exists)
     {
-         cout << " yes" << endl;
+        cout << " yes" << endl;
 
         SimpleConfig config("config.json");
         string config_version;
@@ -385,7 +392,7 @@ void Client::checkNeededActions()
     }
     else
     {
-         cout << " no" << endl;
+        cout << " no" << endl;
 
         cout << "COMPASSClient: complete copy into compass home directory needed";
         config_and_data_copy_wanted_ = true;
@@ -400,10 +407,10 @@ void Client::performNeededActions()
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
-            nullptr, "Delete Previous Configuration & Data",
-            "Complete deletion of the previous configuration and data is required. This will delete"
-            " the folder '~/.compass'. Do you want to continue?",
-            QMessageBox::Yes | QMessageBox::No);
+                    nullptr, "Delete Previous Configuration & Data",
+                    "Complete deletion of the previous configuration and data is required. This will delete"
+                    " the folder '~/.compass'. Do you want to continue?",
+                    QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes)
         {

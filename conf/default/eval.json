@@ -26,7 +26,7 @@
         "EvaluationStandard": {
             "EvaluationStandard1171": {
                 "parameters": {
-                    "name": ""
+                    "name": "EUROCAE ED-117A"
                 },
                 "sub_configs": {
                     "EvaluationRequirementGroup": {

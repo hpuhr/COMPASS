@@ -41,7 +41,7 @@
 #include <QTabBar>
 #include <QTabWidget>
 
-unsigned int ViewContainer::view_count_ = 0;
+//unsigned int ViewContainer::view_count_ = 0;
 
 using namespace Utils;
 using namespace std;
@@ -89,7 +89,7 @@ ViewContainer::~ViewContainer()
 
 void ViewContainer::addView(const std::string& class_name)
 {
-    generateSubConfigurable(class_name, class_name + std::to_string(view_count_));
+    generateSubConfigurable(class_name, class_name + std::to_string(view_manager_.newViewNumber()));
 }
 
 void ViewContainer::showView(QWidget* widget)
@@ -188,10 +188,10 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     if (class_id == "ListBoxView")
     {
         views_.emplace_back(new ListBoxView(class_id, instance_id, this, view_manager_));
-        unsigned int number = String::getAppendedInt(instance_id);
+        //unsigned int number = String::getAppendedInt(instance_id);
 
-        if (number >= view_count_)
-            view_count_ = number + 1;
+//        if (number >= view_count_)
+//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -199,10 +199,10 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "HistogramView")
     {
         views_.emplace_back(new HistogramView(class_id, instance_id, this, view_manager_));
-        unsigned int number = String::getAppendedInt(instance_id);
+        //unsigned int number = String::getAppendedInt(instance_id);
 
-        if (number >= view_count_)
-            view_count_ = number + 1;
+//        if (number >= view_count_)
+//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -210,10 +210,10 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "ScatterPlotView")
     {
         views_.emplace_back(new ScatterPlotView(class_id, instance_id, this, view_manager_));
-        unsigned int number = String::getAppendedInt(instance_id);
+//        unsigned int number = String::getAppendedInt(instance_id);
 
-        if (number >= view_count_)
-            view_count_ = number + 1;
+//        if (number >= view_count_)
+//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
@@ -222,9 +222,9 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "OSGView")
     {
         views_.emplace_back(new OSGView(class_id, instance_id, this, view_manager_));
-        unsigned int number = String::getAppendedInt(instance_id);
-        if (number >= view_count_)
-            view_count_ = number + 1;
+//        unsigned int number = String::getAppendedInt(instance_id);
+//        if (number >= view_count_)
+//            view_count_ = number + 1;
 
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());

@@ -6,7 +6,7 @@
                 "parameters": null,
                 "sub_configs": {
                     "ListBoxView": {
-                        "ListBoxView2": {
+                        "ListBoxView0": {
                             "parameters": {
                                 "overwrite_csv": true,
                                 "show_associations": false,

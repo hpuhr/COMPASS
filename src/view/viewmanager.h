@@ -91,6 +91,8 @@ class ViewManager : public QObject, public Configurable
 
     QStringList viewClassList() const;
 
+    unsigned int newViewNumber();
+
 protected:
     COMPASS& compass_;
 

@@ -3,7 +3,7 @@ message("  Path: ${COMPASS_PATH}")
 
 cmake_minimum_required(VERSION 3.1)
 
-set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
+set ( CMAKE_BUILD_TYPE Debug ) #Debug RelWithDebInfo Release
 
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
@@ -16,7 +16,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -UNDEBUG -Wall -std=c++11)
+add_definitions ( -Wall -std=c++11)
 
 #-Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation for new compiler and old libs
 # -UNDEBUG for enabling asserts in release buils (until testing/error management is improved)
@@ -147,11 +147,11 @@ link_directories(
     ${jASTERIX_LIBRARIES}
     )
 
-target_link_libraries ( compass optimized
+target_link_libraries ( compass
     ${jASTERIX_LIBRARIES})
 ENDIF()
 
-target_link_libraries ( compass optimized
+target_link_libraries ( compass
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL

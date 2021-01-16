@@ -486,6 +486,22 @@ QStringList ViewManager::viewClassList() const
     return view_class_list_;
 }
 
+unsigned int ViewManager::newViewNumber()
+{
+    unsigned int max_number = 0;
+    unsigned int tmp;
+
+    for (auto& view_it : views_)
+    {
+        tmp = String::getAppendedInt(view_it.second->instanceId());
+
+        if (tmp > max_number)
+            max_number = tmp;
+    }
+
+    return max_number + 1;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
@@ -565,7 +581,7 @@ void ViewManager::removeContainerWidget(std::string instance_id)
         return;
     }
 
-    throw std::runtime_error("ViewManager: removeContainer:  key not found");
+    throw std::runtime_error("ViewManager: removeContainer: key not found");
 }
 
 void ViewManager::deleteContainerWidget(std::string instance_id)
@@ -579,13 +595,12 @@ void ViewManager::deleteContainerWidget(std::string instance_id)
     if (it != container_widgets_.end())
     {
         it->second->deleteLater();
-
         container_widgets_.erase(it);
 
         return;
     }
 
-    throw std::runtime_error("ViewManager: deleteContainerWidget:  key not found");
+    throw std::runtime_error("ViewManager: deleteContainerWidget: key not found");
 }
 
 void ViewManager::viewShutdown(View* view, const std::string& err)

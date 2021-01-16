@@ -118,7 +118,8 @@ ViewContainer& ViewContainerWidget::viewContainer() const { return *view_contain
 void ViewContainerWidget::closeEvent(QCloseEvent* event)
 {
     loginf << "ViewContainerWidget: closeEvent: instance " << instanceId();
-    view_manager_.deleteContainerWidget(instanceId());
+    //view_manager_.deleteContainerWidget(instanceId());
+    view_manager_.removeContainerWidget(instanceId());
     QWidget::closeEvent(event);
 }
 

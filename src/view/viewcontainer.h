@@ -54,7 +54,7 @@ class ViewContainer : public QObject, public Configurable
                                          const std::string& instance_id);
 
     virtual std::string getWindowName();
-    static unsigned int getViewCount() { return view_count_; }
+    //static unsigned int getViewCount() { return view_count_; }
 
     void addView(const std::string& class_name);
     void showView(QWidget* widget);
@@ -68,7 +68,7 @@ class ViewContainer : public QObject, public Configurable
 
     std::vector<std::unique_ptr<View>> views_;
 
-    static unsigned int view_count_;
+    //static unsigned int view_count_;
 
     virtual void checkSubConfigurables();
     void addView(View* view);
