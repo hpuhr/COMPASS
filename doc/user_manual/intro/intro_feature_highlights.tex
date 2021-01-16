@@ -1,36 +1,79 @@
 \section{Feature Highlights}
 
+\subsection{Import}
 \begin{itemize}  
-\item Support of multiple database systems, e.g. SQLite3, MySQL
-\item Support of multiple, configurable database schemas, e.g. SCDB, SCDB Extended
-\item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
-\item Dynamic ASTERIX import using jASTERIX decoder
-\item Import of (D)GPS trails from NMEA files
-\item Import of polygons from GML,KML,ESRI Shapefiles
-\item MySQL database import and management of SCDB databases
-\item High performance processing, low memory footprint
-\item Views for data inspection
-\item Cross-view data selection and inspection
-\item Filtering for detailed analysis
-\item Simple custom filter generation
-\item ARTAS track association (TRI) analysis
-\item Supported Database Objects
-\begin{itemize}  
-\item Radar plots
-\item MLAT \& WAM target reports
-\item ADS-B target reports
-\item System Track updates
-\item Reference trajectory updates
+    \item Support of multiple database systems, e.g. SQLite3, MySQL
+    \item Support of multiple, configurable database schemas, e.g. SCDB, SCDB Extended
+    \item Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
+    \item Dynamic ASTERIX import using jASTERIX
+    \item Import of (D)GPS trails from NMEA files
+    \item Import of polygons from GML,KML,ESRI Shapefiles
+    \item MySQL database import and management of SCDB databases
+    \item Supported Database Objects
+    \begin{itemize}  
+        \item Radar plots
+        \item MLAT \& WAM target reports
+        \item ADS-B target reports
+        \item System Track updates
+        \item Reference trajectory updates
+    \end{itemize}
 \end{itemize}
-\item Command line options for automated processing
-\item View points for efficient inspection
-\item Standard compliance evaluation (under construction)
+
+\subsection{Analysis}
 \begin{itemize}  
-\item Definition of standards based on configurable requirements
-\item Generalized comparison of test data vs. reference data
-\item Calculation of requirements/performance indicators
-\item Investigation/display of results on several levels of detail
-\item Manual removal of specific targets possible
-\item Export of results as report PDF
+    \item High performance processing, low memory footprint
+    \item Filtering for detailed analysis
+    \item Simple custom filter generation
+    \item General target report association (find unique targets)
+    \item ARTAS track association (TRI) analysis
 \end{itemize}
-\end{itemize} 
+
+\subsection{Visualization}
+\begin{itemize}  
+    \item Textual data inspection using Listbox View
+    \begin{itemize}  
+        \item Display of data as text tables
+        \item Configurable data loading of data of interest
+        \item Exporting of data as CSV
+    \end{itemize}
+    \item Data distribution inspection using Histogram View
+    \begin{itemize}  
+        \item Display of any numeric variable or evaluation result as histogram
+        \item Linear or logarithmic axis supported
+    \end{itemize}
+    \item Graphical data inspection using OSG View
+    \begin{itemize}  
+        \item Customizable map/terrain display based on osgEarth
+        \item Customizable display of ATC surveillance data using OpenSceneGraph
+        \item High-speed time-filtered display
+        \item Numerous operations for analysis, e.g. data selection, labeling, distance measurement
+        \item Configurable data layering and styling for detailed analysis
+        \item Relatively low memory footprint (e.g. 16 million target reports in ~8 GB RAM)
+    \end{itemize}    
+    \item 2D data distribution inspection using ScatterPlot View
+    \begin{itemize}  
+        \item Display of any 2 numeric variables as X/Y plot
+    \end{itemize}
+    \item Cross-view data selection and inspection
+    \item View points for efficient inspection
+\end{itemize}
+
+\subsection{Evaluation}    
+\begin{itemize}  
+    \item Standard compliance evaluation (in development)
+    \begin{itemize}  
+        \item Definition of standards based on configurable requirements
+        \item Generalized comparison of test data vs. reference data
+        \item Calculation of requirements/performance indicators
+        \item Investigation/display of results on several levels of detail
+        \item Automatic removal of targets (short tracks, VFR, …) possible
+        \item Manual removal of specific targets possible
+        \item Export of results as report PDF
+    \end{itemize}
+\end{itemize}
+
+\subsection{Semi-automated Processing}    
+\begin{itemize}  
+    \item Command line options for common processing features
+\end{itemize}
+
