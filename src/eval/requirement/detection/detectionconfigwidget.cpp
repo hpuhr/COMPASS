@@ -53,7 +53,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     connect(min_gap_length_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::minGapLengthEditSlot);
 
-    form_layout_->addRow("Minimum Gap Length[s]", min_gap_length_edit_);
+    form_layout_->addRow("Minimum Gap Length [s]", min_gap_length_edit_);
 
     // max gap
     use_max_gap_length_check_ = new QCheckBox ();
@@ -68,7 +68,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     connect(max_gap_length_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::maxGapLengthEditSlot);
 
-    form_layout_->addRow("Maximum Gap Length[s]", max_gap_length_edit_);
+    form_layout_->addRow("Maximum Gap Length [s]", max_gap_length_edit_);
 
     // miss tolerance
     use_miss_tolerance_check_ = new QCheckBox ();

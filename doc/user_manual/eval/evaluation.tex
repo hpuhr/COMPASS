@@ -228,6 +228,14 @@ Below, the following buttons exist:
 
 At the bottom, the 'Reference Maximum Time Difference [s]' field can be edited to adjust the maximum time difference between reference updates. This value is used to find time-adjacent reference target reports for test target reports. Please adjust this value to e.g. the reference update peroid plus 1 second.
 
+Currently, the following standards are (partly) supported:
+\begin{itemize}  
+\item EUROCAE ED-116
+\item EUROCAE ED-117/A
+\item EUROCAE ED-87C
+\end{itemize}
+\ \\
+
 \subsubsection{Current Standard}
 
 Below that, the current standard is shown. On the left side, a tree-view exists showing:
@@ -262,23 +270,23 @@ The following requirements exist:
 
 \begin{center}
  \begin{table}[H]
-  \begin{tabularx}{\textwidth}{ | l | X | r | }
+  \begin{tabularx}{\textwidth}{ | l | X |  }
     \hline
-    \textbf{Type} & \textbf{Description} & \textbf{Link} \\ \hline
-    Detection & Calculates probability of detection &  \\ \hline
-    Extra Data & Calculates probability of unused test data (test data w/o reference data) &  \\ \hline
-    Extra Track & Calculates probability of undetected tracks (reference data w/o test data) &  \\ \hline
-    Identification Correct & Calculates probability of correct secondary identification &  \\ \hline
-    Identification False & Calculates probability of false secondary identification &  \\ \hline
-    Mode 3/A False & Calculates probability of false Mode 3/A code &  \\ \hline
-    Mode 3/A Present & Calculates probability of Mode 3/A code present &  \\ \hline
-    Mode C False & Calculates probability of false Mode C code &  \\ \hline
-    Mode C Present & Calculates probability of Mode C code present &  \\ \hline
-    Position Across & Calculates the probability of the position across error begin within a threshold &  \\ \hline
-    Position Along & Calculates the probability of the position along error begin within a threshold &  \\ \hline
-    Position Distance & Calculates the probability of the position error begin within or outside a threshold &  \\ \hline
-    Position Latency & Calculates the probability of the position latency begin within a threshold &  \\ \hline
-    Speed & Calculates the probability of the speed error begin within or outside a threshold or percentage &  \\ \hline
+    \textbf{Type} & \textbf{Description} \\ \hline
+    \nameref{sec:eval_req_detection} & Calculates probability of detection  \\ \hline
+    \nameref{sec:eval_req_extra_data} & Calculates probability of unused test data (test data w/o reference data) \\ \hline
+    \nameref{sec:eval_req_extra_track} & Calculates probability of undetected tracks (reference data w/o test data) \\ \hline
+    \nameref{sec:eval_req_id_correct} & Calculates probability of correct secondary identification \\ \hline
+    \nameref{sec:eval_req_id_false} & Calculates probability of false secondary identification \\ \hline
+    \nameref{sec:eval_req_m3a_false} & Calculates probability of false Mode 3/A code \\ \hline
+    \nameref{sec:eval_req_m3a_present} & Calculates probability of Mode 3/A code present \\ \hline
+    \nameref{sec:eval_req_mc_false} & Calculates probability of false Mode C code \\ \hline
+    \nameref{sec:eval_req_mc_present} & Calculates probability of Mode C code present \\ \hline
+    \nameref{sec:eval_req_pos_across} & Calculates the probability of the position across error begin within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error begin within a threshold \\ \hline
+    \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error begin within or outside a threshold \\ \hline
+    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency begin within a threshold \\ \hline
+    \nameref{sec:eval_req_speed} & Calculates the probability of the speed error begin within or outside a threshold or percentage \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}

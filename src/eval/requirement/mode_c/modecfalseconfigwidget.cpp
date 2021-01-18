@@ -32,14 +32,6 @@ namespace EvaluationRequirement
     ModeCFalseConfigWidget::ModeCFalseConfigWidget(ModeCFalseConfig& cfg)
     : BaseConfigWidget(cfg)
     {
-        // false prob
-        max_prob_false_edit_ = new QLineEdit(QString::number(config().maximumProbabilityFalse()));
-        max_prob_false_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-//        connect(max_prob_false_edit_, &QLineEdit::textEdited,
-//                this, &ModeCFalseConfigWidget::maxProbFalseEditSlot);
-
-        form_layout_->addRow("False Maximum Probability [1]", max_prob_false_edit_);
-
         // max diff
         max_diff_edit_ = new QLineEdit(QString::number(config().maxDifference()));
         max_diff_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
@@ -47,19 +39,6 @@ namespace EvaluationRequirement
 //                this, &ModeCFalseConfigWidget::maxDiffEditSlot);
 
         form_layout_->addRow("Maximum Difference [ft]", max_diff_edit_);
-    }
-
-    void ModeCFalseConfigWidget::maxProbFalseEditSlot(QString value)
-    {
-        loginf << "EvaluationRequirementModeCConfigWidget: maxProbFalseEditSlot: value " << value.toStdString();
-
-        bool ok;
-        float val = value.toFloat(&ok);
-
-        if (ok)
-            config().maximumProbabilityFalse(val);
-        else
-            loginf << "EvaluationRequirementModeCConfigWidget: maxProbFalseEditSlot: invalid value";
     }
 
     void ModeCFalseConfigWidget::maxDiffEditSlot(QString value)

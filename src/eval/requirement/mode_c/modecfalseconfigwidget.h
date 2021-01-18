@@ -34,16 +34,12 @@ namespace EvaluationRequirement
         Q_OBJECT
 
     public slots:
-        void maxProbFalseEditSlot(QString value);
-
         void maxDiffEditSlot(QString value);
 
     public:
         ModeCFalseConfigWidget(ModeCFalseConfig& cfg);
 
     protected:
-        QLineEdit* max_prob_false_edit_{nullptr};
-
         QLineEdit* max_diff_edit_{nullptr};
 
         ModeCFalseConfig& config();
