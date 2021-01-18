@@ -81,7 +81,7 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(EvaluationManager& eval_man
     connect(max_nucp_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::maxNUCPEditedSlot);
     layout->addWidget(max_nucp_edit_, row, 1);
 
-    // others
+    // v1
     ++row;
 
     use_v1_check_ = new QCheckBox ("Use v1");
@@ -191,12 +191,16 @@ void EvaluationFilterTabWidget::toggleUseFiltersSlot()
 {
     assert (use_filter_check_);
     eval_man_.useLoadFilter(use_filter_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::toggleUseTimeSlot()
 {
     assert (use_time_check_);
     eval_man_.useTimeFilter(use_time_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::timeBeginEditedSlot (const QString& text)
@@ -231,30 +235,40 @@ void EvaluationFilterTabWidget::toggleUseADSBSlot()
 {
     assert (use_adsb_check_);
     eval_man_.useASDBFilter(use_adsb_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::toggleUseV0Slot()
 {
     assert (use_v0_check_);
     eval_man_.useV0(use_v0_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::toggleUseV1Slot()
 {
     assert (use_v1_check_);
     eval_man_.useV1(use_v1_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::toggleUseV2Slot()
 {
     assert (use_v2_check_);
     eval_man_.useV2(use_v2_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::toggleUseMinNUCPSlot()
 {
     assert (use_min_nucp_check_);
     eval_man_.useMinNUCP(use_min_nucp_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::minNUCPEditedSlot (const QString& text)
@@ -274,6 +288,8 @@ void EvaluationFilterTabWidget::toggleUseMinNICSlot()
 {
     assert (use_min_nic_check_);
     eval_man_.useMinNIC(use_min_nic_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::minNICEditedSlot (const QString& text)
@@ -293,6 +309,8 @@ void EvaluationFilterTabWidget::toggleUseMinNACpSlot()
 {
     assert (use_min_nacp_check_);
     eval_man_.useMinNACp(use_min_nacp_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::minNACPEditedSlot (const QString& text)
@@ -312,6 +330,8 @@ void EvaluationFilterTabWidget::toggleUseMinSILv1Slot()
 {
     assert (use_min_sil_v1_check_);
     eval_man_.useMinSILv1(use_min_sil_v1_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::minSILv1PEditedSlot (const QString& text)
@@ -332,6 +352,8 @@ void EvaluationFilterTabWidget::toggleUseMinSILv2Slot()
 {
     assert (use_min_sil_v2_check_);
     eval_man_.useMinSILv2(use_min_sil_v2_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::minSILv2PEditedSlot (const QString& text)
@@ -352,6 +374,8 @@ void EvaluationFilterTabWidget::toggleUseMaxNUCPSlot()
 {
     assert (use_max_nucp_check_);
     eval_man_.useMaxNUCP(use_max_nucp_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::maxNUCPEditedSlot (const QString& text)
@@ -371,6 +395,8 @@ void EvaluationFilterTabWidget::toggleUseMaxNICSlot()
 {
     assert (use_max_nic_check_);
     eval_man_.useMaxNIC(use_max_nic_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::maxNICEditedSlot (const QString& text)
@@ -390,6 +416,8 @@ void EvaluationFilterTabWidget::toggleUseMaxNACpSlot()
 {
     assert (use_max_nacp_check_);
     eval_man_.useMaxNACp(use_max_nacp_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::maxNACPEditedSlot (const QString& text)
@@ -409,6 +437,8 @@ void EvaluationFilterTabWidget::toggleUseMaxSILv1Slot()
 {
     assert (use_max_sil_v1_check_);
     eval_man_.useMaxSILv1(use_max_sil_v1_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::maxSILv1PEditedSlot (const QString& text)
@@ -429,6 +459,8 @@ void EvaluationFilterTabWidget::toggleUseMaxSILv2Slot()
 {
     assert (use_max_sil_v2_check_);
     eval_man_.useMaxSILv2(use_max_sil_v2_check_->checkState() == Qt::Checked);
+
+    update();
 }
 
 void EvaluationFilterTabWidget::maxSILv2PEditedSlot (const QString& text)
@@ -446,78 +478,117 @@ void EvaluationFilterTabWidget::maxSILv2PEditedSlot (const QString& text)
 
 void EvaluationFilterTabWidget::update()
 {
+    bool use_filter = eval_man_.useLoadFilter();
+
     assert (use_filter_check_);
     use_filter_check_->setChecked(eval_man_.useLoadFilter());
 
+    // time filter
     assert (use_time_check_);
     use_time_check_->setChecked(eval_man_.useTimeFilter());
+    use_time_check_->setEnabled(use_filter);
 
     assert (time_begin_edit_);
     time_begin_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimeBegin()).c_str());
+    time_begin_edit_->setEnabled(use_filter && eval_man_.useTimeFilter());
 
     assert (time_end_edit_);
     time_end_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimeEnd()).c_str());
+    time_end_edit_->setEnabled(use_filter && eval_man_.useTimeFilter());
+
+    bool use_adsb_filter = use_filter && eval_man_.useASDBFilter();
 
     assert (use_adsb_check_);
     use_adsb_check_->setChecked(eval_man_.useASDBFilter());
+    use_adsb_check_->setEnabled(use_filter);
 
+    // v0
     assert (use_v0_check_);
     use_v0_check_->setChecked(eval_man_.useV0());
+    use_v0_check_->setEnabled(use_adsb_filter);
 
+    // nucp
     assert (use_min_nucp_check_);
     use_min_nucp_check_->setChecked(eval_man_.useMinNUCP());
+    use_min_nucp_check_->setEnabled(use_adsb_filter && eval_man_.useV0());
     assert (min_nucp_edit_);
     min_nucp_edit_->setText(QString::number(eval_man_.minNUCP()));
-
-    assert (use_v1_check_);
-    use_v1_check_->setChecked(eval_man_.useV1());
-    assert (use_v2_check_);
-    use_v2_check_->setChecked(eval_man_.useV2());
-
-    assert (use_min_nic_check_);
-    use_min_nic_check_->setChecked(eval_man_.useMinNIC());
-    assert (min_nic_edit_);
-    min_nic_edit_->setText(QString::number(eval_man_.minNIC()));
-
-    assert (use_min_nacp_check_);
-    use_min_nacp_check_->setChecked(eval_man_.useMinNACp());
-    assert (min_nacp_edit_);
-    min_nacp_edit_->setText(QString::number(eval_man_.minNACp()));
-
-    assert (use_min_sil_v1_check_);
-    use_min_sil_v1_check_->setChecked(eval_man_.useMinSILv1());
-    assert (min_sil_v1_edit_);
-    min_sil_v1_edit_->setText(QString::number(eval_man_.minSILv1()));
-
-    assert (use_min_sil_v2_check_);
-    use_min_sil_v2_check_->setChecked(eval_man_.useMinSILv2());
-    assert (min_sil_v2_edit_);
-    min_sil_v2_edit_->setText(QString::number(eval_man_.minSILv2()));
-
-    // XXX
+    min_nucp_edit_->setEnabled(use_adsb_filter && eval_man_.useMinNUCP() && eval_man_.useV0());
 
     assert (use_max_nucp_check_);
     use_max_nucp_check_->setChecked(eval_man_.useMaxNUCP());
+    use_max_nucp_check_->setEnabled(use_adsb_filter && eval_man_.useV0());
     assert (max_nucp_edit_);
     max_nucp_edit_->setText(QString::number(eval_man_.maxNUCP()));
+    max_nucp_edit_->setEnabled(use_adsb_filter && eval_man_.useMaxNUCP() && eval_man_.useV0());
+
+    // v1
+    assert (use_v1_check_);
+    use_v1_check_->setChecked(eval_man_.useV1());
+    use_v1_check_->setEnabled(use_adsb_filter);
+    assert (use_v2_check_);
+    use_v2_check_->setChecked(eval_man_.useV2());
+    use_v2_check_->setEnabled(use_adsb_filter);
+
+    bool use_v12 = eval_man_.useV1() || eval_man_.useV2();
+
+    // nic
+    assert (use_min_nic_check_);
+    use_min_nic_check_->setChecked(eval_man_.useMinNIC());
+    use_min_nic_check_->setEnabled(use_adsb_filter && use_v12);
+    assert (min_nic_edit_);
+    min_nic_edit_->setText(QString::number(eval_man_.minNIC()));
+    min_nic_edit_->setEnabled(use_adsb_filter && eval_man_.useMinNIC() && use_v12);
 
     assert (use_max_nic_check_);
     use_max_nic_check_->setChecked(eval_man_.useMaxNIC());
+    use_max_nic_check_->setEnabled(use_adsb_filter && use_v12);
     assert (max_nic_edit_);
     max_nic_edit_->setText(QString::number(eval_man_.maxNIC()));
+    max_nic_edit_->setEnabled(use_adsb_filter && eval_man_.useMaxNIC() && use_v12);
+
+    // nacp
+    assert (use_min_nacp_check_);
+    use_min_nacp_check_->setChecked(eval_man_.useMinNACp());
+    use_min_nacp_check_->setEnabled(use_adsb_filter && use_v12);
+    assert (min_nacp_edit_);
+    min_nacp_edit_->setText(QString::number(eval_man_.minNACp()));
+    min_nacp_edit_->setEnabled(use_adsb_filter && eval_man_.useMinNACp() && use_v12);
 
     assert (use_max_nacp_check_);
     use_max_nacp_check_->setChecked(eval_man_.useMaxNACp());
+    use_max_nacp_check_->setEnabled(use_adsb_filter && use_v12);
     assert (max_nacp_edit_);
     max_nacp_edit_->setText(QString::number(eval_man_.maxNACp()));
+    max_nacp_edit_->setEnabled(use_adsb_filter && eval_man_.useMaxNACp() && use_v12);
+
+    // sil v1
+    assert (use_min_sil_v1_check_);
+    use_min_sil_v1_check_->setChecked(eval_man_.useMinSILv1());
+    use_min_sil_v1_check_->setEnabled(use_adsb_filter && use_v12);
+    assert (min_sil_v1_edit_);
+    min_sil_v1_edit_->setText(QString::number(eval_man_.minSILv1()));
+    min_sil_v1_edit_->setEnabled(use_adsb_filter && eval_man_.useMinSILv1() && use_v12);
 
     assert (use_max_sil_v1_check_);
     use_max_sil_v1_check_->setChecked(eval_man_.useMaxSILv1());
+    use_max_sil_v1_check_->setEnabled(use_adsb_filter && use_v12);
     assert (max_sil_v1_edit_);
     max_sil_v1_edit_->setText(QString::number(eval_man_.maxSILv1()));
+    max_sil_v1_edit_->setEnabled(use_adsb_filter && eval_man_.useMaxSILv1() && use_v12);
+
+    // sil v2
+    assert (use_min_sil_v2_check_);
+    use_min_sil_v2_check_->setChecked(eval_man_.useMinSILv2());
+    use_min_sil_v2_check_->setEnabled(use_adsb_filter && use_v12);
+    assert (min_sil_v2_edit_);
+    min_sil_v2_edit_->setText(QString::number(eval_man_.minSILv2()));
+    min_sil_v2_edit_->setEnabled(use_adsb_filter && eval_man_.useMinSILv2() && use_v12);
 
     assert (use_max_sil_v2_check_);
     use_max_sil_v2_check_->setChecked(eval_man_.useMaxSILv2());
+    use_max_sil_v2_check_->setEnabled(use_adsb_filter && use_v12);
     assert (max_sil_v2_edit_);
     max_sil_v2_edit_->setText(QString::number(eval_man_.maxSILv2()));
+    max_sil_v2_edit_->setEnabled(use_adsb_filter && eval_man_.useMaxSILv2() && use_v12);
 }

@@ -1,0 +1,48 @@
+\section{Requirements}
+\label{sec:eval_requirements} 
+
+\subsection{Detection Requirement}
+
+\begin{itemize}  
+\item Update Interval [s]: Update interval of the test data
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Minimum Probability [1]: Minimum probability of detection
+\item Use Miss Tolerance: Checkbox if miss tolerance should be used
+\item Miss Tolerance [s]: Acceptable time delta for miss detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (\#EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (\#MUI). \\
+
+The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must be higher than the defined 'Minimum Probability' for the requirement to pass.
+
+\subsection{Identification Requirement}
+
+\begin{itemize}  
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Minimum Probability [1]: Minimum probability of detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to check each target report's Mode S Target Identification (TI). A TI is incorrect if set in both reference and test data and different, resulting in the number of false TIs (\#FID) and correct TIs (\#CID). \\
+
+The ratio of \#CID and \#FID+\#CID gives the Probability of Correct Identification (PID). The PID must be higher than the defined 'Minimum Probability' for the requirement to pass.
+
+\subsection{Position Requirement}
+
+\begin{itemize}  
+\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
+\item Maximum Distance [m]: Maximum allowed distance from test target report to reference
+\item Minimum Probability [1]: Minimum probability of detection
+\end{itemize}
+\ \\
+
+Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
+
+As a summary, the reference is used to check each test target report's position. The position is incorrect if the reference position exists and the distance (to the reference position at the same time as the test target report, using linear interpolation) is larger than the defined threshold. This results in the number of incorrect positions (\#PNOK) and correct positions (\#POK). \\
+
+The ratio of \#POK and \#PNOK+\#POK gives the Probability of Acceptable Position (POK). The POK must be higher than the defined 'Minimum Probability' for the requirement to pass. 

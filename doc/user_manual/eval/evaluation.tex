@@ -67,7 +67,7 @@ At the top, 6 tabs exist:
 \begin{itemize}  
 \item Main: Main configuration
 \item Targets: Table of existing targets (filled after data was loaded)
-\item Targets: Filter which data is loaded, by time and/or ADS-B quality indicators
+\item Filter: Filter which data is loaded, by time and/or ADS-B quality indicators
 \item Standard: Definition of standards, selection of current standard, configuration of requirements to be checked
 \item Results Config: Additional configration for the result generation
 \item Results: Evaluation results (created after data was evaluated)
@@ -89,7 +89,7 @@ Below 3 buttons exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/eval_overview.png}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_main.png}
   \caption{Evaluation Main tab}
 \end{figure}
 
@@ -130,15 +130,13 @@ In the center, using the 'Standard' drop-down menu, the current standard can be 
 
 Below that, the 'Sector Layers: Requirement Groups Usage' allows to define which requirements should be verified for which sector layer. \\
 
-On the left, all existing sector layers are listed, in the show example:
+On the left, all existing sector layers are listed, in the shown example:
 \begin{itemize}  
-\item All: DOI without altitude limitation
-\item Lower: Same DOI with altitude limitation, i.e. everything below a certain flight level
-\item Upper: Same DOI with altitude limitation, i.e. everything above a certain flight level
+\item fir\_cut\_sim: DOI altitude limitation
 \end{itemize}
 \ \\
 
-For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in all 3 sector layers.
+For each sector layer, the requirement groups (defined in the Standard tab) can be active/disabled. In the shown example, the existing requirement group 'Mandatory' is active in the sector layer.
 
 \subsection{Targets Tab}
 
@@ -168,7 +166,46 @@ The following columns exist:
 \end{itemize}
 \ \\
 
-Unless otherwise specified, the column content reflects the values from both reference and test data.
+Unless otherwise specified, the column content reflects the values from both reference and test data. \\
+
+After loading the data, the table can look as follows:
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_loaded.png}
+  \caption{Evaluation Targets tab with loaded data}
+\end{figure}
+
+\subsection{Filter Tab}
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_filter.png}
+  \caption{Evaluation Filter tab}
+\end{figure}
+
+In the Filter tab, what data is loaded for evaluation can be filtered \\
+
+Below, the following elements exist:
+\begin{itemize}  
+\item 'Use Load Filter': Toggles usage of the load filter
+\item 'Use Time Filter: Toggles usage of the time filter
+\item 'Use ADS-B Filter: Toggles usage of the ADS-B filter
+\item 'Use v0: Toggles usage of MOPS Version 0
+\item 'Use Min NUCp: Toggles usage of the minimum NUCp value filter
+\item 'Use Max NUCp: Toggles usage of the maximum NUCp value filter
+\item 'Use v1: Toggles usage of MOPS Version 1
+\item 'Use v2: Toggles usage of MOPS Version 2
+\item 'Use Min NIC: Toggles usage of the minimum NIC value filter
+\item 'Use Max NIC: Toggles usage of the maximum NIC value filter
+\item 'Use Min NACp: Toggles usage of the minimum NACp value filter
+\item 'Use Max NACp: Toggles usage of the maximum NACp value filter
+\item 'Use Min SIL v1: Toggles usage of the minimum SIL v1 value filter
+\item 'Use Max SIL v1: Toggles usage of the maximum SIL v1 value filter
+\item 'Use Min SIL v2: Toggles usage of the minimum SIL v2 value filter
+\item 'Use Max SIL v2: Toggles usage of the maximum SIL v2 value filter
+\end{itemize}
+\ \\
 
 \subsection{Standard Tab}
 
@@ -183,11 +220,13 @@ In the Standard tab, at the top the current standard can be selected. \\
 Below, the following buttons exist:
 \begin{itemize}  
 \item Add: Add a new standard with a unique name
-\item Rename: Rename the current standard (currently disabled)
-\item Copy: Copy the current standart to a new one (currently disabled)
+\item Rename: Rename the current standard
+\item Copy: Copy the current standart to a new one
 \item Remove: Delete current standard
 \end{itemize}
 \ \\
+
+At the bottom, the 'Reference Maximum Time Difference [s]' field can be edited to adjust the maximum time difference between reference updates. This value is used to find time-adjacent reference target reports for test target reports. Please adjust this value to e.g. the reference update peroid plus 1 second.
 
 \subsubsection{Current Standard}
 
@@ -203,74 +242,62 @@ Below that, the current standard is shown. On the left side, a tree-view exists 
 \end{itemize}
 \ \\
 
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_standard_add_req.png}
+  \caption{Evaluation Standard tab: Add requirement}
+\end{figure}
+
 When clicking on the standard name, a menu is shown allowing adding new requirement groups ('Add Group'). \\
 
 When clicking on a requirement group, a menu is shown allowing the following functions:
 \begin{itemize}  
-\item Delete Group: Delete the clicked requirement group
-\item Add Requirement:
-\begin{itemize}  
-\item Detection
-\item Identification
-\item Position
+\item Delete Group: Delete the selected requirement group
+\item Add Requirement: Add a requirement of the selected type
+\item Delete Requirement: Delete the selected requirement
 \end{itemize}
-\end{itemize}
+\ \\
+
+The following requirements exist:
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X | r | }
+    \hline
+    \textbf{Type} & \textbf{Description} & \textbf{Link} \\ \hline
+    Detection & Calculates probability of detection &  \\ \hline
+    Extra Data & Calculates probability of unused test data (test data w/o reference data) &  \\ \hline
+    Extra Track & Calculates probability of undetected tracks (reference data w/o test data) &  \\ \hline
+    Identification Correct & Calculates probability of correct secondary identification &  \\ \hline
+    Identification False & Calculates probability of false secondary identification &  \\ \hline
+    Mode 3/A False & Calculates probability of false Mode 3/A code &  \\ \hline
+    Mode 3/A Present & Calculates probability of Mode 3/A code present &  \\ \hline
+    Mode C False & Calculates probability of false Mode C code &  \\ \hline
+    Mode C Present & Calculates probability of Mode C code present &  \\ \hline
+    Position Across & Calculates the probability of the position across error begin within a threshold &  \\ \hline
+    Position Along & Calculates the probability of the position along error begin within a threshold &  \\ \hline
+    Position Distance & Calculates the probability of the position error begin within or outside a threshold &  \\ \hline
+    Position Latency & Calculates the probability of the position latency begin within a threshold &  \\ \hline
+    Speed & Calculates the probability of the speed error begin within or outside a threshold or percentage &  \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 \ \\
 
 If a requirement is clicked, it's configuration widget is shown on the right hand side. \\
 
 Each requirement has the following common attributes:
 \begin{itemize}  
+\item Type: Type of the requirement
 \item Name: Name of the requirement
 \item Short Name: Abbreviated name of the requirement
+\item Comment: Any text comment, e.g. reference to source document
+\item Probability [1]: Probability threshold, as [0,1]
+\item Probability Check Type: Probability comparison type for calculated probability against probability threshold
 \end{itemize}
 \ \\
 
-\subsubsection{Detection Requirement}
-
-\begin{itemize}  
-\item Update Interval [s]: Update interval of the test data
-\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
-\item Minimum Probability [1]: Minimum probability of detection
-\item Use Miss Tolerance: Checkbox if miss tolerance should be used
-\item Miss Tolerance [s]: Acceptable time delta for miss detection
-\end{itemize}
-\ \\
-
-Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
-
-As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (\#EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (\#MUI). \\
-
-The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must be higher than the defined 'Minimum Probability' for the requirement to pass.
-
-\subsubsection{Identification Requirement}
-
-\begin{itemize}  
-\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
-\item Minimum Probability [1]: Minimum probability of detection
-\end{itemize}
-\ \\
-
-Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
-
-As a summary, the reference is used to check each target report's Mode S Target Identification (TI). A TI is incorrect if set in both reference and test data and different, resulting in the number of false TIs (\#FID) and correct TIs (\#CID). \\
-
-The ratio of \#CID and \#FID+\#CID gives the Probability of Correct Identification (PID). The PID must be higher than the defined 'Minimum Probability' for the requirement to pass.
-
-\subsubsection{Position Requirement}
-
-\begin{itemize}  
-\item Maximum Reference Time Difference [s]: Maximum time delta to closest reference target report
-\item Maximum Distance [m]: Maximum allowed distance from test target report to reference
-\item Minimum Probability [1]: Minimum probability of detection
-\end{itemize}
-\ \\
-
-Please note that the exact requirement calculation method is quite complex and will be added at a later point. \\
-
-As a summary, the reference is used to check each test target report's position. The position is incorrect if the reference position exists and the distance (to the reference position at the same time as the test target report, using linear interpolation) is larger than the defined threshold. This results in the number of incorrect positions (\#PNOK) and correct positions (\#POK). \\
-
-The ratio of \#POK and \#PNOK+\#POK gives the Probability of Acceptable Position (POK). The POK must be higher than the defined 'Minimum Probability' for the requirement to pass.
+For detailed information about each requirement please refer to section \nameref{sec:eval_requirements}.
 
 \subsection{Results Tab}
 
@@ -455,3 +482,4 @@ If a Latex error ocurred, a message box with the error message is shown. If the 
 
 Please note that the generated report can of course be edited by the user and re-generated using pdflatex, which allows for better customization options (adding e.g. details, corporate identity etc.).
 
+\subfile{eval_requirements}
