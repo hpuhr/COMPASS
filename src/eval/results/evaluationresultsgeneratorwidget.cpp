@@ -22,6 +22,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QGridLayout>
+#include <QFormLayout>
 #include <QCheckBox>
 #include <QLineEdit>
 
@@ -30,36 +31,36 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(EvaluationRes
 {
     QHBoxLayout* main_layout = new QHBoxLayout();
 
-    QGridLayout* layout = new QGridLayout();
+    QFormLayout* layout = new QFormLayout();
 
-    int row = 0;
+    //int row = 0;
 
     // skip no data details
-    ++row;
+    //++row;
 
-    skip_no_data_details_check_ = new QCheckBox ("Skip No Data Details");
+    skip_no_data_details_check_ = new QCheckBox ();
     skip_no_data_details_check_->setChecked(results_gen_.skipNoDataDetails());
     connect(skip_no_data_details_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot);
-    layout->addWidget(skip_no_data_details_check_, row, 0);
+    layout->addRow("Skip No Data Details", skip_no_data_details_check_);
 
     // split results by MOPS
-    ++row;
+    //++row;
 
-    split_results_by_mops_check_ = new QCheckBox ("Split Results by MOPS Version");
+    split_results_by_mops_check_ = new QCheckBox ();
     split_results_by_mops_check_->setChecked(results_gen_.splitResultsByMOPS());
     connect(split_results_by_mops_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot);
-    layout->addWidget(split_results_by_mops_check_, row, 0);
+    layout->addRow("Split Results by MOPS Version", split_results_by_mops_check_);
 
     // show adsb info
-    ++row;
+    //++row;
 
-    show_adsb_info_check_ = new QCheckBox ("Show ADS-B Info");
+    show_adsb_info_check_ = new QCheckBox ();
     show_adsb_info_check_->setChecked(results_gen_.showAdsbInfo());
     connect(show_adsb_info_check_, &QCheckBox::clicked,
             this, &EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot);
-    layout->addWidget(show_adsb_info_check_, row, 0);
+    layout->addRow("Show ADS-B Info", show_adsb_info_check_);
 
     setContentsMargins(0, 0, 0, 0);
 
