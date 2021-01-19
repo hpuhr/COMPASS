@@ -163,10 +163,10 @@ namespace EvaluationRequirementResult
         addCommonDetails(sec_det_table);
 
         sec_det_table.addRow({"#Updates", "Total number target reports", num_updates_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or identification",
                                 num_no_ref_pos_+num_no_ref_id_}, this);
         sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
+        sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference identification", num_no_ref_id_}, this);
         sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
         sec_det_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_}, this);

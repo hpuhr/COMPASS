@@ -152,15 +152,15 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
 
     sec_det_table.addRow({"Use", "To be used in results", use_}, this);
     sec_det_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-    sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or code",
+    sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or identification",
                           num_no_ref_pos_+num_no_ref_val_}, this);
     sec_det_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-    sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference code", num_no_ref_val_}, this);
+    sec_det_table.addRow({"#NoRef [1]", "Number of updates w/o reference identification", num_no_ref_val_}, this);
     sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
-    sec_det_table.addRow({"#Unknown [1]", "Number of updates unknown code", num_unknown_}, this);
-    sec_det_table.addRow({"#Correct [1]", "Number of updates with correct code", num_correct_}, this);
-    sec_det_table.addRow({"#False [1]", "Number of updates with false code", num_false_}, this);
+    sec_det_table.addRow({"#Unknown [1]", "Number of updates unknown identification", num_unknown_}, this);
+    sec_det_table.addRow({"#Correct [1]", "Number of updates with correct identification", num_correct_}, this);
+    sec_det_table.addRow({"#False [1]", "Number of updates with false identification", num_false_}, this);
 
     // condition
     {

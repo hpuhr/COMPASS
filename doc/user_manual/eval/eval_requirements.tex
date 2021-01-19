@@ -6,6 +6,8 @@ Please note that the exact requirement calculation methods are quite complex and
 \subsection{Detection}
 \label{sec:eval_req_detection} 
 
+\subsubsection{Configuration}
+
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_detection.png}
   \caption{Evaluation Detection requirement}
@@ -26,15 +28,65 @@ The 'Detection' requirement can be used to check whether targets are detected at
 \end{itemize}
 \ \\
 
+\subsubsection{Calculation}
+
 As a summary, the reference is used to calculate the number of expected update intervals inside the sector layer (\#EUI). Then, for the test data, if the reference exists at the time, time differences between target reports are checked and the number of misses/gaps are calculated as number of missed update intervals (\#MUI). \\
 
 Gaps are, if a minimum or maximum gap length is used, only counted if the detected gap fulfills the thresholds. \\
 
 The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must greator or equal than the defined 'Probability' for the requirement to pass.
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory  \\ \hline
+    Reqirement & Name of the requirement & Detection  \\ \hline
+    Num Results & Total number of results & 728  \\ \hline
+    Num Usable Results & Number of usable results & 417  \\ \hline
+    Num Unusable Results & Number of unusable results & 311  \\ \hline
+    \#Updates/\#EUIs [1] & Total number update intervals & 7960  \\ \hline
+    \#MUIs [1] & Number of missed update intervals & 2221  \\ \hline
+    PD [\%] & Probability of Detection & 72.10  \\ \hline
+    Condition &  & >= 90.00  \\ \hline
+    Condition Fulfilled &  & Failed  \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PD.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#EUIs [1] & Expected Update Intervals & 6 \\ \hline
+    \#MUIs [1] & Missed Update Intervals & 5 \\ \hline
+    PD [\%] & Probability of Detection & 16.67 \\ \hline
+    Reference Period 0 & Time inside sector & [15:47:22.680,15:47:45.828] \\ \hline
+    Reference Period 1 & Time inside sector & [15:47:53.844,15:47:57.844] \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
 
 \subsection{Extra Data}
 \label{sec:eval_req_extra_data} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_extra_data.png}
@@ -56,8 +108,63 @@ The 'Extra Data' requirement detects "extra" test data, i.e. test data for which
 \end{itemize}
 \ \\
 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim  \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory  \\ \hline
+    Reqirement & Name of the requirement & Extra Data  \\ \hline 
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 250 \\ \hline
+    Num Unusable Results & Number of unusable results & 478 \\ \hline
+    \#Check. & Number of checked test updates & 131343 \\ \hline
+    \#OK. & Number of OK test updates & 109622 \\ \hline
+    \#Extra & Number of extra test updates & 21721 \\ \hline
+    PEx [\%] & Probability of extra test update & 16.54 \\ \hline
+    Condition &  & <= 3.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PEx.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Ref [1] & Number of reference updates & 157 \\ \hline
+    \#Tst [1] & Number of test updates & 614 \\ \hline
+    Ign. & Ignore target & false \\ \hline
+    \#Check. & Number of checked test updates & 590 \\ \hline
+    \#OK. & Number of OK test updates & 329 \\ \hline
+    \#Extra & Number of extra test updates & 261 \\ \hline
+    PEx [\%] & Probability of update with extra data & 44.24 \\ \hline
+    Condition &  & <= 3.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
+
 \subsection{Extra Track}
 \label{sec:eval_req_extra_track} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_extra_track.png}
@@ -79,8 +186,60 @@ First the time period of each track (by ocurrance of track number, with a maximu
 
 Please note that currently, in the case of multiple tracks existing at the same time, the requirement does not decided which track is correct and which one is extra, therefore all target reports are counted as being extra. \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Extra Track \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 110 \\ \hline
+    Num Unusable Results & Number of unusable results & 618 \\ \hline
+    \#Check. & Number of checked test track updates & 56106 \\ \hline
+    \#OK. & Number of OK test track updates & 56106 \\ \hline
+    \#Extra & Number of extra test track updates & 0 \\ \hline
+    PEx [\%] & Probability of update with extra track & 0.00 \\ \hline
+    Condition &  & <= 0.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PEx.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Tst [1] & Number of test updates & 566 \\ \hline
+    Ign. & Ignore target & false \\ \hline
+    \#Check. & Number of checked test track updates & 327 \\ \hline
+    \#OK. & Number of OK test track updates & 327 \\ \hline
+    \#Extra & Number of extra test track updates & 0 \\ \hline
+    PEx [\%] & Probability of update with extra track & 0 \\ \hline
+    Condition &  & <= 0.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
 \subsection{Identification Correct}
 \label{sec:eval_req_id_correct} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_id_correct.png}
@@ -99,8 +258,67 @@ The 'Identification Correct' requirement is used to calculate the probability of
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Identification Correct \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    \#Updates & Total number target reports & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or identification & 7359 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7359 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference identification & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#CID [1] & Number of updates with correct identification & 53997 \\ \hline
+    \#NCID [1] & Number of updates with no correct identification & 0 \\ \hline
+    POK [\%] & Probability of correct identification & 100.00 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PEx.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 892 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or identification & 84 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 84 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference identification & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 563 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 245 \\ \hline
+    \#CID [1] & Number of updates with correct identification & 563 \\ \hline
+    \#NCID [1] & Number of updates with no correct identification & 0 \\ \hline
+    POK [\%] & Probability of correct identification & 100 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Identification False}
 \label{sec:eval_req_id_false} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_id_false.png}
@@ -119,15 +337,77 @@ The 'Identification False' requirement is used to calculate the probability of a
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Identification False \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or identification & 7359 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7359 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference identification & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#Unknown [1] & Number of updates unknown identification & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct identification & 53997 \\ \hline
+    \#False [1] & Number of updates with false identification & 0 \\ \hline
+    PF [\%] & Probability of identity false & 0 \\ \hline
+    Condition &  & <= 1.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PF.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 566 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or identification & 51 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 51 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference identification & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 292 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 223 \\ \hline
+    \#Unknown [1] & Number of updates unknown identification & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct identification & 292 \\ \hline
+    \#False [1] & Number of updates with false identification & 0 \\ \hline
+    PF [\%] & Probability of Mode 3/A false & 0 \\ \hline
+    Condition &  & <= 1.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Mode 3/A False}
 \label{sec:eval_req_m3a_false} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_m3a_false.png}
   \caption{Evaluation Mode 3/A False requirement}
 \end{figure}
 
-The 'Mode 3/A False' requirement is used to calculate the probability of a target report having a false Mode 3/A code. False in this context means there is Mode 3/A information data available, and it is not the same as in the reference. \\
+The 'Mode 3/A False' requirement is used to calculate the probability of a target report having a false Mode 3/A code. False in this context means there is Mode 3/A information data available, and it is not the same as in the reference. Only values which are valid and not garbled are used. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of false Mode 3/A code
@@ -135,8 +415,70 @@ The 'Mode 3/A False' requirement is used to calculate the probability of a targe
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Mode A False \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 106 \\ \hline
+    Num Unusable Results & Number of unusable results & 622 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 101669 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or code & 7353 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7353 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference code & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53987 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#Unknown [1] & Number of updates unknown code & 198 \\ \hline
+    \#Correct [1] & Number of updates with correct code & 53788 \\ \hline
+    \#False [1] & Number of updates with false code & 1 \\ \hline
+    PF [\%] & Probability of Mode 3/A false & 0 \\ \hline
+    Condition &  & <= 1.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PF.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 732 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or code & 35 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 35 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference code & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 542 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 155 \\ \hline
+    \#Unknown [1] & Number of updates unknown code & 5 \\ \hline
+    \#Correct [1] & Number of updates with correct code & 536 \\ \hline
+    \#False [1] & Number of updates with false code & 1 \\ \hline
+    PF [\%] & Probability of Mode 3/A false & 0.19 \\ \hline
+    Condition &  & <= 1.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Mode 3/A Present}
 \label{sec:eval_req_m3a_present} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_m3a_present.png}
@@ -151,8 +493,69 @@ The 'Mode 3/A Present' requirement is used to calculate the probability of a tar
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Mode A Present \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position & 7359 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#NoRefId [1] & Number of updates without reference code & 10 \\ \hline
+    \#Present [1] & Number of updates with present tst code & 53789 \\ \hline
+    \#Missing [1] & Number of updates with missing tst code & 198 \\ \hline
+    PP [\%] & Probability of Mode 3/A present & 99.63 \\ \hline
+    Condition &  & >= 98.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 956 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position & 60 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 60 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 467 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 429 \\ \hline
+    \#NoRefId [1] & Number of updates without reference code & 0 \\ \hline
+    \#Present [1] & Number of updates with present tst code & 456 \\ \hline
+    \#Missing [1] & Number of updates with missing tst code & 11 \\ \hline
+    PP [\%] & Probability of Mode 3/A present & 97.64 \\ \hline
+    Condition &  & >= 98.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
 \subsection{Mode C False}
 \label{sec:eval_req_mc_false} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_mc_false.png}
@@ -168,8 +571,71 @@ The 'Mode C False' requirement is used to calculate the probability of a target 
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Mode C False \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or code & 7363 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7359 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference code & 4 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#Unknown [1] & Number of updates unknown code & 40 \\ \hline
+    \#Correct [1] & Number of updates with correct code & 53935 \\ \hline
+    \#False [1] & Number of updates with false code & 18 \\ \hline
+    PF [\%] & Probability of Mode C false & 0.03 \\ \hline
+    Condition &  & <= 3.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PF.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 709 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or code & 30 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 30 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference code & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 591 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 88 \\ \hline
+    \#Unknown [1] & Number of updates unknown code & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct code & 585 \\ \hline
+    \#False [1] & Number of updates with false code & 6 \\ \hline
+    PF [\%] & Probability of Mode C false & 1.02 \\ \hline
+    Condition &  & <= 3.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
 \subsection{Mode C Present}
 \label{sec:eval_req_mc_present} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_mc_present.png}
@@ -184,15 +650,76 @@ The 'Mode C Present' requirement is used to calculate the probability of a targe
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Mode C Present \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position & 7359 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#NoRefC [1] & Number of updates without reference code & 4 \\ \hline
+    \#Present [1] & Number of updates with present tst code & 53953 \\ \hline
+    \#Missing [1] & Number of updates with missing tst code & 40 \\ \hline
+    PP [\%] & Probability of Mode C present & 99.93 \\ \hline
+    Condition &  & >= 97.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 1041 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position & 92 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 92 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 406 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 543 \\ \hline
+    \#NoRefC [1] & Number of updates without reference code & 0 \\ \hline
+    \#Present [1] & Number of updates with present tst code & 398 \\ \hline
+    \#Missing [1] & Number of updates with missing tst code & 8 \\ \hline
+    PP [\%] & Probability of Mode C present & 98.03 \\ \hline
+    Condition &  & >= 97.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
 \subsection{Position Across}
 \label{sec:eval_req_pos_across} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_across.png}
   \caption{Evaluation Position Across requirement}
 \end{figure}
 
-The 'Position Across' requirement is used to calculate the probability of a target report having an across-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component across the track angle of the reference at the time. If the absolute value of this across-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PACOK. The PACOK must be greater or equal than the defined 'Probability' for the requirement to pass.
+The 'Position Across' requirement is used to calculate the probability of a target report having an across-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component across the track angle of the reference at the time. If the absolute value of this across-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PACOK. The PACOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of false Mode C code
@@ -201,15 +728,81 @@ The 'Position Across' requirement is used to calculate the probability of a targ
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Across \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    ACMin [m] & Minimum of across-track error & -444.23 \\ \hline
+    ACMax [m] & Maximum of across-track error & 463.83 \\ \hline
+    ACAvg [m] & Average of across-track error & 4.19 \\ \hline
+    ACSDev [m] & Standard Deviation of across-track error & 24.81 \\ \hline
+    ACVar [m$^2$] & Variance of across-track error & 615.60 \\ \hline
+    \#ACOK [1] & Number of updates with across-track error & 52961 \\ \hline
+    \#ACNOK [1] & Number of updates with unacceptable across-track error  & 1036 \\ \hline
+    PACOK [\%] & Probability of acceptable across-track error & 98.08 \\ \hline
+    Condition Across &  & >= 90.00 \\ \hline
+    Condition Across Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PACOK.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 515 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 45 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 186 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 284 \\ \hline
+    ACMin [m] & Minimum of across-track error & -28.77 \\ \hline
+    ACMax [m] & Maximum of across-track error & 77.88 \\ \hline
+    ACAvg [m] & Average of across-track error & 1.85 \\ \hline
+    ACSDev [m] & Standard Deviation of across-track error & 12.83 \\ \hline
+    ACVar [m$^2$] & Variance of across-track error & 164.55 \\ \hline
+    \#ACOK [1] & Number of updates with across-track error & 185 \\ \hline
+    \#ACNOK [1] & Number of updates with unacceptable across-track error  & 1 \\ \hline
+    PACOK [\%] & Probability of acceptable across-track error & 99.46 \\ \hline
+    Condition Across &  & >= 90.00 \\ \hline
+    Condition Across Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Position Along}
 \label{sec:eval_req_pos_along} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_along.png}
   \caption{Evaluation Position Along requirement}
 \end{figure}
 
-The 'Position Along' requirement is used to calculate the probability of a target report having an along-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time. If the absolute value of this along-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PALOK. The PALOK must be greater or equal than the defined 'Probability' for the requirement to pass.
+The 'Position Along' requirement is used to calculate the probability of a target report having an along-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time. If the absolute value of this along-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PALOK. The PALOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of false Mode C code
@@ -218,8 +811,74 @@ The 'Position Along' requirement is used to calculate the probability of a targe
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Along \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    ALMin [m] & Minimum of along-track error & -1094.27 \\ \hline
+    ALMax [m] & Maximum of along-track error & 828.16 \\ \hline
+    ALAvg [m] & Average of along-track error & 18.37 \\ \hline
+    ALSDev [m] & Standard Deviation of along-track error & 30.47 \\ \hline
+    ALVar [m$^2$] & Variance of along-track error & 928.43 \\ \hline
+    \#ALOK [1] & Number of updates with along-track error & 51854 \\ \hline
+    \#ALNOK [1] & Number of updates with unacceptable along-track error  & 2143 \\ \hline
+    PALOK [\%] & Probability of acceptable along-track error & 96.03 \\ \hline
+    Condition Along &  & >= 90.00 \\ \hline
+    Condition Along Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PALOK.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 865 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 59 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 482 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 324 \\ \hline
+    ALMin [m] & Minimum of along-track error & -91.41 \\ \hline
+    ALMax [m] & Maximum of along-track error & 100.38 \\ \hline
+    ALAvg [m] & Average of along-track error & 42.52 \\ \hline
+    ALSDev [m] & Standard Deviation of along-track error & 18.89 \\ \hline
+    ALVar [m$^2$] & Variance of along-track error & 356.75 \\ \hline
+    \#ALOK [1] & Number of updates with along-track error & 453 \\ \hline
+    \#ALNOK [1] & Number of updates with unacceptable along-track error  & 29 \\ \hline
+    PALOK [\%] & Probability of acceptable along-track error & 93.98 \\ \hline
+    Condition Along &  & >= 90.00 \\ \hline
+    Condition Along Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Position Distance}
 \label{sec:eval_req_pos_distance} 
+
+\subsubsection{Configuration}
 
 This requirement can be used in 2 variations:
 
@@ -240,7 +899,7 @@ The offset of the position (test vs. linear interpolated reference position) is 
 The 'Failed Values are of Interest' checkbox define if the target reports passing or failing the check are of interest.
 
 
-\subsection{Position Correct Variation}
+\paragraph{Position Correct Variation}
 
 \begin{itemize}  
 \item Probability [1]: Probability of correct position
@@ -251,7 +910,7 @@ The 'Failed Values are of Interest' checkbox define if the target reports passin
 \end{itemize}
 \ \\
 
-\subsection{Position False Variation}
+\paragraph{Position False Variation}
 
 \begin{itemize}  
 \item Probability [1]: Probability of false position
@@ -262,15 +921,82 @@ The 'Failed Values are of Interest' checkbox define if the target reports passin
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Position Correct \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    DMin [m] & Minimum of distance & 0.09 \\ \hline
+    DMax [m] & Maximum of distance & 1115.68 \\ \hline
+    DAvg [m] & Average of distance & 34.06 \\ \hline
+    DSDev [m] & Standard Deviation of distance & 27.19 \\ \hline
+    DVar [m$^2$] & Variance of distance & 739.18 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 291 \\ \hline
+    \#CP [1] & Number of updates with passed comparison  & 53706 \\ \hline
+    PCP [\%] & Probability of passed comparison & 99.46 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PCP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 927 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 52 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 646 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 229 \\ \hline
+    DMin [m] & Minimum of distance & 4.14 \\ \hline
+    DMax [m] & Maximum of distance & 284.87 \\ \hline
+    DAvg [m] & Average of distance & 81.87 \\ \hline
+    DSDev [m] & Standard Deviation of distance & 34.43 \\ \hline
+    DVar [m$^2$] & Variance of distance & 1185.18 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 25 \\ \hline
+    \#CP [1] & Number of updates with  passed comparison & 621 \\ \hline
+    PCP [\%] & Probability of passed comparison & 96.13 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+
 \subsection{Position Latency}
 \label{sec:eval_req_pos_latency} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_pos_latency.png}
   \caption{Evaluation Position Latency requirement}
 \end{figure}
 
-The 'Position Latency' requirement is used to calculate the probability of a target report having a time-lantency error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time, which divided by the negative speed gives the latency. If the absolute value of this latency is smaller or equal than the defined threshold, the target report is counted for the calculated probability PLTOK. The PLTOK must be greater or equal than the defined 'Probability' for the requirement to pass.
+The 'Position Latency' requirement is used to calculate the probability of a target report having a time-lantency error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time, which divided by the negative speed gives the latency. If the absolute value of this latency is smaller or equal than the defined threshold, the target report is counted for the calculated probability PLTOK. The PLTOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of false Mode C code
@@ -279,8 +1005,74 @@ The 'Position Latency' requirement is used to calculate the probability of a tar
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Latency \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    LTMin [s] & Minimum of latency & -00:00:02.758 \\ \hline
+    LTMax [s] & Maximum of latency & 00:00:04.790 \\ \hline
+    LTAvg [s] & Average of latency & -00:00:00.081 \\ \hline
+    LTSDev [s] & Standard Deviation of latency & 00:00:00.146 \\ \hline
+    LTVar [s$^2$] & Variance of latency & 00:00:00.021 \\ \hline
+    \#LTOK [1] & Number of updates with latency & 44216 \\ \hline
+    \#LTNOK [1] & Number of updates with unacceptable latency  & 9781 \\ \hline
+    PLTOK [\%] & Probability of acceptable latency & 81.89 \\ \hline
+    Condition Latency &  & >= 90.00 \\ \hline
+    Condition Latency Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PLTOK.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 1729 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference positions & 142 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 1469 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 118 \\ \hline
+    LTMin [s] & Minimum of latency & -00:00:00.590 \\ \hline
+    LTMax [s] & Maximum of latency & 00:00:00.431 \\ \hline
+    LTAvg [s] & Average of latency & -00:00:00.092 \\ \hline
+    LTSDev [s] & Standard Deviation of latency & 00:00:00.085 \\ \hline
+    LTVar [s$^2$] & Variance of latency & 00:00:00.007 \\ \hline
+    \#LTOK [1] & Number of updates with latency & 1324 \\ \hline
+    \#LTNOK [1] & Number of updates with unacceptable latency  & 145 \\ \hline
+    PLTOK [\%] & Probability of acceptable latency & 90.13 \\ \hline
+    Condition Latency &  & >= 90.00 \\ \hline
+    Condition Latency Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
 \subsection{Speed}
 \label{sec:eval_req_speed} 
+
+\subsubsection{Configuration}
 
 \begin{figure}[H]
     \includegraphics[width=14cm,frame]{../screenshots/eval_req_speed.png}
@@ -289,7 +1081,7 @@ The 'Position Latency' requirement is used to calculate the probability of a tar
 
 The 'Speed' requirement is used to calculate the probability of a target report having an speed error smaller than a defined threshold. The difference of the speed (test speed vs. speed based on reference positions) is calculated, and if its absolute value is smaller or equal than the defined threshold, the target report is counted for the calculated probability PCP (probability of check passed). The PCP must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
-In another variation, if the 'Use Percent Threshold if Higher' checkbox is set, the check is changed for faster speeds. If the 'Threshold Percent' value times the calculated speed is larger or equal the dewfined threshold value, then threshold value is changed to value of the 'Threshold Percent' value times the calculated speed. This means that for higher speeds, an accuracy with the given percentage is required.
+In another variation, if the 'Use Percent Threshold if Higher' checkbox is set, the check is changed for faster speeds. If the 'Threshold Percent' value times the calculated speed is larger or equal the dewfined threshold value, then threshold value is changed to value of the 'Threshold Percent' value times the calculated speed. This means that for higher speeds, an accuracy with the given percentage is required. \\
 
 \begin{itemize}  
 \item Probability [1]: Probability of false Mode C code
@@ -302,3 +1094,68 @@ In another variation, if the 'Use Percent Threshold if Higher' checkbox is set, 
 \end{itemize}
 \ \\
 
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & fir\_cut\_sim \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Speed \\ \hline
+    Num Results & Total number of results & 728 \\ \hline
+    Num Usable Results & Number of usable results & 107 \\ \hline
+    Num Unusable Results & Number of unusable results & 621 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 101685 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference speeds & 7359 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 53997 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 40329 \\ \hline
+    \#NoTstData [1] & Number of updates without tst speed data & 0 \\ \hline
+    OMin [m/s] & Minimum of speed offset & 0.00 \\ \hline
+    OMax [m/s] & Maximum of speed offset & 1114.58 \\ \hline
+    OAvg [m/s] & Average of speed offset & 3.59 \\ \hline
+    OSDev [m/s] & Standard Deviation of speed offset & 7.62 \\ \hline
+    OVar [m$^2$/s$^2$] & Variance of speed offset & 58.01 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 38 \\ \hline
+    \#CP [1] & Number of updates with passed comparison  & 53959 \\ \hline
+    PCP [\%] & Probability of passed comparison & 99.93 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\
+
+Also, a table is given for all single targets, sorted by PCP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 1795 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference speeds & 131 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 949 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 715 \\ \hline
+    \#NoTstData [1] & Number of updates without tst speed data & 0 \\ \hline
+    OMin [m/s] & Minimum of speed offset & 0.00 \\ \hline
+    OMax [m/s] & Maximum of speed offset & 56.07 \\ \hline
+    OAvg [m/s] & Average of speed offset & 5.23 \\ \hline
+    OSDev [m/s] & Standard Deviation of speed offset & 5.60 \\ \hline
+    OVar [m$^2$/s$^2$] & Variance of speed offset & 31.34 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 2 \\ \hline
+    \#CP [1] & Number of updates with  passed comparison & 947 \\ \hline
+    PCP [\%] & Probability of passed comparison & 99.79 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+\ \\

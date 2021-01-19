@@ -138,10 +138,10 @@ namespace EvaluationRequirementResult
 
         utn_req_table.addRow({"Use", "To be used in results", use_}, this);
         utn_req_table.addRow({"#Up [1]", "Number of updates", num_updates_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or callsign",
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference position or identification",
                               num_no_ref_pos_+num_no_ref_id_}, this);
         utn_req_table.addRow({"#NoRefPos [1]", "Number of updates w/o reference position ", num_no_ref_pos_}, this);
-        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference callsign", num_no_ref_id_}, this);
+        utn_req_table.addRow({"#NoRef [1]", "Number of updates w/o reference identification", num_no_ref_id_}, this);
         utn_req_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
         utn_req_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
         utn_req_table.addRow({"#CID [1]", "Number of updates with correct identification", num_correct_}, this);

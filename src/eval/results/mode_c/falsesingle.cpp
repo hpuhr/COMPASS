@@ -103,7 +103,7 @@ namespace EvaluationRequirementResult
         if (!section.hasTable(table_name))
             section.addTable(table_name, 14,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13);
+             "#Up", "#NoRef", "#Unknown", "#Correct", "#False", "PF"}, true, 13, Qt::DescendingOrder);
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
