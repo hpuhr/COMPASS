@@ -21,7 +21,7 @@ Both areas can be resized and hidden if wanted.
 
 \section{Data Loading}
 
-To load the data use the the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used. \\
+To load the data the mechanism described in Section \nameref{sec:load} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used. \\
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -51,6 +51,8 @@ If Meta variables are used, they are display in all DObjects they exist. If DBOb
   \caption{Listbox View adding of variables}
 \end{figure}
 
+After a adding a variable the dataset has to be reloaded to include the additional data, therefore the 'Reload' button becomes active.
+
 
 \subsection{Show Only Selected}
 When this checkbox is checked, only target reports selected in other views are shown. If this is active, de-selecting a target report removes it from the shown data.
@@ -64,13 +66,6 @@ When the 'Use Presentation' checkbox is not checked, the original database value
 When this checkbox is checked, the associated UTNs are shown for each target report. If no UTN is shown, this target reports was never associated to an UTN, if several are shown (e.g. '1,2,4') this target report was used in several UTNs. \\
 
 This checkbox can only be used if association information is present in the database.
-
-\begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded_assoc.png}
-  \caption{Listbox View after loading with associated UTNs}
-\end{figure}
-
 
 \subsection{Exporting}
 \label{sec:exporting}
@@ -109,4 +104,4 @@ The exported file can be opened in any editor, or for example imported into Libr
  
 \subsection{Reload}
 
-Additionally, if a change is made that requires re-loading of the data (e.g. additional data should be displayed) the 'Reload' button becomes available, and can be used to trigger a loading process as in Section \nameref{sec:management_dbos}. 
+Additionally, if a change is made that requires re-loading of the data (e.g. additional data should be displayed) the 'Reload' button becomes available, and can be used to trigger a loading process as in Section \nameref{sec:load}. 
