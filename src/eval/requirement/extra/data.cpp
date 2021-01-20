@@ -151,6 +151,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             else
                 ground_bit_set = false;
 
+            if (!ground_bit_set)
+                tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(tod, 15.0);
+
             inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
 
             if (inside)

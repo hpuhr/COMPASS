@@ -153,6 +153,8 @@ public:
     bool has_ref_altitude_secondary_ {false};
     std::string ref_altitude_secondary_name_;
 
+    std::string ref_ground_bit_name_; // can be empty
+
     std::string ref_spd_ground_speed_kts_name_; // can be empty
     std::string ref_spd_track_angle_deg_name_; // can be empty
 

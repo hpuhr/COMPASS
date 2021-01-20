@@ -113,7 +113,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             was_inside = inside;
 
             // for ref
-            tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(tod);
+            tie (has_ground_bit, ground_bit_set) = target_data.refGroundBitForTime(tod);
+            // for tst
+            if (!ground_bit_set)
+                tie (has_ground_bit, ground_bit_set) = target_data.tstGroundBitForTimeInterpolated(tod);
 
             inside = target_data.hasRefPosForTime(tod)
                     && sector_layer.isInside(target_data.refPosForTime(tod), has_ground_bit, ground_bit_set);
@@ -361,6 +364,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
             ground_bit_set = target_data.tstGroundBitForTime(tod);
         else
             ground_bit_set = false;
+
+        if (!ground_bit_set)
+            tie(has_ground_bit, ground_bit_set) = target_data.interpolatedRefGroundBitForTime(tod, 15.0);
 
         is_inside = sector_layer.isInside(ref_pos, has_ground_bit, ground_bit_set);
 

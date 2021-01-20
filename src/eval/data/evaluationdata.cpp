@@ -94,6 +94,10 @@ void EvaluationData::addReferenceData (DBObject& object, std::shared_ptr<Buffer>
     if (object_manager.metaVariable("mode3a_v").existsIn(dbo_name))
         ref_modea_v_name_ = object_manager.metaVariable("mode3a_v").getFor(dbo_name).name();
 
+    // ground bit
+    if (object_manager.metaVariable("ground_bit").existsIn(dbo_name))
+        ref_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
+
     // speed & track_angle
     if (dbo_name == "ADSB")
     {
@@ -225,11 +229,6 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     // ground bit
     if (object_manager.metaVariable("ground_bit").existsIn(dbo_name))
         tst_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
-
-//    if (object.name() == "ADSB")
-//    {
-//        tst_ground_bit_name_ = "ground_bit";
-//    }
 
     // track num
     if (object_manager.metaVariable("track_num").existsIn(dbo_name))

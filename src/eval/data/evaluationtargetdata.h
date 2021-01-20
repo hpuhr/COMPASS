@@ -140,6 +140,9 @@ public:
     bool hasRefTAForTime (float tod) const;
     unsigned int refTAForTime (float tod) const;
 
+    std::pair<bool,bool> refGroundBitForTime (float tod) const; // has gbs, gbs true
+    std::pair<bool,bool> interpolatedRefGroundBitForTime (float tod, float d_max) const; // has gbs, gbs true
+
     // test
     bool hasTstPosForTime (float tod) const;
     EvaluationTargetPosition tstPosForTime (float tod) const;

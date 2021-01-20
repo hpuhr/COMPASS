@@ -782,6 +782,59 @@ unsigned int EvaluationTargetData::refTAForTime (float tod) const
     return eval_data_->ref_buffer_->get<int>(eval_data_->ref_target_address_name_).get(index);
 }
 
+std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const // has gbs, gbs true
+{
+    if (!ref_data_.count(tod))
+        return {false, false};
+
+    auto it_pair = ref_data_.equal_range(tod);
+
+    assert (it_pair.first != ref_data_.end());
+
+    unsigned int index = it_pair.first->second;
+
+    if (eval_data_->ref_target_address_name_.size()
+            && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).isNull(index))
+    {
+        return {true, eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).get(index) == "Y"};
+    }
+    else
+        return {false, false};
+}
+
+std::pair<bool,bool> EvaluationTargetData::interpolatedRefGroundBitForTime (float tod, float d_max) const
+// has gbs, gbs true
+{
+    assert (test_data_mappings_.count(tod));
+
+    bool has_gbs = false;
+    bool gbs = false;
+
+    TstDataMapping& mapping = test_data_mappings_.at(tod);
+
+    if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+        return {has_gbs, gbs};
+
+    if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
+    {
+        assert (mapping.tod_ref1_ <= tod);
+        assert (mapping.tod_ref2_ >= tod);
+
+        if (tod - mapping.tod_ref1_ > d_max) // lower to far
+            return {has_gbs, gbs};
+
+        if (mapping.tod_ref2_ - tod > d_max) // upper to far
+            return {has_gbs, gbs};
+
+        tie (has_gbs, gbs) = refGroundBitForTime(mapping.tod_ref1_);
+
+        if (!gbs)
+            tie (has_gbs, gbs) = refGroundBitForTime(mapping.tod_ref2_);
+    }
+
+    return {has_gbs, gbs};
+}
+
 bool EvaluationTargetData::hasTstPosForTime (float tod) const
 {
     return tst_data_.count(tod);
