@@ -672,6 +672,12 @@
                                 "dbo_name": "Radar",
                                 "dbo_variable_name": "ground_bit"
                             }
+                        },
+                        "DBOVariableDefinitionTrackerground_bit0": {
+                            "parameters": {
+                                "dbo_name": "Tracker",
+                                "dbo_variable_name": "ground_bit"
+                            }
                         }
                     }
                 }

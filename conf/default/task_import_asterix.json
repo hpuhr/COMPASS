@@ -113,6 +113,11 @@
             }
         },
         "ASTERIXFile": {
+            "ASTERIXFilehomeskdataaustriahello_worldacg_helloworld_fake_ID.ff": {
+                "parameters": {
+                    "name": "/home/sk/data/austria/hello_world/acg_helloworld_fake_ID.ff"
+                }
+            }
         },
         "JSONParsingSchema": {
             "JSONParsingSchemajASTERIX0": {
@@ -4562,6 +4567,22 @@
                                             "mandatory": false,
                                             "unit": ""
                                         }
+                                    },
+                                    "JSONDataMapping96": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type string, value \"30010000060000\"",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "260.MB DATA",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
                                     }
                                 }
                             }
@@ -7952,6 +7973,102 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping194": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 16383.75",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "290.ADS.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping195": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 63.75",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "290.UAT.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping196": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 63.75",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "290.VDL.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping197": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 597",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "510.Composed Track Number.SYSTEM TRACK NUMBER",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping198": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "510.Composed Track Number.SYSTEM UNIT IDENTIFICATION",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping199": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "510.Composed Track Number.extend",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping2": {
                                         "parameters": {
                                             "active": true,
@@ -7984,6 +8101,166 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping200": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type array, value [false,false,true,false,false,false,false,false]",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF.REF_FSPEC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping201": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF.TVS.Vx",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping202": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 0.0",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF.TVS.Vy",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping203": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 50",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CSN.CSN.SAC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping204": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 9",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CSN.CSN.SIC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping205": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 2",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CSN.CSN.TYP",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping206": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 8",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF.CSN.REP",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping207": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 2015",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CST.CST.LOCAL TRACK NUMBER",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping208": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 50",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CST.CST.SAC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping209": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 78",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CST.CST.SIC",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping21": {
                                         "parameters": {
                                             "active": false,
@@ -7995,6 +8272,86 @@
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "080.FX",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping210": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 9",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": true,
+                                            "json_key": "REF.CST.CST.TYP",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping211": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 5",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "REF.CST.REP",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping212": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type boolean, value false",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "fs_alert",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping213": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type boolean, value false",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "ground_bit",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "fs_gbs",
+                                            "json_value_format": "bool",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping214": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type boolean, value false",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "fs_spi",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""

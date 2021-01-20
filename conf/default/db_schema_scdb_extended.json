@@ -7246,6 +7246,19 @@
                                 "unit": "Knots"
                             }
                         },
+                        "GROUND_BIT": {
+                            "parameters": {
+                                "comment": " ",
+                                "data_format": "",
+                                "dimension": "",
+                                "is_key": false,
+                                "name": "GROUND_BIT",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "enum",
+                                "unit": ""
+                            }
+                        },
                         "HASH_CODE": {
                             "parameters": {
                                 "comment": "ARTAS MD5 Hash Code",

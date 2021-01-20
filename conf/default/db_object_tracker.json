@@ -1403,6 +1403,27 @@
                     }
                 }
             },
+            "DBOVariableTrackerground_bit0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "ground_bit",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.GROUND_BIT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.GROUND_BIT"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackergroundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
