@@ -616,13 +616,17 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
 
     DBObject& db_object = object_man.object(dbo_name);
 
-    if (dbo_name == "ADSB")
-    {
-        read_set.add(db_object.variable("ground_bit"));
-        //            read_set.add(obj.variable("nac_p"));
-        //            read_set.add(obj.variable("nucp_nic"));
-        //            read_set.add(obj.variable("sil"));
-    }
+    // ground bit
+    if (object_man.metaVariable("ground_bit").existsIn(dbo_name))
+        read_set.add(object_man.metaVariable("ground_bit").getFor(dbo_name));
+
+//    if (dbo_name == "ADSB")
+//    {
+//        read_set.add(db_object.variable("ground_bit"));
+//        //            read_set.add(obj.variable("nac_p"));
+//        //            read_set.add(obj.variable("nucp_nic"));
+//        //            read_set.add(obj.variable("sil"));
+//    }
 
     // speed & heading
     if (dbo_name == "ADSB")

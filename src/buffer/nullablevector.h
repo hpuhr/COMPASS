@@ -63,7 +63,7 @@ class NullableVector
 
     /// @brief Sets specific value
     void set(unsigned int index, T value);
-    void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str);
+    void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug=false);
 
     /// @brief Appends specific value
     void append(unsigned int index, T value);
@@ -204,7 +204,7 @@ void NullableVector<T>::set(unsigned int index, T value)
 
 template <class T>
 void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
-                                      const std::string& value_str)
+                                      const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
     T value;
@@ -231,16 +231,16 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
     }
     else if (format == "bool")
     {
-        if (value_str == "0")
+        if (value_str == "0" || value_str == "false")
             value = 'N';
-        else if (value_str == "1")
+        else if (value_str == "1"  || value_str == "true")
             value = 'Y';
     }
     else if (format == "bool_invert")
     {
-        if (value_str == "1")
+        if (value_str == "1"  || value_str == "true")
             value = 'N';
-        else if (value_str == "0")
+        else if (value_str == "0" || value_str == "false")
             value = 'Y';
     }
     else
@@ -248,6 +248,10 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
         logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
         assert(false);
     }
+
+    if (debug)
+        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
+               << "' value '" << value << "'";
 
     set(index, value);
 }

@@ -223,10 +223,13 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         tst_modec_v_name_ = object_manager.metaVariable("modec_v").getFor(dbo_name).name();
 
     // ground bit
-    if (object.name() == "ADSB")
-    {
-        tst_ground_bit_name_ = "ground_bit";
-    }
+    if (object_manager.metaVariable("ground_bit").existsIn(dbo_name))
+        tst_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
+
+//    if (object.name() == "ADSB")
+//    {
+//        tst_ground_bit_name_ = "ground_bit";
+//    }
 
     // track num
     if (object_manager.metaVariable("track_num").existsIn(dbo_name))

@@ -633,6 +633,30 @@ void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& rec
         record["track_lu_ds_id"] = lu_sac * 256 + lu_sic;
     }
 
+    // 380.COM.STAT
+    //    Flight Status
+    //    = 0 No alert, no SPI, aircraft airborne
+    //    = 1 No alert, no SPI, aircraft on ground
+    //    = 2 Alert, no SPI, aircraft airborne
+    //    = 3 Alert, no SPI, aircraft on ground
+    //    = 4 Alert, SPI, aircraft airborne or on ground
+    //    = 5 No alert, SPI, aircraft airborne or on ground
+    //    = 6 Not defined
+    //    = 7 Unknown or not yet extracted
+
+    if (record.contains("380") && record.at("380").contains("COM")
+            && record.at("380").at("COM").contains("STAT"))
+    {
+        unsigned int stat = record.at("380").at("COM").at("STAT");
+        record["fs_alert"] = (stat == 2) || (stat == 3) || (stat == 4);
+        record["fs_spi"] = (stat == 4) || (stat == 5);
+        record["fs_gbs"] = (stat == 1) || (stat == 3);
+
+        if ((stat == 1) || (stat == 3))
+            loginf << "UGA";
+        //select ground_bit,count(*) from sd_track group by ground_bit;
+    }
+
     // overrides
     if (override_active_)
     {

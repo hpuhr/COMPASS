@@ -282,7 +282,7 @@ void JSONDataMapping::initialize()
 
 template <typename T>
 bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list,
-                                      size_t row_cnt) const
+                                      size_t row_cnt, bool debug) const
 {
     if (in_array_)
     {
@@ -313,9 +313,9 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
                     if (j_it.contains(last_key))
                     {
                         if (append_value_)
-                            appendValue(&j_it.at(last_key), array_list, row_cnt);
+                            appendValue(&j_it.at(last_key), array_list, row_cnt, debug);
                         else
-                            setValue(&j_it.at(last_key), array_list, row_cnt);
+                            setValue(&j_it.at(last_key), array_list, row_cnt, debug);
                     }
                 }
 
@@ -347,9 +347,9 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
             try
             {
                 if (append_value_)
-                    appendValue(val_ptr, array_list, row_cnt);
+                    appendValue(val_ptr, array_list, row_cnt, debug);
                 else
-                    setValue(val_ptr, array_list, row_cnt);
+                    setValue(val_ptr, array_list, row_cnt, debug);
 
                 return false;  // everything ok
             }
@@ -369,34 +369,34 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
 
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<bool>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<char>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<unsigned char>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<int>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<unsigned int>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<long int>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<unsigned long int>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<float>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<double>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 template bool JSONDataMapping::findAndSetValue(const nlohmann::json& j,
                                                NullableVector<std::string>& array_list,
-                                               size_t row_cnt) const;
+                                               size_t row_cnt, bool debug) const;
 
 const nlohmann::json* JSONDataMapping::findKey(const nlohmann::json& j) const
 {
@@ -476,12 +476,16 @@ const nlohmann::json* JSONDataMapping::findParentKey(const nlohmann::json& j) co
 
 template <typename T>
 void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list,
-                               size_t row_cnt) const
+                               size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
 
     logdbg << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
            << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
+
+    if (debug)
+        loginf << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.set(row_cnt, *val_ptr);
@@ -494,12 +498,16 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<T>&
 
 template <typename T>
 void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list,
-                                  size_t row_cnt) const
+                                  size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
 
     logdbg << "JSONDataMapping: appendValue: key " << json_key_ << " json " << val_ptr->type_name()
            << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
+
+    if (debug)
+        loginf << "JSONDataMapping: appendValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.append(row_cnt, *val_ptr);
@@ -511,9 +519,13 @@ void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<
 }
 
 void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list,
-                               size_t row_cnt) const
+                               size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     bool tmp_bool;
 
@@ -538,9 +550,13 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<boo
 }
 
 void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list,
-                                  size_t row_cnt) const
+                                  size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: appendValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     bool tmp_bool;
 
@@ -563,9 +579,13 @@ void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<
 }
 
 void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list,
-                               size_t row_cnt) const
+                               size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.set(row_cnt, static_cast<int>(*val_ptr));
@@ -578,9 +598,13 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<cha
 }
 
 void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list,
-                                  size_t row_cnt) const
+                                  size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: appendValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.append(row_cnt, static_cast<int>(*val_ptr));
@@ -594,65 +618,75 @@ void JSONDataMapping::appendValue(const nlohmann::json* val_ptr, NullableVector<
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
                                         NullableVector<unsigned char>& array_list,
-                                        size_t row_cnt) const;
+                                        size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
                                            NullableVector<unsigned char>& array_list,
-                                           size_t row_cnt) const;
+                                           size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
-                                        NullableVector<int>& array_list, size_t row_cnt) const;
+                                        NullableVector<int>& array_list, size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
-                                           NullableVector<int>& array_list, size_t row_cnt) const;
+                                           NullableVector<int>& array_list, size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
                                         NullableVector<unsigned int>& array_list,
-                                        size_t row_cnt) const;
+                                        size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
                                            NullableVector<unsigned int>& array_list,
-                                           size_t row_cnt) const;
+                                           size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
-                                        NullableVector<long int>& array_list, size_t row_cnt) const;
+                                        NullableVector<long int>& array_list, size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
                                            NullableVector<long int>& array_list,
-                                           size_t row_cnt) const;
+                                           size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
                                         NullableVector<unsigned long int>& array_list,
-                                        size_t row_cnt) const;
+                                        size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
                                            NullableVector<unsigned long int>& array_list,
-                                           size_t row_cnt) const;
+                                           size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
-                                        NullableVector<float>& array_list, size_t row_cnt) const;
+                                        NullableVector<float>& array_list, size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
-                                           NullableVector<float>& array_list, size_t row_cnt) const;
+                                           NullableVector<float>& array_list, size_t row_cnt, bool debug) const;
 
 template void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
-                                        NullableVector<double>& array_list, size_t row_cnt) const;
+                                        NullableVector<double>& array_list, size_t row_cnt, bool debug) const;
 template void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
                                            NullableVector<double>& array_list,
-                                           size_t row_cnt) const;
+                                           size_t row_cnt, bool debug) const;
 
 void JSONDataMapping::setValue(const nlohmann::json* val_ptr,
-                               NullableVector<std::string>& array_list, size_t row_cnt) const
+                               NullableVector<std::string>& array_list, size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
     else
-        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+    {
+        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr), debug);
+    }
 
     logdbg << "JSONDataMapping: setValue(string): json " << Utils::JSON::toString(*val_ptr)
            << " buffer " << array_list.get(row_cnt);
 }
 
 void JSONDataMapping::appendValue(const nlohmann::json* val_ptr,
-                                  NullableVector<std::string>& array_list, size_t row_cnt) const
+                                  NullableVector<std::string>& array_list, size_t row_cnt, bool debug) const
 {
     assert(val_ptr);
+
+    if (debug)
+        loginf << "JSONDataMapping: appendValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
     if (json_value_format_ == "")
         array_list.append(row_cnt, Utils::JSON::toString(*val_ptr));

@@ -79,6 +79,7 @@ void SQLiteConnection::openFile(const std::string& file_name)
     char* sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA journal_mode = OFF", NULL, NULL, &sErrMsg);
+    //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
     connection_ready_ = true;
 
