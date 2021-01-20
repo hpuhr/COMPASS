@@ -349,9 +349,48 @@ After the loading and the post-processing have been performed, all targets are s
   \caption{Evaluation Targets tab after loading}
 \end{figure}
 
+\subsection{Filtering Targets}
+\label{sec:eval_run_load} 
+
 The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. \\
 
 Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
+
+The 'Change Usage' button can be used for the following actions:
+\begin{itemize}  
+\item Use All: Enable usage for all UTNs
+\item Use None: Disable usage for all UTNs
+\item Clear Comments: Clear comments of all UTNs
+\item Filter: Start 'Filter UTNs' dialog
+\end{itemize}
+\ \\
+
+The 'Filter UTNs' dialog can be used to dynamically filter UTNs based on the configurated values:
+
+\begin{figure}[H]
+    \includegraphics[width=15cm]{../screenshots/eval_filter_utns.png}
+  \caption{Evaluation Filter UTNs dialog}
+\end{figure}
+
+\begin{itemize}  
+\item Remove Short Targets: Removes targets with a small number of target reports or duration
+\item Remove Primary-Only Targets: Removes primary-only targets (w/o secondary attributes)
+\item Remove Mode A/C Code onlys: Removes targets without Mode S attributes
+\item Remove by Mode A Code: Removes targets having a Mode A code given in the list
+\item Remove by Target Address: Removes targets having a Mode S target address given in the list
+\item Remove by Non-Detection of DBObject: Removes targets not being detected by a given DBOObject (e.g. sensor type)
+\end{itemize}
+\ \\
+
+When the 'Run' button is clicked, all (enabled) targets are checked and are disabled if any of the selected filters apply.
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_targets_filtered.png}
+  \caption{Evaluation Targets tab after filtering}
+\end{figure}
+
+Please note that the 'Change Usage' button can be used also after the 'Evaluate' button is used, which automatically updates the evaluation results.
 
 \subsection{Evaluation}
 \label{sec:eval_run_eval} 
@@ -392,11 +431,13 @@ Navigation can be made more efficient by returning to the last sub-result by usi
   \caption{Evaluation results: Overview}
 \end{figure}
 
-When single-clicking a row, the respective result error are shown in the existing OSGViews.
+Please note that the results are given as example only and are no indication of performance for any system currently in operation. \\
+
+When single-clicking a row, the respective result error are shown in the existing Views.
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{../screenshots/eval_results_pd_sum_osgview.png}
+    \includegraphics[width=19cm,frame]{../screenshots/eval_results_pd_sum_osgview.png}
   \caption{Evaluation results: Sector PD errors in OSGView}
 \end{figure}
 
@@ -418,11 +459,9 @@ When single-clicking a row, the respective target data and result errors are sho
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{../screenshots/eval_results_pd_single_osgview.png}
+    \includegraphics[width=18cm,frame]{../screenshots/eval_results_pd_single_osgview.png}
   \caption{Evaluation results: Target PD Errors in OSGView}
 \end{figure}
-
-In the current example, the target was not detected in the test data at all, therefore the "miss" connection line is drawn from the first to last reference position (in the sector).
 
 When double-clicking a row, a step into the respective target details is performed.
 
