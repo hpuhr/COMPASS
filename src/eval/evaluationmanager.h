@@ -64,6 +64,7 @@ public:
     bool canLoadData ();
     void loadData ();
     bool canEvaluate ();
+    std::string getCannotEvaluateComment();
     void evaluate ();
     bool canGenerateReport ();
     void generateReport ();

@@ -448,7 +448,41 @@ void EvaluationManager::loadData ()
 bool EvaluationManager::canEvaluate ()
 {
     assert (initialized_);
-    return data_loaded_ && hasCurrentStandard();
+
+    if (!data_loaded_ || !hasCurrentStandard())
+        return false;
+
+    bool has_anything_to_eval = false;
+
+    for (auto& sec_it : sectorsLayers())
+    {
+        const string& sector_layer_name = sec_it->name();
+
+        for (auto& req_group_it : currentStandard())
+        {
+            const string& requirement_group_name = req_group_it->name();
+
+            if (useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+                has_anything_to_eval = true;
+        }
+    }
+
+    return has_anything_to_eval;
+}
+
+std::string EvaluationManager::getCannotEvaluateComment()
+{
+    assert (!canEvaluate());
+
+    if (!data_loaded_)
+        return "Please select and load reference & test data";
+
+    if (!hasCurrentStandard())
+        return "Please select a standard";
+
+    // no sector
+
+    return "Please add at least one sector and activate at least one requirement group";
 }
 
 void EvaluationManager::newDataSlot(DBObject& object)
@@ -1639,6 +1673,9 @@ void EvaluationManager::useGroupInSectorLayer(const std::string& sector_layer_na
            << " sector_layer_name " << sector_layer_name << " group_name " << group_name << " value " << value;
 
     use_grp_in_sector_[current_standard_][sector_layer_name][group_name] = value;
+
+    if (widget_)
+        widget_->updateButtons();
 }
 
 json::boolean_t& EvaluationManager::useRequirement(const std::string& standard_name, const std::string& group_name,

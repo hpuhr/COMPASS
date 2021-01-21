@@ -652,8 +652,6 @@ void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& rec
         record["fs_spi"] = (stat == 4) || (stat == 5);
         record["fs_gbs"] = (stat == 1) || (stat == 3);
 
-        if ((stat == 1) || (stat == 3))
-            loginf << "UGA";
         //select ground_bit,count(*) from sd_track group by ground_bit;
     }
 

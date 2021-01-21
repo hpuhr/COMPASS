@@ -72,6 +72,14 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
 
     main_layout_->addWidget(tab_widget_);
 
+    // not evaluate comment
+    not_eval_comment_label = new QLabel();
+    QPalette palette = not_eval_comment_label->palette();
+    palette.setColor(not_eval_comment_label->foregroundRole(), Qt::red);
+    not_eval_comment_label->setPalette(palette);
+
+    main_layout_->addWidget(not_eval_comment_label);
+
     // buttons
     QHBoxLayout* button_layout = new QHBoxLayout();
 
@@ -103,6 +111,17 @@ void EvaluationManagerWidget::updateButtons()
 {
     evaluate_button_->setEnabled(eval_man_.canEvaluate());
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
+
+    if (eval_man_.canEvaluate())
+    {
+        not_eval_comment_label->setText("");
+        not_eval_comment_label->setHidden(true);
+    }
+    else
+    {
+        not_eval_comment_label->setText(eval_man_.getCannotEvaluateComment().c_str());
+        not_eval_comment_label->setHidden(false);
+    }
 }
 
 void EvaluationManagerWidget::expandResults()
