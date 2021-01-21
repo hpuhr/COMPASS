@@ -8,14 +8,10 @@ For a detailed list of features, as well as the offered commercial services, ple
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental COMPASS Version v0.5.6-alpha
-- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/COMPASS-v0.5.6-alpha.AppImage)
-- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/user_manual_v0.5.6.pdf)
+## Released Experimental COMPASS Version v0.6.0-alpha
+- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.0-alpha/COMPASS-v0.6.0-alpha.AppImage)
+- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.0-alpha/user_manual_v0.6.0.pdf)
 - [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
-
-## Released ATSDB Version v0.5.5-beta
-- [Previous Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/ATSDB-v0.5.5.AppImage)
-- [Previous User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/user_manual_v0.5.5.pdf)
 
 
 ## Screenshots
