@@ -112,13 +112,6 @@
                 }
             }
         },
-        "ASTERIXFile": {
-            "ASTERIXFilehomeskdataaustriahello_worldacg_helloworld_fake_ID.ff": {
-                "parameters": {
-                    "name": "/home/sk/data/austria/hello_world/acg_helloworld_fake_ID.ff"
-                }
-            }
-        },
         "JSONParsingSchema": {
             "JSONParsingSchemajASTERIX0": {
                 "parameters": {
