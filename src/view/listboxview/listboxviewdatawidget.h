@@ -49,6 +49,7 @@ class ListBoxViewDataWidget : public QWidget
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
     void updateDataSlot(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void loadingDoneSlot();
 
     void exportDataSlot(bool overwrite);
     void exportDoneSlot(bool cancelled);
@@ -81,6 +82,8 @@ class ListBoxViewDataWidget : public QWidget
     QTabWidget* tab_widget_{nullptr};
     /// Container with all table widgets
     AllBufferTableWidget* all_buffer_table_widget_{nullptr};
+
+    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
     std::map<std::string, BufferTableWidget*> buffer_tables_;
 };
 

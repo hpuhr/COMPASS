@@ -28,6 +28,8 @@ class EvaluationStandardComboBox;
 
 class QPushButton;
 class QStackedWidget;
+class QLineEdit;
+
 
 class EvaluationStandardTabWidget : public QWidget
 {
@@ -38,7 +40,11 @@ private slots:
     void changedCurrentStandardSlot(); // eval man
 
     void addStandardSlot ();
+    void renameStandardSlot ();
+    void copyStandardSlot ();
     void removeStandardSlot ();
+
+    void maxRefTimeDiffEditSlot(QString value);
 
 public:
     EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerWidget& man_widget);
@@ -55,6 +61,8 @@ protected:
     QPushButton* remove_button_ {nullptr};
 
     QStackedWidget* standards_widget_{nullptr};
+
+    QLineEdit* max_ref_time_diff_edit_{nullptr};
 
     void updateButtons();
     void updateStandardStack();

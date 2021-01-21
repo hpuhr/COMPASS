@@ -28,6 +28,7 @@
 #include "mysqlppconnection.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
+#include "latextable.h"
 #include "system.h"
 
 #include "eval/results/report/section.h"
@@ -52,82 +53,88 @@ using namespace Utils;
 namespace EvaluationResultsReport
 {
 
-    PDFGenerator::PDFGenerator(const std::string& class_id, const std::string& instance_id,
-                               EvaluationManager& eval_manager)
-        : Configurable(class_id, instance_id, &eval_manager), eval_man_(eval_manager)
+PDFGenerator::PDFGenerator(const std::string& class_id, const std::string& instance_id,
+                           EvaluationManager& eval_manager)
+    : Configurable(class_id, instance_id, &eval_manager), eval_man_(eval_manager)
+{
+    registerParameter("author", &author_, "");
+
+    if (!author_.size())
+        author_ = System::getUserName();
+    if (!author_.size())
+        author_ = "User";
+
+    registerParameter("abstract", &abstract_, "");
+
+    report_filename_ = "report.tex";
+
+    registerParameter("num_max_table_rows", &num_max_table_rows_, 1000);
+    registerParameter("num_max_table_col_width", &num_max_table_col_width_, 18);
+
+    registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
+
+    registerParameter("run_pdflatex", &run_pdflatex_, true);
+
+    registerParameter("open_created_pdf", &open_created_pdf_, false);
+
+    pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
+
+    if (!pdflatex_found_)
     {
-        registerParameter("author", &author_, "");
+        run_pdflatex_ = false;
+        open_created_pdf_ = false;
+    }
+}
 
-        if (!author_.size())
-            author_ = System::getUserName();
-        if (!author_.size())
-            author_ = "User";
+void PDFGenerator::generateSubConfigurable(const std::string& class_id,
+                                           const std::string& instance_id)
+{
+    throw std::runtime_error("PDFGenerator: generateSubConfigurable: unknown class_id " +
+                             class_id);
+}
 
-        registerParameter("abstract", &abstract_, "");
+void PDFGenerator::checkSubConfigurables()
+{
+    // move along sir
+}
 
-        report_filename_ = "report.tex";
+PDFGeneratorDialog& PDFGenerator::dialog()
+{
+    if (!report_path_.size())
+    {
+        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
 
-        registerParameter("wait_on_map_loading", &wait_on_map_loading_, true);
-
-        registerParameter("run_pdflatex", &run_pdflatex_, true);
-
-        registerParameter("open_created_pdf", &open_created_pdf_, false);
-
-        pdflatex_found_ = System::exec("which pdflatex").size(); // empty if none
-
-        if (!pdflatex_found_)
+        if (sql_con)
         {
-            run_pdflatex_ = false;
-            open_created_pdf_ = false;
+            report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/eval_report_"
+                    + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
         }
-    }
-
-    void PDFGenerator::generateSubConfigurable(const std::string& class_id,
-                                               const std::string& instance_id)
-    {
-        throw std::runtime_error("PDFGenerator: generateSubConfigurable: unknown class_id " +
-                                 class_id);
-    }
-
-    void PDFGenerator::checkSubConfigurables()
-    {
-        // move along sir
-    }
-
-    PDFGeneratorDialog& PDFGenerator::dialog()
-    {
-        if (!report_path_.size())
+        else
         {
-            SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
-
-            if (sql_con)
-            {
-                report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/eval_report_"
-                        + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
-            }
-            else
-            {
-                MySQLppConnection* mysql_con =
-                        dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
-                assert (mysql_con);
-                report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
-            }
-            loginf << "PDFGenerator: dialog: report path '" << report_path_ << "'"
-                   << " filename '"  << report_filename_ << "'";
+            MySQLppConnection* mysql_con =
+                    dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
+            assert (mysql_con);
+            report_path_ = HOME_PATH+"/eval_report_"+mysql_con->usedDatabase() + "/";
         }
-
-        if (!dialog_)
-            dialog_.reset(new PDFGeneratorDialog(*this));
-
-        return *dialog_;
+        loginf << "PDFGenerator: dialog: report path '" << report_path_ << "'"
+               << " filename '"  << report_filename_ << "'";
     }
 
-    void PDFGenerator::run ()
-    {
-        loginf << "EvaluationResultsReportPDFGenerator: run";
+    if (!dialog_)
+        dialog_.reset(new PDFGeneratorDialog(*this));
 
-        assert (dialog_);
-        dialog_->setRunning(true);
+    return *dialog_;
+}
+
+void PDFGenerator::run ()
+{
+    loginf << "EvaluationResultsReportPDFGenerator: run";
+
+    assert (dialog_);
+    dialog_->setRunning(true);
+
+    try
+    {
 
         LatexDocument doc (report_path_, report_filename_);
         doc.title("OpenATS COMPASS Evaluation Report");
@@ -138,8 +145,9 @@ namespace EvaluationResultsReport
         if (abstract_.size())
             doc.abstract(abstract_);
 
+        LatexTable::num_max_rows_ = num_max_table_rows_;
         LatexVisitor visitor (doc, false, false, false, include_target_details_, include_target_tr_details_,
-                              wait_on_map_loading_);
+                              num_max_table_col_width_, wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -248,18 +256,18 @@ namespace EvaluationResultsReport
                 std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
                         +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
 
-                loginf << "ViewPointsReportGenerator: run: running pdflatex";
+                loginf << "EvaluationResultsReportPDFGenerator: run: running pdflatex";
                 dialog_->setStatus("Running pdflatex");
                 dialog_->setRemainingTime("");
 
                 //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-                logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
+                logdbg << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
 
                 command_out = System::exec(command);
 
-                logdbg << "ViewPointsReportGenerator: run: cmd done";
+                logdbg << "EvaluationResultsReportPDFGenerator: run: cmd done";
 
                 // update status
                 stop_time = boost::posix_time::microsec_clock::local_time();
@@ -269,10 +277,12 @@ namespace EvaluationResultsReport
                 elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
                 dialog_->setElapsedTime(elapsed_time_str);
 
-                while (command_out.find("Rerun to get outlines right") != std::string::npos
-                       || command_out.find("Rerun to get cross-references right") != std::string::npos)
+                unsigned int run_cnt=0;
+
+                while (run_cnt < 3 || (command_out.find("Rerun to get outlines right") != std::string::npos
+                                       || command_out.find("Rerun to get cross-references right") != std::string::npos))
                 {
-                    loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
+                    loginf << "EvaluationResultsReportPDFGenerator: run: re-running pdflatex";
                     dialog_->setStatus("Re-running pdflatex");
 
                     //                while (QCoreApplication::hasPendingEvents())
@@ -285,10 +295,12 @@ namespace EvaluationResultsReport
                     elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
                     dialog_->setElapsedTime(elapsed_time_str);
 
-                    logdbg << "ViewPointsReportGenerator: run: re-run done";
+                    logdbg << "EvaluationResultsReportPDFGenerator: run: re-run done";
+
+                    ++run_cnt;
                 }
 
-                loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
+                loginf << "EvaluationResultsReportPDFGenerator: run: result '" << command_out << "'";
 
                 if (!command_out.size()) // no warnings
                 {
@@ -304,12 +316,12 @@ namespace EvaluationResultsReport
                         {
                             String::replace(fullpath, ".tex", ".pdf");
 
-                            loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+                            loginf << "EvaluationResultsReportPDFGenerator: run: opening '" << fullpath << "'";
 
                             QDesktopServices::openUrl(QUrl(fullpath.c_str()));
                         }
                         else
-                            logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
+                            logerr << "EvaluationResultsReportPDFGenerator: run: opening not possible since wrong file ending";
                     }
                 }
                 else // show warnings
@@ -320,146 +332,189 @@ namespace EvaluationResultsReport
                 }
             }
         }
+
         dialog_->setRunning(false);
         dialog_->close();
 
         QApplication::restoreOverrideCursor();
 
         running_ = false;
-    }
 
-    void PDFGenerator::cancel ()
+    }
+    catch (exception& e)
     {
-        loginf << "PDFGenerator: cancel";
+        logwrn << "EvaluationResultsReportPDFGenerator: run: caught exception '" << e.what() << "'";
 
-        cancel_ = true;
+        dialog_->setProgress(0, 1, 0);
+        dialog_->setStatus("Writing report failed");
+        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-        if (!running_)
-            dialog_->close();
+        dialog_->setRunning(false);
+        dialog_->close();
+
+        QApplication::restoreOverrideCursor();
+
+        running_ = false;
+
+        QMessageBox m_warning(QMessageBox::Warning, "Export PDF Failed",
+                              (string("Error message:\n")+e.what()).c_str(),
+                              QMessageBox::Ok);
+        m_warning.exec();
     }
+}
 
-    std::string PDFGenerator::reportPath() const
-    {
-        return report_path_;
-    }
+void PDFGenerator::cancel ()
+{
+    loginf << "PDFGenerator: cancel";
 
-    void PDFGenerator::reportPath(const std::string& path)
-    {
-        loginf << "PDFGenerator: reportPath: '" << path << "'";
-        report_path_ = path;
+    cancel_ = true;
 
-        if (dialog_)
-            dialog_->updateFileInfo();
-    }
+    if (!running_)
+        dialog_->close();
+}
 
-    std::string PDFGenerator::reportFilename() const
-    {
-        return report_filename_;
-    }
+std::string PDFGenerator::reportPath() const
+{
+    return report_path_;
+}
 
-    void PDFGenerator::reportFilename(const std::string& filename)
-    {
-        loginf << "PDFGenerator: reportFilename: '" << filename << "'";
-        report_filename_ = filename;
+void PDFGenerator::reportPath(const std::string& path)
+{
+    loginf << "PDFGenerator: reportPath: '" << path << "'";
+    report_path_ = path;
 
-        if (dialog_)
-            dialog_->updateFileInfo();
-    }
+    if (dialog_)
+        dialog_->updateFileInfo();
+}
 
-    void PDFGenerator::reportPathAndFilename(const std::string& str)
-    {
-        report_path_ = Files::getDirectoryFromPath(str) + "/";
-        report_filename_ = Files::getFilenameFromPath(str);
+std::string PDFGenerator::reportFilename() const
+{
+    return report_filename_;
+}
 
-        loginf << "PDFGenerator: reportPathAndFilename: path '" << report_path_
-               << "' filename '" << report_filename_ << "'";
+void PDFGenerator::reportFilename(const std::string& filename)
+{
+    loginf << "PDFGenerator: reportFilename: '" << filename << "'";
+    report_filename_ = filename;
 
-        if (dialog_)
-            dialog_->updateFileInfo();
-    }
+    if (dialog_)
+        dialog_->updateFileInfo();
+}
 
-    bool PDFGenerator::isRunning() const
-    {
-        return running_;
-    }
+void PDFGenerator::reportPathAndFilename(const std::string& str)
+{
+    report_path_ = Files::getDirectoryFromPath(str) + "/";
+    report_filename_ = Files::getFilenameFromPath(str);
 
-    void PDFGenerator::showDone(bool show_done)
-    {
-        show_done_ = show_done;
-    }
+    loginf << "PDFGenerator: reportPathAndFilename: path '" << report_path_
+           << "' filename '" << report_filename_ << "'";
 
-    std::string PDFGenerator::author() const
-    {
-        return author_;
-    }
+    if (dialog_)
+        dialog_->updateFileInfo();
+}
 
-    void PDFGenerator::author(const std::string& author)
-    {
-        author_ = author;
-    }
+bool PDFGenerator::isRunning() const
+{
+    return running_;
+}
 
-    std::string PDFGenerator::abstract() const
-    {
-        return abstract_;
-    }
+void PDFGenerator::showDone(bool show_done)
+{
+    show_done_ = show_done;
+}
 
-    void PDFGenerator::abstract(const std::string& abstract)
-    {
-        abstract_ = abstract;
-    }
+std::string PDFGenerator::author() const
+{
+    return author_;
+}
 
-    bool PDFGenerator::runPDFLatex() const
-    {
-        return run_pdflatex_;
-    }
+void PDFGenerator::author(const std::string& author)
+{
+    author_ = author;
+}
 
-    void PDFGenerator::runPDFLatex(bool value)
-    {
-        run_pdflatex_ = value;
-    }
+std::string PDFGenerator::abstract() const
+{
+    return abstract_;
+}
 
-    bool PDFGenerator::pdfLatexFound() const
-    {
-        return pdflatex_found_;
-    }
+void PDFGenerator::abstract(const std::string& abstract)
+{
+    abstract_ = abstract;
+}
 
-    bool PDFGenerator::openCreatedPDF() const
-    {
-        return open_created_pdf_;
-    }
+bool PDFGenerator::runPDFLatex() const
+{
+    return run_pdflatex_;
+}
 
-    void PDFGenerator::openCreatedPDF(bool value)
-    {
-        open_created_pdf_ = value;
-    }
+void PDFGenerator::runPDFLatex(bool value)
+{
+    run_pdflatex_ = value;
+}
 
-    bool PDFGenerator::waitOnMapLoading() const
-    {
-        return wait_on_map_loading_;
-    }
+bool PDFGenerator::pdfLatexFound() const
+{
+    return pdflatex_found_;
+}
 
-    void PDFGenerator::waitOnMapLoading(bool value)
-    {
-        wait_on_map_loading_ = value;
-    }
-    
-    bool PDFGenerator::includeTargetDetails() const
-    {
-        return include_target_details_;
-    }
-    
-    void PDFGenerator::includeTargetDetails(bool value)
-    {
-        include_target_details_ = value;
-    }
-    
-    bool PDFGenerator::includeTargetTRDetails() const
-    {
-        return include_target_tr_details_;
-    }
-    
-    void PDFGenerator::includeTargetTRDetails(bool value)
-    {
-        include_target_tr_details_ = value;
-    }
+bool PDFGenerator::openCreatedPDF() const
+{
+    return open_created_pdf_;
+}
+
+void PDFGenerator::openCreatedPDF(bool value)
+{
+    open_created_pdf_ = value;
+}
+
+bool PDFGenerator::waitOnMapLoading() const
+{
+    return wait_on_map_loading_;
+}
+
+void PDFGenerator::waitOnMapLoading(bool value)
+{
+    wait_on_map_loading_ = value;
+}
+
+bool PDFGenerator::includeTargetDetails() const
+{
+    return include_target_details_;
+}
+
+void PDFGenerator::includeTargetDetails(bool value)
+{
+    include_target_details_ = value;
+}
+
+bool PDFGenerator::includeTargetTRDetails() const
+{
+    return include_target_tr_details_;
+}
+
+void PDFGenerator::includeTargetTRDetails(bool value)
+{
+    include_target_tr_details_ = value;
+}
+
+unsigned int PDFGenerator::numMaxTableRows() const
+{
+    return num_max_table_rows_;
+}
+
+void PDFGenerator::numMaxTableRows(unsigned int value)
+{
+    num_max_table_rows_ = value;
+}
+
+unsigned int PDFGenerator::numMaxTableColWidth() const
+{
+    return num_max_table_col_width_;
+}
+
+void PDFGenerator::numMaxTableColWidth(unsigned int value)
+{
+    num_max_table_col_width_ = value;
+}
 }

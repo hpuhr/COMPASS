@@ -240,7 +240,7 @@ void Sector::save()
     eval_man.saveSector(id_);
 }
 
-bool Sector::isInside(const EvaluationTargetPosition& pos) const
+bool Sector::isInside(const EvaluationTargetPosition& pos, bool has_ground_bit, bool ground_bit_set) const
 {
     if (pos.has_altitude_)
     {
@@ -249,6 +249,9 @@ bool Sector::isInside(const EvaluationTargetPosition& pos) const
         else if (has_max_altitude_ && pos.altitude_ > max_altitude_)
             return false;
     }
+
+    if (has_ground_bit && ground_bit_set && has_min_altitude_)
+        return false;
 
     OGRPoint ogr_pos (pos.latitude_, pos.longitude_);
     return ogr_polygon_->Contains(&ogr_pos);
@@ -309,6 +312,9 @@ void Sector::createPolygon()
 
     for (auto& point_it : points_)
         ring->addPoint(point_it.first, point_it.second);
+
+    if (*points_.begin() != *points_.rbegin())
+        ring->addPoint(points_.begin()->first, points_.begin()->second); // close if not not closed
 
     ogr_polygon_->addRingDirectly(ring);
 }

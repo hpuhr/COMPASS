@@ -28,6 +28,7 @@
 #include <QLabel>
 #include <QFormLayout>
 #include <QCheckBox>
+#include <QLineEdit>
 
 EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man,
                                                  EvaluationManagerWidget& man_widget)
@@ -131,7 +132,11 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
     assert (standard_box_);
     standard_box_->setStandardName(eval_man_.currentStandardName());
 
+    logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: sectors";
+
     assert (sector_widget_);
     sector_widget_->update();
+
+    logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: done";
 }
 

@@ -23,7 +23,7 @@
 
 #include "configurable.h"
 
-class ManagementWidget;
+class MainLoadWidget;
 class View;
 class ViewManager;
 class QHBoxLayout;
@@ -31,37 +31,33 @@ class QPushButton;
 class QTabWidget;
 
 class ViewManager;
-class ViewContainerConfigWidget;
 
 class ViewContainer : public QObject, public Configurable
 {
     Q_OBJECT
 
   public slots:
-
-    void showMenuSlot();
+    void showAddViewMenuSlot();
+    void showViewMenuSlot();
     // void saveViewTemplate ();
-    void deleteView();
+    void deleteViewSlot();
+    void addNewViewSlot();
 
   public:
     ViewContainer(const std::string& class_id, const std::string& instance_id, Configurable* parent,
                   ViewManager* view_manager, QTabWidget* tab_widget, int window_cnt);
     virtual ~ViewContainer();
 
-    void addView(View* view);
-    void removeView(View* view);
-    const std::vector<View*>& getViews() const;
+    const std::vector<std::unique_ptr<View>>& getViews() const;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
     virtual std::string getWindowName();
-    static unsigned int getViewCount() { return view_count_; }
+    //static unsigned int getViewCount() { return view_count_; }
 
     void addView(const std::string& class_name);
     void showView(QWidget* widget);
-
-    ViewContainerConfigWidget* configWidget();
 
   protected:
     ViewManager& view_manager_;
@@ -70,18 +66,12 @@ class ViewContainer : public QObject, public Configurable
 
     int window_cnt_{0};
 
-    std::vector<View*> views_;
+    std::vector<std::unique_ptr<View>> views_;
 
-    QMenu menu_;
-    QPushButton* last_active_manage_button_{nullptr};
-
-    ViewContainerConfigWidget* config_widget_{nullptr};
-
-    std::map<QPushButton*, View*> view_manage_buttons_;
-
-    static unsigned int view_count_;
+    //static unsigned int view_count_;
 
     virtual void checkSubConfigurables();
+    void addView(View* view);
 };
 
 #endif  // VIEWCONTAINER_H

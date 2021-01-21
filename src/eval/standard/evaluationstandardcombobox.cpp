@@ -16,6 +16,7 @@
  */
 
 #include "evaluationstandardcombobox.h"
+#include "evaluationstandard.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 
@@ -66,7 +67,7 @@ void EvaluationStandardComboBox::updateStandards()
 
     for (auto std_it = eval_man_.standardsBegin(); std_it != eval_man_.standardsEnd(); ++std_it)
     {
-        addItem(std_it->first.c_str());
+        addItem((*std_it)->name().c_str());
     }
 
     if (eval_man_.hasCurrentStandard())

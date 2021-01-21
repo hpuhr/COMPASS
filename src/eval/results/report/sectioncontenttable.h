@@ -22,6 +22,8 @@
 
 #include <QVariant>
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
+#include <QBrush>
 
 #include "json.hpp"
 
@@ -29,7 +31,7 @@
 
 class ViewableDataConfig;
 
-class QSortFilterProxyModel;
+class QPushButton;
 class QTableView;
 
 namespace EvaluationRequirementResult
@@ -41,6 +43,51 @@ namespace EvaluationResultsReport
 {
     using namespace std;
 
+    //typedef void (*CallBackFunction)(void);
+
+    class TableQSortFilterProxyModel : public QSortFilterProxyModel
+    {
+        Q_OBJECT
+
+    public:
+
+        TableQSortFilterProxyModel(QObject* parent=nullptr)
+            : QSortFilterProxyModel(parent)
+        {
+
+        }
+
+        bool showUnused() const
+        {
+            return show_unused_;
+        }
+
+        void showUnused(bool value)
+        {
+            //emit layoutAboutToBeChanged();
+
+            show_unused_ = value;
+
+            //emit layoutChanged();
+        }
+
+    protected:
+        bool show_unused_ {true};
+
+        bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+        {
+            //return sourceModel()->row(source_row)[0].checkState() == Qt::Checked;
+
+            QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
+
+            if (show_unused_)
+                return true;
+            else
+                return (sourceModel()->data(index, Qt::BackgroundRole) != QBrush(Qt::lightGray));
+        }
+    };
+
+
     class SectionContentTable : public QAbstractItemModel, public SectionContent
     {
         Q_OBJECT
@@ -51,6 +98,13 @@ namespace EvaluationResultsReport
         void customContextMenuSlot(const QPoint& p);
         void addUTNSlot ();
         void removeUTNSlot ();
+        void showFullUTNSlot ();
+        void showSurroundingDataSlot ();
+
+        void showMenuSlot();
+        void toggleShowUnusedSlot();
+        void copyContentSlot();
+        void executeCallBackSlot();
 
     public:
         SectionContentTable(const string& name, unsigned int num_columns,
@@ -74,10 +128,17 @@ namespace EvaluationResultsReport
         Qt::ItemFlags flags(const QModelIndex &index) const override;
 
         vector<string> headings() const;
-        std::vector<std::string> sortedRowStrings(unsigned int row) const;
+        unsigned int filteredRowCount () const;
+        std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
         bool hasReference (unsigned int row) const;
         std::string reference (unsigned int row) const;
+
+        bool showUnused() const;
+        void showUnused(bool value);
+
+        void registerCallBack (const std::string& name, std::function<void()> func);
+        void executeCallBack (const std::string& name);
 
     protected:
         unsigned int num_columns_ {0};
@@ -87,12 +148,20 @@ namespace EvaluationResultsReport
         unsigned int sort_column_ {0};
         Qt::SortOrder order_ {Qt::AscendingOrder};
 
+        bool show_unused_ {false};
+
         vector<vector<QVariant>> rows_;
         vector<EvaluationRequirementResult::Base*> result_ptrs_;
         vector<QVariant> annotations_;
 
-        mutable QSortFilterProxyModel* proxy_model_ {nullptr};
+//        mutable QPushButton* toogle_show_unused_button_ {nullptr};
+//        mutable QPushButton* copy_button_ {nullptr};
+         mutable QPushButton* options_button_ {nullptr};
+
+        mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
         mutable QTableView* table_view_ {nullptr}; // for reset
+
+        std::map<std::string, std::function<void()>> callback_map_;
     };
 
 }

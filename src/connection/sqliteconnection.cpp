@@ -32,6 +32,9 @@
 #include "sqliteconnectioninfowidget.h"
 #include "sqliteconnectionwidget.h"
 #include "stringconv.h"
+#include "files.h"
+
+using namespace Utils;
 
 SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::string& instance_id,
                                    DBInterface* interface)
@@ -76,6 +79,7 @@ void SQLiteConnection::openFile(const std::string& file_name)
     char* sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
     sqlite3_exec(db_handle_, "PRAGMA journal_mode = OFF", NULL, NULL, &sErrMsg);
+    //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
     connection_ready_ = true;
 
@@ -692,6 +696,13 @@ std::string SQLiteConnection::identifier() const
     assert(connection_ready_);
 
     return last_filename_;
+}
+
+std::string SQLiteConnection::shortIdentifier() const
+{
+    assert(connection_ready_);
+
+    return Files::getFilenameFromPath(last_filename_);
 }
 
 void SQLiteConnection::addFile(const std::string& filename)

@@ -54,7 +54,7 @@ class AllBufferTableModel : public QAbstractTableModel
                                 int role = Qt::DisplayRole) const;
 
     void clearData();
-    void setData(std::shared_ptr<Buffer> buffer);
+    void setData(std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
     void saveAsCSV(const std::string& file_name, bool overwrite);
 

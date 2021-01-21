@@ -453,23 +453,26 @@ void AllBufferTableModel::clearData()
     endResetModel();
 }
 
-void AllBufferTableModel::setData(std::shared_ptr<Buffer> buffer)
+void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
-    assert(buffer);
+
     beginResetModel();
 
-    std::string dbo_name = buffer->dboName();
-
-    if (dbo_to_number_.count(dbo_name) == 0)  // new dbo from the wild
+    for (auto& buf_it : buffers)
     {
-        unsigned int num = dbo_to_number_.size();
-        number_to_dbo_[num] = dbo_name;
-        dbo_to_number_[dbo_name] = num;
+        std::string dbo_name = buf_it.first;
+
+        if (dbo_to_number_.count(dbo_name) == 0)  // new dbo from the wild
+        {
+            unsigned int num = dbo_to_number_.size();
+            number_to_dbo_[num] = dbo_name;
+            dbo_to_number_[dbo_name] = num;
+        }
     }
 
     assert(dbo_to_number_.size() == number_to_dbo_.size());
 
-    buffers_[dbo_name] = buffer;
+    buffers_ = buffers;
 
     updateTimeIndexes();
     rebuildRowIndexes();

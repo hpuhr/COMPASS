@@ -24,13 +24,20 @@
 #include "stringconv.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 #include <QTableView>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
+#include <QMessageBox>
+#include <QClipboard>
+#include <QApplication>
 
 #include <cassert>
 #include <type_traits>
+#include <iostream>
 
 using namespace std;
 using namespace Utils;
@@ -64,9 +71,23 @@ namespace EvaluationResultsReport
     {
         assert (layout);
 
+        QVBoxLayout* main_layout = new QVBoxLayout();
+
+        QHBoxLayout* upper_layout = new QHBoxLayout();
+
+        upper_layout->addWidget(new QLabel(("Table: "+name_).c_str()));
+        upper_layout->addStretch();
+
+        options_button_ = new QPushButton("Options");
+        connect (options_button_, &QPushButton::clicked, this, &SectionContentTable::showMenuSlot);
+        upper_layout->addWidget(options_button_);
+
+        main_layout->addLayout(upper_layout);
+
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
             proxy_model_->setSourceModel(this);
         }
 
@@ -100,7 +121,9 @@ namespace EvaluationResultsReport
         table_view_->resizeColumnsToContents();
         table_view_->resizeRowsToContents();
 
-        layout->addWidget(table_view_);
+        main_layout->addWidget(table_view_);
+
+        layout->addLayout(main_layout);
 
     }
 
@@ -217,11 +240,28 @@ namespace EvaluationResultsReport
         return headings_;
     }
 
-    std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row) const
+    unsigned int SectionContentTable::filteredRowCount () const
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
+            SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+            assert (tmp);
+            proxy_model_->setSourceModel(tmp);
+        }
+
+        return proxy_model_->rowCount();
+    }
+
+    std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
+    {
+        if (!proxy_model_)
+        {
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -266,7 +306,10 @@ namespace EvaluationResultsReport
             QModelIndex index = proxy_model_->index(row, col);
             assert (index.isValid());
             // get string can convert to latex
-            result.push_back(String::latexString(proxy_model_->data(index).toString().toStdString()));
+            if (latex)
+                result.push_back(String::latexString(proxy_model_->data(index).toString().toStdString()));
+            else
+                result.push_back(proxy_model_->data(index).toString().toStdString());
         }
 
         return result;
@@ -276,7 +319,9 @@ namespace EvaluationResultsReport
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -301,7 +346,9 @@ namespace EvaluationResultsReport
     {
         if (!proxy_model_)
         {
-            proxy_model_ = new QSortFilterProxyModel();
+            proxy_model_ = new TableQSortFilterProxyModel();
+            proxy_model_->showUnused(show_unused_);
+
             SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
             assert (tmp);
             proxy_model_->setSourceModel(tmp);
@@ -332,6 +379,36 @@ namespace EvaluationResultsReport
         tmp.erase(0,15);
 
         return tmp;;
+    }
+
+    bool SectionContentTable::showUnused() const
+    {
+        return show_unused_;
+    }
+
+    void SectionContentTable::showUnused(bool value)
+    {
+        loginf << "SectionContentTable: showUnused: value " << value;
+
+        assert (proxy_model_);
+
+        beginResetModel();
+
+        show_unused_ = value;
+        proxy_model_->showUnused(show_unused_);
+
+        endResetModel();
+    }
+
+    void SectionContentTable::registerCallBack (const std::string& name, std::function<void()> func)
+    {
+        assert (!callback_map_.count(name));
+        callback_map_.emplace(name, func);
+    }
+    void SectionContentTable::executeCallBack (const std::string& name)
+    {
+        assert (callback_map_.count(name));
+        callback_map_.at(name)();
     }
 
 
@@ -392,6 +469,8 @@ namespace EvaluationResultsReport
 
             eval_man_.showResultId(reference);
         }
+        else
+            loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
     }
 
     void SectionContentTable::customContextMenuSlot(const QPoint& p)
@@ -445,6 +524,16 @@ namespace EvaluationResultsReport
                 menu.addAction(action);
             }
 
+            QAction* action = new QAction("Show Full UTN", this);
+            connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
+            action->setData(utn);
+            menu.addAction(action);
+
+            QAction* action2 = new QAction("Show Surrounding Data", this);
+            connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
+            action2->setData(utn);
+            menu.addAction(action2);
+
             menu.exec(table_view_->viewport()->mapToGlobal(p));
         }
         else
@@ -460,7 +549,15 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: addUTNSlot: utn " << utn;
 
-        eval_man_.setUseTargetData(utn, true);
+//        QMessageBox msg_box;
+//        msg_box.setWindowTitle("Generating Results");
+//        msg_box.setText( "Please wait.");
+//        msg_box.setStandardButtons(QMessageBox::NoButton);
+//        msg_box.show();
+
+        eval_man_.useUTN(utn, true, true);
+
+//        msg_box.close();
     }
 
     void SectionContentTable::removeUTNSlot ()
@@ -472,7 +569,127 @@ namespace EvaluationResultsReport
 
         loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
 
-        eval_man_.setUseTargetData(utn, false);
+/*        QMessageBox msg_box;
+        msg_box.setWindowTitle("Generating Results");
+        msg_box.setText( "Please wait.");
+        msg_box.setStandardButtons(QMessageBox::NoButton);
+        msg_box.show()*/;
+
+        eval_man_.useUTN(utn, false, true);
+
+//        msg_box.close();
     }
 
+    void SectionContentTable::showFullUTNSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
+
+        eval_man_.showFullUTN(utn);
+    }
+
+    void SectionContentTable::showSurroundingDataSlot ()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        unsigned int utn = action->data().toUInt();
+
+        loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
+
+        eval_man_.showSurroundingData(utn);
+    }
+
+    void SectionContentTable::showMenuSlot()
+    {
+        QMenu menu;
+
+        //        toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
+        //        connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
+        //        upper_layout->addWidget(toogle_show_unused_button_);
+
+        //        copy_button_ = new QPushButton("Copy Content");
+        //        connect (copy_button_, &QPushButton::clicked, this, &SectionContentTable::copyContentSlot);
+        //        upper_layout->addWidget(copy_button_);
+
+        QAction* unused_action = new QAction("Toggle Show Unused", this);
+        connect (unused_action, &QAction::triggered, this, &SectionContentTable::toggleShowUnusedSlot);
+        menu.addAction(unused_action);
+
+        QAction* copy_action = new QAction("Copy Content", this);
+        connect (copy_action, &QAction::triggered, this, &SectionContentTable::copyContentSlot);
+        menu.addAction(copy_action);
+
+        for (auto& cb_it : callback_map_)
+        {
+            QAction* copy_action = new QAction(cb_it.first.c_str(), this);
+            connect (copy_action, &QAction::triggered, this, &SectionContentTable::executeCallBackSlot);
+            copy_action->setData(cb_it.first.c_str());
+            menu.addAction(copy_action);
+        }
+
+        menu.exec(QCursor::pos());
+    }
+
+    void SectionContentTable::toggleShowUnusedSlot()
+    {
+        showUnused(!show_unused_);
+    }
+
+    void SectionContentTable::copyContentSlot()
+    {
+        loginf << "SectionContentTable: copyContentSlot";
+
+        stringstream ss;
+
+        unsigned int num_cols = headings_.size();
+
+        // headings
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (cnt == 0)
+                ss << headings_.at(cnt);
+            else
+                ss <<  ";" << headings_.at(cnt);
+        }
+        ss << "\n";
+
+        unsigned int num_rows = proxy_model_->rowCount();
+
+        vector<string> row_strings;
+
+        for (unsigned int row=0; row < num_rows; ++row)
+        {
+            row_strings = sortedRowStrings(row, false);
+            assert (row_strings.size() == num_cols);
+
+            for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+            {
+                if (cnt == 0)
+                    ss << row_strings.at(cnt);
+                else
+                    ss <<  ";" << row_strings.at(cnt);
+            }
+            ss << "\n";
+        }
+
+        QApplication::clipboard()->setText(ss.str().c_str());
+    }
+
+    void SectionContentTable::executeCallBackSlot()
+    {
+        QAction* action = dynamic_cast<QAction*> (QObject::sender());
+        assert (action);
+
+        string name = action->data().toString().toStdString();
+
+        loginf << "SectionContentTable: executeCallBackSlot: name " << name;
+
+        assert (callback_map_.count(name));
+        executeCallBack(name);
+    }
 }

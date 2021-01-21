@@ -1137,6 +1137,11 @@ void DBObject::updateToDatabaseContent()
            << " count " << count_;
 }
 
+bool DBObject::associationsLoaded() const
+{
+    return associations_loaded_;
+}
+
 bool DBObject::isLoading() { return read_job_ || finalize_jobs_.size(); }
 
 bool DBObject::isPostProcessing() { return finalize_jobs_.size(); }

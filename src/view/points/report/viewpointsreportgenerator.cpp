@@ -131,237 +131,262 @@ void ViewPointsReportGenerator::run ()
     assert (dialog_);
     dialog_->setRunning(true);
 
-    LatexDocument doc (report_path_, report_filename_);
-    doc.title("OpenATS COMPASS View Points Report");
+    try
+    {
 
-    if (author_.size())
-        doc.author(author_);
+        LatexDocument doc (report_path_, report_filename_);
+        doc.title("OpenATS COMPASS View Points Report");
 
-    if (abstract_.size())
-        doc.abstract(abstract_);
+        if (author_.size())
+            doc.author(author_);
 
-    LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, false,
-                          false, wait_on_map_loading_);
+        if (abstract_.size())
+            doc.abstract(abstract_);
 
-    cancel_ = false;
-    running_ = true;
-    pdf_created_ = false;
+        LatexVisitor visitor (doc, group_by_type_, add_overview_table_, add_overview_screenshot_, false,
+                              false, 18, wait_on_map_loading_);
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        cancel_ = false;
+        running_ = true;
+        pdf_created_ = false;
 
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime stop_time;
-    boost::posix_time::time_duration time_diff;
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    boost::posix_time::ptime vp_start_time;
+        boost::posix_time::ptime start_time;
+        boost::posix_time::ptime stop_time;
+        boost::posix_time::time_duration time_diff;
 
-    start_time = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::ptime vp_start_time;
 
-    ViewPointsWidget* vp_widget = view_manager_.viewPointsWidget();
-    assert (vp_widget);
-    ViewPointsTableModel* table_model = vp_widget->tableModel();
-    assert (table_model);
+        start_time = boost::posix_time::microsec_clock::local_time();
 
-    std::vector<unsigned int> vp_ids;
+        ViewPointsWidget* vp_widget = view_manager_.viewPointsWidget();
+        assert (vp_widget);
+        ViewPointsTableModel* table_model = vp_widget->tableModel();
+        assert (table_model);
 
-    if (export_all_unsorted_)
-        vp_ids = vp_widget->viewPoints();
-    else
-        vp_ids = vp_widget->viewedViewPoints();
+        std::vector<unsigned int> vp_ids;
 
-    string status_str, elapsed_time_str, remaining_time_str;
-    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+        if (export_all_unsorted_)
+            vp_ids = vp_widget->viewPoints();
+        else
+            vp_ids = vp_widget->viewedViewPoints();
 
-    unsigned int vp_cnt = 0;
-    unsigned int vp_size = vp_ids.size();
-    double ms;
-    double ms_per_vp;
+        string status_str, elapsed_time_str, remaining_time_str;
+        DBObjectManager& obj_man = COMPASS::instance().objectManager();
+
+        unsigned int vp_cnt = 0;
+        unsigned int vp_size = vp_ids.size();
+        double ms;
+        double ms_per_vp;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    OSGView::instant_display_ = true;
+        OSGView::instant_display_ = true;
 #endif
 
-    for (auto vp_id : vp_ids)
-    {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents();
-
-        if (cancel_)
+        for (auto vp_id : vp_ids)
         {
-            loginf << "ViewPointsReportGenerator: run: cancel";
-            break;
-        }
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
 
-        assert (table_model->hasViewPoint(vp_id));
-        const ViewPoint& view_point = table_model->viewPoint(vp_id);
+            if (cancel_)
+            {
+                loginf << "ViewPointsReportGenerator: run: cancel";
+                break;
+            }
 
-        loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
-        view_manager_.setCurrentViewPoint(&view_point);
+            assert (table_model->hasViewPoint(vp_id));
+            const ViewPoint& view_point = table_model->viewPoint(vp_id);
 
-        while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents();
+            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
+            view_manager_.setCurrentViewPoint(&view_point);
 
-        // do stuff
-        view_point.accept(visitor);
-        visitor.imagePrefix("vp_"+to_string(vp_id));
+            while (obj_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents();
 
-        // visit se views
-        for (auto& view_it : view_manager_.getViews())
-            view_it.second->accept(visitor);
+            // do stuff
+            view_point.accept(visitor);
+            visitor.imagePrefix("vp_"+to_string(vp_id));
 
-        // update status
-        stop_time = boost::posix_time::microsec_clock::local_time();
-
-        time_diff = stop_time - start_time;
-        ms = time_diff.total_milliseconds();
-        elapsed_time_str =
-                String::timeStringFromDouble(ms / 1000.0, false);
-
-        status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(vp_size);
-
-        if (vp_cnt && ms > 0)
-        {
-            ms_per_vp = ms/(double)vp_cnt;
-
-            remaining_time_str = String::timeStringFromDouble((vp_size-vp_cnt) * ms_per_vp / 1000.0, false);
-
-            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
-                   << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
-        }
-        else
-        {
-            loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
-                   << " done after " << elapsed_time_str;
-
-        }
-
-        dialog_->setElapsedTime(elapsed_time_str);
-        dialog_->setProgress(0, vp_size, vp_cnt);
-        dialog_->setStatus(status_str);
-        dialog_->setRemainingTime(remaining_time_str);
-
-        ++vp_cnt;
-    }
-
-    if (cancel_)
-    {
-        dialog_->setProgress(0, vp_size, 0);
-        dialog_->setStatus("Writing view points cancelled");
-        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    }
-    else // proceed
-    {
-        dialog_->setProgress(0, vp_size, vp_size);
-        dialog_->setStatus("Writing view points done");
-        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
-
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-        doc.write();
-
-        if (run_pdflatex_)
-        {
-            std::string command_out;
-            std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
-                    +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
-
-            loginf << "ViewPointsReportGenerator: run: running pdflatex";
-            dialog_->setStatus("Running pdflatex");
-            dialog_->setRemainingTime("");
-
-            //while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-            logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
-
-            command_out = System::exec(command);
-
-            logdbg << "ViewPointsReportGenerator: run: cmd done";
+            // visit se views
+            for (auto& view_it : view_manager_.getViews())
+                view_it.second->accept(visitor);
 
             // update status
             stop_time = boost::posix_time::microsec_clock::local_time();
 
             time_diff = stop_time - start_time;
             ms = time_diff.total_milliseconds();
-            elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
-            dialog_->setElapsedTime(elapsed_time_str);
+            elapsed_time_str =
+                    String::timeStringFromDouble(ms / 1000.0, false);
 
-            while (command_out.find("Rerun to get outlines right") != std::string::npos
-                   || command_out.find("Rerun to get cross-references right") != std::string::npos)
+            status_str = "Writing view point "+to_string(vp_cnt+1)+"/"+to_string(vp_size);
+
+            if (vp_cnt && ms > 0)
             {
-                loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
-                dialog_->setStatus("Re-running pdflatex");
+                ms_per_vp = ms/(double)vp_cnt;
 
-//                while (QCoreApplication::hasPendingEvents())
+                remaining_time_str = String::timeStringFromDouble((vp_size-vp_cnt) * ms_per_vp / 1000.0, false);
+
+                loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
+                       << " done after " << elapsed_time_str << " remaining " << remaining_time_str;
+            }
+            else
+            {
+                loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
+                       << " done after " << elapsed_time_str;
+
+            }
+
+            dialog_->setElapsedTime(elapsed_time_str);
+            dialog_->setProgress(0, vp_size, vp_cnt);
+            dialog_->setStatus(status_str);
+            dialog_->setRemainingTime(remaining_time_str);
+
+            ++vp_cnt;
+        }
+
+        if (cancel_)
+        {
+            dialog_->setProgress(0, vp_size, 0);
+            dialog_->setStatus("Writing view points cancelled");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+        else // proceed
+        {
+            dialog_->setProgress(0, vp_size, vp_size);
+            dialog_->setStatus("Writing view points done");
+            dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+            while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
+            doc.write();
+
+            if (run_pdflatex_)
+            {
+                std::string command_out;
+                std::string command = "cd "+report_path_+" && pdflatex --interaction=nonstopmode "+report_filename_
+                        +" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
+
+                loginf << "ViewPointsReportGenerator: run: running pdflatex";
+                dialog_->setStatus("Running pdflatex");
+                dialog_->setRemainingTime("");
+
+                //while (QCoreApplication::hasPendingEvents())
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
+
                 command_out = System::exec(command);
+
+                logdbg << "ViewPointsReportGenerator: run: cmd done";
+
+                // update status
+                stop_time = boost::posix_time::microsec_clock::local_time();
 
                 time_diff = stop_time - start_time;
                 ms = time_diff.total_milliseconds();
                 elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
                 dialog_->setElapsedTime(elapsed_time_str);
 
-                logdbg << "ViewPointsReportGenerator: run: re-run done";
-            }
-
-            loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
-
-            if (!command_out.size()) // no warnings
-            {
-                pdf_created_ = true;
-
-                dialog_->setStatus("Running pdflatex done");
-
-                if (open_created_pdf_)
+                while (command_out.find("Rerun to get outlines right") != std::string::npos
+                       || command_out.find("Rerun to get cross-references right") != std::string::npos)
                 {
-                    std::string fullpath = report_path_+report_filename_;
+                    loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
+                    dialog_->setStatus("Re-running pdflatex");
 
-                    if (String::hasEnding(fullpath, ".tex"))
+                    //                while (QCoreApplication::hasPendingEvents())
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                    command_out = System::exec(command);
+
+                    time_diff = stop_time - start_time;
+                    ms = time_diff.total_milliseconds();
+                    elapsed_time_str = String::timeStringFromDouble(ms / 1000.0, false);
+                    dialog_->setElapsedTime(elapsed_time_str);
+
+                    logdbg << "ViewPointsReportGenerator: run: re-run done";
+                }
+
+                loginf << "ViewPointsReportGenerator: run: result '" << command_out << "'";
+
+                if (!command_out.size()) // no warnings
+                {
+                    pdf_created_ = true;
+
+                    dialog_->setStatus("Running pdflatex done");
+
+                    if (open_created_pdf_)
                     {
-                        String::replace(fullpath, ".tex", ".pdf");
+                        std::string fullpath = report_path_+report_filename_;
 
-                        loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+                        if (String::hasEnding(fullpath, ".tex"))
+                        {
+                            String::replace(fullpath, ".tex", ".pdf");
 
-                        QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                            loginf << "ViewPointsReportGenerator: run: opening '" << fullpath << "'";
+
+                            QDesktopServices::openUrl(QUrl(fullpath.c_str()));
+                        }
+                        else
+                            logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
                     }
-                    else
-                        logerr << "ViewPointsReportGenerator: run: opening not possible since wrong file ending";
+                }
+                else // show warnings
+                {
+                    QMessageBox msgBox;
+                    msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
+                    msgBox.exec();
                 }
             }
-            else // show warnings
-            {
-                QMessageBox msgBox;
-                msgBox.setText("PDF Latex failed with warnings:\n\n"+QString(command_out.c_str()));
-                msgBox.exec();
-            }
         }
-    }
-    dialog_->setRunning(false);
-    dialog_->close();
+        dialog_->setRunning(false);
+        dialog_->close();
 
-    QApplication::restoreOverrideCursor();
+        QApplication::restoreOverrideCursor();
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    OSGView::instant_display_ = false;
+        OSGView::instant_display_ = false;
 #endif
 
-    if (show_done_)
-    {
-        QMessageBox msgBox;
-        if (cancel_)
-            msgBox.setText("Export View Points as PDF Cancelled");
-        else
-            msgBox.setText("Export View Points as PDF Done");
+        if (show_done_)
+        {
+            QMessageBox msgBox;
+            if (cancel_)
+                msgBox.setText("Export View Points as PDF Cancelled");
+            else
+                msgBox.setText("Export View Points as PDF Done");
 
-        msgBox.exec();
+            msgBox.exec();
+        }
+
+        running_ = false;
+
     }
+    catch (exception& e)
+    {
+        logwrn << "ViewPointsReportGenerator: run: caught exception '" << e.what() << "'";
 
-    running_ = false;
+        dialog_->setProgress(0, 1, 0);
+        dialog_->setStatus("Writing report failed");
+        dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
+
+        dialog_->setRunning(false);
+        dialog_->close();
+
+        QApplication::restoreOverrideCursor();
+
+        running_ = false;
+
+        QMessageBox m_warning(QMessageBox::Warning, "Export PDF Failed",
+                              (string("Error message:\n")+e.what()).c_str(),
+                              QMessageBox::Ok);
+        m_warning.exec();
+    }
 }
 
 void ViewPointsReportGenerator::cancel ()

@@ -1,7 +1,7 @@
 export ARCH=x86_64
 export QT_SELECT=5
 
-cd /app/workspace/atsdb/
+cd /app/workspace/compass/
 mkdir -p appimage/appdir/bin/
 
 cp /usr/bin/compass_client appimage/appdir/bin/
@@ -25,4 +25,4 @@ mkdir -p appimage/appdir/lib
 /app/tools/linuxdeployqt-continuous-x86_64.AppImage --appimage-extract-and-run appimage/appdir/compass.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so
 #-qmake=/usr/lib/x86_64-linux-gnu/qt5/bin/qmake  -show-exclude-libs
 
-cd /app/workspace/atsdb/docker
+cd /app/workspace/compass/docker

@@ -45,15 +45,15 @@ class DBFilterCondition : public QObject, public Configurable
 {
     Q_OBJECT
 
-  private slots:
+private slots:
     /// @brief Slot to be called when the value of the condition has been changed
     void valueChanged();
 
-  signals:
+signals:
     /// @brief Signal which is emitted when a change in the condition has occurred
     void possibleFilterChange();
 
-  public:
+public:
     /// @brief Constructor
     DBFilterCondition(const std::string& class_id, const std::string& instance_id,
                       DBFilter* filter_parent);
@@ -151,7 +151,8 @@ private:
     /// @brief Variable name and operator label
     QLabel* label_{nullptr};
 
-    std::string getTransformedValue(const std::string& untransformed_value, DBOVariable* variable);
+    // transformed val, null contained
+    std::pair<std::string, bool> getTransformedValue(const std::string& untransformed_value, DBOVariable* variable);
     bool checkValueInvalid(const std::string& new_value);
 };
 

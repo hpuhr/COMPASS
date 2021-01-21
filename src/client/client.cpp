@@ -29,6 +29,7 @@
 
 #include <QApplication>
 #include <QMessageBox>
+#include <QSurfaceFormat>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -56,6 +57,25 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
+    //    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
+//    QSurfaceFormat format;
+//    format.setRenderableType(QSurfaceFormat::OpenGL);
+//    format.setProfile(QSurfaceFormat::CoreProfile);
+//    format.setVersion(3,3);
+
+    //    QSurfaceFormat format;
+    //    format.setSwapBehavior(QSurfaceFormat::SwapBehavior::SingleBuffer); //DoubleBuffer
+    //    format.setRedBufferSize(8);
+    //    format.setGreenBufferSize(8);
+    //    format.setBlueBufferSize(8);
+    //    format.setAlphaBufferSize(8);
+    //    format.setDepthBufferSize(32); //24
+    //    format.setStencilBufferSize(8);
+    //    format.setSwapInterval(0);
+    //    format.setSamples(8);
+    // QSurfaceFormat::setDefaultFormat(format);
+
     std::string create_new_sqlite3_db_filename;
     std::string open_sqlite3_db_filename;
     std::string import_view_points_filename;
@@ -79,34 +99,34 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
-            ("reset,r", po::bool_switch(&config_and_data_reset_wanted_) ,"reset user configuration and data")
+            ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
             ("create_new_sqlite3_db", po::value<std::string>(&create_new_sqlite3_db_filename),
-                "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
+             "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("open_sqlite3_db", po::value<std::string>(&open_sqlite3_db_filename),
-                "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+             "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
             ("import_view_points", po::value<std::string>(&import_view_points_filename),
-                "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-#if USE_JASTERIX
+             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+        #if USE_JASTERIX
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
-                "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-#endif
+             "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+        #endif
             ("import_json", po::value<std::string>(&import_json_filename),
-                "imports JSON file with given filename, e.g. '/data/file1.json'")
+             "imports JSON file with given filename, e.g. '/data/file1.json'")
             ("json_schema", po::value<std::string>(&import_json_schema),
-                "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
             ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename),
-                "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
             ("import_sectors_json", po::value<std::string>(&import_sectors_filename),
-                "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
             ("auto_process", po::bool_switch(&auto_process), "start automatic processing of imported data")
             ("associate_data", po::bool_switch(&associate_data), "associate target reports")
             ("start", po::bool_switch(&start), "start after finishing previous steps")
             ("load_data", po::bool_switch(&load_data), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename),
-                "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
             ("evaluate", po::bool_switch(&evaluate), "run evaluation")
             ("export_eval_report", po::value<std::string>(&export_eval_report_filename),
-                "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
             ("quit", po::bool_switch(&quit), "quit after finishing all previous steps");
 
     try
@@ -179,13 +199,13 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         task_man.loadData(load_data);
 
     if (export_view_points_report_filename.size())
-            task_man.exportViewPointsReportFile(export_view_points_report_filename);
+        task_man.exportViewPointsReportFile(export_view_points_report_filename);
 
     if (evaluate)
         task_man.evaluate(true);
 
     if (export_eval_report_filename.size())
-            task_man.exportEvalReportFile(export_eval_report_filename);
+        task_man.exportEvalReportFile(export_eval_report_filename);
 
     if (quit)
         task_man.quit(quit);
@@ -317,131 +337,113 @@ void Client::checkAndSetupConfig()
 
 void Client::checkNeededActions()
 {
-    cout << "COMPASSClient: checking if local configuration exists ... ";
+    cout << "COMPASSClient: checking if compass home directory exists ... ";
 
-    config_and_data_exists_ = Files::directoryExists(HOME_SUBDIRECTORY);
+    bool home_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);
 
-    if (config_and_data_exists_)
+    if (home_subdir_exists)
         cout << " yes" << endl;
     else
+    {
         cout << " no" << endl;
 
-    if (!Files::fileExists(HOME_CONF_DIRECTORY + "config.json"))
-    {
-        cout << "COMPASSClient: config.json does not exist, delete and upgrade required" << endl;
-        config_and_data_deletion_wanted_ = true;
-        upgrade_needed_ = true;
+        cout << "COMPASSClient: complete copy into compass home directory needed";
+        config_and_data_copy_wanted_ = true;
+
         return;
     }
 
-    if (config_and_data_exists_)  // check updating actions
+    // home subdir exists
+    cout << "COMPASSClient: checking if old compass config exists ... ";
+
+    bool old_cfg_exists = Files::fileExists(HOME_SUBDIRECTORY + "conf/config.json");
+
+    if (old_cfg_exists) // complete delete needed
     {
+        cout << " yes" << endl;
+
+        cout << "COMPASSClient: complete delete of compass home directory needed";
+
+        home_subdir_deletion_wanted_ = true;
+        config_and_data_copy_wanted_ = true;
+
+        return;
+    }
+    else
+        cout << " no" << endl;
+
+    // home subdir exists, no old config exists
+    cout << "COMPASSClient: checking if current compass config exists ... ";
+
+    bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);
+
+    if (current_cfg_subdir_exists)
+    {
+        cout << " yes" << endl;
+
         SimpleConfig config("config.json");
         string config_version;
 
         if (config.existsId("version"))
             config_version = config.getString("version");
 
-        if (String::compareVersions(VERSION, config_version) != 0)  // not same
-        {
-            upgrade_needed_ = true;
+        assert (String::compareVersions(VERSION, config_version) == 0);  // must be same
+        return; // nothing to do
+    }
+    else
+    {
+        cout << " no" << endl;
 
-            // 0 if same, -1 if v1 > v2, 1 if v1 < v2
-            bool app_version_newer = String::compareVersions(VERSION, config_version) == -1;
+        cout << "COMPASSClient: complete copy into compass home directory needed";
+        config_and_data_copy_wanted_ = true;
 
-            cout << "COMPASSClient: configuration mismatch detected, local version '"
-                 << config_version << "'" << (app_version_newer ? " newer" : " older")
-                 << " application version '" << VERSION << "'" << endl;
-
-            if (app_version_newer)  // check if cfg version is so old it needs deleting
-                config_and_data_deletion_wanted_ =
-                    (String::compareVersions(DELETE_CFG_BEFORE_VERSION, config_version) == -1);
-            else
-                config_and_data_deletion_wanted_ =  // check if cfg version is new so it needs
-                                                    // deleting
-                    (String::compareVersions(VERSION, config_version) == 1);
-        }
-        else
-            cout << "COMPASSClient: same configuration version '" << config_version << "' found"
-                 << endl;
+        return;
     }
 }
 
 void Client::performNeededActions()
 {
-    if (!config_and_data_exists_)  // simple copy of nothing exists
+    if (home_subdir_deletion_wanted_)  // version so old it should be deleted before
     {
-        cout << "COMPASSClient: no previous installation, copying new information and data" << endl;
-
-        copyConfigurationAndData();
-        config_and_data_copied_ = true;
-
-        return;
-    }
-
-    if (upgrade_needed_ || config_and_data_reset_wanted_)
-    {
-        if (config_and_data_deletion_wanted_)  // version so old it should be deleted before
-        {
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(
-                nullptr, "Delete Previous Configuration & Data",
-                "Deletion of the existing configuration and data is required. This will delete"
-                " the folders ~/.compass/conf and ~/.compass/data. Do you want to continue?",
-                QMessageBox::Yes | QMessageBox::No);
-
-            if (reply == QMessageBox::Yes)
-            {
-                cout << "COMPASSClient: config & data delete confirmed" << endl;
-
-                deleteConfigurationAndData();
-                copyConfigurationAndData();
-                return;
-            }
-            else
-            {
-                cout << "COMPASSClient: required config & data delete denied" << endl;
-                quit_requested_ = true;
-                return;
-            }
-        }
-
-        // simple upgrade
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
-            nullptr, "Upgrade Configuration & Data",
-            "A configuration & data updade is required, do you want to update now?",
-            QMessageBox::Yes | QMessageBox::No);
+                    nullptr, "Delete Previous Configuration & Data",
+                    "Complete deletion of the previous configuration and data is required. This will delete"
+                    " the folder '~/.compass'. Do you want to continue?",
+                    QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes)
         {
-            cout << "COMPASSClient: config & data upgrade confirmed" << endl;
-            copyConfigurationAndData();
+            cout << "COMPASSClient: config & data delete confirmed, deleting" << endl;
+
+            deleteCompleteHomeSubDir();
         }
         else
         {
-            cout << "COMPASSClient: config & data upgrade denied" << endl;
+            cout << "COMPASSClient: required config & data delete denied" << endl;
             quit_requested_ = true;
             return;
         }
     }
+
+    if (config_and_data_copy_wanted_)
+    {
+        cout << "COMPASSClient: copying current config & data" << endl;
+
+        copyConfigurationAndData();
+    }
+
 }
 
-void Client::deleteConfigurationAndData()
+void Client::deleteCompleteHomeSubDir()
 {
-    if (!Files::directoryExists(HOME_CONF_DIRECTORY))
-        throw runtime_error("COMPASSClient: unable to delete conf files at '" + HOME_CONF_DIRECTORY +
+    if (!Files::directoryExists(HOME_SUBDIRECTORY))
+        throw runtime_error("COMPASSClient: unable to delete directory'" + HOME_SUBDIRECTORY +
                             "'");
 
-    if (!Files::directoryExists(HOME_DATA_DIRECTORY))
-        throw runtime_error("COMPASSClient: unable to delete data files at '" + HOME_DATA_DIRECTORY +
-                            "'");
+    Files::deleteFolder(HOME_SUBDIRECTORY);
 
-    Files::deleteFolder(HOME_CONF_DIRECTORY);
-    Files::deleteFolder(HOME_DATA_DIRECTORY);
-
-    assert(!Files::directoryExists(HOME_CONF_DIRECTORY));
-    assert(!Files::directoryExists(HOME_DATA_DIRECTORY));
+    assert(!Files::directoryExists(HOME_SUBDIRECTORY));
 }
 
 void Client::copyConfigurationAndData()
@@ -450,29 +452,37 @@ void Client::copyConfigurationAndData()
         throw runtime_error("COMPASSClient: unable to locate system installation files at '" +
                             system_install_path_ + "'");
 
+    if (!Files::directoryExists(OSGEARTH_CACHE_SUBDIRECTORY))
+    {
+        cout << "COMPASSClient: creating GDAL cache directory '" << OSGEARTH_CACHE_SUBDIRECTORY
+             << "'";
+        Files::createMissingDirectories(OSGEARTH_CACHE_SUBDIRECTORY);
+        assert (Files::directoryExists(OSGEARTH_CACHE_SUBDIRECTORY));
+    }
+
     cout << "COMPASSClient: copying files from system installation from '" << system_install_path_
-         << "' to '" << HOME_SUBDIRECTORY << "' ... ";
+         << "' to '" << HOME_VERSION_SUBDIRECTORY << "' ... ";
 
-    if (!Files::copyRecursively(system_install_path_, HOME_SUBDIRECTORY))
+    if (!Files::copyRecursively(system_install_path_, HOME_VERSION_SUBDIRECTORY))
         throw runtime_error("COMPASSClient: copying files from system installation from '" +
-                            system_install_path_ + "' to '" + HOME_SUBDIRECTORY + " failed");
+                            system_install_path_ + "' to '" + HOME_VERSION_SUBDIRECTORY + " failed");
 
     cout << " done" << endl;
 }
 
-void Client::copyConfiguration()
-{
-    string system_conf_path = system_install_path_ + "conf/";
-    string home_conf_path = HOME_SUBDIRECTORY + "conf/";
+//void Client::copyConfiguration()
+//{
+//    string system_conf_path = system_install_path_ + "conf/";
+//    string home_conf_path = HOME_SUBDIRECTORY + "conf/";
 
-    cout << "COMPASSClient: reset config from from '" << system_conf_path << "' to '"
-         << home_conf_path << "' ... ";
+//    cout << "COMPASSClient: reset config from from '" << system_conf_path << "' to '"
+//         << home_conf_path << "' ... ";
 
-    if (!Files::copyRecursively(system_conf_path, home_conf_path))
-        throw runtime_error("COMPASSClient: reset config from from '" + system_conf_path + "' to '" +
-                            home_conf_path + "' failed");
+//    if (!Files::copyRecursively(system_conf_path, home_conf_path))
+//        throw runtime_error("COMPASSClient: reset config from from '" + system_conf_path + "' to '" +
+//                            home_conf_path + "' failed");
 
-    cout << " done" << endl;
-}
+//    cout << " done" << endl;
+//}
 
 

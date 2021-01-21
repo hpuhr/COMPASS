@@ -24,6 +24,10 @@
 #include "listboxview.h"
 #include "listboxviewdatawidget.h"
 #include "allbuffertablewidget.h"
+#include "histogramview.h"
+#include "histogramviewdatawidget.h"
+#include "scatterplotview.h"
+#include "scatterplotviewdatawidget.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
@@ -55,10 +59,11 @@ using namespace Utils;
 
 LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
                            bool add_overview_screenshot, bool include_target_details,
-                           bool include_target_tr_details, bool wait_on_map_loading)
+                           bool include_target_tr_details, unsigned int max_table_col_width, bool wait_on_map_loading)
     : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
       add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
-      include_target_tr_details_(include_target_tr_details), wait_on_map_loading_(wait_on_map_loading)
+      include_target_tr_details_(include_target_tr_details), max_table_col_width_(max_table_col_width),
+      wait_on_map_loading_(wait_on_map_loading)
 {
 }
 
@@ -150,7 +155,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
 
-    current_section_name_ = e->compoundResultsHeading(); // slightly hacky, remove "Results" from top
+    current_section_name_ = String::latexString(e->compoundResultsHeading()); // slightly hacky, remove "Results" from top
 
     // ignore if top "Results"
     if (current_section_name_ == "")
@@ -197,7 +202,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     if (headings.size() >= 9)
         table.setWideTable(true);
 
-    unsigned int num_rows = e->rowCount();
+    unsigned int num_rows = e->filteredRowCount();
     vector<string> row_strings;
     string ref;
 
@@ -205,6 +210,31 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     {
         row_strings = e->sortedRowStrings(row);
         assert (row_strings.size() == num_cols);
+
+        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        {
+            if (row_strings[cnt].size() > max_table_col_width_)
+            {
+                std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
+                std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);
+
+                if (space_pos == std::string::npos)
+                {
+                    if (comma_pos == std::string::npos)
+                    {
+                        break; // no 64-bit-or-less substring
+                    }
+                    else
+                    {
+                        row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
+                    }
+                }
+                else
+                {
+                    row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
+                }
+            }
+        }
 
         if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
         {
@@ -318,6 +348,59 @@ void LatexVisitor::visit(ListBoxView* e)
     }
 }
 
+void LatexVisitor::visit(HistogramView* e)
+{
+    assert (e);
+
+    loginf << "LatexVisitor: visit: HistogramView " << e->instanceId();
+
+    std::string screenshot_path = report_.path()+"/screenshots";
+
+    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+
+    if (!screenshot_folder_created_)
+    {
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: HistogramView: unable to create directories for '"
+                                +screenshot_path+"'");
+
+        screenshot_folder_created_ = true;
+    }
+
+    e->showInTabWidget();
+
+    HistogramViewDataWidget* data_widget = e->getDataWidget();
+    assert (data_widget);
+
+    if (!data_widget->showsData())
+        return;
+
+    // normal screenshot
+    QPixmap pmap = data_widget->renderPixmap();;
+
+    QImage screenshot = pmap.toImage();
+
+    std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
+
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: HistogramView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    // add normal screenshot after overview
+    sec.addImage(image_path, e->instanceId());
+}
+
 #if USE_EXPERIMENTAL_SOURCE == true
 void LatexVisitor::visit(OSGView* e)
 {
@@ -330,7 +413,12 @@ void LatexVisitor::visit(OSGView* e)
 
     if (!screenshot_folder_created_)
     {
-        Files::createMissingDirectories(screenshot_path);
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+                                +screenshot_path+"'");
+
         screenshot_folder_created_ = true;
     }
 
@@ -352,8 +440,13 @@ void LatexVisitor::visit(OSGView* e)
     assert (!screenshot.isNull());
 
     loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
-    Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
-    bool ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: OSGView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
     assert (ret);
 
     LatexSection& sec = report_.getSection(current_section_name_);
@@ -381,6 +474,59 @@ void LatexVisitor::visit(OSGView* e)
     sec.addImage(image_path, e->instanceId());
 }
 #endif
+
+void LatexVisitor::visit(ScatterPlotView* e)
+{
+    assert (e);
+
+    loginf << "LatexVisitor: visit: ScatterPlotView " << e->instanceId();
+
+    std::string screenshot_path = report_.path()+"/screenshots";
+
+    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+
+    if (!screenshot_folder_created_)
+    {
+        bool ret = Files::createMissingDirectories(screenshot_path);
+
+        if (!ret)
+            throw runtime_error("LatexVisitor: visit: ScatterPlotView: unable to create directories for '"
+                                +screenshot_path+"'");
+
+        screenshot_folder_created_ = true;
+    }
+
+    e->showInTabWidget();
+
+    ScatterPlotViewDataWidget* data_widget = e->getDataWidget();
+    assert (data_widget);
+
+    if (!data_widget->showsData())
+        return;
+
+    // normal screenshot
+    QPixmap pmap = data_widget->renderPixmap();;
+
+    QImage screenshot = pmap.toImage();
+
+    std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
+    assert (!screenshot.isNull());
+
+    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
+
+    if (!ret)
+        throw runtime_error("LatexVisitor: visit: ScatterPlotView: unable to create directories for '"
+                            +image_path+"'");
+
+    ret = screenshot.save(image_path.c_str(), "JPG"); // , 50
+    assert (ret);
+
+    LatexSection& sec = report_.getSection(current_section_name_);
+
+    // add normal screenshot after overview
+    sec.addImage(image_path, e->instanceId());
+}
 
 void LatexVisitor::imagePrefix(const std::string& image_prefix)
 {

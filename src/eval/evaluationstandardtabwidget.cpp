@@ -33,6 +33,7 @@
 #include <QStackedWidget>
 #include <QFrame>
 #include <QTreeView>
+#include <QFormLayout>
 
 using namespace std;
 
@@ -70,9 +71,13 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
         button_layout->addWidget(add_button_);
 
         rename_button_ = new QPushButton("Rename");
+        connect (rename_button_, &QPushButton::clicked,
+                 this, &EvaluationStandardTabWidget::renameStandardSlot);
         button_layout->addWidget(rename_button_);
 
         copy_button_ = new QPushButton("Copy");
+        connect (copy_button_, &QPushButton::clicked,
+                 this, &EvaluationStandardTabWidget::copyStandardSlot);
         button_layout->addWidget(copy_button_);
 
         remove_button_ = new QPushButton("Remove");
@@ -93,6 +98,21 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationManager& eval
 
     if (eval_man_.hasCurrentStandard())
         updateStandardStack();
+
+    // some cfg
+    {
+        QFormLayout* form_layout = new QFormLayout();
+
+        // max ref time diff
+        max_ref_time_diff_edit_ = new QLineEdit(QString::number(eval_man_.maxRefTimeDiff()));
+        max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
+        connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
+                this, &EvaluationStandardTabWidget::maxRefTimeDiffEditSlot);
+
+        form_layout->addRow("Reference Maximum Time Difference [s]", max_ref_time_diff_edit_);
+
+        main_layout->addLayout(form_layout);
+    }
 
     // connections
     connect (&eval_man_, &EvaluationManager::standardsChangedSignal,
@@ -129,8 +149,8 @@ void EvaluationStandardTabWidget::addStandardSlot ()
 
     bool ok;
     QString text =
-        QInputDialog::getText(this, tr("Standard Name"),
-                              tr("Specify a (unique) standard name:"), QLineEdit::Normal, "", &ok);
+            QInputDialog::getText(this, tr("Standard Name"),
+                                  tr("Specify a (unique) standard name:"), QLineEdit::Normal, "", &ok);
 
     if (ok && !text.isEmpty())
     {
@@ -139,7 +159,7 @@ void EvaluationStandardTabWidget::addStandardSlot ()
         if (!name.size())
         {
             QMessageBox m_warning(QMessageBox::Warning, "Adding Standard Failed",
-            "Standard has to have a non-empty name.", QMessageBox::Ok);
+                                  "Standard has to have a non-empty name.", QMessageBox::Ok);
             m_warning.exec();
             return;
         }
@@ -147,12 +167,80 @@ void EvaluationStandardTabWidget::addStandardSlot ()
         if (eval_man_.hasStandard(name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "Adding Standard Failed",
-            "Standard with this name already exists.", QMessageBox::Ok);
+                                  "Standard with this name already exists.", QMessageBox::Ok);
             m_warning.exec();
             return;
         }
 
         eval_man_.addStandard(name);
+    }
+}
+
+void EvaluationStandardTabWidget::renameStandardSlot ()
+{
+    loginf << "EvaluationStandardTabWidget: renameStandardSlot";
+
+    bool ok;
+    QString text =
+            QInputDialog::getText(this, tr("Standard Name"),
+                                  tr("Specify a (unique) standard name:"), QLineEdit::Normal,
+                                  eval_man_.currentStandardName().c_str(), &ok);
+
+    if (ok)
+    {
+        string new_name = text.toStdString();
+
+        if (!new_name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Renaming Standard Failed",
+                                  "Standard with empty name not possible.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        if (eval_man_.hasStandard(new_name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Renaming Standard Failed",
+                                  "Standard with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        eval_man_.renameCurrentStandard(new_name);
+    }
+
+}
+
+void EvaluationStandardTabWidget::copyStandardSlot ()
+{
+    loginf << "EvaluationStandardTabWidget: copyStandardSlot";
+
+    bool ok;
+    QString text =
+            QInputDialog::getText(this, tr("New Standard Name"),
+                                  tr("Specify a (unique) standard name:"), QLineEdit::Normal, "", &ok);
+
+    if (ok)
+    {
+        string new_name = text.toStdString();
+
+        if (!new_name.size())
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Copying Standard Failed",
+                                  "Standard with empty name not possible.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        if (eval_man_.hasStandard(new_name))
+        {
+            QMessageBox m_warning(QMessageBox::Warning, "Copying Standard Failed",
+                                  "Standard with this name already exists.", QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        eval_man_.copyCurrentStandard(new_name);
     }
 }
 
@@ -170,11 +258,11 @@ void EvaluationStandardTabWidget::updateButtons()
     assert (add_button_);
     add_button_->setDisabled(false);
     assert (rename_button_);
-    rename_button_->setDisabled(true);
+    rename_button_->setEnabled(eval_man_.hasCurrentStandard());
     assert (copy_button_);
-    copy_button_->setDisabled(true);
+    copy_button_->setEnabled(eval_man_.hasCurrentStandard());
     assert (remove_button_);
-    remove_button_->setDisabled(!eval_man_.hasCurrentStandard());
+    remove_button_->setEnabled(eval_man_.hasCurrentStandard());
 }
 
 void EvaluationStandardTabWidget::updateStandardStack()
@@ -196,4 +284,17 @@ void EvaluationStandardTabWidget::updateStandardStack()
         standards_widget_->addWidget(standard.widget());
 
     standards_widget_->setCurrentWidget(standard.widget());
+}
+
+void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
+{
+    loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        eval_man_.maxRefTimeDiff(val);
+    else
+        loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: invalid value";
 }

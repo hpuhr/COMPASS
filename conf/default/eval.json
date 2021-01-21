@@ -15,13 +15,932 @@
                 "parameters": {
                     "abstract": "",
                     "author": "",
-                    "open_created_pdf": false,
+                    "num_max_table_col_width": 24,
+                    "num_max_table_rows": 1000,
+                    "open_created_pdf": true,
                     "run_pdflatex": true,
                     "wait_on_map_loading": true
                 }
             }
         },
         "EvaluationStandard": {
+            "EvaluationStandard1171": {
+                "parameters": {
+                    "name": "EUROCAE ED-117A"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupActive Stands0": {
+                            "parameters": {
+                                "name": "Active Stands"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.949999988079071,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": true
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTC/GAPS30": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 15.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Long Horizontal Gaps",
+                                            "prob": 0.0010000000474974513,
+                                            "prob_check_type": 1,
+                                            "short_name": "PLG",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 125.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy 0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy ",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 25.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupApron Taxiways0": {
+                            "parameters": {
+                                "name": "Apron Taxiways"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.699999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": true
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Long Horizontal Gaps",
+                                            "prob": 0.009999999776482582,
+                                            "prob_check_type": 1,
+                                            "short_name": "PLG",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 100.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 20.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupCommon0": {
+                            "parameters": {
+                                "name": "Common"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification MA0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "name": "Probability of Identification MA",
+                                            "prob": 0.9700000286102295,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID MA"
+                                        }
+                                    },
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification MSID0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "name": "Probability of Identification MSID",
+                                            "prob": 0.9700000286102295,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID ID"
+                                        }
+                                    },
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "name": "Probability of Identification MSAD",
+                                            "prob": 0.9900000095367432,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID TA"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationFalseConfig": {
+                                    "EvaluationRequirementIdentificationFalseConfigPropability of False Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "name": "Propability of False Identification",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFID"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupManoeuvring Area0": {
+                            "parameters": {
+                                "name": "Manoeuvring Area"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.949999988079071,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": true
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Long Horizontal Gaps",
+                                            "prob": 0.0010000000474974513,
+                                            "prob_check_type": 1,
+                                            "short_name": "PLG",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 60.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 12.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "EvaluationStandardEUROCAE ED-1160": {
+                "parameters": {
+                    "name": "EUROCAE ED-116"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupCommon0": {
+                            "parameters": {
+                                "name": "Common"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Detection0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-116 3.4.2\n",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Detection",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PD",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigHorizontal Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-116 3.4.12",
+                                            "failed_values_of_interest": true,
+                                            "name": "Horizontal Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "HPA",
+                                            "threshold_value": 7.5,
+                                            "threshold_value_check_type": 0
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "EvaluationStandardEUROCAE ED-1170": {
+                "parameters": {
+                    "name": "EUROCAE ED-117"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupAirborne 2.5-5nm0": {
+                            "parameters": {
+                                "name": "Airborne 2.5-5nm"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigHorizontal Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.3",
+                                            "failed_values_of_interest": true,
+                                            "name": "Horizontal Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "HPA",
+                                            "threshold_value": 40.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupAirborne RT-2.5nm0": {
+                            "parameters": {
+                                "name": "Airborne RT-2.5nm"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigHorizontal Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.3",
+                                            "failed_values_of_interest": true,
+                                            "name": "Horizontal Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "HPA",
+                                            "threshold_value": 20.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupAirborne0": {
+                            "parameters": {
+                                "name": "Airborne"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Update0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.2.4",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Update",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PU",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupApron0": {
+                            "parameters": {
+                                "name": "Apron"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Update0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.2.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Update",
+                                            "prob": 0.699999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PU",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupCommon0": {
+                            "parameters": {
+                                "name": "Common"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.5",
+                                            "name": "Probability of Identification",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Detection0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Secion 3.3.10",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Detection",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 0,
+                                            "short_name": "PFD",
+                                            "threshold_value": 50.0,
+                                            "threshold_value_check_type": 2
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupManeuvering Area0": {
+                            "parameters": {
+                                "name": "Maneuvering Area"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Update0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.2.3",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Update",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PU",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigHorizontal Position Accuracy 20": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.3",
+                                            "failed_values_of_interest": true,
+                                            "name": "Horizontal Position Accuracy 2",
+                                            "prob": 0.9900000095367432,
+                                            "prob_check_type": 3,
+                                            "short_name": "HPA2",
+                                            "threshold_value": 12.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigHorizontal Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.3",
+                                            "failed_values_of_interest": true,
+                                            "name": "Horizontal Position Accuracy 1",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "HPA1",
+                                            "threshold_value": 7.5,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupRunways0": {
+                            "parameters": {
+                                "name": "Runways"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of MLAT Detection",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PD",
+                                            "update_interval": 2.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupStand0": {
+                            "parameters": {
+                                "name": "Stand"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of MLAT Detection",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PD",
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigProbability of Update0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.2.2",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Update",
+                                            "prob": 0.5,
+                                            "prob_check_type": 3,
+                                            "short_name": "PU",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupTaxiways0": {
+                            "parameters": {
+                                "name": "Taxiways"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of MLAT Detection",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PD",
+                                            "update_interval": 2.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "EvaluationStandardEUROCAE ED-87C0": {
+                "parameters": {
+                    "name": "EUROCAE ED-87C"
+                },
+                "sub_configs": {
+                    "EvaluationRequirementGroup": {
+                        "EvaluationRequirementGroupActive Stands0": {
+                            "parameters": {
+                                "name": "Active Stands"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.949999988079071,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 5.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTC/GAPS30": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 5.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Track Continuity 5s",
+                                            "prob": 0.0010000000474974513,
+                                            "prob_check_type": 1,
+                                            "short_name": "TC/GAPS5",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "name": "Probability of Identification",
+                                            "prob": 0.9800000190734863,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 125.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy 0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy ",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 25.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupApron Taxiways0": {
+                            "parameters": {
+                                "name": "Apron Taxiways"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Track Continuity 3-5s",
+                                            "prob": 0.0010000000474974513,
+                                            "prob_check_type": 1,
+                                            "short_name": "TC/GAPS3",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": true,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 5.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Track Continuity 5s",
+                                            "prob": 9.999999747378752e-06,
+                                            "prob_check_type": 1,
+                                            "short_name": "TC/GAPS5",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "name": "Probability of Identification",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 100.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 20.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementSpeedConfig": {
+                                    "EvaluationRequirementSpeedConfigReported Velocity Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Velocity Accuracy",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "RVA",
+                                            "threshold_percent": 10.0,
+                                            "threshold_value": 5.0,
+                                            "threshold_value_check_type": 0,
+                                            "use_percent_if_higher": true
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupCommon0": {
+                            "parameters": {
+                                "name": "Common"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementIdentificationFalseConfig": {
+                                    "EvaluationRequirementIdentificationFalseConfigPropability of False Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "name": "Propability of False Identification",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFID"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "EvaluationRequirementGroupManoeuvring Area0": {
+                            "parameters": {
+                                "name": "Manoeuvring Area"
+                            },
+                            "sub_configs": {
+                                "EvaluationRequirementDetectionConfig": {
+                                    "EvaluationRequirementDetectionConfigProbability of Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "minimum_probability": 0.949999988079071,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Probability of Target Report",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "PTR",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 3.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Track Continuity 3-5s",
+                                            "prob": 0.0010000000474974513,
+                                            "prob_check_type": 1,
+                                            "short_name": "TC/GAPS3",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": true,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": false
+                                        }
+                                    },
+                                    "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "max_gap_length_s": 5.0,
+                                            "min_gap_length_s": 5.0,
+                                            "miss_tolerance": 0.009999999776482582,
+                                            "name": "Track Continuity 5s",
+                                            "prob": 9.999999974752427e-07,
+                                            "prob_check_type": 1,
+                                            "short_name": "TC/GAPS5",
+                                            "update_interval": 1.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": true,
+                                            "use_miss_tolerance": false
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "name": "Probability of Identification",
+                                            "prob": 0.9990000128746033,
+                                            "prob_check_type": 3,
+                                            "short_name": "PID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigProbability of False Target Report0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": false,
+                                            "name": "Probability of False Target Report",
+                                            "prob": 9.999999747378752e-05,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFTR",
+                                            "threshold_value": 60.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigReported Position Accuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Position Accuracy",
+                                            "prob": 0.949999988079071,
+                                            "prob_check_type": 3,
+                                            "short_name": "RPA",
+                                            "threshold_value": 12.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementSpeedConfig": {
+                                    "EvaluationRequirementSpeedConfigReported Velocity\nAccuracy0": {
+                                        "parameters": {
+                                            "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "failed_values_of_interest": true,
+                                            "name": "Reported Velocity Accuracy",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "RVA",
+                                            "threshold_percent": 10.0,
+                                            "threshold_value": 5.0,
+                                            "threshold_value_check_type": 0,
+                                            "use_percent_if_higher": true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "EvaluationStandardtest0": {
                 "parameters": {
                     "name": "test"
@@ -36,34 +955,222 @@
                                 "EvaluationRequirementDetectionConfig": {
                                     "EvaluationRequirementDetectionConfigProbability of Detection0": {
                                         "parameters": {
+                                            "comment": "",
+                                            "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
+                                            "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
                                             "miss_tolerance": 0.9990000128746033,
-                                            "name": "Probability of Detection",
+                                            "name": "Detection",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 2.0,
+                                            "update_interval": 4.0,
+                                            "use_max_gap_length": false,
+                                            "use_min_gap_length": false,
                                             "use_miss_tolerance": true
                                         }
                                     }
                                 },
-                                "EvaluationRequirementIdentificationConfig": {
-                                    "EvaluationRequirementIdentificationConfigProbability of Correct Identification0": {
+                                "EvaluationRequirementExtraDataConfig": {
+                                    "EvaluationRequirementExtraUTNsConfigExtraData0": {
                                         "parameters": {
+                                            "comment": "",
+                                            "ignore_primary_only": true,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability": 0.0,
+                                            "min_duration": 60.0,
+                                            "min_num_updates": 10,
+                                            "name": "Extra Data",
+                                            "prob": 0.029999999329447746,
+                                            "prob_check_type": 1,
+                                            "short_name": "ED"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementExtraTrackConfig": {
+                                    "EvaluationRequirementExtraTrackConfigExtra Track0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "ignore_primary_only": true,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability": 0.0,
+                                            "min_duration": 60.0,
+                                            "min_num_updates": 10,
+                                            "name": "Extra Track",
+                                            "prob": 0.0,
+                                            "prob_check_type": 1,
+                                            "short_name": "ET"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementIdentificationCorrectConfig": {
+                                    "EvaluationRequirementIdentificationCorrectConfigProbability of Correct Identification0": {
+                                        "parameters": {
+                                            "comment": "",
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.9900000095367432,
-                                            "name": "Probability of Correct Identification",
+                                            "name": "Identification Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
                                             "short_name": "PCID"
                                         }
                                     }
                                 },
-                                "EvaluationRequirementPositionMaxDistanceConfig": {
-                                    "EvaluationRequirementPositionMaxDistanceConfigHorizontal Position Accuracy0": {
+                                "EvaluationRequirementIdentificationFalseConfig": {
+                                    "EvaluationRequirementIdentificationFalseConfigIdentification False0": {
                                         "parameters": {
-                                            "max_distance": 140.0,
+                                            "comment": "",
+                                            "name": "Identification False",
+                                            "prob": 0.009999999776482582,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFID"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeAFalseConfig": {
+                                    "EvaluationRequirementModeAFalseConfigMode A False0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_ref_time_diff": 4.0,
+                                            "maximum_probability_false": 0.009999999776482582,
+                                            "name": "Mode A False",
+                                            "prob": 0.009999999776482582,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFMA"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeAPresentConfig": {
+                                    "EvaluationRequirementModeAPresentConfigMode A Present0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability_present": 0.9800000190734863,
+                                            "name": "Mode A Present",
+                                            "prob": 0.9800000190734863,
+                                            "prob_check_type": 3,
+                                            "short_name": "PMA"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCFalseConfig": {
+                                    "EvaluationRequirementModeCFalseConfigMode C0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_difference": 100.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "maximum_probability_false": 0.009999999776482582,
+                                            "minimum_probability_present": 0.9700000286102295,
+                                            "name": "Mode C False",
+                                            "prob": 0.029999999329447746,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFMC",
+                                            "use_maximum_probability_false": true,
+                                            "use_minimum_probability_present": true
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementModeCPresentConfig": {
+                                    "EvaluationRequirementModeCPresentConfigMode C Present0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability_present": 0.9800000190734863,
+                                            "name": "Mode C Present",
+                                            "prob": 0.9700000286102295,
+                                            "prob_check_type": 3,
+                                            "short_name": "PMC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAcrossConfig": {
+                                    "EvaluationRequirementPositionAcrossConfigAcross0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 70.0,
                                             "max_ref_time_diff": 5.0,
                                             "minimum_probability": 0.8999999761581421,
-                                            "name": "Horizontal Position Accuracy",
-                                            "short_name": "HPA"
+                                            "name": "Across",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "AC"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionAlongConfig": {
+                                    "EvaluationRequirementPositionAlongConfigAlong0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 70.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Along",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "AL"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionDistanceConfig": {
+                                    "EvaluationRequirementPositionDistanceConfigPosition Error0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dist_abs_value_check_type": 1,
+                                            "failed_values_of_interest": true,
+                                            "max_abs_value": 70.0,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Position Correct",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "PCP",
+                                            "threshold_value": 140.0,
+                                            "threshold_value_check_type": 1
+                                        }
+                                    },
+                                    "EvaluationRequirementPositionDistanceConfigPosition False0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "dist_abs_value_check_type": 1,
+                                            "failed_values_of_interest": false,
+                                            "max_abs_value": 700.0,
+                                            "name": "Position False",
+                                            "prob": 0.009999999776482582,
+                                            "prob_check_type": 1,
+                                            "short_name": "PFP",
+                                            "threshold_value": 500.0,
+                                            "threshold_value_check_type": 3
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementPositionLatencyConfig": {
+                                    "EvaluationRequirementPositionLatencyConfigLatency0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "max_abs_value": 0.20000000298023224,
+                                            "max_ref_time_diff": 5.0,
+                                            "minimum_probability": 0.8999999761581421,
+                                            "name": "Latency",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "LT"
+                                        }
+                                    }
+                                },
+                                "EvaluationRequirementSpeedConfig": {
+                                    "EvaluationRequirementSpeedConfigSpeed0": {
+                                        "parameters": {
+                                            "comment": "",
+                                            "failed_values_of_interest": true,
+                                            "name": "Speed",
+                                            "prob": 0.8999999761581421,
+                                            "prob_check_type": 3,
+                                            "short_name": "SPD",
+                                            "threshold_percent": 10.0,
+                                            "threshold_value": 50.0,
+                                            "threshold_value_check_type": 1,
+                                            "use_percent_if_higher": false
                                         }
                                     }
                                 }

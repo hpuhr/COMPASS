@@ -25,6 +25,8 @@
 #include "logger.h"
 #include "stringconv.h"
 
+#include <QMessageBox>
+
 using namespace Utils;
 using namespace nlohmann;
 using namespace std;
@@ -298,6 +300,8 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
     for (auto& ds_it : data_sources_)
         ds_it.second.setActive(false);
 
+    string unknown_ds;
+
     // set active sources
     for (auto& ds_it : active_sources.get<json::array_t>())
     {
@@ -306,7 +310,24 @@ void DataSourcesFilter::loadViewPointConditions (const nlohmann::json& filters)
         if (data_sources_.count(number))
             data_sources_.at(number).setActive(true);
         else
+        {
             logwrn << "DataSourcesFilter: loadViewPointConditions: source " << number << " not found";
+
+            if (unknown_ds.size())
+                unknown_ds += ","+to_string(number);
+            else
+                unknown_ds = to_string(number);
+
+        }
+    }
+
+    if (unknown_ds.size())
+    {
+        QMessageBox m_warning(QMessageBox::Warning, "Loading ViewPoint Incorrect",
+                             ("The current view point includes an unknown data source id(s) "
+                              +unknown_ds+" for DBObject "+dbo_name_+".").c_str(),
+                              QMessageBox::Ok);
+        m_warning.exec();
     }
 
     if (widget())

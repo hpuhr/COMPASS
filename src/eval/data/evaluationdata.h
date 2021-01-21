@@ -20,6 +20,7 @@
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
+#include "evaluationdatafilterdialog.h"
 
 #include <QAbstractItemModel>
 
@@ -56,8 +57,8 @@ typedef boost::multi_index_container<
 class EvaluateTargetsFinalizeTask : public tbb::task {
 
 public:
-    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags)
-        : target_data_(target_data), done_flags_(done_flags)
+    EvaluateTargetsFinalizeTask(TargetCache& target_data, std::vector<bool>& done_flags, bool& done)
+        : target_data_(target_data), done_flags_(done_flags), done_(done)
     {
     }
 
@@ -72,13 +73,23 @@ public:
             done_flags_[cnt] = true;
         });
 
+//        for(unsigned int cnt=0; cnt < num_targets; ++cnt)
+//        {
+//            target_data_[cnt].finalize();
+//            done_flags_[cnt] = true;
+//        }
+
+        done_ = true;
+
         return NULL; // or a pointer to a new task to be executed immediately
     }
 
 protected:
     TargetCache& target_data_;
     std::vector<bool>& done_flags_;
+    bool& done_;
 };
+
 
 class EvaluationData : public QAbstractItemModel
 {
@@ -113,20 +124,80 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     const EvaluationTargetData& getTargetOf (const QModelIndex& index);
+
     void setUseTargetData (unsigned int utn, bool value);
+    void setUseAllTargetData (bool value);
+    void clearComments ();
+    void setUseByFilter ();
+
+    void setTargetDataComment (unsigned int utn, std::string comment);
 
     EvaluationDataWidget* widget();
+    EvaluationDataFilterDialog& dialog();
+
+    // ref
+    std::shared_ptr<Buffer> ref_buffer_;
+
+    std::string ref_latitude_name_;
+    std::string ref_longitude_name_;
+    std::string ref_target_address_name_;
+    std::string ref_callsign_name_;
+
+    std::string ref_modea_name_;
+    std::string ref_modea_g_name_; // can be empty
+    std::string ref_modea_v_name_; // can be empty
+
+    std::string ref_modec_name_;
+    std::string ref_modec_g_name_; // can be empty
+    std::string ref_modec_v_name_; // can be empty
+    bool has_ref_altitude_secondary_ {false};
+    std::string ref_altitude_secondary_name_;
+
+    std::string ref_ground_bit_name_; // can be empty
+
+    std::string ref_spd_ground_speed_kts_name_; // can be empty
+    std::string ref_spd_track_angle_deg_name_; // can be empty
+
+    std::string ref_spd_x_ms_name_; // can be empty
+    std::string ref_spd_y_ms_name_; // can be empty
+
+    // tst
+    std::shared_ptr<Buffer> tst_buffer_;
+
+    std::string tst_latitude_name_;
+    std::string tst_longitude_name_;
+    std::string tst_target_address_name_;
+    std::string tst_callsign_name_;
+
+    std::string tst_modea_name_;
+    std::string tst_modea_g_name_; // can be empty
+    std::string tst_modea_v_name_; // can be empty
+
+    std::string tst_modec_name_;
+    std::string tst_modec_g_name_; // can be empty
+    std::string tst_modec_v_name_; // can be empty
+
+    std::string tst_ground_bit_name_; // can be empty
+
+    std::string tst_track_num_name_; // can be empty
+
+    std::string tst_spd_ground_speed_kts_name_; // can be empty
+    std::string tst_spd_track_angle_deg_name_; // can be empty
+
+    std::string tst_spd_x_ms_name_; // can be empty
+    std::string tst_spd_y_ms_name_; // can be empty
 
 protected:
     EvaluationManager& eval_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
                                 "M3/A", "MC Min", "MC Max"};
 
     TargetCache target_data_;
     bool finalized_ {false};
 
     std::unique_ptr<EvaluationDataWidget> widget_;
+    std::unique_ptr<EvaluationDataFilterDialog> dialog_;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};

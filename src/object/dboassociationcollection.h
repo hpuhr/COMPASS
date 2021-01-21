@@ -18,8 +18,10 @@
 #ifndef DBOASSOCIATIONCOLLECTION_H
 #define DBOASSOCIATIONCOLLECTION_H
 
+#include <string>
 #include <map>
 #include <vector>
+#include <set>
 
 class DBOAssociationEntry
 {
@@ -67,7 +69,9 @@ class DBOAssociationCollection
     std::vector<unsigned int> getUTNsFor(unsigned int rec_num) const;
     std::string getUTNsStringFor(unsigned int rec_num) const;
 
+    bool hasRecNumsForUTN(unsigned int utn) const;
     std::vector<unsigned int> getRecNumsForUTN(unsigned int utn) const;
+    std::set<unsigned int> getAllUTNS () const;
 
   protected:
     // rec_num -> assoc entry

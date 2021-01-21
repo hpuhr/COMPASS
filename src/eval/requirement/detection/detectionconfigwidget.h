@@ -18,7 +18,7 @@
 #ifndef EVALUATIONREQUIREMENTDETECTIONCONFIGWIDGET_H
 #define EVALUATIONREQUIREMENTDETECTIONCONFIGWIDGET_H
 
-#include <QWidget>
+#include "eval/requirement/base/baseconfigwidget.h"
 
 class QLineEdit;
 class QCheckBox;
@@ -27,42 +27,43 @@ class QFormLayout;
 
 namespace EvaluationRequirement
 {
-    class DetectionConfig;
+class DetectionConfig;
 
-    class DetectionConfigWidget : public QWidget
-    {
-        Q_OBJECT
+class DetectionConfigWidget : public BaseConfigWidget
+{
+    Q_OBJECT
 
-    public slots:
-        void updateIntervalEditSlot(QString value);
-        void maxRefTimeDiffEditSlot(QString value);
-        void minimumProbEditSlot(QString value);
+public slots:
+    void updateIntervalEditSlot(QString value);
 
-//        void toggleUseMaxGapSlot();
-//        void maxGapEditSlot(QString value);
+    void toggleUseMinGapLengthSlot();
+    void minGapLengthEditSlot(QString value);
 
-        void toggleUseMissToleranceSlot();
-        void missToleranceEditSlot(QString value);
+    void toggleUseMaxGapLengthSlot();
+    void maxGapLengthEditSlot(QString value);
 
-    public:
-        DetectionConfigWidget(DetectionConfig& config);
+    void toggleUseMissToleranceSlot();
+    void missToleranceEditSlot(QString value);
 
-    protected:
-        DetectionConfig& config_;
+public:
+    DetectionConfigWidget(DetectionConfig& cfg);
 
-        QFormLayout* form_layout_ {nullptr};
+protected:
+    QLineEdit* update_interval_edit_{nullptr};
 
-        QLineEdit* update_interval_edit_{nullptr};
-        QLineEdit* max_ref_time_diff_edit_{nullptr};
-        QLineEdit* minimum_prob_edit_{nullptr};
+    QCheckBox* use_min_gap_length_check_{nullptr};
+    QLineEdit* min_gap_length_edit_{nullptr};
 
-        //QCheckBox* use_max_gap_check_{nullptr};
-        //QLineEdit* max_gap_interval_edit_{nullptr};
+    QCheckBox* use_max_gap_length_check_{nullptr};
+    QLineEdit* max_gap_length_edit_{nullptr};
 
-        QCheckBox* use_miss_tolerance_check_{nullptr};
-        QLineEdit* miss_tolerance_edit_{nullptr};
+    QCheckBox* use_miss_tolerance_check_{nullptr};
+    QLineEdit* miss_tolerance_edit_{nullptr};
 
-    };
+    DetectionConfig& config();
+
+    void updateActive();
+};
 
 }
 

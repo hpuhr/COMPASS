@@ -35,7 +35,6 @@ public:
 
     virtual void join(std::shared_ptr<Base> other);
 
-    virtual void print() = 0;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
 
     std::vector<std::shared_ptr<Base>>& results() { return results_; }

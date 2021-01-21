@@ -20,8 +20,8 @@
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/baseconfig.h"
+#include "eval/requirement/base/base.h"
 #include "eval/results/single.h"
 #include "eval/results/detection/joined.h"
 #include "eval/results/report/rootitem.h"
@@ -34,6 +34,7 @@
 #include <QApplication>
 #include <QThread>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -43,16 +44,38 @@ using namespace std;
 using namespace EvaluationRequirementResult;
 using namespace Utils;
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationManager& eval_man)
-    : eval_man_(eval_man), results_model_(eval_man_)
+EvaluationResultsGenerator::EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
+                                                       EvaluationManager& eval_man)
+    : Configurable(class_id, instance_id, &eval_man, "eval_results.json"),
+      eval_man_(eval_man), results_model_(eval_man_)
 {
+    registerParameter("skip_no_data_details", &skip_no_data_details_, true);
+    registerParameter("split_results_by_mops", &split_results_by_mops_, false);
+    registerParameter("show_adsb_info", &show_adsb_info_, false);
 
+
+    createSubConfigurables();
 }
 
+EvaluationResultsGenerator::~EvaluationResultsGenerator()
+{
+    clear();
+}
+
+void EvaluationResultsGenerator::generateSubConfigurable(const std::string& class_id,
+                                                         const std::string& instance_id)
+{
+    assert (false);
+}
+
+void EvaluationResultsGenerator::checkSubConfigurables()
+{
+}
 
 void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
 {
-    loginf << "EvaluationResultsGenerator: evaluate";
+    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details " << skip_no_data_details_
+           << " split_results_by_mops " << split_results_by_mops_ << " show_adsb_info " << show_adsb_info_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
@@ -68,35 +91,30 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
-            const string& requirement_group_name = req_group_it.first;
+            const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            num_req_evals += req_group_it.second->size() * data.size(); // num reqs * num target
-            num_req_evals += req_group_it.second->size(); // num reqs for sector sum
+            num_req_evals += req_group_it->size() * data.size(); // num reqs * num target
+            num_req_evals += req_group_it->size(); // num reqs for sector sum
         }
     }
 
-    QProgressDialog postprocess_dialog_ ("", "", 0, num_req_evals);
-    postprocess_dialog_.setWindowTitle("Evaluating");
-    postprocess_dialog_.setCancelButton(nullptr);
-    postprocess_dialog_.setWindowModality(Qt::ApplicationModal);
+    QProgressDialog postprocess_dialog ("", "", 0, num_req_evals);
+    postprocess_dialog.setWindowTitle("Evaluating");
+    postprocess_dialog.setCancelButton(nullptr);
+    postprocess_dialog.setWindowModality(Qt::ApplicationModal);
 
-    QLabel* progress_label = new QLabel("", &postprocess_dialog_);
+    QLabel* progress_label = new QLabel("", &postprocess_dialog);
     progress_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    postprocess_dialog_.setLabel(progress_label);
+    postprocess_dialog.setLabel(progress_label);
 
-    postprocess_dialog_.show();
+    postprocess_dialog.show();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
-    results_.clear();
-    results_vec_.clear();
-    results_model_.endReset();
+    clear();
 
     vector<unsigned int> utns;
 
@@ -113,6 +131,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     string remaining_time_str;
 
+    string mops_str;
+
     for (auto& sec_it : sector_layers)
     {
         const string& sector_layer_name = sec_it->name();
@@ -121,82 +141,87 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
-            const string& requirement_group_name = req_group_it.first;
+            const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
-                   << " group " << req_group_it.first;
+                   << " group " << requirement_group_name;
 
-            for (auto& req_cfg_it : *req_group_it.second)
+            for (auto& req_cfg_it : *req_group_it)
             {
                 loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
-                       << " group " << req_group_it.first
+                       << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";
 
                 std::shared_ptr<EvaluationRequirement::Base> req = req_cfg_it->createRequirement();
                 std::shared_ptr<Joined> result_sum;
+                map<string, std::shared_ptr<Joined>> mops_sums;
 
                 vector<shared_ptr<Single>> results;
                 results.resize(num_utns);
 
                 vector<bool> done_flags;
-                done_flags.resize(num_utns);
+                done_flags.resize(num_utns, false);
+                bool task_done = false;
 
                 // generate results
                 EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-                            results, utns, data, req, *sec_it, done_flags, false);
+                            results, utns, data, req, *sec_it, done_flags, task_done, false);
                 tbb::task::enqueue(*t);
 
-                bool done = false;
                 unsigned int tmp_done_cnt;
 
-                postprocess_dialog_.setLabelText(
+                postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
-                             +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()).c_str());
+                             +":\n Requirement: "+req_group_it->name()+":"+req_cfg_it->name()).c_str());
+                postprocess_dialog.setValue(eval_cnt);
 
-                logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it.first
+                logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it->name()
                        << " req '" << req_cfg_it->name() << "'";
 
-                while (!done)
+                while (!task_done)
                 {
-                    done = true;
                     tmp_done_cnt = 0;
 
                     for (auto done_it : done_flags)
                     {
-                        if (!done_it)
-                            done = false;
-                        else
+                        if (done_it)
                             tmp_done_cnt++;
                     }
 
-                    assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+                    //assert (eval_cnt+tmp_done_cnt <= num_req_evals);
+                    // hack
+                    if (eval_cnt+tmp_done_cnt <= num_req_evals && tmp_done_cnt)
+                    {
 
-                    elapsed_time = boost::posix_time::microsec_clock::local_time();
+                        elapsed_time = boost::posix_time::microsec_clock::local_time();
 
-                    time_diff = elapsed_time - start_time;
-                    elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
+                        time_diff = elapsed_time - start_time;
+                        elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-                    time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
-                    remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
+                        time_per_eval = elapsed_time_s/(double)(eval_cnt+tmp_done_cnt);
+                        remaining_time_s = (double)(num_req_evals-eval_cnt-tmp_done_cnt)*time_per_eval;
 
-                    postprocess_dialog_.setLabelText(
-                                ("Sector Layer "+sector_layer_name
-                                 +": Requirement: "+req_group_it.first+":"+req_cfg_it->name()
-                                 +"\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
-                                 +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
-                                 +" (estimated)").c_str());
+                        postprocess_dialog.setLabelText(
+                                    ("Sector Layer "+sector_layer_name
+                                     +":\n  "+req_group_it->name()+": "+req_cfg_it->name()
+                                     +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
+                                     +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
+                                     +" (estimated)").c_str());
 
-                    postprocess_dialog_.setValue(eval_cnt+tmp_done_cnt);
+                        postprocess_dialog.setValue(eval_cnt+tmp_done_cnt);
+                    }
 
-                    if (!done)
+                    if (!task_done)
                     {
                         QCoreApplication::processEvents();
-                        QThread::msleep(100);
+                        QThread::msleep(200);
                     }
                 }
+
+                postprocess_dialog.setLabelText(("Sector Layer "+sector_layer_name+":\nAggregating results").c_str());
 
                 for (auto& result_it : results)
                 {
@@ -204,15 +229,48 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     results_vec_.push_back(result_it);
 
                     if (!result_sum)
-                        result_sum = result_it->createEmptyJoined(sector_layer_name+":Sum");
+                        result_sum = result_it->createEmptyJoined("Sum");
 
                     result_sum->join(result_it);
+
+                    if (split_results_by_mops_)
+                    {
+                        mops_str = result_it->target()->mopsVersionsStr();
+
+                        if (!mops_str.size())
+                            mops_str = "N/A";
+
+                        mops_str = "MOPS "+mops_str;
+
+                        if (!mops_sums.count(mops_str+" Sum"))
+                            mops_sums[mops_str+" Sum"] =
+                                    result_it->createEmptyJoined(mops_str+" Sum");
+
+                        mops_sums.at(mops_str+" Sum")->join(result_it);
+                    }
                 }
 
                 if (result_sum)
                 {
+                    loginf << "EvaluationResultsGenerator: evaluate: adding result '" << result_sum->reqGrpId()
+                           << "' id '" << result_sum->resultId() << "'";
+                    assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
+                }
+
+                if (split_results_by_mops_)
+                {
+                    for (auto& mops_res_it : mops_sums)
+                    {
+                        loginf << "EvaluationResultsGenerator: evaluate: adding result '"
+                               << mops_res_it.second->reqGrpId()
+                               << "' id '" << mops_res_it.second->resultId() << "'";
+
+                        assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+                        results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
+                        results_vec_.push_back(mops_res_it.second); // has to be added after all singles
+                    }
                 }
 
                 assert (eval_cnt <= num_req_evals);
@@ -226,21 +284,32 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     time_diff = elapsed_time - start_time;
     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
-    loginf << "EvaluationResultsGenerator: evaluate done " << String::timeStringFromDouble(elapsed_time_s, true);
+    loginf << "EvaluationResultsGenerator: evaluate: data done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     // 00:06:22.852 with no parallel
 
     emit eval_man_.resultsChangedSignal();
 
-    postprocess_dialog_.setLabelText("Generating Results");
+    postprocess_dialog.close();
 
-    postprocess_dialog_.setValue(num_req_evals);
+    loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
+    // generating results GUI
     generateResultsReportGUI();
 
-    postprocess_dialog_.close();
+    loginf << "EvaluationResultsGenerator: evaluate: done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     QApplication::restoreOverrideCursor();
+}
+
+void EvaluationResultsGenerator::clear()
+{
+    // clear everything
+    results_model_.beginReset();
+    results_model_.clear();
+    results_.clear();
+    results_vec_.clear();
+    results_model_.endReset();
 }
 
 void EvaluationResultsGenerator::generateResultsReportGUI()
@@ -252,29 +321,45 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
+    QMessageBox msg_box; // QApplication::topLevelWidgets().first()
+    msg_box.setWindowTitle("Updating Results");
+    msg_box.setText( "Please wait...");
+    msg_box.setStandardButtons(QMessageBox::NoButton);
+    msg_box.setWindowModality(Qt::ApplicationModal);
+    msg_box.show();
+
     // prepare for new data
     results_model_.beginReset();
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-    EvaluationResultsReport::Section& overview_section = root_item->getSection("Overview");
-    overview_section.addText("Sample");
-
-    EvaluationResultsReport::SectionContentText& overview_text = overview_section.getText("Sample");
-
-    overview_text.addText("Why not visit Sweden this time of the year?");
-    overview_text.addText("It has lovely lakes");
-    overview_text.addText("Elk bytes\nline2");
+    // generate results
 
     // first add all joined
     for (auto& result_it : results_vec_)
+    {
         if (result_it->isJoined())
+        {
+            QCoreApplication::processEvents();
             result_it->addToReport(root_item);
+        }
+    }
 
     // then all singles
+
+    unsigned int cnt = 0;
     for (auto& result_it : results_vec_)
+    {
         if (result_it->isSingle())
+        {
+            if (cnt % 100 == 0)
+                QCoreApplication::processEvents();
+
             result_it->addToReport(root_item);
+
+            ++cnt;
+        }
+    }
 
     results_model_.endReset();
 
@@ -284,13 +369,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
+    msg_box.close();
+
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);
-}
-
-void EvaluationResultsGenerator::generateResultsReportPDF()
-{
-
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
@@ -298,9 +380,9 @@ EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
     return results_model_;
 }
 
-void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
+void EvaluationResultsGenerator::updateToChanges ()
 {
-    loginf << "EvaluationResultsGenerator: updateToUseChangeOf: utn " << utn;
+    loginf << "EvaluationResultsGenerator: updateToChanges";
 
     // clear everything
     results_model_.beginReset();
@@ -333,3 +415,42 @@ void EvaluationResultsGenerator::updateToUseChangeOf (unsigned int utn)
 
     generateResultsReportGUI();
 }
+
+bool EvaluationResultsGenerator::skipNoDataDetails() const
+{
+    return skip_no_data_details_;
+}
+
+void EvaluationResultsGenerator::skipNoDataDetails(bool value)
+{
+    skip_no_data_details_ = value;
+}
+
+EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
+{
+    if (!widget_)
+        widget_.reset(new EvaluationResultsGeneratorWidget(*this));
+
+    return *widget_.get();
+}
+
+bool EvaluationResultsGenerator::splitResultsByMOPS() const
+{
+    return split_results_by_mops_;
+}
+
+void EvaluationResultsGenerator::splitResultsByMOPS(bool value)
+{
+    split_results_by_mops_ = value;
+}
+
+bool EvaluationResultsGenerator::showAdsbInfo() const
+{
+    return show_adsb_info_;
+}
+
+void EvaluationResultsGenerator::showAdsbInfo(bool value)
+{
+    show_adsb_info_ = value;
+}
+

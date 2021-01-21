@@ -1,4 +1,5 @@
 
+include("${CMAKE_CURRENT_LIST_DIR}/assoc/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/buffer/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/asterix/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/client/CMakeLists.txt")

@@ -11,11 +11,13 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/projection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/transformation.h"
         #"${CMAKE_CURRENT_LIST_DIR}/geomap.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/projection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/transformation.cpp"
         #"${CMAKE_CURRENT_LIST_DIR}/geomap.cpp"
 )
 

@@ -1148,11 +1148,11 @@ void TaskManager::performAutomaticTasks ()
 
                     eval_man.evaluate();
 
-                    while (!eval_man.evaluated())
-                    {
-                        QCoreApplication::processEvents();
-                        QThread::msleep(1);
-                    }
+//                    while (!eval_man.evaluated())
+//                    {
+//                        QCoreApplication::processEvents();
+//                        QThread::msleep(1);
+//                    }
 
                     assert (eval_man.evaluated());
 

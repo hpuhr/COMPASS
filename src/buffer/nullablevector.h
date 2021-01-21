@@ -63,7 +63,7 @@ class NullableVector
 
     /// @brief Sets specific value
     void set(unsigned int index, T value);
-    void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str);
+    void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug=false);
 
     /// @brief Appends specific value
     void append(unsigned int index, T value);
@@ -76,6 +76,7 @@ class NullableVector
     NullableVector<T>& operator*=(double factor);
 
     std::set<T> distinctValues(unsigned int index = 0);
+    std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
 
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
                                                                      unsigned int to_index);
@@ -203,7 +204,7 @@ void NullableVector<T>::set(unsigned int index, T value)
 
 template <class T>
 void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
-                                      const std::string& value_str)
+                                      const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
     T value;
@@ -230,16 +231,16 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
     }
     else if (format == "bool")
     {
-        if (value_str == "0")
+        if (value_str == "0" || value_str == "false")
             value = 'N';
-        else if (value_str == "1")
+        else if (value_str == "1"  || value_str == "true")
             value = 'Y';
     }
     else if (format == "bool_invert")
     {
-        if (value_str == "1")
+        if (value_str == "1"  || value_str == "true")
             value = 'N';
-        else if (value_str == "0")
+        else if (value_str == "0" || value_str == "false")
             value = 'Y';
     }
     else
@@ -247,6 +248,10 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
         logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
         assert(false);
     }
+
+    if (debug)
+        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
+               << "' value '" << value << "'";
 
     set(index, value);
 }
@@ -524,6 +529,33 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
     }
 
     return values;
+}
+
+template <class T>
+std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
+{
+    bool set = false;
+    T min, max;
+
+    for (; index < data_.size(); ++index)
+    {
+        if (!isNull(index))  // not for null
+        {
+            if (!set)
+            {
+                min = data_.at(index);
+                max = data_.at(index);
+                set = true;
+            }
+            else
+            {
+                min = std::min(min, data_.at(index));
+                max = std::max(max, data_.at(index));
+            }
+        }
+    }
+
+    return std::tuple<bool,T,T> {set, min, max};
 }
 
 template <class T>

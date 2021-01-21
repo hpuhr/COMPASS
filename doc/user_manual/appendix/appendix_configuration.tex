@@ -1,0 +1,98 @@
+\section{Appendix: Configuration}
+\label{sec:appendix_configuration}
+
+The application configuration is stored in the user home directory in a sub-folder '.compass'. \\
+
+If such a folder does not exist, or the configuration is outdated, the default configuration is copied from the AppImage into said folder. \\
+
+Depending on the COMPASS version, different behaviours exist, as described in the following sections.
+
+\subsection{v0.6.0 and later}
+
+In the '~/.compass' folder, separate sub-folders exist for each application version, allowing for usage of different version of COMPASS.
+
+Directory structure:
+\begin{itemize}
+\item 0.6.0/: Configuration \& data for version 0.6.0
+\begin{itemize}
+\item conf/: Configuration as described in \nameref{sec:appendix_config_config_folder}
+\item data/: Data as described in \nameref{sec:appendix_config_data_folder}
+\end{itemize}
+\item osgearth\_cache: OSGEarth cache folder (for downloaded map information)
+\end{itemize}
+
+
+\subsection{Pre-v0.6.0 and older}
+
+In the '~/.compass' folder, one configuration for the most current application version exists, which is kept up-to-date with an update mechanism.
+
+Directory structure:
+\begin{itemize}
+\item conf/: Configuration as described in \nameref{sec:appendix_config_config_folder}
+\item data/: Data as described in \nameref{sec:appendix_config_data_folder}
+\end{itemize}
+
+In older versions, the osgearth\_cache folder is located in data/maps.
+
+\subsection{Configuration Folder}
+\label{sec:appendix_config_config_folder}
+
+All application configuration is stored as JSON files, which are read during startup and saved during (correct) shutdown of the application.
+
+\begin{itemize}
+\item config.json: Main configuration file defining application version, sub-config location etc.
+\item log4cpp.properties: Logging configuration
+\item default/: Sub-configuration
+\begin{itemize}
+    \item client.json: Main client configuration, referencing other configurations
+    \item compass.json: Main configuration, referencing other configurations
+    \item db\_object\_adsb.json: Defines DBObject ADSB
+    \item db\_object.json: Main DBObject configuration, referencing other configurations
+    \item db\_object\_mlat.json: Defines DBObject MLAT
+    \item db\_object\_radar.json: Defines DBObject Radar
+    \item db\_object\_reftraj.json: Defines DBObject RefTraj
+    \item db\_object\_tracker.json: Defines DBObject Tracker
+    \item db\_schema.json: Main DBSchema configuration, referencing other configurations
+    \item db\_schema\_scdb\_extended.json: Defines DBSchema SCDB Extended
+    \item db\_schema\_scdb.json: Defines DBSchema SCDB
+    \item eval.json: Main evaluation configuration, contains all standards
+    \item eval\_results.json: Evaluation results generation configuration
+    \item filter.json: Main filter configuration
+    \item projection.json: Main projection configuration
+    \item task.json: Main task configuration, referencing other configurations:
+    \begin{itemize}
+        \item task\_calc\_artas\_assoc.json
+        \item task\_calc\_assoc.json
+        \item task\_calc\_radar\_pos.json
+        \item task\_db\_open.json
+        \item task\_import\_asterix.json
+        \item task\_import\_gps.json
+        \item task\_import\_json.json
+        \item task\_import\_mysqldb.json
+        \item task\_import\_view\_points.json
+        \item task\_manage\_datasources.json
+        \item task\_manage\_dbojects.json
+        \item task\_manage\_schema.json
+        \item task\_manage\_sectors.json
+        \item task\_postprocess.json
+    \end{itemize}
+    \item threads.json: Outdated, will be removed
+    \item units.json: Main unit/conversion configuration
+    \item views.json: Main view configuration, contains all views
+\end{itemize}
+\end{itemize}
+
+
+\subsection{Data Folder}
+\label{sec:appendix_config_data_folder}
+
+The data folder contains e.g. used images, 3rd party (static) configuration etc.
+
+\begin{itemize}
+\item fonts: Used fonts
+\item gdal: GDAL libary data \& configuration
+\item icons: Application icons
+\item jasterix\_definitions: jASTERIX libary definitions
+\item maps: OSGView map files
+\item textures: OSGView symbol textures
+\end{itemize}

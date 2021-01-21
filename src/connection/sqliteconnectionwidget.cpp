@@ -16,6 +16,10 @@
  */
 
 #include "sqliteconnectionwidget.h"
+#include "logger.h"
+#include "mysqlserver.h"
+#include "sqliteconnection.h"
+#include "files.h"
 
 #include <QApplication>
 #include <QComboBox>
@@ -29,9 +33,8 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-#include "logger.h"
-#include "mysqlserver.h"
-#include "sqliteconnection.h"
+using namespace Utils;
+using namespace std;
 
 SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent)
     : QWidget(parent), connection_(connection)
@@ -90,12 +93,19 @@ SQLiteConnectionWidget::~SQLiteConnectionWidget()
 
 void SQLiteConnectionWidget::newFileSlot()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "New SQLite3 File");
+    string filename = QFileDialog::getSaveFileName(this, "New SQLite3 File").toStdString();
 
     if (filename.size() > 0)
     {
-        if (!connection_.hasFile(filename.toStdString()))
-            connection_.addFile(filename.toStdString());
+        if (Files::fileExists(filename))
+        {
+            // confirmation already done by dialog
+            loginf << "SQLiteConnectionWidget: newFileSlot: deleting pre-existing file '" << filename << "'";
+            Files::deleteFile(filename);
+        }
+
+        if (!connection_.hasFile(filename))
+            connection_.addFile(filename);
     }
 }
 

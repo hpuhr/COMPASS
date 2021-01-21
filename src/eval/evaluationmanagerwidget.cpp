@@ -17,11 +17,14 @@
 
 #include "evaluationmanagerwidget.h"
 #include "evaluationmaintabwidget.h"
+#include "evaluationfiltertabwidget.h"
 #include "evaluationtargetstabwidget.h"
 #include "evaluationstandardtabwidget.h"
 #include "evaluationresultstabwidget.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
+#include "evaluationresultsgenerator.h"
+#include "evaluationresultsgeneratorwidget.h"
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationdatasourcewidget.h"
@@ -41,6 +44,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTimer>
 
 EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
     : QWidget(nullptr), eval_man_(eval_man)
@@ -49,12 +53,32 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
 
     tab_widget_ = new QTabWidget();
 
-    addMainWidget();
-    addTargetsWidget();
-    addStandardWidget();
-    addResultsWidget();
+    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
+    tab_widget_->addTab(main_tab_widget_.get(), "Main");
+
+    targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
+    tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
+
+    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, *this));
+    tab_widget_->addTab(filter_widget_.get(), "Filter");
+
+    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
+    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
+
+    tab_widget_->addTab(&eval_man_.resultsGenerator().widget(), "Results Config");
+
+    results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
+    tab_widget_->addTab(results_tab_widget_.get(), "Results");
 
     main_layout_->addWidget(tab_widget_);
+
+    // not evaluate comment
+    not_eval_comment_label = new QLabel();
+    QPalette palette = not_eval_comment_label->palette();
+    palette.setColor(not_eval_comment_label->foregroundRole(), Qt::red);
+    not_eval_comment_label->setPalette(palette);
+
+    main_layout_->addWidget(not_eval_comment_label);
 
     // buttons
     QHBoxLayout* button_layout = new QHBoxLayout();
@@ -87,6 +111,17 @@ void EvaluationManagerWidget::updateButtons()
 {
     evaluate_button_->setEnabled(eval_man_.canEvaluate());
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
+
+    if (eval_man_.canEvaluate())
+    {
+        not_eval_comment_label->setText("");
+        not_eval_comment_label->setHidden(true);
+    }
+    else
+    {
+        not_eval_comment_label->setText(eval_man_.getCannotEvaluateComment().c_str());
+        not_eval_comment_label->setHidden(false);
+    }
 }
 
 void EvaluationManagerWidget::expandResults()
@@ -108,37 +143,20 @@ void EvaluationManagerWidget::reshowLastResultId()
     results_tab_widget_->reshowLastId();
 }
 
-void EvaluationManagerWidget::addMainWidget ()
-{
-    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(main_tab_widget_.get(), "Main");
-}
-
-void EvaluationManagerWidget::addTargetsWidget ()
-{
-    targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
-}
-
-void EvaluationManagerWidget::addStandardWidget ()
-{
-    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
-}
-
-void EvaluationManagerWidget::addResultsWidget ()
-{
-    results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
-
-    tab_widget_->addTab(results_tab_widget_.get(), "Results");
-}
-
 void EvaluationManagerWidget::loadDataSlot()
 {
     loginf << "EvaluationManagerWidget: loadDataSlot";
+
+    if (!eval_man_.warningShown())
+    {
+        QMessageBox* mbox = new QMessageBox;
+        mbox->setWindowTitle(tr("Warning"));
+        mbox->setText("Please note that the Evaluation feature is currently not verified and should be used"
+                      " for testing/validation purposes only.");
+        mbox->exec();
+
+        eval_man_.warningShown(true);
+    }
 
     eval_man_.loadData();
 }

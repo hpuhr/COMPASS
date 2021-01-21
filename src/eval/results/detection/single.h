@@ -35,7 +35,7 @@ public:
             int sum_uis, int missed_uis, TimePeriodCollection ref_periods,
             std::vector<EvaluationRequirement::DetectionDetail> details);
 
-    virtual void print() override;
+    //virtual void print() override;
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
@@ -68,6 +68,7 @@ protected:
 
     void updatePD();
     void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addTargetDetailsToTable (EvaluationResultsReport::Section& section, const std::string& table_name);
     void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
     void reportDetails(EvaluationResultsReport::Section& utn_req_section);
 

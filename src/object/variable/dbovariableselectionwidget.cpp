@@ -16,11 +16,6 @@
  */
 
 #include "dbovariableselectionwidget.h"
-
-#include <QGridLayout>
-#include <QLabel>
-#include <QPushButton>
-
 #include "compass.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -28,8 +23,16 @@
 #include "files.h"
 #include "global.h"
 #include "metadbovariable.h"
+#include "logger.h"
+
+#include <QGridLayout>
+#include <QLabel>
+#include <QPushButton>
+
+#include <algorithm>
 
 using namespace Utils;
+using namespace std;
 
 DBOVariableSelectionWidget::DBOVariableSelectionWidget(bool h_box, QWidget* parent) : QFrame(parent)
 {
@@ -92,7 +95,7 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 {
     menu_.clear();
 
-    if (show_empty_variable_)
+    if (show_empty_variable_) // show empty
     {
         QAction* action = menu_.addAction("");
         QVariantMap vmap;
@@ -107,6 +110,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_))
         {
             if (show_existing_in_db_only_ && !var_it.second.existsInDB())
+                continue;
+
+            if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
                 continue;
 
             QAction* action = menu_.addAction(QString::fromStdString(var_it.first));
@@ -125,6 +131,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
             for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
             {
                 if (show_existing_in_db_only_ && !meta_it.second->existsInDB())
+                    continue;
+
+                if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
                     continue;
 
                 QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
@@ -148,6 +157,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
                 if (show_existing_in_db_only_ && !var_it.second.existsInDB())
                     continue;
 
+                if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
+                    continue;
+
                 QAction* action = m2->addAction(QString::fromStdString(var_it.first));
 
                 QVariantMap vmap;
@@ -157,6 +169,11 @@ void DBOVariableSelectionWidget::updateMenuEntries()
             }
         }
     }
+}
+
+bool DBOVariableSelectionWidget::showDataType(PropertyDataType type)
+{
+    return std::find(only_data_types_.begin(), only_data_types_.end(), type) != only_data_types_.end();
 }
 
 /*
@@ -293,6 +310,19 @@ bool DBOVariableSelectionWidget::showExistingInDBOnly() const { return show_exis
 void DBOVariableSelectionWidget::showExistingInDBOnly(bool show)
 {
     show_existing_in_db_only_ = show;
+}
+
+void DBOVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types)
+{
+    only_data_types_ = only_data_types;
+    show_data_types_only_ = true;
+
+    updateMenuEntries();
+}
+
+void DBOVariableSelectionWidget::disableShowDataTypesOnly()
+{
+    show_data_types_only_ = false;
 }
 
 bool DBOVariableSelectionWidget::showDBOOnly() const { return show_dbo_only_; }

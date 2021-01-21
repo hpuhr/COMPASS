@@ -813,6 +813,13 @@ std::string MySQLppConnection::identifier() const
     return used_server_ + ": " + used_database_;
 }
 
+std::string MySQLppConnection::shortIdentifier() const
+{
+    assert(connection_ready_);
+
+    return used_database_;
+}
+
 std::string MySQLppConnection::usedDatabase() const
 {
     return used_database_;

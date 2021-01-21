@@ -19,6 +19,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/utnfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/utnfilterwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilter.h"
+        "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilterwidget.h"
         #"${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilterwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbfilter.cpp"
@@ -33,6 +35,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/utnfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/utnfilterwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilter.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/adsbqualityfilterwidget.cpp"
         #"${CMAKE_CURRENT_LIST_DIR}/dbospecificvaluesdbfilterwidget.cpp"
 )
 

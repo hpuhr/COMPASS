@@ -21,7 +21,7 @@
 #include "sector.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-#include "eval/requirement/config.h"
+#include "eval/requirement/base/baseconfig.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -41,12 +41,15 @@ EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man)
 
 void EvaluationSectorWidget::update()
 {
+    logdbg << "EvaluationSectorWidget: update";
+
     assert (grid_layout_);
 
     QLayoutItem* child;
     while ((child = grid_layout_->takeAt(0)) != 0)
     {
-        grid_layout_->removeItem(child);
+        if (child->widget())
+            delete child->widget();
         delete child;
     }
 
@@ -73,7 +76,7 @@ void EvaluationSectorWidget::update()
 
             for (auto& req_grp_it : std)
             {
-                const string& requirement_group_name = req_grp_it.first;
+                const string& requirement_group_name = req_grp_it->name();
 
                 QCheckBox* check = new QCheckBox(requirement_group_name.c_str());
                 check->setChecked(eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));
@@ -88,6 +91,8 @@ void EvaluationSectorWidget::update()
             ++row;
         }
     }
+
+    logdbg << "EvaluationSectorWidget: update: done";
 }
 
 void EvaluationSectorWidget::toggleUseGroupSlot()

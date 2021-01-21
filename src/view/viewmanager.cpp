@@ -81,6 +81,16 @@ void ViewManager::init(QTabWidget* tab_widget)
     connect (this, &ViewManager::showViewPointSignal, &filter_man, &FilterManager::showViewPointSlot);
     connect (this, &ViewManager::unshowViewPointSignal, &filter_man, &FilterManager::unshowViewPointSlot);
 
+    view_class_list_.append("HistogramView");
+    view_class_list_.append("ListBoxView");
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    view_class_list_.append("OSGView");
+#endif
+
+    view_class_list_.append("ScatterPlotView");
+
+
     initialized_ = true;
 
     createSubConfigurables();
@@ -96,7 +106,7 @@ void ViewManager::close()
     {
         auto first_it = container_widgets_.begin();
         logdbg << "ViewManager: close: deleting container widget " << first_it->first;
-        delete first_it->second;
+        delete first_it->second; // deletes the respective view container, which removes itself from this
         container_widgets_.erase(first_it);
     }
 
@@ -106,6 +116,7 @@ void ViewManager::close()
         auto first_it = containers_.begin();
         logdbg << "ViewManager: close: deleting container " << first_it->first;
         delete first_it->second;
+        //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
     }
 
     if (view_points_widget_)
@@ -117,11 +128,7 @@ void ViewManager::close()
 
     view_points_report_gen_ = nullptr;
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
+    loginf << "ViewManager: close: done";
 }
 
 ViewManager::~ViewManager()
@@ -130,7 +137,6 @@ ViewManager::~ViewManager()
 
     assert(!container_widgets_.size());
     assert(!containers_.size());
-    assert(!widget_);
     assert(!initialized_);
 }
 
@@ -179,8 +185,8 @@ void ViewManager::generateSubConfigurable(const std::string& class_id,
         throw std::runtime_error("ViewManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
 
-    if (widget_)
-        widget_->update();
+//    if (widget_)
+//        widget_->update();
 }
 
 void ViewManager::checkSubConfigurables()
@@ -210,19 +216,6 @@ DBOVariableSet ViewManager::getReadSet(const std::string& dbo_name)
     }
     return read_set;
 }
-
-ViewManagerWidget* ViewManager::widget()
-{
-    if (!widget_)
-    {
-        widget_ = new ViewManagerWidget(*this);
-    }
-
-    assert(widget_);
-    return widget_;
-}
-
-
 
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
@@ -482,6 +475,33 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
     }
 }
 
+void ViewManager::showMainViewContainerAddView()
+{
+    assert (containers_.count("ViewContainer0"));
+    containers_.at("ViewContainer0")->showAddViewMenuSlot();
+}
+
+QStringList ViewManager::viewClassList() const
+{
+    return view_class_list_;
+}
+
+unsigned int ViewManager::newViewNumber()
+{
+    unsigned int max_number = 0;
+    unsigned int tmp;
+
+    for (auto& view_it : views_)
+    {
+        tmp = String::getAppendedInt(view_it.second->instanceId());
+
+        if (tmp > max_number)
+            max_number = tmp;
+    }
+
+    return max_number + 1;
+}
+
 ViewContainerWidget* ViewManager::addNewContainerWidget()
 {
     logdbg << "ViewManager: addNewContainerWidget";
@@ -528,28 +548,6 @@ bool ViewManager::isRegistered(View* view)
     return !(it == views_.end());
 }
 
-// void ViewManager::deleteContainer (std::string instance_id)
-//{
-//    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
-
-//    std::map <std::string, ViewContainer*>::iterator it=containers_.find(instance_id);
-
-//    if (it != containers_.end())
-//    {
-//        //it->second->close(); // TODO for widgets
-//        it->second->deleteLater();
-
-//        containers_.erase(it);
-
-//        if (widget_)
-//            widget_->update();
-
-//        return;
-//    }
-
-//    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
-//}
-
 void ViewManager::removeContainer(std::string instance_id)
 {
     std::map<std::string, ViewContainer*>::iterator it;
@@ -561,9 +559,6 @@ void ViewManager::removeContainer(std::string instance_id)
     if (it != containers_.end())
     {
         containers_.erase(it);
-
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
 
         return;
     }
@@ -583,13 +578,10 @@ void ViewManager::removeContainerWidget(std::string instance_id)
     {
         container_widgets_.erase(it);
 
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
-
         return;
     }
 
-    throw std::runtime_error("ViewManager: removeContainer:  key not found");
+    throw std::runtime_error("ViewManager: removeContainer: key not found");
 }
 
 void ViewManager::deleteContainerWidget(std::string instance_id)
@@ -603,59 +595,17 @@ void ViewManager::deleteContainerWidget(std::string instance_id)
     if (it != container_widgets_.end())
     {
         it->second->deleteLater();
-
         container_widgets_.erase(it);
-
-        if (initialized_ && widget_)  // not during destructor
-            widget_->update();
 
         return;
     }
 
-    throw std::runtime_error("ViewManager: deleteContainerWidget:  key not found");
+    throw std::runtime_error("ViewManager: deleteContainerWidget: key not found");
 }
-
-// void ViewManager::updateReadSet ()
-//{
-//    logdbg  << "ViewManager: updateReadSet";
-//    //
-//    DBOVariableSet new_set;
-
-//    std::map<std::string, View*>::iterator it;
-
-//    for (it = views_.begin(); it != views_.end(); it++)
-//    {
-//        if( it->second->viewType() != "DBView" )
-//            continue;
-
-//        DBView* dbview = (DBView*)it->second;
-//        new_set.add (dbview->getReadList());
-//    }
-
-//    read_set_.add (new_set);
-//    read_set_.intersect (new_set);
-
-//    if (DBObjectManager::getInstance().hasObjects() &&
-//    DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"))
-//    {
-//        logdbg  << "DBResultSetManager: constructor: adding id";
-//        read_set_.add (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id"));
-//    }
-
-//    if (read_set_.getChanged())
-//    {
-//        if (DBResultSetManager::getInstance().getAutoUpdate ())
-//            DBResultSetManager::getInstance().startLoadingData ();
-//    }
-//}
 
 void ViewManager::viewShutdown(View* view, const std::string& err)
 {
     delete view;
-
-    // TODO
-    //    if( views_widget_ )
-    //        views_widget_->update();
 
     if (err.size())
         QMessageBox::critical(NULL, "View Shutdown", QString::fromStdString(err));

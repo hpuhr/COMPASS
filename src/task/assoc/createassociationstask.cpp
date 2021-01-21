@@ -52,8 +52,43 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
             "Allows creation of UTNs and target report association based on Mode S Addresses.";
 
     registerParameter("key_var_str", &key_var_str_, "rec_num");
+    registerParameter("ds_id_var_str", &ds_id_var_str_, "ds_id");
     registerParameter("tod_var_str", &tod_var_str_, "tod");
     registerParameter("target_addr_var_str", &target_addr_var_str_, "target_addr");
+    registerParameter("target_id_var_str", &target_id_var_str_, "callsign");
+    registerParameter("track_num_var_str", &track_num_var_str_, "track_num");
+    registerParameter("mode_3a_var_str", &mode_3a_var_str_, "mode3a_code");
+    registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
+    registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
+    registerParameter("longitude_var_str", &longitude_var_str_, "pos_long_deg");
+
+    // common
+    registerParameter("associate_non_mode_s", &associate_non_mode_s_, true);
+    registerParameter("clean_dubious_utns", &clean_dubious_utns_, true);
+    registerParameter("mark_dubious_utns_unused", &mark_dubious_utns_unused_, false);
+    registerParameter("comment_dubious_utns", &comment_dubious_utns_, true);
+
+    // tracker stuff
+    registerParameter("max_time_diff_tracker", &max_time_diff_tracker_, 15.0);
+
+    registerParameter("max_distance_quit_tracker", &max_distance_quit_tracker_, 10*NM2M); // kb 5nm
+    registerParameter("max_distance_dubious_tracker", &max_distance_dubious_tracker_, 3*NM2M); //kb 2.5? 2.5 lowest
+    registerParameter("max_positions_dubious_tracker", &max_positions_dubious_tracker_, 5);
+
+    registerParameter("max_distance_acceptable_tracker", &max_distance_acceptable_tracker_, NM2M/2.0);
+    registerParameter("max_altitude_diff_tracker", &max_altitude_diff_tracker_, 300.0);
+
+    registerParameter("min_updates_tracker", &min_updates_tracker_, 2); // kb 3!!!
+    registerParameter("prob_min_time_overlap_tracker", &prob_min_time_overlap_tracker_, 0.5); //kb 0.7
+    registerParameter("max_speed_tracker_kts", &max_speed_tracker_kts_, 100000);
+
+    // sensor
+    registerParameter("max_time_diff_sensor", &max_time_diff_sensor_, 15.0);
+    registerParameter("max_distance_acceptable_sensor", &max_distance_acceptable_sensor_, 2*NM2M);
+    registerParameter("max_altitude_diff_sensor", &max_altitude_diff_sensor_, 300.0);
+
+    // target id? kb: nope
+    // kb: TODO ma 1bit hamming distance, especially g (1bit wrong)/v (!->at least 1bit wrong)
 }
 
 CreateAssociationsTask::~CreateAssociationsTask() {}
@@ -121,10 +156,10 @@ bool CreateAssociationsTask::checkPrerequisites()
 
 bool CreateAssociationsTask::isRecommended()
 {
-//    if (!checkPrerequisites())
-//        return false;
+    //    if (!checkPrerequisites())
+    //        return false;
 
-//    return !done_;
+    //    return !done_;
 
     return false;
 }
@@ -137,21 +172,45 @@ bool CreateAssociationsTask::canRun()
 
     // meta var stuff
     logdbg << "CreateAssociationsTask: canRun: meta vars";
-    if (!key_var_str_.size() || !target_addr_var_str_.size() || !tod_var_str_.size())
+    if (!key_var_str_.size()
+            || !ds_id_var_str_.size()
+            || !tod_var_str_.size()
+            || !target_addr_var_str_.size()
+            || !target_id_var_str_.size()
+            || !track_num_var_str_.size()
+            || !mode_3a_var_str_.size()
+            || !mode_c_var_str_.size()
+            || !latitude_var_str_.size()
+            || !longitude_var_str_.size())
         return false;
 
     logdbg << "CreateAssociationsTask: canRun: metas ";
-    if (!object_man.existsMetaVariable(key_var_str_) ||
-            !object_man.existsMetaVariable(target_addr_var_str_) ||
-            !object_man.existsMetaVariable(tod_var_str_))
+    if (!object_man.existsMetaVariable(key_var_str_)
+            || !object_man.existsMetaVariable(ds_id_var_str_)
+            || !object_man.existsMetaVariable(tod_var_str_)
+            || !object_man.existsMetaVariable(target_addr_var_str_)
+            || !object_man.existsMetaVariable(target_id_var_str_)
+            || !object_man.existsMetaVariable(track_num_var_str_)
+            || !object_man.existsMetaVariable(mode_3a_var_str_)
+            || !object_man.existsMetaVariable(mode_c_var_str_)
+            || !object_man.existsMetaVariable(latitude_var_str_)
+            || !object_man.existsMetaVariable(longitude_var_str_))
         return false;
 
     logdbg << "CreateAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : object_man)
     {
-        if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first) ||
-                !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first))
+        if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(ds_id_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(target_id_var_str_).existsIn(dbo_it.first)
+                //|| !object_man.metaVariable(track_num_var_str_).existsIn(dbo_it.first) // not in adsb
+                || !object_man.metaVariable(mode_3a_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(mode_c_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(latitude_var_str_).existsIn(dbo_it.first)
+                || !object_man.metaVariable(longitude_var_str_).existsIn(dbo_it.first)
+                )
             return false;
     }
 
@@ -178,8 +237,15 @@ void CreateAssociationsTask::run()
     status_dialog_->markStartTime();
 
     checkAndSetMetaVariable(key_var_str_, &key_var_);
+    checkAndSetMetaVariable(ds_id_var_str_, &ds_id_var_);
     checkAndSetMetaVariable(tod_var_str_, &tod_var_);
     checkAndSetMetaVariable(target_addr_var_str_, &target_addr_var_);
+    checkAndSetMetaVariable(target_id_var_str_, &target_id_var_);
+    checkAndSetMetaVariable(track_num_var_str_, &track_num_var_);
+    checkAndSetMetaVariable(mode_3a_var_str_, &mode_3a_var_);
+    checkAndSetMetaVariable(mode_c_var_str_, &mode_c_var_);
+    checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
+    checkAndSetMetaVariable(longitude_var_str_, &longitude_var_);
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
@@ -194,13 +260,189 @@ void CreateAssociationsTask::run()
         connect(dbo_it.second, &DBObject::loadingDoneSignal, this,
                 &CreateAssociationsTask::loadingDoneSlot);
 
-        dbo_it.second->load(read_set, false, false, nullptr, false);
+        dbo_it.second->load(read_set, false, true, &tod_var_->getFor(dbo_it.first), true);
 
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
     status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
     status_dialog_->show();
+}
+
+double CreateAssociationsTask::maxTimeDiffTracker() const
+{
+    return max_time_diff_tracker_;
+}
+
+void CreateAssociationsTask::maxTimeDiffTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxTimeDiffTracker: value " << value;
+    max_time_diff_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxTimeDiffSensor() const
+{
+    return max_time_diff_sensor_;
+}
+
+void CreateAssociationsTask::maxTimeDiffSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxTimeDiffSensor: value " << value;
+    max_time_diff_sensor_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceQuitTracker() const
+{
+    return max_distance_quit_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceQuitTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceQuitTracker: value " << value;
+    max_distance_quit_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceDubiousTracker() const
+{
+    return max_distance_dubious_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceDubiousTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceDubiousTracker: value " << value;
+    max_distance_dubious_tracker_ = value;
+}
+
+unsigned int CreateAssociationsTask::maxPositionsDubiousTracker() const
+{
+    return max_positions_dubious_tracker_;
+}
+
+void CreateAssociationsTask::maxPositionsDubiousTracker(unsigned int value)
+{
+    loginf << "CreateAssociationsTask: maxPositionsDubiousTracker: value " << value;
+    max_positions_dubious_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceAcceptableTracker() const
+{
+    return max_distance_acceptable_tracker_;
+}
+
+void CreateAssociationsTask::maxDistanceAcceptableTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceAcceptableTracker: value " << value;
+    max_distance_acceptable_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxDistanceAcceptableSensor() const
+{
+    return max_distance_acceptable_sensor_;
+}
+
+void CreateAssociationsTask::maxDistanceAcceptableSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxDistanceAcceptableSensor: value " << value;
+    max_distance_acceptable_sensor_ = value;
+}
+
+double CreateAssociationsTask::maxAltitudeDiffTracker() const
+{
+    return max_altitude_diff_tracker_;
+}
+
+void CreateAssociationsTask::maxAltitudeDiffTracker(double value)
+{
+    loginf << "CreateAssociationsTask: maxAltitudeDiffTracker: value " << value;
+    max_altitude_diff_tracker_ = value;
+}
+
+double CreateAssociationsTask::maxAltitudeDiffSensor() const
+{
+    return max_altitude_diff_sensor_;
+}
+
+void CreateAssociationsTask::maxAltitudeDiffSensor(double value)
+{
+    loginf << "CreateAssociationsTask: maxAltitudeDiffSensor: value " << value;
+    max_altitude_diff_sensor_ = value;
+}
+
+double CreateAssociationsTask::probMinTimeOverlapTracker() const
+{
+    return prob_min_time_overlap_tracker_;
+}
+
+void CreateAssociationsTask::probMinTimeOverlapTracker(double value)
+{
+    loginf << "CreateAssociationsTask: probMinTimeOverlapTracker: value " << value;
+    prob_min_time_overlap_tracker_ = value;
+}
+
+unsigned int CreateAssociationsTask::minUpdatesTracker() const
+{
+    return min_updates_tracker_;
+}
+
+void CreateAssociationsTask::minUpdatesTracker(unsigned int value)
+{
+    loginf << "CreateAssociationsTask: minUpdatesTracker: value " << value;
+    min_updates_tracker_ = value;
+}
+
+bool CreateAssociationsTask::associateNonModeS() const
+{
+    return associate_non_mode_s_;
+}
+
+void CreateAssociationsTask::associateNonModeS(bool value)
+{
+    loginf << "CreateAssociationsTask: associateNonModeS: value " << value;
+    associate_non_mode_s_ = value;
+}
+
+double CreateAssociationsTask::maxSpeedTrackerKts() const
+{
+    return max_speed_tracker_kts_;
+}
+
+void CreateAssociationsTask::maxSpeedTrackerKts(double value)
+{
+    loginf << "CreateAssociationsTask: maxSpeedTrackerKts: value " << value;
+    max_speed_tracker_kts_ = value;
+}
+
+bool CreateAssociationsTask::cleanDubiousUtns() const
+{
+    return clean_dubious_utns_;
+}
+
+void CreateAssociationsTask::cleanDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: cleanDubiousUtns: value " << value;
+    clean_dubious_utns_ = value;
+}
+
+bool CreateAssociationsTask::markDubiousUtnsUnused() const
+{
+    return mark_dubious_utns_unused_;
+}
+
+void CreateAssociationsTask::markDubiousUtnsUnused(bool value)
+{
+    loginf << "CreateAssociationsTask: markDubiousUtnsUnused: value " << value;
+    mark_dubious_utns_unused_ = value;
+}
+
+bool CreateAssociationsTask::commentDubiousUtns() const
+{
+    return comment_dubious_utns_;
+}
+
+void CreateAssociationsTask::commentDubiousUtns(bool value)
+{
+    loginf << "CreateAssociationsTask: commentDubiousUtns: value " << value;
+    comment_dubious_utns_ = value;
 }
 
 void CreateAssociationsTask::newDataSlot(DBObject& object)
@@ -251,7 +493,7 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
         }
 
         create_job_ = std::make_shared<CreateAssociationsJob>(
-            *this, COMPASS::instance().interface(), buffers);
+                    *this, COMPASS::instance().interface(), buffers);
 
         connect(create_job_.get(), &CreateAssociationsJob::doneSignal, this,
                 &CreateAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -259,9 +501,9 @@ void CreateAssociationsTask::loadingDoneSlot(DBObject& object)
                 &CreateAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
         connect(create_job_.get(), &CreateAssociationsJob::statusSignal, this,
                 &CreateAssociationsTask::associationStatusSlot, Qt::QueuedConnection);
-//        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
-//                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
-//                Qt::QueuedConnection);
+        //        connect(create_job_.get(), &CreateAssociationsJob::saveAssociationsQuestionSignal,
+        //                this, &CreateAssociationsTask::saveAssociationsQuestionSlot,
+        //                Qt::QueuedConnection);
 
         JobManager::instance().addDBJob(create_job_);
 
@@ -276,11 +518,6 @@ void CreateAssociationsTask::createDoneSlot()
     create_job_done_ = true;
 
     status_dialog_->setAssociationStatus("Done");
-//    status_dialog_->setFoundHashes(create_job_->foundHashes());
-//    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
-//    status_dialog_->setMissingHashes(create_job_->missingHashes());
-//    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
-//    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
 
     status_dialog_->setDone();
 
@@ -323,39 +560,65 @@ void CreateAssociationsTask::closeStatusDialogSlot()
     status_dialog_ = nullptr;
 }
 
-std::string CreateAssociationsTask::keyVarStr() const { return key_var_str_; }
-
-void CreateAssociationsTask::keyVarStr(const std::string& var_str)
+MetaDBOVariable* CreateAssociationsTask::keyVar() const
 {
-    loginf << "CreateAssociationsTask: keyVarStr: '" << var_str << "'";
-
-    key_var_str_ = var_str;
+    assert (key_var_);
+    return key_var_;
 }
 
-std::string CreateAssociationsTask::targetAddrVarStr() const { return target_addr_var_str_; }
-
-void CreateAssociationsTask::targetAddrVarStr(const std::string& var_str)
+MetaDBOVariable* CreateAssociationsTask::dsIdVar() const
 {
-    loginf << "CreateAssociationsTask: targetAddrVarStr: '" << var_str << "'";
-
-    target_addr_var_str_ = var_str;
+    assert (key_var_);
+    return ds_id_var_;
 }
 
-std::string CreateAssociationsTask::todVarStr() const { return tod_var_str_; }
-
-void CreateAssociationsTask::todVarStr(const std::string& var_str)
+MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const
 {
-    loginf << "CreateAssociationsTask: todVarStr: '" << var_str << "'";
-
-    tod_var_str_ = var_str;
+    assert (target_addr_var_);
+    return target_addr_var_;
 }
 
-MetaDBOVariable* CreateAssociationsTask::keyVar() const { return key_var_; }
+MetaDBOVariable* CreateAssociationsTask::todVar() const
+{
+    assert (tod_var_);
+    return tod_var_;
+}
 
-MetaDBOVariable* CreateAssociationsTask::targetAddrVar() const { return target_addr_var_; }
+MetaDBOVariable* CreateAssociationsTask::targetIdVar() const
+{
+    assert (target_id_var_);
+    return target_id_var_;
+}
 
-MetaDBOVariable* CreateAssociationsTask::todVar() const { return tod_var_; }
+MetaDBOVariable* CreateAssociationsTask::trackNumVar() const
+{
+    assert (track_num_var_);
+    return track_num_var_;
+}
 
+MetaDBOVariable* CreateAssociationsTask::mode3AVar() const
+{
+    assert (mode_3a_var_);
+    return mode_3a_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::modeCVar() const
+{
+    assert (mode_c_var_);
+    return mode_c_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::latitudeVar() const
+{
+    assert (latitude_var_);
+    return latitude_var_;
+}
+
+MetaDBOVariable* CreateAssociationsTask::longitudeVar() const
+{
+    assert (longitude_var_);
+    return longitude_var_;
+}
 
 void CreateAssociationsTask::checkAndSetMetaVariable(std::string& name_str,
                                                      MetaDBOVariable** var)
@@ -386,6 +649,10 @@ DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name
     assert(key_var_->existsIn(dbo_name));
     read_set.add(key_var_->getFor(dbo_name));
 
+    assert(ds_id_var_);
+    assert(ds_id_var_->existsIn(dbo_name));
+    read_set.add(ds_id_var_->getFor(dbo_name));
+
     assert(tod_var_);
     assert(tod_var_->existsIn(dbo_name));
     read_set.add(tod_var_->getFor(dbo_name));
@@ -393,6 +660,30 @@ DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name
     assert(target_addr_var_);
     assert(target_addr_var_->existsIn(dbo_name));
     read_set.add(target_addr_var_->getFor(dbo_name));
+
+    assert(target_id_var_);
+    assert(target_id_var_->existsIn(dbo_name));
+    read_set.add(target_id_var_->getFor(dbo_name));
+
+    assert(track_num_var_);
+    if(track_num_var_->existsIn(dbo_name))
+        read_set.add(track_num_var_->getFor(dbo_name));
+
+    assert(mode_3a_var_);
+    assert(mode_3a_var_->existsIn(dbo_name));
+    read_set.add(mode_3a_var_->getFor(dbo_name));
+
+    assert(mode_c_var_);
+    assert(mode_c_var_->existsIn(dbo_name));
+    read_set.add(mode_c_var_->getFor(dbo_name));
+
+    assert(latitude_var_);
+    assert(latitude_var_->existsIn(dbo_name));
+    read_set.add(latitude_var_->getFor(dbo_name));
+
+    assert(longitude_var_);
+    assert(longitude_var_->existsIn(dbo_name));
+    read_set.add(longitude_var_->getFor(dbo_name));
 
     return read_set;
 }

@@ -507,8 +507,8 @@
                         },
                         "LabelEntrymultiple_sources0": {
                             "parameters": {
-                                "prefix": "",
-                                "show": false,
+                                "prefix": "MUL ",
+                                "show": true,
                                 "suffix": "",
                                 "variable_name": "multiple_sources"
                             }
@@ -575,6 +575,46 @@
                                 "show": false,
                                 "suffix": "",
                                 "variable_name": "pos_long_deg_calc"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_lat_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_lat_deg"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_long_deg0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_long_deg"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_x_m0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_x_m"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_xy_corr_coeff0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_xy_corr_coeff"
+                            }
+                        },
+                        "LabelEntrypos_std_dev_y_m0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "pos_std_dev_y_m"
                             }
                         },
                         "LabelEntrypos_sys_x_nm0": {
@@ -753,6 +793,54 @@
                                 "variable_name": "track_end"
                             }
                         },
+                        "LabelEntrytrack_es_age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_es_age"
+                            }
+                        },
+                        "LabelEntrytrack_lu_ds_id0": {
+                            "parameters": {
+                                "prefix": "LU ",
+                                "show": true,
+                                "suffix": "",
+                                "variable_name": "track_lu_ds_id"
+                            }
+                        },
+                        "LabelEntrytrack_lu_sac0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_lu_sac"
+                            }
+                        },
+                        "LabelEntrytrack_lu_sic0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_lu_sic"
+                            }
+                        },
+                        "LabelEntrytrack_mds_age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_mds_age"
+                            }
+                        },
+                        "LabelEntrytrack_mlt_age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_mlt_age"
+                            }
+                        },
                         "LabelEntrytrack_num0": {
                             "parameters": {
                                 "prefix": "TN ",
@@ -775,6 +863,14 @@
                                 "show": false,
                                 "suffix": "",
                                 "variable_name": "track_slant_corr_type"
+                            }
+                        },
+                        "LabelEntrytrack_ssr_age0": {
+                            "parameters": {
+                                "prefix": "",
+                                "show": false,
+                                "suffix": "",
+                                "variable_name": "track_ssr_age"
                             }
                         },
                         "LabelEntrytracked_alt_baro_ft0": {
@@ -1302,6 +1398,27 @@
                             "parameters": {
                                 "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.GEO_AREA_MASK"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackerground_bit0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "",
+                    "name": "ground_bit",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.GROUND_BIT0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.GROUND_BIT"
                             }
                         }
                     }
@@ -3107,6 +3224,132 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_es_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "Time",
+                    "name": "track_es_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_ES_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_ES_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_lu_ds_id0": {
+                "parameters": {
+                    "data_type_str": "INT",
+                    "dbo_name": "Tracker",
+                    "description": "Last updating DATA SOURCE ID",
+                    "dimension": "",
+                    "name": "track_lu_ds_id",
+                    "representation_str": "DATA_SRC_NAME",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_LUDS_ID0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_LU_DS_ID"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_lu_sac0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "dbo_name": "Tracker",
+                    "description": "Last updating ASTERIX System Area Code [I062/340]",
+                    "dimension": "",
+                    "name": "track_lu_sac",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_LU_SAC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_LU_SAC"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_lu_sic0": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "dbo_name": "Tracker",
+                    "description": "Last updating ASTERIX System Identification Code [I062/340]",
+                    "dimension": "",
+                    "name": "track_lu_sic",
+                    "representation_str": "STANDARD",
+                    "unit": ""
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_LU_SIC0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_LU_SIC"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_mds_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "Time",
+                    "name": "track_mds_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_MDS_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MDS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_mlt_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "Time",
+                    "name": "track_mlt_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_MLT_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MLT_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_num0": {
                 "parameters": {
                     "data_type_str": "INT",
@@ -3137,26 +3380,19 @@
             },
             "DBOVariableTrackertrack_psr_age0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Time",
                     "name": "track_psr_age",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
                         "DBOSchemaVariableDefinitionTrackersd_track.TRACK_PSR_AGE0": {
                             "parameters": {
                                 "schema": "SCDB Extended",
-                                "variable_identifier": "sd_track.TRACK_PSR_AGE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionTrackertrack_psr_age0": {
-                            "parameters": {
-                                "meta_table": "Tracker",
-                                "schema": "SCDB",
                                 "variable_identifier": "sd_track.TRACK_PSR_AGE"
                             }
                         }
@@ -3186,6 +3422,27 @@
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.TRACK_SLANT_CORR_TYPE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_ssr_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": " ",
+                    "dimension": "Time",
+                    "name": "track_ssr_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackersd_track.TRACK_SSR_AGE0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_SSR_AGE"
                             }
                         }
                     }

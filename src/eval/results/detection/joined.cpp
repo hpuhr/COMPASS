@@ -17,7 +17,7 @@
 
 #include "eval/results/detection/joined.h"
 #include "eval/results/detection/single.h"
-#include "eval/requirement/base.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/detection/detection.h"
 #include "evaluationtargetdata.h"
 #include "evaluationmanager.h"
@@ -87,19 +87,19 @@ namespace EvaluationRequirementResult
         }
     }
 
-    void JoinedDetection::print()
-    {
-        std::shared_ptr<EvaluationRequirement::Detection> req =
-                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-        assert (req);
+//    void JoinedDetection::print()
+//    {
+//        std::shared_ptr<EvaluationRequirement::Detection> req =
+//                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+//        assert (req);
 
-        if (sum_uis_)
-            loginf << "JoinedDetection: print: req. name " << req->name()
-                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
-        else
-            loginf << "JoinedDetection: print: req. name " << req->name()
-                   << " has no data";
-    }
+//        if (sum_uis_)
+//            loginf << "JoinedDetection: print: req. name " << req->name()
+//                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
+//        else
+//            loginf << "JoinedDetection: print: req. name " << req->name()
+//                   << " has no data";
+//    }
 
     void JoinedDetection::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
@@ -127,7 +127,7 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
+        //string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
 
         // pd
         QVariant pd_var;
@@ -138,13 +138,14 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pd_ * 100.0).c_str();
 
-            result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(pd_);
         }
 
-        // "Req.", "Group", "Result", "Condition", "Result"
-        ov_table.addRow({sector_layer_.name().c_str(), requirement_->shortname().c_str(),
-                         requirement_->groupName().c_str(), {sum_uis_},
-                         pd_var, condition.c_str(), result.c_str()}, this, {});
+        // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
+        ov_table.addRow({sector_layer_.name().c_str(), requirement_->groupName().c_str(),
+                         requirement_->shortname().c_str(),
+                         result_id_.c_str(), {sum_uis_},
+                         pd_var, req->getConditionStr().c_str(), result.c_str()}, this, {});
         // "Report:Results:Overview"
     }
 
@@ -168,8 +169,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
         assert (req);
 
-        string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
         // pd
         QVariant pd_var;
 
@@ -179,11 +178,11 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pd_ * 100.0).c_str();
 
-            result = pd_ >= req->minimumProbability() ? "Passed" : "Failed";
+            result = req-> getResultConditionStr(pd_);
         }
 
         sec_det_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);
-        sec_det_table.addRow({"Condition", {}, condition.c_str()}, this);
+        sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
         sec_det_table.addRow({"Condition Fulfilled", {}, result.c_str()}, this);
 
         // figure
@@ -203,7 +202,9 @@ namespace EvaluationRequirementResult
     bool JoinedDetection::hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "req_overview")
+        //loginf << "UGA2 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
+
+        if (table.name() == req_overview_table_name_)
             return true;
         else
             return false;;
@@ -247,7 +248,9 @@ namespace EvaluationRequirementResult
     bool JoinedDetection::hasReference (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation)
     {
-        if (table.name() == "req_overview")
+        //loginf << "UGA3 '"  << table.name() << "'" << " other '" << req_overview_table_name_ << "'";
+
+        if (table.name() == req_overview_table_name_)
             return true;
         else
             return false;;
