@@ -306,7 +306,7 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
 
             try
             {
-                std::string last_key = sub_keys_.back();
+                const std::string& last_key = sub_keys_.back();
 
                 for (auto& j_it : val_ptr->get<nlohmann::json::array_t>())  // iterate over array
                 {
@@ -346,6 +346,9 @@ bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>
         {
             try
             {
+                logdbg << "JSONDataMapping: findAndSetValue: row_cnt " << row_cnt
+                       << " key " << json_key_ << " value '" << val_ptr->dump() << "'";
+
                 if (append_value_)
                     appendValue(val_ptr, array_list, row_cnt, debug);
                 else
