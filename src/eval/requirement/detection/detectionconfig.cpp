@@ -38,6 +38,8 @@ DetectionConfig::DetectionConfig(
     registerParameter("use_max_gap_length", &use_max_gap_length_, false);
     registerParameter("max_gap_length_s", &max_gap_length_s_, 5.0);
 
+    registerParameter("invert_prob", &invert_prob_, false);
+
     registerParameter("use_miss_tolerance", &use_miss_tolerance_, false);
     registerParameter("miss_tolerance", &miss_tolerance_s_, 0.01);
 }
@@ -51,7 +53,7 @@ std::shared_ptr<Base> DetectionConfig::createRequirement()
 {
     shared_ptr<Detection> req = make_shared<Detection>(
                 name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, update_interval_s_,
-                use_min_gap_length_, min_gap_length_s_, use_max_gap_length_, max_gap_length_s_,
+                use_min_gap_length_, min_gap_length_s_, use_max_gap_length_, max_gap_length_s_, invert_prob_,
                 use_miss_tolerance_, miss_tolerance_s_);
 
     return req;
@@ -65,6 +67,16 @@ float DetectionConfig::updateInterval() const
 void DetectionConfig::updateInterval(float value)
 {
     update_interval_s_ = value;
+}
+
+bool DetectionConfig::invertProb() const
+{
+    return invert_prob_;
+}
+
+void DetectionConfig::invertProb(bool value)
+{
+    invert_prob_ = value;
 }
 
 //    bool DetectionConfig::useMaxGapInterval() const

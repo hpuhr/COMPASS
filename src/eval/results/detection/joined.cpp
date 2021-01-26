@@ -77,7 +77,15 @@ namespace EvaluationRequirementResult
 
             assert (missed_uis_ <= sum_uis_);
 
-            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+            std::shared_ptr<EvaluationRequirement::Detection> req =
+                    std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+            assert (req);
+
+            if (req->invertProb())
+                pd_ = (float)missed_uis_/(float)(sum_uis_);
+            else
+                pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
+
             has_pd_ = true;
         }
         else

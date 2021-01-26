@@ -65,7 +65,7 @@ public:
             float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             float update_interval_s,
             bool use_min_gap_length, float min_gap_length_s,
-            bool use_max_gap_length, float max_gap_length_s,
+            bool use_max_gap_length, float max_gap_length_s, bool invert_prob,
             bool use_miss_tolerance, float miss_tolerance_s);
 
     float updateInterval() const;
@@ -77,7 +77,8 @@ public:
     bool useMaxGapLength() const;
 
     float maxGapLength() const;
-    void maxGapLength(float value);
+
+    bool invertProb() const;
 
     bool useMissTolerance() const;
 
@@ -89,6 +90,8 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+
+
 protected:
     float update_interval_s_{0};
 
@@ -97,6 +100,8 @@ protected:
 
     bool use_max_gap_length_ {false};
     float max_gap_length_s_{0};
+
+    bool invert_prob_ {false};
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};

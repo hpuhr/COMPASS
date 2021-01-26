@@ -42,6 +42,8 @@ public slots:
     void toggleUseMaxGapLengthSlot();
     void maxGapLengthEditSlot(QString value);
 
+    void toggleInvertProbSlot();
+
     void toggleUseMissToleranceSlot();
     void missToleranceEditSlot(QString value);
 
@@ -56,6 +58,8 @@ protected:
 
     QCheckBox* use_max_gap_length_check_{nullptr};
     QLineEdit* max_gap_length_edit_{nullptr};
+
+    QCheckBox* use_invert_prob_check_{nullptr};
 
     QCheckBox* use_miss_tolerance_check_{nullptr};
     QLineEdit* miss_tolerance_edit_{nullptr};

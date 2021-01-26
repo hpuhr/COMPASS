@@ -70,6 +70,14 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     form_layout_->addRow("Maximum Gap Length [s]", max_gap_length_edit_);
 
+    // invert prob
+    use_invert_prob_check_ = new QCheckBox ();
+    use_invert_prob_check_->setChecked(config().invertProb());
+    connect(use_invert_prob_check_, &QCheckBox::clicked,
+            this, &DetectionConfigWidget::toggleInvertProbSlot);
+
+    form_layout_->addRow("Invert Probability", use_invert_prob_check_);
+
     // miss tolerance
     use_miss_tolerance_check_ = new QCheckBox ();
     use_miss_tolerance_check_->setChecked(config().useMissTolerance());
@@ -146,6 +154,17 @@ void DetectionConfigWidget::maxGapLengthEditSlot(QString value)
         config().maxGapLength(val);
     else
         loginf << "EvaluationRequirementDetectionConfigWidget: maxGapLengthEditSlot: axvalid value";
+}
+
+// invert prob
+void DetectionConfigWidget::toggleInvertProbSlot()
+{
+    loginf << "EvaluationRequirementDetectionConfigWidget: toggleInvertProbSlot";
+
+    assert (use_invert_prob_check_);
+    config().invertProb(use_invert_prob_check_->checkState() == Qt::Checked);
+
+    updateActive();
 }
 
 // miss tol

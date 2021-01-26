@@ -56,6 +56,9 @@ public:
     float updateInterval() const;
     void updateInterval(float value);
 
+    bool invertProb() const;
+    void invertProb(bool value);
+
     bool useMissTolerance() const;
     void useMissTolerance(bool value);
 
@@ -70,6 +73,8 @@ protected:
 
     bool use_max_gap_length_ {false};
     float max_gap_length_s_{0};
+
+    bool invert_prob_ {false};
 
     bool use_miss_tolerance_{false};
     float miss_tolerance_s_{0};
