@@ -20,9 +20,11 @@
 
 #include <QWidget>
 
+class QLineEdit;
 class QCheckBox;
 
 class EvaluationResultsGenerator;
+class EvaluationManager;
 
 class EvaluationResultsGeneratorWidget : public QWidget
 {
@@ -32,16 +34,21 @@ private slots:
     void toggleShowAdsbInfoSlot();
     void toggleSkipNoDataDetailsSlot();
 
+    void resultDetailZoomEditSlot(QString value);
+
 public:
-    EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen);
+    EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen, EvaluationManager& eval_man);
     virtual ~EvaluationResultsGeneratorWidget();
 
 protected:
     EvaluationResultsGenerator& results_gen_;
+    EvaluationManager& eval_man_;
 
     QCheckBox* skip_no_data_details_check_ {nullptr};
     QCheckBox* split_results_by_mops_check_ {nullptr};
     QCheckBox* show_adsb_info_check_ {nullptr};
+
+    QLineEdit* result_detail_zoom_edit_{nullptr};
 };
 
 #endif // EVALUATIONRESULTSGENERATORWIDGET_H

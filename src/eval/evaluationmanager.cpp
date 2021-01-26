@@ -140,6 +140,7 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_max_sil_v2", &use_max_sil_v2_, true);
     registerParameter("max_sil_v2", &max_sil_v2_, 4);
 
+    registerParameter("result_detail_zoom", &result_detail_zoom_, 0.02);
 
     registerParameter("warning_shown", &warning_shown_, false);
 
@@ -2609,5 +2610,15 @@ bool EvaluationManager::warningShown() const
 void EvaluationManager::warningShown(bool warning_shown)
 {
     warning_shown_ = warning_shown;
+}
+
+double EvaluationManager::resultDetailZoom() const
+{
+    return result_detail_zoom_;
+}
+
+void EvaluationManager::resultDetailZoom(double result_detail_zoom)
+{
+    result_detail_zoom_ = result_detail_zoom;
 }
 

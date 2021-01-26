@@ -319,6 +319,9 @@ public:
     bool warningShown() const;
     void warningShown(bool warning_shown);
 
+    double resultDetailZoom() const;
+    void resultDetailZoom(double result_detail_zoom);
+
 protected:
     COMPASS& compass_;
 
@@ -420,6 +423,8 @@ protected:
 
     bool use_max_sil_v2_ {false};
     unsigned int max_sil_v2_ {0};
+
+    double result_detail_zoom_ {0.0}; // in WGS84 deg
 
     bool warning_shown_ {false};
 
