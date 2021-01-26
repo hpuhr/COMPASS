@@ -793,7 +793,7 @@ std::pair<bool,bool> EvaluationTargetData::refGroundBitForTime (float tod) const
 
     unsigned int index = it_pair.first->second;
 
-    if (eval_data_->ref_target_address_name_.size()
+    if (eval_data_->ref_ground_bit_name_.size()
             && !eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).isNull(index))
     {
         return {true, eval_data_->ref_buffer_->get<string>(eval_data_->ref_ground_bit_name_).get(index) == "Y"};

@@ -509,7 +509,8 @@ void FilterManager::startedSlot()
 void FilterManager::disableAllFilters ()
 {
     for (auto fil_it : filters_)
-        fil_it->setActive(false);
+        if (!fil_it->disabled())
+            fil_it->setActive(false);
 }
 
 DataSourcesFilter* FilterManager::getDataSourcesFilter (const std::string& dbo_name)
