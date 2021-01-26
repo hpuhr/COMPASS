@@ -129,7 +129,7 @@ void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, s
             if (category == 1)
                 checkCAT001SacSics(data_block);
 
-            loginf << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
+            logdbg << "ASTERIXDecodeJob: jasterix_callback: applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda, false);
         }

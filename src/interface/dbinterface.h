@@ -207,7 +207,8 @@ protected:
     DBConnection* current_connection_{nullptr};
 
     /// Interface initialized (after opening database)
-    bool initialized_;
+    //bool initialized_ {false};
+    bool properties_loaded_ {false};
 
     /// Protects the database
     QMutex connection_mutex_;

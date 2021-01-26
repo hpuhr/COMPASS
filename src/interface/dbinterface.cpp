@@ -126,12 +126,14 @@ void DBInterface::databaseContentChanged()
     if (!existsPropertiesTable())
         createPropertiesTable();
 
-    loadProperties();
+    if (!properties_loaded_)
+        loadProperties();
 
     if (!existsSectorsTable())
         createSectorsTable();
 
-    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
+    if (!COMPASS::instance().evaluationManager().sectorsLoaded())
+        COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     emit databaseContentChangedSignal();
 }
@@ -1019,6 +1021,8 @@ void DBInterface::loadProperties()
 {
     loginf << "DBInterface: loadProperties";
 
+    assert (!properties_loaded_);
+
     QMutexLocker locker(&connection_mutex_);
 
     DBCommand command;
@@ -1045,6 +1049,10 @@ void DBInterface::loadProperties()
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
         assert(!id_vec.isNull(cnt));
+
+        if (properties_.count(id_vec.get(cnt)))
+            logerr << "DBInterface: loadProperties: property '" << id_vec.get(cnt) << "' already exists";
+
         assert(!properties_.count(id_vec.get(cnt)));
         if (!value_vec.isNull(cnt))
             properties_[id_vec.get(cnt)] = value_vec.get(cnt);
@@ -1053,6 +1061,8 @@ void DBInterface::loadProperties()
     for (auto& prop_it : properties_)
         loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '"
                << prop_it.second << "'";
+
+    properties_loaded_ = true;
 }
 
 void DBInterface::saveProperties()
@@ -1067,6 +1077,7 @@ void DBInterface::saveProperties()
 
     // QMutexLocker locker(&connection_mutex_); // done in closeConnection
     assert(current_connection_);
+    assert (properties_loaded_);
 
     string str;
 
