@@ -258,7 +258,7 @@ void MySQLDBImportJob::importSQLArchiveFile()
 
                     if (num_lines_ % 10 == 0)
                     {
-                        loginf  << "MySQLppConnection: importSQLArchiveFile: line cnt "
+                        logdbg  << "MySQLppConnection: importSQLArchiveFile: line cnt "
                                << num_lines_ << " entry '" << entry_name << "'";
 
                         emit statusSignal(("Read " + std::to_string(num_lines_) +
