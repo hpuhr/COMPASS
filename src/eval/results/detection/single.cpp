@@ -67,6 +67,8 @@ void SingleDetection::updatePD()
         else
             pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
 
+        has_pd_ = true;
+
         result_usable_ = true;
     }
     else
