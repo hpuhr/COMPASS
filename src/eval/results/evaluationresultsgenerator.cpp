@@ -429,7 +429,7 @@ void EvaluationResultsGenerator::skipNoDataDetails(bool value)
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationResultsGeneratorWidget(*this));
+        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_));
 
     return *widget_.get();
 }

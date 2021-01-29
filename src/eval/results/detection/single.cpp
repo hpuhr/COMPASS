@@ -57,8 +57,15 @@ void SingleDetection::updatePD()
                << " sum_uis " << sum_uis_;
 
         assert (missed_uis_ <= sum_uis_);
-        pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
-        has_pd_ = true;
+
+        std::shared_ptr<EvaluationRequirement::Detection> req =
+                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
+        assert (req);
+
+        if (req->invertProb())
+            pd_ = (float)missed_uis_/(float)(sum_uis_);
+        else
+            pd_ = 1.0 - ((float)missed_uis_/(float)(sum_uis_));
 
         result_usable_ = true;
     }
@@ -243,8 +250,8 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::viewableData(
 
         (*viewable_ptr)["position_latitude"] = detail.pos_current_.latitude_;
         (*viewable_ptr)["position_longitude"] = detail.pos_current_.longitude_;
-        (*viewable_ptr)["position_window_latitude"] = 0.02;
-        (*viewable_ptr)["position_window_longitude"] = 0.02;
+        (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
+        (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
         (*viewable_ptr)["time"] = detail.tod_;
 
         if (detail.miss_occurred_)
@@ -306,11 +313,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
         double lat_w = 1.1*(lat_max-lat_min)/2.0;
         double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-        if (lat_w < 0.02)
-            lat_w = 0.02;
+        if (lat_w < eval_man_.resultDetailZoom())
+            lat_w = eval_man_.resultDetailZoom();
 
-        if (lon_w < 0.02)
-            lon_w = 0.02;
+        if (lon_w < eval_man_.resultDetailZoom())
+            lon_w = eval_man_.resultDetailZoom();
 
         (*viewable_ptr)["position_window_latitude"] = lat_w;
         (*viewable_ptr)["position_window_longitude"] = lon_w;

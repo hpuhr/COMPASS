@@ -56,17 +56,17 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
     ss.str(std::string());
 
     ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
-       << "(id VARCHAR(255), value VARCHAR(1701), PRIMARY KEY (id));";
+       << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
     table_properties_create_statement_ = ss.str();
     ss.str(std::string());
 
     ss << "CREATE TABLE " << TABLE_NAME_SECTORS
-       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json VARCHAR(65535), PRIMARY KEY (id));";
+       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json TEXT, PRIMARY KEY (id));";
     table_sectors_create_statement_ = ss.str();
     ss.str(std::string());
 
     ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
-       << "(id INT, json VARCHAR(65535), PRIMARY KEY (id));";
+       << "(id INT, json TEXT, PRIMARY KEY (id));";
     table_view_points_create_statement_ = ss.str();
     ss.str(std::string());
 }
@@ -427,8 +427,7 @@ std::string SQLGenerator::getCreateAssociationTableStatement(const std::string& 
 
     ss << "CREATE TABLE " << table_name
        << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num "
-          "INTEGER,"
-          " ds_id INTEGER);";
+          "INTEGER, ds_id INTEGER);";
 
     return ss.str();
 }

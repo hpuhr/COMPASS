@@ -299,7 +299,7 @@ void MySQLDBImportTask::importObsoleteSlot()
     done_ = true;
 }
 
-void MySQLDBImportTask::importStatusSlot(std::string message)
+void MySQLDBImportTask::importStatusSlot(const QString message)
 {
     if (!msg_box_)
     {
@@ -309,5 +309,5 @@ void MySQLDBImportTask::importStatusSlot(std::string message)
         msg_box_->show();
     }
 
-    msg_box_->setText(message.c_str());
+    msg_box_->setText(message);
 }

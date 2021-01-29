@@ -171,7 +171,7 @@ DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
         }
         else
         {
-            if (!set.hasVariable(dataVarX()))
+            if (dataVarX().dboName() == dbo_name && !set.hasVariable(dataVarX()))
             {
                 loginf << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
                 set.add(dataVarX());
@@ -193,7 +193,7 @@ DBOVariableSet ScatterPlotView::getSet(const std::string& dbo_name)
         }
         else
         {
-            if (!set.hasVariable(dataVarY()))
+            if (dataVarY().dboName() == dbo_name && !set.hasVariable(dataVarY()))
             {
                 loginf << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
                 set.add(dataVarY());

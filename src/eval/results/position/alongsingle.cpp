@@ -337,8 +337,8 @@ namespace EvaluationRequirementResult
 
             (*viewable_ptr)["position_latitude"] = detail.tst_pos_.latitude_;
             (*viewable_ptr)["position_longitude"] = detail.tst_pos_.longitude_;
-            (*viewable_ptr)["position_window_latitude"] = 0.02;
-            (*viewable_ptr)["position_window_longitude"] = 0.02;
+            (*viewable_ptr)["position_window_latitude"] = eval_man_.resultDetailZoom();
+            (*viewable_ptr)["position_window_longitude"] = eval_man_.resultDetailZoom();
             (*viewable_ptr)["time"] = detail.tod_;
 
             if (!detail.check_passed_)
@@ -400,11 +400,11 @@ namespace EvaluationRequirementResult
             double lat_w = 1.1*(lat_max-lat_min)/2.0;
             double lon_w = 1.1*(lon_max-lon_min)/2.0;
 
-            if (lat_w < 0.02)
-                lat_w = 0.02;
+            if (lat_w < eval_man_.resultDetailZoom())
+                lat_w = eval_man_.resultDetailZoom();
 
-            if (lon_w < 0.02)
-                lon_w = 0.02;
+            if (lon_w < eval_man_.resultDetailZoom())
+                lon_w = eval_man_.resultDetailZoom();
 
             (*viewable_ptr)["position_window_latitude"] = lat_w;
             (*viewable_ptr)["position_window_longitude"] = lon_w;

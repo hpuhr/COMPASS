@@ -17,6 +17,8 @@
 
 #include "evaluationresultsgeneratorwidget.h"
 #include "evaluationresultsgenerator.h"
+#include "evaluationmanager.h"
+#include "textfielddoublevalidator.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -26,8 +28,9 @@
 #include <QCheckBox>
 #include <QLineEdit>
 
-EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen)
-    : results_gen_(results_gen)
+EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
+        EvaluationResultsGenerator& results_gen, EvaluationManager& eval_man)
+    : results_gen_(results_gen), eval_man_(eval_man)
 {
     QHBoxLayout* main_layout = new QHBoxLayout();
 
@@ -62,6 +65,14 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(EvaluationRes
             this, &EvaluationResultsGeneratorWidget::toggleShowAdsbInfoSlot);
     layout->addRow("Show ADS-B Info", show_adsb_info_check_);
 
+
+    result_detail_zoom_edit_ = new QLineEdit(QString::number(eval_man_.resultDetailZoom()));
+    result_detail_zoom_edit_->setValidator(new QDoubleValidator(0.000001, 1.0, 7, this));
+    connect(result_detail_zoom_edit_, &QLineEdit::textEdited,
+            this, &EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot);
+    layout->addRow("Result Detail WGS84 Zoom Factor [deg]", result_detail_zoom_edit_);
+
+
     setContentsMargins(0, 0, 0, 0);
 
     main_layout->addLayout(layout);
@@ -92,3 +103,15 @@ void EvaluationResultsGeneratorWidget::toggleSkipNoDataDetailsSlot()
     results_gen_.skipNoDataDetails(skip_no_data_details_check_->checkState() == Qt::Checked);
 }
 
+void EvaluationResultsGeneratorWidget::resultDetailZoomEditSlot(QString value)
+{
+    loginf << "EvaluationResultsGeneratorWidget: resultDetailZoomEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        eval_man_.resultDetailZoom(val);
+    else
+        loginf << "EvaluationResultsGeneratorWidget: resultDetailZoomEditSlot: axvalid value";
+}

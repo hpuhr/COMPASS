@@ -437,6 +437,9 @@ void GPSTrailImportTask::parseCurrentFile ()
     {
         try
         {
+            if (line.back() == '\r')
+                line.pop_back();
+
             parser.readLine(line);
         }
         catch (NMEAParseError& e)
