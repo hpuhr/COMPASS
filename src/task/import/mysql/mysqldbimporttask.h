@@ -38,7 +38,7 @@ class MySQLDBImportTask : public Task, public Configurable
   public slots:
     void importDoneSlot();
     void importObsoleteSlot();
-    void importStatusSlot(std::string message);
+    void importStatusSlot(const QString message);
 
   public:
     MySQLDBImportTask(const std::string& class_id, const std::string& instance_id,
@@ -74,7 +74,7 @@ class MySQLDBImportTask : public Task, public Configurable
     std::unique_ptr<MySQLDBImportTaskWidget> widget_;
     std::shared_ptr<MySQLDBImportJob> import_job_;
 
-    QMessageBox* msg_box_;
+    QMessageBox* msg_box_ {nullptr};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

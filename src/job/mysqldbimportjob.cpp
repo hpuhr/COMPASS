@@ -31,6 +31,7 @@
 #include "stringconv.h"
 
 using namespace Utils;
+using namespace std;
 
 MySQLDBImportJob::MySQLDBImportJob(const std::string& filename, bool archive,
                                    MySQLppConnection& connection)
@@ -42,7 +43,7 @@ MySQLDBImportJob::~MySQLDBImportJob() {}
 
 void MySQLDBImportJob::run()
 {
-    logdbg << "MySQLDBImportJob: run";
+    loginf << "MySQLDBImportJob: run";
 
     started_ = true;
 
@@ -53,7 +54,7 @@ void MySQLDBImportJob::run()
 
     done_ = true;
 
-    logdbg << "MySQLDBImportJob: run: done";
+    loginf << "MySQLDBImportJob: run: done";
 }
 
 size_t MySQLDBImportJob::numLines() const { return num_lines_; }
@@ -118,7 +119,7 @@ void MySQLDBImportJob::importSQLFile()
 
             if (num_lines_ % 10 == 0)
             {
-                emit statusSignal("Read " + std::to_string(num_lines_) + " lines");
+                emit statusSignal(("Read " + std::to_string(num_lines_) + " lines").c_str());
             }
         }
         catch (std::exception& e)
@@ -182,8 +183,10 @@ void MySQLDBImportJob::importSQLArchiveFile()
 
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
-        loginf << "MySQLDBImportJob: importSQLArchiveFile: archive file found: "
+        logdbg << "MySQLDBImportJob: importSQLArchiveFile: archive file found: "
                << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        const string entry_name = archive_entry_pathname(entry);
 
         // msg_box.setInformativeText(archive_entry_pathname(entry));
 
@@ -196,7 +199,9 @@ void MySQLDBImportJob::importSQLArchiveFile()
             r = archive_read_data_block(a, &buff, &size, &offset);
 
             if (r == ARCHIVE_EOF)
+            {
                 break;
+            }
             if (r != ARCHIVE_OK)
                 throw std::runtime_error("MySQLDBImportJob: importSQLArchiveFile: archive error: " +
                                          std::string(archive_error_string(a)));
@@ -205,22 +210,24 @@ void MySQLDBImportJob::importSQLArchiveFile()
 
             std::vector<std::string> lines = String::split(str, '\n');
             std::string line;
+            unsigned int num_lines = lines.size();
 
-            // loginf << "UGA read str has " << lines.size() << " lines";
+            //loginf << "UGA2 read str has " << num_lines << " lines";
 
-            for (std::vector<std::string>::iterator line_it = lines.begin(); line_it != lines.end();
-                 line_it++)
+            for (unsigned int line_cnt=0; line_cnt < num_lines; ++line_cnt)
             {
-                if (line_it + 1 == lines.end())
+                const string& line_it = lines.at(line_cnt);
+
+                if (line_cnt == num_lines-1)
                 {
                     // loginf << "last one";
-                    ss << *line_it;
+                    ss << line_it;
                     break;
                 }
 
                 try
                 {
-                    ss << *line_it << '\n';
+                    ss << line_it << '\n';
 
                     line = ss.str();
 
@@ -237,7 +244,7 @@ void MySQLDBImportJob::importSQLArchiveFile()
                         break;
                     }
 
-                    if (line_it->back() == ';')
+                    if (line_it.back() == ';')
                     {
                         //                        loginf << "MySQLppConnection:
                         //                        importSQLArchiveFile: line cnt " << line_cnt
@@ -251,12 +258,12 @@ void MySQLDBImportJob::importSQLArchiveFile()
 
                     if (num_lines_ % 10 == 0)
                     {
-                        logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt "
-                               << num_lines_;
+                        loginf  << "MySQLppConnection: importSQLArchiveFile: line cnt "
+                               << num_lines_ << " entry '" << entry_name << "'";
 
-                        emit statusSignal("Read " + std::to_string(num_lines_) +
+                        emit statusSignal(("Read " + std::to_string(num_lines_) +
                                           " lines from archive entry '" +
-                                          std::string(archive_entry_pathname(entry)) + "'");
+                                          entry_name + "'").c_str());
                     }
 
                     ++num_lines_;
@@ -281,11 +288,15 @@ void MySQLDBImportJob::importSQLArchiveFile()
             }
 
             if (done)
+            {
                 break;
+            }
         }
 
         if (done)
+        {
             break;
+        }
 
         loginf << "MySQLppConnection: importSQLArchiveFile: archive file "
                << archive_entry_pathname(entry) << " imported";

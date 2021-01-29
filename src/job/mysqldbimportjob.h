@@ -26,7 +26,7 @@ class MySQLDBImportJob : public Job
 {
     Q_OBJECT
   signals:
-    void statusSignal(std::string message);
+    void statusSignal(const QString message);
 
   public:
     MySQLDBImportJob(const std::string& filename, bool archive, MySQLppConnection& connection);
