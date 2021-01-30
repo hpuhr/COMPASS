@@ -31,6 +31,7 @@
 #include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
+#include "dbconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -116,6 +117,9 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
            << COMPASS::instance().interface().ready();
 
     if (!COMPASS::instance().interface().ready())
+        return false;
+
+    if (COMPASS::instance().interface().connection().type() != SQLITE_IDENTIFIER)
         return false;
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "

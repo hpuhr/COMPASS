@@ -186,8 +186,14 @@ void ScatterPlotViewDataWidget::updateDataSlot(DBObject& object, std::shared_ptr
     assert (x_values_[dbo_name].size() == selected_values_[dbo_name].size());
     assert (x_values_[dbo_name].size() == rec_num_values_[dbo_name].size());
 
+    loginf << "ScatterPlotViewDataWidget: updateDataSlot: dbo " << dbo_name
+           << " canUpdateFromDataX " << canUpdateFromDataX(dbo_name)
+           << " canUpdateFromDataY " << canUpdateFromDataY(dbo_name);
+
     if (canUpdateFromDataX(dbo_name) && canUpdateFromDataY(dbo_name))
     {
+        loginf << "ScatterPlotViewDataWidget: updateDataSlot: updating data";
+
         // add selected flags & rec_nums
         assert (buffer->has<bool>("selected"));
         assert (buffer->has<int>("rec_num"));
@@ -362,6 +368,8 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataX(std::string dbo_name)
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
 
+    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataX: dbo " << dbo_name << " var "  << current_var_name;
+
     switch (data_type)
     {
     case PropertyDataType::BOOL:
@@ -529,6 +537,8 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
 
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
+
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: updating, last size " << last_size;
 
     switch (data_type)
     {
@@ -707,6 +717,7 @@ void ScatterPlotViewDataWidget::updateFromDataX(std::string dbo_name, unsigned i
                     Property::asString(data_type));
     }
 
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataX: updated size " << buffer_x_counts_.at(dbo_name);
 }
 
 bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
@@ -739,6 +750,8 @@ bool ScatterPlotViewDataWidget::canUpdateFromDataY(std::string dbo_name)
     assert (data_var);
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
+
+    logdbg << "ScatterPlotViewDataWidget: canUpdateFromDataY: dbo " << dbo_name << " var "  << current_var_name;
 
     switch (data_type)
     {
@@ -907,6 +920,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
 
     PropertyDataType data_type = data_var->dataType();
     string current_var_name = data_var->name();
+
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: updating, last size " << last_size;
 
     switch (data_type)
     {
@@ -1085,6 +1100,8 @@ void ScatterPlotViewDataWidget::updateFromDataY(std::string dbo_name, unsigned i
                     Property::asString(data_type));
     }
 
+    logdbg << "ScatterPlotViewDataWidget: updateFromDataY: updated size " << buffer_y_counts_.at(dbo_name);
+
 }
 
 void ScatterPlotViewDataWidget::updateMinMax()
@@ -1222,11 +1239,14 @@ void ScatterPlotViewDataWidget::updateChart()
 
     QScatterSeries* selected_chart_series {nullptr};
     unsigned int value_cnt {0};
+    unsigned int dbo_value_cnt {0};
     nan_value_cnt_ = 0;
     unsigned int selected_cnt {0};
 
     for (auto& data : x_values_)
     {
+        dbo_value_cnt = 0;
+
         vector<double>& x_values = data.second;
         vector<double>& y_values = y_values_[data.first];
         vector<bool>& selected_values = selected_values_[data.first];
@@ -1248,6 +1268,7 @@ void ScatterPlotViewDataWidget::updateChart()
             if (!std::isnan(x_values.at(cnt)) && !std::isnan(y_values.at(cnt)))
             {
                 ++value_cnt;
+                ++dbo_value_cnt;
 
                 if (selected_values.at(cnt))
                 {
@@ -1272,11 +1293,8 @@ void ScatterPlotViewDataWidget::updateChart()
                 ++nan_value_cnt_;
         }
 
-        if (!value_cnt)
-        {
-            loginf << "ScatterPlotViewDataWidget: updateChart: no valid data";
-            return;
-        }
+        if (!dbo_value_cnt)
+            continue;
 
         if (sum_cnt)
         {
@@ -1293,6 +1311,12 @@ void ScatterPlotViewDataWidget::updateChart()
             //                         chart_view_, &ScatterPlotViewChartView::seriesReleasedSlot);
             //            }
         }
+    }
+
+    if (!value_cnt)
+    {
+        loginf << "ScatterPlotViewDataWidget: updateChart: no valid data";
+        return;
     }
 
     if (selected_chart_series)
@@ -1316,7 +1340,7 @@ void ScatterPlotViewDataWidget::updateChart()
            << view_->dataVarXDBO()+": "+view_->dataVarXName() << "'";
     assert (chart->axes(Qt::Horizontal).size() == 1);
     chart->axes(Qt::Horizontal).at(0)->setTitleText((view_->dataVarXDBO()+": "+view_->dataVarXName()).c_str());
-    loginf << "ScatterPlotViewDataWidget: updateChart: title x ' "
+    loginf << "ScatterPlotViewDataWidget: updateChart: title y ' "
            << view_->dataVarYDBO()+": "+view_->dataVarYName() << "'";
     assert (chart->axes(Qt::Vertical).size() == 1);
     chart->axes(Qt::Vertical).at(0)->setTitleText((view_->dataVarYDBO()+": "+view_->dataVarYName()).c_str());

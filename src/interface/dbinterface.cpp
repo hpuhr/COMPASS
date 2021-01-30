@@ -142,7 +142,8 @@ void DBInterface::closeConnection()
 {
     QMutexLocker locker(&connection_mutex_);
 
-    saveProperties();
+    if (properties_loaded_)  // false if database not opened
+        saveProperties();
 
     logdbg << "DBInterface: closeConnection";
     for (auto it : connections_)
