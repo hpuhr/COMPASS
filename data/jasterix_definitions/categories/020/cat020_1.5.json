@@ -996,7 +996,7 @@
                                     "lsb":0.25
                                 },
                                 {
-                                    "name":"sigma-x",
+                                    "name":"sigma-y",
                                     "comment":"Standard Deviation of Y component",
                                     "type":"fixed_bytes",
                                     "length":2,
