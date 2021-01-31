@@ -972,6 +972,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     {
         for (auto& parser_it : *schema_)
         {
+            if (!parser_it.second.active())
+                continue;
+
             std::string dbo_name = parser_it.second.dbObject().name();
 
             DBObject& db_object = parser_it.second.dbObject();
