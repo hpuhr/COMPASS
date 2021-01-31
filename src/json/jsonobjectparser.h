@@ -97,8 +97,12 @@ class JSONObjectParser : public Configurable
     std::string name() const;
     void name(const std::string& name);
 
-  private:
+    bool active() const;
+    void active(bool value);
+
+private:
     std::string name_;
+    bool active_ {true};
 
     std::string db_object_name_;
     DBObject* db_object_{nullptr};

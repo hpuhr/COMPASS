@@ -47,6 +47,9 @@ void JSONMappingJob::run()
 
     for (auto& parser_it : parsers_)
     {
+        if (!parser_it.second.active())
+            continue;
+
         if (!buffers_.count(parser_it.second.dbObject().name()))
             buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
         else
@@ -68,6 +71,9 @@ void JSONMappingJob::run()
 
         for (auto& map_it : parsers_)
         {
+            if (!map_it.second.active())
+                continue;
+
             logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
             assert(buffer);
