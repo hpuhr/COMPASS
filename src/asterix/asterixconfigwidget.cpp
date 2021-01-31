@@ -222,6 +222,8 @@ void ASTERIXConfigWidget::updateCategories()
     {
         unsigned int category = cat_it.first;
 
+        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category;
+
         QCheckBox* cat_check = new QCheckBox(String::categoryString(category).c_str());
         connect(cat_check, &QCheckBox::clicked, this, &ASTERIXConfigWidget::categoryCheckedSlot);
         cat_check->setProperty("category", category);

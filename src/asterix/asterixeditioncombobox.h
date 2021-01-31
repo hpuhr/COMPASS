@@ -20,6 +20,7 @@
 
 #include <jasterix/category.h>
 #include <jasterix/jasterix.h>
+#include "logger.h"
 
 #include <QComboBox>
 #include <memory>
@@ -50,6 +51,8 @@ class ASTERIXEditionComboBox : public QComboBox
     {
         for (const auto& ed_it : category_->editions())
         {
+            logdbg << "ASTERIXEditionComboBox: ctor: cat " << category->number() << " ed " << ed_it.first;
+
             addItem(ed_it.first.c_str());
         }
 

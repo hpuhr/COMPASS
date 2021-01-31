@@ -413,7 +413,7 @@ void ManageSectorsTask::addLinearRing (const std::string& layer_name, const std:
         ring.getPoint(point_cnt, &point);
         assert (!point.IsEmpty());
 
-        loginf << "ManageSectorsTask: addLinearRing: point lat " << point.getY()
+        logdbg << "ManageSectorsTask: addLinearRing: point lat " << point.getY()
                << " lon " << point.getX() << " z " << point.getZ();
 
         points.push_back({point.getY(), point.getX()});
