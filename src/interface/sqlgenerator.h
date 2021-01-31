@@ -109,6 +109,8 @@ class SQLGenerator
                                          const std::string& object_name);
     std::string getSelectMinMaxStatement();
 
+    std::string getSelectNullCount (const std::string& table_name, const std::vector<std::string> columns);
+
     std::string getInsertViewPointStatement(const unsigned int id, const std::string& json);
     std::string getSelectAllViewPointsStatement();
 

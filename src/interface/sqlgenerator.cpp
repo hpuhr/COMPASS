@@ -589,6 +589,26 @@ std::string SQLGenerator::getSelectMinMaxStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getSelectNullCount (const std::string& table_name, const std::vector<std::string> columns)
+{
+    stringstream ss;
+    ss << "SELECT count(*) FROM " << table_name << " WHERE";
+
+    bool first = true;
+    for (auto& col_it : columns)
+    {
+        if (!first)
+            ss << " OR";
+
+        ss << " " << col_it << " IS NULL";
+
+        first = false;
+    }
+    ss << ";";
+
+    return ss.str();
+}
+
 std::string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_create_statement_; }
 
 std::string SQLGenerator::getTablePropertiesCreateStatement()
