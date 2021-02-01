@@ -1,7 +1,7 @@
 {
     "parameters": {
         "current_filename": "",
-        "current_framing": "",
+        "current_framing": "ioss",
         "debug_jasterix": false,
         "limit_ram": false,
         "override_sac_new": 50,
@@ -43,7 +43,7 @@
                 "parameters": {
                     "category": 10,
                     "decode": true,
-                    "edition": "0.24_sensis",
+                    "edition": "0.31",
                     "ref": "",
                     "spf": ""
                 }
@@ -3101,7 +3101,7 @@
                         },
                         "JSONObjectParserCAT010 to MLATMLAT0": {
                             "parameters": {
-                                "active": true,
+                                "active": false,
                                 "data_source_variable_name": "ds_id",
                                 "db_object_name": "MLAT",
                                 "json_container_key": "",
@@ -3162,16 +3162,16 @@
                                     },
                                     "JSONDataMapping11": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "simulated_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SIM",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3194,27 +3194,27 @@
                                     },
                                     "JSONDataMapping13": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "test_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.TST",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
                                     },
                                     "JSONDataMapping14": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "report_type",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3290,18 +3290,18 @@
                                     },
                                     "JSONDataMapping19": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value -4347.0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "pos_local_x_nm",
+                                            "dimension": "Position",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "042.X",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter"
                                         }
                                     },
                                     "JSONDataMapping2": {
@@ -3322,18 +3322,18 @@
                                     },
                                     "JSONDataMapping20": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value -5012.0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "pos_local_y_nm",
+                                            "dimension": "Position",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "042.Y",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter"
                                         }
                                     },
                                     "JSONDataMapping21": {
@@ -3450,11 +3450,11 @@
                                     },
                                     "JSONDataMapping28": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.5",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_x_m",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3466,11 +3466,11 @@
                                     },
                                     "JSONDataMapping29": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value -3.25",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_correlation_coeff",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3498,11 +3498,11 @@
                                     },
                                     "JSONDataMapping30": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "pos_std_dev_y_m",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -3706,16 +3706,16 @@
                                     },
                                     "JSONDataMapping42": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "spi",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SPI",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3763,7 +3763,7 @@
                                             "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.CNF",
-                                            "json_value_format": "bool",
+                                            "json_value_format": "bool_invert",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3802,16 +3802,16 @@
                                     },
                                     "JSONDataMapping48": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_manoeuvre_hori",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.MAH",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -3866,16 +3866,16 @@
                                     },
                                     "JSONDataMapping51": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 1",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_end",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "170.TRE",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4202,16 +4202,16 @@
                                     },
                                     "JSONDataMapping8": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "MLAT",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "ground_bit",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.GBS",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4237,7 +4237,7 @@
                         },
                         "JSONObjectParserCAT010 to RadarRadar0": {
                             "parameters": {
-                                "active": false,
+                                "active": true,
                                 "data_source_variable_name": "ds_id",
                                 "db_object_name": "Radar",
                                 "json_container_key": "",
@@ -4282,32 +4282,32 @@
                                     },
                                     "JSONDataMapping10": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "from_fft",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.RAB",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
                                     },
                                     "JSONDataMapping11": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "simulated_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SIM",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
@@ -4330,27 +4330,27 @@
                                     },
                                     "JSONDataMapping13": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "test_target",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.TST",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
                                     },
                                     "JSONDataMapping14": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "detection_type",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -4426,18 +4426,18 @@
                                     },
                                     "JSONDataMapping19": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value -4347.0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "pos_local_x_nm",
+                                            "dimension": "Position",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "042.X",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter"
                                         }
                                     },
                                     "JSONDataMapping2": {
@@ -4458,27 +4458,27 @@
                                     },
                                     "JSONDataMapping20": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value -5012.0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "pos_local_y_nm",
+                                            "dimension": "Position",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "042.Y",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter"
                                         }
                                     },
                                     "JSONDataMapping21": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
-                                            "comment": "Type number, value 180.0",
+                                            "comment": "Type number, value 180.0, not DBM",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "psr_amplitude_dbm",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -4618,11 +4618,11 @@
                                     },
                                     "JSONDataMapping3": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "rdp_chain",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -4842,34 +4842,34 @@
                                     },
                                     "JSONDataMapping42": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "spi",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.SPI",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
                                     },
                                     "JSONDataMapping43": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 18.75",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "height_3d_ft",
+                                            "dimension": "Height",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "091.Measured Height",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Feet"
                                         }
                                     },
                                     "JSONDataMapping44": {
@@ -5242,11 +5242,11 @@
                                     },
                                     "JSONDataMapping65": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 7",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "track_doubtful",
                                             "dimension": "",
                                             "format_data_type": "",
                                             "in_array": false,
@@ -5338,16 +5338,16 @@
                                     },
                                     "JSONDataMapping8": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 0",
                                             "db_object_name": "Radar",
-                                            "dbovariable_name": "",
+                                            "dbovariable_name": "ground_bit",
                                             "dimension": "",
-                                            "format_data_type": "",
+                                            "format_data_type": "STRING",
                                             "in_array": false,
                                             "json_key": "020.GBS",
-                                            "json_value_format": "",
+                                            "json_value_format": "bool",
                                             "mandatory": false,
                                             "unit": ""
                                         }
