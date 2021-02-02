@@ -11,6 +11,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/managesectorstask.h"
         "${CMAKE_CURRENT_LIST_DIR}/managesectorstaskwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/importsectordialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/manageschematask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/manageschemataskwidget.cpp"
@@ -18,4 +19,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/managedbobjectstaskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/managesectorstask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/managesectorstaskwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/importsectordialog.cpp"
     )

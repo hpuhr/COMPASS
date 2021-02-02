@@ -28,76 +28,76 @@ class QCheckBox;
 
 namespace EvaluationResultsReport
 {
-    class PDFGenerator;
+class PDFGenerator;
 
-    class PDFGeneratorDialog : public QDialog
-    {
-        Q_OBJECT
+class PDFGeneratorDialog : public QDialog
+{
+    Q_OBJECT
 
-    public slots:
-        void setPathSlot ();
-        void pathEditedSlot ();
-        void filenameEditedSlot();
+public slots:
+    void setPathSlot ();
+    void pathEditedSlot ();
+    void filenameEditedSlot();
 
-        void authorEditedSlot (const QString& text);
-        void abstractEditedSlot(const QString& text);
+    void authorEditedSlot (const QString& text);
+    void abstractEditedSlot(const QString& text);
 
-        void waitOnMapLoadingEditedSlot(bool checked);
-        void includeTargetDetailsEditedSlot(bool checked);
-        void includeTargetTRDetailsEditedSlot(bool checked);
-        void numMaxTableRowsEditedSlot(const QString& text);
-        void numMaxTableColWidthEditedSlot(const QString& text);
+    void waitOnMapLoadingEditedSlot(bool checked);
+    void includeTargetDetailsEditedSlot(bool checked);
+    void includeTargetTRDetailsEditedSlot(bool checked);
+    void numMaxTableRowsEditedSlot(const QString& text);
+    void numMaxTableColWidthEditedSlot(const QString& text);
 
-        void runPDFLatexChangedSlot (bool checked);
-        void openPDFChangedSlot (bool checked);
+    void runPDFLatexChangedSlot (bool checked);
+    void openPDFChangedSlot (bool checked);
 
-        void runSlot();
-        void cancelSlot();
+    void runSlot();
+    void cancelSlot();
 
-    public:
-        PDFGeneratorDialog(PDFGenerator& generator,
-                           QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+public:
+    PDFGeneratorDialog(PDFGenerator& generator,
+                       QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
-        void updateFileInfo ();
+    void updateFileInfo ();
 
-        void setRunning (bool value);
+    void setRunning (bool value);
 
-        void setElapsedTime (const std::string& time_str);
-        void setProgress (unsigned int min, unsigned int max, unsigned int value);
-        void setStatus (const std::string& status);
-        void setRemainingTime (const std::string& time_str);
+    void setElapsedTime (const std::string& time_str);
+    void setProgress (unsigned int min, unsigned int max, unsigned int value);
+    void setStatus (const std::string& status);
+    void setRemainingTime (const std::string& time_str);
 
-    protected:
-        PDFGenerator& generator_;
+protected:
+    PDFGenerator& generator_;
 
-        QWidget* config_container_ {nullptr};
+    QWidget* config_container_ {nullptr};
 
-        QLineEdit* directory_edit_ {nullptr};
-        QLineEdit* filename_edit_ {nullptr};
+    QLineEdit* directory_edit_ {nullptr};
+    QLineEdit* filename_edit_ {nullptr};
 
-        QLineEdit* author_edit_ {nullptr};
-        QLineEdit* abstract_edit_ {nullptr};
+    QLineEdit* author_edit_ {nullptr};
+    QLineEdit* abstract_edit_ {nullptr};
 
-        QCheckBox* include_target_details_check_ {nullptr};
-        QCheckBox* include_target_tr_details_check_ {nullptr};
+    QCheckBox* include_target_details_check_ {nullptr};
+    QCheckBox* include_target_tr_details_check_ {nullptr};
 
-        QLineEdit* num_max_table_rows_edit_ {nullptr};
-        QLineEdit* num_max_table_col_width_edit_ {nullptr};
+    QLineEdit* num_max_table_rows_edit_ {nullptr};
+    QLineEdit* num_max_table_col_width_edit_ {nullptr};
 
-        QCheckBox* wait_on_map_loading_check_ {nullptr};
+    QCheckBox* wait_on_map_loading_check_ {nullptr};
 
-        QCheckBox* pdflatex_check_ {nullptr};
-        QCheckBox* open_pdf_check_ {nullptr};
+    QCheckBox* pdflatex_check_ {nullptr};
+    QCheckBox* open_pdf_check_ {nullptr};
 
-        QPushButton* run_button_{nullptr};
+    QPushButton* run_button_{nullptr};
 
-        QLabel* elapsed_time_label_{nullptr};
-        QProgressBar* progress_bar_{nullptr};
-        QLabel* status_label_{nullptr};
-        QLabel* remaining_time_label_{nullptr};
+    QLabel* elapsed_time_label_{nullptr};
+    QProgressBar* progress_bar_{nullptr};
+    QLabel* status_label_{nullptr};
+    QLabel* remaining_time_label_{nullptr};
 
-        QPushButton* quit_button_{nullptr};
-    };
+    QPushButton* quit_button_{nullptr};
+};
 
 }
 

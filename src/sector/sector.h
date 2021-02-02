@@ -44,6 +44,9 @@ public:
     std::string layerName() const;
     void layerName(const std::string& layer_name);
 
+    bool exclude() const;
+    void exclude(bool value);
+
     nlohmann::json jsonData() const;
     std::string jsonDataStr() const;
 
@@ -76,6 +79,8 @@ protected:
     unsigned int id_;
     std::string name_;
     std::string layer_name_;
+
+    bool exclude_ {false};
 
     std::vector<std::pair<double,double>> points_;
 

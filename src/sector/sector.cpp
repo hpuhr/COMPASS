@@ -51,6 +51,11 @@ Sector::Sector(unsigned int id, const std::string& name, const std::string& laye
     assert (j.contains("layer_name"));
     assert (j.at("layer_name") == layer_name_);
 
+    if (j.contains("exclude"))
+        exclude_ = j.at("exclude");
+    else
+        exclude_ = false;
+
     assert (j.contains("points"));
     json& points = j.at("points");
     assert (points.is_array());
@@ -95,6 +100,8 @@ nlohmann::json Sector::jsonData () const
     j["id"] = id_;
     j["name"] = name_;
     j["layer_name"] = layer_name_;
+
+    j["exclude"] = exclude_;
 
     j["points"] = json::array();
 
@@ -302,6 +309,16 @@ std::pair<double, double> Sector::getMinMaxLongitude() const
     }
 
     return {min, max};
+}
+
+bool Sector::exclude() const
+{
+    return exclude_;
+}
+
+void Sector::exclude(bool value)
+{
+    exclude_ = value;
 }
 
 void Sector::createPolygon()

@@ -81,7 +81,7 @@ protected:
     QPushButton* import_button_ {nullptr};
 
     QTableWidget* sector_table_{nullptr};
-    QStringList table_columns_{"ID", "Sector Name",  "Layer Name", "Num Points", "Altitude Minimum",
+    QStringList table_columns_{"ID", "Sector Name",  "Layer Name", "Exclude", "Num Points", "Altitude Minimum",
                                "Altitude Maximum", "Color", "Delete"};
 
     void addImportTab();

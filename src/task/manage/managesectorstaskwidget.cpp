@@ -24,7 +24,7 @@
 #include "sector.h"
 #include "sectorlayer.h"
 #include "files.h"
-
+#include "importsectordialog.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFileDialog>
@@ -233,6 +233,16 @@ void ManageSectorsTaskWidget::updateSectorTable()
                 sector_table_->setItem(row, col, item);
             }
 
+            {  // Exclude
+                ++col;
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsUserCheckable);
+                item->setCheckState(sec_it->exclude() ? Qt::Checked : Qt::Unchecked);
+                //item1->setCheckState();
+                item->setData(Qt::UserRole, QVariant(sector_id));
+                sector_table_->setItem(row, col, item);
+            }
+
             {  // Num Points
                 ++col;
                 QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->points().size()));
@@ -420,10 +430,21 @@ void ManageSectorsTaskWidget::importSlot()
 {
     loginf << "ManageSectorsTaskWidget: importSlot";
 
-    assert (task_.canImportFile());
-    task_.importFile();
+    ImportSectorDialog dialog("test", this);
+    int ret = dialog.exec();
 
-    updateSectorTable();
+    if (ret == QDialog::Accepted)
+    {
+        loginf << "ManageSectorsTaskWidget: importSlot: accepted, layer name '" << dialog.layerName()
+               << "' exclude " << dialog.exclude();
+    }
+    else
+        loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
+
+//    assert (task_.canImportFile());
+//    task_.importFile();
+
+//    updateSectorTable();
 }
 
 void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
@@ -462,6 +483,10 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     {
         if (text.size())
             sector->layerName(text);
+    }
+    else if (col_name == "Exclude")
+    {
+        sector->exclude(item->checkState() == Qt::Checked);
     }
     else if (col_name == "Altitude Minimum")
     {
