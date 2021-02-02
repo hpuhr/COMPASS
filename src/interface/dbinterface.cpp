@@ -1177,6 +1177,38 @@ void DBInterface::insertMinMax(const string& id, const string& object_name,
     current_connection_->executeSQL(str);
 }
 
+bool DBInterface::areColumnsNull (const std::string& table_name, const std::vector<std::string> columns)
+{
+    QMutexLocker locker(&connection_mutex_);
+
+    string str = sql_generator_.getSelectNullCount(table_name, columns);
+
+    loginf << "DBInterface: areColumnsNull: sql '" << str << "'";
+
+    DBCommand command;
+    command.set(str);
+
+    PropertyList list;
+    list.addProperty("count", PropertyDataType::INT);
+    command.list(list);
+
+    shared_ptr<DBResult> result = current_connection_->execute(command);
+
+    assert(result->containsData());
+
+    shared_ptr<Buffer> buffer = result->buffer();
+
+    assert(buffer);
+    assert(buffer->has<int>("count"));
+
+    NullableVector<int> count_vec = buffer->get<int>("count");
+    assert (count_vec.size() == 1);
+
+    loginf << "DBInterface: areColumnsNull: null count " << count_vec.get(0);
+
+    return count_vec.get(0) != 0;
+}
+
 /**
  * If variable is a not meta variable, min/max values just for the variable. If it is, gets min/max
  * values for all subvariables and calculates the min/max for all subvariables. If the variable

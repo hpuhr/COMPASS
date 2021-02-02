@@ -1483,7 +1483,8 @@
                                     "comment":"Age of the DAP \"Track Angle Rate\" in item 062/380 (Subfield #16)",
                                     "type":"fixed_bytes",
                                     "length":1,
-                                    "data_type":"uint"
+                                    "data_type":"uint",
+                                    "lsb":0.25
                                 }
                             ]
                         },

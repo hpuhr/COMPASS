@@ -972,7 +972,7 @@
                                 },
                                 {
                                     "name":"DOP-xy",
-                                    "comment":"ρ(X,Y)",
+                                    "comment":"DOP covariance along (X,Y)",
                                     "type":"fixed_bytes",
                                     "length":2,
                                     "data_type":"uint",
@@ -996,7 +996,7 @@
                                     "lsb":0.25
                                 },
                                 {
-                                    "name":"sigma-x",
+                                    "name":"sigma-y",
                                     "comment":"Standard Deviation of Y component",
                                     "type":"fixed_bytes",
                                     "length":2,
@@ -1005,7 +1005,7 @@
                                 },
                                 {
                                     "name":"rho-xy",
-                                    "comment":"Correlation coefficient in two’s complement",
+                                    "comment":"Correlation coefficient in two's complement",
                                     "type":"fixed_bytes",
                                     "length":2,
                                     "data_type":"int",

@@ -16,18 +16,6 @@
  */
 
 #include "asteriximporttask.h"
-
-#include <jasterix/category.h>
-#include <jasterix/edition.h>
-#include <jasterix/jasterix.h>
-#include <jasterix/refedition.h>
-
-#include <QApplication>
-#include <QCoreApplication>
-#include <QMessageBox>
-#include <QThread>
-#include <algorithm>
-
 #include "asterixcategoryconfig.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixstatusdialog.h"
@@ -51,6 +39,18 @@
 #include "system.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "metadbtable.h"
+
+#include <jasterix/category.h>
+#include <jasterix/edition.h>
+#include <jasterix/jasterix.h>
+#include <jasterix/refedition.h>
+
+#include <QApplication>
+#include <QCoreApplication>
+#include <QMessageBox>
+#include <QThread>
+#include <algorithm>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -972,6 +972,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
     {
         for (auto& parser_it : *schema_)
         {
+            if (!parser_it.second.active())
+                continue;
+
             std::string dbo_name = parser_it.second.dbObject().name();
 
             DBObject& db_object = parser_it.second.dbObject();
@@ -1138,7 +1141,35 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
     logdbg << "ASTERIXImportTask: insertDoneSlot";
     --insert_active_;
 
+    bool test = test_; // test_ cleared by checkAllDone
+
     checkAllDone();
+
+    if (all_done_ && !test && !create_mapping_stubs_)
+    {
+        loginf << "ASTERIXImportTask: insertDoneSlot: finalizing";
+
+        // in case data was imported, clear other task done properties
+        if (status_widget_->dboInsertedCounts().count("Radar"))
+        {
+            bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
+                        COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                        {"pos_lat_deg","pos_long_deg"});
+
+            loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;
+
+            COMPASS::instance().interface().setProperty(
+                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
+        }
+
+        COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+        COMPASS::instance().interface().setProperty(
+            CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
+
+        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+        emit doneSignal(name_);
+    }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
@@ -1191,23 +1222,6 @@ void ASTERIXImportTask::checkAllDone()
         {
             task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
                                         status_widget_->elapsedTimeStr());
-
-            bool was_done = done_;
-            done_ = true;
-
-            // in case data was imported, clear other task done properties
-            if (status_widget_->dboInsertedCounts().count("Radar"))
-                COMPASS::instance().interface().setProperty(
-                    RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
-
-            COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-            COMPASS::instance().interface().setProperty(
-                CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
-
-            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-            if (!was_done)  // only emit if first time done
-                emit doneSignal(name_);
         }
 
         test_ = false;  // set again by widget

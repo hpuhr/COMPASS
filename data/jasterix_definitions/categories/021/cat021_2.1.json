@@ -1203,10 +1203,18 @@
             "data_fields":[
                 {
                     "name":"Track Number",
-                    "comment":"0...4095",
-                    "type":"fixed_bytes",
+                    "type":"fixed_bitfield",
                     "length":2,
-                    "data_type":"uint"
+                    "items":[
+                        {
+                            "name":"Track Number",
+                            "comment":"TRACK NUMBER(0...4095)",
+                            "type":"fixed_bits",
+                            "start_bit":0,
+                            "bit_length":12,
+                            "data_type":"uint"
+                        }
+                    ]
                 }
             ]
         },
@@ -1251,7 +1259,7 @@
                             "type":"fixed_bits",
                             "data_type":"icao_characters",
                             "start_bit":0,
-                            "bit_length":47,
+                            "bit_length":48,
                             "num_characters":8,
                             "character_bit_length":6
                         }
@@ -1708,7 +1716,7 @@
                             "optional_bitfield_index":8,
                             "data_fields":[
                                 {
-                                    "name":"age",
+                                    "name":"Age",
                                     "comment":"Age of the Flight Level information in item I021/145",
                                     "type":"fixed_bytes",
                                     "data_type":"uint",

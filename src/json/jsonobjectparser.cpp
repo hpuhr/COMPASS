@@ -37,6 +37,7 @@ JSONObjectParser::JSONObjectParser(const std::string& class_id, const std::strin
     : Configurable(class_id, instance_id, parent)
 {
     registerParameter("name", &name_, "");
+    registerParameter("active", &active_, true);
     registerParameter("db_object_name", &db_object_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
@@ -894,3 +895,15 @@ void JSONObjectParser::updateMappings()
 std::string JSONObjectParser::name() const { return name_; }
 
 void JSONObjectParser::name(const std::string& name) { name_ = name; }
+
+bool JSONObjectParser::active() const
+{
+    return active_;
+}
+
+void JSONObjectParser::active(bool value)
+{
+    loginf << "JSONObjectParser: active: name " << name_ << " active " << value;
+
+    active_ = value;
+}

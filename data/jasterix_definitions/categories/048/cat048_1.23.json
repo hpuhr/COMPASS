@@ -1,5 +1,5 @@
 {
-    "name":"cat048_1.15_record",
+    "name":"cat048_1.23_record",
     "type":"record",
     "field_specification":{
         "name":"FSPEC",
@@ -134,6 +134,20 @@
                             "bit_length":1
                         },
                         {
+                            "name":"ERR",
+                            "comment":"0 No Extended Range\n1 Extended Range present",
+                            "type":"fixed_bits",
+                            "start_bit":6,
+                            "bit_length":1
+                        },
+                        {
+                            "name":"XPP",
+                            "comment":"0 No X-Pulse present\n1 X-Pulse present",
+                            "type":"fixed_bits",
+                            "start_bit":5,
+                            "bit_length":1
+                        },
+                        {
                             "name":"ME",
                             "comment":"0 No military emergency\n1 Military emergency",
                             "type":"fixed_bits",
@@ -181,7 +195,7 @@
                             "items":[
                                 {
                                     "name":"W/E Value",
-                                    "comment":"0 Not defined; never used.\n1 Multipath Reply (Reflection)\n2 Reply due to sidelobe interrogation/reception\n3 Split plot\n4 Second time around reply\n5 Angel\n6 Slow moving target correlated with road infrastructure (terrestrial vehicle)\n7 Fixed PSR plot\n8 Slow PSR target\n9 Low quality PSR plot\n10 Phantom SSR plot\n11 Non-Matching Mode-3/A Code\n12 Mode C code / Mode S altitude code abnormal value compared to the track\n13 Target in Clutter Area\n14 Maximum Doppler Response in Zero Filter\n15 Transponder anomaly detected\n16 Duplicated or Illegal Mode S Aircraft Address\n17 Mode S error correction applied\n18 Undecodable Mode C code / Mode S altitude code",
+                                    "comment":"0 Not defined; never used.\n1 Multipath Reply (Reflection)\n2 Reply due to sidelobe interrogation/reception\n3 Split plot\n4 Second time around reply\n5 Angel\n6 Slow moving target correlated with road infrastructure (terrestrial vehicle)\n7 Fixed PSR plot\n8 Slow PSR target\n9 Low quality PSR plot\n10 Phantom SSR plot\n11 Non-Matching Mode-3/A Code\n12 Mode C code / Mode S altitude code abnormal value compared to the track\n13 Target in Clutter Area\n14 Maximum Doppler Response in Zero Filter\n15 Transponder anomaly detected\n16 Duplicated or Illegal Mode S Aircraft Address\n17 Mode S error correction applied\n18 Undecodable Mode C code / Mode S altitude code\n19 Birds\n20 Flock of Birds\n21 Mode 1 was present in original reply\n22 Mode 2 was present in original reply\n23 Plot potentially caused by Wind Turbine",
                                     "type":"fixed_bits",
                                     "start_bit":1,
                                     "bit_length":7
@@ -811,7 +825,7 @@
                         },
                         {
                             "name":"CDM",
-                            "comment":"Climbing / Descending Mode\n00 Maintaining\n01 Climbing\n10 Descending\n11 Invalid",
+                            "comment":"Climbing / Descending Mode\n00 Maintaining\n01 Climbing\n10 Descending\n11 Unknown",
                             "type":"fixed_bits",
                             "start_bit":1,
                             "bit_length":2
@@ -963,10 +977,17 @@
                         },
                         {
                             "name":"STAT",
-                            "comment":"Flight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground\n6 - 7 Not assigned",
+                            "comment":"Flight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground\n6 Not assigned\n7 Unknown",
                             "type":"fixed_bits",
                             "start_bit":10,
                             "bit_length":3
+                        },
+                        {
+                            "name":"SI",
+                            "comment":"SI/II Transponder Capability\n0 No\n1 Yes",
+                            "type":"fixed_bits",
+                            "start_bit":9,
+                            "bit_length":1
                         },
                         {
                             "name":"MSSC",
