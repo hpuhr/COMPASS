@@ -87,7 +87,7 @@ public:
     std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
 
     void createNewSector (const std::string& name, const std::string& layer_name,
-                          std::vector<std::pair<double,double>> points);
+                          bool exclude, std::vector<std::pair<double,double>> points);
     bool hasSector (const std::string& name, const std::string& layer_name);
     bool hasSector (unsigned int id);
     std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);
@@ -100,6 +100,7 @@ public:
     void deleteAllSectors();
     void importSectors (const std::string& filename);
     void exportSectors (const std::string& filename);
+    unsigned int getMaxSectorId ();
 
     std::string dboNameRef() const;
     void dboNameRef(const std::string& name);
@@ -431,6 +432,7 @@ protected:
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
+    unsigned int max_sector_id_ {0};
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
     nlohmann::json use_grp_in_sector_; //standard_name->sector_layer_name->req_grp_name->bool use
@@ -447,8 +449,6 @@ protected:
         std::tuple<bool, unsigned int, unsigned int>>> adsb_info_;
 
     virtual void checkSubConfigurables() override;
-
-    unsigned int getMaxSectorId ();
 
     void updateReferenceDBO();
     void updateReferenceDataSources();

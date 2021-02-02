@@ -437,14 +437,14 @@ void ManageSectorsTaskWidget::importSlot()
     {
         loginf << "ManageSectorsTaskWidget: importSlot: accepted, layer name '" << dialog.layerName()
                << "' exclude " << dialog.exclude();
+
+        assert (task_.canImportFile());
+        task_.importFile(dialog.layerName(), dialog.exclude());
+
+        updateSectorTable();
     }
     else
         loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
-
-//    assert (task_.canImportFile());
-//    task_.importFile();
-
-//    updateSectorTable();
 }
 
 void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
@@ -477,12 +477,30 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     if (col_name == "Sector Name")
     {
         if (text.size())
-            sector->name(text);
+        {
+            if (eval_man.hasSector(text, sector->layerName()))
+            {
+                QMessageBox m_warning(QMessageBox::Warning, "Sector Change Failed",
+                ("Layer '"+sector->layerName()+"' Sector '"+text+"' already exists.").c_str(), QMessageBox::Ok);
+                m_warning.exec();
+            }
+            else
+                sector->name(text);
+        }
     }
     else if (col_name == "Layer Name")
     {
         if (text.size())
-            sector->layerName(text);
+        {
+            if (eval_man.hasSector(sector->name(), text))
+            {
+                QMessageBox m_warning(QMessageBox::Warning, "Sector Change Failed",
+                ("Layer '"+text+"' Sector '"+sector->name()+"' already exists.").c_str(), QMessageBox::Ok);
+                m_warning.exec();
+            }
+            else
+                sector->layerName(text);
+        }
     }
     else if (col_name == "Exclude")
     {

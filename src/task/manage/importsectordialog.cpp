@@ -73,12 +73,10 @@ bool ImportSectorDialog::exclude ()
 
 void ImportSectorDialog::cancelSlot()
 {
-    //import_ = false;
     reject();
 }
 
 void ImportSectorDialog::importSlot()
 {
-    //import_ = true;
     accept();
 }

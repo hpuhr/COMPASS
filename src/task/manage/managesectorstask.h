@@ -45,7 +45,7 @@ public:
     virtual void deleteWidget();
 
     bool canImportFile();
-    void importFile ();
+    void importFile (const std::string& layer_name, bool exclude);
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended() { return false; }
@@ -71,16 +71,17 @@ protected:
     unsigned int found_sectors_num_{0};
     std::string parse_message_;
 
+    std::string layer_name_;
+    bool exclude_;
+
     virtual void checkSubConfigurables() {}
 
     void parseCurrentFile (bool import);
 
-    void addPolygon (const std::string& layer_name, OGRPolygon& polygon, bool import);
-    void addLinearRing (const std::string& layer_name, const std::string& polygon_name, OGRLinearRing& ring,
-                        bool import);
+    void addPolygon (const std::string& sector_name, OGRPolygon& polygon, bool import);
+    void addLinearRing (const std::string& sector_name, OGRLinearRing& ring, bool import);
 
-    void addSector (const std::string& sector_name, const std::string& layer_name,
-                    std::vector<std::pair<double,double>> points);
+    void addSector (const std::string& sector_name, std::vector<std::pair<double,double>> points);
 };
 
 #endif // MANAGESECTORSTASK_H

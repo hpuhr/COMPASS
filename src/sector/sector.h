@@ -32,7 +32,7 @@ class Sector
 public:
     // should be protected?
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
-           std::vector<std::pair<double,double>> points);
+           bool exclude, std::vector<std::pair<double,double>> points);
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
            const std::string& json_str);
 

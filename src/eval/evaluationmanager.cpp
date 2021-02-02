@@ -786,24 +786,21 @@ void EvaluationManager::loadSectors()
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
+    for (auto& sec_lay_it : sector_layers_)
+        for (auto& sec_it : sec_lay_it->sectors())
+           max_sector_id_ = std::max(max_sector_id_, sec_it->id());
+
     sectors_loaded_ = true;
 }
 
 unsigned int EvaluationManager::getMaxSectorId ()
 {
     assert (sectors_loaded_);
-
-    unsigned int id = 0;
-    for (auto& sec_lay_it : sector_layers_)
-        for (auto& sec_it : sec_lay_it->sectors())
-            if (sec_it->id() > id)
-                id = sec_it->id();
-
-    return id;
+    return max_sector_id_;
 }
 
 void EvaluationManager::createNewSector (const std::string& name, const std::string& layer_name,
-                                         std::vector<std::pair<double,double>> points)
+                                         bool exclude, std::vector<std::pair<double,double>> points)
 {
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
@@ -811,9 +808,9 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
     assert (sectors_loaded_);
     assert (!hasSector(name, layer_name));
 
-    unsigned int id = getMaxSectorId()+1;
+    ++max_sector_id_; // new max
 
-    shared_ptr<Sector> sector = make_shared<Sector> (id, name, layer_name, points);
+    shared_ptr<Sector> sector = make_shared<Sector> (max_sector_id_, name, layer_name, exclude, points);
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))

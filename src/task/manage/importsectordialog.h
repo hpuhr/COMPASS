@@ -23,8 +23,6 @@ public:
 protected:
     QLineEdit* layer_name_edit_edit_ {nullptr};
     QCheckBox* exclude_check_ {nullptr};
-
-    //bool import_ {false};
 };
 
 #endif // IMPORTSECTORDIALOG_H
