@@ -87,7 +87,7 @@ public:
     std::shared_ptr<SectorLayer> sectorLayer (const std::string& layer_name);
 
     void createNewSector (const std::string& name, const std::string& layer_name,
-                          bool exclude, std::vector<std::pair<double,double>> points);
+                          bool exclude, QColor color, std::vector<std::pair<double,double>> points);
     bool hasSector (const std::string& name, const std::string& layer_name);
     bool hasSector (unsigned int id);
     std::shared_ptr<Sector> sector (const std::string& name, const std::string& layer_name);

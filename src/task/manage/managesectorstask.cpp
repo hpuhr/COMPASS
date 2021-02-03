@@ -212,7 +212,7 @@ bool ManageSectorsTask::canImportFile()
     return true;
 }
 
-void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude)
+void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude, QColor color)
 {
     assert (canImportFile());
 
@@ -230,6 +230,7 @@ void ManageSectorsTask::importFile (const std::string& layer_name, bool exclude)
 
     layer_name_ = layer_name;
     exclude_ = exclude;
+    color_ = color;
 
     task_manager_.appendInfo("ManageSectorsTask: import of file '" + current_filename_ +
                              "' into layer '" + layer_name_ + "' started");
@@ -462,7 +463,7 @@ void ManageSectorsTask::addSector (const std::string& sector_name, std::vector<s
     assert (!eval_man.hasSector(sector_name, layer_name_));
 
     loginf << "ManageSectorsTask: addSector: adding layer '" << layer_name_ << "' name '" << sector_name;
-    eval_man.createNewSector(sector_name, layer_name_, exclude_, points);
+    eval_man.createNewSector(sector_name, layer_name_, exclude_, color_, points);
 }
 
 

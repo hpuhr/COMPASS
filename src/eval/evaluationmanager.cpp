@@ -800,7 +800,7 @@ unsigned int EvaluationManager::getMaxSectorId ()
 }
 
 void EvaluationManager::createNewSector (const std::string& name, const std::string& layer_name,
-                                         bool exclude, std::vector<std::pair<double,double>> points)
+                                         bool exclude, QColor color, std::vector<std::pair<double,double>> points)
 {
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
@@ -810,7 +810,7 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
 
     ++max_sector_id_; // new max
 
-    shared_ptr<Sector> sector = make_shared<Sector> (max_sector_id_, name, layer_name, exclude, points);
+    shared_ptr<Sector> sector = make_shared<Sector> (max_sector_id_, name, layer_name, exclude, color, points);
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))

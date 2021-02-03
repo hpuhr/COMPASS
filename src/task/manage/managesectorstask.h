@@ -18,11 +18,13 @@
 #ifndef MANAGESECTORSTASK_H
 #define MANAGESECTORSTASK_H
 
-#include <QObject>
-#include <memory>
-
 #include "configurable.h"
 #include "task.h"
+
+#include <QObject>
+#include <QColor>
+
+#include <memory>
 
 class TaskManager;
 class ManageSectorsTaskWidget;
@@ -45,7 +47,7 @@ public:
     virtual void deleteWidget();
 
     bool canImportFile();
-    void importFile (const std::string& layer_name, bool exclude);
+    void importFile (const std::string& layer_name, bool exclude, QColor color);
 
     virtual bool checkPrerequisites();
     virtual bool isRecommended() { return false; }
@@ -73,6 +75,7 @@ protected:
 
     std::string layer_name_;
     bool exclude_;
+    QColor color_;
 
     virtual void checkSubConfigurables() {}
 

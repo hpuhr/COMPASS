@@ -439,7 +439,7 @@ void ManageSectorsTaskWidget::importSlot()
                << "' exclude " << dialog.exclude();
 
         assert (task_.canImportFile());
-        task_.importFile(dialog.layerName(), dialog.exclude());
+        task_.importFile(dialog.layerName(), dialog.exclude(), dialog.color());
 
         updateSectorTable();
     }

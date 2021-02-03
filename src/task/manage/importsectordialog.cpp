@@ -1,4 +1,5 @@
 #include "importsectordialog.h"
+#include "logger.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
@@ -7,6 +8,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QColorDialog>
+#include <QApplication>
 
 ImportSectorDialog::ImportSectorDialog(const std::string& layer_name,
                                        QWidget* parent, Qt::WindowFlags f)
@@ -39,6 +42,23 @@ ImportSectorDialog::ImportSectorDialog(const std::string& layer_name,
     exclude_check_->setChecked(false);
     grid->addWidget(exclude_check_, row, 1);
 
+    // color
+    ++row;
+    grid->addWidget(new QLabel("Color"), row, 0);
+
+    color_ = QColor("#AAAAAA");
+
+    color_button_ = new QPushButton();
+    color_button_->setFlat(true);
+
+    QPalette pal = color_button_->palette();
+    pal.setColor(QPalette::Button, color_);
+    color_button_->setAutoFillBackground(true);
+    color_button_->setPalette(pal);
+
+    connect (color_button_, &QPushButton::clicked, this, &ImportSectorDialog::colorSlot);
+    grid->addWidget(color_button_, row, 1);
+
     main_layout->addLayout(grid);
 
     main_layout->addStretch();
@@ -56,6 +76,7 @@ ImportSectorDialog::ImportSectorDialog(const std::string& layer_name,
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
+
 }
 
 
@@ -69,6 +90,30 @@ bool ImportSectorDialog::exclude ()
 {
     assert (exclude_check_);
     return exclude_check_->checkState() == Qt::Checked;
+}
+
+QColor ImportSectorDialog::color ()
+{
+    return color_;
+}
+
+void ImportSectorDialog::colorSlot()
+{
+    QColor color =
+            QColorDialog::getColor(color_, QApplication::activeWindow(), "Select Sector",
+                                   QColorDialog::DontUseNativeDialog);
+
+    if (color.isValid())
+    {
+        loginf << "ImportSectorDialog: colorSlot: color " << color.name().toStdString();
+        color_ = color;
+
+        assert (color_button_);
+
+        QPalette pal = color_button_->palette();
+        pal.setColor(QPalette::Button, color_);
+        color_button_->setPalette(pal);
+    }
 }
 
 void ImportSectorDialog::cancelSlot()

@@ -28,11 +28,10 @@ using namespace std;
 const string default_color{"#AAAAAA"};
 
 Sector::Sector(unsigned int id, const std::string& name, const std::string& layer_name,
-               bool exclude, std::vector<std::pair<double,double>> points)
-    : id_(id), name_(name), layer_name_(layer_name), exclude_(exclude), points_(points)
+               bool exclude, QColor color, std::vector<std::pair<double,double>> points)
+    : id_(id), name_(name), layer_name_(layer_name), exclude_(exclude), color_str_{color.name().toStdString()},
+      points_(points)
 {
-    color_str_ = default_color;
-
     createPolygon();
 }
 
