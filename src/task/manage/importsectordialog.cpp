@@ -11,6 +11,8 @@
 #include <QColorDialog>
 #include <QApplication>
 
+#include <cassert>
+
 ImportSectorDialog::ImportSectorDialog(const std::string& layer_name,
                                        QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
