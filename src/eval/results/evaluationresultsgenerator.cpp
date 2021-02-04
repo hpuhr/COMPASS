@@ -350,7 +350,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     unsigned int cnt = 0;
     for (auto& result_it : results_vec_)
     {
-        if (result_it->isSingle())
+        if (result_it->isSingle() && result_it->use())
         {
             if (cnt % 100 == 0)
                 QCoreApplication::processEvents();
