@@ -1447,7 +1447,7 @@ void HistogramViewDataWidget::updateChart()
 
         tmp_chart_y_axis->setLabelFormat("%g");
         tmp_chart_y_axis->setBase(10.0);
-        tmp_chart_y_axis->setMinorTickCount(10);
+        //tmp_chart_y_axis->setMinorTickCount(10);
         //tmp_chart_y_axis->setMinorTickCount(-1);
         tmp_chart_y_axis->setRange(10e-2, pow(10.0, 1+ceil(log10(max_bin_cnt_))));
 
