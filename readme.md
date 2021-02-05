@@ -4,56 +4,14 @@ Please note that the previous project name was ATSDB. OpenATS COMPASS is a direc
 ## Description
 Based on a dynamic database schema, recorded air traffic surveillance data can be imported into database, analysed, inspected and evaluated.
 
-- Support of multiple database systems, e.g. Sqlite3, MySQL
-- Support of multiple, configurable database schemas, e.g. SCDB
-- Dynamic JSON import from jASTERIX, SDDL, ADS-B exchange, OpenSky Network
-- Dynamic ASTERIX import using [jASTERIX](https://github.com/hpuhr/jASTERIX)
-- Import of (D)GPS trails from NMEA files
-- Import of polygons from GML,KML,ESRI Shapefiles
-- MySQL database import and management of SCDB databases
-- High performance processing, low memory footprint
-- Filtering for detailed analysis
-- Simple custom filter generation
-- ARTAS track association (TRI) analysis
-- Supported Database Objects
-  - Radar plots
-  - MLAT & WAM target reports
-  - ADS-B target reports
-  - System Track updates
-  - Reference trajectory updates
-- Textual data inspection using Listbox View
-  - Display of data as text tables
-  - Configurable data loading of data of interest
-  - Exporting of data as CSV
-- Graphical data inspection using OSG View
-  - Customizable map/terrain display based on osgEarth
-  - Customizable display of ATC surveillance data
-  - High-speed time-filtered display
-  - Numerous operations for analysis, e.g. data selection, labeling, distance measurement
-  - Configurable data layering and styling for detailed analysis
-  - Relatively low memory footprint (e.g. 16 million target reports in ~8 GB RAM)
-- Cross-view data selection and inspection
-  - Command line options for automated processing
-  - View points for efficient inspection
-- Standard compliance evaluation (under construction)
-  - Definition of standards based on configurable requirements
-  - Generalized comparison of test data vs. reference data
-  - Calculation of requirements/performance indicators
-  - Investigation/display of results on several levels of detail
-  - Manual removal of specific targets possible
-  - Export of results as report PDF
-
+For a detailed list of features, as well as the offered commercial services, please refer to [OpenATS COMPASS](https://www.openats.at/projects/compass/).
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released Experimental COMPASS Version v0.5.6-alpha
-- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/COMPASS-v0.5.6-alpha.AppImage)
-- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.6-alpha/user_manual_v0.5.6.pdf)
+## Released Experimental COMPASS Version v0.6.0-hf1-alpha
+- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.0-alpha/COMPASS-v0.6.0-hf1-alpha.AppImage)
+- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.0-alpha/user_manual_v0.6.0.pdf)
 - [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
-
-## Released ATSDB Version v0.5.5-beta
-- [Previous Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/ATSDB-v0.5.5.AppImage)
-- [Previous User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.5.5-beta/user_manual_v0.5.5.pdf)
 
 
 ## Screenshots
