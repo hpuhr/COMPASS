@@ -47,6 +47,8 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
 protected:
     float threshold_value_ {0};
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};

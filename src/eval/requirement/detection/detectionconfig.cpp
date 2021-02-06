@@ -19,8 +19,15 @@
 #include "eval/requirement/detection/detectionconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+#include "comparisontype.h"
+#include "stringconv.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
+using namespace Utils;
 
 namespace EvaluationRequirement
 {
@@ -164,6 +171,43 @@ void DetectionConfig::createWidget()
     assert (!widget_);
     widget_.reset(new DetectionConfigWidget(*this));
     assert (widget_);
+}
+
+void DetectionConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    table.addRow({"Probability [1]", "Probability of detection or miss (inverted probability)",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+
+    table.addRow({"Update Interval [s]", "",
+                  update_interval_s_}, nullptr);
+
+    table.addRow({"Use Minimum Gap Length", "If minimum gap length should be used",
+                  String::boolToString(use_min_gap_length_).c_str()}, nullptr);
+    table.addRow({"Minimum Gap Length [s]", "Minimum gap length to be considered",
+                  min_gap_length_s_}, nullptr);
+
+    table.addRow({"Use Maximum Gap Length", "If maximum gap length should be used",
+                  String::boolToString(use_max_gap_length_).c_str()}, nullptr);
+    table.addRow({"Maximum Gap Length [s]", "Maximum gap length to be considered",
+                  max_gap_length_s_}, nullptr);
+
+    table.addRow({"Invert Probability", "If calculated probability should be inverted",
+                  comment_.c_str()}, nullptr);
+
+    table.addRow({"Use Miss Tolerance", "If miss tolerance should be used",
+                  String::boolToString(use_miss_tolerance_).c_str()}, nullptr);
+    table.addRow({"Miss Tolerance [s]", "Acceptable time delta for miss detection",
+                  miss_tolerance_s_}, nullptr);
+
+    // prob & check type added in subclass
 }
 
 }

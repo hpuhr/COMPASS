@@ -50,6 +50,8 @@ public:
     bool useMsTi() const;
     void useMsTi(bool value);
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
 protected:
     // true: all must be false, false: at least one must be false
     bool require_all_false_ {true};

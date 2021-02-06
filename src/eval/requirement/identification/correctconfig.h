@@ -31,40 +31,42 @@ class EvaluationStandard;
 namespace EvaluationRequirement
 {
 
-    class IdentificationCorrectConfig : public BaseConfig
-    {
-    public:
-        IdentificationCorrectConfig(const std::string& class_id, const std::string& instance_id,
-                             Group& group, EvaluationStandard& standard,
-                             EvaluationManager& eval_man);
+class IdentificationCorrectConfig : public BaseConfig
+{
+public:
+    IdentificationCorrectConfig(const std::string& class_id, const std::string& instance_id,
+                                Group& group, EvaluationStandard& standard,
+                                EvaluationManager& eval_man);
 
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        bool requireCorrectnessOfAll() const;
-        void requireCorrectnessOfAll(bool value);
+    bool requireCorrectnessOfAll() const;
+    void requireCorrectnessOfAll(bool value);
 
-        bool useModeA() const;
-        void useModeA(bool value);
+    bool useModeA() const;
+    void useModeA(bool value);
 
-        bool useMsTa() const;
-        void useMsTa(bool value);
+    bool useMsTa() const;
+    void useMsTa(bool value);
 
-        bool useMsTi() const;
-        void useMsTi(bool value);
+    bool useMsTi() const;
+    void useMsTi(bool value);
 
-    protected:
-        // true: all must be correct (not false), false: at least one must be correct (not false)
-        bool require_correctness_of_all_ {false};
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        // mode a ssr code
-        bool use_mode_a_ {true};
-        // 24-bit mode s address
-        bool use_ms_ta_ {true};
-        // downlinked aircraft identification
-        bool use_ms_ti_ {true};
+protected:
+    // true: all must be correct (not false), false: at least one must be correct (not false)
+    bool require_correctness_of_all_ {false};
 
-        virtual void createWidget() override;
-    };
+    // mode a ssr code
+    bool use_mode_a_ {true};
+    // 24-bit mode s address
+    bool use_ms_ta_ {true};
+    // downlinked aircraft identification
+    bool use_ms_ti_ {true};
+
+    virtual void createWidget() override;
+};
 
 }
 

@@ -65,6 +65,8 @@ public:
     float missTolerance() const;
     void missTolerance(float value);
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
 protected:
     float update_interval_s_{0};
 

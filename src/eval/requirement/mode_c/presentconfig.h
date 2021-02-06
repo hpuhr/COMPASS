@@ -29,22 +29,24 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-    class ModeCPresentConfig : public BaseConfig
-    {
-    public:
-        ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
-                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+class ModeCPresentConfig : public BaseConfig
+{
+public:
+    ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
+                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        float minimumProbabilityPresent() const;
-        void minimumProbabilityPresent(float value);
+    float minimumProbabilityPresent() const;
+    void minimumProbabilityPresent(float value);
 
-    protected:
-        float minimum_probability_present_{0};
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-         virtual void createWidget() override;
-    };
+protected:
+    float minimum_probability_present_{0};
+
+    virtual void createWidget() override;
+};
 
 }
 

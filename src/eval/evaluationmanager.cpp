@@ -574,6 +574,7 @@ void EvaluationManager::evaluate ()
     {
         widget_->updateButtons();
         widget_->expandResults();
+        //widget_->showResultId("")
     }
 
     emit resultsChangedSignal();

@@ -166,6 +166,7 @@ void PDFGenerator::run ()
         assert (eval_man_.hasResults());
         std::shared_ptr<Section> root_section = eval_man_.resultsGenerator().resultsModel().rootItem()->rootSection();
 
+
         string status_str, elapsed_time_str, remaining_time_str;
 
         // create sections
@@ -517,4 +518,5 @@ void PDFGenerator::numMaxTableColWidth(unsigned int value)
 {
     num_max_table_col_width_ = value;
 }
+
 }

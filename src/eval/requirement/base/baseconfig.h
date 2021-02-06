@@ -22,6 +22,7 @@
 #include "evaluationstandardtreeitem.h"
 #include "eval/requirement/base/baseconfigwidget.h"
 #include "eval/requirement/base/comparisontype.h"
+#include "eval/results/report/rootitem.h"
 
 #include <QObject>
 
@@ -74,6 +75,8 @@ public:
 
     std::string comment() const;
     void comment(const std::string& comment);
+
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
     Group& group_;

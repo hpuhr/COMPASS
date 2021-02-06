@@ -18,14 +18,15 @@
 #ifndef EVALUATIONSTANDARD_H
 #define EVALUATIONSTANDARD_H
 
+#include "configurable.h"
+#include "evaluationstandardtreeitem.h"
+#include "evaluationstandardrootitem.h"
+#include "eval/results/report/rootitem.h"
+
 #include <QObject>
 #include <QMenu>
 
 #include <memory>
-
-#include "configurable.h"
-#include "evaluationstandardtreeitem.h"
-#include "evaluationstandardrootitem.h"
 
 class EvaluationManager;
 class Group;
@@ -79,6 +80,8 @@ public:
     void showMenu ();
     void beginModelReset();
     void endModelReset();
+
+    void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
     EvaluationManager& eval_man_;

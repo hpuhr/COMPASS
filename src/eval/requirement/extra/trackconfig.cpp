@@ -19,70 +19,89 @@
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
-    ExtraTrackConfig::ExtraTrackConfig(
-            const std::string& class_id, const std::string& instance_id,
-            Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-        : BaseConfig(class_id, instance_id, group, standard, eval_man)
-    {
-        registerParameter("min_duration", &min_duration_, 60.0);
-        registerParameter("min_num_updates", &min_num_updates_, 10);
-        registerParameter("ignore_primary_only", &ignore_primary_only_, true);
-    }
+ExtraTrackConfig::ExtraTrackConfig(
+        const std::string& class_id, const std::string& instance_id,
+        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+{
+    registerParameter("min_duration", &min_duration_, 60.0);
+    registerParameter("min_num_updates", &min_num_updates_, 10);
+    registerParameter("ignore_primary_only", &ignore_primary_only_, true);
+}
 
-    ExtraTrackConfig::~ExtraTrackConfig()
-    {
+ExtraTrackConfig::~ExtraTrackConfig()
+{
 
-    }
+}
 
-    std::shared_ptr<Base> ExtraTrackConfig::createRequirement()
-    {
-        shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
-                    min_num_updates_, ignore_primary_only_);
+std::shared_ptr<Base> ExtraTrackConfig::createRequirement()
+{
+    shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(
+                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
+                min_num_updates_, ignore_primary_only_);
 
-        return req;
-    }
+    return req;
+}
 
-    float ExtraTrackConfig::minDuration() const
-    {
-        return min_duration_;
-    }
+float ExtraTrackConfig::minDuration() const
+{
+    return min_duration_;
+}
 
-    void ExtraTrackConfig::minDuration(float value)
-    {
-        min_duration_ = value;
-    }
+void ExtraTrackConfig::minDuration(float value)
+{
+    min_duration_ = value;
+}
 
-    unsigned int ExtraTrackConfig::minNumUpdates() const
-    {
-        return min_num_updates_;
-    }
+unsigned int ExtraTrackConfig::minNumUpdates() const
+{
+    return min_num_updates_;
+}
 
-    void ExtraTrackConfig::minNumUpdates(unsigned int value)
-    {
-        min_num_updates_ = value;
-    }
+void ExtraTrackConfig::minNumUpdates(unsigned int value)
+{
+    min_num_updates_ = value;
+}
 
-    bool ExtraTrackConfig::ignorePrimaryOnly() const
-    {
-        return ignore_primary_only_;
-    }
+bool ExtraTrackConfig::ignorePrimaryOnly() const
+{
+    return ignore_primary_only_;
+}
 
-    void ExtraTrackConfig::ignorePrimaryOnly(bool value)
-    {
-        ignore_primary_only_ = value;
-    }
+void ExtraTrackConfig::ignorePrimaryOnly(bool value)
+{
+    ignore_primary_only_ = value;
+}
 
-    void ExtraTrackConfig::createWidget()
-    {
-        assert (!widget_);
-        widget_.reset(new ExtraTrackConfigWidget(*this));
-        assert (widget_);
-    }
+void ExtraTrackConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new ExtraTrackConfigWidget(*this));
+    assert (widget_);
+}
+
+void ExtraTrackConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+
+    // prob & check type added in subclass
+}
 }

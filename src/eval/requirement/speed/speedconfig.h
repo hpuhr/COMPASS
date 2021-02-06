@@ -33,7 +33,7 @@ class SpeedConfig : public BaseConfig
 {
 public:
     SpeedConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
     virtual ~SpeedConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -53,6 +53,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
     float threshold_value_ {0};

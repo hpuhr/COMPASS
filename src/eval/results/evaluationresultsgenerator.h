@@ -154,6 +154,8 @@ protected:
     std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
 
     virtual void checkSubConfigurables() override;
+
+    void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 };
 
 #endif // EVALUATIONRESULTSGENERATOR_H

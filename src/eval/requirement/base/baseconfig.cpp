@@ -19,13 +19,48 @@
 #include "eval/requirement/group.h"
 #include "logger.h"
 
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+
 #include <QFormLayout>
 #include <QLineEdit>
 
 using namespace std;
+using namespace EvaluationResultsReport;
 
 namespace EvaluationRequirement
 {
+
+std::string comparisonTypeString(COMPARISON_TYPE type)
+{
+    if (type == LESS_THAN)
+        return "<";
+    else if (type == LESS_THAN_OR_EQUAL)
+        return "<=";
+    else if (type == GREATER_THAN)
+        return ">";
+    else if (type == GREATER_THAN_OR_EUQAL)
+        return ">=";
+    else
+        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unkown type "
+                                 + std::to_string((unsigned int) type));
+}
+
+std::string comparisonTypeLongString(COMPARISON_TYPE type)
+{
+    if (type == LESS_THAN)
+        return "Less Than (<)";
+    else if (type == LESS_THAN_OR_EQUAL)
+        return "Less Than or Equal (<=)";
+    else if (type == GREATER_THAN)
+        return "Greater Than (>)";
+    else if (type == GREATER_THAN_OR_EUQAL)
+        return "Greater Than or Equal (>=)";
+    else
+        throw std::runtime_error("EvaluationRequirement: comparisonTypeString: unkown type "
+                                 + std::to_string((unsigned int) type));
+}
 
 BaseConfig::BaseConfig(
         const std::string& class_id, const std::string& instance_id,
@@ -162,6 +197,22 @@ COMPARISON_TYPE BaseConfig::probCheckType() const
 void BaseConfig::probCheckType(const COMPARISON_TYPE& prob_type)
 {
     prob_check_type_ = prob_type;
+}
+
+void BaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    table.addRow({"Group", "Group name", group_.name().c_str()}, nullptr);
+
+    // prob & check type added in subclass
 }
 
 }

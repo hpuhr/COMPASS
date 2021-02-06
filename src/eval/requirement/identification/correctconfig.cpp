@@ -19,73 +19,92 @@
 #include "eval/requirement/identification/correctconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
-    IdentificationCorrectConfig::IdentificationCorrectConfig(
-            const std::string& class_id, const std::string& instance_id,
-            Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-        : BaseConfig(class_id, instance_id, group, standard, eval_man)
-    {
-    }
+IdentificationCorrectConfig::IdentificationCorrectConfig(
+        const std::string& class_id, const std::string& instance_id,
+        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+{
+}
 
-    std::shared_ptr<Base> IdentificationCorrectConfig::createRequirement()
-    {
-        shared_ptr<IdentificationCorrect> req = make_shared<IdentificationCorrect>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    require_correctness_of_all_,
-                    use_mode_a_, use_ms_ta_, use_ms_ti_);
+std::shared_ptr<Base> IdentificationCorrectConfig::createRequirement()
+{
+    shared_ptr<IdentificationCorrect> req = make_shared<IdentificationCorrect>(
+                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                require_correctness_of_all_,
+                use_mode_a_, use_ms_ta_, use_ms_ti_);
 
-        return req;
-    }
-    
-    bool IdentificationCorrectConfig::requireCorrectnessOfAll() const
-    {
-        return require_correctness_of_all_;
-    }
+    return req;
+}
 
-    void IdentificationCorrectConfig::requireCorrectnessOfAll(bool value)
-    {
-        require_correctness_of_all_ = value;
-    }
+bool IdentificationCorrectConfig::requireCorrectnessOfAll() const
+{
+    return require_correctness_of_all_;
+}
 
-    bool IdentificationCorrectConfig::useModeA() const
-    {
-        return use_mode_a_;
-    }
-    
-    void IdentificationCorrectConfig::useModeA(bool value)
-    {
-        use_mode_a_ = value;
-    }
-    
-    bool IdentificationCorrectConfig::useMsTa() const
-    {
-        return use_ms_ta_;
-    }
-    
-    void IdentificationCorrectConfig::useMsTa(bool value)
-    {
-        use_ms_ta_ = value;
-    }
-    
-    bool IdentificationCorrectConfig::useMsTi() const
-    {
-        return use_ms_ti_;
-    }
-    
-    void IdentificationCorrectConfig::useMsTi(bool value)
-    {
-        use_ms_ti_ = value;
-    }
-    
-    void IdentificationCorrectConfig::createWidget()
-    {
-        assert (!widget_);
-        widget_.reset(new IdentificationCorrectConfigWidget(*this));
-        assert (widget_);
-    }
+void IdentificationCorrectConfig::requireCorrectnessOfAll(bool value)
+{
+    require_correctness_of_all_ = value;
+}
+
+bool IdentificationCorrectConfig::useModeA() const
+{
+    return use_mode_a_;
+}
+
+void IdentificationCorrectConfig::useModeA(bool value)
+{
+    use_mode_a_ = value;
+}
+
+bool IdentificationCorrectConfig::useMsTa() const
+{
+    return use_ms_ta_;
+}
+
+void IdentificationCorrectConfig::useMsTa(bool value)
+{
+    use_ms_ta_ = value;
+}
+
+bool IdentificationCorrectConfig::useMsTi() const
+{
+    return use_ms_ti_;
+}
+
+void IdentificationCorrectConfig::useMsTi(bool value)
+{
+    use_ms_ti_ = value;
+}
+
+void IdentificationCorrectConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new IdentificationCorrectConfigWidget(*this));
+    assert (widget_);
+}
+
+void IdentificationCorrectConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+
+    // prob & check type added in subclass
+}
 }

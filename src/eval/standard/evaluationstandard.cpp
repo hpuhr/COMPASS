@@ -22,11 +22,19 @@
 #include "evaluationstandardtreemodel.h"
 #include "logger.h"
 
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+
+#include "eval/requirement/group.h"
+#include "eval/requirement/base/baseconfig.h"
+
 #include <QTreeView>
 #include <QInputDialog>
 #include <QMessageBox>
 
 using namespace std;
+using namespace EvaluationResultsReport;
 
 EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::string& instance_id,
                                        EvaluationManager& eval_man)
@@ -256,4 +264,26 @@ void EvaluationStandard::groupsChangedSlot()
     }
 }
 
+void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Overview:Standard");
+
+    // reqs overview
+
+    section.addTable("req_overview_table", 3, {"Group", "Type", "Name"}, false);
+
+    EvaluationResultsReport::SectionContentTable& req_table = section.getTable("req_overview_table");
+
+    for (auto& std_it : groups_)
+    {
+        for (auto& req_it : *std_it)
+        {
+            req_table.addRow({std_it->name().c_str(),
+                          Group::requirement_type_mapping_.at(req_it->classId()).c_str(),
+                          (req_it->name()+" ("+req_it->shortName()+")").c_str()}, nullptr);
+
+            req_it->addToReport(root_item);
+        }
+    }
+}
 

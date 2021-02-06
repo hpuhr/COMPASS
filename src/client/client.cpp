@@ -51,9 +51,13 @@ using namespace Utils;
 
 namespace po = boost::program_options;
 
+std::string APP_FILENAME;
+
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
+
+    APP_FILENAME = argv[0];
 
     tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 

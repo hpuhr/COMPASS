@@ -18,30 +18,49 @@
 #include "eval/requirement/mode_a/presentconfig.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
-    ModeAPresentConfig::ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
-                             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-                         : BaseConfig(class_id, instance_id, group, standard, eval_man)
-    {
-    }
+ModeAPresentConfig::ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
+                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+{
+}
 
-    std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
-    {
-        shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
+{
+    shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
+                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
 
-        return req;
-    }
+    return req;
+}
 
-    void ModeAPresentConfig::createWidget()
-    {
-        assert (!widget_);
-        widget_.reset(new ModeAPresentConfigWidget(*this));
-        assert (widget_);
-    }
+void ModeAPresentConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new ModeAPresentConfigWidget(*this));
+    assert (widget_);
+}
+
+void ModeAPresentConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+
+    // prob & check type added in subclass
+}
 }

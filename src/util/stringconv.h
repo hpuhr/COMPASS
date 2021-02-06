@@ -81,6 +81,11 @@ inline std::string percentToString(double number)
     return out.str();
 }
 
+inline std::string boolToString(bool value)
+{
+    return value ? "true" : "false";
+}
+
 inline unsigned int intFromOctalString(std::string number) { return std::stoi(number, 0, 8); }
 
 inline unsigned int intFromHexString(std::string number) { return std::stoi(number, 0, 16); }

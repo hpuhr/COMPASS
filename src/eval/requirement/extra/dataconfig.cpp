@@ -19,7 +19,11 @@
 #include "eval/requirement/extra/dataconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -83,5 +87,20 @@ namespace EvaluationRequirement
         assert (!widget_);
         widget_.reset(new ExtraDataConfigWidget(*this));
         assert (widget_);
+    }
+
+    void ExtraDataConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+    {
+        Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+
+        // prob & check type added in subclass
     }
 }

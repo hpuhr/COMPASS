@@ -27,8 +27,15 @@
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+
+#include "compass.h"
+#include "dbinterface.h"
+#include "dbconnection.h"
+
 #include "logger.h"
 #include "stringconv.h"
+#include "global.h"
 
 #include <QProgressDialog>
 #include <QApplication>
@@ -42,6 +49,7 @@
 
 using namespace std;
 using namespace EvaluationRequirementResult;
+using namespace EvaluationResultsReport;
 using namespace Utils;
 
 EvaluationResultsGenerator::EvaluationResultsGenerator(const std::string& class_id, const std::string& instance_id,
@@ -175,7 +183,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 postprocess_dialog.setLabelText(
                             ("Sector Layer "+sector_layer_name
-                             +":\n Requirement: "+req_group_it->name()+":"+req_cfg_it->name()).c_str());
+                             +":\n Requirement: "+req_group_it->name()+":\n    "+req_cfg_it->name()+"\n\n\n").c_str());
                 postprocess_dialog.setValue(eval_cnt);
 
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it->name()
@@ -206,7 +214,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                         postprocess_dialog.setLabelText(
                                     ("Sector Layer "+sector_layer_name
-                                     +":\n  "+req_group_it->name()+": "+req_cfg_it->name()
+                                     +":\n  "+req_group_it->name()+":\n    "+req_cfg_it->name()
                                      +"\n\nElapsed: "+String::timeStringFromDouble(elapsed_time_s, false)
                                      +"\nRemaining: "+String::timeStringFromDouble(remaining_time_s, false)
                                      +" (estimated)").c_str());
@@ -333,6 +341,26 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
+    // add dataset stuff
+
+    Section& gen_sec = root_item->getSection("Overview:General");
+
+    gen_sec.addText("This section contains information about the used application, database and dat sources.");
+
+    gen_sec.addTable("gen_overview_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& gen_table = gen_sec.getTable("gen_overview_table");
+
+    DBConnection& db_con = COMPASS::instance().interface().connection();
+
+    gen_table.addRow({"Application", "Application Filename", APP_FILENAME.c_str()}, nullptr);
+    gen_table.addRow({"Application Version", "Application Version", VERSION.c_str()}, nullptr);
+    gen_table.addRow({"DB Type", "Database Type", db_con.type().c_str()}, nullptr);
+    gen_table.addRow({"DB", "Database Identifier", db_con.identifier().c_str()}, nullptr);
+
+    assert (eval_man_.hasCurrentStandard());
+    gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);
+
     // generate results
 
     // first add all joined
@@ -360,6 +388,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
             ++cnt;
         }
     }
+
+
+    // generate non-result details
+    addNonResultsContent (root_item);
 
     results_model_.endReset();
 
@@ -454,3 +486,9 @@ void EvaluationResultsGenerator::showAdsbInfo(bool value)
     show_adsb_info_ = value;
 }
 
+void EvaluationResultsGenerator::addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    // standard
+    assert (eval_man_.hasCurrentStandard());
+    eval_man_.currentStandard().addToReport(root_item);
+}

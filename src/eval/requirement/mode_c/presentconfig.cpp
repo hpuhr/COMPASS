@@ -19,42 +19,61 @@
 #include "eval/requirement/mode_c/modecpresentconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
 
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
-    ModeCPresentConfig::ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
-                             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-                         : BaseConfig(class_id, instance_id, group, standard, eval_man)
-    {
-        registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
-    }
+ModeCPresentConfig::ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
+                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+{
+    registerParameter("minimum_probability_present", &minimum_probability_present_, 0.98);
+}
 
-    std::shared_ptr<Base> ModeCPresentConfig::createRequirement()
-    {
-        shared_ptr<ModeCPresent> req = make_shared<ModeCPresent>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_present_);
+std::shared_ptr<Base> ModeCPresentConfig::createRequirement()
+{
+    shared_ptr<ModeCPresent> req = make_shared<ModeCPresent>(
+                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, minimum_probability_present_);
 
-        return req;
-    }
+    return req;
+}
 
 
-    float ModeCPresentConfig::minimumProbabilityPresent() const
-    {
-        return minimum_probability_present_;
-    }
+float ModeCPresentConfig::minimumProbabilityPresent() const
+{
+    return minimum_probability_present_;
+}
 
-    void ModeCPresentConfig::minimumProbabilityPresent(float value)
-    {
-        minimum_probability_present_ = value;
-    }
+void ModeCPresentConfig::minimumProbabilityPresent(float value)
+{
+    minimum_probability_present_ = value;
+}
 
-    void ModeCPresentConfig::createWidget()
-    {
-        assert (!widget_);
-        widget_.reset(new ModeCPresentConfigWidget(*this));
-        assert (widget_);
-    }
+void ModeCPresentConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new ModeCPresentConfigWidget(*this));
+    assert (widget_);
+}
+
+void ModeCPresentConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
+    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
+    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+
+    // prob & check type added in subclass
+}
 }
