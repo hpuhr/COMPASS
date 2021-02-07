@@ -86,7 +86,7 @@ std::string EvaluationStandard::name() const
 bool EvaluationStandard::hasGroup (const std::string& name)
 {
     auto iter = std::find_if(groups_.begin(), groups_.end(),
-        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<Group>& x) { return x->name() == name;});
 
     return iter != groups_.end();
 }
@@ -118,7 +118,7 @@ Group& EvaluationStandard::group (const std::string& name)
     assert (hasGroup(name));
 
     auto iter = std::find_if(groups_.begin(), groups_.end(),
-        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<Group>& x) { return x->name() == name;});
 
     assert (iter != groups_.end());
 
@@ -130,7 +130,7 @@ void EvaluationStandard::removeGroup (const std::string& name)
     assert (hasGroup(name));
 
     auto iter = std::find_if(groups_.begin(), groups_.end(),
-        [&name](const unique_ptr<Group>& x) { return x->name() == name;});
+                             [&name](const unique_ptr<Group>& x) { return x->name() == name;});
 
     assert (iter != groups_.end());
 
@@ -223,8 +223,8 @@ void EvaluationStandard::addGroupSlot()
 
     bool ok;
     QString text =
-        QInputDialog::getText(nullptr, tr("Group Name"),
-                              tr("Specify a (unique) group name:"), QLineEdit::Normal, "", &ok);
+            QInputDialog::getText(nullptr, tr("Group Name"),
+                                  tr("Specify a (unique) group name:"), QLineEdit::Normal, "", &ok);
 
     if (ok && !text.isEmpty())
     {
@@ -233,7 +233,7 @@ void EvaluationStandard::addGroupSlot()
         if (!name.size())
         {
             QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
-            "Group has to have a non-empty name.", QMessageBox::Ok);
+                                  "Group has to have a non-empty name.", QMessageBox::Ok);
             m_warning.exec();
             return;
         }
@@ -241,7 +241,7 @@ void EvaluationStandard::addGroupSlot()
         if (hasGroup(name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
-            "Group with this name already exists.", QMessageBox::Ok);
+                                  "Group with this name already exists.", QMessageBox::Ok);
             m_warning.exec();
             return;
         }
@@ -270,7 +270,7 @@ void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::R
 
     // reqs overview
 
-    section.addTable("req_overview_table", 3, {"Group", "Type", "Name"}, false);
+    section.addTable("req_overview_table", 4, {"Short Name", "Name", "Group", "Type", }, false);
 
     EvaluationResultsReport::SectionContentTable& req_table = section.getTable("req_overview_table");
 
@@ -278,9 +278,8 @@ void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::R
     {
         for (auto& req_it : *std_it)
         {
-            req_table.addRow({std_it->name().c_str(),
-                          Group::requirement_type_mapping_.at(req_it->classId()).c_str(),
-                          (req_it->name()+" ("+req_it->shortName()+")").c_str()}, nullptr);
+            req_table.addRow({req_it->shortName().c_str(), req_it->name().c_str(), std_it->name().c_str(),
+                              Group::requirement_type_mapping_.at(req_it->classId()).c_str()}, nullptr);
 
             req_it->addToReport(root_item);
         }
