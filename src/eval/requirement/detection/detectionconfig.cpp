@@ -206,8 +206,6 @@ void DetectionConfig::addToReport (std::shared_ptr<EvaluationResultsReport::Root
                   String::boolToString(use_miss_tolerance_).c_str()}, nullptr);
     table.addRow({"Miss Tolerance [s]", "Acceptable time delta for miss detection",
                   miss_tolerance_s_}, nullptr);
-
-    // prob & check type added in subclass
 }
 
 }

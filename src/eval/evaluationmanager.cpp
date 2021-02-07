@@ -40,6 +40,7 @@
 #include "stringconv.h"
 #include "dbovariableorderedset.h"
 #include "dbconnection.h"
+#include "stringconv.h"
 
 #include "json.hpp"
 
@@ -1498,6 +1499,8 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     data["evaluation_results"]["req_grp_id"] = req_grp_id;
     data["evaluation_results"]["result_id"] = result_id;
 
+    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
@@ -1510,6 +1513,8 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     data["evaluation_results"]["show_results"] = true;
     data["evaluation_results"]["req_grp_id"] = req_grp_id;
     data["evaluation_results"]["result_id"] = result_id;
+
+    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
