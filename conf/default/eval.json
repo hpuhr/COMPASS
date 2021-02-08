@@ -1,14 +1,67 @@
 {
     "parameters": {
-        "active_sources_ref": {},
-        "active_sources_tst": {},
-        "current_standard": "",
+        "active_sources_ref": {
+        },
+        "active_sources_tst": {
+        },
+        "configs": {
+        },
+        "current_standard": "EUROCAE ED-117A",
         "dbo_name_ref": "RefTraj",
-        "dbo_name_tst": "Tracker",
+        "dbo_name_tst": "MLAT",
         "generate_details": true,
+        "load_time_begin": 0.0,
+        "load_time_end": 0.0,
+        "max_nacp": 5,
+        "max_nic": 5,
+        "max_nucp": 4,
+        "max_ref_time_diff": 5.0,
+        "max_sil_v1": 2,
+        "max_sil_v2": 4,
+        "min_nacp": 5,
+        "min_nic": 5,
+        "min_nucp": 4,
+        "min_sil_v1": 2,
+        "min_sil_v2": 4,
+        "remove_mode_a_code_values": "7000,7777",
+        "remove_mode_a_codes": true,
+        "remove_mode_target_addresses": false,
+        "remove_modeac_onlys": true,
+        "remove_not_detected_dbo_values": {},
+        "remove_not_detected_dbos": false,
+        "remove_psr_only_targets": true,
+        "remove_short_targets": true,
+        "remove_short_targets_min_duration": 60.0,
+        "remove_short_targets_min_updates": 10,
+        "remove_target_address_vales": "",
+        "result_detail_zoom": 0.0020000000949949026,
+        "use_adsb_filter": false,
         "use_grp_in_sector": {},
-        "use_requirement": {}
+        "use_load_filter": false,
+        "use_max_nacp": true,
+        "use_max_nic": true,
+        "use_max_nucp": true,
+        "use_max_sil_v1": true,
+        "use_max_sil_v2": true,
+        "use_min_nacp": true,
+        "use_min_nic": true,
+        "use_min_nucp": true,
+        "use_min_sil_v1": true,
+        "use_min_sil_v2": true,
+        "use_requirement": {},
+        "use_time_filter": false,
+        "use_v0": true,
+        "use_v1": true,
+        "use_v2": true,
+        "warning_shown": true
     },
+    "sub_config_files": [
+        {
+            "class_id": "EvaluationResultsGenerator",
+            "instance_id": "EvaluationResultsGenerator0",
+            "path": "eval_results.json"
+        }
+    ],
     "sub_configs": {
         "EvaluationResultsReportPDFGenerator": {
             "EvaluationResultsReportPDFGenerator0": {
@@ -39,11 +92,12 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Target Report",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
@@ -57,9 +111,10 @@
                                     "EvaluationRequirementDetectionConfigTC/GAPS30": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 15.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Long Horizontal Gaps",
                                             "prob": 0.0010000000474974513,
                                             "prob_check_type": 1,
@@ -108,11 +163,12 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.8999999761581421,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Target Report",
                                             "prob": 0.699999988079071,
                                             "prob_check_type": 3,
@@ -126,9 +182,10 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Long Horizontal Gaps",
                                             "prob": 0.009999999776482582,
                                             "prob_check_type": 1,
@@ -206,7 +263,7 @@
                                     "EvaluationRequirementIdentificationFalseConfigPropability of False Identification0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
-                                            "name": "Propability of False Identification",
+                                            "name": "Probability of False Identification",
                                             "prob": 9.999999747378752e-05,
                                             "prob_check_type": 1,
                                             "short_name": "PFID"
@@ -224,11 +281,12 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Target Report",
                                             "prob": 0.949999988079071,
                                             "prob_check_type": 3,
@@ -242,9 +300,10 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117A Table 3-1",
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.9990000128746033,
                                             "name": "Probability of Long Horizontal Gaps",
                                             "prob": 0.0010000000474974513,
                                             "prob_check_type": 1,
@@ -302,9 +361,10 @@
                                     "EvaluationRequirementDetectionConfigProbability of Detection0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-116 3.4.2\n",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.8999999761581421,
                                             "name": "Probability of Detection",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
@@ -312,7 +372,7 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     }
                                 },
@@ -392,6 +452,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Update0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.2.4",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -417,6 +478,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Update0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.2.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -474,6 +536,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Update0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.2.3",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -525,6 +588,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -550,6 +614,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -566,6 +631,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Update0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.2.2",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -591,6 +657,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of MLAT Detection0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-117 Section 3.3.4",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -625,6 +692,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
@@ -643,6 +711,7 @@
                                     "EvaluationRequirementDetectionConfigTC/GAPS30": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -705,6 +774,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
@@ -723,6 +793,7 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -739,6 +810,7 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -835,6 +907,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Target Report0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
@@ -853,6 +926,7 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -869,6 +943,7 @@
                                     "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
                                             "miss_tolerance": 0.009999999776482582,
@@ -956,6 +1031,7 @@
                                     "EvaluationRequirementDetectionConfigProbability of Detection0": {
                                         "parameters": {
                                             "comment": "",
+                                            "invert_prob": false,
                                             "max_gap_length_s": 5.0,
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
@@ -965,7 +1041,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 4.0,
+                                            "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": true
