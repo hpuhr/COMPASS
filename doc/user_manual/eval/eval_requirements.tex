@@ -698,7 +698,7 @@ Also, a table is given for all single targets, sorted by PP.
 The 'Position Across' requirement is used to calculate the probability of a target report having an across-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component across the track angle of the reference at the time. If the absolute value of this across-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PACOK. The PACOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
-\item Probability [1]: Probability of false Mode C code
+\item Probability [1]: Probability of acceptable across-track position
 \item Probability Check Type: $\geq$
 \item Maximum Absolute Value [m]: Maximum absolute across-track position difference between the test and the reference, in meters
 \end{itemize}
@@ -779,7 +779,7 @@ Also, a table is given for all single targets, sorted by PACOK.
 The 'Position Along' requirement is used to calculate the probability of a target report having an along-track error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time. If the absolute value of this along-track position error is smaller or equal than the defined threshold, the target report is counted for the calculated probability PALOK. The PALOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
-\item Probability [1]: Probability of false Mode C code
+\item Probability [1]: Probability of acceptable along-track position
 \item Probability Check Type: $\geq$
 \item Maximum Absolute Value [m]: Maximum absolute along-track position difference between the test and the reference, in meters
 \end{itemize}
@@ -965,10 +965,10 @@ Also, a table is given for all single targets, sorted by PCP.
   \caption{Evaluation Position Latency requirement}
 \end{figure}
 
-The 'Position Latency' requirement is used to calculate the probability of a target report having a time-lantency error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time, which divided by the negative speed gives the latency. If the absolute value of this latency is smaller or equal than the defined threshold, the target report is counted for the calculated probability PLTOK. The PLTOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
+The 'Position Latency' requirement is used to calculate the probability of a target report having a time-latency error smaller than a defined threshold. The offset of the position (test vs. linear interpolated reference position) is used to calculate the error component along the track angle of the reference at the time, which divided by the negative speed gives the latency. If the absolute value of this latency is smaller or equal than the defined threshold, the target report is counted for the calculated probability PLTOK. The PLTOK must be greater or equal than the defined 'Probability' for the requirement to pass. \\
 
 \begin{itemize}  
-\item Probability [1]: Probability of false Mode C code
+\item Probability [1]: Probability of acceptable position latency
 \item Probability Check Type: $\geq$
 \item Maximum Absolute Value [s]: Maximum absolute latency, in seconds
 \end{itemize}

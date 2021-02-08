@@ -32,9 +32,17 @@ namespace EvaluationRequirement
 IdentificationFalseConfigWidget::IdentificationFalseConfigWidget(IdentificationFalseConfig& cfg)
     : BaseConfigWidget(cfg)
 {
-    //        QCheckBox* require_correctness_of_all_check_{nullptr};
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of false identification");
+
+    assert (check_type_box_);
+
+    // correctness of all
     require_all_false_check_ = new QCheckBox ();
     require_all_false_check_->setChecked(config().requireAllFalse());
+    require_all_false_check_->setToolTip(
+                "If checked, all available secondary attributes be different than in "
+                " the reference to count. If not checked, a single wrong secondary attribute is enough.");
     connect(require_all_false_check_, &QCheckBox::clicked,
             this, &IdentificationFalseConfigWidget::toggleRequireCorrectnessOfAllSlot);
     form_layout_->addRow("Require All False", require_all_false_check_);
@@ -42,23 +50,24 @@ IdentificationFalseConfigWidget::IdentificationFalseConfigWidget(IdentificationF
     // mode a ssr code
     use_mode_a_check_ = new QCheckBox ();
     use_mode_a_check_->setChecked(config().useModeA());
+    use_mode_a_check_->setToolTip("If the Mode 3/A code should be checked");
     connect(use_mode_a_check_, &QCheckBox::clicked,
             this, &IdentificationFalseConfigWidget::toggleUseModeASlot);
     form_layout_->addRow("Use Mode 3/A Code", use_mode_a_check_);
 
     // 24-bit mode s address
-    //QCheckBox* use_ms_ta_check_{nullptr};
     use_ms_ta_check_ = new QCheckBox ();
     use_ms_ta_check_->setChecked(config().useMsTa());
+    use_ms_ta_check_->setToolTip("If the Mode S target address should be checked");
     connect(use_ms_ta_check_, &QCheckBox::clicked,
             this, &IdentificationFalseConfigWidget::toggleUseMsTaSlot);
     form_layout_->addRow("Use Mode S Target Address", use_ms_ta_check_);
 
 
     // downlinked aircraft identification
-    //QCheckBox* use_ms_ti_check_{nullptr};
     use_ms_ti_check_ = new QCheckBox ();
     use_ms_ti_check_->setChecked(config().useMsTi());
+    use_ms_ti_check_->setToolTip("If the Mode S target identification should be checked");
     connect(use_ms_ti_check_, &QCheckBox::clicked,
             this, &IdentificationFalseConfigWidget::toggleUseMsTiSlot);
     form_layout_->addRow("Use Mode S Target Identification", use_ms_ti_check_);

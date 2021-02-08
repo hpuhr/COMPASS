@@ -22,7 +22,9 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 

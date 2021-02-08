@@ -22,7 +22,9 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -97,14 +99,30 @@ void IdentificationCorrectConfig::addToReport (std::shared_ptr<EvaluationResults
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    table.addRow({"Probability [1]", "Probability of correct identification",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
 
-    // prob & check type added in subclass
+    table.addRow({"Require Correctness of All",
+                  "If checked, all available secondary attributes must match "
+                  "the reference. If not checked, a single matching secondary attribute is enough.",
+                  String::boolToString(require_correctness_of_all_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode 3/A Code",
+                  "If the Mode 3/A code should be checked",
+                  String::boolToString(use_mode_a_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode S Target Address",
+                  "If the Mode S target address should be checked",
+                  String::boolToString(use_ms_ta_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode S Target Identification",
+                  "If the Mode S target identification should be checked",
+                  String::boolToString(use_ms_ti_).c_str()}, nullptr);
 }
 }

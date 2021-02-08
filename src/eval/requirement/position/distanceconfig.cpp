@@ -22,7 +22,9 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -95,14 +97,25 @@ void PositionDistanceConfig::addToReport (std::shared_ptr<EvaluationResultsRepor
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    table.addRow({"Probability [1]", "Probability of correct/false position",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
 
-    // prob & check type added in subclass
+    table.addRow({"Threshold Value [m]",
+                  "Minimum/Maximum allowed distance from test target report to reference",
+                  threshold_value_}, nullptr);
+
+    table.addRow({"Threshold Value Check Type",
+                  "Distance comparison operator with the given threshold",
+                  comparisonTypeString(threshold_value_check_type_).c_str()}, nullptr);
+
+    table.addRow({"Failed Values are of Interest",
+                  "If the distances of interest are the ones not passing the check",
+                  String::boolToString(failed_values_of_interest_).c_str()}, nullptr);
 }
 }

@@ -22,7 +22,9 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -94,14 +96,26 @@ void ExtraTrackConfig::addToReport (std::shared_ptr<EvaluationResultsReport::Roo
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    table.addRow({"Probability [1]", "Probability of extra data",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
 
-    // prob & check type added in subclass
+    table.addRow({"Minimum Duration [s]",
+                  "Minimum track duration, requirement result is ignored if less",
+                  min_duration_}, nullptr);
+
+    table.addRow({"Minimum Number of Updates [1]",
+                  "Minimum number of extra target reports, requirement result is ignored if less",
+                  min_num_updates_}, nullptr);
+
+    table.addRow({"Ignore Primary Only",
+                  "Requirement result is ignored if target is primary only (has no"
+                  " secondary attributes, also not in reference)",
+                  String::boolToString(ignore_primary_only_).c_str()}, nullptr);
 }
 }

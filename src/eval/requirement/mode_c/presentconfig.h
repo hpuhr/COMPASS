@@ -37,14 +37,9 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    float minimumProbabilityPresent() const;
-    void minimumProbabilityPresent(float value);
-
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
-    float minimum_probability_present_{0};
-
     virtual void createWidget() override;
 };
 

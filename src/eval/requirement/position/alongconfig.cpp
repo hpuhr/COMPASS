@@ -22,7 +22,9 @@
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
 using namespace EvaluationResultsReport;
 using namespace std;
 
@@ -72,14 +74,16 @@ void PositionAlongConfig::addToReport (std::shared_ptr<EvaluationResultsReport::
 {
     Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
 
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
-
-    // prob & check type added in subclass
+    table.addRow({"Probability [1]", "Probability of acceptable along-track position",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+    table.addRow({"Maximum Absolute Value [m]",
+                  "Maximum absolute along-track position difference between the test and the reference",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
 }
 }

@@ -31,9 +31,21 @@ namespace EvaluationRequirement
 PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of correct/false position");
+
+    assert (check_type_box_);
+
+//    Probability [1]: Probability of correct position
+//    • Probability Check Type: ≥
+//    • Threshold Value [m]:
+//    • Threshold Value Check Type: ≤,
+//    • Failed Values are of Interest: Checked,
+
     // max dist
     threshold_value_edit_ = new QLineEdit(QString::number(config().thresholdValue()));
     threshold_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    threshold_value_edit_->setToolTip("Minimum/Maximum allowed distance from test target report to reference");
     connect(threshold_value_edit_, &QLineEdit::textEdited,
             this, &PositionDistanceConfigWidget::thresholdValueEditSlot);
 
@@ -43,6 +55,7 @@ PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfi
     // prob check type
     threshold_value_check_type_box_ = new ComparisonTypeComboBox();
     threshold_value_check_type_box_->setType(config().thresholdValueCheckType());
+    threshold_value_check_type_box_->setToolTip("Distance comparison operator with the given threshold");
     connect(threshold_value_check_type_box_, &ComparisonTypeComboBox::changedTypeSignal,
             this, &PositionDistanceConfigWidget::changedThresholdValueCheckTypeSlot);
     form_layout_->addRow("Threshold Value Check Type", threshold_value_check_type_box_);
@@ -50,6 +63,7 @@ PositionDistanceConfigWidget::PositionDistanceConfigWidget(PositionDistanceConfi
     // failed values of interest
     failed_values_of_interest_check_ = new QCheckBox ();
     failed_values_of_interest_check_->setChecked(config().failedValuesOfInterest());
+    failed_values_of_interest_check_->setToolTip("If the distances of interest are the ones not passing the check");
     connect(failed_values_of_interest_check_, &QCheckBox::clicked,
             this, &PositionDistanceConfigWidget::toggleFailedValuesOfInterestSlot);
 
