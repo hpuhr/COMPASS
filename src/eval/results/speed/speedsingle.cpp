@@ -60,7 +60,7 @@ namespace EvaluationRequirementResult
     void SingleSpeed::update()
     {
         assert (num_no_ref_ <= num_pos_);
-        assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_+num_no_tst_value_);
+        assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
         assert (values_.size() == num_comp_failed_+num_comp_passed_);
 

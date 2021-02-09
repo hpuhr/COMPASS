@@ -270,15 +270,18 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
+        logwrn << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
-               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
-               << " num_pos_calc_errors " << num_pos_calc_errors
-               << " num_speeds " << num_speeds;
-
+               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_speeds == num_comp_failed + num_comp_passed + num_no_tst_value);
+
+    if (num_speeds != num_comp_failed + num_comp_passed)
+        logwrn << "EvaluationRequirementSpeed '" << name_ << "': evaluate: utn " << target_data.utn_
+               << " num_speeds " << num_speeds << " num_comp_failed " <<  num_comp_failed
+               << " num_comp_passed " << num_comp_passed;
+
+    assert (num_speeds == num_comp_failed + num_comp_passed);
     assert (num_speeds == values.size());
 
     //assert (details.size() == num_pos);
