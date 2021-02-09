@@ -1677,10 +1677,10 @@
                     "data_type_str": "INT",
                     "dbo_name": "Radar",
                     "description": "Height in Ft measured by a 3D radar [048/110]",
-                    "dimension": "",
+                    "dimension": "Height",
                     "name": "height_3d_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Feet"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2703,10 +2703,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Radar",
                     "description": "Calculated x position in Cartesian coordinates [I001/042, I048/042]",
-                    "dimension": "",
+                    "dimension": "Position",
                     "name": "pos_local_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2759,10 +2759,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Radar",
                     "description": "Calculated y position in Cartesian coordinates [I001/042, I048/042]",
-                    "dimension": "",
+                    "dimension": "Position",
                     "name": "pos_local_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

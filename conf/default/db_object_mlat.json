@@ -2918,7 +2918,7 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "x coordinate in nautical miles",
-                    "dimension": "Length",
+                    "dimension": "Position",
                     "name": "pos_local_x_nm",
                     "representation_str": "STANDARD",
                     "unit": "Nautical Mile"
@@ -2974,7 +2974,7 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "y coordinate in nautical miles",
-                    "dimension": "Length",
+                    "dimension": "Position",
                     "name": "pos_local_y_nm",
                     "representation_str": "STANDARD",
                     "unit": "Nautical Mile"
