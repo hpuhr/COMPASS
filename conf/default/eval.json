@@ -697,7 +697,7 @@
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Probability of Target Report",
                                             "prob": 0.949999988079071,
                                             "prob_check_type": 3,
@@ -705,16 +705,16 @@
                                             "update_interval": 5.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     },
                                     "EvaluationRequirementDetectionConfigTC/GAPS30": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
-                                            "invert_prob": false,
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Track Continuity 5s",
                                             "prob": 0.0010000000474974513,
                                             "prob_check_type": 1,
@@ -722,7 +722,7 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": true,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     }
                                 },
@@ -779,7 +779,7 @@
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.8999999761581421,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Probability of Target Report",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
@@ -787,16 +787,16 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     },
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
-                                            "invert_prob": false,
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Track Continuity 3-5s",
                                             "prob": 0.0010000000474974513,
                                             "prob_check_type": 1,
@@ -804,16 +804,16 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": true,
                                             "use_min_gap_length": true,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     },
                                     "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
-                                            "invert_prob": false,
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Track Continuity 5s",
                                             "prob": 9.999999747378752e-06,
                                             "prob_check_type": 1,
@@ -821,7 +821,7 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": true,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     }
                                 },
@@ -912,7 +912,7 @@
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Probability of Target Report",
                                             "prob": 0.949999988079071,
                                             "prob_check_type": 3,
@@ -920,16 +920,16 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     },
                                     "EvaluationRequirementDetectionConfigTrack Continuity 3-5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
-                                            "invert_prob": false,
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 3.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Track Continuity 3-5s",
                                             "prob": 0.0010000000474974513,
                                             "prob_check_type": 1,
@@ -937,16 +937,16 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": true,
                                             "use_min_gap_length": true,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     },
                                     "EvaluationRequirementDetectionConfigTrack Continuity 5s0": {
                                         "parameters": {
                                             "comment": "From EUROCAE ED-87C Table 3.1",
-                                            "invert_prob": false,
+                                            "invert_prob": true,
                                             "max_gap_length_s": 5.0,
                                             "min_gap_length_s": 5.0,
-                                            "miss_tolerance": 0.009999999776482582,
+                                            "miss_tolerance": 0.10000000149011612,
                                             "name": "Track Continuity 5s",
                                             "prob": 9.999999974752427e-07,
                                             "prob_check_type": 1,
@@ -954,7 +954,7 @@
                                             "update_interval": 1.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": true,
-                                            "use_miss_tolerance": false
+                                            "use_miss_tolerance": true
                                         }
                                     }
                                 },
