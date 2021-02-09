@@ -83,6 +83,7 @@ EvaluationDataSourceWidget::~EvaluationDataSourceWidget()
 
 void EvaluationDataSourceWidget::updateDataSources()
 {
+    loginf << "EvaluationDataSourceWidget: updateDataSources";
     assert (data_source_layout_);
 
     QLayoutItem* child;
@@ -158,7 +159,7 @@ void EvaluationDataSourceWidget::updateCheckboxesDisabled()
         assert(data_sources_.find(checkit.first) != data_sources_.end());
         ActiveDataSource& src = data_sources_.at(checkit.first);
         checkit.second->setEnabled(src.isActiveInData());
-        logdbg << "EvaluationDataSourceWidget: updateCheckboxesDisabled: src " << src.getName()
+        loginf << "EvaluationDataSourceWidget: updateCheckboxesDisabled: src " << src.getName()
                << " active " << src.isActiveInData();
     }
 }

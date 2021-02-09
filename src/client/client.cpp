@@ -391,6 +391,9 @@ void Client::checkNeededActions()
         if (config.existsId("version"))
             config_version = config.getString("version");
 
+        if (String::compareVersions(VERSION, config_version) != 0)
+            cerr << "COMPASSClient: app version '" << VERSION << "' config version " << config_version << "'" << endl;
+
         assert (String::compareVersions(VERSION, config_version) == 0);  // must be same
         return; // nothing to do
     }
