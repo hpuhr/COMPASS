@@ -64,6 +64,7 @@ class NullableVector
     /// @brief Sets specific value
     void set(unsigned int index, T value);
     void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug=false);
+    void setAll(T value);
 
     /// @brief Appends specific value
     void append(unsigned int index, T value);
@@ -72,6 +73,7 @@ class NullableVector
 
     /// @brief Sets specific element to Null value
     void setNull(unsigned int index);
+    void setAllNull();
 
     NullableVector<T>& operator*=(double factor);
 
@@ -257,6 +259,18 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
 }
 
 template <class T>
+void NullableVector<T>::setAll(T value)
+{
+    unsigned int data_size = data_.size();
+
+    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    {
+        data_.at(index) = value;
+        unsetNull(index);
+    }
+}
+
+template <class T>
 void NullableVector<T>::append(unsigned int index, T value)
 {
     logdbg << "NullableVector " << property_.name() << ": append: index " << index << " value '"
@@ -340,6 +354,16 @@ void NullableVector<T>::setNull(unsigned int index)
 
     null_flags_.at(index) = true;
 }
+
+template <class T>
+void NullableVector<T>::setAllNull()
+{
+    unsigned int data_size = data_.size();
+
+    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+        setNull(index);
+}
+
 
 /// @brief Checks if specific element is Null
 template <class T>
