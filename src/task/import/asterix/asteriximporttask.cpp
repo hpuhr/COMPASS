@@ -457,17 +457,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImportTask::test() const { return test_; }
-
-void ASTERIXImportTask::test(bool test) { test_ = test; }
-
-bool ASTERIXImportTask::createMappingStubs() const { return create_mapping_stubs_; }
-
-void ASTERIXImportTask::createMappingStubs(bool create_mapping_stubs)
-{
-    create_mapping_stubs_ = create_mapping_stubs;
-}
-
 bool ASTERIXImportTask::limitRAM() const { return limit_ram_; }
 
 void ASTERIXImportTask::limitRAM(bool limit_ram)
@@ -671,7 +660,16 @@ bool ASTERIXImportTask::canRun() { return canImportFile(); }
 
 void ASTERIXImportTask::run()
 {
+    run (false, false);
+}
+
+void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
+{
+    test_ = test;
+    create_mapping_stubs_ = create_mapping_stubs;
+
     done_ = false; // since can be run multiple times
+    num_radar_inserted_ = 0;
 
     float free_ram = System::getFreeRAMinGB();
 
@@ -1047,7 +1045,9 @@ void ASTERIXImportTask::mapStubsObsoleteSlot()
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
-    logdbg << "ASTERIXImportTask: insertData: inserting into database";
+    loginf << "ASTERIXImportTask: insertData: inserting into database";
+
+    assert (!test_ && !create_mapping_stubs_);
 
     assert(status_widget_);
 
@@ -1206,6 +1206,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         db_object.insertData(set, buffer, false);
 
         status_widget_->addNumInserted(db_object.name(), buffer->size());
+
+        if (db_object.name() == "Radar")
+            num_radar_inserted_ = buffer->size(); // store for later check
     }
 
     checkAllDone();
@@ -1228,12 +1231,14 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
 
     checkAllDone();
 
+    logdbg << "ASTERIXImportTask: insertDoneSlot: check done";
+
     if (all_done_ && !test && !create_mapping_stubs_)
     {
         loginf << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
         // in case data was imported, clear other task done properties
-        if (status_widget_->dboInsertedCounts().count("Radar"))
+        if (num_radar_inserted_)
         {
             bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
                         COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
@@ -1254,7 +1259,7 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
         emit doneSignal(name_);
     }
 
-    logdbg << "ASTERIXImportTask: insertDoneSlot: done";
+    loginf << "ASTERIXImportTask: insertDoneSlot: done";
 }
 
 void ASTERIXImportTask::checkAllDone()
@@ -1278,10 +1283,16 @@ void ASTERIXImportTask::checkAllDone()
 
         QApplication::restoreOverrideCursor();
 
+        logdbg << "ASTERIXImportTask: checkAllDone: refresh";
+
         refreshjASTERIX();
+
+        logdbg << "ASTERIXImportTask: checkAllDone: widget done";
 
         assert(widget_);
         widget_->runDone();
+
+        logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
         if (!create_mapping_stubs_ && !test_)
             emit COMPASS::instance().interface().databaseContentChangedSignal();
@@ -1295,6 +1306,8 @@ void ASTERIXImportTask::checkAllDone()
                                      std::to_string(db_cnt_it.second) + " " + db_cnt_it.first +
                                      " records");
 
+        logdbg << "ASTERIXImportTask: checkAllDone: status logging";
+
         if (test_)
             task_manager_.appendSuccess("ASTERIXImportTask: import test done after " +
                                         status_widget_->elapsedTimeStr());
@@ -1307,10 +1320,12 @@ void ASTERIXImportTask::checkAllDone()
                                         status_widget_->elapsedTimeStr());
         }
 
-        test_ = false;  // set again by widget
+        //test_ = false;  // set again by widget
 
         if (!show_done_summary_)
         {
+            logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
+
             status_widget_->close();
             status_widget_ = nullptr;
         }
@@ -1321,9 +1336,13 @@ void ASTERIXImportTask::checkAllDone()
 
 void ASTERIXImportTask::closeStatusDialogSlot()
 {
+    loginf << "ASTERIXImportTask: closeStatusDialogSlot";
+
     assert(status_widget_);
     status_widget_->close();
     status_widget_ = nullptr;
+
+    loginf << "ASTERIXImportTask: closeStatusDialogSlot: done";
 }
 
 bool ASTERIXImportTask::maxLoadReached()
