@@ -45,7 +45,10 @@ class TextFieldDoubleValidator : public QDoubleValidator
         if (decimals())
         {
             if ((s.startsWith("0") && s.size() == 1) || (s.startsWith("0.") && s.size() == 2))
-                return QValidator::Intermediate;
+            {
+                //loginf << "UGA dec inter";
+                return QValidator::Acceptable;
+            }
 
             // check length of decimal places
             QChar point = '.';
@@ -61,6 +64,8 @@ class TextFieldDoubleValidator : public QDoubleValidator
             bool ok;
             double value = s.toDouble(&ok);
 
+            //loginf << "UGA dec ok " << ok << " bot " << (bottom() <= value) << " top " << (value <= top());
+
             if (ok && bottom() <= value && value <= top())
                 return QValidator::Acceptable;
 
@@ -71,6 +76,8 @@ class TextFieldDoubleValidator : public QDoubleValidator
             // check range of value
             bool ok;
             int value = s.toInt(&ok);
+
+            //loginf << "UGA int ok " << ok << " bot " << (bottom() <= value) << " top " << (value <= top());
 
             if (ok && bottom() <= value && value <= top())
                 return QValidator::Acceptable;
