@@ -30,7 +30,7 @@ class JSONObjectParserWidget : public QWidget
 {
     Q_OBJECT
   public slots:
-    void toggleActiveSlot ();
+    //void toggleActiveSlot ();
     void jsonContainerKeyChangedSlot();
     void jsonKeyChangedSlot();
     void jsonValueChangedSlot();
@@ -53,11 +53,13 @@ class JSONObjectParserWidget : public QWidget
     explicit JSONObjectParserWidget(JSONObjectParser& parser, QWidget* parent = nullptr);
 
     void setParser(JSONObjectParser& parser);
+    void updateActive();
     void updateMappingsGrid();
 
   private:
     JSONObjectParser* parser_{nullptr};
 
+    QCheckBox* active_check_ {nullptr};
     QLineEdit* json_container_key_edit_{nullptr};  // location of container with target report data
     QLineEdit* json_key_edit_{nullptr};            // * for all
     QLineEdit* json_value_edit_{nullptr};

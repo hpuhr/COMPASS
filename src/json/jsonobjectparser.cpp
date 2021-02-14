@@ -906,4 +906,7 @@ void JSONObjectParser::active(bool value)
     loginf << "JSONObjectParser: active: name " << name_ << " active " << value;
 
     active_ = value;
+
+    if (widget_)
+        widget_->updateActive();
 }

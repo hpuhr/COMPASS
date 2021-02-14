@@ -141,6 +141,10 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
+    std::vector<std::string> getPossibleMappings (unsigned int cat);
+    std::string getActiveMapping (unsigned int cat);
+    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
+
   protected:
     bool debug_jasterix_;
     bool limit_ram_;

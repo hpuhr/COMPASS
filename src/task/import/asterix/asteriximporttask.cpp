@@ -567,6 +567,89 @@ void ASTERIXImportTask::overrideTodOffset(float value)
     post_process_.override_tod_offset_ = value;
 }
 
+std::vector<std::string> ASTERIXImportTask::getPossibleMappings (unsigned int cat)
+{
+    std::vector<std::string> list;
+
+    list.push_back(""); // no mapping
+
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: getPossibleMappings: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat) // if same, add
+           list.push_back(par_it.first);
+    }
+
+    return list;
+}
+
+std::string ASTERIXImportTask::getActiveMapping (unsigned int cat)
+{
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: getActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat) // if same, add
+           return par_it.first;
+    }
+
+    // none found
+    return "";
+}
+
+void ASTERIXImportTask::setActiveMapping (unsigned int cat, const std::string& mapping_name)
+{
+    loginf << "ASTERIXImportTask: setActiveMapping: cat " << cat << " mapping '" << mapping_name << "'";
+
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: setActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat) // if same, change
+            par_it.second.active(par_it.first == mapping_name);
+    }
+}
+
 void ASTERIXImportTask::deleteWidget() { widget_.reset(nullptr); }
 
 bool ASTERIXImportTask::canImportFile()
