@@ -379,7 +379,8 @@ void Client::checkNeededActions()
     // home subdir exists, no old config exists
     cout << "COMPASSClient: checking if current compass config exists ... ";
 
-    bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);
+    bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY)
+            && Files::directoryExists(HOME_VERSION_SUBDIRECTORY);
 
     if (current_cfg_subdir_exists)
     {

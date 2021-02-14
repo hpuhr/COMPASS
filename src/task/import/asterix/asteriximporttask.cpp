@@ -1045,7 +1045,7 @@ void ASTERIXImportTask::mapStubsObsoleteSlot()
 
 void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> job_buffers)
 {
-    loginf << "ASTERIXImportTask: insertData: inserting into database";
+    logdbg << "ASTERIXImportTask: insertData: inserting into database";
 
     assert (!test_ && !create_mapping_stubs_);
 
@@ -1235,7 +1235,7 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
 
     if (all_done_ && !test && !create_mapping_stubs_)
     {
-        loginf << "ASTERIXImportTask: insertDoneSlot: finalizing";
+        logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
 
         // in case data was imported, clear other task done properties
         if (num_radar_inserted_)
@@ -1259,7 +1259,7 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
         emit doneSignal(name_);
     }
 
-    loginf << "ASTERIXImportTask: insertDoneSlot: done";
+    logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
 
 void ASTERIXImportTask::checkAllDone()
