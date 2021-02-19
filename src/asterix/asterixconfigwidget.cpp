@@ -302,6 +302,8 @@ void ASTERIXConfigWidget::updateCategories()
         // mapping
         ASTERIXMappingComboBox* map_combo = new ASTERIXMappingComboBox(task_, category);
         map_combo->setMapping(task_.getActiveMapping(category));
+        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category << " mapping '"
+               << task_.getActiveMapping(category) << "'";
 
         connect(map_combo, &ASTERIXMappingComboBox::changedMappingSignal,
                 this, &ASTERIXConfigWidget::categoryMappingChangedSlot);

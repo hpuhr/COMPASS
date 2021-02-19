@@ -605,7 +605,7 @@ std::string ASTERIXImportTask::getActiveMapping (unsigned int cat)
         tmp_str = par_it.second.JSONValue();
         tmp_cat = std::stoi(tmp_str);
 
-        if (tmp_cat == cat) // if same, add
+        if (tmp_cat == cat && par_it.second.active()) // if same, add
            return par_it.first;
     }
 
