@@ -218,7 +218,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"uint",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },
@@ -876,7 +876,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"int",
-                    "lsb":0.2197265401898285
+                    "lsb":0.2197265625
                 },
                 {
                     "name":"CALCULATED HEADING",
@@ -884,7 +884,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"uint",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },
@@ -916,7 +916,7 @@
                     "type":"fixed_bytes",
                     "length":1,
                     "data_type":"uint",
-                    "lsb":0.2197265401898285
+                    "lsb":0.2197265625
                 },
                 {
                     "name":"Sigma (H)",

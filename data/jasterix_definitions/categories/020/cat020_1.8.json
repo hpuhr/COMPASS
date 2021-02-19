@@ -246,7 +246,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":0.00000536441
+                    "lsb":5.36441802978515625e-6
                 },
                 {
                     "name":"Longitude",
@@ -254,7 +254,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":0.00000536441
+                    "lsb":5.36441802978515625e-6
                 }
             ]
         },
