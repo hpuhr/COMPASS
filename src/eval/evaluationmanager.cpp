@@ -476,15 +476,18 @@ std::string EvaluationManager::getCannotEvaluateComment()
 {
     assert (!canEvaluate());
 
+    // no sector
+    if (!sectorsLayers().size())
+        return "Please add at least one sector";
+
     if (!data_loaded_)
         return "Please select and load reference & test data";
 
     if (!hasCurrentStandard())
         return "Please select a standard";
 
-    // no sector
-
-    return "Please add at least one sector and activate at least one requirement group";
+    // no sector active
+    return "Please activate at least one requirement group";
 }
 
 void EvaluationManager::newDataSlot(DBObject& object)
