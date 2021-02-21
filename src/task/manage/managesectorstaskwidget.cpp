@@ -25,6 +25,7 @@
 #include "sectorlayer.h"
 #include "files.h"
 #include "importsectordialog.h"
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFileDialog>
@@ -430,7 +431,15 @@ void ManageSectorsTaskWidget::importSlot()
 {
     loginf << "ManageSectorsTaskWidget: importSlot";
 
-    ImportSectorDialog dialog("test", this);
+
+    string filename = task_.currentFilename();
+
+    filename = Files::getFilenameFromPath(filename);
+
+    if (filename.find(".", 0) != string::npos)
+        filename = filename.substr(0, filename.find(".", 0));
+
+    ImportSectorDialog dialog(filename.c_str(), this);
     int ret = dialog.exec();
 
     if (ret == QDialog::Accepted)
