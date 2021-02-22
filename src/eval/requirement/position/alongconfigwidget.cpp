@@ -30,9 +30,16 @@ namespace EvaluationRequirement
 PositionAlongConfigWidget::PositionAlongConfigWidget(PositionAlongConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of acceptable along-track position");
+
+    assert (check_type_box_);
+
     // max dist
     max_abs_value_edit_ = new QLineEdit(QString::number(config().maxAbsValue()));
     max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    max_abs_value_edit_->setToolTip(
+                "Maximum absolute along-track position difference between the test and the reference");
     connect(max_abs_value_edit_, &QLineEdit::textEdited,
             this, &PositionAlongConfigWidget::maxAbsValueEditSlot);
 

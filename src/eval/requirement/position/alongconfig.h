@@ -41,6 +41,8 @@ public:
     float maxAbsValue() const;
     void maxAbsValue(float value);
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
 protected:
     float max_abs_value_ {0};
 

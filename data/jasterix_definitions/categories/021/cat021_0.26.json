@@ -420,7 +420,7 @@
                                             "type":"fixed_bytes",
                                             "length":3,
                                             "data_type":"int",
-                                            "lsb":0.00002145767
+                                            "lsb":2.1457672119140625e-5
                                         },
                                         {
                                             "name":"Longitude",
@@ -428,7 +428,7 @@
                                             "type":"fixed_bytes",
                                             "length":3,
                                             "data_type":"int",
-                                            "lsb":0.00002145767
+                                            "lsb":2.1457672119140625e-5
                                         },
                                         {
                                             "name":"TID2",
@@ -501,7 +501,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":0.000005364418
+                    "lsb":5.36441802978515625E-6
                 },
                 {
                     "name":"Longitude",
@@ -509,7 +509,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":0.000005364418
+                    "lsb":5.36441802978515625E-6
                 }
             ]
         },
@@ -701,7 +701,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"int",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },
@@ -749,7 +749,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"int",
-                    "lsb":0.00006103515
+                    "lsb":6.103515625e-5
                 },
                 {
                     "name":"Track Angle",
@@ -757,7 +757,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"uint",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },

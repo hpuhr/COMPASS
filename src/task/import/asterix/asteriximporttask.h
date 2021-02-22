@@ -79,6 +79,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool canImportFile();
     virtual bool canRun();
     virtual void run();
+    void run(bool test, bool create_mapping_stubs);
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
@@ -110,12 +111,6 @@ class ASTERIXImportTask : public Task, public Configurable
     bool debug() const;
     void debug(bool debug);
 
-    bool test() const;
-    void test(bool test);
-
-    bool createMappingStubs() const;
-    void createMappingStubs(bool createMappingStubs);
-
     bool limitRAM() const;
     void limitRAM(bool value);
 
@@ -140,6 +135,10 @@ class ASTERIXImportTask : public Task, public Configurable
 
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
+
+    std::vector<std::string> getPossibleMappings (unsigned int cat);
+    std::string getActiveMapping (unsigned int cat);
+    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
 
   protected:
     bool debug_jasterix_;
@@ -178,6 +177,8 @@ class ASTERIXImportTask : public Task, public Configurable
 
     std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
     std::set<int> added_data_sources_;
+
+    unsigned int num_radar_inserted_ {0};
 
     bool all_done_{false};
 

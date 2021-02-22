@@ -35,7 +35,7 @@ class ActiveDataSource
                                 nlohmann::json::boolean_t& active_flag)
         : number_(number), name_(name), active_flag_(active_flag)
     {
-        loginf << "UGA number " << number_ << " name " << name_  << " active_flag " << active_flag_;
+        //loginf << "UGA number " << number_ << " name " << name_  << " active_flag " << active_flag_;
     }
 
     /// @brief Destructor

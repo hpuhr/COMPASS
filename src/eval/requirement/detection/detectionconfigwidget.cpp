@@ -32,9 +32,15 @@ namespace EvaluationRequirement
 DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of detection or miss (inverted probability)");
+
+    assert (check_type_box_);
+
     // ui
     update_interval_edit_ = new QLineEdit(QString::number(config().updateInterval()));
     update_interval_edit_->setValidator(new QDoubleValidator(0.1, 30.0, 2, this));
+    update_interval_edit_->setToolTip("Update interval of the test data");
     connect(update_interval_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::updateIntervalEditSlot);
 
@@ -43,6 +49,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     // min gap
     use_min_gap_length_check_ = new QCheckBox ();
     use_min_gap_length_check_->setChecked(config().useMinGapLength());
+    use_min_gap_length_check_->setToolTip("If minimum gap length should be used");
     connect(use_min_gap_length_check_, &QCheckBox::clicked,
             this, &DetectionConfigWidget::toggleUseMinGapLengthSlot);
 
@@ -50,6 +57,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     min_gap_length_edit_ = new QLineEdit(QString::number(config().minGapLength()));
     min_gap_length_edit_->setValidator(new QDoubleValidator(0.01, 300.0, 3, this));
+    min_gap_length_edit_->setToolTip("Minimum gap length to be considered");
     connect(min_gap_length_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::minGapLengthEditSlot);
 
@@ -58,6 +66,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     // max gap
     use_max_gap_length_check_ = new QCheckBox ();
     use_max_gap_length_check_->setChecked(config().useMaxGapLength());
+    use_max_gap_length_check_->setToolTip("If maximum gap length should be used");
     connect(use_max_gap_length_check_, &QCheckBox::clicked,
             this, &DetectionConfigWidget::toggleUseMaxGapLengthSlot);
 
@@ -65,6 +74,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     max_gap_length_edit_ = new QLineEdit(QString::number(config().maxGapLength()));
     max_gap_length_edit_->setValidator(new QDoubleValidator(0.01, 300.0, 3, this));
+    max_gap_length_edit_->setToolTip("Maximum gap length to be considered");
     connect(max_gap_length_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::maxGapLengthEditSlot);
 
@@ -73,6 +83,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     // invert prob
     use_invert_prob_check_ = new QCheckBox ();
     use_invert_prob_check_->setChecked(config().invertProb());
+    use_invert_prob_check_->setToolTip("If calculated probability should be inverted");
     connect(use_invert_prob_check_, &QCheckBox::clicked,
             this, &DetectionConfigWidget::toggleInvertProbSlot);
 
@@ -81,6 +92,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     // miss tolerance
     use_miss_tolerance_check_ = new QCheckBox ();
     use_miss_tolerance_check_->setChecked(config().useMissTolerance());
+    use_miss_tolerance_check_->setToolTip("If miss tolerance should be used");
     connect(use_miss_tolerance_check_, &QCheckBox::clicked,
             this, &DetectionConfigWidget::toggleUseMissToleranceSlot);
 
@@ -88,6 +100,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
     miss_tolerance_edit_ = new QLineEdit(QString::number(config().missTolerance()));
     miss_tolerance_edit_->setValidator(new QDoubleValidator(0.01, 1.0, 3, this));
+    miss_tolerance_edit_->setToolTip("Acceptable time delta for miss detection");
     connect(miss_tolerance_edit_, &QLineEdit::textEdited,
             this, &DetectionConfigWidget::missToleranceEditSlot);
 

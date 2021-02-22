@@ -4571,7 +4571,7 @@
                             "parameters": {
                                 "comment": "x coordinate in nautical miles",
                                 "data_format": "",
-                                "dimension": "Length",
+                                "dimension": "Position",
                                 "is_key": false,
                                 "name": "POS_LOCAL_X_NM",
                                 "number_conversion_type": "",
@@ -4597,7 +4597,7 @@
                             "parameters": {
                                 "comment": "y coordinate in nautical miles",
                                 "data_format": "",
-                                "dimension": "Length",
+                                "dimension": "Position",
                                 "is_key": false,
                                 "name": "POS_LOCAL_Y_NM",
                                 "number_conversion_type": "",
@@ -5488,13 +5488,13 @@
                             "parameters": {
                                 "comment": "Height in Ft measured by a 3D radar [048/110]",
                                 "data_format": "",
-                                "dimension": "",
+                                "dimension": "Height",
                                 "is_key": false,
                                 "name": "HEIGHT_3D_FT",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "mediumint",
-                                "unit": ""
+                                "unit": "Feet"
                             }
                         },
                         "IC_CODE": {
@@ -5956,13 +5956,13 @@
                             "parameters": {
                                 "comment": "Calculated x position in Cartesian coordinates [I001/042, I048/042]",
                                 "data_format": "",
-                                "dimension": "",
+                                "dimension": "Position",
                                 "is_key": false,
                                 "name": "POS_LOCAL_X_NM",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
-                                "unit": ""
+                                "unit": "Nautical Mile"
                             }
                         },
                         "POS_LOCAL_X_NM_CALC": {
@@ -5982,13 +5982,13 @@
                             "parameters": {
                                 "comment": "Calculated y position in Cartesian coordinates [I001/042, I048/042]",
                                 "data_format": "",
-                                "dimension": "",
+                                "dimension": "Position",
                                 "is_key": false,
                                 "name": "POS_LOCAL_Y_NM",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
-                                "unit": ""
+                                "unit": "Nautical Mile"
                             }
                         },
                         "POS_LOCAL_Y_NM_CALC": {

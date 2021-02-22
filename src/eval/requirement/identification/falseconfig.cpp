@@ -18,7 +18,13 @@
 #include "eval/requirement/identification/falseconfig.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -85,6 +91,37 @@ bool IdentificationFalseConfig::useMsTi() const
 void IdentificationFalseConfig::useMsTi(bool value)
 {
     use_ms_ti_ = value;
+}
+
+void IdentificationFalseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    table.addRow({"Probability [1]", "Probability of false identification",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+
+    table.addRow({"Require All False",
+                  "If checked, all available secondary attributes be different than in "
+                  " the reference to count. If not checked, a single wrong secondary attribute is enough.",
+                  String::boolToString(require_all_false_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode 3/A Code",
+                  "If the Mode 3/A code should be checked",
+                  String::boolToString(use_mode_a_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode S Target Address",
+                  "If the Mode S target address should be checked",
+                  String::boolToString(use_ms_ta_).c_str()}, nullptr);
+
+    table.addRow({"Use Mode S Target Identification",
+                  "If the Mode S target identification should be checked",
+                  String::boolToString(use_ms_ti_).c_str()}, nullptr);
 }
 
 }

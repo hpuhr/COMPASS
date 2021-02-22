@@ -49,12 +49,12 @@ BaseConfigWidget::BaseConfigWidget(BaseConfig& cfg)
     form_layout_->addRow("Comment", comment_edit);
 
     // prob
-    QLineEdit* minimum_prob_edit_ = new QLineEdit(QString::number(config_.prob()));
-    minimum_prob_edit_->setValidator(new QDoubleValidator(0.0000001, 1.0, 8, this));
-    connect(minimum_prob_edit_, &QLineEdit::textEdited,
+    prob_edit_ = new QLineEdit(QString::number(config_.prob()));
+    prob_edit_->setValidator(new QDoubleValidator(0.0000001, 1.0, 8, this));
+    connect(prob_edit_, &QLineEdit::textEdited,
             this, &BaseConfigWidget::changedProbabilitySlot);
 
-    form_layout_->addRow("Probability [1]", minimum_prob_edit_);
+    form_layout_->addRow("Probability [1]", prob_edit_);
 
     // prob check type
     check_type_box_ = new ComparisonTypeComboBox();

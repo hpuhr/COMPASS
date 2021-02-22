@@ -33,14 +33,10 @@ namespace EvaluationRequirement
     {
         Q_OBJECT
 
-    public slots:
-        void minProbPresentEditSlot(QString value);
-
     public:
         ModeCPresentConfigWidget(ModeCPresentConfig& cfg);
 
     protected:
-        QLineEdit* min_prob_pres_edit_{nullptr};
 
         ModeCPresentConfig& config();
     };

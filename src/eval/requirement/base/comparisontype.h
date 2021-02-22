@@ -1,6 +1,9 @@
 #ifndef EVALUATIONREQUIREMENTCOMPARISONTYPE
 #define EVALUATIONREQUIREMENTCOMPARISONTYPE
 
+#include <string>
+#include <stdexcept>
+
 namespace EvaluationRequirement
 {
 
@@ -10,6 +13,9 @@ enum COMPARISON_TYPE {
     GREATER_THAN, // >
     GREATER_THAN_OR_EUQAL // >=
 };
+
+extern std::string comparisonTypeString(COMPARISON_TYPE type);
+extern std::string comparisonTypeLongString(COMPARISON_TYPE type);
 
 }
 

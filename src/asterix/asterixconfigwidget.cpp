@@ -16,6 +16,15 @@
  */
 
 #include "asterixconfigwidget.h"
+#include "asterixeditioncombobox.h"
+#include "asterixframingcombobox.h"
+#include "asteriximporttask.h"
+#include "asterixrefeditioncombobox.h"
+#include "asterixspfeditioncombobox.h"
+#include "asterixmappingcombobox.h"
+#include "files.h"
+#include "logger.h"
+#include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -32,15 +41,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-
-#include "asterixeditioncombobox.h"
-#include "asterixframingcombobox.h"
-#include "asteriximporttask.h"
-#include "asterixrefeditioncombobox.h"
-#include "asterixspfeditioncombobox.h"
-#include "files.h"
-#include "logger.h"
-#include "stringconv.h"
 
 using namespace std;
 using namespace Utils;
@@ -149,7 +149,7 @@ void ASTERIXConfigWidget::framingChangedSlot()
 void ASTERIXConfigWidget::framingEditSlot()
 {
     std::string framing_path = "file:///" + task_.jASTERIX()->framingsFolderPath() + "/" +
-                               task_.currentFraming() + ".json";
+            task_.currentFraming() + ".json";
     loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
@@ -212,6 +212,10 @@ void ASTERIXConfigWidget::updateCategories()
     categories_grid_->addWidget(spf_edit_label, 0, 6);
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+
+    QLabel* mapping_label = new QLabel("Mapping");
+    mapping_label->setFont(font_bold);
+    categories_grid_->addWidget(mapping_label, 0, 7);
 
     int row = 1;
 
@@ -294,6 +298,18 @@ void ASTERIXConfigWidget::updateCategories()
         categories_grid_->addWidget(spf_edit, row, 6);
         assert(!spf_edit_buttons_.count(category));
         spf_edit_buttons_[category] = spf_edit;
+
+        // mapping
+        ASTERIXMappingComboBox* map_combo = new ASTERIXMappingComboBox(task_, category);
+        map_combo->setMapping(task_.getActiveMapping(category));
+        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category << " mapping '"
+               << task_.getActiveMapping(category) << "'";
+
+        connect(map_combo, &ASTERIXMappingComboBox::changedMappingSignal,
+                this, &ASTERIXConfigWidget::categoryMappingChangedSlot);
+
+        categories_grid_->addWidget(map_combo, row, 7);
+
 
         row++;
     }
@@ -429,4 +445,12 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
            << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
+}
+
+void ASTERIXConfigWidget::categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str)
+{
+    loginf << "ASTERIXConfigWidget: categoryMappingChangedSlot: cat " << cat
+           << " mapping '" << mapping_str << "'";
+
+    task_.setActiveMapping(cat, mapping_str);
 }

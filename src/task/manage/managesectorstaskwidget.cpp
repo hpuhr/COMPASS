@@ -24,6 +24,7 @@
 #include "sector.h"
 #include "sectorlayer.h"
 #include "files.h"
+#include "importsectordialog.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -233,6 +234,16 @@ void ManageSectorsTaskWidget::updateSectorTable()
                 sector_table_->setItem(row, col, item);
             }
 
+            {  // Exclude
+                ++col;
+                QTableWidgetItem* item = new QTableWidgetItem();
+                item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsUserCheckable);
+                item->setCheckState(sec_it->exclude() ? Qt::Checked : Qt::Unchecked);
+                //item1->setCheckState();
+                item->setData(Qt::UserRole, QVariant(sector_id));
+                sector_table_->setItem(row, col, item);
+            }
+
             {  // Num Points
                 ++col;
                 QTableWidgetItem* item = new QTableWidgetItem(QString::number(sector->points().size()));
@@ -420,10 +431,29 @@ void ManageSectorsTaskWidget::importSlot()
 {
     loginf << "ManageSectorsTaskWidget: importSlot";
 
-    assert (task_.canImportFile());
-    task_.importFile();
 
-    updateSectorTable();
+    string filename = task_.currentFilename();
+
+    filename = Files::getFilenameFromPath(filename);
+
+    if (filename.find(".", 0) != string::npos)
+        filename = filename.substr(0, filename.find(".", 0));
+
+    ImportSectorDialog dialog(filename.c_str(), this);
+    int ret = dialog.exec();
+
+    if (ret == QDialog::Accepted)
+    {
+        loginf << "ManageSectorsTaskWidget: importSlot: accepted, layer name '" << dialog.layerName()
+               << "' exclude " << dialog.exclude();
+
+        assert (task_.canImportFile());
+        task_.importFile(dialog.layerName(), dialog.exclude(), dialog.color());
+
+        updateSectorTable();
+    }
+    else
+        loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
 }
 
 void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
@@ -456,12 +486,34 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
     if (col_name == "Sector Name")
     {
         if (text.size())
-            sector->name(text);
+        {
+            if (eval_man.hasSector(text, sector->layerName()))
+            {
+                QMessageBox m_warning(QMessageBox::Warning, "Sector Change Failed",
+                ("Layer '"+sector->layerName()+"' Sector '"+text+"' already exists.").c_str(), QMessageBox::Ok);
+                m_warning.exec();
+            }
+            else
+                sector->name(text);
+        }
     }
     else if (col_name == "Layer Name")
     {
         if (text.size())
-            sector->layerName(text);
+        {
+            if (eval_man.hasSector(sector->name(), text))
+            {
+                QMessageBox m_warning(QMessageBox::Warning, "Sector Change Failed",
+                ("Layer '"+text+"' Sector '"+sector->name()+"' already exists.").c_str(), QMessageBox::Ok);
+                m_warning.exec();
+            }
+            else
+                sector->layerName(text);
+        }
+    }
+    else if (col_name == "Exclude")
+    {
+        sector->exclude(item->checkState() == Qt::Checked);
     }
     else if (col_name == "Altitude Minimum")
     {

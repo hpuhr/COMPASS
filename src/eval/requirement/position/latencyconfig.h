@@ -33,14 +33,16 @@ class PositionLatencyConfig : public BaseConfig
 {
 public:
     PositionLatencyConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_ma);
+                          Group& group, EvaluationStandard& standard,
+                          EvaluationManager& eval_ma);
     virtual ~PositionLatencyConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
     float maxAbsValue() const;
     void maxAbsValue(float value);
+
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
     float max_abs_value_ {0};

@@ -36,6 +36,7 @@ protected:
 
     QFormLayout* form_layout_ {nullptr};
 
+    QLineEdit* prob_edit_ {nullptr};
     ComparisonTypeComboBox* check_type_box_ {nullptr};
 };
 

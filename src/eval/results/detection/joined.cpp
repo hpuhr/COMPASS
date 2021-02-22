@@ -261,7 +261,7 @@ namespace EvaluationRequirementResult
         if (table.name() == req_overview_table_name_)
             return true;
         else
-            return false;;
+            return false;
     }
 
     std::string JoinedDetection::reference(

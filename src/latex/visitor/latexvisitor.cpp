@@ -199,8 +199,13 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     section.addTable(table_name, num_cols, headings, "", false);
     LatexTable& table = section.getTable(table_name);
 
+    bool wide_table = false;
+
     if (headings.size() >= 9)
+    {
         table.setWideTable(true);
+        wide_table = true;
+    }
 
     unsigned int num_rows = e->filteredRowCount();
     vector<string> row_strings;
@@ -211,27 +216,30 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
         row_strings = e->sortedRowStrings(row);
         assert (row_strings.size() == num_cols);
 
-        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
+        if (wide_table) // truncate texts
         {
-            if (row_strings[cnt].size() > max_table_col_width_)
+            for (unsigned int cnt=0; cnt < num_cols; ++cnt)
             {
-                std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
-                std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);
-
-                if (space_pos == std::string::npos)
+                if (row_strings[cnt].size() > max_table_col_width_)
                 {
-                    if (comma_pos == std::string::npos)
+                    std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
+                    std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);
+
+                    if (space_pos == std::string::npos)
                     {
-                        break; // no 64-bit-or-less substring
+                        if (comma_pos == std::string::npos)
+                        {
+                            break; // no 64-bit-or-less substring
+                        }
+                        else
+                        {
+                            row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
+                        }
                     }
                     else
                     {
-                        row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
+                        row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
                     }
-                }
-                else
-                {
-                    row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
                 }
             }
         }

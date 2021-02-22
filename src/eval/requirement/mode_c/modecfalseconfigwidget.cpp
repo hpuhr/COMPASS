@@ -32,11 +32,17 @@ namespace EvaluationRequirement
     ModeCFalseConfigWidget::ModeCFalseConfigWidget(ModeCFalseConfig& cfg)
     : BaseConfigWidget(cfg)
     {
+        assert (prob_edit_);
+        prob_edit_->setToolTip("Probability of false Mode C code");
+
+        assert (check_type_box_);
+
         // max diff
         max_diff_edit_ = new QLineEdit(QString::number(config().maxDifference()));
         max_diff_edit_->setValidator(new QDoubleValidator(0.0, 1000.0, 4, this));
-//        connect(max_diff_edit_, &QLineEdit::textEdited,
-//                this, &ModeCFalseConfigWidget::maxDiffEditSlot);
+        prob_edit_->setToolTip("Maximum altitude difference between the test and the reference");
+        connect(max_diff_edit_, &QLineEdit::textEdited,
+                this, &ModeCFalseConfigWidget::maxDiffEditSlot);
 
         form_layout_->addRow("Maximum Difference [ft]", max_diff_edit_);
     }

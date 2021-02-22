@@ -33,13 +33,18 @@ namespace EvaluationRequirement
 PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of acceptable position latency");
+
+    assert (check_type_box_);
+
     // max dist
     max_abs_value_edit_ = new QLineEdit(String::timeStringFromDouble(config().maxAbsValue()).c_str());
-    //max_abs_value_edit_->setValidator(new QDoubleValidator(0.0, 10000.0, 2, this));
+    max_abs_value_edit_->setToolTip("Maximum absolute latency");
     connect(max_abs_value_edit_, &QLineEdit::textEdited,
             this, &PositionLatencyConfigWidget::maxAbsValueEditSlot);
 
-    form_layout_->addRow("Maximum Absolute Value [s]", max_abs_value_edit_);
+    form_layout_->addRow("Maximum Absolute Value [HH:MM:SS.SSS]", max_abs_value_edit_);
 }
 
 void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)

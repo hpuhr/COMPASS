@@ -19,55 +19,76 @@
 #include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
+#include "eval/results/report/section.h"
+#include "eval/results/report/sectioncontenttext.h"
+#include "eval/results/report/sectioncontenttable.h"
+#include "stringconv.h"
 
+using namespace Utils;
+using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
-    ModeCFalseConfig::ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
-                             Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-                         : BaseConfig(class_id, instance_id, group, standard, eval_man)
-    {
-        registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
+ModeCFalseConfig::ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
+                                   Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+{
+    registerParameter("maximum_probability_false", &maximum_probability_false_, 0.01);
 
-        registerParameter("max_difference", &max_difference_, 100);
-    }
+    registerParameter("max_difference", &max_difference_, 100);
+}
 
-    std::shared_ptr<Base> ModeCFalseConfig::createRequirement()
-    {
-        shared_ptr<ModeCFalse> req = make_shared<ModeCFalse>(
-                    name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
-                    maximum_probability_false_, max_difference_);
+std::shared_ptr<Base> ModeCFalseConfig::createRequirement()
+{
+    shared_ptr<ModeCFalse> req = make_shared<ModeCFalse>(
+                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                maximum_probability_false_, max_difference_);
 
-        return req;
-    }
+    return req;
+}
 
-    float ModeCFalseConfig::maximumProbabilityFalse() const
-    {
-        return maximum_probability_false_;
-    }
+float ModeCFalseConfig::maximumProbabilityFalse() const
+{
+    return maximum_probability_false_;
+}
 
-    void ModeCFalseConfig::maximumProbabilityFalse(float value)
-    {
-        maximum_probability_false_ = value;
-    }
-    
-    float ModeCFalseConfig::maxDifference() const
-    {
-        return max_difference_;
-    }
-    
-    void ModeCFalseConfig::maxDifference(float value)
-    {
-        max_difference_ = value;
-    }
+void ModeCFalseConfig::maximumProbabilityFalse(float value)
+{
+    maximum_probability_false_ = value;
+}
 
-    void ModeCFalseConfig::createWidget()
-    {
-        assert (!widget_);
-        widget_.reset(new ModeCFalseConfigWidget(*this));
-        assert (widget_);
-    }
-    
+float ModeCFalseConfig::maxDifference() const
+{
+    return max_difference_;
+}
+
+void ModeCFalseConfig::maxDifference(float value)
+{
+    max_difference_ = value;
+}
+
+void ModeCFalseConfig::createWidget()
+{
+    assert (!widget_);
+    widget_.reset(new ModeCFalseConfigWidget(*this));
+    assert (widget_);
+}
+
+void ModeCFalseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+{
+    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+
+    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+
+    table.addRow({"Probability [1]", "Probability of false Mode C code",
+                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability Check Type", "",
+                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+    table.addRow({"Maximum Difference [ft]", "Maximum altitude difference between the test and the reference",
+                  max_difference_}, nullptr);
+}
 }

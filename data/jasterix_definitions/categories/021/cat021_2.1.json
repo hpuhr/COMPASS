@@ -453,7 +453,7 @@
                             "type":"fixed_bits",
                             "start_bit":0,
                             "bit_length":30,
-                            "lsb":9.3132257e-10
+                            "lsb":9.31322574615478515625E-10
                         }
                     ]
                 }
@@ -499,7 +499,7 @@
                             "type":"fixed_bits",
                             "start_bit":0,
                             "bit_length":30,
-                            "lsb":9.3132257e-10
+                            "lsb":9.31322574615478515625E-10
                         }
                     ]
                 }
@@ -772,7 +772,7 @@
                                             "type":"fixed_bytes",
                                             "length":3,
                                             "data_type":"int",
-                                            "lsb":0.00002145767
+                                            "lsb":2.1457672119140625E-5
                                         },
                                         {
                                             "name":"Longitude",
@@ -780,7 +780,7 @@
                                             "type":"fixed_bytes",
                                             "length":3,
                                             "data_type":"int",
-                                            "lsb":0.00002145767
+                                            "lsb":2.1457672119140625E-5
                                         },
                                         {
                                             "name":"TID2",
@@ -853,7 +853,7 @@
                     "type":"fixed_bytes",
                     "length":3,
                     "data_type":"int",
-                    "lsb":0.00002145767
+                    "lsb":2.1457672119140625e-5
                 },
                 {
                     "name":"Longitude",
@@ -861,7 +861,7 @@
                     "type":"fixed_bytes",
                     "length":3,
                     "data_type":"int",
-                    "lsb":0.00002145767
+                    "lsb":2.1457672119140625e-5
                 }
             ]
         },
@@ -877,7 +877,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":1.67638063e-7
+                    "lsb":1.676380634307861328125E-7
                 },
                 {
                     "name":"Longitude",
@@ -885,7 +885,7 @@
                     "type":"fixed_bytes",
                     "length":4,
                     "data_type":"int",
-                    "lsb":1.67638063e-7
+                    "lsb":1.676380634307861328125E-7
                 }
             ]
         },
@@ -1091,7 +1091,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"int",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },
@@ -1181,7 +1181,7 @@
                             "type":"fixed_bits",
                             "start_bit":0,
                             "bit_length":15,
-                            "lsb":0.00006103515
+                            "lsb":6.103515625E-5
                         }
                     ]
                 },
@@ -1191,7 +1191,7 @@
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"uint",
-                    "lsb":0.00549316406
+                    "lsb":0.0054931640625
                 }
             ]
         },

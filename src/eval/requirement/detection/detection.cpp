@@ -169,7 +169,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
     //int no_ref_uis {0};
 
     bool is_inside {false}, was_outside {false};
-    pair<EvaluationTargetPosition, bool> ret_pos;
+    //pair<EvaluationTargetPosition, bool> ret_pos;
     bool ok;
 
     vector<DetectionDetail> details;
@@ -345,16 +345,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
         // is inside period
         period_index = ref_periods.getPeriodIndex(tod);
 
-        ret_pos = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
+        tie(ref_pos, ok) = target_data.interpolatedRefPosForTime(tod, max_ref_time_diff);
 
-        ref_pos = ret_pos.first;
-        ok = ret_pos.second;
+//        ref_pos = ret_pos.first;
+//        ok = ret_pos.second;
         //assert (ok); // must be since inside ref time interval
 
-        if (!ok)
+        if (!ok) // only happens if test time is exact beginning of reference interval
         {
-            loginf << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
-                   << " impossible check failed";
+            if (!skip_no_data_details)
+                details.push_back(
+                            {tod, {}, false,
+                             pos_current, is_inside_ref_time_period,
+                             sum_missed_uis, "At exact beginning of reference time period"});
+
             continue;
         }
 

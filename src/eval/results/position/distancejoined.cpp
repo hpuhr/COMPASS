@@ -225,7 +225,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     }
 
     // figure
-    if (has_p_min_ && p_passed_ != 1.0) // TODO
+    if (values_.size()) // TODO
     {
         sector_section.addFigure("sector_errors_overview", "Sector Errors Overview",
                                  getErrorsViewable());
@@ -234,7 +234,7 @@ void JoinedPositionDistance::addDetails(std::shared_ptr<EvaluationResultsReport:
     {
         sector_section.addText("sector_errors_overview_no_figure");
         sector_section.getText("sector_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
+                    "No data found, therefore no figure was generated.");
     }
 }
 

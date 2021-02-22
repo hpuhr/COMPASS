@@ -51,6 +51,7 @@ protected:
     const std::string name_;
 
     std::vector<std::shared_ptr<Sector>> sectors_;
+    bool has_exclude_sector_ {false};
 };
 
 #endif // SECTORLAYER_H

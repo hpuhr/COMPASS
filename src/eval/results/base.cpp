@@ -32,7 +32,7 @@ using namespace std;
 namespace EvaluationRequirementResult
 {
 
-    const std::string Base::req_overview_table_name_ {"Requirements Overview"};
+    const std::string Base::req_overview_table_name_ {"Results Overview"};
 
     Base::Base(const std::string& type, const std::string& result_id,
                std::shared_ptr<EvaluationRequirement::Base> requirement, const SectorLayer& sector_layer,
@@ -101,7 +101,7 @@ namespace EvaluationRequirementResult
     EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
-        EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Requirements");
+        EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Results");
 
         if (!ov_sec.hasTable(req_overview_table_name_))
             ov_sec.addTable(req_overview_table_name_, 8,
