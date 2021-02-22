@@ -52,6 +52,7 @@ The following columns exist in the table:
 \item ID: Unique identifier number, read-only
 \item Sector Name: Name of the sector, editable
 \item Layer Name: Name of the layer the sector will be grouped in, editable
+\item Exclude: Whether the sector is an 'Exclude' sector
 \item Num Points: Number of points in polygon, read-only
 \item Altitude Minimum: Minimum altitude in feet, editable, can be empty (gray)
 \item Altitude Maximum: Maximum altitude in feet, editable, can be empty (gray)
@@ -59,6 +60,8 @@ The following columns exist in the table:
 \item Delete: Delete button
 \end{itemize}
 \ \\
+
+The 'Exclude' sector is a special case where e.g. a sector layer 'Example' has at least one normal sector 'Area', giving the 2.5d polygon in which surveillance data of interest exists. Now, to exclude target reports in a specific sector inside the bigger 'Area' sector, one or several smaller sectors can be imported (again into sector layer 'Example') and marked as 'Exclude' sectors and at best using a different color. \\
 
 At the botton, 3 buttons exist:
 
@@ -78,7 +81,22 @@ After adding two example files, the 'Import' tab looks as follows:
   \caption{Task: Manage Sectors with Example Files}
 \end{figure}
 
-To import a sector, select the wanted file in the file list and press the 'Import' button. After successful import, a confirmation message is shown. \\
+To import a sector, select the wanted file in the file list and press the 'Import' button, after which an import dialog is shown. \\
+
+\begin{figure}[H]
+    \includegraphics[width=6cm]{../screenshots/manage_sectors_import_dialog.png}
+  \caption{Task: Manage Sectors import dialog}
+\end{figure}
+
+The following options exist:
+\begin{itemize}  
+\item Sector Layer: Define in which sector layer the new sectors will be grouped in
+\item Exclude: Define whether the imported sectors will be impored as 'Exclude' sectors
+\item Color: Color to be used
+\end{itemize}
+\ \\
+
+After successful import, a confirmation message is shown. \\
 
 After importing both sectors, the 'Manage' tab looks as follows:
 

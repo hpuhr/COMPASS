@@ -63,8 +63,6 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
         //connect(active_check_, &QCheckBox::clicked, this, &JSONObjectParserWidget::toggleActiveSlot);
         grid->addWidget(active_check_, row, 1);
 
-        grid->addWidget(active_check_);
-
         ++row;
         grid->addWidget(new QLabel("DBObject"), row, 0);
         grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 1);

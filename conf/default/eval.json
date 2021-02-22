@@ -53,7 +53,7 @@
         "use_v0": true,
         "use_v1": true,
         "use_v2": true,
-        "warning_shown": true
+        "warning_shown": false
     },
     "sub_config_files": [
         {
