@@ -18,7 +18,7 @@
 
 	<cache_policy max_age="1209600"/>
         <cache type="filesystem">
-            <path>osgearth_cache/readymap</path>
+            <path>../../../osgearth_cache/readymap</path>
         </cache>
 
     </options>
