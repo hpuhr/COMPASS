@@ -51,9 +51,13 @@ using namespace Utils;
 
 namespace po = boost::program_options;
 
+std::string APP_FILENAME;
+
 Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 {
     setlocale(LC_ALL, "C");
+
+    APP_FILENAME = argv[0];
 
     tbb::task_scheduler_init guard(std::thread::hardware_concurrency());
 
@@ -375,7 +379,8 @@ void Client::checkNeededActions()
     // home subdir exists, no old config exists
     cout << "COMPASSClient: checking if current compass config exists ... ";
 
-    bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY);
+    bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY)
+            && Files::directoryExists(HOME_VERSION_SUBDIRECTORY);
 
     if (current_cfg_subdir_exists)
     {
@@ -386,6 +391,9 @@ void Client::checkNeededActions()
 
         if (config.existsId("version"))
             config_version = config.getString("version");
+
+        if (String::compareVersions(VERSION, config_version) != 0)
+            cerr << "COMPASSClient: app version '" << VERSION << "' config version " << config_version << "'" << endl;
 
         assert (String::compareVersions(VERSION, config_version) == 0);  // must be same
         return; // nothing to do

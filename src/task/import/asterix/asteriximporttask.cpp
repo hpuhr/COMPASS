@@ -16,18 +16,6 @@
  */
 
 #include "asteriximporttask.h"
-
-#include <jasterix/category.h>
-#include <jasterix/edition.h>
-#include <jasterix/jasterix.h>
-#include <jasterix/refedition.h>
-
-#include <QApplication>
-#include <QCoreApplication>
-#include <QMessageBox>
-#include <QThread>
-#include <algorithm>
-
 #include "asterixcategoryconfig.h"
 #include "asteriximporttaskwidget.h"
 #include "asterixstatusdialog.h"
@@ -51,6 +39,18 @@
 #include "system.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "metadbtable.h"
+
+#include <jasterix/category.h>
+#include <jasterix/edition.h>
+#include <jasterix/jasterix.h>
+#include <jasterix/refedition.h>
+
+#include <QApplication>
+#include <QCoreApplication>
+#include <QMessageBox>
+#include <QThread>
+#include <algorithm>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -457,17 +457,6 @@ void ASTERIXImportTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImportTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImportTask::test() const { return test_; }
-
-void ASTERIXImportTask::test(bool test) { test_ = test; }
-
-bool ASTERIXImportTask::createMappingStubs() const { return create_mapping_stubs_; }
-
-void ASTERIXImportTask::createMappingStubs(bool create_mapping_stubs)
-{
-    create_mapping_stubs_ = create_mapping_stubs;
-}
-
 bool ASTERIXImportTask::limitRAM() const { return limit_ram_; }
 
 void ASTERIXImportTask::limitRAM(bool limit_ram)
@@ -567,6 +556,89 @@ void ASTERIXImportTask::overrideTodOffset(float value)
     post_process_.override_tod_offset_ = value;
 }
 
+std::vector<std::string> ASTERIXImportTask::getPossibleMappings (unsigned int cat)
+{
+    std::vector<std::string> list;
+
+    list.push_back(""); // no mapping
+
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: getPossibleMappings: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat) // if same, add
+           list.push_back(par_it.first);
+    }
+
+    return list;
+}
+
+std::string ASTERIXImportTask::getActiveMapping (unsigned int cat)
+{
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: getActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat && par_it.second.active()) // if same, add
+           return par_it.first;
+    }
+
+    // none found
+    return "";
+}
+
+void ASTERIXImportTask::setActiveMapping (unsigned int cat, const std::string& mapping_name)
+{
+    loginf << "ASTERIXImportTask: setActiveMapping: cat " << cat << " mapping '" << mapping_name << "'";
+
+    assert (schema_);
+
+    std::string tmp_str;
+    unsigned int tmp_cat;
+
+    for (auto& par_it : schema_->parsers())
+    {
+        if (par_it.second.JSONKey() != "category")
+        {
+            logwrn << "ASTERIXImportTask: setActiveMapping: parser '" << par_it.first << "' has unknown JSON key '"
+                   << par_it.second.JSONKey() << "'";
+            continue;
+        }
+
+        tmp_str = par_it.second.JSONValue();
+        tmp_cat = std::stoi(tmp_str);
+
+        if (tmp_cat == cat) // if same, change
+            par_it.second.active(par_it.first == mapping_name);
+    }
+}
+
 void ASTERIXImportTask::deleteWidget() { widget_.reset(nullptr); }
 
 bool ASTERIXImportTask::canImportFile()
@@ -588,7 +660,16 @@ bool ASTERIXImportTask::canRun() { return canImportFile(); }
 
 void ASTERIXImportTask::run()
 {
+    run (false, false);
+}
+
+void ASTERIXImportTask::run(bool test, bool create_mapping_stubs)
+{
+    test_ = test;
+    create_mapping_stubs_ = create_mapping_stubs;
+
     done_ = false; // since can be run multiple times
+    num_radar_inserted_ = 0;
 
     float free_ram = System::getFreeRAMinGB();
 
@@ -966,12 +1047,17 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 {
     logdbg << "ASTERIXImportTask: insertData: inserting into database";
 
+    assert (!test_ && !create_mapping_stubs_);
+
     assert(status_widget_);
 
     if (!dbo_variable_sets_.size())  // initialize if empty
     {
         for (auto& parser_it : *schema_)
         {
+            if (!parser_it.second.active())
+                continue;
+
             std::string dbo_name = parser_it.second.dbObject().name();
 
             DBObject& db_object = parser_it.second.dbObject();
@@ -1120,6 +1206,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         db_object.insertData(set, buffer, false);
 
         status_widget_->addNumInserted(db_object.name(), buffer->size());
+
+        if (db_object.name() == "Radar")
+            num_radar_inserted_ = buffer->size(); // store for later check
     }
 
     checkAllDone();
@@ -1138,7 +1227,37 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
     logdbg << "ASTERIXImportTask: insertDoneSlot";
     --insert_active_;
 
+    bool test = test_; // test_ cleared by checkAllDone
+
     checkAllDone();
+
+    logdbg << "ASTERIXImportTask: insertDoneSlot: check done";
+
+    if (all_done_ && !test && !create_mapping_stubs_)
+    {
+        logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
+
+        // in case data was imported, clear other task done properties
+        if (num_radar_inserted_)
+        {
+            bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
+                        COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                        {"pos_lat_deg","pos_long_deg"});
+
+            loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;
+
+            COMPASS::instance().interface().setProperty(
+                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
+        }
+
+        COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+        COMPASS::instance().interface().setProperty(
+            CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
+
+        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+        emit doneSignal(name_);
+    }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
@@ -1164,10 +1283,16 @@ void ASTERIXImportTask::checkAllDone()
 
         QApplication::restoreOverrideCursor();
 
+        logdbg << "ASTERIXImportTask: checkAllDone: refresh";
+
         refreshjASTERIX();
+
+        logdbg << "ASTERIXImportTask: checkAllDone: widget done";
 
         assert(widget_);
         widget_->runDone();
+
+        logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
         if (!create_mapping_stubs_ && !test_)
             emit COMPASS::instance().interface().databaseContentChangedSignal();
@@ -1181,6 +1306,8 @@ void ASTERIXImportTask::checkAllDone()
                                      std::to_string(db_cnt_it.second) + " " + db_cnt_it.first +
                                      " records");
 
+        logdbg << "ASTERIXImportTask: checkAllDone: status logging";
+
         if (test_)
             task_manager_.appendSuccess("ASTERIXImportTask: import test done after " +
                                         status_widget_->elapsedTimeStr());
@@ -1191,29 +1318,14 @@ void ASTERIXImportTask::checkAllDone()
         {
             task_manager_.appendSuccess("ASTERIXImportTask: import done after " +
                                         status_widget_->elapsedTimeStr());
-
-            bool was_done = done_;
-            done_ = true;
-
-            // in case data was imported, clear other task done properties
-            if (status_widget_->dboInsertedCounts().count("Radar"))
-                COMPASS::instance().interface().setProperty(
-                    RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
-
-            COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-            COMPASS::instance().interface().setProperty(
-                CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
-
-            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
-
-            if (!was_done)  // only emit if first time done
-                emit doneSignal(name_);
         }
 
-        test_ = false;  // set again by widget
+        //test_ = false;  // set again by widget
 
         if (!show_done_summary_)
         {
+            logdbg << "ASTERIXImportTask: checkAllDone: deleting status widget";
+
             status_widget_->close();
             status_widget_ = nullptr;
         }
@@ -1224,9 +1336,13 @@ void ASTERIXImportTask::checkAllDone()
 
 void ASTERIXImportTask::closeStatusDialogSlot()
 {
+    loginf << "ASTERIXImportTask: closeStatusDialogSlot";
+
     assert(status_widget_);
     status_widget_->close();
     status_widget_ = nullptr;
+
+    loginf << "ASTERIXImportTask: closeStatusDialogSlot: done";
 }
 
 bool ASTERIXImportTask::maxLoadReached()

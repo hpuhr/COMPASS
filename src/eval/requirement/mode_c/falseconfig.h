@@ -30,28 +30,30 @@ class EvaluationStandard;
 
 namespace EvaluationRequirement
 {
-    class ModeCFalseConfig : public BaseConfig
-    {
-    public:
-        ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
-                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+class ModeCFalseConfig : public BaseConfig
+{
+public:
+    ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
+                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
 
-        std::shared_ptr<Base> createRequirement() override;
+    std::shared_ptr<Base> createRequirement() override;
 
-        float maximumProbabilityFalse() const;
-        void maximumProbabilityFalse(float value);
+    float maximumProbabilityFalse() const;
+    void maximumProbabilityFalse(float value);
 
-        float maxDifference() const;
-        void maxDifference(float value);
+    float maxDifference() const;
+    void maxDifference(float value);
 
-    protected:
-        float maximum_probability_false_{0};
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
-        float max_difference_ {0};
+protected:
+    float maximum_probability_false_{0};
 
-        virtual void createWidget() override;
+    float max_difference_ {0};
 
-    };
+    virtual void createWidget() override;
+
+};
 
 }
 

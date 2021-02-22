@@ -40,7 +40,7 @@ LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
 
         ss << "|";
         for (unsigned int cnt=0; cnt < num_columns_; ++cnt)
-            ss << " l |";
+            ss << " X |";
 
         heading_alignment_ = ss.str();
     }

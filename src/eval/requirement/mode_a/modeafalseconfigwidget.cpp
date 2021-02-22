@@ -32,7 +32,10 @@ namespace EvaluationRequirement
     ModeAFalseConfigWidget::ModeAFalseConfigWidget(ModeAFalseConfig& cfg)
             : BaseConfigWidget(cfg)
     {
+        assert (prob_edit_);
+        prob_edit_->setToolTip("Probability of false Mode 3/A code");
 
+        assert (check_type_box_);
     }
 
 

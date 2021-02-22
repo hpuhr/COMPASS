@@ -21,10 +21,10 @@
 #include "configurable.h"
 
 class EvaluationManager;
+class LatexDocument;
 
 namespace EvaluationResultsReport
 {
-
     class PDFGeneratorDialog;
 
     class PDFGenerator : public Configurable

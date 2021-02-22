@@ -48,6 +48,8 @@ void SectorLayer::addSector (std::shared_ptr<Sector> sector)
     assert (!hasSector(sector->name()));
     assert (sector->layerName() == name_);
     sectors_.push_back(sector);
+
+    has_exclude_sector_ |= sector->exclude();
 }
 
 std::shared_ptr<Sector> SectorLayer::sector (const std::string& name)
@@ -77,16 +79,50 @@ void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
 bool SectorLayer::isInside(const EvaluationTargetPosition& pos,
                            bool has_ground_bit, bool ground_bit_set)  const
 {
+    bool is_inside = false;
+    bool is_inside_exclude = false;
+
+    // check if inside normal ones
     for (auto& sec_it : sectors_)
+    {
+        if (sec_it->exclude())
+            continue;
+
         if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
             logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
-                   << " alt " << pos.altitude_;
-            return true;
-        }
+                   << " alt " << pos.altitude_ << " exclude " << sec_it->exclude();
 
-    logdbg << "SectorLayer " << name_ << ": isInside: false";
-    return false;
+            is_inside = true;
+            break;
+        }
+    }
+
+    if (!is_inside) // not inside normal sector
+        return false;
+
+    // is inside normal sector
+
+    if (!has_exclude_sector_) // nothin more to check
+        return true;
+
+    // check if inside exclude ones
+    for (auto& sec_it : sectors_)
+    {
+        if (!sec_it->exclude())
+            continue;
+
+        if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
+        {
+            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_
+                   << " alt " << pos.altitude_ << " exclude " << sec_it->exclude();
+
+            is_inside_exclude = true;
+            break;
+        }
+    }
+
+    return !is_inside_exclude; // true if in no exlcude, false if in include
 }
 
 std::pair<double, double> SectorLayer::getMinMaxLatitude() const

@@ -15,6 +15,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixeditioncombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixrefeditioncombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixspfeditioncombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixmappingcombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixcategoryconfig.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixstatusdialog.h"
     PRIVATE

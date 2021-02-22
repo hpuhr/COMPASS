@@ -409,9 +409,7 @@ void ASTERIXImportTaskWidget::createMappingsSlot()
         return;
     }
 
-    task_.test(false);
-    task_.createMappingStubs(true);
-    task_.run();
+    task_.run(false, true);
 }
 
 void ASTERIXImportTaskWidget::testImportSlot()
@@ -426,9 +424,7 @@ void ASTERIXImportTaskWidget::testImportSlot()
         return;
     }
 
-    task_.test(true);
-    task_.createMappingStubs(false);
-    task_.run();
+    task_.run(true, false);
 }
 
 void ASTERIXImportTaskWidget::expertModeChangedSlot() {}

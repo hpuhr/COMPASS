@@ -20,6 +20,8 @@
 
 #include "json.hpp"
 
+#include <QColor>
+
 #include <ogr_geometry.h>
 
 #include <memory>
@@ -32,7 +34,7 @@ class Sector
 public:
     // should be protected?
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
-           std::vector<std::pair<double,double>> points);
+           bool exclude, QColor color, std::vector<std::pair<double,double>> points);
     Sector(unsigned int id, const std::string& name, const std::string& layer_name,
            const std::string& json_str);
 
@@ -43,6 +45,9 @@ public:
 
     std::string layerName() const;
     void layerName(const std::string& layer_name);
+
+    bool exclude() const;
+    void exclude(bool value);
 
     nlohmann::json jsonData() const;
     std::string jsonDataStr() const;
@@ -77,6 +82,9 @@ protected:
     std::string name_;
     std::string layer_name_;
 
+    bool exclude_ {false};
+    std::string color_str_;
+
     std::vector<std::pair<double,double>> points_;
 
     bool has_min_altitude_ {false};
@@ -84,8 +92,6 @@ protected:
 
     bool has_max_altitude_ {false};
     double max_altitude_{0.0};
-
-    std::string color_str_;
 
     std::unique_ptr<OGRPolygon> ogr_polygon_;
 

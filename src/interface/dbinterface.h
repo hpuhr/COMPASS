@@ -164,6 +164,8 @@ class DBInterface : public QObject, public Configurable
     void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
                       const std::string& max);
 
+    bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
+
     bool existsViewPointsTable();
     void createViewPointsTable();
     void setViewPoint(const unsigned int id, const std::string& value);

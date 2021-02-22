@@ -55,6 +55,15 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
 
         int row = 0;
 
+        grid->addWidget(new QLabel("Active"), row, 0);
+
+        active_check_ = new QCheckBox();
+        active_check_->setDisabled(true); // only for show
+        active_check_->setChecked(parser_->active());
+        //connect(active_check_, &QCheckBox::clicked, this, &JSONObjectParserWidget::toggleActiveSlot);
+        grid->addWidget(active_check_, row, 1);
+
+        ++row;
         grid->addWidget(new QLabel("DBObject"), row, 0);
         grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 1);
 
@@ -140,6 +149,14 @@ void JSONObjectParserWidget::update()
     json_value_edit_->setText(parser_->JSONValue().c_str());
 
     data_source_variable_name_edit_->setText(parser_->dataSourceVariableName().c_str());
+}
+
+void JSONObjectParserWidget::updateActive()
+{
+    loginf << "JSONObjectParserWidget: updateActive: value " << parser_->active();
+
+    assert (active_check_);
+    active_check_->setChecked(parser_->active());
 }
 
 void JSONObjectParserWidget::updateMappingsGrid()
@@ -288,6 +305,16 @@ void JSONObjectParserWidget::updateMappingsGrid()
 }
 
 void JSONObjectParserWidget::setParser(JSONObjectParser& parser) { parser_ = &parser; }
+
+//void JSONObjectParserWidget::toggleActiveSlot ()
+//{
+//    loginf << "JSONObjectParserWidget: toggleActiveSlot";
+
+//    QCheckBox* widget = static_cast<QCheckBox*>(sender());
+//    assert(widget);
+
+//    parser_->active(widget->checkState() == Qt::Checked);
+//}
 
 void JSONObjectParserWidget::jsonContainerKeyChangedSlot()
 {

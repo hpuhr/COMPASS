@@ -38,6 +38,8 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
+    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
 protected:
 
     virtual void createWidget() override;

@@ -32,27 +32,12 @@ namespace EvaluationRequirement
 ModeCPresentConfigWidget::ModeCPresentConfigWidget(ModeCPresentConfig& cfg)
     : BaseConfigWidget(cfg)
 {
-    // prob
-    min_prob_pres_edit_ = new QLineEdit(QString::number(config().minimumProbabilityPresent()));
-    min_prob_pres_edit_->setValidator(new QDoubleValidator(0.0001, 1.0, 4, this));
-//    connect(min_prob_pres_edit_, &QLineEdit::textEdited,
-//            this, &ModeCPresentConfigWidget::minProbPresentEditSlot);
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of Mode C code present");
 
-    form_layout_->addRow("Present Minimum Probability [1]", min_prob_pres_edit_);
+    assert (check_type_box_);
 }
 
-void ModeCPresentConfigWidget::minProbPresentEditSlot(QString value)
-{
-    loginf << "EvaluationRequirementModeCConfigWidget: minProbPresentEditSlot: value " << value.toStdString();
-
-    bool ok;
-    float val = value.toFloat(&ok);
-
-    if (ok)
-        config().minimumProbabilityPresent(val);
-    else
-        loginf << "EvaluationRequirementModeCConfigWidget: minProbPresentEditSlot: invalid value";
-}
 
 ModeCPresentConfig& ModeCPresentConfigWidget::config()
 {

@@ -51,6 +51,8 @@ namespace EvaluationRequirement
         bool ignorePrimaryOnly() const;
         void ignorePrimaryOnly(bool value);
 
+        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+
     protected:
         float min_duration_{0};
         unsigned int min_num_updates_ {0};

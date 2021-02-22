@@ -49,6 +49,7 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
 {
     int argc = 1;
     char* argv[1];
+    argv[0] = "test";
 
     // create client
     Client client(argc, argv);

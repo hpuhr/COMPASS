@@ -10,8 +10,12 @@ This task allows calculation of Radar plot position information based on the def
   \label{fig:task_calc_radar}
 \end{figure}
 
+This task becomes recommended if any Radar data was imported which was missing the WGS84 position information. When started, it (re-)calculates the latitude/longitude position information of all Radars. \\
 
-Please note that for this step the Radar data source positions have to set in the database (see \nameref{sec:task_manage_datasources}), otherwise no plot position can be calculated. 
+If e.g. CAT010 Radar plots with already given latitude/longitude information should be imported, and also CAT048 data without it it, the best way is to import the CAT048 data first, then run this task, and only then import the CAT010 data. This allows to calculate the position information where needed, and keep the original position information for the rest of the data. \\
+
+
+Please note that for this step the Radar data source positions have to set in the database (see \nameref{sec:task_manage_datasources}), otherwise no plot position can be calculated.  \\
 
 There are two projection methods (radar polar coordinates to WGS-84 coordinates) available. The \textit{RS2G} projection is the currently recommended option.
 

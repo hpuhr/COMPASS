@@ -32,9 +32,15 @@ namespace EvaluationRequirement
 ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of extra data");
+
+    assert (check_type_box_);
+
     // min_duration
     min_duration_edit_ = new QLineEdit(QString::number(config().minDuration()));
     min_duration_edit_->setValidator(new QDoubleValidator(0.1, 3000.0, 1, this));
+    min_duration_edit_->setToolTip("Minimum track duration, requirement result is ignored if less");
     connect(min_duration_edit_, &QLineEdit::textEdited,
             this, &ExtraDataConfigWidget::minDurationEditSlot);
 
@@ -43,6 +49,7 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
     // min_num_updates
     min_num_updates_edit_ = new QLineEdit(QString::number(config().minNumUpdates()));
     min_num_updates_edit_->setValidator(new QDoubleValidator(0, 300, 0, this));
+    min_num_updates_edit_->setToolTip("Minimum number of extra target reports, requirement result is ignored if less");
     connect(min_num_updates_edit_, &QLineEdit::textEdited,
             this, &ExtraDataConfigWidget::minNumUpdatesEditSlot);
 
@@ -51,6 +58,8 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
     // ignore_primary_only
     ignore_primary_only_check_ = new QCheckBox ();
     ignore_primary_only_check_->setChecked(config().ignorePrimaryOnly());
+    ignore_primary_only_check_->setToolTip("Requirement result is ignored if target is primary only (has no"
+                                           " secondary attributes, also not in reference)");
     connect(ignore_primary_only_check_, &QCheckBox::clicked,
             this, &ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot);
 

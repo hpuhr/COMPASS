@@ -164,7 +164,7 @@ DBOVariableSet HistogramView::getSet(const std::string& dbo_name)
         }
         else
         {
-            if (!set.hasVariable(dataVar()))
+            if (dataVar().dboName() == dbo_name && !set.hasVariable(dataVar()))
                 set.add(dataVar());
         }
     }

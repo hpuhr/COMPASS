@@ -40,6 +40,7 @@
 #include "stringconv.h"
 #include "dbovariableorderedset.h"
 #include "dbconnection.h"
+#include "stringconv.h"
 
 #include "json.hpp"
 
@@ -475,15 +476,18 @@ std::string EvaluationManager::getCannotEvaluateComment()
 {
     assert (!canEvaluate());
 
+    // no sector
+    if (!sectorsLayers().size())
+        return "Please add at least one sector";
+
     if (!data_loaded_)
         return "Please select and load reference & test data";
 
     if (!hasCurrentStandard())
         return "Please select a standard";
 
-    // no sector
-
-    return "Please add at least one sector and activate at least one requirement group";
+    // no sector active
+    return "Please activate at least one requirement group";
 }
 
 void EvaluationManager::newDataSlot(DBObject& object)
@@ -574,6 +578,7 @@ void EvaluationManager::evaluate ()
     {
         widget_->updateButtons();
         widget_->expandResults();
+        //widget_->showResultId("")
     }
 
     emit resultsChangedSignal();
@@ -786,24 +791,21 @@ void EvaluationManager::loadSectors()
 
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
+    for (auto& sec_lay_it : sector_layers_)
+        for (auto& sec_it : sec_lay_it->sectors())
+           max_sector_id_ = std::max(max_sector_id_, sec_it->id());
+
     sectors_loaded_ = true;
 }
 
 unsigned int EvaluationManager::getMaxSectorId ()
 {
     assert (sectors_loaded_);
-
-    unsigned int id = 0;
-    for (auto& sec_lay_it : sector_layers_)
-        for (auto& sec_it : sec_lay_it->sectors())
-            if (sec_it->id() > id)
-                id = sec_it->id();
-
-    return id;
+    return max_sector_id_;
 }
 
 void EvaluationManager::createNewSector (const std::string& name, const std::string& layer_name,
-                                         std::vector<std::pair<double,double>> points)
+                                         bool exclude, QColor color, std::vector<std::pair<double,double>> points)
 {
     loginf << "EvaluationManager: createNewSector: name " << name << " layer_name " << layer_name
            << " num points " << points.size();
@@ -811,9 +813,9 @@ void EvaluationManager::createNewSector (const std::string& name, const std::str
     assert (sectors_loaded_);
     assert (!hasSector(name, layer_name));
 
-    unsigned int id = getMaxSectorId()+1;
+    ++max_sector_id_; // new max
 
-    shared_ptr<Sector> sector = make_shared<Sector> (id, name, layer_name, points);
+    shared_ptr<Sector> sector = make_shared<Sector> (max_sector_id_, name, layer_name, exclude, color, points);
 
     // add to existing sectors
     if (!hasSectorLayer(layer_name))
@@ -1500,6 +1502,8 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     data["evaluation_results"]["req_grp_id"] = req_grp_id;
     data["evaluation_results"]["result_id"] = result_id;
 
+    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
+
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }
 
@@ -1512,6 +1516,8 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationManager::getViewableForEvalu
     data["evaluation_results"]["show_results"] = true;
     data["evaluation_results"]["req_grp_id"] = req_grp_id;
     data["evaluation_results"]["result_id"] = result_id;
+
+    data["show_sectors"] = vector<string>({String::split(req_grp_id, ':').at(0)});
 
     return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
 }

@@ -85,7 +85,7 @@ void JoinedSpeed::update()
     assert (num_no_ref_ <= num_pos_);
     assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
-    assert (values_.size() == num_comp_failed_+num_comp_passed_+num_no_tst_value_);
+    assert (values_.size() == num_comp_failed_+num_comp_passed_);
 
     unsigned int num_speeds = values_.size();
 

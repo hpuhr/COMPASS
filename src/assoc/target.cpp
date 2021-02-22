@@ -289,7 +289,10 @@ namespace Association
 
         tie(lower, upper) = timesFor(tod, d_max);
 
-        if (lower == -1 || upper == -1)
+        if (lower != -1 && upper == -1) // exact time
+            return {posForExactTime(lower), true};
+
+        if (lower == -1)
             return {{}, false};
 
         EvaluationTargetPosition pos1 = posForExactTime(lower);
@@ -413,7 +416,10 @@ namespace Association
 
         tie(lower, upper) = timesFor(tod, d_max);
 
-        if (lower == -1 || upper == -1)
+        if (lower != -1 && upper == -1) // exact time
+            return {posForExactTime(lower), true};
+
+        if (lower == -1)
             return {{}, false};
 
         EvaluationTargetPosition pos1 = posForExactTime(lower);

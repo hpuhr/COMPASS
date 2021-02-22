@@ -12,9 +12,13 @@ Depending on the use case, different options exist. Please follow the listed ref
  \item \nameref{sec:mysql_connect}
  \item \nameref{sec:mysql_open_db}
  \end{itemize}
+ \item \nameref{sec:task_manage_db_schema}* (Schema 'SCDB' must be selected)
  \item \nameref{sec:task_calc_radar_pos}* (Only once if Radar data exists)
  \item \nameref{sec:task_postprocess}
 \end{itemize}
+\ \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} If this function is used, the used database schema must be switched to 'SCDB' using \nameref{sec:task_manage_db_schema}. \\
 
 \paragraph{Creating a New MySQL Database from Verif Export}
 
@@ -24,14 +28,18 @@ Depending on the use case, different options exist. Please follow the listed ref
  \item \nameref{sec:mysql_connect}
  \item \nameref{sec:mysql_open_db}
  \end{itemize}
+ \item \nameref{sec:task_manage_db_schema}* (Schema 'SCDB' must be selected)
  \item \nameref{sec:task_import_mysql_db}
  \item \nameref{sec:task_calc_radar_pos}* (Only once if Radar data was imported)
  \item \nameref{sec:task_postprocess}
 \end{itemize}
+\ \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} If this function is used, the used database schema must be switched to 'SCDB' using \nameref{sec:task_manage_db_schema}. \\
 
 \subsection{Using a Database Created From Import}
 
-While it is possible to create a MySQL database using using an ASTERIX or JSON import, using an SQLite3 database is recommended for performance reasons.
+While it is possible to create a MySQL database using using an ASTERIX or JSON import, using an SQLite3 database is recommended for performance reasons. Also using the default database schema 'SCDB Extended' is strongly recommended when \textit{not} using a Verif-created database.
 
 \paragraph{Acessing a Previously Created SQLite3 Database} 
 

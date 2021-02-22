@@ -32,7 +32,10 @@ namespace EvaluationRequirement
 ModeAPresentConfigWidget::ModeAPresentConfigWidget(ModeAPresentConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    assert (prob_edit_);
+    prob_edit_->setToolTip("Probability of Mode 3/A code present");
 
+    assert (check_type_box_);
 }
 
 ModeAPresentConfig& ModeAPresentConfigWidget::config()

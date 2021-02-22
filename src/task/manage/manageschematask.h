@@ -18,11 +18,12 @@
 #ifndef MANAGESCHEMATASK_H
 #define MANAGESCHEMATASK_H
 
-#include <QObject>
-#include <memory>
-
 #include "configurable.h"
 #include "task.h"
+
+#include <QObject>
+
+#include <memory>
 
 class TaskManager;
 class ManageSchemaTaskWidget;

@@ -22,10 +22,10 @@ public:
     ComparisonTypeComboBox(QWidget* parent = 0)
         : QComboBox(parent)
     {
-        addItem("Less Than (<)");
-        addItem("Less Than or Equal (<=)");
-        addItem("Greater Than (>)");
-        addItem("Greater Than or Equal (>=)");
+        addItem(comparisonTypeLongString(COMPARISON_TYPE::LESS_THAN).c_str());
+        addItem(comparisonTypeLongString(COMPARISON_TYPE::LESS_THAN_OR_EQUAL).c_str());
+        addItem(comparisonTypeLongString(COMPARISON_TYPE::GREATER_THAN).c_str());
+        addItem(comparisonTypeLongString(COMPARISON_TYPE::GREATER_THAN_OR_EUQAL).c_str());
 
         connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedTypeSignal()));
     }
