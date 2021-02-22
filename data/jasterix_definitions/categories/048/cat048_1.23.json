@@ -930,7 +930,7 @@
                     "type":"fixed_bytes",
                     "length":1,
                     "data_type":"uint",
-                    "lsb":0.2197265625
+                    "lsb":0.2197265401898285
                 },
                 {
                     "name":"Sigma (H)",

@@ -308,7 +308,6 @@ void JSONObjectParserWidget::updateMappingsGrid()
 
 void JSONObjectParserWidget::setParser(JSONObjectParser& parser) { parser_ = &parser; }
 
-
 //void JSONObjectParserWidget::toggleActiveSlot ()
 //{
 //    loginf << "JSONObjectParserWidget: toggleActiveSlot";

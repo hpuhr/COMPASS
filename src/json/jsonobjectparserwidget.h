@@ -31,6 +31,7 @@ class JSONObjectParserWidget : public QWidget
     Q_OBJECT
   public slots:
     //void toggleActiveSlot ();
+
     void jsonContainerKeyChangedSlot();
     void jsonKeyChangedSlot();
     void jsonValueChangedSlot();
