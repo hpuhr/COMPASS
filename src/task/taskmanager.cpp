@@ -549,6 +549,35 @@ void TaskManager::importASTERIXFile(const std::string& filename)
     asterix_import_file_ = true;
     asterix_import_filename_ = filename;
 }
+
+bool TaskManager::asterixOptionsSet() const
+{
+    return set_asterix_framing_ || set_asterix_decoder_cfg_;
+}
+
+void TaskManager::setAsterixOptions()
+{
+    assert (asterixOptionsSet());
+
+    if (set_asterix_framing_)
+        asterixImporterTask().asterixFraming(asterix_framing_);
+
+    if (set_asterix_decoder_cfg_)
+        asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg_);
+}
+
+void TaskManager::asterixFraming(const std::string& asterix_framing)
+{
+    asterix_framing_ = asterix_framing;
+    set_asterix_framing_ = true;
+}
+
+void TaskManager::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
+{
+    asterix_decoder_cfg_ = asterix_decoder_cfg;
+    set_asterix_decoder_cfg_ = true;
+}
+
 #endif
 
 void TaskManager::importJSONFile(const std::string& filename, const std::string& schema)
@@ -557,6 +586,7 @@ void TaskManager::importJSONFile(const std::string& filename, const std::string&
 
     assert (schema.size());
 
+    automatic_tasks_defined_ = true;
     json_import_file_ = true;
     json_import_filename_ = filename;
     json_import_schema_ = schema;

@@ -341,6 +341,8 @@ void JSONImportTask::run()
 {
     loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
 
+    done_ = false; // since can be run multiple times
+
     std::string tmp;
 
     if (test_)
@@ -426,8 +428,10 @@ void JSONImportTask::addReadJSONSlot()
         if (read_json_job_)
             read_json_job_->pause();
 
+        updateMsgBox();
+
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
+        QThread::msleep(10);
     }
 
     // start parse job
@@ -450,15 +454,14 @@ void JSONImportTask::addReadJSONSlot()
 
 void JSONImportTask::readJSONFileDoneSlot()
 {
-    loginf << "JSONImporterTask: readJSONFileDoneSlot";
+    logdbg << "JSONImporterTask: readJSONFileDoneSlot";
 
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: done";
     task_manager_.appendInfo("JSONImporterTask: reading done with " +
                              std::to_string(objects_read_) + " records");
     read_status_percent_ = 100.0;
     read_json_job_ = nullptr;
 
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: updating message box";
+    logdbg << "JSONImporterTask: readJSONFileDoneSlot: updating message box";
     updateMsgBox();
 
     logdbg << "JSONImporterTask: readJSONFileDoneSlot: done";
@@ -798,6 +801,8 @@ void JSONImportTask::checkAllDone()
             task_manager_.appendSuccess("JSONImporterTask: import test done after " + time_str);
         else
         {
+            loginf << "JSONImporterTask: checkAllDone: setting done";
+
             task_manager_.appendSuccess("JSONImporterTask: import done after " + time_str);
             done_ = true;
 
@@ -828,12 +833,17 @@ void JSONImportTask::updateMsgBox()
             msg_box_->close();
 
         msg_box_ = nullptr;
+
+        loginf << "JSONImporterTask: updateMsgBox: deleting";
+
         return;
     }
 
     if (!msg_box_)
     {
         msg_box_.reset(new QMessageBox());
+
+        loginf << "JSONImporterTask: updateMsgBox: creating";
 
         if (test_)
             msg_box_->setWindowTitle("Test Import JSON Data Status");
