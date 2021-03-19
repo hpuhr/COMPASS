@@ -255,7 +255,7 @@ void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_
 
             string spf_ed = cat_cfg.at("spf_edition");
 
-            if (!jasterix_->category(cat)->hasREFEdition(spf_ed))
+            if (!jasterix_->category(cat)->hasSPFEdition(spf_ed))
                 throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
                                     +" has no spf edition '"+spf_ed+"'");
 

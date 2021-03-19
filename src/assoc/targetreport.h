@@ -31,6 +31,10 @@ namespace Association
         bool has_tn_{false};
         unsigned int tn_{0};
 
+        // track end
+        bool has_track_end_{false};
+        unsigned int track_end_{0};
+
         // mode 3/a
         bool has_ma_{false};
         unsigned int ma_{0};

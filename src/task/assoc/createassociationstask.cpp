@@ -58,6 +58,7 @@ CreateAssociationsTask::CreateAssociationsTask(const std::string& class_id,
     registerParameter("target_addr_var_str", &target_addr_var_str_, "target_addr");
     registerParameter("target_id_var_str", &target_id_var_str_, "callsign");
     registerParameter("track_num_var_str", &track_num_var_str_, "track_num");
+    registerParameter("track_end_var_str", &track_end_var_str_, "track_end");
     registerParameter("mode_3a_var_str", &mode_3a_var_str_, "mode3a_code");
     registerParameter("mode_c_var_str", &mode_c_var_str_, "modec_code_ft");
     registerParameter("latitude_var_str", &latitude_var_str_, "pos_lat_deg");
@@ -182,6 +183,7 @@ bool CreateAssociationsTask::canRun()
             || !target_addr_var_str_.size()
             || !target_id_var_str_.size()
             || !track_num_var_str_.size()
+            || !track_end_var_str_.size()
             || !mode_3a_var_str_.size()
             || !mode_c_var_str_.size()
             || !latitude_var_str_.size()
@@ -195,6 +197,7 @@ bool CreateAssociationsTask::canRun()
             || !object_man.existsMetaVariable(target_addr_var_str_)
             || !object_man.existsMetaVariable(target_id_var_str_)
             || !object_man.existsMetaVariable(track_num_var_str_)
+            || !object_man.existsMetaVariable(track_end_var_str_)
             || !object_man.existsMetaVariable(mode_3a_var_str_)
             || !object_man.existsMetaVariable(mode_c_var_str_)
             || !object_man.existsMetaVariable(latitude_var_str_)
@@ -210,6 +213,7 @@ bool CreateAssociationsTask::canRun()
                 || !object_man.metaVariable(target_addr_var_str_).existsIn(dbo_it.first)
                 || !object_man.metaVariable(target_id_var_str_).existsIn(dbo_it.first)
                 //|| !object_man.metaVariable(track_num_var_str_).existsIn(dbo_it.first) // not in adsb
+                //|| !object_man.metaVariable(track_end_var_str_).existsIn(dbo_it.first) // not in adsb
                 || !object_man.metaVariable(mode_3a_var_str_).existsIn(dbo_it.first)
                 || !object_man.metaVariable(mode_c_var_str_).existsIn(dbo_it.first)
                 || !object_man.metaVariable(latitude_var_str_).existsIn(dbo_it.first)
@@ -246,6 +250,7 @@ void CreateAssociationsTask::run()
     checkAndSetMetaVariable(target_addr_var_str_, &target_addr_var_);
     checkAndSetMetaVariable(target_id_var_str_, &target_id_var_);
     checkAndSetMetaVariable(track_num_var_str_, &track_num_var_);
+    checkAndSetMetaVariable(track_end_var_str_, &track_end_var_);
     checkAndSetMetaVariable(mode_3a_var_str_, &mode_3a_var_);
     checkAndSetMetaVariable(mode_c_var_str_, &mode_c_var_);
     checkAndSetMetaVariable(latitude_var_str_, &latitude_var_);
@@ -600,6 +605,12 @@ MetaDBOVariable* CreateAssociationsTask::trackNumVar() const
     return track_num_var_;
 }
 
+MetaDBOVariable* CreateAssociationsTask::trackEndVar() const
+{
+    assert (track_end_var_);
+    return track_end_var_;
+}
+
 MetaDBOVariable* CreateAssociationsTask::mode3AVar() const
 {
     assert (mode_3a_var_);
@@ -672,6 +683,10 @@ DBOVariableSet CreateAssociationsTask::getReadSetFor(const std::string& dbo_name
     assert(track_num_var_);
     if(track_num_var_->existsIn(dbo_name))
         read_set.add(track_num_var_->getFor(dbo_name));
+
+    assert(track_end_var_);
+    if(track_end_var_->existsIn(dbo_name))
+        read_set.add(track_end_var_->getFor(dbo_name));
 
     assert(mode_3a_var_);
     assert(mode_3a_var_->existsIn(dbo_name));

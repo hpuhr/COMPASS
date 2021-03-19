@@ -159,6 +159,7 @@ void CreateAssociationsJob::createTargetReports()
     MetaDBOVariable* meta_ta_var = task_.targetAddrVar();
     MetaDBOVariable* meta_ti_var = task_.targetIdVar();
     MetaDBOVariable* meta_tn_var = task_.trackNumVar();
+    MetaDBOVariable* meta_tr_end_var = task_.trackEndVar();
     MetaDBOVariable* meta_mode_3a_var = task_.mode3AVar();
     MetaDBOVariable* meta_mode_c_var = task_.modeCVar();
     MetaDBOVariable* meta_latitude_var = task_.latitudeVar();
@@ -170,6 +171,7 @@ void CreateAssociationsJob::createTargetReports()
     assert (meta_ta_var);
     assert (meta_ti_var);
     assert (meta_tn_var);
+    assert (meta_tr_end_var);
     assert (meta_mode_3a_var);
     assert (meta_mode_c_var);
     assert (meta_latitude_var);
@@ -206,6 +208,10 @@ void CreateAssociationsJob::createTargetReports()
         if (meta_tn_var->existsIn(dbo_name))
             tn_var = &meta_tn_var->getFor(dbo_name);
 
+        DBOVariable* tr_end_var {nullptr}; // not in ads-b
+        if (meta_tr_end_var->existsIn(dbo_name))
+            tr_end_var = &meta_tr_end_var->getFor(dbo_name);
+
         assert (meta_mode_3a_var->existsIn(dbo_name));
         DBOVariable& mode_3a_var = meta_mode_3a_var->getFor(dbo_name);
 
@@ -239,6 +245,13 @@ void CreateAssociationsJob::createTargetReports()
         {
             assert (buffer->has<int>(tn_var->name()));
             tns = &buffer->get<int>(tn_var->name());
+        }
+
+        NullableVector<string>* tr_ends {nullptr};
+        if (tr_end_var)
+        {
+            assert (buffer->has<string>(tr_end_var->name()));
+            tr_ends = &buffer->get<string>(tr_end_var->name());
         }
 
         assert (buffer->has<int>(mode_3a_var.name()));
@@ -300,6 +313,9 @@ void CreateAssociationsJob::createTargetReports()
             tr.has_tn_ = tns && !tns->isNull(cnt);
             tr.tn_ = tr.has_tn_ ? tns->get(cnt) : 0;
 
+            tr.has_track_end_ = tr_ends && !tr_ends->isNull(cnt);
+            tr.track_end_ = tr.has_track_end_ ? tr_ends->get(cnt) == "Y" : false;
+
             tr.has_ma_ = !m3as.isNull(cnt);
             tr.ma_ = tr.has_ma_ ? m3as.get(cnt) : 0;
 
@@ -329,7 +345,7 @@ void CreateAssociationsJob::createTrackerUTNS()
 
         unsigned int utn;
 
-        map<unsigned int, Association::Target> tracker_targets;
+        map<unsigned int, Association::Target> tracker_targets; // utn -> target
         map<unsigned int, pair<unsigned int, float>> tn2utn; // track num -> utn, last tod
 
         DBObjectManager& object_man = COMPASS::instance().objectManager();
@@ -337,6 +353,8 @@ void CreateAssociationsJob::createTrackerUTNS()
         bool clean_dubious_utns = task_.cleanDubiousUtns();
         bool mark_dubious_utns_unused = task_.markDubiousUtnsUnused();
         bool comment_dubious_utns = task_.commentDubiousUtns();
+
+        bool attached_to_existing_utn;
 
         // create utn for all tracks
         for (auto& ds_it : ds_id_trs) // ds_id->trs
@@ -355,15 +373,35 @@ void CreateAssociationsJob::createTrackerUTNS()
             // create temporary targets
             for (auto& tr_it : ds_it.second)
             {
-                if (tr_it.has_tn_)
+                if (tr_it.has_tn_) // has track number
                 {
-                    if (!tn2utn.count(tr_it.tn_)) // first track update exists
+                    if (!tn2utn.count(tr_it.tn_)) // if not yet mapped to utn
                     {
-                        logdbg << "CreateAssociationsJob: createTrackerUTNS: registering new tmp target "
-                               << tmp_utn_cnt << " for tn " << tr_it.tn_;
+                        attached_to_existing_utn = false;
 
-                        tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
-                        ++tmp_utn_cnt;
+                        // check if can be attached to already existing utn
+                        if (!tr_it.has_ta_) // not for mode-s targets
+                        {
+                            int cont_utn = findContinuationUTNForTrackerUpdate(tr_it, tracker_targets);
+
+                            if (cont_utn != -1)
+                            {
+                                loginf << "CreateAssociationsJob: createTrackerUTNS: continuing target "
+                                       << cont_utn << " with tn " << tr_it.tn_ << " at time "
+                                       << String::timeStringFromDouble(tr_it.tod_);
+                                tn2utn[tr_it.tn_] = {cont_utn, tr_it.tod_};
+                                attached_to_existing_utn = true;
+                            }
+                        }
+
+                        if (!attached_to_existing_utn)
+                        {
+                            logdbg << "CreateAssociationsJob: createTrackerUTNS: registering new tmp target "
+                                   << tmp_utn_cnt << " for tn " << tr_it.tn_;
+
+                            tn2utn[tr_it.tn_] = {tmp_utn_cnt, tr_it.tod_};
+                            ++tmp_utn_cnt;
+                        }
                     }
 
                     //loginf << "UGA1";
@@ -848,6 +886,123 @@ void CreateAssociationsJob::createAssociations()
     }
 }
 
+int CreateAssociationsJob::findContinuationUTNForTrackerUpdate (
+        const Association::TargetReport& tr, const std::map<unsigned int, Association::Target>& targets)
+// tries to find existing utn for tracker update, -1 if failed
+{
+    if (tr.has_ta_)
+        return -1;
+
+    const double max_time_diff_tracker = 30.0;
+    const double max_altitude_diff_tracker = 300.0;
+    const double max_distance_acceptable_tracker = 1852.0;;
+
+    unsigned int num_targets = targets.size();
+
+    vector<tuple<bool, unsigned int, double>> results;
+    // usable, other utn, distance
+    results.resize(num_targets);
+
+    tbb::parallel_for(uint(0), num_targets, [&](unsigned int cnt)
+    {
+        const Association::Target& other = targets.at(cnt);
+        Transformation trafo;
+
+        results[cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
+
+        if (!other.numAssociated()) // check if target has associated target reports
+            return;
+
+        if (other.hasTA()) // not for mode-s targets
+            return;
+
+        if (tr.tod_ <= other.tod_max_) // check if not recently updated
+            return;
+
+        // tr.tod_ > other.tod_max_
+        if (tr.tod_ - other.tod_max_ > max_time_diff_tracker) // check if last updated longer ago than threshold
+            return;
+
+        const Association::TargetReport& other_last_tr = other.lastAssociated();
+
+        if (!other_last_tr.has_track_end_ || !other_last_tr.track_end_) // check if other track was ended
+            return;
+
+        if (!other_last_tr.has_ma_ || !tr.has_ma_) // check mode a codes exist
+            return;
+
+        if (other_last_tr.ma_ != tr.ma_) // check mode-a
+            return;
+
+        // mode a codes the same
+
+        if (other_last_tr.has_mc_ && tr.has_mc_
+                && fabs(other_last_tr.mc_ - tr.mc_) > max_altitude_diff_tracker) // check mode c codes if existing
+            return;
+
+        bool ok;
+        double x_pos, y_pos;
+        double distance;
+
+        tie(ok, x_pos, y_pos) = trafo.distanceCart(
+                    other_last_tr.latitude_, other_last_tr.longitude_,
+                    tr.latitude_, tr.longitude_);
+
+        if (!ok)
+            return;
+
+        distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
+
+        if (distance > max_distance_acceptable_tracker)
+            return;
+
+        results[cnt] = tuple<bool, unsigned int, double>(
+                    true, other.utn_, distance);
+    });
+
+    // find best match
+    unsigned int num_matches = 0;
+
+    bool usable;
+    unsigned int other_utn;
+    double distance;
+
+    bool first = true;
+    unsigned int best_other_utn;
+    double best_distance;
+
+    for (auto& res_it : results) // usable, other utn, distance
+    {
+        tie(usable, other_utn, distance) = res_it;
+
+        if (!usable)
+            continue;
+
+        ++num_matches;
+
+        if (first || distance < best_distance)
+        {
+            best_other_utn = other_utn;
+            best_distance = distance;
+
+            first = false;
+        }
+    }
+
+    if (first)
+        return -1;
+
+    if (num_matches > 1)
+    {
+        loginf << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: " << num_matches << " found";
+        return -1;
+    }
+
+    loginf << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: continuation match utn "
+           << best_other_utn << " found, distance " << best_distance;
+    return best_other_utn;
+}
+
 int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& target)
 // tries to find existing utn for target, -1 if failed
 {
@@ -857,11 +1012,8 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
         return tmp_utn;
 
     // try to find by m a/c/pos
-    //if (target.hasMA() && target.hasMA(3599))
+    //if (target.hasMA() && target.hasMA(396))
     logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
-
-    //    OGRSpatialReference wgs84;
-    //    wgs84.SetWellKnownGeogCS("WGS84");
 
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
@@ -885,7 +1037,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {
-            //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+            //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
             logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
                    << " other " << other.utn_
                    << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
@@ -898,12 +1050,12 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
                 tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
 
-                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
                 logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
                        << " other " << other.utn_
                        << " ma same " << ma_same.size() << " diff " << ma_different.size();
 
-                if (ma_same.size() > ma_different.size() &&  ma_same.size() >= min_updates_tracker)
+                if (ma_same.size() > ma_different.size() && ma_same.size() >= min_updates_tracker)
                 {
                     // check mode c codes
 
@@ -914,7 +1066,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
                     tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
                                 other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker);
 
-                    //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                    //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
                     logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
                            << " other " << other.utn_
                            << " ma same " << ma_same.size() << " diff " << ma_different.size()
@@ -999,7 +1151,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
                             if (distance_avg < max_distance_acceptable_tracker)
                             {
-                                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
                                 logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
                                        << " next utn " << utn_cnt_ << " dist avg " << distance_avg
                                        << " num " << same_distances.size();
@@ -1012,7 +1164,7 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
             }
             else
             {
-                //if (target.hasMA() && target.hasMA(3599) && other.hasMA() && other.hasMA(3599))
+                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
                 //    logdbg << "\tno overlap";
             }
         }
@@ -1053,14 +1205,14 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
     if (first)
     {
-        //if (target.hasMA() && target.hasMA(3599))
+        //if (target.hasMA() && target.hasMA(396))
         logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
                << " no match found";
         return -1;
     }
     else
     {
-        //if (target.hasMA() && target.hasMA(3599))
+        //if (target.hasMA() && target.hasMA(396))
         logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
                << " best other " << best_other_utn
                << " best score " << fixed << best_score << " dist avg " << best_distance_avg

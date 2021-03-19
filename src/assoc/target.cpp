@@ -82,6 +82,17 @@ namespace Association
             addAssociated(tr_it);
     }
 
+    unsigned int Target::numAssociated() const
+    {
+        return assoc_trs_.size();
+    }
+
+    const TargetReport& Target::lastAssociated() const
+    {
+        assert (assoc_trs_.size());
+        return *assoc_trs_.back();
+    }
+
     bool Target::hasTA () const
     {
         return tas_.size();

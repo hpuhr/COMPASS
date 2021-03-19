@@ -57,6 +57,8 @@ namespace Association
 
         void addAssociated (TargetReport* tr);
         void addAssociated (vector<TargetReport*> trs);
+        unsigned int numAssociated() const;
+        const TargetReport& lastAssociated() const;
 
         bool hasTA () const;
         bool hasTA (unsigned int ta)  const;

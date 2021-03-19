@@ -61,6 +61,9 @@ protected:
     void createNonTrackerUTNS();
     void createAssociations();
 
+    int findContinuationUTNForTrackerUpdate (const Association::TargetReport& tr,
+                                             const std::map<unsigned int, Association::Target>& targets);
+    // tries to find existing utn for tracker update, -1 if failed
     int findUTNForTrackerTarget (const Association::Target& target);
     // tries to find existing utn for target, -1 if failed
     int findUTNForTargetByTA (const Association::Target& target);
