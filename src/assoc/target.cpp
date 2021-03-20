@@ -138,7 +138,7 @@ namespace Association
         return mas_.count(ma);
     }
 
-    std::string Target::asStr()
+    std::string Target::asStr() const
     {
         stringstream ss;
 
@@ -179,6 +179,11 @@ namespace Association
         }
 
         return ss.str();
+    }
+
+    std::string Target::timeStr() const
+    {
+        return "["+String::timeStringFromDouble(tod_min_)+" - "+String::timeStringFromDouble(tod_max_)+"]";
     }
 
     bool Target::isTimeInside (float tod) const
@@ -578,6 +583,8 @@ namespace Association
         {
             tod = tr_it->tod_;
 
+            assert (hasDataForExactTime(tod));
+
             cmp_res = other.compareModeACode(tr_it->has_ma_, tr_it->ma_, tod, max_time_diff);
 
             if (cmp_res == CompareResult::UNKNOWN)
@@ -660,24 +667,26 @@ namespace Association
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
-            Target& other, const std::vector<float>& timestamps, float max_time_diff, float max_alt_diff) const
+            Target& other, const std::vector<float>& timestamps,
+            float max_time_diff, float max_alt_diff, bool debug) const
     {
         vector<float> unknown;
         vector<float> same;
         vector<float> different;
 
-        float tod;
         CompareResult cmp_res;
 
         TargetReport* tr;
 
-        for (auto ts_it : timestamps)
+        for (auto tod : timestamps)
         {
             assert (hasDataForExactTime(tod));
             tr = &dataForExactTime (tod);
-            tod = ts_it;
 
-            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod, max_time_diff, max_alt_diff);
+            cmp_res = other.compareModeCCode(tr->has_mc_, tr->mc_, tod, max_time_diff, max_alt_diff, debug);
+
+            if (debug)
+               loginf << "tod " << String::timeStringFromDouble(tod) << " result " << (unsigned int) cmp_res;
 
             if (cmp_res == CompareResult::UNKNOWN)
                 unknown.push_back(tod);
@@ -692,8 +701,8 @@ namespace Association
         return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeCCode (bool has_mc, unsigned int mc, float tod,
-                                            float max_time_diff, float max_alt_diff)
+    CompareResult Target::compareModeCCode (bool has_mc, float mc, float tod,
+                                            float max_time_diff, float max_alt_diff, bool debug)
     {
         if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
@@ -703,33 +712,64 @@ namespace Association
         tie(lower, upper) = timesFor(tod, max_time_diff);
 
         if (lower == -1 && upper == -1)
+        {
+            if (debug)
+                loginf << "Target: compareModeCCode: unknown, no times found";
             return CompareResult::UNKNOWN;
+        }
 
         if ((lower == -1 && upper != -1)
                 || (lower != -1 && upper == -1)) // only 1
         {
+            if (debug)
+                loginf << "Target: compareModeCCode: only 1";
+
             TargetReport& ref1 = (lower != -1) ? dataForExactTime(lower)
                                                : dataForExactTime(upper);
 
             if (!has_mc)
             {
                 if (!ref1.has_mc_ ) // both have no mode c
+                {
+                    if (debug)
+                        loginf << "Target: compareModeCCode: same, both have no mode c";
                     return CompareResult::SAME;
+                }
                 else
+                {
+                    if (debug)
+                        loginf << "Target: compareModeCCode: different, no mode c but in ref1";
                     return CompareResult::DIFFERENT;
+                }
             }
 
             // mode c exists
             if (!ref1.has_mc_)
+            {
+                if (debug)
+                    loginf << "Target: compareModeCCode: different, mode c but not in ref1";
                 return CompareResult::DIFFERENT;  // mode c here, but none in other
+            }
 
             if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)) // is same
+            {
+                if (debug)
+                    loginf << "Target: compareModeCCode: same, diff check passed";
                 return CompareResult::SAME;
+            }
             else
+            {
+                if (debug)
+                    loginf << "Target: compareModeCCode: different, diff check failed";
                 return CompareResult::DIFFERENT;
+            }
         }
 
         // both set
+
+        if (debug)
+            loginf << "Target: compareModeCCode: both";
+
         assert (lower != -1);
         assert (hasDataForExactTime(lower));
         TargetReport& ref1 = dataForExactTime(lower);
@@ -741,22 +781,50 @@ namespace Association
         if (!has_mc)
         {
             if (!ref1.has_mc_ || !ref2.has_mc_) // both have no mode c
+            {
+                if (debug)
+                    loginf << "Target: compareModeCCode: same, both have no mode c";
                 return CompareResult::SAME;
+            }
             else
+            {
+                if (debug)
+                    loginf << "Target: compareModeCCode: different, no mode c here, but in one of refs";
                 return CompareResult::DIFFERENT; // no mode c here, but in other
+            }
         }
 
         // mode a exists
         if (!ref1.has_mc_ && !ref2.has_mc_)
+        {
+            if (debug)
+                loginf << "Target: compareModeCCode: different, mode c here, but none in refs";
             return CompareResult::DIFFERENT; // mode c here, but none in other
+        }
 
         if ((ref1.has_mc_ && fabs(ref1.mc_ - mc) < max_alt_diff)
                 || (ref2.has_mc_ && fabs(ref2.mc_ - mc) < max_alt_diff)) // one of them is same
         {
+            if (debug)
+                loginf << "Target: compareModeCCode: same, diff check passed";
             return CompareResult::SAME;
         }
         else
+        {
+            if (debug)
+            {
+                loginf << "Target: compareModeCCode: different, diff check failed";
+                loginf << "\t mc " << mc;
+                loginf << "\t ref1.has_mc_ " << ref1.has_mc_;
+                loginf << "\t ref1.mc_ " << ref1.mc_;
+                loginf << "\t fabs(ref1.mc_ - mc) " << fabs(ref1.mc_ - mc);
+                loginf << "\t ref2.has_mc_ " << ref2.has_mc_;
+                loginf << "\t ref2.mc_ " << ref2.mc_;
+                loginf << "\t fabs(ref2.mc_ - mc) " << fabs(ref2.mc_ - mc);
+                loginf << "\t max_alt_diff " << max_alt_diff;
+            }
             return CompareResult::DIFFERENT;
+        }
     }
 
     void Target::calculateSpeeds()

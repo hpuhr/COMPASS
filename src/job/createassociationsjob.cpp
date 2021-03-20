@@ -51,9 +51,6 @@ void CreateAssociationsJob::run()
 {
     logdbg << "CreateAssociationsJob: run: start";
 
-    //    Association::Target::max_time_diff_ = max_time_diff_;
-    //    Association::Target::max_altitude_diff_ = max_altitude_diff_;
-
     started_ = true;
 
     boost::posix_time::ptime start_time;
@@ -555,9 +552,15 @@ void CreateAssociationsJob::createTrackerUTNS()
                            << " tmp_utn " << tmp_utn;
 
                     if (tmp_utn == -1) // none found, create new target
+                    {
                         addTarget(tmp_target->second);
+                    }
                     else // attach to existing target
                     {
+                        if (tmp_target->second.hasMA() && tmp_target->second.hasMA(396))
+                            loginf << "CreateAssociationsJob: createTrackerUTNS: attaching utn " << tmp_target->first
+                                   << " to tmp_utn " << tmp_utn;
+
                         assert (targets_.count(tmp_utn));
                         targets_.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
                     }
@@ -768,7 +771,7 @@ void CreateAssociationsJob::createNonTrackerUTNS()
                     // check mode c code
                     Association::CompareResult mc_res = other.compareModeCCode(
                                 tr_it.has_mc_, tr_it.mc_, tod,
-                                max_time_diff_sensor, max_altitude_diff_sensor);
+                                max_time_diff_sensor, max_altitude_diff_sensor, false);
 
                     if (mc_res != Association::CompareResult::SAME)
                         continue;
@@ -994,11 +997,11 @@ int CreateAssociationsJob::findContinuationUTNForTrackerUpdate (
 
     if (num_matches > 1)
     {
-        loginf << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: " << num_matches << " found";
+        logdbg << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: " << num_matches << " found";
         return -1;
     }
 
-    loginf << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: continuation match utn "
+    logdbg << "CreateAssociationsJob: findContinuationUTNForTrackerUpdate: continuation match utn "
            << best_other_utn << " found, distance " << best_distance;
     return best_other_utn;
 }
@@ -1012,8 +1015,9 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
         return tmp_utn;
 
     // try to find by m a/c/pos
-    //if (target.hasMA() && target.hasMA(396))
-    logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
+    bool print_debug_target = target.hasMA() && target.hasMA(396);
+    if (print_debug_target)
+        loginf << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_ << " by mode a/c, pos";
 
     vector<tuple<bool, unsigned int, unsigned int, double>> results;
     // usable, other utn, num updates, avg distance
@@ -1028,35 +1032,48 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
     const double max_distance_dubious_tracker = task_.maxDistanceDubiousTracker();
     const double max_distance_acceptable_tracker = task_.maxDistanceAcceptableTracker();
 
-    tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+    //tbb::parallel_for(uint(0), utn_cnt_, [&](unsigned int cnt)
+    for (unsigned int cnt=0; cnt < utn_cnt_; ++cnt)
     {
         Association::Target& other = targets_.at(cnt);
         Transformation trafo;
 
         results[cnt] = tuple<bool, unsigned int, unsigned int, double>(false, other.utn_, 0, 0);
 
+        bool print_debug = target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396);
+
         if (!(target.hasTA() && other.hasTA())) // only try if not both mode s
         {
-            //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
-            logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
-                   << " other " << other.utn_
-                   << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
+            if (print_debug)
+            {
+                loginf << "\ttarget " << target.utn_ << " " << target.timeStr()
+                       << " checking other " << other.utn_ << " " << other.timeStr()
+                       << " overlaps " << target.timeOverlaps(other) << " prob " << target.probTimeOverlaps(other);
+            }
 
             if (target.timeOverlaps(other) && target.probTimeOverlaps(other) >= prob_min_time_overlap_tracker)
             {
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " overlap passed";
+
                 vector<float> ma_unknown;
                 vector<float> ma_same;
                 vector<float> ma_different;
 
                 tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(other, max_time_diff_tracker);
 
-                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
-                logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
-                       << " other " << other.utn_
-                       << " ma same " << ma_same.size() << " diff " << ma_different.size();
+                if (print_debug)
+                {
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                           << " ma unknown " << ma_unknown.size()
+                           << " same " << ma_same.size() << " diff " << ma_different.size();
+                }
 
                 if (ma_same.size() > ma_different.size() && ma_same.size() >= min_updates_tracker)
                 {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode a check passed";
+
                     // check mode c codes
 
                     vector<float> mc_unknown;
@@ -1064,26 +1081,25 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
                     vector<float> mc_different;
 
                     tie (mc_unknown, mc_same, mc_different) = target.compareModeCCodes(
-                                other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker);
+                                other, ma_same, max_time_diff_tracker, max_altitude_diff_tracker, print_debug);
 
-                    //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
-                    logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
-                           << " other " << other.utn_
-                           << " ma same " << ma_same.size() << " diff " << ma_different.size()
-                           << " mc same " << mc_same.size() << " diff " << mc_different.size();
+                    if (print_debug)
+                    {
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                               << " ma same " << ma_same.size() << " diff " << ma_different.size()
+                               << " mc same " << mc_same.size() << " diff " << mc_different.size();
+                    }
 
                     if (mc_same.size() > mc_different.size() && mc_same.size() >= min_updates_tracker)
                     {
+                        if (print_debug)
+                            loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check passed";
                         // check positions
 
                         vector<pair<float, double>> same_distances;
                         double distances_sum {0};
 
                         unsigned int pos_dubious_cnt {0};
-
-                        //                        OGRSpatialReference local;
-
-                        //                        std::unique_ptr<OGRCoordinateTransformation> ogr_geo2cart;
 
                         EvaluationTargetPosition tst_pos;
 
@@ -1101,41 +1117,54 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
                             tie(ref_pos, ok) = other.interpolatedPosForTimeFast(tod_it, max_time_diff_tracker);
 
                             if (!ok)
+                            {
+                                if (print_debug)
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " pos calc failed ";
+
                                 continue;
-
-                            //                            local.SetStereographic(ref_pos.latitude_, ref_pos.longitude_, 1.0, 0.0, 0.0);
-
-                            //                            ogr_geo2cart.reset(OGRCreateCoordinateTransformation(&wgs84, &local));
-
-                            //                            if (in_appimage_) // inside appimage
-                            //                            {
-                            //                                x_pos = tst_pos.longitude_;
-                            //                                y_pos = tst_pos.latitude_;
-                            //                            }
-                            //                            else
-                            //                            {
-                            //                                x_pos = tst_pos.latitude_;
-                            //                                y_pos = tst_pos.longitude_;
-                            //                            }
-
-                            //                            ok = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
+                            }
 
                             tie(ok, x_pos, y_pos) = trafo.distanceCart(
                                         ref_pos.latitude_, ref_pos.longitude_,
                                         tst_pos.latitude_, tst_pos.longitude_);
 
                             if (!ok)
+                            {
+                                if (print_debug)
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " pos calc failed ";
+
                                 continue;
+                            }
 
                             distance = sqrt(pow(x_pos,2)+pow(y_pos,2));
 
                             if (distance > max_distance_dubious_tracker)
                                 ++pos_dubious_cnt;
 
-                            if (distance > max_distance_quit_tracker || pos_dubious_cnt > max_positions_dubious_tracker)
+                            if (distance > max_distance_quit_tracker)
                                 // too far or dubious, quit
                             {
                                 same_distances.clear();
+
+                                if (print_debug)
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " max distance failed "
+                                           << distance << " > " << max_distance_quit_tracker;
+
+                                break;
+                            }
+
+                            if (pos_dubious_cnt > max_positions_dubious_tracker)
+                            {
+                                same_distances.clear();
+
+                                if (print_debug)
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " pos dubious failed "
+                                           << pos_dubious_cnt << " > " << max_positions_dubious_tracker;
+
                                 break;
                             }
 
@@ -1151,24 +1180,52 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
                             if (distance_avg < max_distance_acceptable_tracker)
                             {
-                                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
-                                logdbg << "\ttarget " << target.utn_ << " other " << other.utn_
-                                       << " next utn " << utn_cnt_ << " dist avg " << distance_avg
-                                       << " num " << same_distances.size();
+                                if (print_debug)
+                                {
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " next utn " << utn_cnt_ << " dist avg " << distance_avg
+                                           << " num " << same_distances.size();
+                                }
+
                                 results[cnt] = tuple<bool, unsigned int, unsigned int, double>(
                                             true, other.utn_, same_distances.size(), distance_avg);
                             }
+                            else
+                            {
+                                if (print_debug)
+                                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                           << " distance_avg failed "
+                                           << distance_avg << " < " << max_distance_acceptable_tracker;
+                            }
+                        }
+                        else
+                        {
+                            if (print_debug)
+                                loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                       << " same distances failed "
+                                       << same_distances.size() << " < " << min_updates_tracker;
                         }
                     }
+                    else
+                    {
+                        if (print_debug)
+                            loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode c check failed";
+                    }
+                }
+                else
+                {
+                    if (print_debug)
+                        loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " mode a check failed";
                 }
             }
             else
             {
-                //if (target.hasMA() && target.hasMA(396) && other.hasMA() && other.hasMA(396))
-                //    logdbg << "\tno overlap";
+                if (print_debug)
+                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_ << " no overlap";
             }
         }
-    });
+    //});
+    }
 
     // find best match
     bool usable;
@@ -1183,17 +1240,28 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
     double best_distance_avg;
     double best_score;
 
+    if (print_debug_target)
+        loginf << "\ttarget " << target.utn_ << " checking results";
+
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
         tie(usable, other_utn, num_updates, distance_avg) = res_it;
 
         if (!usable)
+        {
+//            if (print_debug_target)
+//                loginf << "\ttarget " << target.utn_ << " result utn " << other_utn << " not usable";
             continue;
+        }
 
         score = (double)num_updates*(max_distance_acceptable_tracker-distance_avg);
 
         if (first || score > best_score)
         {
+            if (print_debug_target)
+                loginf << "\ttarget " << target.utn_ << " result utn " << other_utn
+                       << " marked as best, score " << score;
+
             best_other_utn = other_utn;
             best_num_updates = num_updates;
             best_distance_avg = distance_avg;
@@ -1205,18 +1273,16 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
     if (first)
     {
-        //if (target.hasMA() && target.hasMA(396))
-        logdbg << "CreateAssociationsJob: findUTNForTarget: checking target " << target.utn_
-               << " no match found";
+        if (print_debug_target)
+            loginf << "\ttarget " << target.utn_ << " no match found";
         return -1;
     }
     else
     {
-        //if (target.hasMA() && target.hasMA(396))
-        logdbg << "CreateAssociationsJob: findUTNForTarget: target " << target.utn_
-               << " best other " << best_other_utn
-               << " best score " << fixed << best_score << " dist avg " << best_distance_avg
-               << " num " << best_num_updates;
+        if (print_debug_target)
+            loginf << "\ttarget " << target.utn_ << " match found best other " << best_other_utn
+                   << " best score " << fixed << best_score << " dist avg " << best_distance_avg
+                   << " num " << best_num_updates;
 
         return best_other_utn;
     }

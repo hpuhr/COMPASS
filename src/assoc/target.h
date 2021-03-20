@@ -68,7 +68,8 @@ namespace Association
         bool hasMA () const;
         bool hasMA (unsigned int ma)  const;
 
-        std::string asStr();
+        std::string asStr() const;
+        std::string timeStr() const;
 
         bool isTimeInside (float tod) const;
         bool hasDataForTime (float tod, float d_max) const;
@@ -91,9 +92,9 @@ namespace Association
 
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
                 Target& other, const std::vector<float>& timestamps,
-                float max_time_diff, float max_alt_diff) const;
-        CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod,
-                                        float max_time_diff, float max_alt_diff);
+                float max_time_diff, float max_alt_diff, bool debug) const;
+        CompareResult compareModeCCode (bool has_mc, float mc, float tod,
+                                        float max_time_diff, float max_alt_diff, bool debug);
         // unknown, same, different timestamps from this
 
         void calculateSpeeds();
