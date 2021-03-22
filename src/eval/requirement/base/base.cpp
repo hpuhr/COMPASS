@@ -370,17 +370,17 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeC (
 
                     if (lower_nok)
                     {
-                        comment += " tst value '"+String::octStringFromInt(code, 4, '0')
+                        comment += " tst value '"+to_string(code)
                                 +"' ref value at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                +String::octStringFromInt(target_data.refModeCForTime(ref_lower), 4, '0')
+                                +to_string(target_data.refModeCForTime(ref_lower))
                                 + "'";
                     }
                     else
                     {
                         assert (upper_nok);
-                        comment += " tst value '"+String::octStringFromInt(code, 4, '0')
+                        comment += " tst value '"+to_string(code)
                                 +"' ref value at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                +String::octStringFromInt(target_data.refModeCForTime(ref_upper), 4, '0')
+                                +to_string(target_data.refModeCForTime(ref_upper))
                                 + "'";
                     }
 
