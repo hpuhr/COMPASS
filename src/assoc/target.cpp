@@ -937,6 +937,8 @@ namespace Association
 
         if (!tmp_)
         {
+            loginf << "Target: removeNonModeSTRs: " << asStr();
+
             for (auto tr_it : tmp_trs)
                 tr_it->removeAssociated(this);
         }

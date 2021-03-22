@@ -52,10 +52,6 @@ protected:
     std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
     //dbo name->ds_id->trs
 
-//    std::map<unsigned int, Association::Target> targets_;
-//    std::map<unsigned int, unsigned int> ta_2_utn_;
-//    unsigned int utn_cnt_ {0};
-
     void createTargetReports();
     std::map<unsigned int, Association::Target> createTrackerUTNs();
 

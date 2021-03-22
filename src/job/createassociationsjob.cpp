@@ -47,7 +47,14 @@ CreateAssociationsJob::CreateAssociationsJob(CreateAssociationsTask& task, DBInt
 {
 }
 
-CreateAssociationsJob::~CreateAssociationsJob() {}
+CreateAssociationsJob::~CreateAssociationsJob()
+{
+    logdbg << "CreateAssociationsJob: dtor";
+
+    target_reports_.clear();
+
+    logdbg << "CreateAssociationsJob: dtor: done";
+}
 
 void CreateAssociationsJob::run()
 {
@@ -122,6 +129,9 @@ void CreateAssociationsJob::run()
     }
 
     object_man.setAssociationsByAll(); // no specific dbo or data source
+
+    loginf << "CreateAssociationsJob: run: clearing tmp data";
+    targets.clear(); // removes from assoc target reports
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -339,9 +349,6 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        //tracker_targets.clear();
-        //tn2utn.clear();
-
         string ds_name = object_man.object("Tracker").dataSources().at(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
@@ -367,7 +374,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
 
         emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
 
-        addTrackerUTNs (ds_name, tracker_targets, sum_targets);
+        addTrackerUTNs (ds_name, move(tracker_targets), sum_targets);
 
         // try to associate targets to each other
 
@@ -401,8 +408,6 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
     // get ta lookup map
     std::map<unsigned int, unsigned int> ta_2_utn = getTALookupMap(targets);
-
-    loginf << "CreateAssociationsJob: createNonTrackerUTNS: UGA2";
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
@@ -697,7 +702,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createPerTrac
 
                     if (cont_utn != -1)
                     {
-                        loginf << "CreateAssociationsJob: createPerTrackerTargets: continuing target "
+                        logdbg << "CreateAssociationsJob: createPerTrackerTargets: continuing target "
                                << cont_utn << " with tn " << tr_it.tn_ << " at time "
                                << String::timeStringFromDouble(tr_it.tod_);
                         tn2utn[tr_it.tn_] = {cont_utn, tr_it.tod_};
@@ -1387,7 +1392,7 @@ int CreateAssociationsJob::findUTNForTargetByTA (const Association::Target& targ
 std::map<unsigned int, unsigned int> CreateAssociationsJob::getTALookupMap (
         const std::map<unsigned int, Association::Target>& targets)
 {
-    loginf << "CreateAssociationsJob: getTALookupMap";
+    logdbg << "CreateAssociationsJob: getTALookupMap";
 
     std::map<unsigned int, unsigned int> ta_2_utn;
 
@@ -1403,7 +1408,8 @@ std::map<unsigned int, unsigned int> CreateAssociationsJob::getTALookupMap (
         ta_2_utn[*target_it.second.tas_.begin()] = target_it.second.utn_;
     }
 
-    loginf << "CreateAssociationsJob: getTALookupMap: done";
+    logdbg << "CreateAssociationsJob: getTALookupMap: done";
 
     return ta_2_utn;
 }
+
