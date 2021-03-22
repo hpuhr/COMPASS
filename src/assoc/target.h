@@ -82,19 +82,19 @@ namespace Association
         EvaluationTargetPosition posForExactTime (float tod) const;
 
         float duration () const;
-        bool timeOverlaps (Target& other) const;
-        float probTimeOverlaps (Target& other) const; // ratio of overlap, measured by shortest target
+        bool timeOverlaps (const Target& other) const;
+        float probTimeOverlaps (const Target& other) const; // ratio of overlap, measured by shortest target
 
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (
-                Target& other, float max_time_diff) const;
+                const Target& other, float max_time_diff) const;
         // unknown, same, different
-        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff);
+        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff) const;
 
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
-                Target& other, const std::vector<float>& timestamps,
+                const Target& other, const std::vector<float>& timestamps,
                 float max_time_diff, float max_alt_diff, bool debug) const;
         CompareResult compareModeCCode (bool has_mc, float mc, float tod,
-                                        float max_time_diff, float max_alt_diff, bool debug);
+                                        float max_time_diff, float max_alt_diff, bool debug) const;
         // unknown, same, different timestamps from this
 
         void calculateSpeeds();

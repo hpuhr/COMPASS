@@ -535,7 +535,7 @@ namespace Association
         return tod_max_ - tod_min_;
     }
 
-    bool Target::timeOverlaps (Target& other) const
+    bool Target::timeOverlaps (const Target& other) const
     {
         if (!assoc_trs_.size() || !other.assoc_trs_.size())
             return false;
@@ -546,7 +546,7 @@ namespace Association
         return tod_min_ < other.tod_max_ && other.tod_min_ < tod_max_;
     }
 
-    float Target::probTimeOverlaps (Target& other) const
+    float Target::probTimeOverlaps (const Target& other) const
     {
         if (!has_tod_)
             return 0.0;
@@ -570,7 +570,7 @@ namespace Association
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeACodes (
-            Target& other, float max_time_diff) const
+            const Target& other, float max_time_diff) const
     {
         vector<float> unknown;
         vector<float> same;
@@ -600,7 +600,7 @@ namespace Association
         return std::tuple<vector<float>, vector<float>, vector<float>>(unknown, same, different);
     }
 
-    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff)
+    CompareResult Target::compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff) const
     {
         if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
@@ -667,7 +667,7 @@ namespace Association
     }
 
     std::tuple<vector<float>, vector<float>, vector<float>> Target::compareModeCCodes (
-            Target& other, const std::vector<float>& timestamps,
+            const Target& other, const std::vector<float>& timestamps,
             float max_time_diff, float max_alt_diff, bool debug) const
     {
         vector<float> unknown;
@@ -702,7 +702,7 @@ namespace Association
     }
 
     CompareResult Target::compareModeCCode (bool has_mc, float mc, float tod,
-                                            float max_time_diff, float max_alt_diff, bool debug)
+                                            float max_time_diff, float max_alt_diff, bool debug) const
     {
         if (!hasDataForTime(tod, max_time_diff))
             return CompareResult::UNKNOWN;
@@ -814,14 +814,14 @@ namespace Association
             if (debug)
             {
                 loginf << "Target: compareModeCCode: different, diff check failed";
-                loginf << "\t mc " << mc;
-                loginf << "\t ref1.has_mc_ " << ref1.has_mc_;
-                loginf << "\t ref1.mc_ " << ref1.mc_;
-                loginf << "\t fabs(ref1.mc_ - mc) " << fabs(ref1.mc_ - mc);
-                loginf << "\t ref2.has_mc_ " << ref2.has_mc_;
-                loginf << "\t ref2.mc_ " << ref2.mc_;
-                loginf << "\t fabs(ref2.mc_ - mc) " << fabs(ref2.mc_ - mc);
-                loginf << "\t max_alt_diff " << max_alt_diff;
+//                loginf << "\t mc " << mc;
+//                loginf << "\t ref1.has_mc_ " << ref1.has_mc_;
+//                loginf << "\t ref1.mc_ " << ref1.mc_;
+//                loginf << "\t fabs(ref1.mc_ - mc) " << fabs(ref1.mc_ - mc);
+//                loginf << "\t ref2.has_mc_ " << ref2.has_mc_;
+//                loginf << "\t ref2.mc_ " << ref2.mc_;
+//                loginf << "\t fabs(ref2.mc_ - mc) " << fabs(ref2.mc_ - mc);
+//                loginf << "\t max_alt_diff " << max_alt_diff;
             }
             return CompareResult::DIFFERENT;
         }
