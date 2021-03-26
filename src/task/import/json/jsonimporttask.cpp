@@ -474,7 +474,7 @@ void JSONImportTask::readJSONFileObsoleteSlot()
 
 void JSONImportTask::parseJSONDoneSlot()
 {
-    logdbg << "JSONImporterTask: parseJSONDoneSlot";
+    loginf << "JSONImporterTask: parseJSONDoneSlot";
 
     assert (json_parse_job_);
 
@@ -546,7 +546,7 @@ void JSONImportTask::parseJSONDoneSlot()
             read_json_job_->unpause();
     }
 
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: done";
+    loginf << "JSONImporterTask: parseJSONDoneSlot: done";
 }
 
 void JSONImportTask::parseJSONObsoleteSlot()
@@ -566,6 +566,7 @@ void JSONImportTask::mapJSONDoneSlot()
 
     objects_mapped_ += map_job->numMapped();  // TODO done twice?
     objects_not_mapped_ += map_job->numNotMapped();
+    objects_parse_errors_ += map_job->numErrors();
 
     objects_created_ += map_job->numCreated();
 

@@ -40,17 +40,20 @@ class JSONMappingJob : public Job
 
     size_t numMapped() const;
     size_t numNotMapped() const;
+    size_t numErrors() const;
     size_t numCreated() const;
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers() { return std::move(buffers_); }
 
     std::map<unsigned int, std::pair<size_t, size_t>> categoryMappedCounts() const;
 
-  private:
+
+private:
     std::map<unsigned int, std::pair<size_t, size_t>>
         category_mapped_counts_;  // mapped, not mapped
     size_t num_mapped_{0};        // number of parsed where a parse was successful
     size_t num_not_mapped_{0};    // number of parsed where no parse was successful
+    size_t num_errors_{0};        // number of failed parses
     size_t num_created_{0};       // number of created objects from parsing
 
     std::unique_ptr<nlohmann::json> data_;
