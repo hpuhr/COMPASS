@@ -385,9 +385,15 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
 
     }
 
-    markDubiousUTNs (sum_targets);
+    emit statusSignal("Self-associating Sum Targets");
+    map<unsigned int, Association::Target> final_targets = selfAssociateTrackerUTNs(sum_targets);
 
-    return sum_targets;
+    emit statusSignal("Checking Final Targets");
+    cleanTrackerUTNs(final_targets);
+
+    markDubiousUTNs (final_targets);
+
+    return final_targets;
 }
 
 void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets)
@@ -513,8 +519,9 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 for (unsigned int target_cnt=0; target_cnt < targets.size(); ++target_cnt)
                 {
-                    assert (targets.count(target_cnt));
-                    Association::Target& other = targets.at(target_cnt);
+                    //assert (targets.count(target_cnt));
+                    //Association::Target& other = targets.at(target_cnt);
+                    Association::Target& other = std::next(targets.begin(), target_cnt)->second;
 
                     results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
@@ -836,6 +843,54 @@ void CreateAssociationsJob::cleanTrackerUTNs(std::map<unsigned int, Association:
     }
 }
 
+std::map<unsigned int, Association::Target> CreateAssociationsJob::selfAssociateTrackerUTNs(
+        std::map<unsigned int, Association::Target>& targets)
+{
+    loginf << "CreateAssociationsJob: selfAssociateTrackerUTNs: num targets " << targets.size();
+
+    std::map<unsigned int, Association::Target> new_targets;
+
+    while (targets.size())
+    {
+        pair<const unsigned int, Association::Target>& tgt_it = *targets.begin();
+
+        loginf << "CreateAssociationsJob: selfAssociateTrackerUTNs: processing target utn " << tgt_it.first;
+
+        int tmp_utn = findUTNForTrackerTarget(tgt_it.second, new_targets);
+
+        if (tmp_utn == -1)
+        {
+
+            if (new_targets.size())
+                tmp_utn = new_targets.rbegin()->first + 1;
+            else
+                tmp_utn = 0;
+
+            loginf << "CreateAssociationsJob: selfAssociateTrackerUTNs: no associatble utn found,"
+                      " keeping target as utn " << tmp_utn;
+
+            new_targets.emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(tmp_utn),   // args for key
+                        std::forward_as_tuple(tmp_utn, false));  // args for mapped value
+        }
+        else
+        {
+            loginf << "CreateAssociationsJob: selfAssociateTrackerUTNs: associatble utn " << tmp_utn
+                   << " found, associating";
+        }
+
+        // move to other map
+        new_targets.at(tmp_utn).addAssociated(tgt_it.second.assoc_trs_);
+        targets.erase(tgt_it.first);
+    }
+
+
+    loginf << "CreateAssociationsJob: selfAssociateTrackerUTNs: done with num targets " << targets.size();
+
+    return new_targets;
+}
+
 void CreateAssociationsJob::markDubiousUTNs(std::map<unsigned int, Association::Target>& targets)
 // only for final utns, must have calculated speeds
 {
@@ -1060,6 +1115,9 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
                                                     const std::map<unsigned int, Association::Target>& targets)
 // tries to find existing utn for target, -1 if failed
 {
+    if (!targets.size()) // check if targets exist
+        return -1;
+
     int tmp_utn = findUTNForTargetByTA(target, targets);
 
     if (tmp_utn != -1) // either mode s, so

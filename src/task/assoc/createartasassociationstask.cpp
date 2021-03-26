@@ -207,6 +207,8 @@ bool CreateARTASAssociationsTask::canRun()
         return false;
 
     // no data sources
+    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
+           << (tracker_object.dsBegin() == tracker_object.dsEnd());
     if (tracker_object.dsBegin() == tracker_object.dsEnd())
         return false;
 
@@ -230,7 +232,7 @@ bool CreateARTASAssociationsTask::canRun()
         current_data_source_name_ = tracker_object.dsBegin()->second.name();
     }
 
-    logdbg << "CreateARTASAssociationsTask: canRun: tracker vars";
+    loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
     if (!tracker_object.hasVariable(tracker_track_num_var_str_) ||
         !tracker_object.hasVariable(tracker_track_begin_var_str_) ||
         !tracker_object.hasVariable(tracker_track_end_var_str_) ||
@@ -251,6 +253,9 @@ bool CreateARTASAssociationsTask::canRun()
     logdbg << "CreateARTASAssociationsTask: canRun: metas in objects";
     for (auto& dbo_it : object_man)
     {
+        if (dbo_it.first == "RefTraj") // not set in references
+            continue;
+
         if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first) ||
             !object_man.metaVariable(hash_var_str_).existsIn(dbo_it.first) ||
             !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first))
@@ -296,6 +301,9 @@ void CreateARTASAssociationsTask::run()
     for (auto& dbo_it : object_man)
     {
         if (!dbo_it.second->hasData())
+            continue;
+
+        if (dbo_it.first == "RefTraj") // not set in references
             continue;
 
         DBOVariableSet read_set = getReadSetFor(dbo_it.first);

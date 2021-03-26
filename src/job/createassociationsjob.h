@@ -60,8 +60,13 @@ protected:
 
     std::map<unsigned int, Association::Target> createPerTrackerTargets(unsigned int ds_id);
     void cleanTrackerUTNs(std::map<unsigned int, Association::Target>& targets);
-    // only for final utns, must have calculated speeds
+    std::map<unsigned int, Association::Target> selfAssociateTrackerUTNs(
+            std::map<unsigned int, Association::Target>& targets);
+    // tries to associate each utn to all others, returns new target list
+
     void markDubiousUTNs(std::map<unsigned int, Association::Target>& targets);
+    // marks weird utns as, only for final utns, must have calculated speeds
+
     void addTrackerUTNs(const std::string& ds_name, std::map<unsigned int, Association::Target> from_targets,
                         std::map<unsigned int, Association::Target>& to_targets);
 

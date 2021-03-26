@@ -29,8 +29,6 @@ namespace Association
         ~Target();
 
         static bool in_appimage_;
-//        static double max_time_diff_;
-//        static double max_altitude_diff_;
 
         unsigned int utn_{0};
         bool tmp_ {false};
