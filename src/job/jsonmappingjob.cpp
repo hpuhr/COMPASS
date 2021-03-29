@@ -44,7 +44,7 @@ JSONMappingJob::~JSONMappingJob() { logdbg << "JSONMappingJob: dtor"; }
 
 void JSONMappingJob::run()
 {
-    loginf << "JSONMappingJob: run";
+    logdbg << "JSONMappingJob: run";
 
     started_ = true;
 
@@ -122,7 +122,7 @@ void JSONMappingJob::run()
     };
 
     assert(data_);
-    loginf << "JSONMappingJob: run: applying JSON function";
+    logdbg << "JSONMappingJob: run: applying JSON function";
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
                                 process_lambda, false);
 
@@ -142,7 +142,7 @@ void JSONMappingJob::run()
     done_ = true;
     data_ = nullptr;
 
-    loginf << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped "
+    logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped "
            << num_not_mapped_;
 }
 

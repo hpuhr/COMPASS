@@ -97,7 +97,7 @@ void CreateAssociationsJob::run()
 
     // create non-tracker utns
 
-    emit statusSignal("Creating non-Tracker UTNS");
+    emit statusSignal("Creating non-Tracker UTNs");
     createNonTrackerUTNS(targets);
 
     multiple_associated = 0;
@@ -438,7 +438,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
 
             string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
-            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNS ("+to_string(done_perc)+"%)").c_str());
+            emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
             std::vector<Association::TargetReport>& target_reports = ds_it.second;
             unsigned int num_target_reports = target_reports.size();
