@@ -53,12 +53,14 @@ protected:
     //dbo name->ds_id->trs
 
     void createTargetReports();
-    std::map<unsigned int, Association::Target> createTrackerUTNs();
+    std::map<unsigned int, Association::Target> createReferenceUTNs();
+
+    void createTrackerUTNs(std::map<unsigned int, Association::Target>& sum_targets);
 
     void createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets);
     void createAssociations();
 
-    std::map<unsigned int, Association::Target> createPerTrackerTargets(unsigned int ds_id);
+    std::map<unsigned int, Association::Target> createTrackedTargets(const std::string& dbo_name, unsigned int ds_id);
     void cleanTrackerUTNs(std::map<unsigned int, Association::Target>& targets);
     std::map<unsigned int, Association::Target> selfAssociateTrackerUTNs(
             std::map<unsigned int, Association::Target>& targets);

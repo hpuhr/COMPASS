@@ -77,9 +77,14 @@ void CreateAssociationsJob::run()
     emit statusSignal("Creating Target Reports");
     createTargetReports();
 
+    // create reference utns
+    emit statusSignal("Creating Reference UTNs");
+    std::map<unsigned int, Association::Target> targets = createReferenceUTNs();
+
+
     // create tracker utns
     emit statusSignal("Creating Tracker UTNs");
-    std::map<unsigned int, Association::Target> targets = createTrackerUTNs();
+    createTrackerUTNs(targets);
 
     unsigned int multiple_associated {0};
     unsigned int single_associated {0};
@@ -330,16 +335,82 @@ void CreateAssociationsJob::createTargetReports()
     }
 }
 
-std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackerUTNs()
+std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferenceUTNs()
+{
+    loginf << "CreateAssociationsJob: createReferenceUTNs";
+
+    std::map<unsigned int, Association::Target> sum_targets;
+
+    if (!target_reports_.count("RefTraj"))
+    {
+        loginf << "CreateAssociationsJob: createReferenceUTNs: no tracker data";
+        return sum_targets;
+    }
+
+    DBObjectManager& object_man = COMPASS::instance().objectManager();
+
+    // create utn for all tracks
+    for (auto& ds_it : target_reports_.at("RefTraj")) // ds_id->trs
+    {
+        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
+
+        string ds_name = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
+
+        loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
+
+        emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
+
+        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("RefTraj", ds_it.first);
+
+        if (!tracker_targets.size())
+        {
+            logwrn << "CreateAssociationsJob: createReferenceUTNs: ref ds_id " << ds_it.first
+                   << " created no utns";
+            continue;
+        }
+
+        loginf << "CreateAssociationsJob: createReferenceUTNs: cleaning new utns for ds_id " << ds_it.first;
+
+        emit statusSignal(("Cleaning new "+ds_name+" Targets").c_str());
+
+        cleanTrackerUTNs (tracker_targets);
+
+        loginf << "CreateAssociationsJob: createReferenceUTNs: creating new utns for ds_id " << ds_it.first;
+
+        emit statusSignal(("Creating new "+ds_name+" Targets").c_str());
+
+        addTrackerUTNs (ds_name, move(tracker_targets), sum_targets);
+
+        // try to associate targets to each other
+
+        loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first << " done";
+
+        emit statusSignal("Checking Sum Targets");
+        cleanTrackerUTNs(sum_targets);
+    }
+
+    emit statusSignal("Self-associating Sum Reference Targets");
+    map<unsigned int, Association::Target> final_targets = selfAssociateTrackerUTNs(sum_targets);
+
+    emit statusSignal("Checking Final Reference Targets");
+    cleanTrackerUTNs(final_targets);
+
+    markDubiousUTNs (final_targets);
+
+    return final_targets;
+}
+
+
+void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association::Target>& sum_targets)
 {
     loginf << "CreateAssociationsJob: createTrackerUTNs";
 
-    std::map<unsigned int, Association::Target> sum_targets;
+    //std::map<unsigned int, Association::Target> sum_targets;
 
     if (!target_reports_.count("Tracker"))
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: no tracker data";
-        return sum_targets;
+        return;
     }
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
@@ -355,7 +426,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
 
         emit statusSignal(("Creating new "+ds_name+" UTNs").c_str());
 
-        map<unsigned int, Association::Target> tracker_targets = createPerTrackerTargets(ds_it.first);
+        map<unsigned int, Association::Target> tracker_targets = createTrackedTargets("Tracker", ds_it.first);
 
         if (!tracker_targets.size())
         {
@@ -385,14 +456,14 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
     }
 
     emit statusSignal("Self-associating Sum Targets");
-    map<unsigned int, Association::Target> final_targets = selfAssociateTrackerUTNs(sum_targets);
+    sum_targets = selfAssociateTrackerUTNs(sum_targets);
 
     emit statusSignal("Checking Final Targets");
-    cleanTrackerUTNs(final_targets);
+    cleanTrackerUTNs(sum_targets);
 
-    markDubiousUTNs (final_targets);
+    markDubiousUTNs (sum_targets);
 
-    return final_targets;
+    return;
 }
 
 void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets)
@@ -403,7 +474,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
     for (auto& dbo_it : target_reports_)
     {
-        if (dbo_it.first == "Tracker") // already associated
+        if (dbo_it.first == "RefTraj" || dbo_it.first == "Tracker") // already associated
             continue;
 
         num_data_sources += dbo_it.second.size();
@@ -426,7 +497,7 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
     for (auto& dbo_it : target_reports_)
     {
-        if (dbo_it.first == "Tracker") // already associated
+        if (dbo_it.first == "RefTraj" || dbo_it.first == "Tracker") // already associated
             continue;
 
         for (auto& ds_it : dbo_it.second) // ds_id -> trs
@@ -669,7 +740,8 @@ void CreateAssociationsJob::createAssociations()
     }
 }
 
-std::map<unsigned int, Association::Target> CreateAssociationsJob::createPerTrackerTargets(unsigned int ds_id)
+std::map<unsigned int, Association::Target> CreateAssociationsJob::createTrackedTargets(
+        const std::string& dbo_name, unsigned int ds_id)
 {
     map<unsigned int, Association::Target> tracker_targets; // utn -> target
 
@@ -677,10 +749,10 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createPerTrac
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    assert (object_man.object("Tracker").dataSources().count(ds_id));
-    string ds_name = object_man.object("Tracker").dataSources().at(ds_id).name();
+    assert (object_man.object(dbo_name).dataSources().count(ds_id));
+    string ds_name = object_man.object(dbo_name).dataSources().at(ds_id).name();
 
-    std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at("Tracker");
+    std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 
     if (!ds_id_trs.count(ds_id))
     {
