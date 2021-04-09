@@ -34,7 +34,7 @@ JSONParseJob::~JSONParseJob() {}
 
 void JSONParseJob::run()
 {
-    loginf << "JSONParseJob: run: start with " << objects_.size() << " objects";
+    loginf << "JSONParseJob: run: start with " << objects_.size() << " objects schema '" << current_schema_ << "'";
 
     started_ = true;
     assert(!json_objects_);
@@ -56,6 +56,8 @@ void JSONParseJob::run()
 
             if (json_objects_->contains("data_blocks")) // no framing
             {
+                logdbg << "JSONParseJob: run: data blocks found";
+
                 assert(json_objects_->at("data_blocks").is_array());
 
                 std::vector<std::string> keys{"content", "records"};
@@ -74,12 +76,14 @@ void JSONParseJob::run()
                     if (category == 1)
                         checkCAT001SacSics(data_block);
 
-                    loginf << "JSONParseJob: run: applying JSON function without framing";
+                    logdbg << "JSONParseJob: run: applying JSON function without framing";
                     JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
                 }
             }
             else // framed
             {
+                logdbg << "JSONParseJob: run: no data blocks found, framed";
+
                 assert(json_objects_->contains("frames"));
                 assert(json_objects_->at("frames").is_array());
 

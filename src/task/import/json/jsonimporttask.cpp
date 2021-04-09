@@ -616,6 +616,9 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         {
             std::string dbo_name = parser_it.second.dbObject().name();
 
+            if (!job_buffers.count(dbo_name))
+                continue;
+
             DBObject& db_object = parser_it.second.dbObject();
             assert(db_object.hasCurrentDataSourceDefinition());
 
@@ -624,6 +627,17 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
             assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
 
             DBOVariableSet set = parser_it.second.variableList();
+
+//            DBOVariableSet set;
+
+//            for (const auto& prop_it : job_buffers.at(dbo_name)->properties().properties())
+//            {
+//                assert (db_object.hasVariable(prop_it.name()));
+//                set.add(db_object.variable(prop_it.name()));
+//            }
+
+//            if (parser_it.second.overrideDataSource())
+//                set.add(db_object.variable(data_source_var_name));
 
             if (dbo_variable_sets_.count(dbo_name))  // add variables
             {
@@ -648,14 +662,27 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
     for (auto& buf_it : job_buffers)
     {
         std::string dbo_name = buf_it.first;
-        assert(dbo_variable_sets_.count(dbo_name));
+
         std::shared_ptr<Buffer> buffer = buf_it.second;
 
         if (!buffer->size())
         {
-            logdbg << "JSONImportTask: insertData: dbo " << buf_it.first << " with empty buffer";
+            logdbg << "JSONImportTask: insertData: dbo " << dbo_name << " with empty buffer";
             continue;
         }
+
+        if (!dbo_variable_sets_.count(dbo_name))
+        {
+            logerr << "JSONImportTask: insertData: dbo " << dbo_name << " has no variable set, buffer size "
+                   << buffer->size();
+            continue;
+        }
+
+        assert(dbo_variable_sets_.count(dbo_name));
+
+        loginf << "JSONImporterTask: insertData: insert dbo " << dbo_name << " size " << buffer->size()
+               << " num prop " << buffer->properties().size();
+        //buffer->properties().print();
 
         assert(object_manager.existsObject(dbo_name));
         DBObject& db_object = object_manager.object(dbo_name);
@@ -752,6 +779,12 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         }
 
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
+
+        loginf << "JSONImporterTask: insertData: calling dbo insert buffer size " << buffer->size()
+               << " num set " << set.getSize();
+
+        //set.print();
+
         db_object.insertData(set, buffer, false);
 
         objects_inserted_ += buffer->size();

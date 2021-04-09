@@ -382,7 +382,6 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracker
 
         emit statusSignal("Checking Sum Targets");
         cleanTrackerUTNs(sum_targets);
-
     }
 
     emit statusSignal("Self-associating Sum Targets");

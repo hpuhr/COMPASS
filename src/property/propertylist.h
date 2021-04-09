@@ -199,6 +199,14 @@ class PropertyList
         logdbg << "PropertyList: clear: end";
     }
 
+    void print () const
+    {
+        for (auto it : properties_)
+        {
+            loginf << "Property id '" << it.name() << "' type " << it.dataTypeString();
+        }
+    }
+
     /// @brief Return number of properties in list
     unsigned int size() const { return properties_.size(); }
 };
