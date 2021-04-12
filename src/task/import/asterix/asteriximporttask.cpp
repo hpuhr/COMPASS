@@ -1324,7 +1324,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         status_widget_->addNumInserted(db_object.name(), buffer->size());
 
         if (db_object.name() == "Radar")
-            num_radar_inserted_ = buffer->size(); // store for later check
+            num_radar_inserted_ += buffer->size(); // store for later check
     }
 
     checkAllDone();

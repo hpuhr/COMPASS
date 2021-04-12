@@ -180,10 +180,10 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
 
 bool CreateARTASAssociationsTask::isRecommended()
 {
-    if (!checkPrerequisites())
-        return false;
+    //if (!checkPrerequisites())
+    return false;
 
-    return !done_;
+    //return !done_;
 }
 
 bool CreateARTASAssociationsTask::canRun()

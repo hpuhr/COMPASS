@@ -342,6 +342,7 @@ void JSONImportTask::run()
     loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
 
     done_ = false; // since can be run multiple times
+    num_radar_inserted_ = 0;
 
     std::string tmp;
 
@@ -789,6 +790,9 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
         objects_inserted_ += buffer->size();
 
+        if (db_object.name() == "Radar")
+            num_radar_inserted_ += buffer->size(); // store for later check
+
         // status_widget_->addNumInserted(db_object.name(), buffer->size());
     }
 
@@ -841,8 +845,19 @@ void JSONImportTask::checkAllDone()
             done_ = true;
 
             // in case data was imported, clear other task done properties
-            COMPASS::instance().interface().setProperty(
-                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+            if (num_radar_inserted_)
+            {
+                bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
+                            COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                            {"pos_lat_deg","pos_long_deg"});
+
+                loginf << "JSONImporterTask: insertDoneSlot: radar has null positions " << has_null_positions;
+
+                COMPASS::instance().interface().setProperty(
+                            RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
+            }
+
+
             COMPASS::instance().interface().setProperty(
                         CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
