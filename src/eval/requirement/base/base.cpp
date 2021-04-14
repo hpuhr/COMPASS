@@ -117,69 +117,66 @@ bool Base::compareValue (double val, double threshold, COMPARISON_TYPE check_typ
 std::pair<ValueComparisonResult, std::string> Base::compareTi (
         float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
 {
+    float ref_lower{0}, ref_upper{0};
+    tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
+    bool has_ref_data = (ref_lower != -1 || ref_upper != -1)
+            && ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
+                || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper)));
+
+    if (!has_ref_data)
+        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
     if (target_data.hasTstCallsignForTime(tod))
     {
         string value = target_data.tstCallsignForTime(tod);
 
-        float ref_lower{0}, ref_upper{0};
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
-        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+        assert (has_ref_data); // ref times possible
+
+        value_ok = false;
+
+        lower_nok = false;
+        upper_nok = false;
+
+        if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
         {
-            if ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                    || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))) // ref value(s) exist
+            value_ok = target_data.refCallsignForTime(ref_lower) == value;
+            lower_nok = !value_ok;
+        }
+
+        if (!value_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
+        {
+            value_ok = target_data.refCallsignForTime(ref_upper) == value;
+            upper_nok = !value_ok;
+        }
+
+        if (value_ok)
+            return {ValueComparisonResult::Same, "OK"};
+        else
+        {
+            string comment = "Not OK:";
+
+            if (lower_nok)
             {
-                value_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
-                {
-                    value_ok = target_data.refCallsignForTime(ref_lower) == value;
-                    lower_nok = !value_ok;
-                }
-
-                if (!value_ok && ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper))
-                {
-                    value_ok = target_data.refCallsignForTime(ref_upper) == value;
-                    upper_nok = !value_ok;
-                }
-
-                if (value_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " tst value '"+target_data.tstCallsignForTime(tod)
-                                +"' ref value at "+String::timeStringFromDouble(ref_lower)
-                                + "  '"+target_data.refCallsignForTime(ref_lower)
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " tst value '"+target_data.tstCallsignForTime(tod)
-                                +"' ref value at "+String::timeStringFromDouble(ref_upper)
-                                + "  '"+target_data.refCallsignForTime(ref_upper)
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
+                comment += " tst value '"+target_data.tstCallsignForTime(tod)
+                        +"' ref value at "+String::timeStringFromDouble(ref_lower)
+                        + "  '"+target_data.refCallsignForTime(ref_lower)
+                        + "'";
             }
             else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+            {
+                assert (upper_nok);
+                comment += " tst value '"+target_data.tstCallsignForTime(tod)
+                        +"' ref value at "+String::timeStringFromDouble(ref_upper)
+                        + "  '"+target_data.refCallsignForTime(ref_upper)
+                        + "'";
+            }
 
+            return {ValueComparisonResult::Different, comment};
         }
-        else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
     }
     else
         return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
@@ -188,69 +185,67 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
 std::pair<ValueComparisonResult, std::string> Base::compareTa (
         float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
 {
+    float ref_lower{0}, ref_upper{0};
+
+    tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
+
+    bool has_ref_data = (ref_lower != -1 || ref_upper != -1)
+            && ((ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
+                || (ref_upper != -1 && target_data.hasRefTAForTime(ref_upper)));
+
+    if (!has_ref_data)
+        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
     if (target_data.hasTstTAForTime(tod))
     {
         unsigned int value = target_data.tstTAForTime(tod);
 
-        float ref_lower{0}, ref_upper{0};
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
-        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+        assert (has_ref_data); // ref times possible
+
+        value_ok = false;
+
+        lower_nok = false;
+        upper_nok = false;
+
+        if (ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
         {
-            if ((ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
-                    || (ref_upper != -1 && target_data.hasRefTAForTime(ref_upper))) // ref value(s) exist
+            value_ok = target_data.refTAForTime(ref_lower) == value;
+            lower_nok = !value_ok;
+        }
+
+        if (!value_ok && ref_upper != -1 && target_data.hasRefTAForTime(ref_upper))
+        {
+            value_ok = target_data.refTAForTime(ref_upper) == value;
+            upper_nok = !value_ok;
+        }
+
+        if (value_ok)
+            return {ValueComparisonResult::Same, "OK"};
+        else
+        {
+            string comment = "Not OK:";
+
+            if (lower_nok)
             {
-                value_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
-                {
-                    value_ok = target_data.refTAForTime(ref_lower) == value;
-                    lower_nok = !value_ok;
-                }
-
-                if (!value_ok && ref_upper != -1 && target_data.hasRefTAForTime(ref_upper))
-                {
-                    value_ok = target_data.refTAForTime(ref_upper) == value;
-                    upper_nok = !value_ok;
-                }
-
-                if (value_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
-                                +"' ref value at "+String::timeStringFromDouble(ref_lower)
-                                + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_lower))
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
-                                +"' ref value at "+String::timeStringFromDouble(ref_upper)
-                                + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_upper))
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
+                comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
+                        +"' ref value at "+String::timeStringFromDouble(ref_lower)
+                        + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_lower))
+                        + "'";
             }
             else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+            {
+                assert (upper_nok);
+                comment += " tst value '"+String::hexStringFromInt(target_data.tstTAForTime(tod))
+                        +"' ref value at "+String::timeStringFromDouble(ref_upper)
+                        + "  '"+String::hexStringFromInt(target_data.refTAForTime(ref_upper))
+                        + "'";
+            }
 
+            return {ValueComparisonResult::Different, comment};
         }
-        else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
     else
         return {ValueComparisonResult::Unknown_NoTstData, "No test value"};
@@ -259,69 +254,66 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
 std::pair<ValueComparisonResult, std::string> Base::compareModeA (
         float tod, const EvaluationTargetData& target_data, float max_ref_time_diff)
 {
+    float ref_lower{0}, ref_upper{0};
+    tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
+
+    bool has_ref_data = (ref_lower != -1 || ref_upper != -1)
+            && ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
+                || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper)));
+
+    if (!has_ref_data)
+        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
     if (target_data.hasTstModeAForTime(tod))
     {
         unsigned int code = target_data.tstModeAForTime(tod);
 
-        float ref_lower{0}, ref_upper{0};
-        tie(ref_lower, ref_upper) = target_data.refTimesFor(tod, max_ref_time_diff);
-
         bool value_ok;
         bool lower_nok, upper_nok;
 
-        if ((ref_lower != -1 || ref_upper != -1)) // ref times possible
+        assert (has_ref_data); // ref times possible
+
+        value_ok = false;
+
+        lower_nok = false;
+        upper_nok = false;
+
+        if (ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
         {
-            if ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                    || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))) // ref value(s) exist
+            value_ok = target_data.refModeAForTime(ref_lower) == code;
+            lower_nok = !value_ok;
+        }
+
+        if (!value_ok && ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))
+        {
+            value_ok = target_data.refModeAForTime(ref_upper) == code;
+            upper_nok = !value_ok;
+        }
+
+        if (value_ok)
+            return {ValueComparisonResult::Same, "OK"};
+        else
+        {
+            string comment = "Not OK:";
+
+            if (lower_nok)
             {
-                value_ok = false;
-
-                lower_nok = false;
-                upper_nok = false;
-
-                if (ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
-                {
-                    value_ok = target_data.refModeAForTime(ref_lower) == code;
-                    lower_nok = !value_ok;
-                }
-
-                if (!value_ok && ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper))
-                {
-                    value_ok = target_data.refModeAForTime(ref_upper) == code;
-                    upper_nok = !value_ok;
-                }
-
-                if (value_ok)
-                    return {ValueComparisonResult::Same, "OK"};
-                else
-                {
-                    string comment = "Not OK:";
-
-                    if (lower_nok)
-                    {
-                        comment += " tst value '"+String::octStringFromInt(code, 4, '0')
-                                +"' ref value at "+String::timeStringFromDouble(ref_lower)+ "  '"
-                                +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
-                                + "'";
-                    }
-                    else
-                    {
-                        assert (upper_nok);
-                        comment += " tst value '"+String::octStringFromInt(code, 4, '0')
-                                +"' ref value at "+String::timeStringFromDouble(ref_upper)+ "  '"
-                                +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
-                                + "'";
-                    }
-
-                    return {ValueComparisonResult::Different, comment};
-                }
+                comment += " tst value '"+String::octStringFromInt(code, 4, '0')
+                        +"' ref value at "+String::timeStringFromDouble(ref_lower)+ "  '"
+                        +String::octStringFromInt(target_data.refModeAForTime(ref_lower), 4, '0')
+                        + "'";
             }
             else
-                return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+            {
+                assert (upper_nok);
+                comment += " tst value '"+String::octStringFromInt(code, 4, '0')
+                        +"' ref value at "+String::timeStringFromDouble(ref_upper)+ "  '"
+                        +String::octStringFromInt(target_data.refModeAForTime(ref_upper), 4, '0')
+                        + "'";
+            }
 
+            return {ValueComparisonResult::Different, comment};
         }
-        else
-            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
     }
     else
         return {ValueComparisonResult::Unknown_NoTstData, "No test value"};

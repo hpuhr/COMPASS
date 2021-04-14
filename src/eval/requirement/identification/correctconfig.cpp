@@ -36,6 +36,11 @@ IdentificationCorrectConfig::IdentificationCorrectConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
+    registerParameter("require_correctness_of_all", &require_correctness_of_all_, false);
+
+    registerParameter("use_mode_a", &use_mode_a_, true);
+    registerParameter("use_ms_ta", &use_ms_ta_, true);
+    registerParameter("use_ms_ti", &use_ms_ti_, true);
 }
 
 std::shared_ptr<Base> IdentificationCorrectConfig::createRequirement()
