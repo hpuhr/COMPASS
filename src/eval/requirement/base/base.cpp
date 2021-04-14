@@ -123,10 +123,17 @@ std::pair<ValueComparisonResult, std::string> Base::compareTi (
             && ((ref_lower != -1 && target_data.hasRefCallsignForTime(ref_lower))
                 || (ref_upper != -1 && target_data.hasRefCallsignForTime(ref_upper)));
 
-    if (!has_ref_data)
-        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    bool has_tst_data = target_data.hasTstCallsignForTime(tod);
 
-    if (target_data.hasTstCallsignForTime(tod))
+    if (!has_ref_data)
+    {
+        if (has_tst_data)
+            return {ValueComparisonResult::Different, "Tst data without ref value"};
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    }
+
+    if (has_tst_data)
     {
         string value = target_data.tstCallsignForTime(tod);
 
@@ -193,10 +200,18 @@ std::pair<ValueComparisonResult, std::string> Base::compareTa (
             && ((ref_lower != -1 && target_data.hasRefTAForTime(ref_lower))
                 || (ref_upper != -1 && target_data.hasRefTAForTime(ref_upper)));
 
-    if (!has_ref_data)
-        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    bool has_tst_data = target_data.hasTstTAForTime(tod);
 
-    if (target_data.hasTstTAForTime(tod))
+    if (!has_ref_data)
+    {
+        if (has_tst_data)
+            return {ValueComparisonResult::Different, "Tst data without ref value"};
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+
+    }
+
+    if (has_tst_data)
     {
         unsigned int value = target_data.tstTAForTime(tod);
 
@@ -261,10 +276,17 @@ std::pair<ValueComparisonResult, std::string> Base::compareModeA (
             && ((ref_lower != -1 && target_data.hasRefModeAForTime(ref_lower))
                 || (ref_upper != -1 && target_data.hasRefModeAForTime(ref_upper)));
 
-    if (!has_ref_data)
-        return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    bool has_tst_data = target_data.hasTstModeAForTime(tod);
 
-    if (target_data.hasTstModeAForTime(tod))
+    if (!has_ref_data)
+    {
+        if (has_tst_data)
+            return {ValueComparisonResult::Different, "Tst data without ref value"};
+        else
+            return {ValueComparisonResult::Unknown_NoRefData, "No ref value"};
+    }
+
+    if (has_tst_data)
     {
         unsigned int code = target_data.tstModeAForTime(tod);
 
