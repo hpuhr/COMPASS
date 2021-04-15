@@ -130,7 +130,7 @@ namespace EvaluationRequirementResult
         {
             pd_var = String::percentToString(pd_ * 100.0, req->getNumProbDecimals()).c_str();
 
-            loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
+            //loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
 
             result = req->getResultConditionStr(pd_);
         }
