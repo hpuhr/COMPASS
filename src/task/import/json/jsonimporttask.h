@@ -141,6 +141,8 @@ class JSONImportTask : public Task, public Configurable
 
     size_t objects_created_{0};
     size_t objects_inserted_{0};
+
+    unsigned int num_radar_inserted_ {0};
     bool all_done_{false};
 
     size_t statistics_calc_objects_inserted_{0};

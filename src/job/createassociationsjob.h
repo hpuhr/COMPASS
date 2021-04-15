@@ -52,25 +52,38 @@ protected:
     std::map<std::string, std::map<unsigned int, std::vector<Association::TargetReport>>> target_reports_;
     //dbo name->ds_id->trs
 
-    std::map<unsigned int, Association::Target> targets_;
-    std::map<unsigned int, unsigned int> ta_2_utn_;
-    unsigned int utn_cnt_ {0};
-
     void createTargetReports();
-    void createTrackerUTNS();
-    void createNonTrackerUTNS();
+    std::map<unsigned int, Association::Target> createReferenceUTNs();
+
+    void createTrackerUTNs(std::map<unsigned int, Association::Target>& sum_targets);
+
+    void createNonTrackerUTNS(std::map<unsigned int, Association::Target>& targets);
     void createAssociations();
 
-    int findUTNForTrackerTarget (const Association::Target& target);
+    std::map<unsigned int, Association::Target> createTrackedTargets(const std::string& dbo_name, unsigned int ds_id);
+    void cleanTrackerUTNs(std::map<unsigned int, Association::Target>& targets);
+    std::map<unsigned int, Association::Target> selfAssociateTrackerUTNs(
+            std::map<unsigned int, Association::Target>& targets);
+    // tries to associate each utn to all others, returns new target list
+
+    void markDubiousUTNs(std::map<unsigned int, Association::Target>& targets);
+    // marks weird utns as, only for final utns, must have calculated speeds
+
+    void addTrackerUTNs(const std::string& ds_name, std::map<unsigned int, Association::Target> from_targets,
+                        std::map<unsigned int, Association::Target>& to_targets);
+
+    int findContinuationUTNForTrackerUpdate (const Association::TargetReport& tr,
+                                             const std::map<unsigned int, Association::Target>& targets);
+    // tries to find existing utn for tracker update, -1 if failed
+    int findUTNForTrackerTarget (const Association::Target& target,
+                                 const std::map<unsigned int, Association::Target>& targets);
     // tries to find existing utn for target, -1 if failed
-    int findUTNForTargetByTA (const Association::Target& target);
+    int findUTNForTargetByTA (const Association::Target& target,
+                              const std::map<unsigned int, Association::Target>& targets);
     // tries to find existing utn for target by target address, -1 if failed
-    int findUTNForTargetReport (const Association::TargetReport& tr);
-    // tries to find existing utn for target report, -1 if failed
-    void addTarget (const Association::Target& target);
-    // creates new utn, adds to targets_
-    void addTargetByTargetReport (Association::TargetReport& tr);
-    // creates new utn, adds to targets_, adds target report
+
+    std::map<unsigned int, unsigned int> getTALookupMap (
+            const std::map<unsigned int, Association::Target>& targets);
 };
 
 #endif // CREATEASSOCIATIONSJOB_H

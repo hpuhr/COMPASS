@@ -76,6 +76,9 @@ class ASTERIXImportTask : public Task, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    void asterixFraming(const std::string& asterix_framing);
+    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
+
     bool canImportFile();
     virtual bool canRun();
     virtual void run();

@@ -38,8 +38,12 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
 
     if (record.contains("010"))
     {
+        assert (record.at("010").contains("SAC"));
         sac = record.at("010").at("SAC");
+
+        assert (record.at("010").contains("SIC"));
         sic = record.at("010").at("SIC");
+
         record["ds_id"] = sac * 256 + sic;
     }
 

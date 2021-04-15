@@ -285,7 +285,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
 
         for (int feature_cnt=0; feature_cnt < layer->GetFeatureCount(); ++feature_cnt) // OGRFeature
         {
-            feature = layer->GetFeature(feature_cnt);
+            feature = layer->GetNextFeature();
 
             if (!feature) // TODO solve this
             {

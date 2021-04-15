@@ -23,6 +23,9 @@
 #include "jsonobjectparser.h"
 #include "logger.h"
 
+#include <exception>
+
+using namespace std;
 using namespace Utils;
 using namespace nlohmann;
 
@@ -58,7 +61,7 @@ void JSONMappingJob::run()
     }
 
     auto process_lambda = [this](nlohmann::json& record) {
-        // loginf << "UGA '" << record.dump(4) << "'";
+        //loginf << "UGA '" << record.dump(4) << "'";
 
         unsigned int category{0};
         bool has_cat = record.contains("category");
@@ -77,12 +80,31 @@ void JSONMappingJob::run()
             logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second.dbObject().name());
             assert(buffer);
-            parsed = map_it.second.parseJSON(record, *buffer);
+            try
+            {
+                logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " parsing JSON";
 
-            if (parsed)
-                map_it.second.transformBuffer(*buffer, buffer->size() - 1);
+                parsed = map_it.second.parseJSON(record, *buffer);
 
-            parsed_any |= parsed;
+                if (parsed)
+                {
+                    logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " transforming buffer";
+                    map_it.second.transformBuffer(*buffer, buffer->size() - 1);
+                }
+
+                logdbg << "JSONMappingJob: run: obj " << map_it.second.dbObject().name() << " done";
+
+                parsed_any |= parsed;
+            }
+            catch (exception& e)
+            {
+                logerr << "JSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
+                       << record.dump(4) << "' parser " << map_it.second.dbObject().name();
+
+                ++num_errors_;
+
+                continue;
+            }
         }
 
         if (parsed_any)
@@ -100,7 +122,7 @@ void JSONMappingJob::run()
     };
 
     assert(data_);
-    // loginf << "JSONMappingJob: run: applying JSON function";
+    logdbg << "JSONMappingJob: run: applying JSON function";
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
                                 process_lambda, false);
 
@@ -133,4 +155,9 @@ size_t JSONMappingJob::numCreated() const { return num_created_; }
 std::map<unsigned int, std::pair<size_t, size_t>> JSONMappingJob::categoryMappedCounts() const
 {
     return category_mapped_counts_;
+}
+
+size_t JSONMappingJob::numErrors() const
+{
+    return num_errors_;
 }

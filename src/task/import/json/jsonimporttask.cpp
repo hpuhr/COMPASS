@@ -341,6 +341,9 @@ void JSONImportTask::run()
 {
     loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' test " << test_;
 
+    done_ = false; // since can be run multiple times
+    num_radar_inserted_ = 0;
+
     std::string tmp;
 
     if (test_)
@@ -426,8 +429,10 @@ void JSONImportTask::addReadJSONSlot()
         if (read_json_job_)
             read_json_job_->pause();
 
+        updateMsgBox();
+
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
+        QThread::msleep(10);
     }
 
     // start parse job
@@ -450,15 +455,14 @@ void JSONImportTask::addReadJSONSlot()
 
 void JSONImportTask::readJSONFileDoneSlot()
 {
-    loginf << "JSONImporterTask: readJSONFileDoneSlot";
+    logdbg << "JSONImporterTask: readJSONFileDoneSlot";
 
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: done";
     task_manager_.appendInfo("JSONImporterTask: reading done with " +
                              std::to_string(objects_read_) + " records");
     read_status_percent_ = 100.0;
     read_json_job_ = nullptr;
 
-    loginf << "JSONImporterTask: readJSONFileDoneSlot: updating message box";
+    logdbg << "JSONImporterTask: readJSONFileDoneSlot: updating message box";
     updateMsgBox();
 
     logdbg << "JSONImporterTask: readJSONFileDoneSlot: done";
@@ -471,7 +475,7 @@ void JSONImportTask::readJSONFileObsoleteSlot()
 
 void JSONImportTask::parseJSONDoneSlot()
 {
-    logdbg << "JSONImporterTask: parseJSONDoneSlot";
+    loginf << "JSONImporterTask: parseJSONDoneSlot";
 
     assert (json_parse_job_);
 
@@ -543,7 +547,7 @@ void JSONImportTask::parseJSONDoneSlot()
             read_json_job_->unpause();
     }
 
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: done";
+    loginf << "JSONImporterTask: parseJSONDoneSlot: done";
 }
 
 void JSONImportTask::parseJSONObsoleteSlot()
@@ -563,6 +567,7 @@ void JSONImportTask::mapJSONDoneSlot()
 
     objects_mapped_ += map_job->numMapped();  // TODO done twice?
     objects_not_mapped_ += map_job->numNotMapped();
+    objects_parse_errors_ += map_job->numErrors();
 
     objects_created_ += map_job->numCreated();
 
@@ -612,6 +617,9 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         {
             std::string dbo_name = parser_it.second.dbObject().name();
 
+            if (!job_buffers.count(dbo_name))
+                continue;
+
             DBObject& db_object = parser_it.second.dbObject();
             assert(db_object.hasCurrentDataSourceDefinition());
 
@@ -620,6 +628,17 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
             assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
 
             DBOVariableSet set = parser_it.second.variableList();
+
+//            DBOVariableSet set;
+
+//            for (const auto& prop_it : job_buffers.at(dbo_name)->properties().properties())
+//            {
+//                assert (db_object.hasVariable(prop_it.name()));
+//                set.add(db_object.variable(prop_it.name()));
+//            }
+
+//            if (parser_it.second.overrideDataSource())
+//                set.add(db_object.variable(data_source_var_name));
 
             if (dbo_variable_sets_.count(dbo_name))  // add variables
             {
@@ -644,14 +663,27 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
     for (auto& buf_it : job_buffers)
     {
         std::string dbo_name = buf_it.first;
-        assert(dbo_variable_sets_.count(dbo_name));
+
         std::shared_ptr<Buffer> buffer = buf_it.second;
 
         if (!buffer->size())
         {
-            logdbg << "JSONImportTask: insertData: dbo " << buf_it.first << " with empty buffer";
+            logdbg << "JSONImportTask: insertData: dbo " << dbo_name << " with empty buffer";
             continue;
         }
+
+        if (!dbo_variable_sets_.count(dbo_name))
+        {
+            logerr << "JSONImportTask: insertData: dbo " << dbo_name << " has no variable set, buffer size "
+                   << buffer->size();
+            continue;
+        }
+
+        assert(dbo_variable_sets_.count(dbo_name));
+
+        loginf << "JSONImporterTask: insertData: insert dbo " << dbo_name << " size " << buffer->size()
+               << " num prop " << buffer->properties().size();
+        //buffer->properties().print();
 
         assert(object_manager.existsObject(dbo_name));
         DBObject& db_object = object_manager.object(dbo_name);
@@ -748,9 +780,18 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         }
 
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
+
+        loginf << "JSONImporterTask: insertData: calling dbo insert buffer size " << buffer->size()
+               << " num set " << set.getSize();
+
+        //set.print();
+
         db_object.insertData(set, buffer, false);
 
         objects_inserted_ += buffer->size();
+
+        if (db_object.name() == "Radar")
+            num_radar_inserted_ += buffer->size(); // store for later check
 
         // status_widget_->addNumInserted(db_object.name(), buffer->size());
     }
@@ -798,12 +839,25 @@ void JSONImportTask::checkAllDone()
             task_manager_.appendSuccess("JSONImporterTask: import test done after " + time_str);
         else
         {
+            loginf << "JSONImporterTask: checkAllDone: setting done";
+
             task_manager_.appendSuccess("JSONImporterTask: import done after " + time_str);
             done_ = true;
 
             // in case data was imported, clear other task done properties
-            COMPASS::instance().interface().setProperty(
-                        RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+            if (num_radar_inserted_)
+            {
+                bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
+                            COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                            {"pos_lat_deg","pos_long_deg"});
+
+                loginf << "JSONImporterTask: insertDoneSlot: radar has null positions " << has_null_positions;
+
+                COMPASS::instance().interface().setProperty(
+                            RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
+            }
+
+
             COMPASS::instance().interface().setProperty(
                         CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
@@ -828,12 +882,17 @@ void JSONImportTask::updateMsgBox()
             msg_box_->close();
 
         msg_box_ = nullptr;
+
+        loginf << "JSONImporterTask: updateMsgBox: deleting";
+
         return;
     }
 
     if (!msg_box_)
     {
         msg_box_.reset(new QMessageBox());
+
+        loginf << "JSONImporterTask: updateMsgBox: creating";
 
         if (test_)
             msg_box_->setWindowTitle("Test Import JSON Data Status");

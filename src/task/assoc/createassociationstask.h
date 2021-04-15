@@ -66,6 +66,7 @@ public:
     MetaDBOVariable* targetAddrVar() const;
     MetaDBOVariable* targetIdVar() const;
     MetaDBOVariable* trackNumVar() const;
+    MetaDBOVariable* trackEndVar() const;
     MetaDBOVariable* mode3AVar() const;
     MetaDBOVariable* modeCVar() const;
     MetaDBOVariable* latitudeVar() const;
@@ -146,6 +147,9 @@ protected:
 
     std::string track_num_var_str_;
     MetaDBOVariable* track_num_var_{nullptr};
+
+    std::string track_end_var_str_;
+    MetaDBOVariable* track_end_var_{nullptr};
 
     std::string mode_3a_var_str_;
     MetaDBOVariable* mode_3a_var_{nullptr};
