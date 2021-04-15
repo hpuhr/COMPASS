@@ -175,6 +175,26 @@ CreateAssociationsTaskWidget::CreateAssociationsTaskWidget(
             this, &CreateAssociationsTaskWidget::maxSpeedTrackerKtsEditedSlot);
     layout->addWidget(max_speed_tracker_kts_edit_, row, 1);
 
+    // QLineEdit* cont_max_time_diff_tracker_edit_{nullptr};
+    ++row;
+
+    layout->addWidget(new QLabel("Maximum Continuation Time Difference [s]"), row, 0);
+
+    cont_max_time_diff_tracker_edit_ = new QLineEdit();
+    connect(cont_max_time_diff_tracker_edit_, &QLineEdit::textEdited,
+            this, &CreateAssociationsTaskWidget::contMaxTimeDiffTrackerEditedSlot);
+    layout->addWidget(cont_max_time_diff_tracker_edit_, row, 1);
+
+    // QLineEdit* cont_max_distance_acceptable_tracker_edit_{nullptr};
+    ++row;
+
+    layout->addWidget(new QLabel("Maximum Acceptable Continuation Distance [m]"), row, 0);
+
+    cont_max_distance_acceptable_tracker_edit_ = new QLineEdit();
+    connect(cont_max_distance_acceptable_tracker_edit_, &QLineEdit::textEdited,
+            this, &CreateAssociationsTaskWidget::contMaxDistanceAcceptableTrackerEditedSlot);
+    layout->addWidget(cont_max_distance_acceptable_tracker_edit_, row, 1);
+
     // sensor
     ++row;
     QLabel* sensor_label = new QLabel("Sensor/Track Association Parameters");
@@ -281,6 +301,14 @@ void CreateAssociationsTaskWidget::update()
     //    QLineEdit* max_speed_tracker_kts_edit_{nullptr};
     assert (max_speed_tracker_kts_edit_);
     max_speed_tracker_kts_edit_->setText(QString::number(task_.maxSpeedTrackerKts()));
+
+    //    QLineEdit* cont_max_time_diff_tracker_edit_{nullptr};
+    assert (cont_max_time_diff_tracker_edit_);
+    cont_max_time_diff_tracker_edit_->setText(QString::number(task_.contMaxTimeDiffTracker()));
+
+    //    QLineEdit* cont_max_distance_acceptable_tracker_edit_{nullptr};
+    assert (cont_max_distance_acceptable_tracker_edit_);
+    cont_max_distance_acceptable_tracker_edit_->setText(QString::number(task_.contMaxDistanceAcceptableTracker()));
 
 
     // sensor
@@ -529,5 +557,39 @@ void CreateAssociationsTaskWidget::maxSpeedTrackerKtsEditedSlot (const QString& 
         task_.maxSpeedTrackerKts(value);
     else
         logwrn << "CreateAssociationsTaskWidget: maxSpeedTrackerKtsEditedSlot: unable to parse value '"
+               << value_str << "'";
+}
+
+void CreateAssociationsTaskWidget::contMaxTimeDiffTrackerEditedSlot (const QString& text)
+{
+    string value_str = text.toStdString();
+
+    loginf << "CreateAssociationsTaskWidget: contMaxTimeDiffTrackerEditedSlot: value '" << value_str << "'";
+
+    bool ok;
+
+    double value = text.toDouble(&ok);
+
+    if (ok)
+        task_.contMaxTimeDiffTracker(value);
+    else
+        logwrn << "CreateAssociationsTaskWidget: contMaxTimeDiffTrackerEditedSlot: unable to parse value '"
+               << value_str << "'";
+}
+
+void CreateAssociationsTaskWidget::contMaxDistanceAcceptableTrackerEditedSlot (const QString& text)
+{
+    string value_str = text.toStdString();
+
+    loginf << "CreateAssociationsTaskWidget: contMaxDistanceAcceptableTrackerEditedSlot: value '" << value_str << "'";
+
+    bool ok;
+
+    double value = text.toDouble(&ok);
+
+    if (ok)
+        task_.contMaxDistanceAcceptableTracker(value);
+    else
+        logwrn << "CreateAssociationsTaskWidget: contMaxDistanceAcceptableTrackerEditedSlot: unable to parse value '"
                << value_str << "'";
 }

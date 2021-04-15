@@ -52,6 +52,9 @@ public slots:
     void minUpdatesTrackerEditedSlot (const QString& text);
     void maxSpeedTrackerKtsEditedSlot (const QString& text);
 
+    void contMaxTimeDiffTrackerEditedSlot (const QString& text);
+    void contMaxDistanceAcceptableTrackerEditedSlot (const QString& text);
+
 public:
     CreateAssociationsTaskWidget(CreateAssociationsTask& task, QWidget* parent = 0,
                                  Qt::WindowFlags f = 0);
@@ -79,6 +82,9 @@ protected:
 
     QLineEdit* prob_min_time_overlap_tracker_edit_{nullptr};
     QLineEdit* max_speed_tracker_kts_edit_{nullptr};
+
+    QLineEdit* cont_max_time_diff_tracker_edit_{nullptr};
+    QLineEdit* cont_max_distance_acceptable_tracker_edit_{nullptr};
 
     // sensor
     QLineEdit* max_time_diff_sensor_edit_{nullptr};

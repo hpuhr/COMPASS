@@ -454,6 +454,26 @@ void CreateAssociationsTask::commentDubiousUtns(bool value)
     comment_dubious_utns_ = value;
 }
 
+double CreateAssociationsTask::contMaxTimeDiffTracker() const
+{
+    return cont_max_time_diff_tracker_;
+}
+
+void CreateAssociationsTask::contMaxTimeDiffTracker(double cont_max_time_diff_tracker)
+{
+    cont_max_time_diff_tracker_ = cont_max_time_diff_tracker;
+}
+
+double CreateAssociationsTask::contMaxDistanceAcceptableTracker() const
+{
+    return cont_max_distance_acceptable_tracker_;
+}
+
+void CreateAssociationsTask::contMaxDistanceAcceptableTracker(double cont_max_distance_acceptable_tracker)
+{
+    cont_max_distance_acceptable_tracker_ = cont_max_distance_acceptable_tracker;
+}
+
 void CreateAssociationsTask::newDataSlot(DBObject& object)
 {
 }

@@ -1071,9 +1071,9 @@ int CreateAssociationsJob::findContinuationUTNForTrackerUpdate (
     if (tr.has_ta_)
         return -1;
 
-    const double max_time_diff_tracker = 30.0;
-    const double max_altitude_diff_tracker = 300.0;
-    const double max_distance_acceptable_tracker = 1852.0;;
+    const double max_time_diff_tracker = task_.contMaxTimeDiffTracker();
+    const double max_altitude_diff_tracker = task_.maxAltitudeDiffTracker();
+    const double max_distance_acceptable_tracker = task_.contMaxDistanceAcceptableTracker();
 
     unsigned int num_targets = targets.size();
 
