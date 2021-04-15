@@ -118,6 +118,7 @@ namespace EvaluationResultsReport
                     this, &SectionContentTable::doubleClickedSlot);
         }
 
+        table_view_->horizontalHeader()->setMaximumSectionSize(150);
         table_view_->resizeColumnsToContents();
         table_view_->resizeRowsToContents();
 

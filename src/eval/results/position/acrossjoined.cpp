@@ -146,7 +146,7 @@ void JoinedPositionAcross::addToOverviewTable(std::shared_ptr<EvaluationResultsR
 
     if (has_p_min_)
     {
-        p_min_var = String::percentToString(p_min_ * 100.0).c_str();
+        p_min_var = String::percentToString(p_min_ * 100.0, req->getNumProbDecimals()).c_str();
         result = req->getResultConditionStr(p_min_);
     }
 

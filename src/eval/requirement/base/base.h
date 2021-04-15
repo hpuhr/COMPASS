@@ -60,6 +60,7 @@ public:
     std::string groupName() const;
 
     float prob() const;
+    unsigned int getNumProbDecimals() const;
 
     COMPARISON_TYPE probCheckType() const;
 

@@ -95,20 +95,6 @@ namespace EvaluationRequirementResult
         }
     }
 
-//    void JoinedDetection::print()
-//    {
-//        std::shared_ptr<EvaluationRequirement::Detection> req =
-//                std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
-//        assert (req);
-
-//        if (sum_uis_)
-//            loginf << "JoinedDetection: print: req. name " << req->name()
-//                   << " pd " << String::percentToString(100.0 * pd_) << " passed " << (pd_ >= req->minimumProbability());
-//        else
-//            loginf << "JoinedDetection: print: req. name " << req->name()
-//                   << " has no data";
-//    }
-
     void JoinedDetection::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
@@ -135,8 +121,6 @@ namespace EvaluationRequirementResult
                 std::static_pointer_cast<EvaluationRequirement::Detection>(requirement_);
         assert (req);
 
-        //string condition = ">= "+String::percentToString(req->minimumProbability() * 100.0);
-
         // pd
         QVariant pd_var;
 
@@ -144,9 +128,11 @@ namespace EvaluationRequirementResult
 
         if (has_pd_)
         {
-            pd_var = String::percentToString(pd_ * 100.0).c_str();
+            pd_var = String::percentToString(pd_ * 100.0, req->getNumProbDecimals()).c_str();
 
-            result = req-> getResultConditionStr(pd_);
+            loginf << "UGA '" << pd_var.toString().toStdString() << "' dec " << req->getNumProbDecimals();
+
+            result = req->getResultConditionStr(pd_);
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -184,9 +170,9 @@ namespace EvaluationRequirementResult
 
         if (has_pd_)
         {
-            pd_var = String::percentToString(pd_ * 100.0).c_str();
+            pd_var = String::percentToString(pd_ * 100.0, req->getNumProbDecimals()).c_str();
 
-            result = req-> getResultConditionStr(pd_);
+            result = req->getResultConditionStr(pd_);
         }
 
         sec_det_table.addRow({"PD [%]", "Probability of Detection", pd_var}, this);

@@ -60,6 +60,23 @@ float Base::prob() const
     return prob_;
 }
 
+unsigned int Base::getNumProbDecimals() const
+{
+    assert (prob_ <= 1);
+
+    float tmp=1;
+    unsigned int decimals=1;
+
+    while (tmp > prob_ && decimals < 6)
+    {
+        tmp /= 10.0;
+        ++decimals;
+    }
+
+    //loginf << "Requirement::Base: getNumProbDecimals: prob " << prob_ << " dec " << decimals;
+    return decimals;
+}
+
 COMPARISON_TYPE Base::probCheckType() const
 {
     return prob_check_type_;
@@ -68,13 +85,13 @@ COMPARISON_TYPE Base::probCheckType() const
 std::string Base::getConditionStr () const
 {
     if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN)
-        return "< "+String::percentToString(prob_ * 100.0);
+        return "< "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else if (prob_check_type_ == COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
-        return "<= "+String::percentToString(prob_ * 100.0);
+        return "<= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN)
-        return "> "+String::percentToString(prob_ * 100.0);
+        return "> "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else if (prob_check_type_ == COMPARISON_TYPE::GREATER_THAN_OR_EUQAL)
-        return ">= "+String::percentToString(prob_ * 100.0);
+        return ">= "+String::percentToString(prob_ * 100.0, getNumProbDecimals());
     else
         throw std::runtime_error("EvaluationRequiretBase: getConditionStr: unknown type '"
                                  +to_string(prob_check_type_)+"'");
