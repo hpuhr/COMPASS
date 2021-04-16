@@ -20,9 +20,10 @@
 
 #include "view.h"
 #include "viewselection.h"
+#include "listboxviewdatasource.h"
 
 class ListBoxViewWidget;
-class ListBoxViewDataSource;
+//class ListBoxViewDataSource;
 class ListBoxViewDataWidget;
 
 /**
@@ -99,6 +100,8 @@ class ListBoxView : public View
     void showAssociations(bool show_associations);
 
     virtual void accept(LatexVisitor& v) override;
+
+    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
 
   protected:
     /// For data display

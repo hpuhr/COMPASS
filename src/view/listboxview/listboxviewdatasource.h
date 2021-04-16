@@ -18,13 +18,15 @@
 #ifndef LISTBOXVIEWDATASOURCE_H_
 #define LISTBOXVIEWDATASOURCE_H_
 
-#include <QObject>
-
 #include "buffer.h"
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
 #include "viewselection.h"
+
+#include <QObject>
+
+#include <memory>
 
 class Job;
 class ViewableDataConfig;
@@ -59,26 +61,23 @@ class ListBoxViewDataSource : public QObject, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
+    bool hasCurrentSet();
+    bool hasSet (const std::string& name);
+    void addSet (const std::string& name);
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet()
-    {
-        assert(set_);
-        return set_;
-    }
-    /// @brief Returns stored result Buffers
-    // std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
+    DBOVariableOrderedSet* getSet();
 
-    /// @brief Sets use selection flag
-    // void setUseSelection (bool use_selection) { use_selection_=use_selection; }
-    /// @brief Returns use selection flag
-    // bool getUseSelection () { return use_selection_; }
+    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
 
   protected:
+    std::string current_set_name_;
+
     /// Variable read list
-    DBOVariableOrderedSet* set_{nullptr};
+    //DBOVariableOrderedSet* set_{nullptr};
+    std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>> sets_;
 
     /// Selected DBObject records
     ViewSelectionEntries& selection_entries_;
@@ -89,6 +88,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
 
     bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
     void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
+
+    void addDefaultVariables (DBOVariableOrderedSet& set);
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

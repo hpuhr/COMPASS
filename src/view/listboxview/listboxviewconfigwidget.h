@@ -25,10 +25,12 @@
 class DBOVariableOrderedSetWidget;
 class ListBoxView;
 
+class QComboBox;
 class QCheckBox;
 class QLineEdit;
 class QPushButton;
 class QLabel;
+class QStackedWidget;
 
 /**
  * @brief Widget with configuration elements for a ListBoxView
@@ -39,6 +41,11 @@ class ListBoxViewConfigWidget : public QWidget
     Q_OBJECT
 
   public slots:
+    void selectedSetSlot(const QString& text);
+    void addSetSlot();
+    void copySetSlot();
+    void removeSetSlot();
+
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
     void toggleUseOverwrite();
@@ -67,8 +74,15 @@ class ListBoxViewConfigWidget : public QWidget
   protected:
     /// Base view
     ListBoxView* view_;
+
+    QComboBox* set_box_{nullptr};
+    QPushButton* add_set_button_{nullptr};
+    QPushButton* copy_set_button_{nullptr};
+    QPushButton* remove_set_button_{nullptr};
+
     /// Variable read list widget
-    DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
+    QStackedWidget* set_stack_{nullptr};
+    //DBOVariableOrderedSetWidget* variable_set_widget_{nullptr};
 
     QCheckBox* only_selected_check_{nullptr};
     QCheckBox* presentation_check_{nullptr};
@@ -83,6 +97,7 @@ class ListBoxViewConfigWidget : public QWidget
     bool reload_needed_{false};
 
     void updateUpdateButton();
+    void updateSetBox();
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

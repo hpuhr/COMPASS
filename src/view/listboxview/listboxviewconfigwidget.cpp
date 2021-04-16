@@ -16,14 +16,6 @@
  */
 
 #include "listboxviewconfigwidget.h"
-
-#include <QCheckBox>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QVBoxLayout>
-
 #include "dbobjectmanager.h"
 #include "dbovariableorderedsetwidget.h"
 #include "listboxview.h"
@@ -31,7 +23,17 @@
 #include "logger.h"
 #include "stringconv.h"
 
+#include <QComboBox>
+#include <QCheckBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QStackedWidget>
+
 using namespace Utils;
+using namespace std;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* parent)
     : QWidget(parent), view_(view)
@@ -40,10 +42,51 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
 
     assert(view_);
 
-    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
-    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
-            this, &ListBoxViewConfigWidget::reloadWantedSlot);
-    vlayout->addWidget(variable_set_widget_);
+    // sets
+
+    set_box_ = new QComboBox();
+    connect(set_box_, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(selectedSetSlot(const QString&)));
+
+    updateSetBox();
+
+    vlayout->addWidget(set_box_);
+
+    QHBoxLayout* set_manage_layout = new QHBoxLayout();
+
+    add_set_button_ = new QPushButton("Add");
+    connect(add_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::addSetSlot);
+    set_manage_layout->addWidget(add_set_button_);
+
+    copy_set_button_ = new QPushButton("Copy");
+    connect(copy_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::copySetSlot);
+    set_manage_layout->addWidget(copy_set_button_);
+
+    remove_set_button_ = new QPushButton("Remove");
+    connect(remove_set_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::removeSetSlot);
+    set_manage_layout->addWidget(remove_set_button_);
+
+    vlayout->addLayout(set_manage_layout);
+
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    vlayout->addWidget(line);
+
+    // set widget
+    set_stack_ = new QStackedWidget();
+    vlayout->addWidget(set_stack_);
+
+//    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
+//    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
+//            this, &ListBoxViewConfigWidget::reloadWantedSlot);
+//    vlayout->addWidget(variable_set_widget_);
+
+    QFrame* line2 = new QFrame();
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
+    vlayout->addWidget(line2);
+
+    // rest
 
     only_selected_check_ = new QCheckBox("Show Only Selected");
     only_selected_check_->setChecked(view_->showOnlySelected());
@@ -65,7 +108,7 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget(ListBoxView* view, QWidget* par
         associations_check_->setDisabled(true);
     vlayout->addWidget(associations_check_);
 
-    vlayout->addStretch();
+    //vlayout->addStretch();
 
     overwrite_check_ = new QCheckBox("Overwrite Exported File");
     overwrite_check_->setChecked(view_->overwriteCSV());
@@ -111,6 +154,28 @@ void ListBoxViewConfigWidget::setStatus (const std::string& status, bool visible
     status_label_->setPalette(palette);
 
     status_label_->setVisible(visible);
+}
+
+void ListBoxViewConfigWidget::selectedSetSlot(const QString& text)
+{
+    string name = text.toStdString();
+
+    loginf << "ListBoxViewConfigWidget: selectedSetSlot: name '" << name << "'";
+}
+
+void ListBoxViewConfigWidget::addSetSlot()
+{
+    loginf << "istBoxViewConfigWidget: addSetSlot";
+}
+
+void ListBoxViewConfigWidget::copySetSlot()
+{
+    loginf << "istBoxViewConfigWidget: copySetSlot";
+}
+
+void ListBoxViewConfigWidget::removeSetSlot()
+{
+    loginf << "istBoxViewConfigWidget: removeSetSlot";
 }
 
 void ListBoxViewConfigWidget::toggleShowOnlySeletedSlot()
@@ -189,6 +254,19 @@ void ListBoxViewConfigWidget::updateUpdateButton()
 {
     assert(update_button_);
     update_button_->setEnabled(reload_needed_);
+}
+
+void ListBoxViewConfigWidget::updateSetBox()
+{
+    loginf << "ListBoxViewConfigWidget: updateSetBox";
+
+    assert(set_box_);
+    set_box_->clear();
+
+    for (const auto& set_it : view_->getSets())
+    {
+        set_box_->addItem(set_it.first.c_str());
+    }
 }
 
 void ListBoxViewConfigWidget::loadingStartedSlot()

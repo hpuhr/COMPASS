@@ -204,6 +204,12 @@ void ListBoxView::accept(LatexVisitor& v)
     v.visit(this);
 }
 
+const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& ListBoxView::getSets()
+{
+    assert (data_source_);
+    return data_source_->getSets();
+}
+
 bool ListBoxView::canShowAssociations() const { return can_show_associations_; }
 
 void ListBoxView::updateSelection()

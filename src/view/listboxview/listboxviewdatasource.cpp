@@ -36,37 +36,35 @@
 using namespace std;
 using namespace nlohmann;
 
+const string DEFAULT_SET_NAME {"Default"};
+
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
                                              const std::string& instance_id, Configurable* parent)
     : QObject(),
       Configurable(class_id, instance_id, parent),
       selection_entries_(ViewSelection::getInstance().getEntries())
 {
-    // registerParameter ("use_selection", &use_selection_, true);
+    registerParameter ("current_set_name", &current_set_name_, DEFAULT_SET_NAME);
 
-    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this,
-            SLOT(loadingStartedSlot()));
+    connect(&COMPASS::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
-        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this,
-                SLOT(newDataSlot(DBObject&)));
-        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this,
-                SLOT(loadingDoneSlot(DBObject&)));
+        connect(obj_it.second, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
+        connect(obj_it.second, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
     }
 
     createSubConfigurables();
+
+    if (hasCurrentSet())
+        current_set_name_ = DEFAULT_SET_NAME;
+
+    assert (hasCurrentSet());
 }
 
 ListBoxViewDataSource::~ListBoxViewDataSource()
 {
     unshowViewPoint(nullptr); // removes tmps TODO not done yet
-
-    if (set_)
-    {
-        delete set_;
-        set_ = nullptr;
-    }
 }
 
 void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
@@ -77,8 +75,12 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
 
     if (class_id.compare("DBOVariableOrderedSet") == 0)
     {
-        assert(set_ == 0);
-        set_ = new DBOVariableOrderedSet(class_id, instance_id, this);
+        assert (!sets_.count(instance_id));
+
+        std::unique_ptr<DBOVariableOrderedSet> set;
+        set.reset(new DBOVariableOrderedSet(class_id, instance_id, this));
+
+        sets_[instance_id] = move(set);
     }
     else
         throw std::runtime_error(
@@ -87,50 +89,44 @@ void ListBoxViewDataSource::generateSubConfigurable(const std::string& class_id,
 
 void ListBoxViewDataSource::checkSubConfigurables()
 {
-    if (set_ == nullptr)
+    if (!hasSet(DEFAULT_SET_NAME))
     {
-        generateSubConfigurable("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
-        assert(set_);
-
-        DBObjectManager& obj_man = COMPASS::instance().objectManager();
-
-        if (obj_man.existsMetaVariable("rec_num"))
-            set_->add(obj_man.metaVariable("rec_num"));
-
-        //        Time of Day
-        if (obj_man.existsMetaVariable("tod"))
-            set_->add(obj_man.metaVariable("tod"));
-
-        //        Datasource
-        if (obj_man.existsMetaVariable("ds_id"))
-            set_->add(obj_man.metaVariable("ds_id"));
-
-        //        Lat/Long
-        if (obj_man.existsMetaVariable("pos_lat_deg"))
-            set_->add(obj_man.metaVariable("pos_lat_deg"));
-        if (obj_man.existsMetaVariable("pos_long_deg"))
-            set_->add(obj_man.metaVariable("pos_long_deg"));
-
-        //        Mode 3/A code
-        if (obj_man.existsMetaVariable("mode3a_code"))
-            set_->add(obj_man.metaVariable("mode3a_code"));
-
-        //        Mode S TA
-        if (obj_man.existsMetaVariable("target_addr"))
-            set_->add(obj_man.metaVariable("target_addr"));
-
-        //        Mode S Callsign
-        if (obj_man.existsMetaVariable("callsign"))
-            set_->add(obj_man.metaVariable("callsign"));
-
-        //        Mode C
-        if (obj_man.existsMetaVariable("modec_code_ft"))
-            set_->add(obj_man.metaVariable("modec_code_ft"));
-
-        //        Track Number
-        if (obj_man.existsMetaVariable("track_num"))
-            set_->add(obj_man.metaVariable("track_num"));
+        generateSubConfigurable("DBOVariableOrderedSet", DEFAULT_SET_NAME);
+        assert(hasSet(DEFAULT_SET_NAME));
+        addDefaultVariables(*sets_.at(DEFAULT_SET_NAME).get());
     }
+}
+
+bool ListBoxViewDataSource::hasCurrentSet()
+{
+    assert (current_set_name_.size());
+    return hasSet(current_set_name_);
+}
+
+bool ListBoxViewDataSource::hasSet (const std::string& name)
+{
+    return sets_.count(name) && sets_.at(name) != nullptr;
+}
+
+void ListBoxViewDataSource::addSet (const std::string& name)
+{
+    assert (name.size());
+    assert (!hasSet(name));
+
+    generateSubConfigurable("DBOVariableOrderedSet", name);
+    assert(hasSet(name));
+    addDefaultVariables(*sets_.at(name).get());
+}
+
+DBOVariableOrderedSet* ListBoxViewDataSource::getSet()
+{
+    assert (hasCurrentSet());
+    return sets_.at(current_set_name_).get();
+}
+
+const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& ListBoxViewDataSource::getSets()
+{
+    return sets_;
 }
 
 void ListBoxViewDataSource::unshowViewPoint (const ViewableDataConfig* vp)
@@ -188,13 +184,14 @@ bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, c
 {
     DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
+    assert (hasCurrentSet());
     if (dbo_name == META_OBJECT_NAME)
     {
         assert (obj_man.existsMetaVariable(var_name));
         MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
-        if (!set_->hasMetaVariable(meta_var))
+        if (!getSet()->hasMetaVariable(meta_var))
         {
-            set_->add(meta_var);
+            getSet()->add(meta_var);
             return true;
         }
         else
@@ -208,9 +205,9 @@ bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, c
         assert (obj.hasVariable(var_name));
         DBOVariable& var = obj.variable(var_name);
 
-        if (!set_->hasVariable(var))
+        if (!getSet()->hasVariable(var))
         {
-            set_->add(var);
+            getSet()->add(var);
             return true;
         }
         else
@@ -231,8 +228,8 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
     {
         assert (obj_man.existsMetaVariable(var_name));
         MetaDBOVariable& meta_var = obj_man.metaVariable(var_name);
-        assert (set_->hasMetaVariable(meta_var));
-        set_->removeMetaVariable(meta_var);
+        assert (getSet()->hasMetaVariable(meta_var));
+        getSet()->removeMetaVariable(meta_var);
     }
     else
     {
@@ -241,9 +238,51 @@ void ListBoxViewDataSource::removeTemporaryVariable (const std::string& dbo_name
 
         assert (obj.hasVariable(var_name));
         DBOVariable& var = obj.variable(var_name);
-        assert (set_->hasVariable(var));
-        set_->removeVariable(var);
+        assert (getSet()->hasVariable(var));
+        getSet()->removeVariable(var);
     }
+}
+
+void ListBoxViewDataSource::addDefaultVariables (DBOVariableOrderedSet& set)
+{
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+
+    if (obj_man.existsMetaVariable("rec_num"))
+        set.add(obj_man.metaVariable("rec_num"));
+
+    //        Time of Day
+    if (obj_man.existsMetaVariable("tod"))
+        set.add(obj_man.metaVariable("tod"));
+
+    //        Datasource
+    if (obj_man.existsMetaVariable("ds_id"))
+        set.add(obj_man.metaVariable("ds_id"));
+
+    //        Lat/Long
+//        if (obj_man.existsMetaVariable("pos_lat_deg"))
+//            set.add(obj_man.metaVariable("pos_lat_deg"));
+//        if (obj_man.existsMetaVariable("pos_long_deg"))
+//            set.add(obj_man.metaVariable("pos_long_deg"));
+
+    //        Mode 3/A code
+    if (obj_man.existsMetaVariable("mode3a_code"))
+        set.add(obj_man.metaVariable("mode3a_code"));
+
+    //        Mode S TA
+    if (obj_man.existsMetaVariable("target_addr"))
+        set.add(obj_man.metaVariable("target_addr"));
+
+    //        Mode S Callsign
+    if (obj_man.existsMetaVariable("callsign"))
+        set.add(obj_man.metaVariable("callsign"));
+
+    //        Mode C
+    if (obj_man.existsMetaVariable("modec_code_ft"))
+        set.add(obj_man.metaVariable("modec_code_ft"));
+
+    //        Track Number
+    if (obj_man.existsMetaVariable("track_num"))
+        set.add(obj_man.metaVariable("track_num"));
 }
 
 void ListBoxViewDataSource::loadingStartedSlot()
