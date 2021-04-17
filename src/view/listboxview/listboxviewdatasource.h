@@ -45,11 +45,13 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void loadingStartedSlot();
     void newDataSlot(DBObject& object);
     void loadingDoneSlot(DBObject& object);
+    void setChangedSlot();
 
   signals:
     void loadingStartedSignal();
     /// @brief Emitted when resulting buffer was delivered
     void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void setChangedSignal();
 
   public:
     /// @brief Constructor
@@ -64,6 +66,12 @@ class ListBoxViewDataSource : public QObject, public Configurable
     bool hasCurrentSet();
     bool hasSet (const std::string& name);
     void addSet (const std::string& name);
+    void copySet (const std::string& name, const std::string& new_name);
+    void removeSet (const std::string& name);
+
+    std::string currentSetName() const;
+    void currentSetName(const std::string& current_set_name);
+
     /// @brief Returns variable read list
     DBOVariableOrderedSet* getSet();
 
@@ -72,7 +80,7 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
 
-  protected:
+protected:
     std::string current_set_name_;
 
     /// Variable read list

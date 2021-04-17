@@ -56,10 +56,13 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id,
 
     createSubConfigurables();
 
-    if (hasCurrentSet())
+    if (!hasCurrentSet())
         current_set_name_ = DEFAULT_SET_NAME;
 
     assert (hasCurrentSet());
+
+    connect(getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+            &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
 }
 
 ListBoxViewDataSource::~ListBoxViewDataSource()
@@ -110,6 +113,8 @@ bool ListBoxViewDataSource::hasSet (const std::string& name)
 
 void ListBoxViewDataSource::addSet (const std::string& name)
 {
+    loginf << "ListBoxViewDataSource: addSet: name '" << name << "'";
+
     assert (name.size());
     assert (!hasSet(name));
 
@@ -117,6 +122,37 @@ void ListBoxViewDataSource::addSet (const std::string& name)
     assert(hasSet(name));
     addDefaultVariables(*sets_.at(name).get());
 }
+
+void ListBoxViewDataSource::copySet (const std::string& name, const std::string& new_name)
+{
+    loginf << "ListBoxViewDataSource: copySet: name '" << name << "' new name '" << new_name << "'";
+
+    assert (name.size());
+    assert (hasSet(name));
+
+    assert (new_name.size());
+    assert (!hasSet(new_name));
+
+    generateSubConfigurable("DBOVariableOrderedSet", new_name);
+    assert(hasSet(new_name));
+
+    for (const auto& var_def_it : getSet()->definitions())
+        sets_.at(new_name)->add(var_def_it.second->dboName(), var_def_it.second->variableName());
+}
+
+void ListBoxViewDataSource::removeSet (const std::string& name)
+{
+    loginf << "ListBoxViewDataSource: removeSet: name '" << name << "'";
+
+    assert (hasSet(name));
+    assert (name != DEFAULT_SET_NAME);
+
+    sets_.erase(name);
+
+    if (current_set_name_ == name)
+        current_set_name_ = DEFAULT_SET_NAME;
+}
+
 
 DBOVariableOrderedSet* ListBoxViewDataSource::getSet()
 {
@@ -180,10 +216,28 @@ void ListBoxViewDataSource::showViewPoint (const ViewableDataConfig* vp)
     }
 }
 
+std::string ListBoxViewDataSource::currentSetName() const
+{
+    return current_set_name_;
+}
+
+void ListBoxViewDataSource::currentSetName(const std::string& current_set_name)
+{
+    loginf << "ListBoxViewDataSource: currentSetName: name '" << current_set_name << "'";
+
+    assert (hasSet(current_set_name));
+    current_set_name_ = current_set_name;
+
+    connect(getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+            &ListBoxViewDataSource::setChangedSlot, Qt::UniqueConnection);
+
+    emit setChangedSignal();
+}
+
 bool ListBoxViewDataSource::addTemporaryVariable (const std::string& dbo_name, const std::string& var_name)
 {
     DBObjectManager& obj_man = COMPASS::instance().objectManager();
-
+    
     assert (hasCurrentSet());
     if (dbo_name == META_OBJECT_NAME)
     {
@@ -304,4 +358,9 @@ void ListBoxViewDataSource::newDataSlot(DBObject& object)
 void ListBoxViewDataSource::loadingDoneSlot(DBObject& object)
 {
     logdbg << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
+}
+
+void ListBoxViewDataSource::setChangedSlot()
+{
+    emit setChangedSignal();
 }

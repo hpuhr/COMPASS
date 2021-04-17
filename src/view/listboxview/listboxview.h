@@ -101,8 +101,6 @@ class ListBoxView : public View
 
     virtual void accept(LatexVisitor& v) override;
 
-    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
-
   protected:
     /// For data display
     ListBoxViewWidget* widget_{nullptr};

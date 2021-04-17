@@ -40,8 +40,10 @@ BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject& ob
 {
     read_set_ = data_source_.getSet()->getFor(object_.name());
 
-    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
-            &BufferTableModel::setChangedSlot);
+//    connect(data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal, this,
+//            &BufferTableModel::setChangedSlot);
+
+    connect(&data_source_, &ListBoxViewDataSource::setChangedSignal, this, &BufferTableModel::setChangedSlot);
 }
 
 BufferTableModel::~BufferTableModel() { buffer_ = nullptr; }

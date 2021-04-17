@@ -44,6 +44,7 @@ class ListBoxViewConfigWidget : public QWidget
     void selectedSetSlot(const QString& text);
     void addSetSlot();
     void copySetSlot();
+    void renameSetSlot();
     void removeSetSlot();
 
     void toggleShowOnlySeletedSlot();
@@ -78,6 +79,7 @@ class ListBoxViewConfigWidget : public QWidget
     QComboBox* set_box_{nullptr};
     QPushButton* add_set_button_{nullptr};
     QPushButton* copy_set_button_{nullptr};
+    QPushButton* rename_set_button_{nullptr};
     QPushButton* remove_set_button_{nullptr};
 
     /// Variable read list widget
@@ -94,10 +96,12 @@ class ListBoxViewConfigWidget : public QWidget
 
     QLabel* status_label_ {nullptr};
     QPushButton* update_button_{nullptr};
-    bool reload_needed_{false};
+    bool reload_needed_{true};
 
     void updateUpdateButton();
     void updateSetBox();
+    void updateSetButtons();
+    void updateSetWidget();
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

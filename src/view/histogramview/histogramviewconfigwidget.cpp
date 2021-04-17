@@ -38,8 +38,6 @@ using namespace Utils;
 HistogramViewConfigWidget::HistogramViewConfigWidget(HistogramView* view, QWidget* parent)
     : QWidget(parent), view_(view)
 {
-    //QVBoxLayout* vlayout = new QVBoxLayout;
-
     assert(view_);
 
     setMinimumWidth(400);
