@@ -74,10 +74,12 @@ inline std::string doubleToStringNoScientific(double number)
     return out.str();
 }
 
-inline std::string percentToString(double number)
+inline std::string percentToString(double number, unsigned int precision=2)
 {
     std::ostringstream out;
-    out << std::fixed << std::setprecision(2) << number;
+
+    out << std::fixed << std::setprecision(precision) << number;
+
     return out.str();
 }
 

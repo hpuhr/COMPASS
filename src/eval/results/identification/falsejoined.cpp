@@ -125,7 +125,7 @@ void JoinedIdentificationFalse::addToOverviewTable(std::shared_ptr<EvaluationRes
         if (has_p_false_)
         {
             result = req-> getResultConditionStr(p_false_);
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
+            pf_var = String::percentToString(p_false_ * 100.0, req->getNumProbDecimals()).c_str();
         }
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result", "Condition", "Result"
@@ -171,7 +171,7 @@ void JoinedIdentificationFalse::addDetails(std::shared_ptr<EvaluationResultsRepo
         QVariant pf_var;
 
         if (has_p_false_)
-            pf_var = roundf(p_false_ * 10000.0) / 100.0;
+            pf_var = String::percentToString(p_false_ * 100.0, req->getNumProbDecimals()).c_str();
 
         sec_det_table.addRow({"PF [%]", "Probability of identity false", pf_var}, this);
 

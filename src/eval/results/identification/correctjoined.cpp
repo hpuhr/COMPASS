@@ -90,21 +90,6 @@ namespace EvaluationRequirementResult
         }
     }
 
-//    void JoinedIdentification::print()
-//    {
-//        std::shared_ptr<EvaluationRequirement::Identification> req =
-//                std::static_pointer_cast<EvaluationRequirement::Identification>(requirement_);
-//        assert (req);
-
-//        if (has_pid_)
-//            loginf << "JoinedIdentification: print: req. name " << req->name()
-//                   << " pid " << String::percentToString(100.0 * pid_)
-//                   << " passed " << (pid_ >= req->minimumProbability());
-//        else
-//            loginf << "JoinedIdentification: print: req. name " << req->name()
-//                   << " has no data";
-//    }
-
     void JoinedIdentificationCorrect::addToReport (
             std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
     {
@@ -138,7 +123,7 @@ namespace EvaluationRequirementResult
 
         if (has_pid_)
         {
-            pd_var = String::percentToString(pid_ * 100.0).c_str();
+            pd_var = String::percentToString(pid_ * 100.0, req->getNumProbDecimals()).c_str();
 
             result = req-> getResultConditionStr(pid_);
         }
@@ -184,7 +169,7 @@ namespace EvaluationRequirementResult
 
         if (has_pid_)
         {
-            pd_var = String::percentToString(pid_ * 100.0).c_str();
+            pd_var = String::percentToString(pid_ * 100.0, req->getNumProbDecimals()).c_str();
 
             result = req-> getResultConditionStr(pid_);
         }

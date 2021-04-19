@@ -130,6 +130,23 @@ void DBOVariableOrderedSet::add(MetaDBOVariable& var)
     }
 }
 
+void DBOVariableOrderedSet::add (const std::string& dbo_name, const std::string var_name)
+{
+    if (!hasVariable(dbo_name, var_name))
+    {
+        Configuration& id_configuration = addNewSubConfiguration("DBOVariableOrderDefinition");
+        id_configuration.addParameterString("dbo_name", dbo_name);
+        id_configuration.addParameterString("dbo_variable_name", var_name);
+        id_configuration.addParameterUnsignedInt("index",
+                                                 (unsigned int)variable_definitions_.size());
+        generateSubConfigurable("DBOVariableOrderDefinition", id_configuration.getInstanceId());
+
+        emit setChangedSignal();
+        emit variableAddedChangedSignal();
+    }
+}
+
+
 // void DBOVariableOrderedSet::add (const DBOVariableOrderedSet &set)
 //{
 //    //const std::vector <DBOVariable &> &setset = set.getSet();
@@ -388,6 +405,16 @@ bool DBOVariableOrderedSet::hasMetaVariable(const MetaDBOVariable& variable) con
     for (auto it : variable_definitions_)
         if (it.second->variableName() == variable.name() &&
             it.second->dboName() == META_OBJECT_NAME)
+            return true;
+
+    return false;
+}
+
+bool DBOVariableOrderedSet::hasVariable(const std::string& dbo_name, const std::string& name) const
+{
+    for (auto it : variable_definitions_)
+        if (it.second->variableName() == name &&
+            it.second->dboName() == dbo_name)
             return true;
 
     return false;

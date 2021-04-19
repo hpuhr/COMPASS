@@ -18,13 +18,15 @@
 #ifndef LISTBOXVIEWDATASOURCE_H_
 #define LISTBOXVIEWDATASOURCE_H_
 
-#include <QObject>
-
 #include "buffer.h"
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
 #include "viewselection.h"
+
+#include <QObject>
+
+#include <memory>
 
 class Job;
 class ViewableDataConfig;
@@ -43,11 +45,13 @@ class ListBoxViewDataSource : public QObject, public Configurable
     void loadingStartedSlot();
     void newDataSlot(DBObject& object);
     void loadingDoneSlot(DBObject& object);
+    void setChangedSlot();
 
   signals:
     void loadingStartedSignal();
     /// @brief Emitted when resulting buffer was delivered
     void updateDataSignal(DBObject& object, std::shared_ptr<Buffer> buffer);
+    void setChangedSignal();
 
   public:
     /// @brief Constructor
@@ -59,26 +63,29 @@ class ListBoxViewDataSource : public QObject, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet()
-    {
-        assert(set_);
-        return set_;
-    }
-    /// @brief Returns stored result Buffers
-    // std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
+    bool hasCurrentSet();
+    bool hasSet (const std::string& name);
+    void addSet (const std::string& name);
+    void copySet (const std::string& name, const std::string& new_name);
+    void removeSet (const std::string& name);
 
-    /// @brief Sets use selection flag
-    // void setUseSelection (bool use_selection) { use_selection_=use_selection; }
-    /// @brief Returns use selection flag
-    // bool getUseSelection () { return use_selection_; }
+    std::string currentSetName() const;
+    void currentSetName(const std::string& current_set_name);
+
+    /// @brief Returns variable read list
+    DBOVariableOrderedSet* getSet();
+
+    const std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>>& getSets();
 
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
 
-  protected:
+protected:
+    std::string current_set_name_;
+
     /// Variable read list
-    DBOVariableOrderedSet* set_{nullptr};
+    //DBOVariableOrderedSet* set_{nullptr};
+    std::map<std::string, std::unique_ptr<DBOVariableOrderedSet>> sets_;
 
     /// Selected DBObject records
     ViewSelectionEntries& selection_entries_;
@@ -89,6 +96,8 @@ class ListBoxViewDataSource : public QObject, public Configurable
 
     bool addTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set, true of added
     void removeTemporaryVariable (const std::string& dbo_name, const std::string& var_name); // only to set
+
+    void addDefaultVariables (DBOVariableOrderedSet& set);
 };
 
 #endif /* LISTBOXVIEWDATASOURCE_H_ */

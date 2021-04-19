@@ -129,6 +129,12 @@ public:
     bool commentDubiousUtns() const;
     void commentDubiousUtns(bool value);
 
+    double contMaxTimeDiffTracker() const;
+    void contMaxTimeDiffTracker(double value);
+
+    double contMaxDistanceAcceptableTracker() const;
+    void contMaxDistanceAcceptableTracker(double value);
+
 protected:
     std::string key_var_str_;
     MetaDBOVariable* key_var_{nullptr};
@@ -183,6 +189,9 @@ protected:
     double prob_min_time_overlap_tracker_ {0.5}; //kb 0.7
 
     double max_speed_tracker_kts_ {100000};
+
+    double cont_max_time_diff_tracker_ {30.0};
+    double cont_max_distance_acceptable_tracker_ {1852.0};
 
     // sensor
     double max_time_diff_sensor_ {15.0};

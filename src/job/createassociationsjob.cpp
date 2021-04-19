@@ -539,13 +539,13 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
 
                 //tmp_utn = findUTNForTargetReport(tr_it);
 
-//                if (tmp_utn != -1) // existing target found
-//                {
-//                    assert (targets.count(tmp_utn));
-//                    //association_todos.push_back({tmp_utn, &tr_it});
-//                    tmp_assoc_utns[tr_cnt] = tmp_utn;
-//                    return;
-//                }
+                //                if (tmp_utn != -1) // existing target found
+                //                {
+                //                    assert (targets.count(tmp_utn));
+                //                    //association_todos.push_back({tmp_utn, &tr_it});
+                //                    tmp_assoc_utns[tr_cnt] = tmp_utn;
+                //                    return;
+                //                }
 
                 if (tr_it.has_ta_)
                 {
@@ -601,21 +601,24 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
                     if (!other.isTimeInside(tod))
                         continue;
 
-                    // check mode a code
-                    Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod,
-                                                                               max_time_diff_sensor);
+                    if (tr_it.has_ma_ || tr_it.has_mc_) // mode a/c based
+                    {
+                        // check mode a code
+                        Association::CompareResult ma_res = other.compareModeACode(tr_it.has_ma_, tr_it.ma_, tod,
+                                                                                   max_time_diff_sensor);
 
-                    if (ma_res != Association::CompareResult::SAME)
-                        continue;
-                    //loginf << "UGA3 same mode a";
+                        if (ma_res != Association::CompareResult::SAME)
+                            continue;
+                        //loginf << "UGA3 same mode a";
 
-                    // check mode c code
-                    Association::CompareResult mc_res = other.compareModeCCode(
-                                tr_it.has_mc_, tr_it.mc_, tod,
-                                max_time_diff_sensor, max_altitude_diff_sensor, false);
+                        // check mode c code
+                        Association::CompareResult mc_res = other.compareModeCCode(
+                                    tr_it.has_mc_, tr_it.mc_, tod,
+                                    max_time_diff_sensor, max_altitude_diff_sensor, false);
 
-                    if (mc_res != Association::CompareResult::SAME)
-                        continue;
+                        if (mc_res != Association::CompareResult::SAME)
+                            continue;
+                    }
 
                     // check positions
 
@@ -995,8 +998,8 @@ void CreateAssociationsJob::markDubiousUTNs(std::map<unsigned int, Association::
 }
 
 void CreateAssociationsJob::addTrackerUTNs(const std::string& ds_name,
-        std::map<unsigned int, Association::Target> from_targets,
-        std::map<unsigned int, Association::Target>& to_targets)
+                                           std::map<unsigned int, Association::Target> from_targets,
+                                           std::map<unsigned int, Association::Target>& to_targets)
 {
     loginf << "CreateAssociationsJob: addTrackerUTNs: src " << ds_name
            << " from_targets size " << from_targets.size() << " to_targets size " << to_targets.size();
@@ -1071,9 +1074,9 @@ int CreateAssociationsJob::findContinuationUTNForTrackerUpdate (
     if (tr.has_ta_)
         return -1;
 
-    const double max_time_diff_tracker = 30.0;
-    const double max_altitude_diff_tracker = 300.0;
-    const double max_distance_acceptable_tracker = 1852.0;;
+    const double max_time_diff_tracker = task_.contMaxTimeDiffTracker();
+    const double max_altitude_diff_tracker = task_.maxAltitudeDiffTracker();
+    const double max_distance_acceptable_tracker = task_.contMaxDistanceAcceptableTracker();
 
     unsigned int num_targets = targets.size();
 

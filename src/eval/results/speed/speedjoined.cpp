@@ -148,7 +148,7 @@ void JoinedSpeed::addToOverviewTable(std::shared_ptr<EvaluationResultsReport::Ro
 
     if (has_p_min_)
     {
-        p_passed_var = String::percentToString(p_passed_ * 100.0).c_str();
+        p_passed_var = String::percentToString(p_passed_ * 100.0, req->getNumProbDecimals()).c_str();
 
         result = req->getResultConditionStr(p_passed_);
     }

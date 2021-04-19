@@ -121,7 +121,7 @@ namespace EvaluationRequirementResult
 
         if (has_prob_)
         {
-            prob_var = String::percentToString(prob_ * 100.0).c_str();
+            prob_var = String::percentToString(prob_ * 100.0, req->getNumProbDecimals()).c_str();
 
             result = req-> getResultConditionStr(prob_);
         }
@@ -162,7 +162,7 @@ namespace EvaluationRequirementResult
 
         if (has_prob_)
         {
-            prob_var = String::percentToString(prob_ * 100.0).c_str();
+            prob_var = String::percentToString(prob_ * 100.0, req->getNumProbDecimals()).c_str();
 
             result = req-> getResultConditionStr(prob_);
         }

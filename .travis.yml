@@ -33,6 +33,8 @@ compiler:
 # - clang
 
 before_install:
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
+  - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   - sudo add-apt-repository -y ppa:beineri/opt-qt592-trusty
   - sudo add-apt-repository -y ppa:ubuntugis/ppa
   - sudo apt-get -q update

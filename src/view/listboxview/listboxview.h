@@ -20,9 +20,10 @@
 
 #include "view.h"
 #include "viewselection.h"
+#include "listboxviewdatasource.h"
 
 class ListBoxViewWidget;
-class ListBoxViewDataSource;
+//class ListBoxViewDataSource;
 class ListBoxViewDataWidget;
 
 /**
