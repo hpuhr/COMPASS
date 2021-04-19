@@ -1,21 +1,937 @@
 {
     "parameters": {
         "active_sources_ref": {
+            "MLAT": {
+                "0": true,
+                "12870": true,
+                "12881": true
+            },
+            "RefTraj": {
+                "0": true,
+                "1": true
+            },
+            "Tracker": {
+                "13040": true,
+                "26642": true,
+                "26646": false
+            }
         },
         "active_sources_tst": {
+            "MLAT": {
+                "12870": true,
+                "12871": true,
+                "12872": true,
+                "12873": true,
+                "12874": true,
+                "12875": true,
+                "12876": true,
+                "12877": true,
+                "12878": true,
+                "12881": true,
+                "258": true,
+                "26661": true,
+                "26669": true,
+                "26698": true,
+                "26700": true,
+                "26703": true,
+                "26705": true,
+                "6452": true
+            },
+            "Radar": {
+                "12289": true,
+                "12800": true,
+                "12807": true,
+                "12809": true,
+                "12810": true,
+                "12811": true,
+                "12812": true,
+                "12813": true,
+                "12820": true,
+                "12901": true,
+                "12903": false,
+                "261": true,
+                "262": false
+            },
+            "Tracker": {
+                "13040": true,
+                "26642": false,
+                "26646": true,
+                "6520": true
+            }
         },
         "configs": {
+            "TESTTRK_210325.db": {
+                "utns": {
+                    "1004": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1011": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1014": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1016": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1022": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1027": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1033": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1037": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1039": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1050": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1052": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1059": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1065": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1066": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1079": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1081": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1083": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1084": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1085": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1086": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1087": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1088": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1089": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1090": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1092": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1093": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1094": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1095": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "1096": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "120": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "131": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "142": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "146": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "153": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "16": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "166": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "171": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "177": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "185": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "20": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "204": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "215": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "219": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "231": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "234": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "244": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "249": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "25": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "253": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "254": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "306": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "313": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "317": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "32": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "326": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "327": {
+                        "comment": "Dubious Association"
+                    },
+                    "328": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "333": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "345": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "347": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "355": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "358": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "363": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "364": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "374": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "379": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "38": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "398": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "399": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "406": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "413": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "420": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "422": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "428": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "430": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "433": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "435": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "437": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "440": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "442": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "444": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "447": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "448": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "451": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "454": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "455": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "457": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "461": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "465": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "478": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "483": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "485": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "486": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "488": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "489": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "49": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "493": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "494": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "495": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "497": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "501": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "502": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "503": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "508": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "515": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "517": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "518": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "519": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "520": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "538": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "539": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "543": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "549": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "556": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "566": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "57": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "573": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "576": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "578": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "582": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "587": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "59": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "596": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "599": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "613": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "616": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "619": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "627": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "632": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "65": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "655": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "663": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "667": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "685": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "692": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "701": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "702": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "706": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "711": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "712": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "726": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "728": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "73": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "740": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "745": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "746": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "747": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "749": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "756": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "764": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "767": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "771": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "774": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "775": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "778": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "790": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "80": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "809": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "812": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "813": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "817": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "818": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "820": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "822": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "828": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "833": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "838": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "843": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "846": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "849": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "859": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "867": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "869": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "872": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "876": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "885": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "892": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "896": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "898": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "900": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "903": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "904": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "912": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "916": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "918": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "919": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "924": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "929": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "934": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "937": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "942": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "943": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "944": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "948": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "952": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "953": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "954": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "955": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "958": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "960": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "966": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "972": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "974": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "978": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "986": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "989": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "99": {
+                        "comment": "Short track",
+                        "use": false
+                    },
+                    "990": {
+                        "comment": "Short track",
+                        "use": false
+                    }
+                }
+            },
+            "ccl_asmgcs.db": {
+                "utns": null
+            },
+            "fraport_dfs.db": {
+                "utns": null
+            },
+            "hello_world.db": {
+                "utns": {
+                    "212": {
+                        "comment": "Dubious Association"
+                    }
+                }
+            },
+            "mlat_demo.db": {
+                "utns": null
+            },
+            "test.db": {
+                "utns": {
+                    "119": {
+                        "use": false
+                    },
+                    "149": {
+                        "use": false
+                    }
+                }
+            }
         },
-        "current_standard": "EUROCAE ED-117A",
+        "current_standard": "",
         "dbo_name_ref": "RefTraj",
-        "dbo_name_tst": "MLAT",
+        "dbo_name_tst": "Radar",
         "generate_details": true,
         "load_time_begin": 0.0,
         "load_time_end": 0.0,
         "max_nacp": 5,
         "max_nic": 5,
         "max_nucp": 4,
-        "max_ref_time_diff": 5.0,
+        "max_ref_time_diff": 6.0,
         "max_sil_v1": 2,
         "max_sil_v2": 4,
         "min_nacp": 5,
@@ -24,19 +940,233 @@
         "min_sil_v1": 2,
         "min_sil_v2": 4,
         "remove_mode_a_code_values": "7000,7777",
-        "remove_mode_a_codes": true,
+        "remove_mode_a_codes": false,
         "remove_mode_target_addresses": false,
-        "remove_modeac_onlys": true,
-        "remove_not_detected_dbo_values": {},
+        "remove_modeac_onlys": false,
+        "remove_not_detected_dbo_values": {
+            "Radar": false
+        },
         "remove_not_detected_dbos": false,
-        "remove_psr_only_targets": true,
+        "remove_psr_only_targets": false,
         "remove_short_targets": true,
-        "remove_short_targets_min_duration": 60.0,
-        "remove_short_targets_min_updates": 10,
+        "remove_short_targets_min_duration": 30.0,
+        "remove_short_targets_min_updates": 5,
         "remove_target_address_vales": "",
         "result_detail_zoom": 0.0020000000949949026,
         "use_adsb_filter": false,
-        "use_grp_in_sector": {},
+        "use_grp_in_sector": {
+            "EUROCAE ED-116": {
+                "Apron": {
+                    "Common": true
+                },
+                "FRA_ALL": {
+                    "Common": true
+                },
+                "FRA_FL100": {
+                    "Common": false
+                },
+                "FRA_FL30": {
+                    "Common": true
+                },
+                "Runways": {
+                    "Common": true
+                },
+                "Taxiways": {
+                    "Common": true
+                },
+                "fir_body_cut": {
+                    "Common": true
+                }
+            },
+            "EUROCAE ED-117": {
+                "FRA_ALL": {
+                    "Airborne": false,
+                    "Airborne 2.5-5nm": false,
+                    "Airborne RT-2.5nm": false,
+                    "Apron": false,
+                    "Common": true,
+                    "Maneuvering Area": true,
+                    "Runways": true,
+                    "Stand": true,
+                    "Taxiways": true
+                }
+            },
+            "EUROCAE ED-117A": {
+                "ARTAS_Lis_DOI": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "DOI": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "FRA_ALL": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "FRA_FL100": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "FRA_FL30": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": false,
+                    "Manoeuvring Area": false
+                },
+                "LISBOA_3NM": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "LISBOA_5NM": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "LISBOA_8NM": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "Runways": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "Taxiways": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                }
+            },
+            "EUROCAE ED-87C": {
+                "Apron": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "Runways": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "RunwaysCut": {
+                    "Active Stands": true,
+                    "Apron Taxiways": true,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                },
+                "Taxiways": {
+                    "Active Stands": false,
+                    "Apron Taxiways": false,
+                    "Common": true,
+                    "Manoeuvring Area": true
+                }
+            },
+            "LOWW Special": {
+                "Apron": {
+                    "Common": true
+                },
+                "FRA_ALL": {
+                    "Common": true
+                },
+                "Runways": {
+                    "Common": true
+                },
+                "Taxiways": {
+                    "Common": true
+                }
+            },
+            "TestPorto": {
+                "ARTAS_Lis_DOI": {
+                    "3NM": true,
+                    "5NM": false,
+                    "8NM": false,
+                    "Mandatory": true
+                },
+                "FRA_ALL": {
+                    "3NM": true,
+                    "5NM": true,
+                    "8NM": true,
+                    "Mandatory": true
+                },
+                "LISBOA_3NM": {
+                    "3NM": true,
+                    "5NM": false,
+                    "8NM": false,
+                    "Mandatory": true
+                },
+                "LISBOA_5NM": {
+                    "3NM": false,
+                    "5NM": true,
+                    "8NM": false,
+                    "Mandatory": true
+                },
+                "LISBOA_8NM": {
+                    "3NM": false,
+                    "5NM": false,
+                    "8NM": true,
+                    "Mandatory": true
+                }
+            },
+            "test": {
+                "ARTAS_Lis_DOI": {
+                    "Mandatory": true
+                },
+                "Apron": {
+                    "Mandatory": true
+                },
+                "DOI": {
+                    "Mandatory": true
+                },
+                "FRA_ALL": {
+                    "Mandatory": true
+                },
+                "FRA_FL100": {
+                    "Mandatory": true
+                },
+                "FRA_FL30": {
+                    "Mandatory": true
+                },
+                "LISBOA_3NM": {
+                    "Mandatory": true
+                },
+                "LISBOA_5NM": {
+                    "Mandatory": true
+                },
+                "LISBOA_8NM": {
+                    "Mandatory": true
+                },
+                "LuftraumAT": {
+                    "Mandatory": true
+                },
+                "Runways": {
+                    "Mandatory": true
+                },
+                "Taxiways": {
+                    "Mandatory": true
+                },
+                "fir_body_cut": {
+                    "Mandatory": true
+                }
+            }
+        },
         "use_load_filter": false,
         "use_max_nacp": true,
         "use_max_nic": true,
@@ -53,7 +1183,7 @@
         "use_v0": true,
         "use_v1": true,
         "use_v2": true,
-        "warning_shown": false
+        "warning_shown": true
     },
     "sub_config_files": [
         {
@@ -67,7 +1197,7 @@
             "EvaluationResultsReportPDFGenerator0": {
                 "parameters": {
                     "abstract": "",
-                    "author": "",
+                    "author": "H.Puhr",
                     "num_max_table_col_width": 24,
                     "num_max_table_rows": 1000,
                     "open_created_pdf": true,
@@ -237,7 +1367,11 @@
                                             "name": "Probability of Identification MA",
                                             "prob": 0.9700000286102295,
                                             "prob_check_type": 3,
-                                            "short_name": "PID MA"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID MA",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": false,
+                                            "use_ms_ti": false
                                         }
                                     },
                                     "EvaluationRequirementIdentificationCorrectConfigProbability of Identification MSID0": {
@@ -246,7 +1380,11 @@
                                             "name": "Probability of Identification MSID",
                                             "prob": 0.9700000286102295,
                                             "prob_check_type": 3,
-                                            "short_name": "PID ID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID ID",
+                                            "use_mode_a": false,
+                                            "use_ms_ta": false,
+                                            "use_ms_ti": true
                                         }
                                     },
                                     "EvaluationRequirementIdentificationCorrectConfigProbability of Identification0": {
@@ -255,7 +1393,11 @@
                                             "name": "Probability of Identification MSAD",
                                             "prob": 0.9900000095367432,
                                             "prob_check_type": 3,
-                                            "short_name": "PID TA"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID TA",
+                                            "use_mode_a": false,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": false
                                         }
                                     }
                                 },
@@ -266,7 +1408,11 @@
                                             "name": "Probability of False Identification",
                                             "prob": 9.999999747378752e-05,
                                             "prob_check_type": 1,
-                                            "short_name": "PFID"
+                                            "require_all_false": false,
+                                            "short_name": "PFID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 }
@@ -286,7 +1432,7 @@
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.9990000128746033,
+                                            "miss_tolerance": 0.20000000298023224,
                                             "name": "Probability of Target Report",
                                             "prob": 0.949999988079071,
                                             "prob_check_type": 3,
@@ -369,7 +1515,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PD",
-                                            "update_interval": 1.0,
+                                            "update_interval": 2.0,
                                             "use_max_gap_length": false,
                                             "use_min_gap_length": false,
                                             "use_miss_tolerance": true
@@ -507,7 +1653,11 @@
                                             "name": "Probability of Identification",
                                             "prob": 0.9990000128746033,
                                             "prob_check_type": 3,
-                                            "short_name": "PID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -733,7 +1883,11 @@
                                             "name": "Probability of Identification",
                                             "prob": 0.9800000190734863,
                                             "prob_check_type": 3,
-                                            "short_name": "PID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -832,7 +1986,11 @@
                                             "name": "Probability of Identification",
                                             "prob": 0.9990000128746033,
                                             "prob_check_type": 3,
-                                            "short_name": "PID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -892,7 +2050,11 @@
                                             "name": "Propability of False Identification",
                                             "prob": 9.999999747378752e-05,
                                             "prob_check_type": 1,
-                                            "short_name": "PFID"
+                                            "require_all_false": true,
+                                            "short_name": "PFID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 }
@@ -965,7 +2127,11 @@
                                             "name": "Probability of Identification",
                                             "prob": 0.9990000128746033,
                                             "prob_check_type": 3,
-                                            "short_name": "PID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -1036,7 +2202,7 @@
                                             "max_ref_time_diff": 5.0,
                                             "min_gap_length_s": 3.0,
                                             "minimum_probability": 0.949999988079071,
-                                            "miss_tolerance": 0.9990000128746033,
+                                            "miss_tolerance": 0.9900000095367432,
                                             "name": "Detection",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
@@ -1089,7 +2255,11 @@
                                             "name": "Identification Correct",
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
-                                            "short_name": "PCID"
+                                            "require_correctness_of_all": false,
+                                            "short_name": "PCID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -1100,7 +2270,11 @@
                                             "name": "Identification False",
                                             "prob": 0.009999999776482582,
                                             "prob_check_type": 1,
-                                            "short_name": "PFID"
+                                            "require_all_false": true,
+                                            "short_name": "PFID",
+                                            "use_mode_a": true,
+                                            "use_ms_ta": true,
+                                            "use_ms_ti": true
                                         }
                                     }
                                 },
@@ -1134,7 +2308,7 @@
                                     "EvaluationRequirementModeCFalseConfigMode C0": {
                                         "parameters": {
                                             "comment": "",
-                                            "max_difference": 100.0,
+                                            "max_difference": 300.0,
                                             "max_ref_time_diff": 5.0,
                                             "maximum_probability_false": 0.009999999776482582,
                                             "minimum_probability_present": 0.9700000286102295,
@@ -1201,7 +2375,7 @@
                                             "prob": 0.8999999761581421,
                                             "prob_check_type": 3,
                                             "short_name": "PCP",
-                                            "threshold_value": 140.0,
+                                            "threshold_value": 300.0,
                                             "threshold_value_check_type": 1
                                         }
                                     },
