@@ -8,9 +8,10 @@ For a detailed list of features, as well as the offered commercial services, ple
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released COMPASS Version v0.6.1-alpha
-- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.1-alpha/COMPASS-v0.6.1-alpha.AppImage)
-- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.1-alpha/user_manual_v0.6.1.pdf)
+## Released COMPASS Version v0.6.2-alpha
+- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/COMPASS-v0.6.2-alpha.AppImage)
+- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/user_manual_v0.6.2.pdf)
+- [Example Database v0.6.2](https://cloud.openats.at/s/iejK7QeiyXx45b2)
 - [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
 
 
