@@ -90,16 +90,20 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     ValueComparisonResult cmp_res_ti;
     string cmp_res_ti_comment;
+    bool ti_no_ref;
     bool ti_correct_failed;
 
     ValueComparisonResult cmp_res_ta;
     string cmp_res_ta_comment;
+    bool ta_no_ref;
     bool ta_correct_failed;
 
     ValueComparisonResult cmp_res_ma;
     string cmp_res_ma_comment;
+    bool ma_no_ref;
     bool ma_correct_failed;
 
+    bool all_no_ref;
     bool any_correct;
     bool all_correct;
     bool result_ok;
@@ -164,7 +168,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
             if (!skip_no_data_details)
                 details.push_back({tod, pos_current,
                                    ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
-                                   num_updates, num_no_ref_pos+num_no_ref_id, num_pos_inside, num_pos_outside,
+                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
                                    num_correct, num_not_correct, "Outside sector"});
 
             ++num_pos_outside;
@@ -178,9 +182,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         any_correct = false;
         all_correct = true;
+        all_no_ref = true;
 
         if (use_ms_ti_)
         {
+            ti_no_ref = cmp_res_ti == ValueComparisonResult::Unknown_NoRefData;
+            all_no_ref &= ti_no_ref;
+
             ti_correct_failed = cmp_res_ti == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ti == ValueComparisonResult::Different;
 
@@ -193,6 +201,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_ms_ta_)
         {
+            ta_no_ref = cmp_res_ta == ValueComparisonResult::Unknown_NoRefData;
+            all_no_ref &= ta_no_ref;
+
             ta_correct_failed = cmp_res_ta == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ta == ValueComparisonResult::Different;
 
@@ -210,6 +221,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
         if (use_mode_a_)
         {
+            ma_no_ref = cmp_res_ma == ValueComparisonResult::Unknown_NoRefData;
+            all_no_ref &= ma_no_ref;
+
             ma_correct_failed = cmp_res_ma == ValueComparisonResult::Unknown_NoTstData
                     || cmp_res_ma == ValueComparisonResult::Different;
 
@@ -223,6 +237,19 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
             any_correct |= !ma_correct_failed;
             all_correct &= !ma_correct_failed;
+        }
+
+        if (all_no_ref) // none has a reference
+        {
+            if (!skip_no_data_details)
+                details.push_back({tod, pos_current,
+                                   ref_exists, is_inside, false, // ref_exists, pos_inside, is_not_correct
+                                   num_updates, num_no_ref_pos, num_pos_inside, num_pos_outside,
+                                   num_correct, num_not_correct, "No reference id"});
+
+            ++num_no_ref_id;
+
+            continue;
         }
 
         if (!use_ms_ti_ && !use_ms_ta_ && !use_mode_a_)

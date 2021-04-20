@@ -73,6 +73,8 @@ class DBOVariableOrderedSet : public QObject, public Configurable
     /// @brief Adds a variable to the set at last index
     void add(DBOVariable& var);
     void add(MetaDBOVariable& var);
+    void add (const std::string& dbo_name, const std::string var_name);
+
     /// @brief Adds a variable set
     // void add (const DBOVariableOrderedSet &set);
     /// @brief Adds a variable set for a given DBO type (DBOVariable::getFor)

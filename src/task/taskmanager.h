@@ -114,6 +114,10 @@ class TaskManager : public QObject, public Configurable
     void importViewPointsFile(const std::string& filename);
 #if USE_JASTERIX
     void importASTERIXFile(const std::string& filename);
+    void asterixFraming(const std::string& asterix_framing);
+    void asterixDecoderConfig(const std::string& asterix_decoder_cfg);
+    bool asterixOptionsSet() const;
+    void setAsterixOptions();
 #endif
     void importJSONFile(const std::string& filename, const std::string& schema);
     void importGPSTrailFile(const std::string& filename);
@@ -135,6 +139,7 @@ class TaskManager : public QObject, public Configurable
 
     void evaluate(bool evaluate);
 
+
 protected:
     bool expert_mode_{false};
 
@@ -152,6 +157,10 @@ protected:
 #if USE_JASTERIX
     bool asterix_import_file_ {false};
     std::string asterix_import_filename_;
+    bool set_asterix_framing_ {false};
+    std::string asterix_framing_;
+    bool set_asterix_decoder_cfg_ {false};
+    std::string asterix_decoder_cfg_;
 #endif
 
     bool json_import_file_ {false};

@@ -107,6 +107,7 @@ protected:
     float miss_tolerance_s_{0};
 
     bool isMiss (float d_tod);
+    unsigned int getNumMisses(float d_tod);
 };
 
 }

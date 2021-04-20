@@ -21,7 +21,7 @@ Both areas can be resized and hidden if wanted.
 
 \section{Data Loading}
 
-To load the data the mechanism described in Section \nameref{sec:load} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used. \\
+To load the data the 'Reload' button or the mechanism described in Section \nameref{sec:load} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used. \\
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -38,9 +38,24 @@ Please \textbf{note} that since some variable might only exist in some DBObjects
 \subsection{Selection}
 In the first column in the tables, checkboxes are shown, indicating whether that target report is currently selected. Selection may be changed by selecting/de-selecting the respective checkboxes or in other views (cross-selection). If the selection is changed in one of the other views, this view is updated automatically.
 
+\subsection{Variable Lists}
 
-\subsection{Variable List}
-All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered, and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable and using the up/down buttons. \\
+In the Config tab, a variable list preset can be selected. Custom variable lists can be added, copied and removed by the user. \\
+
+The following presets exist:
+
+\begin{itemize}
+\item Default: Common variables. Can not be renamed or removed.
+\item Mode A/C Info: Includes the Mode A/C valid/garbled/smoothed flags.
+\item Track Lifetime: Include the track begin/confirmed/coasted/end flags.
+\item ADS-B Position Quality: Includes the ADS-B MOPS version, NACp/NUCp/NIC/SIL information.
+\item Vertical Movement: Includes barometric altitude modes and derivatives.
+\item Horizontal Movement: Includes hozizontal movement modes and derivatives.
+\end{itemize}
+\ \\
+
+\subsection{Variables}
+For the selected variable list, all DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered, and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable and using the up/down buttons. \\
 
 When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows appending a variable to the list using a context-menu. \\
 
@@ -86,13 +101,7 @@ To export the complete loaded dataset, click the 'Export' button, so that a dial
 
 Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported File' checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
 
-After export, a dialog is shown indicating that the export was completed.
-
-\begin{figure}[H]
-  \center
-    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported.png}
-  \caption{Listbox View export done}
-\end{figure}
+After export, a dialog is shown indicating that the export was completed. \\
 
 The exported file can be opened in any editor, or for example imported into LibreOffice Calc.
 

@@ -85,6 +85,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     std::string import_view_points_filename;
 #if USE_JASTERIX
     std::string import_asterix_filename;
+    std::string asterix_framing;
+    std::string asterix_decoder_cfg;
 #endif
     std::string import_json_filename;
     std::string import_json_schema;
@@ -113,6 +115,11 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         #if USE_JASTERIX
             ("import_asterix", po::value<std::string>(&import_asterix_filename),
              "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+            ("asterix_framing", po::value<std::string>(&asterix_framing),
+             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+             " (including one pair of single quotes)")
         #endif
             ("import_json", po::value<std::string>(&import_json_filename),
              "imports JSON file with given filename, e.g. '/data/file1.json'")
@@ -177,6 +184,29 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         task_man.importViewPointsFile(import_view_points_filename);
 
 #if USE_JASTERIX
+    try
+    {
+        if (asterix_framing.size())
+        {
+            if (asterix_framing == "none")
+                task_man.asterixFraming("");
+            else
+                task_man.asterixFraming(asterix_framing);
+        }
+
+        if (asterix_decoder_cfg.size())
+            task_man.asterixDecoderConfig(asterix_decoder_cfg);
+
+        if (task_man.asterixOptionsSet())
+            task_man.setAsterixOptions();
+    }
+    catch (exception& e)
+    {
+        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+        quit_requested_ = true;
+        return;
+    }
+
     if (import_asterix_filename.size())
         task_man.importASTERIXFile(import_asterix_filename);
 #endif

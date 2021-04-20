@@ -4373,7 +4373,7 @@
                                             "json_key": "040.RHO",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": "Nautical Mile"
+                                            "unit": "Meter"
                                         }
                                     },
                                     "JSONDataMapping16": {
@@ -4404,7 +4404,7 @@
                                             "in_array": false,
                                             "json_key": "041.Latitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },
@@ -4420,7 +4420,7 @@
                                             "in_array": false,
                                             "json_key": "041.Longitude",
                                             "json_value_format": "",
-                                            "mandatory": true,
+                                            "mandatory": false,
                                             "unit": "Degree"
                                         }
                                     },

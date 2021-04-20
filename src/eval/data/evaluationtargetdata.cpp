@@ -230,7 +230,7 @@ std::string EvaluationTargetData::modeACodesStr() const
     for (unsigned int cnt=0; cnt < mode_a_codes_.size(); ++cnt)
     {
         if (cnt != 0)
-            out << ",";
+            out << ", ";
         out << String::octStringFromInt(mode_a_codes_.at(cnt), 4, '0');
     }
 
@@ -1409,7 +1409,7 @@ string EvaluationTargetData::callsignsStr() const
     for (unsigned int cnt=0; cnt < callsigns_.size(); ++cnt)
     {
         if (cnt != 0)
-            out << ",";
+            out << ", ";
         out << callsigns_.at(cnt);
     }
 
@@ -1428,7 +1428,7 @@ std::string EvaluationTargetData::targetAddressesStr() const
     for (unsigned int cnt=0; cnt < target_addresses_.size(); ++cnt)
     {
         if (cnt != 0)
-            out << ",";
+            out << ", ";
         out << String::hexStringFromInt(target_addresses_.at(cnt), 6, '0');
     }
 

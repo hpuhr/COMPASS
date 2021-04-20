@@ -29,8 +29,6 @@ namespace Association
         ~Target();
 
         static bool in_appimage_;
-//        static double max_time_diff_;
-//        static double max_altitude_diff_;
 
         unsigned int utn_{0};
         bool tmp_ {false};
@@ -57,6 +55,8 @@ namespace Association
 
         void addAssociated (TargetReport* tr);
         void addAssociated (vector<TargetReport*> trs);
+        unsigned int numAssociated() const;
+        const TargetReport& lastAssociated() const;
 
         bool hasTA () const;
         bool hasTA (unsigned int ta)  const;
@@ -66,7 +66,8 @@ namespace Association
         bool hasMA () const;
         bool hasMA (unsigned int ma)  const;
 
-        std::string asStr();
+        std::string asStr() const;
+        std::string timeStr() const;
 
         bool isTimeInside (float tod) const;
         bool hasDataForTime (float tod, float d_max) const;
@@ -79,19 +80,19 @@ namespace Association
         EvaluationTargetPosition posForExactTime (float tod) const;
 
         float duration () const;
-        bool timeOverlaps (Target& other) const;
-        float probTimeOverlaps (Target& other) const; // ratio of overlap, measured by shortest target
+        bool timeOverlaps (const Target& other) const;
+        float probTimeOverlaps (const Target& other) const; // ratio of overlap, measured by shortest target
 
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeACodes (
-                Target& other, float max_time_diff) const;
+                const Target& other, float max_time_diff) const;
         // unknown, same, different
-        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff);
+        CompareResult compareModeACode (bool has_ma, unsigned int ma, float tod, float max_time_diff) const;
 
         std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> compareModeCCodes (
-                Target& other, const std::vector<float>& timestamps,
-                float max_time_diff, float max_alt_diff) const;
-        CompareResult compareModeCCode (bool has_mc, unsigned int mc, float tod,
-                                        float max_time_diff, float max_alt_diff);
+                const Target& other, const std::vector<float>& timestamps,
+                float max_time_diff, float max_alt_diff, bool debug) const;
+        CompareResult compareModeCCode (bool has_mc, float mc, float tod,
+                                        float max_time_diff, float max_alt_diff, bool debug) const;
         // unknown, same, different timestamps from this
 
         void calculateSpeeds();

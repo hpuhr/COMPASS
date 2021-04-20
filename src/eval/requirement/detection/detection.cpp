@@ -188,14 +188,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (isMiss(d_tod))
             {
-                sum_missed_uis += floor(d_tod/update_interval_s_);
+                sum_missed_uis += getNumMisses(d_tod);
 
                 assert (target_data.hasRefPosForTime(tod));
                 pos_current = target_data.refPosForTime(tod);
 
                 logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                        << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
-                       << floor(d_tod/update_interval_s_)
+                       << getNumMisses(d_tod)
                        << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
                        << "] sum_missed_uis " << sum_missed_uis;
 
@@ -279,12 +279,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                     if (isMiss(d_tod))
                     {
-                        sum_missed_uis += floor(d_tod/update_interval_s_);
+                        sum_missed_uis += getNumMisses(d_tod);
 
                         logdbg << "EvaluationRequirementDetection '" << name_
                                << "': evaluate: utn " << target_data.utn_
                                << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
-                               << floor(d_tod/update_interval_s_)
+                               << getNumMisses(d_tod)
                                << " at [" << String::timeStringFromDouble(last_period_tod) << ","
                                << String::timeStringFromDouble(ref_periods.period(period_cnt).end())
                                << "] missed_uis " << sum_missed_uis;
@@ -417,12 +417,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
                 if (isMiss(d_tod))
                 {
-                    sum_missed_uis += floor(d_tod/update_interval_s_);
+                    sum_missed_uis += getNumMisses(d_tod);
 
                     logdbg << "EvaluationRequirementDetection '" << name_
                            << "': evaluate: utn " << target_data.utn_
                            << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
-                           << floor(d_tod/update_interval_s_)
+                           << getNumMisses(d_tod)
                            << " at [" << String::timeStringFromDouble(ref_periods.period(period_index).begin())
                            << ","<< String::timeStringFromDouble(tod)
                            << "] missed_uis " << sum_missed_uis;
@@ -459,11 +459,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
         if (isMiss(d_tod))
         {
-            sum_missed_uis += floor(d_tod/update_interval_s_);
+            sum_missed_uis += getNumMisses(d_tod);
 
             logdbg << "EvaluationRequirementDetection '" << name_ << "': evaluate: utn " << target_data.utn_
                    << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
-                   << floor(d_tod/update_interval_s_)
+                   << getNumMisses(d_tod)
                    << " at [" << String::timeStringFromDouble(last_tod) << "," << String::timeStringFromDouble(tod)
                    << "] sum_missed_uis " << sum_missed_uis;
 
@@ -524,12 +524,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
 
             if (isMiss(d_tod))
             {
-                sum_missed_uis += floor(d_tod/update_interval_s_); // TODO substract miss_tolerance_s_?
+                sum_missed_uis += getNumMisses(d_tod); // TODO substract miss_tolerance_s_?
 
                 logdbg << "EvaluationRequirementDetection '" << name_
                        << "': evaluate: utn " << target_data.utn_
                        << " miss of " << String::timeStringFromDouble(d_tod) << " uis "
-                       << floor(d_tod/update_interval_s_)
+                       << getNumMisses(d_tod)
                        << " at [" << String::timeStringFromDouble(last_period_tod) << ","
                        << String::timeStringFromDouble(ref_periods.period(period_cnt).end())
                        << "] missed_uis " << sum_missed_uis;
@@ -614,4 +614,16 @@ bool Detection::isMiss (float d_tod)
 
     return d_tod > update_interval_s_;
 }
+
+unsigned int Detection::getNumMisses(float d_tod)
+{
+    assert (isMiss(d_tod));
+
+    if (use_miss_tolerance_)
+        d_tod -= miss_tolerance_s_;
+
+    return floor(d_tod/update_interval_s_);
+}
+
+
 }

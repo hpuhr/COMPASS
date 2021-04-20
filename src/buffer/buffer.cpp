@@ -304,7 +304,10 @@ void Buffer::transformVariables(DBOVariableSet& list, bool tc2dbovar)
         if (tc2dbovar)
         {
             if (!properties_.hasProperty(column.name()))
-                logerr << "Buffer: transformVariables: tc2dbovar variable '" << column.name() << "' not found";
+            {
+                logerr << "Buffer: transformVariables: variable '" << column.name() << "' not found";
+                continue;
+            }
 
             assert(properties_.hasProperty(column.name()));
             // TODO HACK should be column data type
@@ -315,9 +318,13 @@ void Buffer::transformVariables(DBOVariableSet& list, bool tc2dbovar)
         else
         {
             if (!properties_.hasProperty(var_it->name()))
-                logerr << "Buffer: transformVariables: variable '" << column.name() << "' not found";
+            {
+                logerr << "Buffer: transformVariables: variable '" << var_it->name() << "' not found";
+                continue;
+            }
 
             assert(properties_.hasProperty(var_it->name()));
+
             logdbg << "Buffer: transformVariables: var " << var_it->name() << " col "
                    << column.name() << " prop dt "
                    << Property::asString(properties_.get(var_it->name()).dataType()) << " col dt "

@@ -36,6 +36,7 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& 
     : QWidget(parent, f), set_(set)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
+    main_layout->setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
     font_bold.setBold(true);

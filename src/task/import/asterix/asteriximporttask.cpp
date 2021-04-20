@@ -171,6 +171,122 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
+void ASTERIXImportTask::asterixFraming(const std::string& asterix_framing)
+{
+    loginf << "ASTERIXImportTask: asterixFraming: framing '" << asterix_framing << "'";
+
+    assert (jasterix_);
+    std::vector<std::string> framings = jasterix_->framings();
+
+    if (asterix_framing != ""
+            && std::find(framings.begin(), framings.end(), asterix_framing) == framings.end())
+        throw runtime_error ("ASTERIXImportTask: unknown framing '"+asterix_framing+"'");
+
+    current_framing_ = asterix_framing;
+}
+
+void ASTERIXImportTask::asterixDecoderConfig(const std::string& asterix_decoder_cfg)
+{
+    loginf << "ASTERIXImportTask: asterixDecoderConfig: config string '" << asterix_decoder_cfg << "'";
+
+    assert (jasterix_);
+
+    json config = json::parse(asterix_decoder_cfg);
+
+    if (!config.is_object())
+        throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: json config is not an object");
+
+    for (auto& cat_it : config.items())
+    {
+        std::string cat_str = cat_it.key();
+
+        unsigned int cat = stoi (cat_str);
+
+        if (!hasConfiguratonFor(cat))
+            throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: unknown cat "+to_string(cat)
+                                +" from '" + cat_str + "'");
+
+        json& cat_cfg = cat_it.value();
+        if (!cat_cfg.is_object())
+            throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                +" config is not an object");
+
+        if (cat_cfg.contains("edition"))
+        {
+            if (!cat_cfg.at("edition").is_string())
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" edition is not a string");
+
+            string edition = cat_cfg.at("edition");
+
+            if (!jasterix_->category(cat)->hasEdition(edition))
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" has no edition '"+edition+"'");
+
+            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
+                   << " edition " << edition;
+
+            category_configs_.at(cat).edition(edition);
+        }
+
+        if (cat_cfg.contains("ref_edition"))
+        {
+            if (!cat_cfg.at("ref_edition").is_string())
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" ref edition is not a string");
+
+            string ref_ed = cat_cfg.at("ref_edition");
+
+            if (!jasterix_->category(cat)->hasREFEdition(ref_ed))
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" has no ref edition '"+ref_ed+"'");
+
+            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
+                   << " ref edition " << ref_ed;
+
+            category_configs_.at(cat).ref(ref_ed);
+        }
+
+        if (cat_cfg.contains("spf_edition"))
+        {
+            if (!cat_cfg.at("spf_edition").is_string())
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" spf edition is not a string");
+
+            string spf_ed = cat_cfg.at("spf_edition");
+
+            if (!jasterix_->category(cat)->hasSPFEdition(spf_ed))
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" has no spf edition '"+spf_ed+"'");
+
+            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
+                   << " spf edition " << spf_ed;
+
+            category_configs_.at(cat).spf(spf_ed);
+        }
+
+        if (cat_cfg.contains("mapping"))
+        {
+            if (!cat_cfg.at("mapping").is_string())
+                throw runtime_error("ASTERIXImportTask: asterixDecoderConfig: cat "+to_string(cat)
+                                    +" mapping is not a string");
+
+            string mapping = cat_cfg.at("mapping");
+
+            std::vector<std::string> mappings = getPossibleMappings (cat);
+
+            if (std::find(mappings.begin(), mappings.end(), mapping) == mappings.end())
+                throw runtime_error ("ASTERIXImportTask: unknown mapping '"+mapping+"'");
+
+            loginf << "ASTERIXImportTask: asterixDecoderConfig: setting cat " << cat
+                   << " mapping '" << mapping << "'";
+
+             setActiveMapping (cat, mapping);
+        }
+    }
+
+}
+
 void ASTERIXImportTask::checkSubConfigurables()
 {
     if (schema_ == nullptr)
@@ -1208,7 +1324,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         status_widget_->addNumInserted(db_object.name(), buffer->size());
 
         if (db_object.name() == "Radar")
-            num_radar_inserted_ = buffer->size(); // store for later check
+            num_radar_inserted_ += buffer->size(); // store for later check
     }
 
     checkAllDone();

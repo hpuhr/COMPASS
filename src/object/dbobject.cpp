@@ -843,7 +843,8 @@ void DBObject::clearData()
 
 void DBObject::insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
 {
-    logdbg << "DBObject " << name_ << ": insertData";
+    logdbg << "DBObject " << name_ << ": insertData: list " << list.getSize()
+           << " buffer " << buffer->size();
 
     assert(!insert_job_);
 
