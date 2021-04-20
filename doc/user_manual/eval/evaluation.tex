@@ -236,6 +236,18 @@ Currently, the following standards are (partly) supported:
 \end{itemize}
 \ \\
 
+Please note that, while the EUROCAE ED-117A has been tested using simulator data, the following limitations exist:
+\begin{itemize}  
+\item In the Stands area, the position accuracy should be calculated using a 5 second position averaging. This is currently not performed, since the averaging method is not specified, and is currently being discussed with users.
+\item Some MLAT sensors use a different update rate for non-moving targets. This is currently not regarded, since what constituates non-movement is not (generally) specified, and will lower the probability of detection. 
+\end{itemize}
+\ \\
+
+Please note that these limitations will be corrected in the near future. \\ 
+
+The other standards have not yet been tested to the fullest degree, which is work in progress.
+
+
 \subsubsection{Current Standard}
 
 Below that, the current standard is shown. On the left side, a tree-view exists showing:
