@@ -27,14 +27,13 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 ![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss4.png)
 
 ## YouTube Videos
-### v0.5.0
+### v0.6.2
+- [ Playlist](https://www.youtube.com/watch?v=a6_mqfcohr4&list=PLarVjKYqSaANf1VYSluFYX13WYkptvem2)
+### Old from v0.5.0
 - [v0.5.0: Import ASTERIX & Setup](https://youtu.be/o1S3S9tcifA)
 - [v0.5.0: New OSGView Features](https://youtu.be/c1v3tIjNLVM)
 
-### Old from v0.4.0
-- [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
-- [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
-- [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
+
 
 
 ## Contents
