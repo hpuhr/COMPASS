@@ -16,23 +16,38 @@ To get a list of available command line options use e.g.:
 Allowed options:
   --help                          produce help message
   -r [ --reset ]                  reset user configuration and data
-  --create_new_sqlite3_db arg     creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'
-  --open_sqlite3_db arg           opens existing SQLite3 database with given filename, e.g. '/data/file1.db'
-  --import_view_points arg        imports view points JSON file with given filename, e.g. '/data/file1.json'
-  --import_asterix arg            imports ASTERIX file with given filename, e.g. '/data/file1.ff'
-  --import_json arg               imports JSON file with given filename, e.g. '/data/file1.json'
-  --json_schema arg               JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'
-  --import_gps_trail arg          imports gps trail NMEA with given filename, e.g. '/data/file2.txt'
-  --import_sectors_json arg       imports exported sectors JSON with given filename, e.g. '/data/sectors.json'
+  --create_new_sqlite3_db arg     creates and opens new SQLite3 database with 
+                                  given filename, e.g. '/data/file1.db'
+  --open_sqlite3_db arg           opens existing SQLite3 database with given 
+                                  filename, e.g. '/data/file1.db'
+  --import_view_points arg        imports view points JSON file with given 
+                                  filename, e.g. '/data/file1.json'
+  --import_asterix arg            imports ASTERIX file with given filename, 
+                                  e.g. '/data/file1.ff'
+  --asterix_framing arg           sets ASTERIX framing, e.g. 'none', 'ioss', 
+                                  'ioss_seq', 'rff'
+  --asterix_decoder_cfg arg       sets ASTERIX decoder config using JSON 
+                                  string, e.g. ''{"10":{"edition":"0.31"}}'' 
+                                  (including one pair of single quotes)
+  --import_json arg               imports JSON file with given filename, e.g. 
+                                  '/data/file1.json'
+  --json_schema arg               JSON file import schema, e.g. 'jASTERIX', 
+                                  'OpenSkyNetwork', 'ADSBExchange', 'SDDL'
+  --import_gps_trail arg          imports gps trail NMEA with given filename, 
+                                  e.g. '/data/file2.txt'
+  --import_sectors_json arg       imports exported sectors JSON with given 
+                                  filename, e.g. '/data/sectors.json'
   --auto_process                  start automatic processing of imported data
   --associate_data                associate target reports
   --start                         start after finishing previous steps
   --load_data                     load data after start
-  --export_view_points_report arg export view points report after start with given filename, e.g. '/data/db2/report.tex
+  --export_view_points_report arg export view points report after start with 
+                                  given filename, e.g. '/data/db2/report.tex
   --evaluate                      run evaluation
-  --export_eval_report arg        export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex
+  --export_eval_report arg        export evaluation report after start with 
+                                  given filename, e.g. '/data/eval_db2/report.t
+                                  ex
   --quit                          quit after finishing all previous steps
-
 \end{lstlisting}
 \ \\
 
@@ -78,6 +93,51 @@ After a database was opened, adds the supplied filename and starts an import usi
 \begin{itemize}
  \item \nameref{sec:task_import_asterix}
 \end{itemize}
+
+
+\subsection{--asterix\_framing framing}
+
+When an Import ASTERIX Task is started the given framing is used, the following options exist:
+
+\begin{itemize}
+\item none:  Raw, netto, unframed ASTERIX data blocks, equivalent to the 'empty' value in the GUI
+\item ioss:  IOSS Final Format
+\item ioss\_seq: IOSS Final Format with sequence numbers
+\item rff: Comsoft RFF format
+\end{itemize}
+
+\subsection{--asterix\_decoder\_cfg 'str'}
+
+When an Import ASTERIX Task is started the given configuration is used, in which the editions and mapping can be specified for each category using a JSON string. \\
+
+Using the following string the edition 0.31 can be set for category 010:  \\
+'\{"10":\{"edition":"0.31"\}\}' (including one pair of single quotes) \\
+
+In a nice formatting the string looks like this:
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+'{
+"10":
+    {
+        "edition":"0.31"
+    }
+}'
+\end{lstlisting}
+\ \\
+
+Please note the string "10" to identify catgory 010. \\
+
+For one or a number of categories, the following options can be set:
+
+\begin{itemize}
+\item "edition":  ASTERIX editions as string, e.g. "1.0"
+\item "ref\_edition":  ASTERIX reserved expansion field as string, e.g. "1.9"
+\item "spf\_edition": ASTERIX special purpose field as string, e.g. "ARTAS"
+\item "mapping": Mapping used after decoding, e.g. "CAT010 to Radar"
+\end{itemize}
+\ \\
+
+Please note that the naming must be exactly as in the GUI, otherwise the application quits with an error message.
+
 
 \subsection{--import\_gps\_trail filename}
 

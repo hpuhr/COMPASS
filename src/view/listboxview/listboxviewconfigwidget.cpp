@@ -246,6 +246,8 @@ void ListBoxViewConfigWidget::addSetSlot()
     view_->getDataSource()->currentSetName(name);
 
     updateSetBox();
+    updateSetButtons();
+    updateSetWidget();
 }
 
 void ListBoxViewConfigWidget::copySetSlot()
@@ -287,6 +289,8 @@ void ListBoxViewConfigWidget::copySetSlot()
     view_->getDataSource()->currentSetName(new_name);
 
     updateSetBox();
+    updateSetButtons();
+    updateSetWidget();
 }
 
 void ListBoxViewConfigWidget::renameSetSlot()
@@ -332,6 +336,9 @@ void ListBoxViewConfigWidget::renameSetSlot()
     view_->getDataSource()->removeSet(old_name);
 
     updateSetBox();
+    updateSetButtons();
+    updateSetWidget();
+
     reloadWantedSlot();
 }
 
@@ -342,6 +349,7 @@ void ListBoxViewConfigWidget::removeSetSlot()
     view_->getDataSource()->removeSet(view_->getDataSource()->currentSetName());
 
     updateSetBox();
+    updateSetButtons();
     updateSetWidget();
 }
 
