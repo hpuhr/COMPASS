@@ -12,6 +12,7 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/COMPASS-v0.6.2-alpha.AppImage)
 - [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/user_manual_v0.6.2.pdf)
 - [Example Database v0.6.2](https://cloud.openats.at/s/iejK7QeiyXx45b2)
+- [Example Report EUROCAE ED-117A](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/example_report-eurocae_ed-117a.pdf)
 - [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
 
 
