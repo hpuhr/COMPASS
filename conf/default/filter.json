@@ -212,6 +212,38 @@
                     }
                 }
             },
+            "Radar Detection Type": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "Radar Detection Type",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "Radar Detection TypeCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "1",
+                                "value": "1",
+                                "variable_dbo_name": "Radar",
+                                "variable_name": "detection_type"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "Radar Detection TypeWidget0": {
+                            "parameters": {
+                                "visible": true
+                            }
+                        }
+                    }
+                }
+            },
             "Target Address": {
                 "parameters": {
                     "active": false,
