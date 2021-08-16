@@ -767,6 +767,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
     unsigned int tmp_utn_cnt {0};
     unsigned int utn;
 
+    bool use_non_mode_s = task_.associateNonModeS();
+
     // create temporary targets
     for (auto& tr_it : ds_id_trs.at(ds_id))
     {
@@ -777,7 +779,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
                 attached_to_existing_utn = false;
 
                 // check if can be attached to already existing utn
-                if (!tr_it.has_ta_) // not for mode-s targets
+                if (!tr_it.has_ta_ && use_non_mode_s) // not for mode-s targets
                 {
                     int cont_utn = findContinuationUTNForTrackerUpdate(tr_it, tracker_targets);
 
@@ -825,7 +827,7 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
             {
                 logwrn << "CreateAssociationsJob: createPerTrackerTargets: tod backjump -"
                        << String::timeStringFromDouble(tn2utn.at(tr_it.tn_).second-tr_it.tod_)
-                       << " tmp target " << tmp_utn_cnt << " at tr " << tr_it.asStr();
+                       << " tmp target " << tmp_utn_cnt << " at tr " << tr_it.asStr() << " tn " << tr_it.tn_;
             }
             assert (tn2utn.at(tr_it.tn_).second <= tr_it.tod_);
 
@@ -1038,6 +1040,9 @@ void CreateAssociationsJob::addTrackerUTNs(const std::string& ds_name,
                 else
                     tmp_utn = 0;
 
+                logdbg << "CreateAssociationsJob: addTrackerUTNs: tmp utn " << tmp_target->first
+                       << " as new " << tmp_utn;
+
                 // add the target
                 to_targets.emplace(
                             std::piecewise_construct,
@@ -1052,6 +1057,9 @@ void CreateAssociationsJob::addTrackerUTNs(const std::string& ds_name,
                 //                        if (tmp_target->second.hasMA() && tmp_target->second.hasMA(396))
                 //                            loginf << "CreateAssociationsJob: createTrackerUTNs: attaching utn " << tmp_target->first
                 //                                   << " to tmp_utn " << tmp_utn;
+
+                logdbg << "CreateAssociationsJob: addTrackerUTNs: tmp utn " << tmp_target->first
+                       << " as existing " << tmp_utn;
 
                 assert (to_targets.count(tmp_utn));
                 to_targets.at(tmp_utn).addAssociated(tmp_target->second.assoc_trs_);
@@ -1196,6 +1204,9 @@ int CreateAssociationsJob::findUTNForTrackerTarget (const Association::Target& t
 
     if (tmp_utn != -1) // either mode s, so
         return tmp_utn;
+
+    if (!task_.associateNonModeS())
+        return -1;
 
     // try to find by m a/c/pos
     bool print_debug_target = false; //target.hasMA() && target.hasMA(396);

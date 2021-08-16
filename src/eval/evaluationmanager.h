@@ -196,6 +196,12 @@ public:
     bool removeModeACodes() const;
     void removeModeACodes(bool value);
 
+    bool removeModeCValues() const;
+    void removeModeCValues(bool value);
+
+    float removeModeCMinValue() const;
+    void removeModeCMinValue(float value);
+
     std::string removeModeACodeValues() const;
     std::set<std::pair<int,int>> removeModeACodeData() const; // single ma,-1 or range ma1,ma2
     void removeModeACodeValues(const std::string& value);
@@ -323,6 +329,8 @@ public:
     double resultDetailZoom() const;
     void resultDetailZoom(double result_detail_zoom);
 
+
+
 protected:
     COMPASS& compass_;
 
@@ -363,6 +371,9 @@ protected:
 
     bool remove_mode_a_codes_{false};
     std::string remove_mode_a_code_values_;
+
+    bool remove_mode_c_values_{false};
+    float remove_mode_c_min_value_;
 
     bool remove_target_addresses_{false};
     std::string remove_target_address_values_;

@@ -231,7 +231,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         tst_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
 
     // track num
-    if (object_manager.metaVariable("track_num").existsIn(dbo_name))
+    if (object_manager.metaVariable("track_num").existsIn(dbo_name) && dbo_name != "ADSB" ) // HACK
         tst_track_num_name_ = object_manager.metaVariable("track_num").getFor(dbo_name).name();
 
     // speed & track_angle

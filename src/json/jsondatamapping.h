@@ -118,6 +118,9 @@ class JSONDataMapping : public Configurable
     /// Unit
     std::string unit_;
 
+    bool has_factor_ {false};
+    double factor_ {0};
+
     bool in_array_{false};
     bool append_value_{false};
 

@@ -85,6 +85,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("remove_modeac_onlys", &remove_modeac_onlys_, false);
     registerParameter("remove_mode_a_codes", &remove_mode_a_codes_, false);
     registerParameter("remove_mode_a_code_values", &remove_mode_a_code_values_, "7000,7777");
+    // mc
+    registerParameter("remove_mode_c_values", &remove_mode_c_values_, false);
+    registerParameter("remove_mode_c_min_value", &remove_mode_c_min_value_, 11000);
     // ta
     registerParameter("remove_mode_target_addresses", &remove_target_addresses_, false);
     registerParameter("remove_target_address_vales", &remove_target_address_values_, "");
@@ -1914,6 +1917,20 @@ void EvaluationManager::filterUTNs ()
             }
         }
 
+        if (use && remove_mode_c_values_)
+        {
+            if (!target_it.hasModeC())
+            {
+                use = false;
+                comment = "Mode C not existing";
+            }
+            else if (target_it.modeCMax() < remove_mode_c_min_value_)
+            {
+                use = false;
+                comment = "Max Mode C too low";
+            }
+        }
+
         if (use && remove_target_addresses_)
         {
             for (auto t_ta : target_it.targetAddresses())
@@ -2626,5 +2643,28 @@ double EvaluationManager::resultDetailZoom() const
 void EvaluationManager::resultDetailZoom(double result_detail_zoom)
 {
     result_detail_zoom_ = result_detail_zoom;
+}
+
+bool EvaluationManager::removeModeCValues() const
+{
+    return remove_mode_c_values_;
+}
+
+void EvaluationManager::removeModeCValues(bool value)
+{
+    loginf << "EvaluationManager: removeModeCValues: value " << value;
+
+    remove_mode_c_values_ = value;
+}
+
+float EvaluationManager::removeModeCMinValue() const
+{
+    return remove_mode_c_min_value_;
+}
+
+void EvaluationManager::removeModeCMinValue(float value)
+{
+    loginf << "EvaluationManager: removeModeCMinValue: value " << value;
+    remove_mode_c_min_value_ = value;
 }
 
