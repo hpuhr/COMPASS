@@ -90,8 +90,6 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
-
-
 protected:
     float update_interval_s_{0};
 
