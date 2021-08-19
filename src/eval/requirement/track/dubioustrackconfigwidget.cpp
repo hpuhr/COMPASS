@@ -130,6 +130,14 @@ void DubiousTrackConfigWidget::minDurationEditSlot(QString value)
         loginf << "DubiousTrackConfigWidget: minDurationEditSlot: invalid value";
 }
 
+DubiousTrackConfig& DubiousTrackConfigWidget::config()
+{
+    DubiousTrackConfig* config = dynamic_cast<DubiousTrackConfig*>(&config_);
+    assert (config);
+
+    return *config;
+}
+
 void DubiousTrackConfigWidget::updateActive()
 {
     assert (min_updates_edit_);
