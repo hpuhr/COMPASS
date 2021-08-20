@@ -17,6 +17,12 @@
 
 
 #include "dubioustrack.h"
+#include "evaluationmanager.h"
+#include "evaluationdata.h"
+#include "stringconv.h"
+
+using namespace std;
+using namespace Utils;
 
 namespace EvaluationRequirement
 {
@@ -37,6 +43,107 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
+    logdbg << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
+           << " mark_primary_only " << mark_primary_only_ << " prob " << prob_
+           << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
+           << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
+
+    const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
+
+    EvaluationTargetPosition tst_pos;
+    bool has_ground_bit;
+    bool ground_bit_set;
+
+    bool is_inside;
+
+    float tod{0};
+
+    bool first_inside = true;
+    float tod_first{0}, tod_last{0};
+
+    unsigned int num_updates {0};
+    unsigned int num_pos_outside {0};
+    unsigned int num_pos_inside {0};
+
+    for (const auto& tst_id : tst_data)
+    {
+        ++num_updates;
+
+        // check if inside based on test position only
+
+        tst_pos = target_data.tstPosForTime(tod);
+
+        has_ground_bit = target_data.hasTstGroundBitForTime(tod);
+
+        if (has_ground_bit)
+            ground_bit_set = target_data.tstGroundBitForTime(tod);
+        else
+            ground_bit_set = false;
+
+        is_inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
+
+
+        if (!is_inside)
+        {
+//            if (!skip_no_data_details)
+//                details.push_back({tod, tst_pos,
+//                                   true, ref_pos, // has_ref_pos, ref_pos
+//                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
+//                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
+//                                   num_comp_failed, num_comp_passed,
+//                                   "Outside sector"});
+            ++num_pos_outside;
+            continue;
+        }
+        ++num_pos_inside;
+
+        tod = tst_id.first;
+
+        if (first_inside)
+        {
+            tod_first = tod;
+            tod_last = tod;
+
+            first_inside = false;
+        }
+        else
+        {
+            tod_last = tod;
+        }
+    }
+
+    bool is_dubious = false;
+    string dubious_reason;
+
+    if (mark_primary_only_)
+    {
+        if (target_data.isPrimaryOnly())
+        {
+            is_dubious = true;
+            dubious_reason = "Primary-only";
+        }
+    }
+
+    if (!is_dubious && use_min_updates_)
+    {
+        if (num_updates < min_updates_)
+        {
+            is_dubious = true;
+            dubious_reason = "Too few updates ("+to_string(num_updates)+")";
+        }
+    }
+
+    if (!is_dubious && use_min_duration_)
+    {
+        assert (tod_last >= tod_first);
+        float duration = tod_last-tod_first;
+        if (duration < min_duration_)
+        {
+            is_dubious = true;
+            dubious_reason = "Too small duration ("+String::doubleToStringPrecision(duration,2)+")";
+        }
+    }
+
     return nullptr;
 }
 

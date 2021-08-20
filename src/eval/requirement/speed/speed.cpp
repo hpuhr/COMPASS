@@ -107,15 +107,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> Speed::evaluate (
 
     EvaluationTargetPosition tst_pos;
 
-    //double x_pos, y_pos;
-    //double speed;
-
     bool is_inside;
-    //pair<EvaluationTargetPosition, bool> ret_pos;
     EvaluationTargetPosition ref_pos;
     bool ok;
 
-    //pair<EvaluationTargetVelocity, bool> ret_spd;
     EvaluationTargetVelocity ref_spd;
     float tst_spd_ms;
     float spd_diff;
