@@ -16,7 +16,8 @@
  */
 
 
-#include "dubioustrack.h"
+#include "eval/requirement/dubious/dubioustrack.h"
+#include "eval/results/dubious/dubioustracksingle.h"
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
 #include "stringconv.h"
@@ -64,9 +65,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
+    unsigned int num_tracks {0};
+    unsigned int num_tracks_dubious {0};
 
     for (const auto& tst_id : tst_data)
     {
+        tod = tst_id.first;
+
         ++num_updates;
 
         // check if inside based on test position only
@@ -82,7 +87,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         is_inside = sector_layer.isInside(tst_pos, has_ground_bit, ground_bit_set);
 
-
         if (!is_inside)
         {
 //            if (!skip_no_data_details)
@@ -97,8 +101,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         }
         ++num_pos_inside;
 
-        tod = tst_id.first;
-
         if (first_inside)
         {
             tod_first = tod;
@@ -110,6 +112,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         {
             tod_last = tod;
         }
+    }
+
+    if (!num_pos_inside)
+    {
+        return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
+                    "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
+                    eval_man_, num_updates, num_pos_outside, num_pos_inside,
+                    0, 0, "");
     }
 
     bool is_dubious = false;
@@ -126,7 +136,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     if (!is_dubious && use_min_updates_)
     {
-        if (num_updates < min_updates_)
+        if (num_pos_inside < min_updates_)
         {
             is_dubious = true;
             dubious_reason = "Too few updates ("+to_string(num_updates)+")";
@@ -144,7 +154,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         }
     }
 
-    return nullptr;
+    num_tracks = 1;
+    num_tracks_dubious = is_dubious;
+
+    return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
+                "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
+                eval_man_, num_updates, num_pos_outside, num_pos_inside,
+                num_tracks, num_tracks_dubious, dubious_reason);
 }
 
 bool DubiousTrack::markPrimaryOnly() const

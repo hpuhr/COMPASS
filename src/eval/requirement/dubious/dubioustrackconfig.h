@@ -20,8 +20,8 @@
 
 #include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
-#include "eval/requirement/track/dubioustrackconfigwidget.h"
-#include "eval/requirement/track/dubioustrack.h"
+#include "eval/requirement/dubious/dubioustrackconfigwidget.h"
+#include "eval/requirement/dubious/dubioustrack.h"
 
 class Group;
 class EvaluationStandard;

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "eval/requirement/track/dubioustrackconfigwidget.h"
-#include "eval/requirement/track/dubioustrackconfig.h"
+#include "eval/requirement/dubious/dubioustrackconfigwidget.h"
+#include "eval/requirement/dubious/dubioustrackconfig.h"
 #include "textfielddoublevalidator.h"
 #include "logger.h"
 
