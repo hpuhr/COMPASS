@@ -34,23 +34,20 @@ public:
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
             unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious, std::string dubious_reason);
-            //std::vector<EvaluationRequirement::DubiousTrackDetail> details
+            unsigned int num_tracks_dubious, std::string dubious_reason,
+            EvaluationRequirement::DubiousTrackDetail detail);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) override;
 
     unsigned int numUpdates() const;
-    //unsigned int numNoRef() const;
     unsigned int numPosOutside() const;
     unsigned int numPosInside() const;
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
 
-    //const vector<double>& values() const;
-
-    //std::vector<EvaluationRequirement::DubiousTrackDetail>& details();
+    EvaluationRequirement::DubiousTrackDetail detail() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -73,14 +70,10 @@ protected:
     unsigned int num_tracks_dubious_ {0};
     std::string dubious_reason_;
 
-//    unsigned int num_no_tst_value_ {0};
-//    unsigned int num_comp_failed_ {0};
-//    unsigned int num_comp_passed_ {0};
+    EvaluationRequirement::DubiousTrackDetail detail_;
 
     bool has_p_dubious_ {false};
     float p_dubious_{0};
-
-    //std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 
     void update();
 

@@ -71,6 +71,8 @@ void JoinedDubiousTrack::addToValues (std::shared_ptr<SingleDubiousTrack> single
     num_tracks_ += single_result->numTracks();
     num_tracks_dubious_ += single_result->numTracksDubious();
 
+    details_.push_back(single_result->detail());
+
     //const vector<double>& other_values = single_result->values();
 
     //values_.insert(values_.end(), other_values.begin(), other_values.end());
@@ -282,7 +284,7 @@ void JoinedDubiousTrack::updatesToUseChanges()
     num_tracks_ = 0;
     num_tracks_dubious_ = 0;
 
-    //values_.clear();
+    details_.clear();
 
     for (auto result_it : results_)
     {
@@ -324,6 +326,11 @@ void JoinedDubiousTrack::exportAsCSV()
 //                output_file << values_.at(cnt) << "\n";
 //        }
 //    }
+}
+
+std::vector<EvaluationRequirement::DubiousTrackDetail> JoinedDubiousTrack::details() const
+{
+    return details_;
 }
 
 }

@@ -44,13 +44,12 @@ namespace EvaluationRequirementResult
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
             unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious, std::string dubious_reason)
+            unsigned int num_tracks_dubious, std::string dubious_reason,
+            EvaluationRequirement::DubiousTrackDetail detail)
         : Single("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_pos_outside_(num_pos_outside),
           num_pos_inside_(num_pos_inside), num_tracks_(num_tracks),
-          num_tracks_dubious_(num_tracks_dubious), dubious_reason_(dubious_reason)
-//          num_comp_failed_(num_comp_failed), num_comp_passed_(num_comp_passed),
-//          values_(values), details_(details)
+          num_tracks_dubious_(num_tracks_dubious), dubious_reason_(dubious_reason), detail_(detail)
     {
         update();
     }
@@ -445,6 +444,11 @@ namespace EvaluationRequirementResult
                 dynamic_cast<EvaluationRequirement::DubiousTrack*>(requirement_.get());
         assert (req);
         return req;
+    }
+
+    EvaluationRequirement::DubiousTrackDetail SingleDubiousTrack::detail() const
+    {
+        return detail_;
     }
 
     unsigned int SingleDubiousTrack::numTracks() const

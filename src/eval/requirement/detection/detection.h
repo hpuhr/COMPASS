@@ -54,7 +54,7 @@ public:
     std::string comment_;
 
     bool has_last_position_ {false};
-    EvaluationTargetPosition pos_last;
+    EvaluationTargetPosition pos_last_;
 };
 
 class Detection : public Base

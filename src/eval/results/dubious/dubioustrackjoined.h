@@ -19,6 +19,7 @@
 #define EVALUATIONREQUIREMENTJOINEDDUBIOSTRACK_H
 
 #include "eval/results/joined.h"
+#include "eval/requirement/dubious/dubioustrack.h"
 
 namespace EvaluationRequirementResult
 {
@@ -52,12 +53,16 @@ namespace EvaluationRequirementResult
 
         void exportAsCSV();
 
+        std::vector<EvaluationRequirement::DubiousTrackDetail> details() const;
+
     protected:
         unsigned int num_updates_ {0};
         unsigned int num_pos_outside_ {0};
         unsigned int num_pos_inside_ {0};
         unsigned int num_tracks_ {0};
         unsigned int num_tracks_dubious_ {0};
+
+        std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 
         bool has_p_dubious_ {false};
         float p_dubious_{0};

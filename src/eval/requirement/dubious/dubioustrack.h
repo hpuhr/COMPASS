@@ -19,9 +19,38 @@
 #define EVALUATIONREQUIREMENTDUBIOUSTRACK_H
 
 #include "eval/requirement/base/base.h"
+#include "evaluationtargetposition.h"
+
+#include <QVariant>
+
+#include <cassert>
 
 namespace EvaluationRequirement
 {
+
+class DubiousTrackDetail
+{
+public:
+    DubiousTrackDetail(
+            float tod_begin, float tod_end, unsigned int num_pos_inside)
+        : tod_begin_(tod_begin), tod_end_(tod_end), num_pos_inside_(num_pos_inside)
+    {
+        assert (tod_end_ >= tod_begin_);
+        duration_ = tod_end_ - tod_begin_;
+    }
+
+    float tod_begin_ {0};
+    float tod_end_ {0};
+    float duration_;
+    unsigned int num_pos_inside_{0};
+    bool is_dubious_ {false};
+
+    std::string dubious_reason_;
+
+    EvaluationTargetPosition pos_begin_;
+    EvaluationTargetPosition pos_last_;
+};
+
 
 class DubiousTrack : public Base
 {

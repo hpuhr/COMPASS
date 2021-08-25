@@ -61,6 +61,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     bool first_inside = true;
     float tod_first{0}, tod_last{0};
+    EvaluationTargetPosition pos_first, pos_last;
 
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
@@ -106,11 +107,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             tod_first = tod;
             tod_last = tod;
 
+            pos_first = tst_pos;
+            pos_last = tst_pos;
+
             first_inside = false;
         }
         else
         {
             tod_last = tod;
+            pos_last = tst_pos;
         }
     }
 
@@ -119,7 +124,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_pos_outside, num_pos_inside,
-                    0, 0, "");
+                    0, 0, "", DubiousTrackDetail(tod_first, tod_last, num_pos_inside));
     }
 
     bool is_dubious = false;
@@ -157,10 +162,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     num_tracks = 1;
     num_tracks_dubious = is_dubious;
 
+    DubiousTrackDetail detail (tod_first, tod_last, num_pos_inside);
+
+    detail.is_dubious_ = is_dubious;
+    detail.dubious_reason_ = dubious_reason;
+    detail.pos_begin_ = pos_first;
+    detail.pos_last_ = pos_last;
+
     return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_updates, num_pos_outside, num_pos_inside,
-                num_tracks, num_tracks_dubious, dubious_reason);
+                num_tracks, num_tracks_dubious, dubious_reason, detail);
 }
 
 bool DubiousTrack::markPrimaryOnly() const
