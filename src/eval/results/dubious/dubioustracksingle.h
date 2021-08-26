@@ -34,8 +34,8 @@ public:
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
             unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious, std::string dubious_reason,
-            EvaluationRequirement::DubiousTrackDetail detail);
+            unsigned int num_tracks_dubious,
+            std::vector<EvaluationRequirement::DubiousTrackDetail> details);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
 
@@ -47,7 +47,7 @@ public:
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
 
-    EvaluationRequirement::DubiousTrackDetail detail() const;
+    const std::vector<EvaluationRequirement::DubiousTrackDetail>& details() const;
 
     virtual bool hasViewableData (
             const EvaluationResultsReport::SectionContentTable& table, const QVariant& annotation) override;
@@ -68,9 +68,8 @@ protected:
     unsigned int num_pos_inside_ {0};
     unsigned int num_tracks_ {0};
     unsigned int num_tracks_dubious_ {0};
-    std::string dubious_reason_;
 
-    EvaluationRequirement::DubiousTrackDetail detail_;
+    std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 
     bool has_p_dubious_ {false};
     float p_dubious_{0};

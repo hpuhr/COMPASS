@@ -31,24 +31,53 @@ namespace EvaluationRequirement
 class DubiousTrackDetail
 {
 public:
-    DubiousTrackDetail(
-            float tod_begin, float tod_end, unsigned int num_pos_inside)
-        : tod_begin_(tod_begin), tod_end_(tod_end), num_pos_inside_(num_pos_inside)
+    DubiousTrackDetail(unsigned int track_num, float tod_begin)
+        : track_num_(track_num), tod_begin_(tod_begin)
     {
-        assert (tod_end_ >= tod_begin_);
-        duration_ = tod_end_ - tod_begin_;
+        tod_end_ = tod_begin_;
     }
 
+    bool first_inside_ {true};
+
+    unsigned int track_num_ {0};
     float tod_begin_ {0};
     float tod_end_ {0};
-    float duration_;
+    float duration_ {0};
+    std::vector<float> tods_inside_;
+
+    //unsigned int num_updates_ {0};
+    //unsigned int num_pos_outside_{0};
     unsigned int num_pos_inside_{0};
+
+    bool has_mode_ac_ {false};
+    bool has_mode_s_ {false};
+
     bool is_dubious_ {false};
 
-    std::string dubious_reason_;
+    std::map<std::string, std::string> dubious_reasons_; // type -> comment
 
     EvaluationTargetPosition pos_begin_;
     EvaluationTargetPosition pos_last_;
+
+    std::string dubiousReasonsString()
+    {
+        std::string str;
+
+        for (auto& reas_it : dubious_reasons_)
+        {
+            if (str.size())
+                str += "\n  ";
+
+            str += reas_it.first;
+            if (reas_it.second.size())
+                str += " ("+reas_it.second+")";
+        }
+
+        if (!str.size())
+            return "Ok";
+        else
+            return str;
+    }
 };
 
 

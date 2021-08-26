@@ -33,9 +33,9 @@ DubiousTrack::DubiousTrack(
         bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
         bool use_min_duration, float min_duration, float prob,
         COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-: Base(name, short_name, group_name, prob, prob_check_type, eval_man),
-  mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-  use_min_duration_(use_min_duration), min_duration_(min_duration)
+    : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+      mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
+      use_min_duration_(use_min_duration), min_duration_(min_duration)
 {
 }
 
@@ -51,6 +51,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     const std::multimap<float, unsigned int>& tst_data = target_data.tstData();
 
+    unsigned int track_num;
+    bool track_num_missing_reported {false};
+
     EvaluationTargetPosition tst_pos;
     bool has_ground_bit;
     bool ground_bit_set;
@@ -59,15 +62,19 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     float tod{0};
 
-    bool first_inside = true;
-    float tod_first{0}, tod_last{0};
-    EvaluationTargetPosition pos_first, pos_last;
+    //bool general_first_inside = true;
+    //float tod_first{0}, tod_last{0};
+    //EvaluationTargetPosition pos_first, pos_last;
 
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
     unsigned int num_pos_inside {0};
+
     unsigned int num_tracks {0};
     unsigned int num_tracks_dubious {0};
+
+    map<unsigned int, DubiousTrackDetail> tracks; // tn -> target
+    vector<DubiousTrackDetail> finished_tracks; // tn -> target
 
     for (const auto& tst_id : tst_data)
     {
@@ -90,33 +97,94 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         if (!is_inside)
         {
-//            if (!skip_no_data_details)
-//                details.push_back({tod, tst_pos,
-//                                   true, ref_pos, // has_ref_pos, ref_pos
-//                                   is_inside, {}, comp_passed, // pos_inside, value, check_passed
-//                                   num_pos, num_no_ref, num_pos_inside, num_pos_outside,
-//                                   num_comp_failed, num_comp_passed,
-//                                   "Outside sector"});
             ++num_pos_outside;
             continue;
         }
-        ++num_pos_inside;
 
-        if (first_inside)
+        if (!target_data.hasTstTrackNumForTime(tod))
         {
-            tod_first = tod;
-            tod_last = tod;
+            if (!track_num_missing_reported)
+            {
+                logwrn << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
+                       << " has no track number at time " << String::timeStringFromDouble(tod);
+                track_num_missing_reported = true;
+            }
+            continue;
+        }
 
-            pos_first = tst_pos;
-            pos_last = tst_pos;
+        track_num = target_data.tstTrackNumForTime(tod);
 
-            first_inside = false;
+        // find corresponding track
+        if (tracks.count(track_num)) // exists
+        {
+            assert (tod >= tracks.at(track_num).tod_end_);
+
+            if (tod - tracks.at(track_num).tod_end_ > 300.0) // time gap too large, new track
+            {
+                finished_tracks.emplace_back(tracks.at(track_num));
+                tracks.erase(track_num);
+            }
+        }
+
+        if (!tracks.count(track_num))
+        {
+            tracks.emplace(std::piecewise_construct,
+                           std::forward_as_tuple(track_num),  // args for key
+                           std::forward_as_tuple(track_num, tod));
+        }
+
+        assert (tracks.count(track_num));
+
+        DubiousTrackDetail& current_detail = tracks.at(track_num);
+
+        ++num_pos_inside;
+        ++current_detail.num_pos_inside_;
+
+        current_detail.tods_inside_.push_back(tod);
+
+//        if (general_first_inside) // do general time
+//        {
+//            tod_first = tod;
+//            tod_last = tod;
+
+//            general_first_inside = false;
+//        }
+//        else
+//            tod_last = tod;
+
+        if (current_detail.first_inside_) // do detail time & pos
+        {
+            current_detail.tod_begin_ = tod;
+            current_detail.tod_end_ = tod;
+
+            current_detail.pos_begin_ = tst_pos;
+            current_detail.pos_last_ = tst_pos;
+
+            current_detail.first_inside_ = false;
         }
         else
         {
-            tod_last = tod;
-            pos_last = tst_pos;
+            current_detail.tod_end_ = tod;
+            assert (current_detail.tod_end_ >= current_detail.tod_begin_);
+            current_detail.duration_ = current_detail.tod_end_ - current_detail.tod_begin_;
+
+            current_detail.pos_last_ = tst_pos;
         }
+
+        // do stats
+        if (!current_detail.has_mode_ac_
+                && (target_data.hasTstModeAForTime(tod) || target_data.hasTstModeCForTime(tod)))
+            current_detail.has_mode_ac_  = true;
+
+        if (!current_detail.has_mode_s_
+                && (target_data.hasTstTAForTime(tod) || target_data.hasTstCallsignForTime(tod)))
+            current_detail.has_mode_s_  = true;
+    }
+
+    while (tracks.size()) // move all to finished
+    {
+        finished_tracks.emplace_back(tracks.begin()->second);
+        tracks.erase(tracks.begin());
     }
 
     if (!num_pos_inside)
@@ -124,55 +192,39 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                     eval_man_, num_updates, num_pos_outside, num_pos_inside,
-                    0, 0, "", DubiousTrackDetail(tod_first, tod_last, num_pos_inside));
+                    0, 0, finished_tracks);
     }
 
-    bool is_dubious = false;
-    string dubious_reason;
-
-    if (mark_primary_only_)
+    for (auto& track : finished_tracks)
     {
-        if (target_data.isPrimaryOnly())
+        if (mark_primary_only_ && !track.has_mode_ac_ && !track.has_mode_s_)
         {
-            is_dubious = true;
-            dubious_reason = "Primary-only";
+            track.dubious_reasons_["Primary-only"] = "";
         }
+
+        if (use_min_updates_ && track.num_pos_inside_ < min_updates_)
+        {
+            track.dubious_reasons_["Too few updates"] = to_string(track.num_pos_inside_);
+        }
+
+        if (use_min_duration_ && track.duration_ < min_duration_)
+        {
+            track.dubious_reasons_["Too short duration"] = String::doubleToStringPrecision(track.duration_, 1);
+        }
+
+        track.is_dubious_ = track.dubious_reasons_.size() != 0;
+
+        if (track.is_dubious_)
+            ++num_tracks_dubious;
+
+        ++num_tracks;
     }
 
-    if (!is_dubious && use_min_updates_)
-    {
-        if (num_pos_inside < min_updates_)
-        {
-            is_dubious = true;
-            dubious_reason = "Too few updates ("+to_string(num_updates)+")";
-        }
-    }
-
-    if (!is_dubious && use_min_duration_)
-    {
-        assert (tod_last >= tod_first);
-        float duration = tod_last-tod_first;
-        if (duration < min_duration_)
-        {
-            is_dubious = true;
-            dubious_reason = "Too small duration ("+String::doubleToStringPrecision(duration,2)+")";
-        }
-    }
-
-    num_tracks = 1;
-    num_tracks_dubious = is_dubious;
-
-    DubiousTrackDetail detail (tod_first, tod_last, num_pos_inside);
-
-    detail.is_dubious_ = is_dubious;
-    detail.dubious_reason_ = dubious_reason;
-    detail.pos_begin_ = pos_first;
-    detail.pos_last_ = pos_last;
 
     return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
                 eval_man_, num_updates, num_pos_outside, num_pos_inside,
-                num_tracks, num_tracks_dubious, dubious_reason, detail);
+                num_tracks, num_tracks_dubious, finished_tracks);
 }
 
 bool DubiousTrack::markPrimaryOnly() const

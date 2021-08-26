@@ -44,12 +44,12 @@ namespace EvaluationRequirementResult
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
             unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious, std::string dubious_reason,
-            EvaluationRequirement::DubiousTrackDetail detail)
+            unsigned int num_tracks_dubious,
+            std::vector<EvaluationRequirement::DubiousTrackDetail> details)
         : Single("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_pos_outside_(num_pos_outside),
           num_pos_inside_(num_pos_inside), num_tracks_(num_tracks),
-          num_tracks_dubious_(num_tracks_dubious), dubious_reason_(dubious_reason), detail_(detail)
+          num_tracks_dubious_(num_tracks_dubious), details_(details)
     {
         update();
     }
@@ -128,9 +128,9 @@ namespace EvaluationRequirementResult
                 order = Qt::DescendingOrder;
 
 
-            section.addTable(table_name, 11,
+            section.addTable(table_name, 12,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#T", "#DT", "PDT"}, true, 10, order);
+             "#T", "#DT", "Reasons", "PDT"}, true, 11, order);
         }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -140,12 +140,23 @@ namespace EvaluationRequirementResult
         if (has_p_dubious_)
             p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
 
+        string reasons;
+
+        for (auto& detail_it : details_)
+        {
+            if (reasons.size())
+                reasons += "\n";
+
+            reasons += to_string(detail_it.track_num_)+":" + detail_it.dubiousReasonsString();
+        }
+
         target_table.addRow(
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
          num_tracks_, // "#T"
          num_tracks_dubious_, // "#DT"
+         reasons.c_str(),  // "Reasons"
          p_dubious_var}, // "PDT"
                     this, {utn_});
     }
@@ -161,10 +172,10 @@ namespace EvaluationRequirementResult
                     || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
                 order = Qt::DescendingOrder;
 
-            section.addTable(table_name, 14,
+            section.addTable(table_name, 15,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#T", "#DT", "PDT",
-             "MOPS", "NUCp/NIC", "NACp"}, true, 10, order);
+             "#T", "#DT", "Reasons", "PDT",
+             "MOPS", "NUCp/NIC", "NACp"}, true, 11, order);
         }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
@@ -173,6 +184,16 @@ namespace EvaluationRequirementResult
 
         if (has_p_dubious_)
             p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
+
+        string reasons;
+
+        for (auto& detail_it : details_)
+        {
+            if (reasons.size())
+                reasons += "\n";
+
+            reasons += to_string(detail_it.track_num_)+":" + detail_it.dubiousReasonsString();
+        }
 
         // "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
         // "#ACOK", "#ACNOK", "PACOK", "#DOK", "#DNOK", "PDOK", "MOPS", "NUCp/NIC", "NACp"
@@ -184,6 +205,7 @@ namespace EvaluationRequirementResult
          target_->modeCMaxStr().c_str(),
          num_tracks_, // "#T"
          num_tracks_dubious_, // "#DT"
+         reasons.c_str(),  // "Reasons"
          p_dubious_var, // "PDT"
          target_->mopsVersionsStr().c_str(), // "MOPS"
          target_->nucpNicStr().c_str(), // "NUCp/NIC"
@@ -446,9 +468,9 @@ namespace EvaluationRequirementResult
         return req;
     }
 
-    EvaluationRequirement::DubiousTrackDetail SingleDubiousTrack::detail() const
+    const std::vector<EvaluationRequirement::DubiousTrackDetail>& SingleDubiousTrack::details() const
     {
-        return detail_;
+        return details_;
     }
 
     unsigned int SingleDubiousTrack::numTracks() const
