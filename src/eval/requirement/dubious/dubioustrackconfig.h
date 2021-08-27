@@ -55,6 +55,24 @@ public:
     float minDuration() const;
     void minDuration(float min_duration);
 
+    bool useMaxGroundspeed() const;
+    void useMaxGroundspeed(bool use_max_groundspeed);
+
+    float maxGroundspeedKts() const;
+    void maxGroundspeedKts(float max_groundspeed_kts);
+
+    bool useMaxAcceleration() const;
+    void useMaxAcceleration(bool use_max_acceleration);
+
+    float maxAcceleration() const;
+    void maxAcceleration(float max_acceleration);
+
+    bool useMaxTurnrate() const;
+    void useMaxTurnrate(bool use_max_turnrate);
+
+    float maxTurnrate() const;
+    void maxTurnrate(float max_turnrate);
+
 protected:
 
     bool mark_primary_only_ {true};
@@ -64,6 +82,15 @@ protected:
 
     bool use_min_duration_ {true};
     float min_duration_ {30.0};
+
+    bool use_max_groundspeed_ {true};
+    float max_groundspeed_kts_ {1333.0};
+
+    bool use_max_acceleration_ {true};
+    float max_acceleration_ {29.43}; // m/s^2
+
+    bool use_max_turnrate_ {true};
+    float max_turnrate_ {30.0}; // deg/s
 
     virtual void createWidget() override;
 };

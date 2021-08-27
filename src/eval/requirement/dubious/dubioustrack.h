@@ -88,8 +88,11 @@ class DubiousTrack : public Base
 public:
     DubiousTrack(const std::string& name, const std::string& short_name, const std::string& group_name,
                  bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
-                 bool use_min_duration, float min_duration, float prob,
-                 COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
+                 bool use_min_duration, float min_duration,
+                 bool use_max_groundspeed, float max_groundspeed_kts,
+                 bool use_max_acceleration, float max_acceleration,
+                 bool use_max_turnrate, float max_turnrate,
+                 float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -98,12 +101,16 @@ public:
     bool markPrimaryOnly() const;
 
     bool useMinUpdates() const;
-
     unsigned int minUpdates() const;
 
     bool useMinDuration() const;
-
     float minDuration() const;
+
+    bool useMaxAcceleration() const;
+    float maxAcceleration() const;
+
+    bool useMaxTurnrate() const;
+    float maxTurnrate() const;
 
 protected:
     bool mark_primary_only_ {true};
@@ -113,6 +120,15 @@ protected:
 
     bool use_min_duration_ {true};
     float min_duration_ {30.0};
+
+    bool use_max_groundspeed_ {true};
+    float max_groundspeed_kts_ {1333.0};
+
+    bool use_max_acceleration_ {true};
+    float max_acceleration_ {29.43}; // m/s^2
+
+    bool use_max_turnrate_ {true};
+    float max_turnrate_ {30.0}; // deg/s
 };
 
 }

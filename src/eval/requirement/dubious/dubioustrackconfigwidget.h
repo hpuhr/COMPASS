@@ -45,6 +45,15 @@ public slots:
     void toggleUseMinDurationSlot();
     void minDurationEditSlot(QString value);
 
+    void toggleUseMaxGroundspeedSlot();
+    void maxGroundspeedEditSlot(QString value);
+
+    void toggleUseMaxAccelerationSlot();
+    void maxAccelerationEditSlot(QString value);
+
+    void toggleUseMaxTurnrateSlot();
+    void maxTurnrateEditSlot(QString value);
+
 public:
     DubiousTrackConfigWidget(DubiousTrackConfig& cfg);
 
@@ -56,6 +65,15 @@ protected:
 
     QCheckBox* use_min_duration_check_{nullptr};
     QLineEdit* min_duration_edit_{nullptr};
+
+    QCheckBox* use_max_groundspeed_check_{nullptr};
+    QLineEdit* max_groundspeed_kts_edit_{nullptr};
+
+    QCheckBox* use_max_acceleration_check_{nullptr};
+    QLineEdit* max_acceleration_edit_{nullptr};
+
+    QCheckBox* use_max_turnrate_check_{nullptr};
+    QLineEdit* max_turnrate_edit_{nullptr};
 
     DubiousTrackConfig& config();
 

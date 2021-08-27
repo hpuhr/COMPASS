@@ -70,7 +70,56 @@ DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
     connect(min_duration_edit_, &QLineEdit::textEdited,
             this, &DubiousTrackConfigWidget::minDurationEditSlot);
 
-    form_layout_->addRow("Minimum Duration [1]", min_duration_edit_);
+    form_layout_->addRow("Minimum Duration [s]", min_duration_edit_);
+
+
+    // use max groundspeed
+    use_max_groundspeed_check_ = new QCheckBox ();
+    use_max_groundspeed_check_->setChecked(config().useMaxGroundspeed());
+    connect(use_max_groundspeed_check_, &QCheckBox::clicked,
+            this, &DubiousTrackConfigWidget::toggleUseMaxGroundspeedSlot);
+
+    form_layout_->addRow("Use Maximum Groundspeed", use_max_groundspeed_check_);
+
+    // max groundspeed
+    max_groundspeed_kts_edit_ = new QLineEdit(QString::number(config().maxGroundspeedKts()));
+    max_groundspeed_kts_edit_->setValidator(new QDoubleValidator(0, 10000, 0, this));
+    connect(max_groundspeed_kts_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::maxGroundspeedEditSlot);
+
+    form_layout_->addRow("Maximum Groundspeed [kts]", max_groundspeed_kts_edit_);
+
+    // use max accel
+    use_max_acceleration_check_ = new QCheckBox ();
+    use_max_acceleration_check_->setChecked(config().useMaxAcceleration());
+    connect(use_max_acceleration_check_, &QCheckBox::clicked,
+            this, &DubiousTrackConfigWidget::toggleUseMaxAccelerationSlot);
+
+    form_layout_->addRow("Use Maximum Groundspeed", use_max_acceleration_check_);
+
+    // max accel
+    max_acceleration_edit_ = new QLineEdit(QString::number(config().maxAcceleration()));
+    max_acceleration_edit_->setValidator(new QDoubleValidator(0, 1000, 0, this));
+    connect(max_acceleration_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::maxAccelerationEditSlot);
+
+    form_layout_->addRow("Maximum Acceleration [m/s^2]", max_acceleration_edit_);
+
+    // use max turnrate
+    use_max_turnrate_check_ = new QCheckBox ();
+    use_max_turnrate_check_->setChecked(config().useMaxTurnrate());
+    connect(use_max_turnrate_check_, &QCheckBox::clicked,
+            this, &DubiousTrackConfigWidget::toggleUseMaxTurnrateSlot);
+
+    form_layout_->addRow("Use Maximum Turnrate", use_max_turnrate_check_);
+
+    // max turnrate
+    max_turnrate_edit_ = new QLineEdit(QString::number(config().maxTurnrate()));
+    max_turnrate_edit_->setValidator(new QDoubleValidator(0, 360, 0, this));
+    connect(max_turnrate_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::maxTurnrateEditSlot);
+
+    form_layout_->addRow("Maximum Turnrate [°/s]", max_turnrate_edit_);
 }
 
 
@@ -130,6 +179,76 @@ void DubiousTrackConfigWidget::minDurationEditSlot(QString value)
         loginf << "DubiousTrackConfigWidget: minDurationEditSlot: invalid value";
 }
 
+void DubiousTrackConfigWidget::toggleUseMaxGroundspeedSlot()
+{
+    loginf << "DubiousTrackConfigWidget: toggleUseMaxGroundspeedSlot";
+
+    assert (use_max_groundspeed_check_);
+    config().useMaxGroundspeed(use_max_groundspeed_check_->checkState() == Qt::Checked);
+
+    updateActive();
+}
+
+void DubiousTrackConfigWidget::maxGroundspeedEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: maxGroundspeedEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maxGroundspeedKts(val);
+    else
+        loginf << "DubiousTrackConfigWidget: maxGroundspeedEditSlot: invalid value";
+}
+
+void DubiousTrackConfigWidget::toggleUseMaxAccelerationSlot()
+{
+    loginf << "DubiousTrackConfigWidget: toggleUseMaxAccelerationSlot";
+
+    assert (use_max_acceleration_check_);
+    config().useMaxAcceleration(use_max_acceleration_check_->checkState() == Qt::Checked);
+
+    updateActive();
+}
+
+void DubiousTrackConfigWidget::maxAccelerationEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: maxAccelerationEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maxAcceleration(val);
+    else
+        loginf << "DubiousTrackConfigWidget: maxAccelerationEditSlot: invalid value";
+}
+
+void DubiousTrackConfigWidget::toggleUseMaxTurnrateSlot()
+{
+    loginf << "DubiousTrackConfigWidget: toggleUseMaxTurnrateSlot";
+
+    assert (use_max_turnrate_check_);
+    config().useMaxTurnrate(use_max_turnrate_check_->checkState() == Qt::Checked);
+
+    updateActive();
+}
+
+void DubiousTrackConfigWidget::maxTurnrateEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: maxTurnrateEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maxTurnrate(val);
+    else
+        loginf << "DubiousTrackConfigWidget: maxTurnrateEditSlot: invalid value";
+}
+
+
 DubiousTrackConfig& DubiousTrackConfigWidget::config()
 {
     DubiousTrackConfig* config = dynamic_cast<DubiousTrackConfig*>(&config_);
@@ -145,6 +264,15 @@ void DubiousTrackConfigWidget::updateActive()
 
     assert (min_duration_edit_);
     min_duration_edit_->setEnabled(config().useMinDuration());
+
+    assert (max_groundspeed_kts_edit_);
+    max_groundspeed_kts_edit_->setEnabled(config().useMaxGroundspeed());
+
+    assert (max_acceleration_edit_);
+    max_acceleration_edit_->setEnabled(config().useMaxAcceleration());
+
+    assert (max_turnrate_edit_);
+    max_turnrate_edit_->setEnabled(config().useMaxTurnrate());
 }
 
 

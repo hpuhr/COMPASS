@@ -31,11 +31,17 @@ namespace EvaluationRequirement
 DubiousTrack::DubiousTrack(
         const std::string& name, const std::string& short_name, const std::string& group_name,
         bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
-        bool use_min_duration, float min_duration, float prob,
-        COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
+        bool use_min_duration, float min_duration,
+        bool use_max_groundspeed, float max_groundspeed_kts,
+        bool use_max_acceleration, float max_acceleration,
+        bool use_max_turnrate, float max_turnrate,
+        float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
-      use_min_duration_(use_min_duration), min_duration_(min_duration)
+      use_min_duration_(use_min_duration), min_duration_(min_duration),
+      use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
+      use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
+      use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate)
 {
 }
 
@@ -201,8 +207,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     0, 0, finished_tracks);
     }
 
+
+    unsigned int dubious_groundspeed_found;
+    unsigned int dubious_acceleration_found;
+    unsigned int dubious_turnrate_found;
+
+    bool has_last_tod;
+    float last_tod;
+    float time_diff;
+    float acceleration;
+    float turnrate;
+
     for (auto& track : finished_tracks)
     {
+        dubious_groundspeed_found = 0;
+        dubious_acceleration_found = 0;
+        dubious_turnrate_found = 0;
+
         if (mark_primary_only_ && !track.has_mode_ac_ && !track.has_mode_s_)
         {
             track.dubious_reasons_["Pri."] = "";
@@ -216,6 +237,73 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         if (use_min_duration_ && !track.left_sector_ && track.duration_ < min_duration_)
         {
             track.dubious_reasons_["Dur."] = String::doubleToStringPrecision(track.duration_, 1);
+        }
+
+
+        has_last_tod = false;
+        for (float tod : track.tods_inside_)
+        {
+            if (use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(tod)
+                    && target_data.tstMeasuredSpeedForTime(tod) > max_groundspeed_kts_)
+            {
+                ++dubious_groundspeed_found;
+            }
+
+            if (has_last_tod)
+            {
+                assert (tod >= last_tod);
+                time_diff = tod - last_tod;
+
+                if (time_diff <= 30.0)
+                {
+                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(tod)
+                            && target_data.hasTstMeasuredSpeedForTime(last_tod))
+                    {
+
+                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(tod)
+                                            - target_data.tstMeasuredSpeedForTime(last_tod)) * KNOTS2M_S / time_diff;
+
+                        if (acceleration > max_acceleration_)
+                            ++dubious_acceleration_found;
+                    }
+
+                    if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(tod)
+                            && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
+                    {
+                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(tod)
+                                        - target_data.tstMeasuredTrackAngleForTime(last_tod)) / time_diff;
+
+                        // move to correct period
+                        while (turnrate < 0.0)
+                            turnrate += 360.0;
+
+                        while (turnrate > 360.0)
+                            turnrate -= 360.0;
+
+                        if (turnrate > max_turnrate_)
+                            ++dubious_turnrate_found;
+                    }
+                }
+            }
+
+            // done
+            last_tod = tod;
+            has_last_tod = true;
+        }
+
+        if (use_max_groundspeed_ && dubious_groundspeed_found > 0)
+        {
+            track.dubious_reasons_["Spd"] = to_string(dubious_groundspeed_found);
+        }
+
+        if (use_max_acceleration_ && dubious_acceleration_found > 0)
+        {
+            track.dubious_reasons_["Acc"] = to_string(dubious_acceleration_found);
+        }
+
+        if (use_max_turnrate_ && dubious_turnrate_found > 0)
+        {
+            track.dubious_reasons_["TR"] = to_string(dubious_turnrate_found);
         }
 
         track.is_dubious_ = track.dubious_reasons_.size() != 0;
@@ -256,6 +344,24 @@ bool DubiousTrack::useMinDuration() const
 float DubiousTrack::minDuration() const
 {
     return min_duration_;
+}
+
+bool DubiousTrack::useMaxAcceleration() const
+{
+    return use_max_acceleration_;
+}
+float DubiousTrack::maxAcceleration() const
+{
+    return max_acceleration_;
+}
+
+bool DubiousTrack::useMaxTurnrate() const
+{
+    return use_max_turnrate_;
+}
+float DubiousTrack::maxTurnrate() const
+{
+    return max_turnrate_;
 }
 
 }

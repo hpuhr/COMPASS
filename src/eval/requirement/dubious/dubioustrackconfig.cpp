@@ -44,6 +44,15 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
 
     registerParameter("use_min_duration", &use_min_duration_, true);
     registerParameter("min_duration", &min_duration_, 30.0);
+
+    registerParameter("use_max_groundspeed", &use_max_groundspeed_, true);
+    registerParameter("max_groundspeed_kts", &max_groundspeed_kts_, 1333.0);
+
+    registerParameter("use_max_acceleration", &use_max_acceleration_, true);
+    registerParameter("max_acceleration", &max_acceleration_, 29.43);
+
+    registerParameter("use_max_turnrate", &use_max_turnrate_, true);
+    registerParameter("max_turnrate", &max_turnrate_, 30.0);
 }
 
 DubiousTrackConfig::~DubiousTrackConfig()
@@ -101,12 +110,76 @@ void DubiousTrackConfig::minDuration(float min_duration)
     min_duration_ = min_duration;
 }
 
+bool DubiousTrackConfig::useMaxGroundspeed() const
+{
+    return use_max_groundspeed_;
+}
+
+void DubiousTrackConfig::useMaxGroundspeed(bool use_max_groundspeed)
+{
+    use_max_groundspeed_ = use_max_groundspeed;
+}
+
+float DubiousTrackConfig::maxGroundspeedKts() const
+{
+    return max_groundspeed_kts_;
+}
+
+void DubiousTrackConfig::maxGroundspeedKts(float max_groundspeed_kts)
+{
+    max_groundspeed_kts_ = max_groundspeed_kts;
+}
+
+bool DubiousTrackConfig::useMaxAcceleration() const
+{
+    return use_max_acceleration_;
+}
+
+void DubiousTrackConfig::useMaxAcceleration(bool use_max_acceleration)
+{
+    use_max_acceleration_ = use_max_acceleration;
+}
+
+float DubiousTrackConfig::maxAcceleration() const
+{
+    return max_acceleration_;
+}
+
+void DubiousTrackConfig::maxAcceleration(float max_acceleration)
+{
+    max_acceleration_ = max_acceleration;
+}
+
+bool DubiousTrackConfig::useMaxTurnrate() const
+{
+    return use_max_turnrate_;
+}
+
+void DubiousTrackConfig::useMaxTurnrate(bool use_max_turnrate)
+{
+    use_max_turnrate_ = use_max_turnrate;
+}
+
+float DubiousTrackConfig::maxTurnrate() const
+{
+    return max_turnrate_;
+}
+
+void DubiousTrackConfig::maxTurnrate(float max_turnrate)
+{
+    max_turnrate_ = max_turnrate;
+}
+
 std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
 {
     shared_ptr<DubiousTrack> req = make_shared<DubiousTrack>(
                 name_, short_name_, group_.name(),
                 mark_primary_only_, use_min_updates_, min_updates_,
-                use_min_duration_, min_duration_, prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
+                use_min_duration_, min_duration_,
+                use_max_groundspeed_, max_groundspeed_kts_,
+                use_max_acceleration_, max_acceleration_,
+                use_max_turnrate_, max_turnrate_,
+                prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
 
     return req;
 }
