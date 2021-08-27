@@ -35,13 +35,15 @@ DubiousTrack::DubiousTrack(
         bool use_max_groundspeed, float max_groundspeed_kts,
         bool use_max_acceleration, float max_acceleration,
         bool use_max_turnrate, float max_turnrate,
+        bool use_rocd, float max_rocd,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
       use_min_duration_(use_min_duration), min_duration_(min_duration),
       use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
       use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
-      use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate)
+      use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
+      use_rocd_(use_rocd), max_rocd_(max_rocd)
 {
 }
 
@@ -211,18 +213,21 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     unsigned int dubious_groundspeed_found;
     unsigned int dubious_acceleration_found;
     unsigned int dubious_turnrate_found;
+    unsigned int dubious_rocd_found;
 
     bool has_last_tod;
     float last_tod;
     float time_diff;
     float acceleration;
     float turnrate;
+    float rocd;
 
     for (auto& track : finished_tracks)
     {
         dubious_groundspeed_found = 0;
         dubious_acceleration_found = 0;
         dubious_turnrate_found = 0;
+        dubious_rocd_found = 0;
 
         if (mark_primary_only_ && !track.has_mode_ac_ && !track.has_mode_s_)
         {
@@ -283,6 +288,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                         if (turnrate > max_turnrate_)
                             ++dubious_turnrate_found;
                     }
+
+                    if (use_rocd_ && target_data.hasTstModeCForTime(tod)
+                            && target_data.hasTstModeCForTime(last_tod))
+                    {
+
+                        rocd = fabs(target_data.tstModeCForTime(tod)
+                                            - target_data.tstModeCForTime(last_tod)) / time_diff;
+
+                        if (rocd > max_rocd_)
+                            ++dubious_rocd_found;
+                    }
                 }
             }
 
@@ -305,6 +321,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         {
             track.dubious_reasons_["TR"] = to_string(dubious_turnrate_found);
         }
+
+        if (use_rocd_ && dubious_rocd_found > 0)
+        {
+            track.dubious_reasons_["ROCD"] = to_string(dubious_rocd_found);
+        }
+
 
         track.is_dubious_ = track.dubious_reasons_.size() != 0;
 
@@ -362,6 +384,15 @@ bool DubiousTrack::useMaxTurnrate() const
 float DubiousTrack::maxTurnrate() const
 {
     return max_turnrate_;
+}
+
+bool DubiousTrack::useROCD() const
+{
+    return use_rocd_;
+}
+float DubiousTrack::maxROCD() const
+{
+    return max_rocd_;
 }
 
 }

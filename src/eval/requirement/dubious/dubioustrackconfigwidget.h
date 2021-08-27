@@ -54,6 +54,9 @@ public slots:
     void toggleUseMaxTurnrateSlot();
     void maxTurnrateEditSlot(QString value);
 
+    void toggleUseMaxROCDSlot();
+    void maxROCDEditSlot(QString value);
+
 public:
     DubiousTrackConfigWidget(DubiousTrackConfig& cfg);
 
@@ -74,6 +77,9 @@ protected:
 
     QCheckBox* use_max_turnrate_check_{nullptr};
     QLineEdit* max_turnrate_edit_{nullptr};
+
+    QCheckBox* use_max_rocd_check_{nullptr};
+    QLineEdit* max_rocd_edit_{nullptr};
 
     DubiousTrackConfig& config();
 

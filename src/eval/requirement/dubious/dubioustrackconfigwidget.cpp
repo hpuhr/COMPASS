@@ -120,6 +120,24 @@ DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
             this, &DubiousTrackConfigWidget::maxTurnrateEditSlot);
 
     form_layout_->addRow("Maximum Turnrate [°/s]", max_turnrate_edit_);
+
+    // use max rocd
+    use_max_rocd_check_ = new QCheckBox ();
+    use_max_rocd_check_->setChecked(config().useMaxROCD());
+    connect(use_max_rocd_check_, &QCheckBox::clicked,
+            this, &DubiousTrackConfigWidget::toggleUseMaxROCDSlot);
+
+    form_layout_->addRow("Use Maximum ROCD", use_max_rocd_check_);
+
+    // max rocd
+    max_rocd_edit_ = new QLineEdit(QString::number(config().maxROCD()));
+    max_rocd_edit_->setValidator(new QDoubleValidator(0, 10000, 0, this));
+    connect(max_rocd_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::maxROCDEditSlot);
+
+    form_layout_->addRow("Maximum ROCD [ft/s]", max_rocd_edit_);
+
+    updateActive();
 }
 
 
@@ -248,6 +266,29 @@ void DubiousTrackConfigWidget::maxTurnrateEditSlot(QString value)
         loginf << "DubiousTrackConfigWidget: maxTurnrateEditSlot: invalid value";
 }
 
+void DubiousTrackConfigWidget::toggleUseMaxROCDSlot()
+{
+    loginf << "DubiousTrackConfigWidget: toggleUseMaxROCDeSlot";
+
+    assert (use_max_rocd_check_);
+    config().useMaxROCD(use_max_rocd_check_->checkState() == Qt::Checked);
+
+    updateActive();
+}
+
+void DubiousTrackConfigWidget::maxROCDEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: maxROCDEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maxROCD(val);
+    else
+        loginf << "DubiousTrackConfigWidget: maxROCDEditSlot: invalid value";
+}
+
 
 DubiousTrackConfig& DubiousTrackConfigWidget::config()
 {
@@ -273,7 +314,12 @@ void DubiousTrackConfigWidget::updateActive()
 
     assert (max_turnrate_edit_);
     max_turnrate_edit_->setEnabled(config().useMaxTurnrate());
+
+    assert (max_rocd_edit_);
+    max_rocd_edit_->setEnabled(config().useMaxROCD());
 }
+
+
 
 
 }

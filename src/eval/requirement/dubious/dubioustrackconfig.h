@@ -73,6 +73,12 @@ public:
     float maxTurnrate() const;
     void maxTurnrate(float max_turnrate);
 
+    bool useMaxROCD() const;
+    void useMaxROCD(bool use_rocd);
+
+    float maxROCD() const;
+    void maxROCD(float max_rocd);
+
 protected:
 
     bool mark_primary_only_ {true};
@@ -91,6 +97,9 @@ protected:
 
     bool use_max_turnrate_ {true};
     float max_turnrate_ {30.0}; // deg/s
+
+    bool use_max_rocd_ {true};
+    float max_rocd_ {1000.0}; // ft/s
 
     virtual void createWidget() override;
 };

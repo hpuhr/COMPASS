@@ -53,6 +53,9 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
 
     registerParameter("use_max_turnrate", &use_max_turnrate_, true);
     registerParameter("max_turnrate", &max_turnrate_, 30.0);
+
+    registerParameter("use_rocd", &use_max_rocd_, true);
+    registerParameter("max_rocd", &max_rocd_, 1000.0);
 }
 
 DubiousTrackConfig::~DubiousTrackConfig()
@@ -170,6 +173,26 @@ void DubiousTrackConfig::maxTurnrate(float max_turnrate)
     max_turnrate_ = max_turnrate;
 }
 
+bool DubiousTrackConfig::useMaxROCD() const
+{
+    return use_max_rocd_;
+}
+
+void DubiousTrackConfig::useMaxROCD(bool use_rocd)
+{
+    use_max_rocd_ = use_rocd;
+}
+
+float DubiousTrackConfig::maxROCD() const
+{
+    return max_rocd_;
+}
+
+void DubiousTrackConfig::maxROCD(float max_rocd)
+{
+    max_rocd_ = max_rocd;
+}
+
 std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
 {
     shared_ptr<DubiousTrack> req = make_shared<DubiousTrack>(
@@ -179,6 +202,7 @@ std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
                 use_max_groundspeed_, max_groundspeed_kts_,
                 use_max_acceleration_, max_acceleration_,
                 use_max_turnrate_, max_turnrate_,
+                use_max_rocd_, max_rocd_,
                 prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
 
     return req;

@@ -92,6 +92,7 @@ public:
                  bool use_max_groundspeed, float max_groundspeed_kts,
                  bool use_max_acceleration, float max_acceleration,
                  bool use_max_turnrate, float max_turnrate,
+                 bool use_rocd, float max_rocd,
                  float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -112,6 +113,9 @@ public:
     bool useMaxTurnrate() const;
     float maxTurnrate() const;
 
+    bool useROCD() const;
+    float maxROCD() const;
+
 protected:
     bool mark_primary_only_ {true};
 
@@ -129,6 +133,9 @@ protected:
 
     bool use_max_turnrate_ {true};
     float max_turnrate_ {30.0}; // deg/s
+
+    bool use_rocd_ {true};
+    float max_rocd_ {1000.0}; // ft/s
 };
 
 }
