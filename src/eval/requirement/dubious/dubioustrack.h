@@ -52,6 +52,8 @@ public:
     bool has_mode_ac_ {false};
     bool has_mode_s_ {false};
 
+    bool left_sector_ {false};
+
     bool is_dubious_ {false};
 
     std::map<std::string, std::string> dubious_reasons_; // type -> comment
@@ -66,15 +68,15 @@ public:
         for (auto& reas_it : dubious_reasons_)
         {
             if (str.size())
-                str += "\n  ";
+                str += ", ";
 
             str += reas_it.first;
             if (reas_it.second.size())
-                str += " ("+reas_it.second+")";
+                str += "("+reas_it.second+")";
         }
 
         if (!str.size())
-            return "Ok";
+            return "OK";
         else
             return str;
     }

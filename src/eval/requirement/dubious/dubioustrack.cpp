@@ -80,6 +80,19 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     {
         tod = tst_id.first;
 
+        if (!target_data.hasTstTrackNumForTime(tod))
+        {
+            if (!track_num_missing_reported)
+            {
+                logwrn << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
+                       << " has no track number at time " << String::timeStringFromDouble(tod);
+                track_num_missing_reported = true;
+            }
+            continue;
+        }
+
+        track_num = target_data.tstTrackNumForTime(tod);
+
         ++num_updates;
 
         // check if inside based on test position only
@@ -98,21 +111,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         if (!is_inside)
         {
             ++num_pos_outside;
-            continue;
-        }
 
-        if (!target_data.hasTstTrackNumForTime(tod))
-        {
-            if (!track_num_missing_reported)
+            if (tracks.count(track_num)) // exists, left sector
             {
-                logwrn << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
-                       << " has no track number at time " << String::timeStringFromDouble(tod);
-                track_num_missing_reported = true;
+                tracks.at(track_num).left_sector_ = true;
             }
+
             continue;
         }
-
-        track_num = target_data.tstTrackNumForTime(tod);
 
         // find corresponding track
         if (tracks.count(track_num)) // exists
@@ -199,17 +205,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     {
         if (mark_primary_only_ && !track.has_mode_ac_ && !track.has_mode_s_)
         {
-            track.dubious_reasons_["Primary-only"] = "";
+            track.dubious_reasons_["Pri."] = "";
         }
 
-        if (use_min_updates_ && track.num_pos_inside_ < min_updates_)
+        if (use_min_updates_ && !track.left_sector_ && track.num_pos_inside_ < min_updates_)
         {
-            track.dubious_reasons_["Too few updates"] = to_string(track.num_pos_inside_);
+            track.dubious_reasons_["#Up"] = to_string(track.num_pos_inside_);
         }
 
-        if (use_min_duration_ && track.duration_ < min_duration_)
+        if (use_min_duration_ && !track.left_sector_ && track.duration_ < min_duration_)
         {
-            track.dubious_reasons_["Too short duration"] = String::doubleToStringPrecision(track.duration_, 1);
+            track.dubious_reasons_["Dur."] = String::doubleToStringPrecision(track.duration_, 1);
         }
 
         track.is_dubious_ = track.dubious_reasons_.size() != 0;
