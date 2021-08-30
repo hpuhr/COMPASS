@@ -43,12 +43,12 @@ namespace EvaluationRequirementResult
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
-            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious,
+            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_pos_inside_dubious,
+            unsigned int num_tracks, unsigned int num_tracks_dubious,
             std::vector<EvaluationRequirement::DubiousTrackDetail> details)
         : Single("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man),
           num_updates_(num_updates), num_pos_outside_(num_pos_outside),
-          num_pos_inside_(num_pos_inside), num_tracks_(num_tracks),
+          num_pos_inside_(num_pos_inside), num_pos_inside_dubious_(num_pos_inside_dubious), num_tracks_(num_tracks),
           num_tracks_dubious_(num_tracks_dubious), details_(details)
     {
         update();
@@ -67,18 +67,35 @@ namespace EvaluationRequirementResult
         if (num_tracks_)
         {
 
-            p_dubious_ = (float)num_tracks_dubious_/(float)num_tracks_;
-            has_p_dubious_ = true;
+            p_dubious_track_ = (float)num_tracks_dubious_/(float)num_tracks_;
+            has_p_dubious_track_ = true;
 
             result_usable_ = true;
         }
         else
         {
-            has_p_dubious_ = false;
-            p_dubious_ = 0;
+            has_p_dubious_track_ = false;
+            p_dubious_track_ = 0;
 
             result_usable_ = false;
         }
+
+        if (num_pos_inside_)
+        {
+            p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
+            has_p_dubious_update_ = true;
+        }
+        else
+        {
+            p_dubious_update_ = 0;
+            has_p_dubious_update_ = false;
+        }
+
+        logdbg << "SingleDubiousTrack " << requirement_->name() << " " << target_->utn_
+               << " has_p_dubious_update_ " << has_p_dubious_update_
+               << " num_pos_inside_dubious_ " << num_pos_inside_dubious_
+               << " num_pos_inside_ " << num_pos_inside_
+               << " p_dubious_update_ " << p_dubious_update_;
 
         updateUseFromTarget();
     }
@@ -128,17 +145,22 @@ namespace EvaluationRequirementResult
                 order = Qt::DescendingOrder;
 
 
-            section.addTable(table_name, 12,
+            section.addTable(table_name, 15,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#T", "#DT", "Reasons", "PDT"}, true, 11, order);
+             "#CU", "#DU", "PDU", "#T", "#DT", "Reasons", "PDT"}, true, 14, order);
         }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
-        QVariant p_dubious_var;
+        QVariant p_dubious_up_var;
 
-        if (has_p_dubious_)
-            p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
+        if (has_p_dubious_update_)
+            p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+
+        QVariant p_dubious_track_var;
+
+        if (has_p_dubious_track_)
+            p_dubious_track_var = roundf(p_dubious_track_ * 10000.0) / 100.0;
 
         string reasons;
 
@@ -154,10 +176,13 @@ namespace EvaluationRequirementResult
         {utn_, target_->timeBeginStr().c_str(), target_->timeEndStr().c_str(),
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(), target_->modeCMaxStr().c_str(),
+         num_pos_inside_, // "#CU"
+         num_pos_inside_dubious_, // "#DU"
+         p_dubious_up_var, // "PDU"
          num_tracks_, // "#T"
          num_tracks_dubious_, // "#DT"
          reasons.c_str(),  // "Reasons"
-         p_dubious_var}, // "PDT"
+         p_dubious_track_var}, // "PDT"
                     this, {utn_});
     }
 
@@ -172,18 +197,23 @@ namespace EvaluationRequirementResult
                     || req()->probCheckType() == EvaluationRequirement::COMPARISON_TYPE::LESS_THAN_OR_EQUAL)
                 order = Qt::DescendingOrder;
 
-            section.addTable(table_name, 15,
+            section.addTable(table_name, 18,
             {"UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max",
-             "#T", "#DT", "Reasons", "PDT",
-             "MOPS", "NUCp/NIC", "NACp"}, true, 11, order);
+             "#CU", "#DU", "PDU", "#T", "#DT", "Reasons", "PDT",
+             "MOPS", "NUCp/NIC", "NACp"}, true, 14, order);
         }
 
         EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
 
+        QVariant p_dubious_up_var;
+
+        if (has_p_dubious_update_)
+            p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+
         QVariant p_dubious_var;
 
-        if (has_p_dubious_)
-            p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
+        if (has_p_dubious_track_)
+            p_dubious_var = roundf(p_dubious_track_ * 10000.0) / 100.0;
 
         string reasons;
 
@@ -203,6 +233,9 @@ namespace EvaluationRequirementResult
          target_->callsignsStr().c_str(), target_->targetAddressesStr().c_str(),
          target_->modeACodesStr().c_str(), target_->modeCMinStr().c_str(),
          target_->modeCMaxStr().c_str(),
+         num_pos_inside_, // "#CU"
+         num_pos_inside_dubious_, // "#DU"
+         p_dubious_up_var, // "PDU"
          num_tracks_, // "#T"
          num_tracks_dubious_, // "#DT"
          reasons.c_str(),  // "Reasons"
@@ -246,8 +279,8 @@ namespace EvaluationRequirementResult
         {
             QVariant p_dubious_var;
 
-            if (has_p_dubious_)
-                p_dubious_ = roundf(p_dubious_ * 10000.0) / 100.0;
+            if (has_p_dubious_track_)
+                p_dubious_track_ = roundf(p_dubious_track_ * 10000.0) / 100.0;
 
             utn_req_table.addRow({"PDT [%]", "Probability of dubious track", p_dubious_var}, this);
 
@@ -255,13 +288,13 @@ namespace EvaluationRequirementResult
 
             string result {"Unknown"};
 
-            if (has_p_dubious_)
-                result = req->getResultConditionStr(p_dubious_);
+            if (has_p_dubious_track_)
+                result = req->getResultConditionStr(p_dubious_track_);
 
             utn_req_table.addRow({"Condition Fulfilled", "", result.c_str()}, this);
         }
 
-        if (has_p_dubious_ && p_dubious_ != 0.0) // TODO
+        if (has_p_dubious_track_ && p_dubious_track_ != 0.0) // TODO
         {
             utn_req_section.addFigure("target_errors_overview", "Target Errors Overview",
                                       getTargetErrorsViewable());
@@ -443,6 +476,11 @@ namespace EvaluationRequirementResult
     unsigned int SingleDubiousTrack::numPosInside() const
     {
         return num_pos_inside_;
+    }
+
+    unsigned int SingleDubiousTrack::numPosInsideDubious() const
+    {
+        return num_pos_inside_dubious_;
     }
 
     std::shared_ptr<Joined> SingleDubiousTrack::createEmptyJoined(const std::string& result_id)

@@ -33,8 +33,8 @@ public:
             const SectorLayer& sector_layer,
             unsigned int utn, const EvaluationTargetData* target, EvaluationManager& eval_man,
             unsigned int num_updates,
-            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_tracks,
-            unsigned int num_tracks_dubious,
+            unsigned int num_pos_outside, unsigned int num_pos_inside, unsigned int num_pos_inside_dubious,
+            unsigned int num_tracks, unsigned int num_tracks_dubious,
             std::vector<EvaluationRequirement::DubiousTrackDetail> details);
 
     virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
@@ -44,6 +44,7 @@ public:
     unsigned int numUpdates() const;
     unsigned int numPosOutside() const;
     unsigned int numPosInside() const;
+    unsigned int numPosInsideDubious() const;
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
 
@@ -66,13 +67,17 @@ protected:
     unsigned int num_updates_ {0};
     unsigned int num_pos_outside_ {0};
     unsigned int num_pos_inside_ {0};
+    unsigned int num_pos_inside_dubious_ {0};
     unsigned int num_tracks_ {0};
     unsigned int num_tracks_dubious_ {0};
 
     std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 
-    bool has_p_dubious_ {false};
-    float p_dubious_{0};
+    bool has_p_dubious_track_ {false};
+    float p_dubious_track_{0};
+
+    bool has_p_dubious_update_ {false};
+    float p_dubious_update_{0};
 
     void update();
 

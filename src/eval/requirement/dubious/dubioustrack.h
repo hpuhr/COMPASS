@@ -48,6 +48,9 @@ public:
     //unsigned int num_updates_ {0};
     //unsigned int num_pos_outside_{0};
     unsigned int num_pos_inside_{0};
+    unsigned int num_pos_inside_dubious_{0};
+
+    std::map<float, std::map<std::string, std::string>> tods_inside_dubious_; // tod -> type -> comment
 
     bool has_mode_ac_ {false};
     bool has_mode_s_ {false};

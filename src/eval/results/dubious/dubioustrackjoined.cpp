@@ -187,7 +187,7 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
         if (has_p_dubious_)
             p_dubious_var = roundf(p_dubious_ * 10000.0) / 100.0;
 
-        sec_det_table.addRow({"PDT [%]", "PProbability of dubious track", p_dubious_var}, this);
+        sec_det_table.addRow({"PDT [%]", "Probability of dubious track", p_dubious_var}, this);
 
         sec_det_table.addRow({"Condition", {}, req->getConditionStr().c_str()}, this);
 
