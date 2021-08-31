@@ -369,7 +369,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
     {
         unsigned int detail_update_cnt = annotation.toUInt();
 
-        loginf << "SingleDubiousTrack: viewableData: detail_update_cnt " << detail_update_cnt;
+        logdbg << "SingleDubiousTrack: viewableData: detail_update_cnt " << detail_update_cnt;
 
         std::unique_ptr<nlohmann::json::object_t> viewable_ptr
                 = eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
@@ -387,7 +387,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
             assert (detail_cnt < details_.size());
         }
 
-        loginf << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
+        logdbg << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
                << " update detail size " << details_.at(detail_cnt).updates_.size()
                << " per_detail_update_cnt " << per_detail_update_cnt;
 
