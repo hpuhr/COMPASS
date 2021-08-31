@@ -59,6 +59,7 @@ namespace EvaluationRequirementResult
         unsigned int num_updates_ {0};
         unsigned int num_pos_outside_ {0};
         unsigned int num_pos_inside_ {0};
+        unsigned int num_pos_inside_dubious_ {0};
         unsigned int num_tracks_ {0};
         unsigned int num_tracks_dubious_ {0};
 
@@ -66,6 +67,9 @@ namespace EvaluationRequirementResult
 
         bool has_p_dubious_ {false};
         float p_dubious_{0};
+
+        bool has_p_dubious_update_ {false};
+        float p_dubious_update_{0};
 
         void addToValues (std::shared_ptr<SingleDubiousTrack> single_result);
         void update();

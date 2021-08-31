@@ -155,7 +155,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         ++num_pos_inside;
         ++current_detail.num_pos_inside_;
 
-        current_detail.tods_inside_.push_back(tod);
+        current_detail.updates_.emplace_back(tod, tst_pos);
+
+        //current_detail.tods_inside_.push_back(tod);
 
         if (current_detail.first_inside_) // do detail time & pos
         {
@@ -251,47 +253,47 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
 
         has_last_tod = false;
-        for (float tod : track_detail.tods_inside_)
+        for (DubiousTrackUpdateDetail& update : track_detail.updates_)
         {
             if (all_updates_dubious) // mark was primarty/short track if required
-                track_detail.tods_inside_dubious_[tod] = all_updates_dubious_reasons;
+                update.dubious_comments_ = all_updates_dubious_reasons;
 
-            if (use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(tod)
-                    && target_data.tstMeasuredSpeedForTime(tod) > max_groundspeed_kts_)
+            if (use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
+                    && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
             {
-                track_detail.tods_inside_dubious_[tod]["Spd"] =
-                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(tod), 1);
+                update.dubious_comments_["Spd"] =
+                        String::doubleToStringPrecision(target_data.tstMeasuredSpeedForTime(update.tod_), 1);
 
                 ++dubious_groundspeed_found;
             }
 
             if (has_last_tod)
             {
-                assert (tod >= last_tod);
-                time_diff = tod - last_tod;
+                assert (update.tod_ >= last_tod);
+                time_diff = update.tod_ - last_tod;
 
                 if (time_diff <= 30.0)
                 {
-                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(tod)
+                    if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
                             && target_data.hasTstMeasuredSpeedForTime(last_tod))
                     {
 
-                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(tod)
+                        acceleration = fabs(target_data.tstMeasuredSpeedForTime(update.tod_)
                                             - target_data.tstMeasuredSpeedForTime(last_tod)) * KNOTS2M_S / time_diff;
 
                         if (acceleration > max_acceleration_)
                         {
-                            track_detail.tods_inside_dubious_[tod]["Acc"] =
+                            update.dubious_comments_["Acc"] =
                                     String::doubleToStringPrecision(acceleration, 1);
 
                             ++dubious_acceleration_found;
                         }
                     }
 
-                    if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(tod)
+                    if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
                             && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
                     {
-                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(tod)
+                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(update.tod_)
                                         - target_data.tstMeasuredTrackAngleForTime(last_tod)) / time_diff;
 
                         // move to correct period
@@ -303,23 +305,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
                         if (turnrate > max_turnrate_)
                         {
-                            track_detail.tods_inside_dubious_[tod]["TR"] =
+                            update.dubious_comments_["TR"] =
                                     String::doubleToStringPrecision(turnrate, 1);
 
                             ++dubious_turnrate_found;
                         }
                     }
 
-                    if (use_rocd_ && target_data.hasTstModeCForTime(tod)
+                    if (use_rocd_ && target_data.hasTstModeCForTime(update.tod_)
                             && target_data.hasTstModeCForTime(last_tod))
                     {
 
-                        rocd = fabs(target_data.tstModeCForTime(tod)
+                        rocd = fabs(target_data.tstModeCForTime(update.tod_)
                                             - target_data.tstModeCForTime(last_tod)) / time_diff;
 
                         if (rocd > max_rocd_)
                         {
-                            track_detail.tods_inside_dubious_[tod]["ROCD"] =
+                            update.dubious_comments_["ROCD"] =
                                     String::doubleToStringPrecision(rocd, 1);
 
                             ++dubious_rocd_found;
@@ -329,7 +331,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             }
 
             // done
-            last_tod = tod;
+            last_tod = update.tod_;
             has_last_tod = true;
         }
 
@@ -353,7 +355,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             track_detail.dubious_reasons_["ROCD"] = to_string(dubious_rocd_found);
         }
 
-        track_detail.num_pos_inside_dubious_ = track_detail.tods_inside_dubious_.size(); // num of tods with issues
+        track_detail.num_pos_inside_dubious_ = track_detail.getNumUpdatesDubious(); // num of tods with issues
         //track_detail.is_dubious_ = track_detail.dubious_reasons_.size() != 0;
 
         if (track_detail.num_pos_inside_

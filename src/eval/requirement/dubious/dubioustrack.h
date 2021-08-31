@@ -28,6 +28,42 @@
 namespace EvaluationRequirement
 {
 
+class DubiousTrackUpdateDetail
+{
+public:
+    DubiousTrackUpdateDetail(float tod, EvaluationTargetPosition pos)
+        : tod_(tod), pos_(pos)
+    {
+    }
+
+    float tod_ {0};
+    EvaluationTargetPosition pos_;
+    std::map<std::string, std::string> dubious_comments_;
+
+    std::string dubiousReasonsString()
+    {
+        if (!dubious_comments_.size())
+            return "OK";
+
+        std::string str;
+
+        for (auto& reas_it : dubious_comments_)
+        {
+            if (str.size())
+                str += ", ";
+
+            str += reas_it.first;
+            if (reas_it.second.size())
+                str += "("+reas_it.second+")";
+        }
+
+        if (!str.size())
+            return "OK";
+        else
+            return str;
+    }
+};
+
 class DubiousTrackDetail
 {
 public:
@@ -43,14 +79,13 @@ public:
     float tod_begin_ {0};
     float tod_end_ {0};
     float duration_ {0};
-    std::vector<float> tods_inside_;
+    //std::vector<float> tods_inside_;
 
-    //unsigned int num_updates_ {0};
-    //unsigned int num_pos_outside_{0};
     unsigned int num_pos_inside_{0};
     unsigned int num_pos_inside_dubious_{0};
 
-    std::map<float, std::map<std::string, std::string>> tods_inside_dubious_; // tod -> type -> comment
+    //std::map<float, std::map<std::string, std::string>> tods_inside_dubious_; // tod -> type -> comment
+    std::vector<DubiousTrackUpdateDetail> updates_; // only for inside, also not dubious
 
     bool has_mode_ac_ {false};
     bool has_mode_s_ {false};
@@ -83,6 +118,40 @@ public:
         else
             return str;
     }
+
+    unsigned int getNumUpdatesDubious()
+    {
+        unsigned int cnt = 0;
+
+        for (auto& update : updates_)
+            if (update.dubious_comments_.size())
+                ++cnt;
+
+        return cnt;
+    }
+
+//    bool hasUpdateDetail(float tod)
+//    {
+//        std::vector<DubiousTrackUpdateDetail>::iterator it =
+//                find_if(updates_.begin(), updates_.end(),
+//                        [tod] (const DubiousTrackUpdateDetail& s) { return s.tod_ == tod; } );
+
+//        return it != updates_.end();
+
+//    }
+
+//    DubiousTrackUpdateDetail& getUpdateDetail(float tod)
+//    {
+//        std::vector<DubiousTrackUpdateDetail>::iterator it =
+//                find_if(updates_.begin(), updates_.end(),
+//                        [tod] (const DubiousTrackUpdateDetail& s) { return s.tod_ == tod; } );
+
+//        assert (it != updates_.end());
+
+//        return *it;
+//    }
+
+
 };
 
 

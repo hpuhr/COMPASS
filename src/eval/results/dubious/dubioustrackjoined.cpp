@@ -68,13 +68,13 @@ void JoinedDubiousTrack::addToValues (std::shared_ptr<SingleDubiousTrack> single
     num_updates_ += single_result->numUpdates();
     num_pos_outside_ += single_result->numPosOutside();
     num_pos_inside_ += single_result->numPosInside();
+    num_pos_inside_dubious_ += single_result->numPosInsideDubious();
     num_tracks_ += single_result->numTracks();
     num_tracks_dubious_ += single_result->numTracksDubious();
 
     details_.insert(details_.end(), single_result->details().begin(), single_result->details().end());
 
     //const vector<double>& other_values = single_result->values();
-
     //values_.insert(values_.end(), other_values.begin(), other_values.end());
 
     update();
@@ -99,6 +99,17 @@ void JoinedDubiousTrack::update()
     {
         has_p_dubious_ = false;
         p_dubious_ = 0;
+    }
+
+    if (num_pos_inside_)
+    {
+        p_dubious_update_ = (float)num_pos_inside_dubious_/(float)num_pos_inside_;
+        has_p_dubious_update_ = true;
+    }
+    else
+    {
+        p_dubious_update_ = 0;
+        has_p_dubious_update_ = false;
     }
 }
 
@@ -174,6 +185,14 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     sec_det_table.addRow({"#Pos [1]", "Number of updates", num_updates_}, this);
     sec_det_table.addRow({"#PosInside [1]", "Number of updates inside sector", num_pos_inside_}, this);
     sec_det_table.addRow({"#PosOutside [1]", "Number of updates outside sector", num_pos_outside_}, this);
+    sec_det_table.addRow({"#DU [1]", "Number of dubious updates inside sector", num_pos_inside_dubious_}, this);
+
+    QVariant p_dubious_up_var;
+
+    if (has_p_dubious_update_)
+        p_dubious_up_var = roundf(p_dubious_update_ * 10000.0) / 100.0;
+
+    sec_det_table.addRow({"PDU [%]", "Probability of dubious update", p_dubious_up_var}, this);
 
     sec_det_table.addRow({"#T [1]", "Number of tracks", num_tracks_}, this);
     sec_det_table.addRow({"#DT [1]", "Number of dubious tracks", num_tracks_dubious_},
@@ -281,6 +300,7 @@ void JoinedDubiousTrack::updatesToUseChanges()
     num_updates_ = 0;
     num_pos_outside_ = 0;
     num_pos_inside_ = 0;
+    num_pos_inside_dubious_ = 0;
     num_tracks_ = 0;
     num_tracks_dubious_ = 0;
 
