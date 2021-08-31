@@ -30,6 +30,23 @@ namespace EvaluationRequirement
 DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    // min comp time
+    min_comp_time_edit_ = new QLineEdit(QString::number(config().minimumComparisonTime()));
+    min_comp_time_edit_->setValidator(new QDoubleValidator(0, 30, 3, this));
+    connect(min_comp_time_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::minCompTimeEditSlot);
+
+    form_layout_->addRow("Minimum Comparison Time [s]", min_comp_time_edit_);
+
+    // max comp time
+    max_comp_time_edit_ = new QLineEdit(QString::number(config().maximumComparisonTime()));
+    max_comp_time_edit_->setValidator(new QDoubleValidator(0, 300, 0, this));
+    connect(max_comp_time_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::maxCompTimeEditSlot);
+
+    form_layout_->addRow("Maximum Comparison Time [s]", max_comp_time_edit_);
+
+
     // mark primary-only tracks
     mark_primary_only_check_ = new QCheckBox ();
     mark_primary_only_check_->setChecked(config().markPrimaryOnly());
@@ -137,7 +154,41 @@ DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
 
     form_layout_->addRow("Maximum ROCD [ft/s]", max_rocd_edit_);
 
+    // dubious prob
+    dubious_prob_edit_ = new QLineEdit(QString::number(config().dubiousProb()));
+    dubious_prob_edit_->setValidator(new QDoubleValidator(0, 1, 4, this));
+    connect(dubious_prob_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::dubiousProbEditSlot);
+
+    form_layout_->addRow("Dubious Probability [1]", dubious_prob_edit_);
+
     updateActive();
+}
+
+void DubiousTrackConfigWidget::minCompTimeEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: minCompTimeEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().minimumComparisonTime(val);
+    else
+        loginf << "DubiousTrackConfigWidget: minCompTimeEditSlot: invalid value";
+}
+
+void DubiousTrackConfigWidget::maxCompTimeEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: maxCompTimeEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().maximumComparisonTime(val);
+    else
+        loginf << "DubiousTrackConfigWidget: maxCompTimeEditSlot: invalid value";
 }
 
 
@@ -287,6 +338,19 @@ void DubiousTrackConfigWidget::maxROCDEditSlot(QString value)
         config().maxROCD(val);
     else
         loginf << "DubiousTrackConfigWidget: maxROCDEditSlot: invalid value";
+}
+
+void DubiousTrackConfigWidget::dubiousProbEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: dubiousProbEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toFloat(&ok);
+
+    if (ok)
+        config().dubiousProb(val);
+    else
+        loginf << "DubiousTrackConfigWidget: dubiousProbEditSlot: invalid value";
 }
 
 

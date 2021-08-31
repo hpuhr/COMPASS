@@ -30,20 +30,22 @@ namespace EvaluationRequirement
 
 DubiousTrack::DubiousTrack(
         const std::string& name, const std::string& short_name, const std::string& group_name,
+        float minimum_comparison_time, float maximum_comparison_time,
         bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
         bool use_min_duration, float min_duration,
         bool use_max_groundspeed, float max_groundspeed_kts,
         bool use_max_acceleration, float max_acceleration,
         bool use_max_turnrate, float max_turnrate,
-        bool use_rocd, float max_rocd,
+        bool use_rocd, float max_rocd, float dubious_prob,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+      minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
       use_min_duration_(use_min_duration), min_duration_(min_duration),
       use_max_groundspeed_(use_max_groundspeed), max_groundspeed_kts_(max_groundspeed_kts),
       use_max_acceleration_(use_max_acceleration), max_acceleration_(max_acceleration),
       use_max_turnrate_(use_max_turnrate), max_turnrate_(max_turnrate),
-      use_rocd_(use_rocd), max_rocd_(max_rocd)
+      use_rocd_(use_rocd), max_rocd_(max_rocd), dubious_prob_(dubious_prob)
 {
 }
 
@@ -69,10 +71,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     bool is_inside;
 
     float tod{0};
-
-    //bool general_first_inside = true;
-    //float tod_first{0}, tod_last{0};
-    //EvaluationTargetPosition pos_first, pos_last;
 
     unsigned int num_updates {0};
     unsigned int num_pos_outside {0};
@@ -157,8 +155,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
         current_detail.updates_.emplace_back(tod, tst_pos);
 
-        //current_detail.tods_inside_.push_back(tod);
-
         if (current_detail.first_inside_) // do detail time & pos
         {
             current_detail.tod_begin_ = tod;
@@ -214,7 +210,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
     float last_tod;
     float time_diff;
     float acceleration;
-    float turnrate;
+    float track_angle1, track_angle2, turnrate;
     float rocd;
 
     for (auto& track_detail : finished_tracks)
@@ -272,7 +268,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                 assert (update.tod_ >= last_tod);
                 time_diff = update.tod_ - last_tod;
 
-                if (time_diff <= 30.0)
+                if (time_diff >= minimum_comparison_time_
+                        && time_diff <= maximum_comparison_time_)
                 {
                     if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
                             && target_data.hasTstMeasuredSpeedForTime(last_tod))
@@ -293,23 +290,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
                             && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
                     {
-//                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(update.tod_)
-//                                        - target_data.tstMeasuredTrackAngleForTime(last_tod)) / time_diff;
+                        track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.tod_);
+                        track_angle2 = target_data.tstMeasuredTrackAngleForTime(last_tod);
 
-                        turnrate = target_data.tstMeasuredTrackAngleForTime(update.tod_)
-                                        - target_data.tstMeasuredTrackAngleForTime(last_tod); // turn angle
-
-                        turnrate = fabs(turnrate);
-
-//                        // move to positive
-//                        while (turnrate < 0.0)
-//                            turnrate += 360.0;
-
-                        // move to 180° period
-                        while (turnrate > 180.0)
-                            turnrate -= 180.0;
-
-                        turnrate /= time_diff;
+                        turnrate = fabs(RAD2DEG*atan2(sin(DEG2RAD*(track_angle1-track_angle2)),
+                                              cos(DEG2RAD*(track_angle1-track_angle2)))) / time_diff; // turn angle rate
 
                         if (turnrate > max_turnrate_)
                         {
@@ -364,10 +349,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         }
 
         track_detail.num_pos_inside_dubious_ = track_detail.getNumUpdatesDubious(); // num of tods with issues
-        //track_detail.is_dubious_ = track_detail.dubious_reasons_.size() != 0;
 
         if (track_detail.num_pos_inside_
-                && ((float) track_detail.num_pos_inside_dubious_ /(float)(track_detail.num_pos_inside_) > 0.15))
+                && ((float) track_detail.num_pos_inside_dubious_ /(float)(track_detail.num_pos_inside_) > dubious_prob_))
         {
             track_detail.is_dubious_ = true;
             ++num_tracks_dubious;

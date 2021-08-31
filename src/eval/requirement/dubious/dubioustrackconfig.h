@@ -79,7 +79,18 @@ public:
     float maxROCD() const;
     void maxROCD(float max_rocd);
 
+    float minimumComparisonTime() const;
+    void minimumComparisonTime(float minimum_comparison_time);
+
+    float maximumComparisonTime() const;
+    void maximumComparisonTime(float maximum_comparison_time);
+
+    float dubiousProb() const;
+    void dubiousProb(float dubious_prob);
+
 protected:
+    float minimum_comparison_time_ {1.0};
+    float maximum_comparison_time_ {30.0};
 
     bool mark_primary_only_ {true};
 
@@ -100,6 +111,8 @@ protected:
 
     bool use_max_rocd_ {true};
     float max_rocd_ {1000.0}; // ft/s
+
+    float dubious_prob_ {0.05};
 
     virtual void createWidget() override;
 };

@@ -129,29 +129,6 @@ public:
 
         return cnt;
     }
-
-//    bool hasUpdateDetail(float tod)
-//    {
-//        std::vector<DubiousTrackUpdateDetail>::iterator it =
-//                find_if(updates_.begin(), updates_.end(),
-//                        [tod] (const DubiousTrackUpdateDetail& s) { return s.tod_ == tod; } );
-
-//        return it != updates_.end();
-
-//    }
-
-//    DubiousTrackUpdateDetail& getUpdateDetail(float tod)
-//    {
-//        std::vector<DubiousTrackUpdateDetail>::iterator it =
-//                find_if(updates_.begin(), updates_.end(),
-//                        [tod] (const DubiousTrackUpdateDetail& s) { return s.tod_ == tod; } );
-
-//        assert (it != updates_.end());
-
-//        return *it;
-//    }
-
-
 };
 
 
@@ -159,12 +136,13 @@ class DubiousTrack : public Base
 {
 public:
     DubiousTrack(const std::string& name, const std::string& short_name, const std::string& group_name,
+                 float minimum_comparison_time, float maximum_comparison_time,
                  bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
                  bool use_min_duration, float min_duration,
                  bool use_max_groundspeed, float max_groundspeed_kts,
                  bool use_max_acceleration, float max_acceleration,
                  bool use_max_turnrate, float max_turnrate,
-                 bool use_rocd, float max_rocd,
+                 bool use_rocd, float max_rocd, float dubious_prob,
                  float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -189,6 +167,9 @@ public:
     float maxROCD() const;
 
 protected:
+    float minimum_comparison_time_ {1.0};
+    float maximum_comparison_time_ {30.0};
+
     bool mark_primary_only_ {true};
 
     bool use_min_updates_ {true};
@@ -208,6 +189,8 @@ protected:
 
     bool use_rocd_ {true};
     float max_rocd_ {1000.0}; // ft/s
+
+    float dubious_prob_ {0.05};
 };
 
 }

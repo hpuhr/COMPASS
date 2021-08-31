@@ -37,6 +37,9 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
 {
     prob_check_type_ = COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
 
+    registerParameter("minimum_comparison_time", &minimum_comparison_time_, 1.0);
+    registerParameter("maximum_comparison_time", &maximum_comparison_time_, 30.0);
+
     registerParameter("mark_primary_only", &mark_primary_only_, true);
 
     registerParameter("use_min_updates", &use_min_updates_, true);
@@ -56,6 +59,8 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
 
     registerParameter("use_rocd", &use_max_rocd_, true);
     registerParameter("max_rocd", &max_rocd_, 1000.0);
+
+    registerParameter("dubious_prob", &dubious_prob_, 0.05);
 }
 
 DubiousTrackConfig::~DubiousTrackConfig()
@@ -193,16 +198,47 @@ void DubiousTrackConfig::maxROCD(float max_rocd)
     max_rocd_ = max_rocd;
 }
 
+float DubiousTrackConfig::minimumComparisonTime() const
+{
+    return minimum_comparison_time_;
+}
+
+void DubiousTrackConfig::minimumComparisonTime(float minimum_comparison_time)
+{
+    minimum_comparison_time_ = minimum_comparison_time;
+}
+
+float DubiousTrackConfig::maximumComparisonTime() const
+{
+    return maximum_comparison_time_;
+}
+
+void DubiousTrackConfig::maximumComparisonTime(float maximum_comparison_time)
+{
+    maximum_comparison_time_ = maximum_comparison_time;
+}
+
+float DubiousTrackConfig::dubiousProb() const
+{
+    return dubious_prob_;
+}
+
+void DubiousTrackConfig::dubiousProb(float dubious_prob)
+{
+    dubious_prob_ = dubious_prob;
+}
+
 std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
 {
     shared_ptr<DubiousTrack> req = make_shared<DubiousTrack>(
                 name_, short_name_, group_.name(),
+                minimum_comparison_time_, maximum_comparison_time_,
                 mark_primary_only_, use_min_updates_, min_updates_,
                 use_min_duration_, min_duration_,
                 use_max_groundspeed_, max_groundspeed_kts_,
                 use_max_acceleration_, max_acceleration_,
                 use_max_turnrate_, max_turnrate_,
-                use_max_rocd_, max_rocd_,
+                use_max_rocd_, max_rocd_, dubious_prob_,
                 prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
 
     return req;

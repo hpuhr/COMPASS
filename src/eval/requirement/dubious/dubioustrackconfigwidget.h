@@ -37,6 +37,9 @@ class DubiousTrackConfigWidget : public BaseConfigWidget
     Q_OBJECT
 
 public slots:
+    void minCompTimeEditSlot(QString value);
+    void maxCompTimeEditSlot(QString value);
+
     void toggleMarkPrimaryOnlySlot();
 
     void toggleUseMinUpdatesSlot();
@@ -57,10 +60,15 @@ public slots:
     void toggleUseMaxROCDSlot();
     void maxROCDEditSlot(QString value);
 
+    void dubiousProbEditSlot(QString value);
+
 public:
     DubiousTrackConfigWidget(DubiousTrackConfig& cfg);
 
 protected:
+    QLineEdit* min_comp_time_edit_{nullptr};
+    QLineEdit* max_comp_time_edit_{nullptr};
+
     QCheckBox* mark_primary_only_check_{nullptr};
 
     QCheckBox* use_min_updates_check_{nullptr};
@@ -80,6 +88,8 @@ protected:
 
     QCheckBox* use_max_rocd_check_{nullptr};
     QLineEdit* max_rocd_edit_{nullptr};
+
+    QLineEdit* dubious_prob_edit_{nullptr};
 
     DubiousTrackConfig& config();
 
