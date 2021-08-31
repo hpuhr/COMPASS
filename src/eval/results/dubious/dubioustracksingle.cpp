@@ -379,7 +379,7 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
         unsigned int per_detail_update_cnt = detail_update_cnt;
 
         assert (details_.size());
-        while (per_detail_update_cnt > details_.at(detail_cnt).updates_.size())
+        while (per_detail_update_cnt >= details_.at(detail_cnt).updates_.size())
         {
             per_detail_update_cnt -= details_.at(detail_cnt).updates_.size();
             ++detail_cnt;
@@ -387,8 +387,12 @@ std::unique_ptr<nlohmann::json::object_t> SingleDubiousTrack::viewableData(
             assert (detail_cnt < details_.size());
         }
 
-        loginf << "SingleDubiousTrack: viewableData: detail_cnt " << detail_cnt
+        loginf << "SingleDubiousTrack: viewableData: FINAL detail_cnt " << detail_cnt
+               << " update detail size " << details_.at(detail_cnt).updates_.size()
                << " per_detail_update_cnt " << per_detail_update_cnt;
+
+        assert (detail_cnt < details_.size());
+        assert (per_detail_update_cnt < details_.at(detail_cnt).updates_.size());
 
         const EvaluationRequirement::DubiousTrackDetail& detail = details_.at(detail_cnt);
         const EvaluationRequirement::DubiousTrackUpdateDetail& update_detail =

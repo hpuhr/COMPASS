@@ -293,15 +293,23 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                     if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
                             && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
                     {
-                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(update.tod_)
-                                        - target_data.tstMeasuredTrackAngleForTime(last_tod)) / time_diff;
+//                        turnrate = fabs(target_data.tstMeasuredTrackAngleForTime(update.tod_)
+//                                        - target_data.tstMeasuredTrackAngleForTime(last_tod)) / time_diff;
 
-                        // move to correct period
-                        while (turnrate < 0.0)
-                            turnrate += 360.0;
+                        turnrate = target_data.tstMeasuredTrackAngleForTime(update.tod_)
+                                        - target_data.tstMeasuredTrackAngleForTime(last_tod); // turn angle
 
-                        while (turnrate > 360.0)
-                            turnrate -= 360.0;
+                        turnrate = fabs(turnrate);
+
+//                        // move to positive
+//                        while (turnrate < 0.0)
+//                            turnrate += 360.0;
+
+                        // move to 180° period
+                        while (turnrate > 180.0)
+                            turnrate -= 180.0;
+
+                        turnrate /= time_diff;
 
                         if (turnrate > max_turnrate_)
                         {
