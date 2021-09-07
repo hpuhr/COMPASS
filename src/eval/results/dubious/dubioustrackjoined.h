@@ -63,6 +63,10 @@ namespace EvaluationRequirementResult
         unsigned int num_tracks_ {0};
         unsigned int num_tracks_dubious_ {0};
 
+        float track_duration_all_ {0};
+        float track_duration_nondub_ {0};
+        float track_duration_dubious_ {0};
+
         std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 
         bool has_p_dubious_ {false};

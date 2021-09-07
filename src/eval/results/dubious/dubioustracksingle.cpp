@@ -71,6 +71,16 @@ void SingleDubiousTrack::update()
         has_p_dubious_track_ = true;
 
         result_usable_ = true;
+
+        for (auto& detail_it : details_)
+        {
+            track_duration_all_ += detail_it.duration_;
+
+            if (detail_it.is_dubious_)
+                track_duration_dubious_ += detail_it.duration_;
+            else
+                track_duration_nondub_ += detail_it.duration_;
+        }
     }
     else
     {
@@ -282,6 +292,31 @@ void SingleDubiousTrack::addTargetDetailsToReport(shared_ptr<EvaluationResultsRe
     utn_req_table.addRow({"#T [1]", "Number of tracks", num_tracks_}, this);
     utn_req_table.addRow({"#DT [1]", "Number of dubious tracks", num_tracks_dubious_},
                          this);
+
+    utn_req_table.addRow({"Duration [s]", "Duration of all tracks", track_duration_all_}, this);
+    utn_req_table.addRow({"Duration Dubious [s]", "Duration of dubious tracks", track_duration_dubious_}, this);
+
+    QVariant dubious_t_avg_var;
+
+    if (num_tracks_dubious_)
+        dubious_t_avg_var = roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
+
+    utn_req_table.addRow({"Duration Non-Dubious [s]", "Duration of non-dubious tracks", track_duration_nondub_}, this);
+
+    utn_req_table.addRow({"Average Duration Dubious [s]", "Average duration of dubious tracks",
+                          dubious_t_avg_var}, this);
+
+    QVariant p_dubious_t_var, p_nondub_t_var;
+
+    if (track_duration_all_)
+    {
+        p_dubious_t_var = roundf(track_duration_dubious_/track_duration_all_ * 10000.0) / 100.0;
+        p_nondub_t_var = roundf(track_duration_nondub_/track_duration_all_ * 10000.0) / 100.0;
+    }
+
+    utn_req_table.addRow({"Duration Dubious Ratio [%]", "Duration ratio of dubious tracks", p_dubious_t_var}, this);
+    utn_req_table.addRow({"Duration Non-Dubious Ration [%]", "Duration ratio of non-dubious tracks", p_nondub_t_var}, this);
+
 
     // condition
     {
@@ -532,6 +567,21 @@ EvaluationRequirement::DubiousTrack* SingleDubiousTrack::req ()
             dynamic_cast<EvaluationRequirement::DubiousTrack*>(requirement_.get());
     assert (req);
     return req;
+}
+
+float SingleDubiousTrack::trackDurationAll() const
+{
+    return track_duration_all_;
+}
+
+float SingleDubiousTrack::trackDurationNondub() const
+{
+    return track_duration_nondub_;
+}
+
+float SingleDubiousTrack::trackDurationDubious() const
+{
+    return track_duration_dubious_;
 }
 
 const std::vector<EvaluationRequirement::DubiousTrackDetail>& SingleDubiousTrack::details() const

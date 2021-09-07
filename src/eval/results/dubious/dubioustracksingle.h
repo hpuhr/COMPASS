@@ -48,6 +48,10 @@ public:
     unsigned int numTracks() const;
     unsigned int numTracksDubious() const;
 
+    float trackDurationAll() const;
+    float trackDurationNondub() const;
+    float trackDurationDubious() const;
+
     const std::vector<EvaluationRequirement::DubiousTrackDetail>& details() const;
 
     virtual bool hasViewableData (
@@ -70,6 +74,10 @@ protected:
     unsigned int num_pos_inside_dubious_ {0};
     unsigned int num_tracks_ {0};
     unsigned int num_tracks_dubious_ {0};
+
+    float track_duration_all_ {0};
+    float track_duration_nondub_ {0};
+    float track_duration_dubious_ {0};
 
     std::vector<EvaluationRequirement::DubiousTrackDetail> details_;
 

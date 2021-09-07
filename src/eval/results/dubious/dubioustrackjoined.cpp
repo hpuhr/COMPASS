@@ -72,6 +72,10 @@ void JoinedDubiousTrack::addToValues (std::shared_ptr<SingleDubiousTrack> single
     num_tracks_ += single_result->numTracks();
     num_tracks_dubious_ += single_result->numTracksDubious();
 
+    track_duration_all_ += single_result->trackDurationAll();
+    track_duration_nondub_ += single_result->trackDurationNondub();
+    track_duration_dubious_ += single_result->trackDurationDubious();
+
     details_.insert(details_.end(), single_result->details().begin(), single_result->details().end());
 
     //const vector<double>& other_values = single_result->values();
@@ -198,6 +202,29 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     sec_det_table.addRow({"#DT [1]", "Number of dubious tracks", num_tracks_dubious_},
                          this);
 
+    sec_det_table.addRow({"Duration [s]", "Duration of all tracks", track_duration_all_}, this);
+    sec_det_table.addRow({"Duration Dubious [s]", "Duration of dubious tracks", track_duration_dubious_}, this);
+
+    QVariant dubious_t_avg_var;
+
+    if (num_tracks_dubious_)
+        dubious_t_avg_var = roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
+
+    sec_det_table.addRow({"Duration Non-Dubious [s]", "Duration of non-dubious tracks", track_duration_nondub_}, this);
+
+    sec_det_table.addRow({"Average Duration Dubious [s]", "Average duration of dubious tracks",
+                          dubious_t_avg_var}, this);
+
+    QVariant p_dubious_t_var, p_nondub_t_var;
+
+    if (track_duration_all_)
+    {
+        p_dubious_t_var = roundf(track_duration_dubious_/track_duration_all_ * 10000.0) / 100.0;
+        p_nondub_t_var = roundf(track_duration_nondub_/track_duration_all_ * 10000.0) / 100.0;
+    }
+
+    sec_det_table.addRow({"Duration Ratio Dubious [%]", "Duration ratio of dubious tracks", p_dubious_t_var}, this);
+    sec_det_table.addRow({"Duration Ratio Non-Dubious [%]", "Duration ratio of non-dubious tracks", p_nondub_t_var}, this);
 
     // condition
     {
@@ -303,6 +330,10 @@ void JoinedDubiousTrack::updatesToUseChanges()
     num_pos_inside_dubious_ = 0;
     num_tracks_ = 0;
     num_tracks_dubious_ = 0;
+
+    track_duration_all_ = 0;
+    track_duration_nondub_ = 0;
+    track_duration_dubious_ = 0;
 
     details_.clear();
 
