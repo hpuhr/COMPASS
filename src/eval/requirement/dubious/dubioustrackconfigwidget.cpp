@@ -30,6 +30,23 @@ namespace EvaluationRequirement
 DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
     : BaseConfigWidget(cfg)
 {
+    // use single ds_id
+    eval_only_single_ds_id_check_ = new QCheckBox ();
+    eval_only_single_ds_id_check_->setChecked(config().evalOnlySingleDsId());
+    connect(eval_only_single_ds_id_check_, &QCheckBox::clicked,
+            this, &DubiousTrackConfigWidget::toggleEvalOnlySingleDsId);
+
+    form_layout_->addRow("Use only from L.U. Sensor", eval_only_single_ds_id_check_);
+
+    // lu_ds_id
+    single_ds_id_edit_ = new QLineEdit(QString::number(config().singleDsId()));
+    single_ds_id_edit_->setValidator(new QDoubleValidator(0, 10000000, 0, this));
+    connect(single_ds_id_edit_, &QLineEdit::textEdited,
+            this, &DubiousTrackConfigWidget::evalOnlySingleDsIdEditSlot);
+
+    form_layout_->addRow("L.U. Sensor [1]", single_ds_id_edit_);
+
+
     // min comp time
     min_comp_time_edit_ = new QLineEdit(QString::number(config().minimumComparisonTime()));
     min_comp_time_edit_->setValidator(new QDoubleValidator(0, 30, 3, this));
@@ -163,6 +180,29 @@ DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
     form_layout_->addRow("Dubious Probability [1]", dubious_prob_edit_);
 
     updateActive();
+}
+
+void DubiousTrackConfigWidget::toggleEvalOnlySingleDsId()
+{
+    loginf << "DubiousTrackConfigWidget: toggleEvalOnlySingleDsId";
+
+    assert (eval_only_single_ds_id_check_);
+    config().evalOnlySingleDsId(eval_only_single_ds_id_check_->checkState() == Qt::Checked);
+
+    updateActive();
+}
+
+void DubiousTrackConfigWidget::evalOnlySingleDsIdEditSlot(QString value)
+{
+    loginf << "DubiousTrackConfigWidget: evalOnlySingleDsIdEditSlot: value " << value.toStdString();
+
+    bool ok;
+    float val = value.toUInt(&ok);
+
+    if (ok)
+        config().singleDsId(val);
+    else
+        loginf << "DubiousTrackConfigWidget: evalOnlySingleDsIdEditSlot: invalid value";
 }
 
 void DubiousTrackConfigWidget::minCompTimeEditSlot(QString value)
@@ -364,6 +404,9 @@ DubiousTrackConfig& DubiousTrackConfigWidget::config()
 
 void DubiousTrackConfigWidget::updateActive()
 {
+    assert (single_ds_id_edit_);
+    single_ds_id_edit_->setEnabled(config().evalOnlySingleDsId());
+
     assert (min_updates_edit_);
     min_updates_edit_->setEnabled(config().useMinUpdates());
 

@@ -37,6 +37,9 @@ DubiousTrackConfig::DubiousTrackConfig(const std::string& class_id, const std::s
 {
     prob_check_type_ = COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
 
+    registerParameter("eval_only_single_ds_id", &eval_only_single_ds_id_, false);
+    registerParameter("single_ds_id", &single_ds_id_, 0);
+
     registerParameter("minimum_comparison_time", &minimum_comparison_time_, 1.0);
     registerParameter("maximum_comparison_time", &maximum_comparison_time_, 30.0);
 
@@ -228,10 +231,31 @@ void DubiousTrackConfig::dubiousProb(float dubious_prob)
     dubious_prob_ = dubious_prob;
 }
 
+bool DubiousTrackConfig::evalOnlySingleDsId() const
+{
+    return eval_only_single_ds_id_;
+}
+
+void DubiousTrackConfig::evalOnlySingleDsId(bool eval_only_single_ds_id)
+{
+    eval_only_single_ds_id_ = eval_only_single_ds_id;
+}
+
+unsigned int DubiousTrackConfig::singleDsId() const
+{
+    return single_ds_id_;
+}
+
+void DubiousTrackConfig::singleDsId(unsigned int single_ds_id)
+{
+    single_ds_id_ = single_ds_id;
+}
+
 std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
 {
     shared_ptr<DubiousTrack> req = make_shared<DubiousTrack>(
                 name_, short_name_, group_.name(),
+                eval_only_single_ds_id_, single_ds_id_,
                 minimum_comparison_time_, maximum_comparison_time_,
                 mark_primary_only_, use_min_updates_, min_updates_,
                 use_min_duration_, min_duration_,

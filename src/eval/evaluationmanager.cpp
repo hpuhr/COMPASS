@@ -691,6 +691,11 @@ void EvaluationManager::addVariables (const std::string dbo_name, DBOVariableSet
     {
         read_set.add(db_object.variable("groundspeed_kt")); // double
         read_set.add(db_object.variable("heading_deg")); // double
+
+        // for mono sensor + lu sensor
+
+        read_set.add(db_object.variable("multiple_sources")); // string
+        read_set.add(db_object.variable("track_lu_ds_id")); // int
     }
 
     //        read_set.add(object_man.metaVariable("groundspeed_kt").getFor(dbo_name_ref_));

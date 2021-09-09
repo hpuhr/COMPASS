@@ -175,6 +175,13 @@ public:
     bool hasTstMeasuredTrackAngleForTime (float tod) const;
     float tstMeasuredTrackAngleForTime (float tod) const; // deg
 
+    bool canCheckTstMultipleSources() const;
+    bool hasTstMultipleSources() const;
+
+    bool canCheckTrackLUDSID() const;
+    bool hasSingleLUDSID() const;
+    unsigned int singleTrackLUDSID() const;
+
     double latitudeMin() const;
     double latitudeMax() const;
     double longitudeMin() const;

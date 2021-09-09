@@ -30,6 +30,7 @@ namespace EvaluationRequirement
 
 DubiousTrack::DubiousTrack(
         const std::string& name, const std::string& short_name, const std::string& group_name,
+        bool eval_only_single_ds_id, unsigned int single_ds_id,
         float minimum_comparison_time, float maximum_comparison_time,
         bool mark_primary_only, bool use_min_updates, unsigned int min_updates,
         bool use_min_duration, float min_duration,
@@ -39,6 +40,7 @@ DubiousTrack::DubiousTrack(
         bool use_rocd, float max_rocd, float dubious_prob,
         float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
     : Base(name, short_name, group_name, prob, prob_check_type, eval_man),
+      eval_only_single_ds_id_(eval_only_single_ds_id), single_ds_id_(single_ds_id),
       minimum_comparison_time_(minimum_comparison_time), maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), use_min_updates_(use_min_updates), min_updates_(min_updates),
       use_min_duration_(use_min_duration), min_duration_(min_duration),
@@ -82,6 +84,49 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
 
     map<unsigned int, DubiousTrackDetail> tracks; // tn -> target
     vector<DubiousTrackDetail> finished_tracks; // tn -> target
+
+    bool do_not_evaluate_target = false;
+
+    // check for single source only
+    if (eval_only_single_ds_id_)
+    {
+        bool can_check = true;
+
+        if (!target_data.canCheckTstMultipleSources())
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " cannot check multiple sources";
+            can_check = false;
+        }
+
+        if (can_check && target_data.hasTstMultipleSources())
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " failed multiple sources";
+            can_check = false;
+        }
+
+        if (can_check && !target_data.canCheckTrackLUDSID())
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " cannot check lu_ds_id";
+            can_check = false;
+        }
+
+        if (can_check && !target_data.hasSingleLUDSID())
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " has no single lu_ds_id";
+            can_check = false;
+        }
+
+        if (!can_check) // can not check
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " can not check";
+            do_not_evaluate_target = true;
+        }
+        else if (target_data.singleTrackLUDSID() != single_ds_id_) // is not correct
+        {
+            //loginf << "UGA utn " << target_data.utn_ << " lu_ds_id not same";
+            do_not_evaluate_target = true;
+        }
+    }
 
     for (const auto& tst_id : tst_data)
     {
@@ -223,7 +268,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         dubious_turnrate_found = 0;
         dubious_rocd_found = 0;
 
-        if (mark_primary_only_ && !track_detail.has_mode_ac_ && !track_detail.has_mode_s_)
+        if (!do_not_evaluate_target && mark_primary_only_ && !track_detail.has_mode_ac_ && !track_detail.has_mode_s_)
         {
             track_detail.dubious_reasons_["Pri."] = "";
 
@@ -231,7 +276,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             all_updates_dubious_reasons["Pri."] = "";
         }
 
-        if (use_min_updates_ && !track_detail.left_sector_ && track_detail.num_pos_inside_ < min_updates_)
+        if (!do_not_evaluate_target && use_min_updates_ && !track_detail.left_sector_
+                && track_detail.num_pos_inside_ < min_updates_)
         {
             track_detail.dubious_reasons_["#Up"] = to_string(track_detail.num_pos_inside_);
 
@@ -239,7 +285,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             all_updates_dubious_reasons["#Up"] = to_string(track_detail.num_pos_inside_);
         }
 
-        if (use_min_duration_ && !track_detail.left_sector_ && track_detail.duration_ < min_duration_)
+        if (!do_not_evaluate_target && use_min_duration_ && !track_detail.left_sector_
+                && track_detail.duration_ < min_duration_)
         {
             track_detail.dubious_reasons_["Dur."] = String::doubleToStringPrecision(track_detail.duration_, 1);
 
@@ -251,10 +298,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
         has_last_tod = false;
         for (DubiousTrackUpdateDetail& update : track_detail.updates_)
         {
-            if (all_updates_dubious) // mark was primarty/short track if required
+            if (!do_not_evaluate_target && all_updates_dubious) // mark was primarty/short track if required
                 update.dubious_comments_ = all_updates_dubious_reasons;
 
-            if (use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
+            if (!do_not_evaluate_target && use_max_groundspeed_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
                     && target_data.tstMeasuredSpeedForTime(update.tod_) > max_groundspeed_kts_)
             {
                 update.dubious_comments_["Spd"] =
@@ -268,7 +315,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                 assert (update.tod_ >= last_tod);
                 time_diff = update.tod_ - last_tod;
 
-                if (time_diff >= minimum_comparison_time_
+                if (!do_not_evaluate_target && time_diff >= minimum_comparison_time_
                         && time_diff <= maximum_comparison_time_)
                 {
                     if (use_max_acceleration_ && target_data.hasTstMeasuredSpeedForTime(update.tod_)
@@ -287,7 +334,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                         }
                     }
 
-                    if (use_max_turnrate_ && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
+                    if (!do_not_evaluate_target && use_max_turnrate_
+                            && target_data.hasTstMeasuredTrackAngleForTime(update.tod_)
                             && target_data.hasTstMeasuredTrackAngleForTime(last_tod))
                     {
                         track_angle1 = target_data.tstMeasuredTrackAngleForTime(update.tod_);
@@ -305,7 +353,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
                         }
                     }
 
-                    if (use_rocd_ && target_data.hasTstModeCForTime(update.tod_)
+                    if (!do_not_evaluate_target && use_rocd_ && target_data.hasTstModeCForTime(update.tod_)
                             && target_data.hasTstModeCForTime(last_tod))
                     {
 
@@ -328,22 +376,22 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (
             has_last_tod = true;
         }
 
-        if (use_max_groundspeed_ && dubious_groundspeed_found > 0)
+        if (!do_not_evaluate_target && use_max_groundspeed_ && dubious_groundspeed_found > 0)
         {
             track_detail.dubious_reasons_["Spd"] = to_string(dubious_groundspeed_found);
         }
 
-        if (use_max_acceleration_ && dubious_acceleration_found > 0)
+        if (!do_not_evaluate_target && use_max_acceleration_ && dubious_acceleration_found > 0)
         {
             track_detail.dubious_reasons_["Acc"] = to_string(dubious_acceleration_found);
         }
 
-        if (use_max_turnrate_ && dubious_turnrate_found > 0)
+        if (!do_not_evaluate_target && use_max_turnrate_ && dubious_turnrate_found > 0)
         {
             track_detail.dubious_reasons_["TR"] = to_string(dubious_turnrate_found);
         }
 
-        if (use_rocd_ && dubious_rocd_found > 0)
+        if (!do_not_evaluate_target && use_rocd_ && dubious_rocd_found > 0)
         {
             track_detail.dubious_reasons_["ROCD"] = to_string(dubious_rocd_found);
         }
