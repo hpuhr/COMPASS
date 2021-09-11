@@ -3084,6 +3084,27 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_acs_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "ACAS Resolution Advisory Report age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_acs_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_acs_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_ACS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_amalgamated0": {
                 "parameters": {
                     "data_type_str": "BOOL",
@@ -3112,6 +3133,48 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_bps_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Barometric Pressure Setting Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_bps_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_bps_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_BPS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_bvr_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Barometric Vertical Rate age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_bvr_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_bvr_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_BVR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_coasted0": {
                 "parameters": {
                     "data_type_str": "STRING",
@@ -3135,6 +3198,27 @@
                                 "meta_table": "Tracker",
                                 "schema": "SCDB",
                                 "variable_identifier": "sd_track.TRACK_COASTED"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_com_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Communications / ACAS Capability and Flight Status age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_com_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_com_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_COM_AGE"
                             }
                         }
                     }
@@ -3196,6 +3280,27 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_emc_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Emitter Category age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_emc_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_emc_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_EMC_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_end0": {
                 "parameters": {
                     "data_type_str": "STRING",
@@ -3240,6 +3345,132 @@
                             "parameters": {
                                 "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.TRACK_ES_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_fss_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Final State Selected Altitude age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_fss_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_fss_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_FSS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_gal_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Geometric Altitude Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_gal_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_gal_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_GAL_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_gsp_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Ground Speed age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_gsp_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_gsp_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_GSP_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_gvr_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Geometric Vertical Rate age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_gvr_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_gvr_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_GVR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_iar_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Indicated Airspeed Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_iar_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_iar_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_IAR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_ias_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Indicated Airspeed/Mach Nb age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_ias_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_ias_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_IAS_AGE"
                             }
                         }
                     }
@@ -3308,6 +3539,48 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_mac_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Mach Number Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_mac_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_mac_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MAC_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_mb_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Mode S MB Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_mb_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_mb_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MB_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_mds_age0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
@@ -3324,6 +3597,48 @@
                             "parameters": {
                                 "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.TRACK_MDS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_met_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Meteorological Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_met_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_met_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MET_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_mhg_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Magnetic Heading age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_mhg_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_mhg_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_MHG_AGE"
                             }
                         }
                     }
@@ -3378,6 +3693,27 @@
                     }
                 }
             },
+            "DBOVariableTrackertrack_pos_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Position Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_pos_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_pos_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_POS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
             "DBOVariableTrackertrack_psr_age0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
@@ -3394,6 +3730,90 @@
                             "parameters": {
                                 "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.TRACK_PSR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_pun_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Position Uncertainty Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_pun_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_pun_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_PUN_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_ran_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Roll Angle age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_ran_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_ran_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_RAN_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_sab_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Status Reported by ADS-B age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_sab_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_sab_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_SAB_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_sal_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Selected Altitude age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_sal_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_sal_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_SAL_AGE"
                             }
                         }
                     }
@@ -3443,6 +3863,111 @@
                             "parameters": {
                                 "schema": "SCDB Extended",
                                 "variable_identifier": "sd_track.TRACK_SSR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_tan_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Track Angle age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_tan_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_tan_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_TAN_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_tar_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Track Angle Rate age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_tar_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_tar_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_TAR_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_tas_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "True Airspeed age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_tas_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_tas_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_TAS_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_tid_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Trajectory Intent Data age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_tid_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_tid_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_TID_AGE"
+                            }
+                        }
+                    }
+                }
+            },
+            "DBOVariableTrackertrack_vun_age0": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "dbo_name": "Tracker",
+                    "description": "Velocity Uncertainty age [I062/295]",
+                    "dimension": "Time",
+                    "name": "track_vun_age",
+                    "representation_str": "STANDARD",
+                    "unit": "Second"
+                },
+                "sub_configs": {
+                    "DBOSchemaVariableDefinition": {
+                        "DBOSchemaVariableDefinitionTrackertrack_vun_age0": {
+                            "parameters": {
+                                "schema": "SCDB Extended",
+                                "variable_identifier": "sd_track.TRACK_VUN_AGE"
                             }
                         }
                     }
