@@ -202,15 +202,18 @@ void JoinedDubiousTrack::addDetails(std::shared_ptr<EvaluationResultsReport::Roo
     sec_det_table.addRow({"#DT [1]", "Number of dubious tracks", num_tracks_dubious_},
                          this);
 
-    sec_det_table.addRow({"Duration [s]", "Duration of all tracks", track_duration_all_}, this);
-    sec_det_table.addRow({"Duration Dubious [s]", "Duration of dubious tracks", track_duration_dubious_}, this);
+    sec_det_table.addRow({"Duration [s]", "Duration of all tracks",
+                          String::doubleToStringPrecision(track_duration_all_,2).c_str()}, this);
+    sec_det_table.addRow({"Duration Dubious [s]", "Duration of dubious tracks",
+                          String::doubleToStringPrecision(track_duration_dubious_,2).c_str()}, this);
 
     QVariant dubious_t_avg_var;
 
     if (num_tracks_dubious_)
         dubious_t_avg_var = roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
 
-    sec_det_table.addRow({"Duration Non-Dubious [s]", "Duration of non-dubious tracks", track_duration_nondub_}, this);
+    sec_det_table.addRow({"Duration Non-Dubious [s]", "Duration of non-dubious tracks",
+                          String::doubleToStringPrecision(track_duration_nondub_,2).c_str()}, this);
 
     sec_det_table.addRow({"Average Duration Dubious [s]", "Average duration of dubious tracks",
                           dubious_t_avg_var}, this);
