@@ -3,7 +3,7 @@
 
 \begin{figure}[H]
    \center
-    \includegraphics[width=9cm,frame]{../screenshots/osgview_style_tab.png}
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_style_tab.png}
   \caption{OSG View Style tab}
 \end{figure}
 
@@ -265,18 +265,25 @@ Please note that:
 
 \subsubsection{Render Order}
 
-In the render order widget, the drawing order of all DBObjects is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
+In the render order widget, the drawing order of the drawn geometry is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
 
 \begin{figure}[H]
-    \includegraphics[width=10cm,frame]{../screenshots/osgview_render_order.png}
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_render_order.png}
   \caption{OSG View render order}
 \end{figure}
 
-To change the drawing order click on the DBObject to move and use the buttons on the right side. Please note that no redraw is required and that the drawing order is persisted in the configuration.
-% 
+Using the 'Order By' checkbox, the drawing order can be defined based on:
+\begin{itemize}
+ \item DBObject: Data-source type (e.g. Tracker, Radar, ...)
+ \item ds\_id: Data-source (e.g. Tracker1, Tracker2, Radar3, ...)
+\end{itemize}
+\ \\
+
+To change the drawing order click on the item to move and use the buttons on the right side. Please note that no redraw is required and that the drawing order is persisted in the configuration. \\
+
  \begin{itemize}
- \item \includegraphics[width=0.5cm]{../../data/icons/top.png} Move to Top: Move DBO to top position
- \item \includegraphics[width=0.5cm]{../../data/icons/up.png} Move Up: Move DBO one position up
- \item \includegraphics[width=0.5cm]{../../data/icons/down.png} Move Down: Move DBO one position down
- \item \includegraphics[width=0.5cm]{../../data/icons/bottom.png} Move to Bottom: Move DBO to the bottom position
+ \item \includegraphics[width=0.5cm]{../../data/icons/top.png} Move to Top: Move item to top position
+ \item \includegraphics[width=0.5cm]{../../data/icons/up.png} Move Up: Move item one position up
+ \item \includegraphics[width=0.5cm]{../../data/icons/down.png} Move Down: Move item one position down
+ \item \includegraphics[width=0.5cm]{../../data/icons/bottom.png} Move to Bottom: Move item to the bottom position
 \end{itemize}
