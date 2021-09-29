@@ -130,8 +130,6 @@
                 }
             }
         },
-        "ASTERIXFile": {
-        },
         "JSONParsingSchema": {
             "JSONParsingSchemajASTERIX0": {
                 "parameters": {
@@ -9162,34 +9160,34 @@
                                     },
                                     "JSONDataMapping128": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_com_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.COM.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping129": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_gsp_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.GSP.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping13": {
@@ -9242,114 +9240,114 @@
                                     },
                                     "JSONDataMapping132": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 63.75, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_met_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.MET.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping133": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_ran_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.RAN.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping134": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_sal_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.SAL.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping135": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_tan_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.TAN.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping136": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 9, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_tar_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.TAR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping137": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 2.25, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_tas_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.TAS.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping138": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 63.75, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_tid_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.TID.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping139": {
@@ -10074,18 +10072,18 @@
                                     },
                                     "JSONDataMapping180": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 4.25",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_acs_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.ACS.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping181": {
@@ -10202,34 +10200,34 @@
                                     },
                                     "JSONDataMapping188": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_bps_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.BPS.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping189": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_gvr_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.GVR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping19": {
@@ -10696,6 +10694,86 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping215": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_ias_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.IAS.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping216": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_sab_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.SAB.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping217": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_vun_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.VUN.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping218": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_emc_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.EMC.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping219": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_pos_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.POS.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
                                     "JSONDataMapping22": {
                                         "parameters": {
                                             "active": false,
@@ -10710,6 +10788,54 @@
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping220": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_gal_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.GAL.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping221": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_pun_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.PUN.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping222": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "track_mb_age",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "295.MB.Age",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping23": {
@@ -11370,66 +11496,66 @@
                                     },
                                     "JSONDataMapping60": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_bvr_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.BVR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping61": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_fss_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.FSS.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping62": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_iar_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.IAR.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping63": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_mac_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.MAC.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping64": {
@@ -11466,18 +11592,18 @@
                                     },
                                     "JSONDataMapping66": {
                                         "parameters": {
-                                            "active": false,
+                                            "active": true,
                                             "append_value": false,
                                             "comment": "Type number, value 3.0, not found",
                                             "db_object_name": "Tracker",
-                                            "dbovariable_name": "",
-                                            "dimension": "",
+                                            "dbovariable_name": "track_mhg_age",
+                                            "dimension": "Time",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "295.MHG.Age",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Second"
                                         }
                                     },
                                     "JSONDataMapping67": {

@@ -1,8 +1,52 @@
 {
     "parameters": {
-        "db_id": "/home/sk/data/demo/20190506.db"
+        "db_id": "/home/sk/data/malta/final_tests/20200125_ops_1215_1315.db",
+        "use_filters": false
     },
     "sub_configs": {
+        "ADSBQualityFilter": {
+            "ADSBQualityFilter0": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "max_nacp": 5,
+                    "max_nic": 5,
+                    "max_nucp": 4,
+                    "max_sil_v1": 2,
+                    "max_sil_v2": 4,
+                    "min_nacp": 5,
+                    "min_nic": 5,
+                    "min_nucp": 4,
+                    "min_sil_v1": 2,
+                    "min_sil_v2": 4,
+                    "name": "ADSB Quality",
+                    "op_and_": true,
+                    "use_max_nacp": false,
+                    "use_max_nic": false,
+                    "use_max_nucp": false,
+                    "use_max_sil_v1": false,
+                    "use_max_sil_v2": false,
+                    "use_min_nacp": true,
+                    "use_min_nic": true,
+                    "use_min_nucp": true,
+                    "use_min_sil_v1": true,
+                    "use_min_sil_v2": true,
+                    "use_v0": true,
+                    "use_v1": true,
+                    "use_v2": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "ADSBQualityFilterWidget": {
+                        "ADSBQualityFilter0Widget0": {
+                            "parameters": {
+                                "visible": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "DBFilter": {
             "Barometric Altitude": {
                 "parameters": {
@@ -21,7 +65,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "409500",
+                                "value": "55500",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "modec_code_ft"
                             }
@@ -161,7 +205,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "40.1566858016",
+                                "value": "40.1449280977249",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_lat_deg"
                             }
@@ -173,7 +217,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "31.65770083512",
+                                "value": "31.8964326381683",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_lat_deg"
                             }
@@ -185,7 +229,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "27.07018078455",
+                                "value": "27.5581097602844",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_long_deg"
                             }
@@ -197,7 +241,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "9.21563259161",
+                                "value": "9.17568147182465",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "pos_long_deg"
                             }
@@ -205,6 +249,38 @@
                     },
                     "DBFilterWidget": {
                         "PositionWidget0": {
+                            "parameters": {
+                                "visible": false
+                            }
+                        }
+                    }
+                }
+            },
+            "Radar Detection Type": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "Radar Detection Type",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "Radar Detection TypeCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "1",
+                                "value": "1",
+                                "variable_dbo_name": "Radar",
+                                "variable_name": "detection_type"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "Radar Detection TypeWidget0": {
                             "parameters": {
                                 "visible": false
                             }
@@ -261,7 +337,7 @@
                                 "op_and": true,
                                 "operator": "<=",
                                 "reset_value": "MAX",
-                                "value": "23:58:59.539",
+                                "value": "13:15:09.297",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -273,7 +349,7 @@
                                 "op_and": true,
                                 "operator": ">=",
                                 "reset_value": "MIN",
-                                "value": "00:01:12.695",
+                                "value": "12:14:58.398",
                                 "variable_dbo_name": "Meta",
                                 "variable_name": "tod"
                             }
@@ -352,6 +428,38 @@
                     }
                 }
             },
+            "Tracker LU SRC": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "Tracker LU SRC",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "Tracker LU SRCCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IN",
+                                "reset_value": "0",
+                                "value": "0",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_lu_ds_id"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "Tracker LU SRCWidget0": {
+                            "parameters": {
+                                "visible": false
+                            }
+                        }
+                    }
+                }
+            },
             "Tracker Multiple Sources": {
                 "parameters": {
                     "active": false,
@@ -383,6 +491,38 @@
                         }
                     }
                 }
+            },
+            "Tracker Track Confirmed": {
+                "parameters": {
+                    "active": false,
+                    "changed": true,
+                    "name": "Tracker Track Confirmed",
+                    "op_and_": true,
+                    "visible": false
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "Tracker Track ConfirmedCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "=",
+                                "reset_value": "Y",
+                                "value": "Y",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_confirmed"
+                            }
+                        }
+                    },
+                    "DBFilterWidget": {
+                        "Tracker Track ConfirmedWidget0": {
+                            "parameters": {
+                                "visible": false
+                            }
+                        }
+                    }
+                }
             }
         },
         "DBOSpecificValuesDBFilter": {
@@ -399,7 +539,31 @@
                 },
                 "sub_configs": {
                     "DBFilterCondition": {
-                        "ARTAS track_num": {
+                        "ARTAS_NEW track_num": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": true,
+                                "op_and": false,
+                                "operator": "IN",
+                                "reset_value": "4227",
+                                "value": "4227",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_num"
+                            }
+                        },
+                        "ARTAS_OPS track_num": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": true,
+                                "op_and": false,
+                                "operator": "IN",
+                                "reset_value": "4227",
+                                "value": "4227",
+                                "variable_dbo_name": "Tracker",
+                                "variable_name": "track_num"
+                            }
+                        },
+                        "MRTS track_num": {
                             "parameters": {
                                 "absolute_value": false,
                                 "display_instance_id": true,
@@ -430,7 +594,10 @@
                         "30721": true,
                         "30722": true,
                         "30723": true,
-                        "30724": true
+                        "30724": true,
+                        "513": true,
+                        "514": true,
+                        "8715": true
                     },
                     "changed": false,
                     "dbo_name": "Radar",
@@ -454,7 +621,9 @@
                     "active_sources": {
                         "13040": true,
                         "13041": true,
-                        "30769": true
+                        "30769": true,
+                        "30770": true,
+                        "30772": true
                     },
                     "changed": true,
                     "dbo_name": "Tracker",
@@ -465,6 +634,27 @@
                 "sub_configs": {
                     "DataSourcesFilterWidget": {
                         "Tracker Data SourcesWidget0": {
+                            "parameters": {
+                                "visible": false
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "UTNFilter": {
+            "UTNFilter0": {
+                "parameters": {
+                    "active": false,
+                    "changed": false,
+                    "name": "UTNs",
+                    "op_and_": true,
+                    "utns_str": "",
+                    "visible": false
+                },
+                "sub_configs": {
+                    "UTNFilterWidget": {
+                        "UTNFilter0Widget0": {
                             "parameters": {
                                 "visible": false
                             }

@@ -209,7 +209,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                             sum_missed_uis, comment};
 
                 assert (target_data.hasRefPosForTime(last_tod));
-                detail.pos_last = target_data.refPosForTime(last_tod);
+                detail.pos_last_ = target_data.refPosForTime(last_tod);
                 detail.has_last_position_ = true;
 
                 details.push_back(detail);
@@ -301,13 +301,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         if (tst_time_found)
                         {
                             assert (target_data.hasTstPosForTime(last_period_tod));
-                            detail.pos_last = target_data.tstPosForTime(last_period_tod);
+                            detail.pos_last_ = target_data.tstPosForTime(last_period_tod);
                             detail.has_last_position_ = true;
                         }
                         else
                         {
                             assert (target_data.hasRefPosForTime(last_period_tod));
-                            detail.pos_last = target_data.refPosForTime(last_period_tod);
+                            detail.pos_last_ = target_data.refPosForTime(last_period_tod);
                             detail.has_last_position_ = true;
                         }
 
@@ -437,7 +437,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                                 sum_missed_uis, comment};
 
                     assert (target_data.hasRefPosForTime(ref_periods.period(period_index).begin()));
-                    detail.pos_last = target_data.refPosForTime(ref_periods.period(period_index).begin());
+                    detail.pos_last_ = target_data.refPosForTime(ref_periods.period(period_index).begin());
                     detail.has_last_position_ = true;
 
                     details.push_back(detail);
@@ -476,7 +476,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                         pos_current, is_inside_ref_time_period,
                         sum_missed_uis, comment};
 
-            detail.pos_last = target_data.tstPosForTime(last_tod);
+            detail.pos_last_ = target_data.tstPosForTime(last_tod);
             detail.has_last_position_ = true;
 
             details.push_back(detail);
@@ -546,13 +546,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (
                 if (tst_time_found)
                 {
                     assert (target_data.hasTstPosForTime(last_period_tod));
-                    detail.pos_last = target_data.tstPosForTime(last_period_tod);
+                    detail.pos_last_ = target_data.tstPosForTime(last_period_tod);
                     detail.has_last_position_ = true;
                 }
                 else
                 {
                     assert (target_data.hasRefPosForTime(last_period_tod));
-                    detail.pos_last = target_data.refPosForTime(last_period_tod);
+                    detail.pos_last_ = target_data.refPosForTime(last_period_tod);
                     detail.has_last_position_ = true;
                 }
 

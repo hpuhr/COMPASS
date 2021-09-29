@@ -54,7 +54,7 @@ public:
     std::string comment_;
 
     bool has_last_position_ {false};
-    EvaluationTargetPosition pos_last;
+    EvaluationTargetPosition pos_last_;
 };
 
 class Detection : public Base
@@ -89,8 +89,6 @@ public:
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
-
-
 
 protected:
     float update_interval_s_{0};

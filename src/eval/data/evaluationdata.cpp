@@ -231,7 +231,7 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
         tst_ground_bit_name_ = object_manager.metaVariable("ground_bit").getFor(dbo_name).name();
 
     // track num
-    if (object_manager.metaVariable("track_num").existsIn(dbo_name))
+    if (object_manager.metaVariable("track_num").existsIn(dbo_name) && dbo_name != "ADSB" ) // HACK
         tst_track_num_name_ = object_manager.metaVariable("track_num").getFor(dbo_name).name();
 
     // speed & track_angle
@@ -254,6 +254,9 @@ void EvaluationData::addTestData (DBObject& object, std::shared_ptr<Buffer> buff
     {
         tst_spd_ground_speed_kts_name_ = "groundspeed_kt";
         tst_spd_track_angle_deg_name_ = "heading_deg";
+
+        tst_multiple_srcs_name_ = "multiple_sources";
+        tst_track_lu_ds_id_name_ = "track_lu_ds_id";
     }
 
     set<int> active_srcs = eval_man_.activeDataSourcesTst();

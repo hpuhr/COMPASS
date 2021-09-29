@@ -299,11 +299,11 @@ std::unique_ptr<nlohmann::json::object_t> SingleDetection::getTargetErrorsViewab
 
         if (detail_it.has_last_position_)
         {
-            lat_min = min(lat_min, detail_it.pos_last.latitude_);
-            lat_max = max(lat_max, detail_it.pos_last.latitude_);
+            lat_min = min(lat_min, detail_it.pos_last_.latitude_);
+            lat_max = max(lat_max, detail_it.pos_last_.latitude_);
 
-            lon_min = min(lon_min, detail_it.pos_last.longitude_);
-            lon_max = max(lon_max, detail_it.pos_last.longitude_);
+            lon_min = min(lon_min, detail_it.pos_last_.longitude_);
+            lon_max = max(lon_max, detail_it.pos_last_.longitude_);
         }
     }
 

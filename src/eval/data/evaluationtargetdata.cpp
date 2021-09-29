@@ -1264,6 +1264,113 @@ float EvaluationTargetData::tstMeasuredTrackAngleForTime (float tod) const // de
     }
 }
 
+bool EvaluationTargetData::canCheckTstMultipleSources() const
+{
+    if (!eval_data_->tst_multiple_srcs_name_.size())
+        return false;
+
+    if (!eval_data_->tst_buffer_->has<string>(eval_data_->tst_multiple_srcs_name_))
+        return false;
+
+    NullableVector<string>& tst_multiple_srcs_vec =
+            eval_data_->tst_buffer_->get<string>(eval_data_->tst_multiple_srcs_name_);
+
+    for (auto tst_index : tst_indexes_)
+    {
+        if (!tst_multiple_srcs_vec.isNull(tst_index))
+            return true;
+    }
+
+    return false;
+}
+
+bool EvaluationTargetData::hasTstMultipleSources() const
+{
+    assert (canCheckTstMultipleSources());
+
+    NullableVector<string>& tst_multiple_srcs_vec =
+            eval_data_->tst_buffer_->get<string>(eval_data_->tst_multiple_srcs_name_);
+
+    for (auto tst_index : tst_indexes_) // one must be not null according to canCheckTstMultipleSources
+    {
+        if (!tst_multiple_srcs_vec.isNull(tst_index) && tst_multiple_srcs_vec.get(tst_index) == "Y")
+            return true;
+    }
+
+    return false;
+}
+
+bool EvaluationTargetData::canCheckTrackLUDSID() const
+{
+    if (!eval_data_->tst_track_lu_ds_id_name_.size())
+        return false;
+
+    if (!eval_data_->tst_buffer_->has<int>(eval_data_->tst_track_lu_ds_id_name_))
+        return false;
+
+    NullableVector<int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+
+    for (auto tst_index : tst_indexes_)
+    {
+        if (!tst_ls_ds_id_vec.isNull(tst_index))
+            return true;
+    }
+
+    return false;
+}
+
+bool EvaluationTargetData::hasSingleLUDSID() const
+{
+    assert (canCheckTrackLUDSID());
+
+    // check if only single source updates
+    assert (canCheckTstMultipleSources());
+    assert (!hasTstMultipleSources());
+
+    bool lu_ds_id_found = false;
+    int lu_ds_id;
+
+    NullableVector<int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+
+    for (auto tst_index : tst_indexes_)
+    {
+        if (!tst_ls_ds_id_vec.isNull(tst_index))
+        {
+            if (!lu_ds_id_found)
+            {
+                lu_ds_id_found = true;
+                lu_ds_id = tst_ls_ds_id_vec.get(tst_index);
+
+                continue;
+            }
+
+            if (lu_ds_id_found && tst_ls_ds_id_vec.get(tst_index) != lu_ds_id)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+unsigned int EvaluationTargetData::singleTrackLUDSID() const
+{
+    assert (hasSingleLUDSID());
+
+    NullableVector<int> tst_ls_ds_id_vec =
+            eval_data_->tst_buffer_->get<int>(eval_data_->tst_track_lu_ds_id_name_);
+
+    for (auto tst_index : tst_indexes_)
+    {
+        if (!tst_ls_ds_id_vec.isNull(tst_index))
+            return tst_ls_ds_id_vec.get(tst_index);
+    }
+
+    assert (false); // can not be reached
+}
+
+
 int EvaluationTargetData::tstModeCForTime (float tod) const
 {
     assert (hasTstModeCForTime(tod));
