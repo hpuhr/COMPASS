@@ -8062,6 +8062,19 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_ACS_AGE": {
+                            "parameters": {
+                                "comment": "ACAS Resolution Advisory Report age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_ACS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_AMALGAMATED": {
                             "parameters": {
                                 "comment": " ",
@@ -8075,6 +8088,32 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_BPS_AGE": {
+                            "parameters": {
+                                "comment": "Barometric Pressure Setting Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_BPS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_BVR_AGE": {
+                            "parameters": {
+                                "comment": "Barometric Vertical Rate age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_BVR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_COASTED": {
                             "parameters": {
                                 "comment": " ",
@@ -8086,6 +8125,19 @@
                                 "special_null": "",
                                 "type": "enum",
                                 "unit": ""
+                            }
+                        },
+                        "TRACK_COM_AGE": {
+                            "parameters": {
+                                "comment": "Communications / ACAS Capability and Flight Status age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_COM_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
                             }
                         },
                         "TRACK_CONFIRMED": {
@@ -8114,6 +8166,19 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_EMC_AGE": {
+                            "parameters": {
+                                "comment": "Emitter Category age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_EMC_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_END": {
                             "parameters": {
                                 "comment": "Y = End of track, N = Track is still alive",
@@ -8134,6 +8199,84 @@
                                 "dimension": "Time",
                                 "is_key": false,
                                 "name": "TRACK_ES_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_FSS_AGE": {
+                            "parameters": {
+                                "comment": "Final State Selected Altitude age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_FSS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_GAL_AGE": {
+                            "parameters": {
+                                "comment": "Geometric Altitude Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_GAL_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_GSP_AGE": {
+                            "parameters": {
+                                "comment": "Ground Speed age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_GSP_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_GVR_AGE": {
+                            "parameters": {
+                                "comment": "Geometric Vertical Rate age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_GVR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_IAR_AGE": {
+                            "parameters": {
+                                "comment": "Indicated Airspeed Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_IAR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_IAS_AGE": {
+                            "parameters": {
+                                "comment": "Indicated Airspeed/Mach Nb age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_IAS_AGE",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
@@ -8179,6 +8322,32 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_MAC_AGE": {
+                            "parameters": {
+                                "comment": "Mach Number Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MAC_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_MB_AGE": {
+                            "parameters": {
+                                "comment": "Mode S MB Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MB_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_MDS_AGE": {
                             "parameters": {
                                 "comment": "Age of the last Mode S detection used to update the track [I062/290]",
@@ -8186,6 +8355,32 @@
                                 "dimension": "Time",
                                 "is_key": false,
                                 "name": "TRACK_MDS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_MET_AGE": {
+                            "parameters": {
+                                "comment": "Meteorological Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MET_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_MHG_AGE": {
+                            "parameters": {
+                                "comment": "Magnetic Heading age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_MHG_AGE",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
@@ -8218,6 +8413,19 @@
                                 "unit": ""
                             }
                         },
+                        "TRACK_POS_AGE": {
+                            "parameters": {
+                                "comment": "Position Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_POS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
                         "TRACK_PSR_AGE": {
                             "parameters": {
                                 "comment": "Age of the last primary detection used to update the track [I062/290]",
@@ -8225,6 +8433,58 @@
                                 "dimension": "Time",
                                 "is_key": false,
                                 "name": "TRACK_PSR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_PUN_AGE": {
+                            "parameters": {
+                                "comment": "Position Uncertainty Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_PUN_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_RAN_AGE": {
+                            "parameters": {
+                                "comment": "Roll Angle age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_RAN_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_SAB_AGE": {
+                            "parameters": {
+                                "comment": "Status Reported by ADS-B age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_SAB_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_SAL_AGE": {
+                            "parameters": {
+                                "comment": "Selected Altitude age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_SAL_AGE",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",
@@ -8251,6 +8511,71 @@
                                 "dimension": "Time",
                                 "is_key": false,
                                 "name": "TRACK_SSR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_TAN_AGE": {
+                            "parameters": {
+                                "comment": "Track Angle age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_TAN_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_TAR_AGE": {
+                            "parameters": {
+                                "comment": "Track Angle Rate age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_TAR_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_TAS_AGE": {
+                            "parameters": {
+                                "comment": "True Airspeed age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_TAS_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_TID_AGE": {
+                            "parameters": {
+                                "comment": "Trajectory Intent Data age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_TID_AGE",
+                                "number_conversion_type": "",
+                                "special_null": "",
+                                "type": "double",
+                                "unit": "Second"
+                            }
+                        },
+                        "TRACK_VUN_AGE": {
+                            "parameters": {
+                                "comment": "Velocity Uncertainty age [I062/295]",
+                                "data_format": "",
+                                "dimension": "Time",
+                                "is_key": false,
+                                "name": "TRACK_VUN_AGE",
                                 "number_conversion_type": "",
                                 "special_null": "",
                                 "type": "double",

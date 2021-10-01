@@ -88,6 +88,22 @@ EvaluationDataFilterDialog::EvaluationDataFilterDialog(EvaluationData& eval_data
 
     config_layout->addRow("\tMode A Code (oct,oct1-oct2)", remove_mode_a_edit_);
 
+    // mc
+
+    remove_mode_c_check_ = new QCheckBox();
+    remove_mode_c_check_->setChecked(eval_man_.removeModeCValues());
+    connect(remove_mode_c_check_, &QCheckBox::clicked, this,
+            &EvaluationDataFilterDialog::removeModeCSlot);
+
+    config_layout->addRow("Remove By Mode C Code", remove_mode_c_check_);
+
+    remove_mode_c_min_edit_ = new QTextEdit();
+    remove_mode_c_min_edit_->setText(QString::number(eval_man_.removeModeCMinValue()));
+    connect(remove_mode_c_min_edit_, &QTextEdit::textChanged, this,
+            &EvaluationDataFilterDialog::removeModeCMinValueSlot);
+
+    config_layout->addRow("\tMode Min Value [ft]", remove_mode_c_min_edit_);
+
     // ta
     remove_ta_check_ = new QCheckBox();
     remove_ta_check_->setChecked(eval_man_.removeTargetAddresses());
@@ -198,6 +214,17 @@ void EvaluationDataFilterDialog::removeModeAValuesSlot()
 {
     assert (remove_mode_a_edit_);
     eval_man_.removeModeACodeValues(remove_mode_a_edit_->document()->toPlainText().toStdString());
+}
+
+void EvaluationDataFilterDialog::removeModeCSlot(bool checked)
+{
+    eval_man_.removeModeCValues(checked);
+}
+
+void EvaluationDataFilterDialog::removeModeCMinValueSlot()
+{
+    assert (remove_mode_c_min_edit_);
+    eval_man_.removeModeCMinValue(remove_mode_c_min_edit_->document()->toPlainText().toFloat());
 }
 
 void EvaluationDataFilterDialog::removeTASlot(bool checked)
