@@ -8,9 +8,11 @@ For a detailed list of features, as well as the offered commercial services, ple
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released COMPASS Version v0.6.1-alpha
-- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.1-alpha/COMPASS-v0.6.1-alpha.AppImage)
-- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.1-alpha/user_manual_v0.6.1.pdf)
+## Released COMPASS Version v0.6.3-alpha
+- [Current Appimage](https://github.com/hpuhr/COMPASS/releases/download/v0.6.3-alpha/COMPASS-v0.6.3-alpha.AppImage)
+- [Current User Manual](https://github.com/hpuhr/COMPASS/releases/download/v0.6.3-alpha/user_manual_v0.6.3.pdf)
+- [Example Database v0.6.2](https://cloud.openats.at/s/iejK7QeiyXx45b2)
+- [Example Report EUROCAE ED-117A](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/example_report-eurocae_ed-117a.pdf)
 - [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
 
 
@@ -25,14 +27,13 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 ![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss4.png)
 
 ## YouTube Videos
-### v0.5.0
+### v0.6.2
+- [ Playlist](https://www.youtube.com/watch?v=a6_mqfcohr4&list=PLarVjKYqSaANf1VYSluFYX13WYkptvem2)
+### Old from v0.5.0
 - [v0.5.0: Import ASTERIX & Setup](https://youtu.be/o1S3S9tcifA)
 - [v0.5.0: New OSGView Features](https://youtu.be/c1v3tIjNLVM)
 
-### Old from v0.4.0
-- [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
-- [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
-- [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
+
 
 
 ## Contents
