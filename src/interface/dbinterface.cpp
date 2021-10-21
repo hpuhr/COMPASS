@@ -35,8 +35,6 @@
 #include "dimension.h"
 #include "jobmanager.h"
 #include "metadbtable.h"
-#include "mysqlppconnection.h"
-#include "mysqlserver.h"
 #include "sqliteconnection.h"
 #include "stringconv.h"
 #include "unit.h"
@@ -216,14 +214,8 @@ void DBInterface::generateSubConfigurable(const string& class_id,
                                           const string& instance_id)
 {
     logdbg << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
-    if (class_id == "MySQLppConnection")
-    {
-        MySQLppConnection* connection = new MySQLppConnection(class_id, instance_id, this);
-        assert(connections_.count(connection->instanceId()) == 0);
-        connections_.insert(pair<string, DBConnection*>(
-                                connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
-    }
-    else if (class_id == "SQLiteConnection")
+
+    if (class_id == "SQLiteConnection")
     {
         SQLiteConnection* connection = new SQLiteConnection(class_id, instance_id, this);
         assert(connections_.count(connection->instanceId()) == 0);
@@ -237,12 +229,6 @@ void DBInterface::generateSubConfigurable(const string& class_id,
 
 void DBInterface::checkSubConfigurables()
 {
-    if (connections_.count("MySQL++ Connection") == 0)
-    {
-        addNewSubConfiguration("MySQLppConnection", "MySQL++ Connection");
-        generateSubConfigurable("MySQLppConnection", "MySQL++ Connection");
-    }
-
     if (connections_.count("SQLite Connection") == 0)
     {
         addNewSubConfiguration("SQLiteConnection", "SQLite Connection");

@@ -23,12 +23,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.h"
-    #        src/job/dbovariabledistinctstatisticsdbjob.h
-    #        src/job/dbocountdbjob.h
-    #        src/job/dboinfodbjob.h
-    #        src/job/writebufferdbjob.h
-    #        src/job/transformationjob.h
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.cpp"
@@ -47,12 +41,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createassociationsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboreadassociationsjob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/mysqldbimportjob.cpp"
-    #        src/job/dbovariabledistinctstatisticsdbjob.cpp
-    #        src/job/dbocountdbjob.cpp
-    #        src/job/dboinfodbjob.cpp
-    #        src/job/writebufferdbjob.cpp
-    #        src/job/transformationjob.cpp
 )
 
 IF (jASTERIX_FOUND)
@@ -61,9 +49,7 @@ IF (jASTERIX_FOUND)
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
-#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
 )
 ENDIF()

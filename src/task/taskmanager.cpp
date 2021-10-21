@@ -35,8 +35,6 @@
 #include "manageschemataskwidget.h"
 #include "managesectorstask.h"
 #include "managesectorstaskwidget.h"
-#include "mysqldbimporttask.h"
-#include "mysqldbimporttaskwidget.h"
 #include "postprocesstask.h"
 #include "postprocesstaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -90,7 +88,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert(task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "GPSTrailImportTask",
+    task_list_.insert(task_list_.end(), {"JSONImportTask", "GPSTrailImportTask", // "MySQLDBImportTask",
                                          "ManageDataSourcesTask", "ManageSectorsTask",
                                          "RadarPlotPositionCalculatorTask", "PostProcessTask",
                                          "CreateAssociationsTask", "CreateARTASAssociationsTask"});
@@ -147,13 +145,6 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
         assert(json_import_task_);
         addTask(class_id, json_import_task_.get());
-    }
-    else if (class_id.compare("MySQLDBImportTask") == 0)
-    {
-        assert(!mysqldb_import_task_);
-        mysqldb_import_task_.reset(new MySQLDBImportTask(class_id, instance_id, *this));
-        assert(mysqldb_import_task_);
-        addTask(class_id, mysqldb_import_task_.get());
     }
     else if (class_id.compare("GPSTrailImportTask") == 0)
     {
@@ -259,12 +250,6 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("JSONImportTask", "JSONImportTask0");
         assert(json_import_task_);
-    }
-
-    if (!mysqldb_import_task_)
-    {
-        generateSubConfigurable("MySQLDBImportTask", "MySQLDBImportTask0");
-        assert(mysqldb_import_task_);
     }
 
     if (!gps_trail_import_task_)
@@ -388,7 +373,6 @@ void TaskManager::shutdown()
 
     view_points_import_task_ = nullptr;
     json_import_task_ = nullptr;
-    mysqldb_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
     manage_datasources_task_ = nullptr;
     manage_sectors_task_ = nullptr;
@@ -483,12 +467,6 @@ JSONImportTask& TaskManager::jsonImporterTask() const
 {
     assert(json_import_task_);
     return *json_import_task_;
-}
-
-MySQLDBImportTask& TaskManager::mysqldbImportTask() const
-{
-    assert(mysqldb_import_task_);
-    return *mysqldb_import_task_;
 }
 
 GPSTrailImportTask& TaskManager::gpsTrailImportTask() const

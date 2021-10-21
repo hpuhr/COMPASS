@@ -48,14 +48,6 @@ message("  CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 
 find_package (Eigen3 3.2 REQUIRED)
 
-find_package ( MySQLpp REQUIRED )
-message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
-message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
-
-find_package ( MySQL REQUIRED )
-message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}")
-message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
-
 find_package ( Sqlite3 REQUIRED )
 message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
 message("  SQLite3_LIBRARY_DIR: ${SQLITE3_LIBRARIES}")
@@ -124,8 +116,6 @@ include_directories (
     ${Qt5Charts_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${SQLITE3_INCLUDE_DIR}
-    ${MYSQL_INCLUDE_DIR}
-    ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
     ${GDAL_INCLUDE_DIRS}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
@@ -158,8 +148,6 @@ target_link_libraries ( compass
     Qt5::Charts
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
-    ${MySQLpp_LIBRARY}
-    ${MYSQL_LIBRARY}
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
@@ -167,7 +155,6 @@ target_link_libraries ( compass
     ${TBB_LIBRARIES}
     ${OPENSSL_CRYPTO_LIBRARY}
     NemaTode::NemaTode
-    #Eigen3::Eigen
     )
 
 

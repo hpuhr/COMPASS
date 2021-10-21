@@ -29,7 +29,6 @@
 #include "global.h"
 #include "dbinterface.h"
 #include "sqliteconnection.h"
-#include "mysqlppconnection.h"
 #include "files.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
@@ -64,18 +63,10 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     registerParameter("abstract", &abstract_, "");
 
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
+    assert (sql_con);
 
-    if (sql_con)
-    {
-        report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/report_"
+    report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/report_"
                 + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
-    }
-    else
-    {
-        MySQLppConnection* mysql_con = dynamic_cast<MySQLppConnection*>(&COMPASS::instance().interface().connection());
-        assert (mysql_con);
-        report_path_ = HOME_PATH+"/report_"+mysql_con->usedDatabase() + "/";
-    }
 
     report_filename_ = "report.tex";
 
