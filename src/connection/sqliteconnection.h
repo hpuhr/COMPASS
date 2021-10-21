@@ -18,11 +18,15 @@
 #ifndef SQLITECONNECTION_H_
 #define SQLITECONNECTION_H_
 
+#include <qobject.h>
+
 #include <sqlite3.h>
 
+#include <memory>
 #include <string>
 
-#include "dbconnection.h"
+#include "configurable.h"
+
 #include "global.h"
 
 class Buffer;
@@ -31,56 +35,68 @@ class SQLiteConnectionWidget;
 class SQLiteConnectionInfoWidget;
 class SavedFile;
 class PropertyList;
+class DBCommand;
+class DBCommandList;
+class DBResult;
+class DBConnectionInfo;
+class Buffer;
+class DBTableInfo;
+class QWidget;
 
 /**
  * @brief Interface for a SQLite3 database connection
  *
  */
-class SQLiteConnection : public DBConnection
+class SQLiteConnection : public QObject, public Configurable
 {
-  public:
+    Q_OBJECT
+
+signals:
+    void connectedSignal();
+
+public:
     SQLiteConnection(const std::string& class_id, const std::string& instance_id,
                      DBInterface* interface);
-    virtual ~SQLiteConnection() override;
+    virtual ~SQLiteConnection();
 
     void openFile(const std::string& file_name);
 
-    virtual void disconnect() override;
+    virtual void disconnect();
 
-    void executeSQL(const std::string& sql) override;
+    void executeSQL(const std::string& sql);
 
-    void prepareBindStatement(const std::string& statement) override;
-    void beginBindTransaction() override;
-    void stepAndClearBindings() override;
-    void endBindTransaction() override;
-    void finalizeBindStatement() override;
+    void prepareBindStatement(const std::string& statement);
+    void beginBindTransaction();
+    void stepAndClearBindings();
+    void endBindTransaction();
+    void finalizeBindStatement();
 
-    void bindVariable(unsigned int index, int value) override;
-    void bindVariable(unsigned int index, double value) override;
-    void bindVariable(unsigned int index, const std::string& value) override;
-    void bindVariableNull(unsigned int index) override;
+    void bindVariable(unsigned int index, int value);
+    void bindVariable(unsigned int index, double value);
+    void bindVariable(unsigned int index, const std::string& value);
+    void bindVariableNull(unsigned int index);
 
-    std::shared_ptr<DBResult> execute(const DBCommand& command) override;
-    std::shared_ptr<DBResult> execute(const DBCommandList& command_list) override;
+    std::shared_ptr<DBResult> execute(const DBCommand& command);
+    std::shared_ptr<DBResult> execute(const DBCommandList& command_list);
 
-    void prepareCommand(const std::shared_ptr<DBCommand> command) override;
-    std::shared_ptr<DBResult> stepPreparedCommand(unsigned int max_results = 0) override;
-    void finalizeCommand() override;
-    bool getPreparedCommandDone() override { return prepared_command_done_; }
+    void prepareCommand(const std::shared_ptr<DBCommand> command);
+    std::shared_ptr<DBResult> stepPreparedCommand(unsigned int max_results = 0);
+    void finalizeCommand();
+    bool getPreparedCommandDone() { return prepared_command_done_; }
 
-    std::map<std::string, DBTableInfo> getTableInfo() override;
-    virtual std::vector<std::string> getDatabases() override;
+    std::map<std::string, DBTableInfo> getTableInfo();
+    virtual std::vector<std::string> getDatabases();
 
     virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id) override;
+                                         const std::string& instance_id);
 
-    QWidget* widget() override;
-    // void deleteWidget () override;
-    QWidget* infoWidget() override;
-    std::string status() const override;
-    std::string identifier() const override;
-    std::string shortIdentifier() const override;
-    std::string type() const override { return SQLITE_IDENTIFIER; }
+    QWidget* widget();
+    // void deleteWidget ();
+    QWidget* infoWidget();
+    std::string status() const;
+    std::string identifier() const;
+    std::string shortIdentifier() const;
+    std::string type() const { return SQLITE_IDENTIFIER; }
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
@@ -90,8 +106,13 @@ class SQLiteConnection : public DBConnection
 
     const std::string& lastFilename() { return last_filename_; }
 
-  protected:
+    bool ready() { return connection_ready_; }
+
+protected:
     DBInterface& interface_;
+
+    bool connection_ready_;
+
     std::string last_filename_;
 
     /// Database handle to execute queries
@@ -112,8 +133,8 @@ class SQLiteConnection : public DBConnection
     void readRowIntoBuffer(const PropertyList& list, unsigned int num_properties,
                            std::shared_ptr<Buffer> buffer, unsigned int index);
 
-    void prepareStatement(const std::string& sql) override;
-    void finalizeStatement() override;
+    void prepareStatement(const std::string& sql);
+    void finalizeStatement();
 
     std::vector<std::string> getTableList();
     DBTableInfo getColumnList(const std::string& table);

@@ -20,7 +20,7 @@
 #include "compass.h"
 #include "configurationmanager.h"
 #include "datasourcesfilter.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbfilter.h"
 #include "dbinterface.h"
 #include "dbobject.h"

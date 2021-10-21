@@ -39,7 +39,7 @@
 #include "viewmanager.h"
 #include "stringconv.h"
 #include "dbovariableorderedset.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "stringconv.h"
 
 #include "json.hpp"

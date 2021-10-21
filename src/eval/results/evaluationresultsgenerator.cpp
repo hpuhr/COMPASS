@@ -31,7 +31,7 @@
 
 #include "compass.h"
 #include "dbinterface.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 
 #include "logger.h"
 #include "stringconv.h"
@@ -351,7 +351,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     EvaluationResultsReport::SectionContentTable& gen_table = gen_sec.getTable("gen_overview_table");
 
-    DBConnection& db_con = COMPASS::instance().interface().connection();
+    SQLiteConnection& db_con = COMPASS::instance().interface().connection();
 
     gen_table.addRow({"Application", "Application Filename", APP_FILENAME.c_str()}, nullptr);
     gen_table.addRow({"Application Version", "Application Version", VERSION.c_str()}, nullptr);

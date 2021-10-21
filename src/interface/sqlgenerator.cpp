@@ -25,7 +25,7 @@
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbovariable.h"

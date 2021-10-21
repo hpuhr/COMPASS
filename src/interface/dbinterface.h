@@ -39,7 +39,7 @@ static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
 class COMPASS;
 class Buffer;
 class BufferWriter;
-class DBConnection;
+class SQLiteConnection;
 class DBOVariable;
 class DBTable;
 class QProgressDialog;
@@ -78,11 +78,6 @@ class DBInterface : public QObject, public Configurable
     /// @brief Destructor
     virtual ~DBInterface();
 
-    const std::map<std::string, DBConnection*>& connections() { return connections_; }
-
-    const std::string& usedConnection() { return used_connection_; }
-    /// @brief Initializes a database connection based on the supplied type
-    void useConnection(const std::string& connection_type);
     void databaseContentChanged();
     void closeConnection();
 
@@ -101,7 +96,7 @@ class DBInterface : public QObject, public Configurable
 
     bool ready();
 
-    DBConnection& connection();
+    SQLiteConnection& connection();
 
     bool hasDataSourceTables(DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
@@ -202,11 +197,7 @@ class DBInterface : public QObject, public Configurable
     DBOAssociationCollection getAssociations(const std::string& table_name);
 
 protected:
-    std::map<std::string, DBConnection*> connections_;
-
-    std::string used_connection_;
-    /// Connection to database, created based on DBConnectionInfo
-    DBConnection* current_connection_{nullptr};
+    std::unique_ptr<SQLiteConnection> current_connection_;
 
     /// Interface initialized (after opening database)
     //bool initialized_ {false};

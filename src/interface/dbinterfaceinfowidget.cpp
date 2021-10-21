@@ -16,6 +16,7 @@
  */
 
 #include "dbinterfaceinfowidget.h"
+#include "sqliteconnection.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -23,7 +24,7 @@
 #include <QTextEdit>
 
 #include "compass.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "logger.h"
 #include "stringconv.h"

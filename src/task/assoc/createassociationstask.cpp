@@ -32,7 +32,7 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "buffer.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>

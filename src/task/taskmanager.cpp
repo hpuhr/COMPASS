@@ -672,7 +672,6 @@ void TaskManager::performAutomaticTasks ()
         return;
     }
 
-    database_open_task_->useConnection("SQLite Connection");
     SQLiteConnectionWidget* connection_widget =
             dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
 

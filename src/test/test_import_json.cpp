@@ -89,9 +89,6 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
     TaskManager& task_manager = COMPASS::instance().taskManager();
     TaskManagerWidget* task_manager_widget = task_manager.widget();
 
-    DatabaseOpenTask& db_open_task = task_manager.databaseOpenTask();
-    db_open_task.useConnection("SQLite Connection");
-
     SQLiteConnectionWidget* connection_widget =
         dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
     REQUIRE(connection_widget);

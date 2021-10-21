@@ -18,7 +18,7 @@
 #include "databaseopentaskwidget.h"
 #include "compass.h"
 #include "databaseopentask.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterface.h"
 #include "global.h"
 #include "logger.h"
@@ -45,32 +45,13 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
     QVBoxLayout* main_layout_ = new QVBoxLayout();
 
-    QGroupBox* group_box = new QGroupBox(tr("Database System"));
-    group_box->setFont(font_bold);
-    QVBoxLayout* grplayout = new QVBoxLayout();
-
     connection_stack_ = new QStackedWidget();
 
-    const std::map<std::string, DBConnection*>& types = db_interface_.connections();
+    SQLiteConnection& connection = db_interface_.connection();
 
-    for (auto& con_it : types)
-    {
-        QRadioButton* radio = new QRadioButton(con_it.first.c_str(), this);
-        connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
-
-        if (db_interface_.usedConnection() == con_it.first)
-            radio->setChecked(true);
-
-        grplayout->addWidget(radio);
-
-        connection_stack_->addWidget(con_it.second->widget());
-        connect(con_it.second->widget(), SIGNAL(databaseOpenedSignal()), this,
-                SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
-    }
-    group_box->setLayout(grplayout);
-    main_layout_->addWidget(group_box);
-
-    main_layout_->addStretch();
+    connection_stack_->addWidget(connection.widget());
+    connect(connection.widget(), SIGNAL(databaseOpenedSignal()), this,
+            SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
 
     main_layout_->addWidget(connection_stack_);
 
@@ -78,8 +59,7 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
     setLayout(main_layout_);
 
-    if (db_interface_.usedConnection().size() > 0)
-        updateUsedConnection();
+    updateUsedConnection();
 }
 
 DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
@@ -88,12 +68,6 @@ DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
 
     while (connection_stack_->count())
         connection_stack_->removeWidget(connection_stack_->widget(0));
-}
-
-void DatabaseOpenTaskWidget::databaseTypeSelectSlot()
-{
-    QRadioButton* radio = dynamic_cast<QRadioButton*>(QObject::sender());
-    task_.useConnection(radio->text().toStdString());
 }
 
 void DatabaseOpenTaskWidget::updateUsedConnection()

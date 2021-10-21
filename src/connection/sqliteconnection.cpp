@@ -38,7 +38,7 @@ using namespace Utils;
 
 SQLiteConnection::SQLiteConnection(const std::string& class_id, const std::string& instance_id,
                                    DBInterface* interface)
-    : DBConnection(class_id, instance_id, interface), interface_(*interface)
+    : Configurable(class_id, instance_id, interface), interface_(*interface), connection_ready_(false)
 {
     registerParameter("last_filename", &last_filename_, "");
 

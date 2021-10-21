@@ -21,7 +21,7 @@
 #include "config.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -66,22 +66,8 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     QMutexLocker locker(&connection_mutex_);
 
     registerParameter("read_chunk_size", &read_chunk_size_, 50000);
-    registerParameter("used_connection", &used_connection_, "");
 
     createSubConfigurables();
-
-    if (used_connection_.size())
-    {
-        if (!connections_.count(used_connection_))
-        {
-            logerr << "DBInterface: constructor: unknown connection '" << used_connection_ << "'";
-            used_connection_ = "";
-        }
-        else
-        {
-            current_connection_ = connections_.at(used_connection_);
-        }
-    }
 }
 
 /**
@@ -93,28 +79,9 @@ DBInterface::~DBInterface()
 
     QMutexLocker locker(&connection_mutex_);
 
-    for (auto it : connections_)
-        delete it.second;
-
-    connections_.clear();
+    current_connection_ = nullptr;
 
     logdbg << "DBInterface: desctructor: end";
-}
-
-/**
- * Generates connection based on the DB_CONNECTION_TYPE of info, calls init on it. If a new database
- * will be created, creates the buffer_writer_, else calls updateExists and updateCount.
- */
-void DBInterface::useConnection(const string& connection_type)
-{
-    logdbg << "DBInterface: useConnection: '" << connection_type << "'";
-    if (current_connection_)
-        assert(!current_connection_->ready());
-
-    current_connection_ = connections_.at(connection_type);
-    used_connection_ = connection_type;
-
-    assert(current_connection_);
 }
 
 void DBInterface::databaseContentChanged()
@@ -144,8 +111,9 @@ void DBInterface::closeConnection()
         saveProperties();
 
     logdbg << "DBInterface: closeConnection";
-    for (auto it : connections_)
-        it.second->disconnect();
+    assert (current_connection_);
+    current_connection_->disconnect();
+
 
     if (info_widget_)
     {
@@ -204,9 +172,9 @@ bool DBInterface::ready()
     return current_connection_->ready();
 }
 
-DBConnection& DBInterface::connection()
+SQLiteConnection& DBInterface::connection()
 {
-    assert(ready());
+    assert(current_connection_);
     return *current_connection_;
 }
 
@@ -217,10 +185,11 @@ void DBInterface::generateSubConfigurable(const string& class_id,
 
     if (class_id == "SQLiteConnection")
     {
-        SQLiteConnection* connection = new SQLiteConnection(class_id, instance_id, this);
-        assert(connections_.count(connection->instanceId()) == 0);
-        connections_.insert(pair<string, DBConnection*>(
-                                connection->instanceId(), dynamic_cast<DBConnection*>(connection)));
+        assert (!current_connection_);
+
+        current_connection_.reset( new SQLiteConnection(class_id, instance_id, this));
+        assert (current_connection_);
+
     }
     else
         throw runtime_error("DBInterface: generateSubConfigurable: unknown class_id " +
@@ -229,7 +198,7 @@ void DBInterface::generateSubConfigurable(const string& class_id,
 
 void DBInterface::checkSubConfigurables()
 {
-    if (connections_.count("SQLite Connection") == 0)
+    if (!current_connection_)
     {
         addNewSubConfiguration("SQLiteConnection", "SQLite Connection");
         generateSubConfigurable("SQLiteConnection", "SQLite Connection");

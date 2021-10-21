@@ -31,7 +31,7 @@
 #include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-#include "dbconnection.h"
+#include "sqliteconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>
