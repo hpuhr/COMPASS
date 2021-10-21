@@ -54,11 +54,6 @@
             "path": "task_manage_sectors.json"
         },
         {
-            "class_id": "MySQLDBImportTask",
-            "instance_id": "MySQLDBImportTask0",
-            "path": "task_import_mysqldb.json"
-        },
-        {
             "class_id": "PostProcessTask",
             "instance_id": "PostProcessTask0",
             "path": "task_postprocess.json"
