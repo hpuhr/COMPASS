@@ -1,11 +1,12 @@
 {
     "parameters": {
         "info": "",
+        "meta_table": "RefTraj",
         "name": "RefTraj"
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
-            "DBODataSourceDefinitionRefTrajSCDB Extended0": {
+            "DBODataSourceDefinitionRefTraj0": {
                 "parameters": {
                     "altitude_column": "ds_reftraj.WGS_ELEV_CARTESIAN_M",
                     "foreign_key": "le_ds.DS_ID",
@@ -23,7 +24,6 @@
                     "primary_ir_min_column": "",
                     "primary_range_stddev_column": "",
                     "sac_column": "le_ds.SAC",
-                    "schema": "SCDB Extended",
                     "secondary_azimuth_stddev_column": "",
                     "secondary_ir_max_column": "",
                     "secondary_ir_min_column": "",
@@ -322,14 +322,6 @@
                 }
             }
         },
-        "DBOSchemaMetaTableDefinition": {
-            "DBOSchemaMetaTableDefinition0": {
-                "parameters": {
-                    "meta_table": "RefTraj",
-                    "schema": "SCDB Extended"
-                }
-            }
-        },
         "DBOVariable": {
             "DBOVariableRefTrajacceleration_ms20": {
                 "parameters": {
@@ -339,17 +331,8 @@
                     "dimension": "",
                     "name": "acceleration_ms2",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajacceleration_ms20": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.ACCELERATION_MS2"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.ACCELERATION_MS2"
                 }
             },
             "DBOVariableRefTrajalt_baro_ft0": {
@@ -360,17 +343,8 @@
                     "dimension": "Height",
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajalt_baro_ft0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.ALT_BARO_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_reftraj.ALT_BARO_FT"
                 }
             },
             "DBOVariableRefTrajalt_baro_std_dev_ft0": {
@@ -381,17 +355,8 @@
                     "dimension": "",
                     "name": "alt_baro_std_dev_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajalt_baro_std_dev_ft0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.ALT_BARO_STD_DEV_FT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.ALT_BARO_STD_DEV_FT"
                 }
             },
             "DBOVariableRefTrajalt_geo_ft0": {
@@ -402,17 +367,8 @@
                     "dimension": "Height",
                     "name": "alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajalt_geo_ft0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.ALT_GEO_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_reftraj.ALT_GEO_FT"
                 }
             },
             "DBOVariableRefTrajalt_geo_std_dev_ft0": {
@@ -423,17 +379,8 @@
                     "dimension": "",
                     "name": "alt_geo_std_dev_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajalt_geo_std_dev_ft0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.ALT_GEO_STD_DEV_FT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.ALT_GEO_STD_DEV_FT"
                 }
             },
             "DBOVariableRefTrajcalc_vertical_rate_ftm0": {
@@ -444,17 +391,8 @@
                     "dimension": "",
                     "name": "calc_vertical_rate_ftm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajcalc_vertical_rate_ftm0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.CALC_VERTICAL_RATE_FTM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.CALC_VERTICAL_RATE_FTM"
                 }
             },
             "DBOVariableRefTrajcallsign0": {
@@ -465,17 +403,8 @@
                     "dimension": "",
                     "name": "callsign",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajcallsign0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.CALLSIGN"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.CALLSIGN"
                 }
             },
             "DBOVariableRefTrajcivil_emergency0": {
@@ -486,17 +415,8 @@
                     "dimension": "",
                     "name": "civil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajcivil_emergency0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.CIVIL_EMERGENCY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.CIVIL_EMERGENCY"
                 }
             },
             "DBOVariableRefTrajds_id0": {
@@ -507,17 +427,8 @@
                     "dimension": "",
                     "name": "ds_id",
                     "representation_str": "DATA_SRC_NAME",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajds_id0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.DS_ID"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.DS_ID"
                 }
             },
             "DBOVariableRefTrajgroundspeed_kt0": {
@@ -528,17 +439,8 @@
                     "dimension": "Speed",
                     "name": "groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajgroundspeed_kt0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.GROUNDSPEED_KT"
-                            }
-                        }
-                    }
+                    "unit": "Knots",
+                    "variable_identifier": "sd_reftraj.GROUNDSPEED_KT"
                 }
             },
             "DBOVariableRefTrajheading_deg0": {
@@ -549,17 +451,8 @@
                     "dimension": "Angle",
                     "name": "heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajheading_deg0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.HEADING_DEG"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_reftraj.HEADING_DEG"
                 }
             },
             "DBOVariableRefTrajmanoeuvre_hori0": {
@@ -570,17 +463,8 @@
                     "dimension": "",
                     "name": "manoeuvre_hori",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmanoeuvre_hori0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MANOEUVRE_HORI"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MANOEUVRE_HORI"
                 }
             },
             "DBOVariableRefTrajmil_emergency0": {
@@ -591,17 +475,8 @@
                     "dimension": "",
                     "name": "mil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmil_emergency0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MIL_EMERGENCY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MIL_EMERGENCY"
                 }
             },
             "DBOVariableRefTrajmode3a_code0": {
@@ -612,17 +487,8 @@
                     "dimension": "",
                     "name": "mode3a_code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmode3a_code0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MODE3A_CODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MODE3A_CODE"
                 }
             },
             "DBOVariableRefTrajmodec_code_ft0": {
@@ -633,17 +499,8 @@
                     "dimension": "Height",
                     "name": "modec_code_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmodec_code_ft0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MODEC_CODE_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_reftraj.MODEC_CODE_FT"
                 }
             },
             "DBOVariableRefTrajmof_long0": {
@@ -654,17 +511,8 @@
                     "dimension": "",
                     "name": "mof_long",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmof_long0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MOF_LONG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MOF_LONG"
                 }
             },
             "DBOVariableRefTrajmof_trans0": {
@@ -675,17 +523,8 @@
                     "dimension": "",
                     "name": "mof_trans",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmof_trans0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MOF_TRANS"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MOF_TRANS"
                 }
             },
             "DBOVariableRefTrajmof_vert0": {
@@ -696,17 +535,8 @@
                     "dimension": "",
                     "name": "mof_vert",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajmof_vert0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.MOF_VERT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.MOF_VERT"
                 }
             },
             "DBOVariableRefTrajpos_lat_deg0": {
@@ -717,17 +547,8 @@
                     "dimension": "Angle",
                     "name": "pos_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajpos_lat_deg0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.POS_LAT_DEG"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_reftraj.POS_LAT_DEG"
                 }
             },
             "DBOVariableRefTrajpos_long_deg0": {
@@ -738,17 +559,8 @@
                     "dimension": "Angle",
                     "name": "pos_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajpos_long_deg0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.POS_LONG_DEG"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_reftraj.POS_LONG_DEG"
                 }
             },
             "DBOVariableRefTrajpos_std_dev_lat_deg0": {
@@ -759,17 +571,8 @@
                     "dimension": "",
                     "name": "pos_std_dev_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_lat_deg0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LAT_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LAT_DEG"
                 }
             },
             "DBOVariableRefTrajpos_std_dev_latlong_corr_coeff0": {
@@ -780,17 +583,8 @@
                     "dimension": "",
                     "name": "pos_std_dev_latlong_corr_coeff",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_latlong_corr_coeff0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LATLONG_CORR_COEFF"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LATLONG_CORR_COEFF"
                 }
             },
             "DBOVariableRefTrajpos_std_dev_long_deg0": {
@@ -801,17 +595,8 @@
                     "dimension": "",
                     "name": "pos_std_dev_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajpos_std_dev_long_deg0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.POS_STD_DEV_LONG_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LONG_DEG"
                 }
             },
             "DBOVariableRefTrajrec_num0": {
@@ -822,17 +607,8 @@
                     "dimension": "",
                     "name": "rec_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajrec_num0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.REC_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.REC_NUM"
                 }
             },
             "DBOVariableRefTrajsac0": {
@@ -843,17 +619,8 @@
                     "dimension": "",
                     "name": "sac",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajsac0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.SAC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.SAC"
                 }
             },
             "DBOVariableRefTrajsic0": {
@@ -864,17 +631,8 @@
                     "dimension": "",
                     "name": "sic",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajsic0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.SIC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.SIC"
                 }
             },
             "DBOVariableRefTrajspi0": {
@@ -885,17 +643,8 @@
                     "dimension": "",
                     "name": "spi",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajspi0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.SPI"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.SPI"
                 }
             },
             "DBOVariableRefTrajtarget_addr0": {
@@ -906,17 +655,8 @@
                     "dimension": "",
                     "name": "target_addr",
                     "representation_str": "DEC_TO_HEX",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtarget_addr0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TARGET_ADDR"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TARGET_ADDR"
                 }
             },
             "DBOVariableRefTrajtimestamp0": {
@@ -927,17 +667,8 @@
                     "dimension": "",
                     "name": "timestamp",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtimestamp0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TIMESTAMP"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TIMESTAMP"
                 }
             },
             "DBOVariableRefTrajtod0": {
@@ -948,17 +679,8 @@
                     "dimension": "Time",
                     "name": "tod",
                     "representation_str": "SECONDS_TO_TIME",
-                    "unit": "Second"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtod0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TOD"
-                            }
-                        }
-                    }
+                    "unit": "Second",
+                    "variable_identifier": "sd_reftraj.TOD"
                 }
             },
             "DBOVariableRefTrajtrack_created0": {
@@ -969,17 +691,8 @@
                     "dimension": "",
                     "name": "track_created",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtrack_created0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TRACK_CREATED"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TRACK_CREATED"
                 }
             },
             "DBOVariableRefTrajtrack_end0": {
@@ -990,17 +703,8 @@
                     "dimension": "",
                     "name": "track_end",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtrack_end0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TRACK_END"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TRACK_END"
                 }
             },
             "DBOVariableRefTrajtrack_num0": {
@@ -1011,17 +715,8 @@
                     "dimension": "",
                     "name": "track_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajtrack_num0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TRACK_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TRACK_NUM"
                 }
             },
             "DBOVariableRefTrajturnrate_degps0": {
@@ -1032,17 +727,8 @@
                     "dimension": "",
                     "name": "turnrate_degps",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajturnrate_degps0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.TURNRATE_DEGPS"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.TURNRATE_DEGPS"
                 }
             },
             "DBOVariableRefTrajusable0": {
@@ -1053,17 +739,8 @@
                     "dimension": "",
                     "name": "usable",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRefTrajusable0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_reftraj.USABLE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_reftraj.USABLE"
                 }
             }
         }

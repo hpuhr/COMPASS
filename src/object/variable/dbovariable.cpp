@@ -72,6 +72,7 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
 {
     registerParameter("name", &name_, "");
     registerParameter("description", &description_, "");
+    registerParameter("variable_identifier", &variable_identifier_, "");
     registerParameter("data_type_str", &data_type_str_, "");
     registerParameter("representation_str", &representation_str_, "");
     registerParameter("dimension", &dimension_, "");
@@ -90,6 +91,9 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
 
     // loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "'
     // unitunit '" << unit_unit_ << "'";
+
+    if (!variable_identifier_.size())
+        loginf  << "DBOVariable: constructor: name " << name_ << " has no variable_identifier";
 
     createSubConfigurables();
 }
@@ -117,6 +121,9 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
     description_ = other.description_;
     other.description_ = "";
 
+    variable_identifier_ = other.variable_identifier_;
+    other.variable_identifier_ = "";
+
     min_max_set_ = other.min_max_set_;
     other.min_max_set_ = false;
 
@@ -132,9 +139,6 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
     unit_ = other.unit_;
     other.unit_ = "";
 
-    schema_variables_ = other.schema_variables_;
-    other.schema_variables_.clear();
-
     widget_ = other.widget_;
     if (widget_)
         widget_->setVariable(*this);
@@ -142,6 +146,7 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
 
     other.configuration().updateParameterPointer("name", &name_);
     other.configuration().updateParameterPointer("description", &description_);
+    other.configuration().updateParameterPointer("variable_identifier", &variable_identifier_);
     other.configuration().updateParameterPointer("data_type_str", &data_type_str_);
     other.configuration().updateParameterPointer("representation_str", &representation_str_);
     other.configuration().updateParameterPointer("dimension", &dimension_);
@@ -153,10 +158,6 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
 
 DBOVariable::~DBOVariable()
 {
-    for (auto it : schema_variables_)
-        delete it.second;
-    schema_variables_.clear();
-
     if (widget_)
     {
         delete widget_;
@@ -167,46 +168,22 @@ DBOVariable::~DBOVariable()
 void DBOVariable::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
-    if (class_id.compare("DBOSchemaVariableDefinition") == 0)
-    {
-        DBOSchemaVariableDefinition* definition =
-            new DBOSchemaVariableDefinition(class_id, instance_id, this);
-        assert(schema_variables_.find(definition->getSchema()) == schema_variables_.end());
-        schema_variables_[definition->getSchema()] = definition;
-    }
-    else
+    //"variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
+
+//    if (class_id == "DBOSchemaVariableDefinition")
+//    {
+//        std::string var_id = configuration()
+//                                   .getSubConfiguration(class_id, instance_id)
+//                                   .getParameterConfigValueString("variable_identifier");
+//        if (var_id.size())
+//            variable_identifier_ = var_id;
+
+//        //configuration().removeSubConfiguration(class_id, instance_id);
+//    }
+//    else
         throw std::runtime_error("DBOVariable: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+                                     class_id);
 }
-
-// DBOVariable& DBOVariable::operator=(DBOVariable&& other)
-//{
-//    db_object_ = *other.db_object_;
-
-//    representation_str_ = other.representation_str_;
-//    other.representation_str_ = "";
-
-//    representation_ = other.representation_;
-//    other.representation_ = Representation.STANDARD;
-
-//    description_ = other.description_;
-
-//    min_max_set_ = other.min_max_set_;
-//    min_ = min_;
-//    max_ = max_;
-
-//    dimension_ = dimension_;
-//    unit_ = unit_;
-
-//    schema_variables_.insert(make_move_iterator(begin(other.schema_variables_)),
-//             make_move_iterator(end(other.schema_variables_)));
-
-//    widget_ = other.widget_;
-
-//    locked_ = other.locked_;
-
-//    return *this;
-//}
 
 bool DBOVariable::operator==(const DBOVariable& var)
 {
@@ -226,90 +203,10 @@ void DBOVariable::print()
            << " data type " << data_type_str_;
 }
 
-//    if (transform)
-//    {
-//        logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " representation " <<
-//        representation_string;
 
-//        DBOVariable *variable;
-
-//        if (isMetaVariable())
-//            variable = getFirst();
-//        else
-//            variable = this;
-
-//        std::string meta_tablename = variable->getCurrentMetaTable ();
-//        std::string table_varname = variable->getCurrentVariableName ();
-
-//        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema
-//        ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
-
-//        if (hasUnit () || table_column->hasUnit())
-//        {
-//            //loginf  << "var type " << variable->getDBOType() << " dim '" <<
-//            variable->getUnitDimension() << "'"; if (variable->hasUnit () !=
-//            table_column->hasUnit())
-//            {
-//                logerr << "DBOVariable: getValueFromRepresentation: unit transformation
-//                inconsistent: var " << variable->getName ()
-//                                            << " has unit " << hasUnit () << " table column " <<
-//                                            table_column->getName() << " has unit "
-//                                            << table_column->hasUnit();
-//                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation
-//                error 1");
-//            }
-
-//            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-//            {
-//                logerr << "DBOVariable: getValueFromRepresentation: unit transformation
-//                inconsistent: var "
-//                        << variable->getName () << " has dimension " << getUnitDimension () << "
-//                        table column "
-//                        << table_column->getName() << " has dimension " <<
-//                        table_column->getUnitDimension();
-//                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation
-//                error 2");
-//            }
-
-//            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
-//            double factor = unit->getFactor (variable->getUnitUnit(),
-//            table_column->getUnitUnit()); logdbg  << "DBOVariable: getValueFromRepresentation:
-//            correct unit transformation with factor " << factor;
-
-//            double var = doubleFromString(ss.str());
-//            var *= factor;
-//            std::string transformed = doubleToString (var);
-
-//            logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " transformed
-//            representation " << transformed; return transformed;
-//        }
-//        else
-//            return ss.str();
-//    }
-//    else
-//        return ss.str();
-//}
 
 void DBOVariable::checkSubConfigurables()
 {
-    //    if (!hasCurrentSchema())
-    //    {
-    //        std::string schema_name = COMPASS::instance().schemaManager().getCurrentSchemaName();
-    //        std::string instance = schema_name+"0";
-    //        std::string meta_table_name = dbo_parent_.name();
-
-    //        loginf << "DBOVariable: checkSubConfigurables: creating new schema definition for " <<
-    //        schema_name;
-
-    //        Configuration &config = addNewSubConfiguration ("DBOSchemaVariableDefinition",
-    //        instance);
-
-    //        config.addParameterString ("schema", schema_name);
-    //        config.addParameterString ("meta_table", meta_table_name);
-    //        config.addParameterString ("variable_identifier", "");
-
-    //        generateSubConfigurable("DBOSchemaVariableDefinition", instance);
-    //    }
 }
 
 const std::string& DBOVariable::dboName() const
@@ -324,58 +221,26 @@ void DBOVariable::name(const std::string& name)
     name_ = name;
 }
 
-bool DBOVariable::hasSchema(const std::string& schema) const
+//const std::string& DBOVariable::metaTable() const
+//{
+//    assert(db_object_);
+//    return db_object_->currentMetaTable();
+//}
+
+bool DBOVariable::hasVariableIdentifier() const
 {
-    // return schema_variables_.find (schema) != schema_variables_.end();
-    assert(db_object_);
-    return schema_variables_.find(schema) != schema_variables_.end() &&
-           db_object_->hasMetaTable(schema);
+    return variable_identifier_.size();
 }
 
-const std::string& DBOVariable::metaTable(const std::string& schema) const
+const std::string& DBOVariable::variableIdentifier() const
 {
-    assert(hasSchema(schema));
-    // return schema_variables_.at(schema)->getMetaTable();
-    assert(db_object_);
-    return db_object_->metaTable(schema);
+    assert(hasVariableIdentifier());
+    return variable_identifier_;
 }
 
-bool DBOVariable::hasVariableName(const std::string& schema) const
+void DBOVariable::setVariableIdentifier(const std::string& value)
 {
-    if (!hasSchema(schema))
-        return false;
-
-    return schema_variables_.count(schema) != 0;
-}
-
-const std::string& DBOVariable::variableName(const std::string& schema) const
-{
-    assert(hasVariableName(schema));
-    return schema_variables_.at(schema)->getVariableIdentifier();
-}
-
-void DBOVariable::setVariableName(const std::string& schema_name, const std::string& name)
-{
-    if (hasVariableName(schema_name))
-    {
-        logdbg << "DBOVariable: setVariableName: setting in existing schema def";
-        schema_variables_.at(schema_name)->setVariableIdentifier(name);
-    }
-    else
-    {
-        logdbg << "DBOVariable: setVariableName: creating new";
-        assert(db_object_);
-        std::string var_instance = "DBOSchemaVariableDefinition" + db_object_->name() + name + "0";
-
-        Configuration& var_configuration =
-            addNewSubConfiguration("DBOSchemaVariableDefinition", var_instance);
-        var_configuration.addParameterString("schema", schema_name);
-        // var_configuration.addParameterString ("meta_table", meta.name());
-        var_configuration.addParameterString("variable_identifier", name);
-
-        generateSubConfigurable("DBOSchemaVariableDefinition", var_instance);
-        assert(hasSchema(schema_name));
-    }
+    variable_identifier_ = value;
 }
 
 bool DBOVariable::hasCurrentDBColumn() const
@@ -385,23 +250,21 @@ bool DBOVariable::hasCurrentDBColumn() const
     if (!db_object_->hasCurrentMetaTable())
         return false;
 
-    if (!hasCurrentSchema())
+    if (!hasVariableIdentifier())
         return false;
 
     std::string meta_tablename = currentMetaTableString();
-    std::string meta_table_varid = currentVariableIdentifier();
 
     logdbg << "DBOVariable: hasCurrentDBColumn: meta " << meta_tablename << " variable id "
-           << meta_table_varid;
+           << variable_identifier_;
 
-    assert(COMPASS::instance().schemaManager().hasCurrentSchema());
     assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_tablename));
 
     return COMPASS::instance()
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
-        .hasColumn(meta_table_varid);
+        .hasColumn(variable_identifier_);
 }
 
 const DBTableColumn& DBOVariable::currentDBColumn() const
@@ -409,24 +272,18 @@ const DBTableColumn& DBOVariable::currentDBColumn() const
     assert(hasCurrentDBColumn());
 
     std::string meta_tablename = currentMetaTableString();
-    std::string meta_table_varid = currentVariableIdentifier();
 
     logdbg << "DBOVariable: currentDBColumn: meta " << meta_tablename << " variable id "
-           << meta_table_varid;
+           << variable_identifier_;
 
     return COMPASS::instance()
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
-        .column(meta_table_varid);
+        .column(variable_identifier_);
 }
 
 bool DBOVariable::isKey() { return hasCurrentDBColumn() && currentDBColumn().isKey(); }
-
-bool DBOVariable::hasCurrentSchema() const
-{
-    return hasSchema(COMPASS::instance().schemaManager().getCurrentSchemaName());
-}
 
 const std::string& DBOVariable::currentMetaTableString() const
 {
@@ -440,14 +297,6 @@ const MetaDBTable& DBOVariable::currentMetaTable() const
     assert(db_object_);
     assert(db_object_->hasCurrentMetaTable());
     return db_object_->currentMetaTable();
-}
-
-const std::string& DBOVariable::currentVariableIdentifier() const
-{
-    assert(hasCurrentSchema());
-    std::string schema = COMPASS::instance().schemaManager().getCurrentSchemaName();
-    assert(schema_variables_.find(schema) != schema_variables_.end());
-    return schema_variables_.at(schema)->getVariableIdentifier();
 }
 
 void DBOVariable::setMinMax()
@@ -940,25 +789,4 @@ std::string DBOVariable::getDataSourcesAsString(const std::string& value) const
     //loginf << "DBOVariable: getDataSourcesAsString: ds '" << value << "' not found";
 
     return value;
-}
-
-bool DBOVariable::onlyExistsInSchema(const std::string& schema_name)
-{
-    for (auto& def_it : schema_variables_)
-    {
-        if (def_it.first != schema_name)  // other found
-            return false;
-    }
-    return true;  // no other found
-}
-
-void DBOVariable::removeInfoForSchema(const std::string& schema_name)
-{
-    loginf << "DBOVariable " << name() << ": removeVariableInfoForSchema: " << schema_name;
-
-    if (schema_variables_.count(schema_name))
-    {
-        delete schema_variables_.at(schema_name);
-        schema_variables_.erase(schema_name);
-    }
 }

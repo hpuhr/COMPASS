@@ -36,7 +36,7 @@
         "DBInterface": {
             "DBInterface0": {
                 "parameters": {
-                    "read_chunk_size": 100000,
+                    "read_chunk_size": 100000
                 },
                 "sub_configs": {
                     "SQLiteConnection": {

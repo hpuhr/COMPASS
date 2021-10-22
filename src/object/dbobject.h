@@ -27,7 +27,6 @@
 #include "dboassociationcollection.h"
 #include "dbodatasource.h"
 #include "dbodatasourcedefinition.h"
-#include "dboschemametatabledefinition.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "global.h"
@@ -49,38 +48,6 @@ class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
 class DBObjectManager;
 
-/**
- * @brief Abstract data description of an object stored in a database
- *
- * A database object serves as definition of a data container stored in a database. It is identified
- * by name and a type, and mainly consists of one or a number of meta tables. One meta table is
- * considered the main meta table, all others are sub meta tables. Columns from all such meta tables
- * are collected and abstracted as DBOVariables of an DBObject.
- *
- * The meta table information is depended on the DBSchema, since for different schemas different
- * table structures might exist. With such a construct it is possible to abstract from different
- * database schemas, by creating one set of DBObjects, which are based on different meta tables
- * (depended on the used schema). All DBOVariable instances have a different table variable, also
- * based on the schema.
- *
- * From an outside view, a DBObject is a collection of DBOVariables. However, a specialization
- * exists, which is called the meta DBObject (of type DBO_UNKNOWN), which serves only as an
- * collection of meta DBOVariables and does not have a meta table.
- *
- * The distinction between meta DBOjects and normal ones can be made using the is_meta_ flag or
- * is_loadable_ flag.
- *
- * For loadable DBObjects, a read list is held. This list contains the information, which variables
- * are to be loaded on read statements from the database. This read list is only held, and other
- * classes can add variables to the retrieved reference of the list.
- *
- * Also holds functionality about its data sources. If such information is present (marked in the
- * database schema), such information can be generated and is executed asynchronously. Interested
- * instances have to be registered as observer and receive a callback once the information is
- * present.
- *
- * \todo Check if DBOVariables can exist only in some schemas, finish checkVariables
- */
 class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
@@ -97,7 +64,7 @@ class DBObject : public QObject, public Configurable
     void labelDefinitionChangedSignal();
 
   public slots:
-    void schemaChangedSlot();
+    //void schemaChangedSlot();
 
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
@@ -182,35 +149,13 @@ class DBObject : public QObject, public Configurable
     size_t count();
     size_t loadedCount();
 
-    /// @brief Returns container with all meta tables
-    const std::map<std::string, DBOSchemaMetaTableDefinition>& metaTables() const
-    {
-        return meta_table_definitions_;
-    }
-    /// @brief Returns identifier of main meta table under DBSchema defined by schema
-    bool hasMetaTable(const std::string& schema) const;
-    const std::string& metaTable(const std::string& schema) const;
-    void deleteMetaTable(const std::string& schema);
-
     /// @brief Returns main meta table for current schema
     MetaDBTable& currentMetaTable() const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable() const;
 
-    /// @brief Returns if a data source is defined in the current schema
-    bool hasCurrentDataSourceDefinition() const;
     /// @brief Returns current data source definition
     const DBODataSourceDefinition& currentDataSourceDefinition() const;
-    bool hasDataSourceDefinition(const std::string& schema)
-    {
-        return data_source_definitions_.count(schema);
-    }
-    void deleteDataSourceDefinition(const std::string& schema);
-    /// @brief Returns container with all data source definitions
-    std::map<std::string, DBODataSourceDefinition>& dataSourceDefinitions()
-    {
-        return data_source_definitions_;
-    }
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -253,8 +198,6 @@ class DBObject : public QObject, public Configurable
 
     void print();
 
-    void removeDependenciesForSchema(const std::string& schema_name);
-
     // association stuff
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
@@ -275,6 +218,7 @@ protected:
     std::string name_;
     /// DBO description
     std::string info_;
+    std::string meta_table_name_;
     /// DBO is loadable flag
     bool is_loadable_{false};  // loadable on its own
     bool loading_wanted_{false};
@@ -291,18 +235,15 @@ protected:
 
     std::shared_ptr<Buffer> data_;
 
-    /// Container with all DBOSchemaMetaTableDefinitions
-    std::map<std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
-
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::unique_ptr<DBODataSourceDefinition> data_source_definition_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;
 
     /// Current (in the current schema) main meta table
-    MetaDBTable* current_meta_table_{nullptr};  // TODO rework const?
-    std::string associations_table_name_;
+    //MetaDBTable* current_meta_table_{nullptr};  // TODO rework const?
+    //std::string associations_table_name_;
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
@@ -315,7 +256,8 @@ protected:
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
-    void removeVariableInfoForSchema(const std::string& schema_name);
+
+    std::string associationsTableName();
 };
 
 #endif /* DBOBJECT_H_ */

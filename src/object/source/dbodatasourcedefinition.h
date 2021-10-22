@@ -41,8 +41,6 @@ class DBODataSourceDefinition : public QObject, public Configurable
                             DBObject* object);
     virtual ~DBODataSourceDefinition();
 
-    const std::string& schema() const { return schema_; }
-
     const std::string& localKey() const { return local_key_; }
     void localKey(const std::string& local_key);
     const std::string& metaTableName() const { return meta_table_; }
@@ -132,8 +130,6 @@ class DBODataSourceDefinition : public QObject, public Configurable
 protected:
     DBObject* object_{nullptr};
 
-    /// DBSchema identifier
-    std::string schema_;
     /// Identifier for key in main table
     std::string local_key_;
     /// Identifier for meta table with data sources

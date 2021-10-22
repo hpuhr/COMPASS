@@ -28,7 +28,6 @@
 #include "compass.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
-#include "dbschemaselectioncombobox.h"
 #include "logger.h"
 #include "metadbtable.h"
 
@@ -50,19 +49,12 @@ class DBOAddSchemaMetaTableDialog : public QDialog
 
         QGridLayout* grid_layout = new QGridLayout;
 
-        QLabel* new_meta_schema_label = new QLabel("Schema");
-        grid_layout->addWidget(new_meta_schema_label, 0, 0);
-
-        schema_box_ = new DBSchemaSelectionComboBox();
-        schema_box_->update();
-        grid_layout->addWidget(schema_box_, 0, 1);
-
         QLabel* new_meta_meta_label = new QLabel("Meta table");
-        grid_layout->addWidget(new_meta_meta_label, 1, 0);
+        grid_layout->addWidget(new_meta_meta_label, 0, 0);
 
         meta_table_box_ = new QComboBox();
         updateMetaTableSelection();
-        grid_layout->addWidget(meta_table_box_, 1, 1);
+        grid_layout->addWidget(meta_table_box_, 0, 1);
 
         main_layout->addLayout(grid_layout);
 
@@ -75,13 +67,7 @@ class DBOAddSchemaMetaTableDialog : public QDialog
 
         setLayout(main_layout);
 
-        setWindowTitle(tr("Add Meta Table for a Schema"));
-    }
-
-    std::string schemaName()
-    {
-        assert(schema_box_);
-        return schema_box_->currentText().toStdString();
+        setWindowTitle(tr("Add Meta Table"));
     }
 
     std::string metaTableName()
@@ -91,7 +77,6 @@ class DBOAddSchemaMetaTableDialog : public QDialog
     }
 
   protected:
-    DBSchemaSelectionComboBox* schema_box_{nullptr};
     QComboBox* meta_table_box_{nullptr};
 
     void updateMetaTableSelection()

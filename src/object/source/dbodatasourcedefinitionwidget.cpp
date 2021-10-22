@@ -61,12 +61,6 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object,
     grid->addWidget(new QLabel(object_.name().c_str()), row, 1);
 
     row++;
-    grid->addWidget(new QLabel("Schema"), row, 0);
-
-    QLabel* schema = new QLabel(definition_.schema().c_str());
-    grid->addWidget(schema, row, 1);
-
-    row++;
     grid->addWidget(new QLabel("Local key"), row, 0);
 
     local_key_box_ = new QComboBox();
@@ -500,9 +494,7 @@ void DBODataSourceDefinitionWidget::updateMetaTableSlot()
     while (meta_name_box_->count() > 0)
         meta_name_box_->removeItem(0);
 
-    std::string schema_name = definition_.schema();
-
-    DBSchema& schema = schema_manager_.getSchema(schema_name);
+    DBSchema& schema = schema_manager_.getCurrentSchema();
 
     auto metatables = schema.metaTables();
 
@@ -530,9 +522,9 @@ void DBODataSourceDefinitionWidget::updateForeignKeySlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(foreign_key_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(foreign_key_box_, meta_table_name,
                                definition_.foreignKey());
 }
 
@@ -543,9 +535,9 @@ void DBODataSourceDefinitionWidget::updateShortNameColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(short_name_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(short_name_box_, meta_table_name,
                                definition_.shortNameColumn(), true);
 }
 
@@ -556,9 +548,9 @@ void DBODataSourceDefinitionWidget::updateNameColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(name_box_, schema_name, meta_table_name, definition_.nameColumn());
+
+    updateVariableSelectionBox(name_box_, meta_table_name, definition_.nameColumn());
 }
 
 void DBODataSourceDefinitionWidget::updateSacColumnSlot()
@@ -568,9 +560,9 @@ void DBODataSourceDefinitionWidget::updateSacColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(sac_box_, schema_name, meta_table_name, definition_.sacColumn(),
+
+    updateVariableSelectionBox(sac_box_, meta_table_name, definition_.sacColumn(),
                                true);
 }
 
@@ -581,9 +573,9 @@ void DBODataSourceDefinitionWidget::updateSicColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(sic_box_, schema_name, meta_table_name, definition_.sicColumn(),
+
+    updateVariableSelectionBox(sic_box_, meta_table_name, definition_.sicColumn(),
                                true);
 }
 
@@ -594,9 +586,9 @@ void DBODataSourceDefinitionWidget::updateLatitudeColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(latitude_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(latitude_box_, meta_table_name,
                                definition_.latitudeColumn(), true);
 }
 
@@ -607,9 +599,9 @@ void DBODataSourceDefinitionWidget::updateLongitudeColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(longitude_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(longitude_box_, meta_table_name,
                                definition_.longitudeColumn(), true);
 }
 
@@ -620,9 +612,9 @@ void DBODataSourceDefinitionWidget::updateAltitudeColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(altitude_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(altitude_box_, meta_table_name,
                                definition_.altitudeColumn(), true);
 }
 
@@ -633,9 +625,9 @@ void DBODataSourceDefinitionWidget::updatePrimaryAzimuthStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(primary_azimuth_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(primary_azimuth_stddev_box_, meta_table_name,
                                definition_.primaryAzimuthStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updatePrimaryRangeStdDevColumnSlot()
@@ -645,9 +637,9 @@ void DBODataSourceDefinitionWidget::updatePrimaryRangeStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(primary_range_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(primary_range_stddev_box_, meta_table_name,
                                definition_.primaryRangeStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updatePrimaryIRMinColumnSlot()
@@ -657,9 +649,9 @@ void DBODataSourceDefinitionWidget::updatePrimaryIRMinColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(primary_ir_min_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(primary_ir_min_box_, meta_table_name,
                                definition_.primaryIRMinColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updatePrimaryIRMaxColumnSlot()
@@ -669,9 +661,9 @@ void DBODataSourceDefinitionWidget::updatePrimaryIRMaxColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(primary_ir_max_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(primary_ir_max_box_, meta_table_name,
                                definition_.primaryIRMaxColumn(), true);
 }
 
@@ -682,9 +674,9 @@ void DBODataSourceDefinitionWidget::updateSecondaryAzimuthStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(secondary_azimuth_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(secondary_azimuth_stddev_box_, meta_table_name,
                                definition_.secondaryAzimuthStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateSecondaryRangeStdDevColumnSlot()
@@ -694,9 +686,9 @@ void DBODataSourceDefinitionWidget::updateSecondaryRangeStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(secondary_range_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(secondary_range_stddev_box_, meta_table_name,
                                definition_.secondaryRangeStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateSecondaryIRMinColumnSlot()
@@ -706,9 +698,9 @@ void DBODataSourceDefinitionWidget::updateSecondaryIRMinColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(secondary_ir_min_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(secondary_ir_min_box_, meta_table_name,
                                definition_.secondaryIRMinColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateSecondaryIRMaxColumnSlot()
@@ -718,9 +710,9 @@ void DBODataSourceDefinitionWidget::updateSecondaryIRMaxColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(secondary_ir_max_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(secondary_ir_max_box_, meta_table_name,
                                definition_.secondaryIRMaxColumn(), true);
 }
 
@@ -731,9 +723,9 @@ void DBODataSourceDefinitionWidget::updateModeSAzimuthStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(mode_s_azimuth_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(mode_s_azimuth_stddev_box_, meta_table_name,
                                definition_.modeSAzimuthStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateModeSRangeStdDevColumnSlot()
@@ -743,9 +735,9 @@ void DBODataSourceDefinitionWidget::updateModeSRangeStdDevColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(mode_s_range_stddev_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(mode_s_range_stddev_box_, meta_table_name,
                                definition_.modeSRangeStdDevColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateModeSIRMinColumnSlot()
@@ -755,9 +747,9 @@ void DBODataSourceDefinitionWidget::updateModeSIRMinColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(mode_s_ir_min_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(mode_s_ir_min_box_, meta_table_name,
                                definition_.modeSIRMinColumn(), true);
 }
 void DBODataSourceDefinitionWidget::updateModeSIRMaxColumnSlot()
@@ -767,14 +759,13 @@ void DBODataSourceDefinitionWidget::updateModeSIRMaxColumnSlot()
     assert(meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
-    std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox(mode_s_ir_max_box_, schema_name, meta_table_name,
+
+    updateVariableSelectionBox(mode_s_ir_max_box_, meta_table_name,
                                definition_.modeSIRMaxColumn(), true);
 }
 
 void DBODataSourceDefinitionWidget::updateVariableSelectionBox(QComboBox* box,
-                                                               const std::string& schema_name,
                                                                const std::string& meta_table_name,
                                                                const std::string& value,
                                                                bool empty_allowed)
@@ -785,7 +776,7 @@ void DBODataSourceDefinitionWidget::updateVariableSelectionBox(QComboBox* box,
     while (box->count() > 0)
         box->removeItem(0);
 
-    DBSchema& schema = schema_manager_.getSchema(schema_name);
+    DBSchema& schema = schema_manager_.getCurrentSchema();
 
     assert(schema.hasMetaTable(meta_table_name));
 

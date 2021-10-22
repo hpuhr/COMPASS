@@ -26,8 +26,6 @@
 #include "global.h"
 #include "property.h"
 #include "stringconv.h"
-//#include "dbobject.h"
-#include "dbovariableschema.h"
 
 class DBTableColumn;
 class DBObject;
@@ -101,29 +99,25 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief Sets variable description
     void description(const std::string& description) { description_ = description; }
 
-    /// @brief Returns of schema is present in schema_variables_
-    bool hasSchema(const std::string& schema) const;
     /// @brief Returns meta table identifier for a given schema
-    const std::string& metaTable(const std::string& schema) const;
+    //const std::string& metaTable() const;
 
-    bool hasVariableName(const std::string& schema) const;
+    bool hasVariableIdentifier() const;
     /// @brief Returns variable identifier for a given schema
-    const std::string& variableName(const std::string& schema) const;
-    void setVariableName(const std::string& schema, const std::string& name);
+    const std::string& variableIdentifier() const;
+    void setVariableIdentifier(const std::string& value);
 
     bool hasCurrentDBColumn() const;
     const DBTableColumn& currentDBColumn() const;
 
     bool isKey();
 
-    /// @brief Returns if current schema is present in schema_variables_
-    bool hasCurrentSchema() const;
     /// @brief Returns meta table identifier for current schema
     const std::string& currentMetaTableString() const;
     /// @brief Returns meta table for current schema
     const MetaDBTable& currentMetaTable() const;
     /// @brief Returns variable identifier for current schema
-    const std::string& currentVariableIdentifier() const;
+    //const std::string& currentVariableIdentifier() const;
 
     /// @brief Returns if dimension information is present
     bool hasDimension() { return dimension_.size() > 0; }
@@ -210,9 +204,6 @@ class DBOVariable : public QObject, public Property, public Configurable
                                              const std::string& value_b_str) const;
 
     bool existsInDB() const;
-    bool onlyExistsInSchema(const std::string& schema_name);
-
-    void removeInfoForSchema(const std::string& schema_name);
 
   private:
     static std::map<Representation, std::string> representation_2_string_;
@@ -227,6 +218,8 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// Description
     std::string description_;
 
+    std::string variable_identifier_;
+
     bool min_max_set_{false};
     /// Minimum as string
     std::string min_;
@@ -238,8 +231,6 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// Unit unit such as seconds
     std::string unit_;
 
-    /// Container with schema identified->schema-variable definitions
-    std::map<std::string, DBOSchemaVariableDefinition*> schema_variables_;
 
     DBOVariableWidget* widget_{nullptr};
 

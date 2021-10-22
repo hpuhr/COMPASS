@@ -24,7 +24,6 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string& class_id,
                                                  const std::string& instance_id, DBObject* object)
     : Configurable(class_id, instance_id, object), object_(object)
 {
-    registerParameter("schema", &schema_, "");
     registerParameter("local_key", &local_key_, "");
     registerParameter("meta_table", &meta_table_, "");
     registerParameter("foreign_key", &foreign_key_, "");

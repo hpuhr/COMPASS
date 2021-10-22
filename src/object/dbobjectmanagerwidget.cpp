@@ -161,11 +161,11 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
 
 void DBObjectManagerWidget::addDBOSlot()
 {
-    if (!schema_manager_.hasCurrentSchema())
-    {
-        logerr << "DBObjectManagerWidget: addDBO: no schema was selected";
-        return;
-    }
+//    if (!schema_manager_.hasCurrentSchema())
+//    {
+//        logerr << "DBObjectManagerWidget: addDBO: no schema was selected";
+//        return;
+//    }
 
     bool ok;
     QString text =
@@ -200,11 +200,11 @@ void DBObjectManagerWidget::addDBOSlot()
 
             Configuration& config = object_manager_.addNewSubConfiguration("DBObject", instance);
             config.addParameterString("name", name);
-            // config.addParameterString ("meta_table", meta_table_name);
-            Configuration& metatable_config =
-                config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
-            metatable_config.addParameterString("schema", schema_manager_.getCurrentSchemaName());
-            metatable_config.addParameterString("meta_table", meta_table_name);
+             config.addParameterString ("meta_table", meta_table_name);
+//            Configuration& metatable_config =
+//                config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
+//            metatable_config.addParameterString("schema", schema_manager_.getCurrentSchemaName());
+//            metatable_config.addParameterString("meta_table", meta_table_name);
 
             object_manager_.generateSubConfigurable("DBObject", instance);
 

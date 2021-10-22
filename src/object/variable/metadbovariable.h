@@ -21,6 +21,7 @@
 #include "configurable.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
+#include "dbovariabledefinition.h"
 #include "stringconv.h"
 
 class MetaDBOVariableWidget;

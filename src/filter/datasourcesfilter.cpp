@@ -44,13 +44,13 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
 
     object_ = &COMPASS::instance().objectManager().object(dbo_name_);
 
-    if (!object_->hasCurrentDataSourceDefinition())
-    {
-        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
-               << dbo_name_ + " has no data sources";
-        disabled_ = true;
-        return;
-    }
+//    if (!object_->hasCurrentDataSourceDefinition())
+//    {
+//        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
+//               << dbo_name_ + " has no data sources";
+//        disabled_ = true;
+//        return;
+//    }
 
     if (!object_->hasDataSources())
     {

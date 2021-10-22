@@ -255,7 +255,6 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
     logdbg << "DBInterface: queryActiveSensorNumbers: start";
 
     assert(object.existsInDB());
-    assert(object.hasCurrentDataSourceDefinition());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -297,7 +296,6 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
     DBObject& object = COMPASS::instance().objectManager().object("ADSB");
 
     assert(object.existsInDB());
-    assert(object.hasCurrentDataSourceDefinition());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -347,9 +345,6 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 
 bool DBInterface::hasDataSourceTables(DBObject& object)
 {
-    if (!object.hasCurrentDataSourceDefinition())
-        return false;
-
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
     const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 

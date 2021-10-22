@@ -27,12 +27,8 @@
 
 DBSchema::DBSchema(const std::string& class_id, const std::string& instance_id,
                    Configurable* parent, DBInterface& db_interface)
-    : Configurable(class_id, instance_id, parent,
-                   "db_schema_" + boost::algorithm::to_lower_copy(instance_id) + ".json"), db_interface_(db_interface)
+    : Configurable(class_id, instance_id, parent), db_interface_(db_interface)
 {
-    registerParameter("name", &name_, (std::string) "");
-    assert(name_.size() != 0);
-
     createSubConfigurables();
 }
 
@@ -59,24 +55,24 @@ void DBSchema::generateSubConfigurable(const std::string& class_id, const std::s
 
     if (class_id.compare("DBTable") == 0)
     {
-        loginf << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable "
+        loginf << "DBSchema: generateSubConfigurable: generating DBTable "
                << instance_id;
         DBTable* table = new DBTable("DBTable", instance_id, *this, db_interface_);
         assert(table->name().size() != 0);
         assert(tables_.find(table->name()) == tables_.end());
         tables_.insert(std::pair<std::string, DBTable*>(table->name(), table));
-        logdbg << "DBSchema '" << name_ << "': generateSubConfigurable: generated DBTable "
+        logdbg << "DBSchema: generateSubConfigurable: generated DBTable "
                << table->name();
     }
     else if (class_id.compare("MetaDBTable") == 0)
     {
-        logdbg << "DBSchema '" << name_ << "': generateSubConfigurable: generating MetaDBTable "
+        logdbg << "DBSchema: generateSubConfigurable: generating MetaDBTable "
                << instance_id;
         MetaDBTable* meta_table = new MetaDBTable("MetaDBTable", instance_id, this, db_interface_);
         assert(meta_table->name().size() != 0);
         assert(meta_tables_.find(meta_table->name()) == meta_tables_.end());
         meta_tables_.insert(std::pair<std::string, MetaDBTable*>(meta_table->name(), meta_table));
-        logdbg << "DBSchema '" << name_ << "': generateSubConfigurable: generated MetaDBTable "
+        logdbg << "DBSchema: generateSubConfigurable: generated MetaDBTable "
                << meta_table->name();
     }
     else
@@ -234,5 +230,5 @@ void DBSchema::updateOnDatabase()
     for (auto& meta_table_it : meta_tables_)
         meta_table_it.second->updateOnDatabase();
 
-    logdbg << "DBSchema: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    logdbg << "DBSchema: updateOnDatabase: exists in db " << exists_in_db_;
 }

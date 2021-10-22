@@ -201,38 +201,38 @@ void DBOVariableWidget::createSchemaBoxes()
 {
     loginf << "DBOVariableWidget: createSchemaBoxes";
 
-    auto& meta_tables = variable_->dbObject().metaTables();
-    auto& schemas = COMPASS::instance().schemaManager().getSchemas();
+    //    auto& meta_tables = variable_->dbObject().metaTables();
+    //    auto& schemas = COMPASS::instance().schemaManager().getSchemas();
 
     assert(properties_layout_);
     schema_boxes_.clear();
 
     int row = schema_boxes_row_;
 
-    std::string schema_name;
+    //std::string schema_name;
 
-    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
-    {
-        schema_name = sit->first;
+    //    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
+    //    {
+    //        schema_name = sit->first;
 
-        if (meta_tables.find(schema_name) == meta_tables.end())
-            continue;
+    //        if (meta_tables.find(schema_name) == meta_tables.end())
+    //            continue;
 
-        std::string schema_string = "Schema: " + schema_name;
-        QLabel* label = new QLabel(schema_string.c_str());
-        properties_layout_->addWidget(label, row, 0);
+    std::string schema_string = "Schema";
+    QLabel* label = new QLabel(schema_string.c_str());
+    properties_layout_->addWidget(label, row, 0);
 
-        assert(meta_tables.count(schema_name) == 1);
-        DBTableColumnComboBox* box = new DBTableColumnComboBox(
-            schema_name, meta_tables.at(schema_name).metaTable(), *variable_);
+    //assert(meta_tables.count(schema_name) == 1);
+    std::string meta_table_name = variable_->currentMetaTable().name();
+    DBTableColumnComboBox* box = new DBTableColumnComboBox(meta_table_name, *variable_);
 
-        properties_layout_->addWidget(box, schema_boxes_row_, 1);
+    properties_layout_->addWidget(box, schema_boxes_row_, 1);
 
-        assert(schema_boxes_.count(schema_name) == 0);
-        schema_boxes_[schema_name] = box;
+    assert(schema_boxes_.count(meta_table_name) == 0);
+    schema_boxes_[meta_table_name] = box; // TODO
 
-        row++;
-    }
+    row++;
+    //    }
 
     loginf << "DBOVariableWidget: createSchemaBoxes: done";
 }

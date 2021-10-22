@@ -187,8 +187,6 @@ std::string SQLGenerator::getCreateTableStatement(const DBTable& table)
 
 std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& object)
 {
-    assert(object.hasCurrentDataSourceDefinition());
-
     const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
     const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
@@ -363,8 +361,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBO
     // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
     // sensor_number__value;";
     // return distinct_radar_numbers_statement_;
-
-    assert(object.hasCurrentDataSourceDefinition());
 
     std::string local_key_dbovar = object.currentDataSourceDefinition().localKey();
     assert(object.hasVariable(local_key_dbovar));

@@ -51,15 +51,6 @@ class DBSchema : public QObject, public Configurable
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Sets the schema name
-    void name(const std::string& name)
-    {
-        assert(name.size() != 0);
-        name_ = name;
-    }
-    /// @brief Returns the schema name
-    const std::string& name() const { return name_; }
-
     /// @brief Returns the DBTable with the supplied name
     DBTable& table(const std::string& name) const;
     /// @brief returns flag if a table with the given name exists
@@ -96,8 +87,6 @@ class DBSchema : public QObject, public Configurable
 
   private:
     DBInterface& db_interface_;
-    /// Name of the schema
-    std::string name_;
 
     bool locked_{false};
 

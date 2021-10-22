@@ -53,30 +53,8 @@ class DBSchemaManager : public QObject, public Configurable
     /// @brief Destructor
     virtual ~DBSchemaManager();
 
-    /// @brief Returns flag indicating if current schema is defined and exists
-    bool hasCurrentSchema();
-    /// @brief Returns name of the current schema
-    const std::string& getCurrentSchemaName();
     /// @brief Returns the current DBSchema
     DBSchema& getCurrentSchema();
-    /// @brief Returns the DBSchema with a given name
-    DBSchema& getSchema(const std::string& name);
-    /// @brief Returns if DBSchema with a given name exists
-    bool hasSchema(const std::string& name);
-    void deleteCurrentSchema();
-
-    /// @brief Returns container with all schemas
-    std::map<std::string, DBSchema*>& getSchemas() { return schemas_; }
-
-    /// @brief Renames the current schema
-    void renameCurrentSchema(const std::string& new_name);
-    /// @brief Sets the current schema
-
-    void setCurrentSchema(const std::string& current_schema);
-    /// @brief Adds an empty schema with a given name
-    void addEmptySchema(const std::string& name);
-    /// @brief Adds an RDL schema with a given name
-    // void addRDLSchema (std::string name);
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
@@ -88,12 +66,10 @@ class DBSchemaManager : public QObject, public Configurable
 
   protected:
     DBInterface& db_interface_;
-    /// Name of current DBSchema
-    std::string current_schema_;
     bool locked_{false};
 
     /// Container with all defined schemas (schema name -> DBSchema)
-    std::map<std::string, DBSchema*> schemas_;
+    std::unique_ptr<DBSchema> schema_;
 
     DBSchemaManagerWidget* widget_{nullptr};
 

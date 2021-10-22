@@ -1,11 +1,12 @@
 {
     "parameters": {
         "info": "",
+        "meta_table": "Radar",
         "name": "Radar"
     },
     "sub_configs": {
         "DBODataSourceDefinition": {
-            "DBODataSourceDefinitionRadarSCDB Extended0": {
+            "DBODataSourceDefinitionRadar0": {
                 "parameters": {
                     "altitude_column": "ds_radar.GROUND_ALTITUDE_AMSL_M",
                     "foreign_key": "le_ds.DS_ID",
@@ -23,38 +24,10 @@
                     "primary_ir_min_column": "ds_radar.PRI_MIN_IR_NM",
                     "primary_range_stddev_column": "ds_radar.PRI_RANGE_ERROR_SD_M",
                     "sac_column": "le_ds.SAC",
-                    "schema": "SCDB Extended",
                     "secondary_azimuth_stddev_column": "ds_radar.SSR_AZIMUTH_ERROR_SD_DEG",
                     "secondary_ir_max_column": "ds_radar.SSR_MAX_IR_NM",
                     "secondary_ir_min_column": "ds_radar.SSR_MIN_IR_NM",
                     "secondary_range_stddev_column": "ds_radar.SSR_RANGE_ERROR_SD_M",
-                    "short_name_column": "le_ds.DS_SHORT_NAME",
-                    "sic_column": "le_ds.SIC"
-                }
-            },
-            "DBODataSourceDefinitionRadarSCDB0": {
-                "parameters": {
-                    "altitude_column": "ds_radar.GROUND_ALTITUDE_AMSL_M",
-                    "foreign_key": "le_ds.DS_ID",
-                    "latitude_column": "ds_radar.POS_LAT_DEG",
-                    "local_key": "ds_id",
-                    "longitude_column": "ds_radar.POS_LONG_DEG",
-                    "meta_table": "RadarDataSources",
-                    "mode_s_azimuth_stddev_column": "",
-                    "mode_s_ir_max_column": "",
-                    "mode_s_ir_min_column": "",
-                    "mode_s_range_stddev_column": "",
-                    "name_column": "le_ds.DS_NAME",
-                    "primary_azimuth_stddev_column": "",
-                    "primary_ir_max_column": "",
-                    "primary_ir_min_column": "",
-                    "primary_range_stddev_column": "",
-                    "sac_column": "le_ds.SAC",
-                    "schema": "SCDB",
-                    "secondary_azimuth_stddev_column": "",
-                    "secondary_ir_max_column": "",
-                    "secondary_ir_min_column": "",
-                    "secondary_range_stddev_column": "",
                     "short_name_column": "le_ds.DS_SHORT_NAME",
                     "sic_column": "le_ds.SIC"
                 }
@@ -1005,20 +978,6 @@
                 }
             }
         },
-        "DBOSchemaMetaTableDefinition": {
-            "DBOSchemaMetaTableDefinition0": {
-                "parameters": {
-                    "meta_table": "Radar",
-                    "schema": "SCDB"
-                }
-            },
-            "DBOSchemaMetaTableDefinitionSCDB ExtendedRadar0": {
-                "parameters": {
-                    "meta_table": "Radar",
-                    "schema": "SCDB Extended"
-                }
-            }
-        },
         "DBOVariable": {
             "DBOVariableRadaracas_aircraft_identification0": {
                 "parameters": {
@@ -1028,24 +987,8 @@
                     "dimension": "",
                     "name": "acas_aircraft_identification",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_aircraft_identification0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_AIRCRAFT_IDENTIFICATION"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_AIRCRAFT_IDENTIFICATION0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_AIRCRAFT_IDENTIFICATION"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_AIRCRAFT_IDENTIFICATION"
                 }
             },
             "DBOVariableRadaracas_alt_capability_ft0": {
@@ -1056,24 +999,8 @@
                     "dimension": "",
                     "name": "acas_alt_capability_ft",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_alt_capability_ft0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_ALT_CAPABILITY_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_ALT_CAPABILITY_FT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_ALT_CAPABILITY_FT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_ALT_CAPABILITY_FT"
                 }
             },
             "DBOVariableRadaracas_bds_1_a0": {
@@ -1084,24 +1011,8 @@
                     "dimension": "",
                     "name": "acas_bds_1_a",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_bds_1_a0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_BDS_1_A"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_BDS_1_A0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_BDS_1_A"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_BDS_1_A"
                 }
             },
             "DBOVariableRadaracas_bds_1_b0": {
@@ -1112,24 +1023,8 @@
                     "dimension": "",
                     "name": "acas_bds_1_b",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_bds_1_b0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_BDS_1_B"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_BDS_1_B0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_BDS_1_B"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_BDS_1_B"
                 }
             },
             "DBOVariableRadaracas_comm_capability0": {
@@ -1140,24 +1035,8 @@
                     "dimension": "",
                     "name": "acas_comm_capability",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_comm_capability0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_COMM_CAPABILITY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_COMM_CAPABILITY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_COMM_CAPABILITY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_COMM_CAPABILITY"
                 }
             },
             "DBOVariableRadaracas_flight_status0": {
@@ -1168,24 +1047,8 @@
                     "dimension": "",
                     "name": "acas_flight_status",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_flight_status0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_FLIGHT_STATUS"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_FLIGHT_STATUS0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_FLIGHT_STATUS"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_FLIGHT_STATUS"
                 }
             },
             "DBOVariableRadaracas_modes_service0": {
@@ -1196,24 +1059,8 @@
                     "dimension": "",
                     "name": "acas_modes_service",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaracas_modes_service0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ACAS_MODES_SERVICE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ACAS_MODES_SERVICE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ACAS_MODES_SERVICE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ACAS_MODES_SERVICE"
                 }
             },
             "DBOVariableRadaralt_baro_ft0": {
@@ -1224,23 +1071,8 @@
                     "dimension": "Height",
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaralt_baro_ft0": {
-                            "parameters": {
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ALT_BARO_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ALT_BARO_FT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ALT_BARO_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_radar.ALT_BARO_FT"
                 }
             },
             "DBOVariableRadaralt_baro_g0": {
@@ -1251,23 +1083,8 @@
                     "dimension": "",
                     "name": "alt_baro_g",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaralt_baro_g0": {
-                            "parameters": {
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ALT_BARO_G"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ALT_BARO_G0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ALT_BARO_G"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ALT_BARO_G"
                 }
             },
             "DBOVariableRadaralt_baro_v0": {
@@ -1278,23 +1095,8 @@
                     "dimension": "",
                     "name": "alt_baro_v",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaralt_baro_v0": {
-                            "parameters": {
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ALT_BARO_V"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ALT_BARO_V0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ALT_BARO_V"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ALT_BARO_V"
                 }
             },
             "DBOVariableRadarantenna0": {
@@ -1305,24 +1107,8 @@
                     "dimension": "",
                     "name": "antenna",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarantenna0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.ANTENNA"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.ANTENNA0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.ANTENNA"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.ANTENNA"
                 }
             },
             "DBOVariableRadarcalc_alt_geo_ft0": {
@@ -1333,24 +1119,8 @@
                     "dimension": "Height",
                     "name": "calc_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarcalc_alt_geo_ft0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.CALC_ALT_GEO_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.CALC_ALT_GEO_FT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.CALC_ALT_GEO_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_radar.CALC_ALT_GEO_FT"
                 }
             },
             "DBOVariableRadarcallsign0": {
@@ -1361,30 +1131,8 @@
                     "dimension": "",
                     "name": "callsign",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarcallsign0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.CALLSIGN"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.CALLSIGN0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.CALLSIGN"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.target_identification0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.target_identification"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_ssr.target_identification"
                 }
             },
             "DBOVariableRadarcat0": {
@@ -1395,24 +1143,8 @@
                     "dimension": "",
                     "name": "cat",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarcat0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.CAT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.CAT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.CAT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.CAT"
                 }
             },
             "DBOVariableRadarcivil_emergency0": {
@@ -1423,24 +1155,8 @@
                     "dimension": "",
                     "name": "civil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarcivil_emergency0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.CIVIL_EMERGENCY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.CIVIL_EMERGENCY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.CIVIL_EMERGENCY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.CIVIL_EMERGENCY"
                 }
             },
             "DBOVariableRadardetection_type0": {
@@ -1451,24 +1167,8 @@
                     "dimension": "",
                     "name": "detection_type",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadardetection_type0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.DETECTION_TYPE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.DETECTION_TYPE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.DETECTION_TYPE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.DETECTION_TYPE"
                 }
             },
             "DBOVariableRadardisplay_state0": {
@@ -1479,24 +1179,8 @@
                     "dimension": "",
                     "name": "display_state",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadardisplay_state0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.DISPLAY_STATE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.DISPLAY_STATE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.DISPLAY_STATE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.DISPLAY_STATE"
                 }
             },
             "DBOVariableRadardom_posix0": {
@@ -1507,24 +1191,8 @@
                     "dimension": "",
                     "name": "dom_posix",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadardom_posix0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.DOM_POSIX"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.DOM_POSIX0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.DOM_POSIX"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.DOM_POSIX"
                 }
             },
             "DBOVariableRadards_id0": {
@@ -1535,30 +1203,8 @@
                     "dimension": "",
                     "name": "ds_id",
                     "representation_str": "DATA_SRC_NAME",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadards_id0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.DS_ID"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.DS_ID0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.DS_ID"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.sensor_id0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.sensor_id"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_ssr.sensor_id"
                 }
             },
             "DBOVariableRadarfrom_fft0": {
@@ -1569,24 +1215,8 @@
                     "dimension": "",
                     "name": "from_fft",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarfrom_fft0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.FROM_FFT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.FROM_FFT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.FROM_FFT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.FROM_FFT"
                 }
             },
             "DBOVariableRadargeo_area_mask0": {
@@ -1597,24 +1227,8 @@
                     "dimension": "",
                     "name": "geo_area_mask",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadargeo_area_mask0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.GEO_AREA_MASK"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.GEO_AREA_MASK0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.GEO_AREA_MASK"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.GEO_AREA_MASK"
                 }
             },
             "DBOVariableRadarground_bit0": {
@@ -1625,23 +1239,8 @@
                     "dimension": "",
                     "name": "ground_bit",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarground_bit0": {
-                            "parameters": {
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.GROUND_BIT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.GROUND_BIT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.GROUND_BIT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.GROUND_BIT"
                 }
             },
             "DBOVariableRadarhash_code0": {
@@ -1652,24 +1251,8 @@
                     "dimension": "",
                     "name": "hash_code",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarhash_code0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.HASH_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.HASH_CODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.HASH_CODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.HASH_CODE"
                 }
             },
             "DBOVariableRadarheight_3d_ft0": {
@@ -1680,24 +1263,8 @@
                     "dimension": "Height",
                     "name": "height_3d_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarheight_3d_ft0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.HEIGHT_3D_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.HEIGHT_3D_FT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.HEIGHT_3D_FT"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_radar.HEIGHT_3D_FT"
                 }
             },
             "DBOVariableRadaric_code0": {
@@ -1708,24 +1275,8 @@
                     "dimension": "",
                     "name": "ic_code",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadaric_code0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.IC_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.IC_CODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.IC_CODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.IC_CODE"
                 }
             },
             "DBOVariableRadarline_id0": {
@@ -1736,24 +1287,8 @@
                     "dimension": "",
                     "name": "line_id",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarline_id0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.LINE_ID"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.LINE_ID0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.LINE_ID"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.LINE_ID"
                 }
             },
             "DBOVariableRadarmas_track_num0": {
@@ -1764,24 +1299,8 @@
                     "dimension": "",
                     "name": "mas_track_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmas_track_num0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MAS_TRACK_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MAS_TRACK_NUM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MAS_TRACK_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MAS_TRACK_NUM"
                 }
             },
             "DBOVariableRadarmil_emergency0": {
@@ -1792,24 +1311,8 @@
                     "dimension": "",
                     "name": "mil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmil_emergency0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MIL_EMERGENCY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MIL_EMERGENCY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MIL_EMERGENCY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MIL_EMERGENCY"
                 }
             },
             "DBOVariableRadarmil_ident0": {
@@ -1820,24 +1323,8 @@
                     "dimension": "",
                     "name": "mil_ident",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmil_ident0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MIL_IDENT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MIL_IDENT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MIL_IDENT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MIL_IDENT"
                 }
             },
             "DBOVariableRadarmode1_code0": {
@@ -1848,24 +1335,8 @@
                     "dimension": "",
                     "name": "mode1_code",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode1_code0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE1_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE1_CODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE1_CODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE1_CODE"
                 }
             },
             "DBOVariableRadarmode1_g0": {
@@ -1876,24 +1347,8 @@
                     "dimension": "",
                     "name": "mode1_g",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode1_g0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE1_G"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE1_G0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE1_G"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE1_G"
                 }
             },
             "DBOVariableRadarmode1_qx0": {
@@ -1904,24 +1359,8 @@
                     "dimension": "",
                     "name": "mode1_qx",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode1_qx0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE1_QX"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE1_QX0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE1_QX"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE1_QX"
                 }
             },
             "DBOVariableRadarmode1_smo0": {
@@ -1932,24 +1371,8 @@
                     "dimension": "",
                     "name": "mode1_smo",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode1_smo0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE1_SMO"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE1_SMO0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE1_SMO"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE1_SMO"
                 }
             },
             "DBOVariableRadarmode1_v0": {
@@ -1960,24 +1383,8 @@
                     "dimension": "",
                     "name": "mode1_v",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode1_v0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE1_V"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE1_V0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE1_V"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE1_V"
                 }
             },
             "DBOVariableRadarmode2_code0": {
@@ -1988,24 +1395,8 @@
                     "dimension": "",
                     "name": "mode2_code",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode2_code0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE2_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE2_CODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE2_CODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE2_CODE"
                 }
             },
             "DBOVariableRadarmode2_g0": {
@@ -2016,24 +1407,8 @@
                     "dimension": "",
                     "name": "mode2_g",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode2_g0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE2_G"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE2_G0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE2_G"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE2_G"
                 }
             },
             "DBOVariableRadarmode2_qx0": {
@@ -2044,24 +1419,8 @@
                     "dimension": "",
                     "name": "mode2_qx",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode2_qx0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE2_QX"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE2_QX0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE2_QX"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE2_QX"
                 }
             },
             "DBOVariableRadarmode2_smo0": {
@@ -2072,24 +1431,8 @@
                     "dimension": "",
                     "name": "mode2_smo",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode2_smo0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE2_SMO"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE2_SMO0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE2_SMO"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE2_SMO"
                 }
             },
             "DBOVariableRadarmode2_v0": {
@@ -2100,24 +1443,8 @@
                     "dimension": "",
                     "name": "mode2_v",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode2_v0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE2_V"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE2_V0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE2_V"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE2_V"
                 }
             },
             "DBOVariableRadarmode3a_code0": {
@@ -2128,30 +1455,8 @@
                     "dimension": "",
                     "name": "mode3a_code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode3a_code0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE3A_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE3A_CODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE3A_CODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.mode_a_code0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.mode_a_code"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_ssr.mode_a_code"
                 }
             },
             "DBOVariableRadarmode3a_g0": {
@@ -2162,24 +1467,8 @@
                     "dimension": "",
                     "name": "mode3a_g",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode3a_g0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE3A_G"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE3A_G0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE3A_G"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE3A_G"
                 }
             },
             "DBOVariableRadarmode3a_qx0": {
@@ -2190,24 +1479,8 @@
                     "dimension": "",
                     "name": "mode3a_qx",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode3a_qx0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE3A_QX"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE3A_QX0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE3A_QX"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE3A_QX"
                 }
             },
             "DBOVariableRadarmode3a_smo0": {
@@ -2218,24 +1491,8 @@
                     "dimension": "",
                     "name": "mode3a_smo",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode3a_smo0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE3A_SMO"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE3A_SMO0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE3A_SMO"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE3A_SMO"
                 }
             },
             "DBOVariableRadarmode3a_v0": {
@@ -2246,24 +1503,8 @@
                     "dimension": "",
                     "name": "mode3a_v",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode3a_v0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE3A_V"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE3A_V0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE3A_V"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE3A_V"
                 }
             },
             "DBOVariableRadarmode4_friendly0": {
@@ -2274,24 +1515,8 @@
                     "dimension": "",
                     "name": "mode4_friendly",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmode4_friendly0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODE4_FRIENDLY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODE4_FRIENDLY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODE4_FRIENDLY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODE4_FRIENDLY"
                 }
             },
             "DBOVariableRadarmodec_code_ft0": {
@@ -2302,30 +1527,8 @@
                     "dimension": "Height",
                     "name": "modec_code_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_code_ft0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_CODE_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_CODE_FT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_CODE_FT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.flight_level0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.flight_level"
-                            }
-                        }
-                    }
+                    "unit": "Feet",
+                    "variable_identifier": "sd_ssr.flight_level"
                 }
             },
             "DBOVariableRadarmodec_code_gray0": {
@@ -2336,24 +1539,8 @@
                     "dimension": "",
                     "name": "modec_code_gray",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_code_gray0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_CODE_GRAY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_CODE_GRAY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_CODE_GRAY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_CODE_GRAY"
                 }
             },
             "DBOVariableRadarmodec_g0": {
@@ -2364,24 +1551,8 @@
                     "dimension": "",
                     "name": "modec_g",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_g0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_G"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_G0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_G"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_G"
                 }
             },
             "DBOVariableRadarmodec_g_gray0": {
@@ -2392,24 +1563,8 @@
                     "dimension": "",
                     "name": "modec_g_gray",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_g_gray0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_G_GRAY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_CODE_GRAY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_G_GRAY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_G_GRAY"
                 }
             },
             "DBOVariableRadarmodec_qx_gray0": {
@@ -2420,24 +1575,8 @@
                     "dimension": "",
                     "name": "modec_qx_gray",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_qx_gray0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_QX_GRAY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_QX_GRAY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_QX_GRAY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_QX_GRAY"
                 }
             },
             "DBOVariableRadarmodec_v0": {
@@ -2448,24 +1587,8 @@
                     "dimension": "",
                     "name": "modec_v",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_v0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_V"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_V0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_V"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_V"
                 }
             },
             "DBOVariableRadarmodec_v_gray0": {
@@ -2476,24 +1599,8 @@
                     "dimension": "",
                     "name": "modec_v_gray",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodec_v_gray0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODEC_V_GRAY"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODEC_V_GRAY0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODEC_V_GRAY"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODEC_V_GRAY"
                 }
             },
             "DBOVariableRadarmodes_mb_data0": {
@@ -2504,24 +1611,8 @@
                     "dimension": "",
                     "name": "modes_mb_data",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmodes_mb_data0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MODES_MB_DATA"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MODES_MB_DATA0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MODES_MB_DATA"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MODES_MB_DATA"
                 }
             },
             "DBOVariableRadarmsg_fmt0": {
@@ -2532,24 +1623,8 @@
                     "dimension": "",
                     "name": "msg_fmt",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmsg_fmt0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MSG_FMT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MSG_FMT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MSG_FMT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MSG_FMT"
                 }
             },
             "DBOVariableRadarmssr_amplitude_dbm0": {
@@ -2560,24 +1635,8 @@
                     "dimension": "",
                     "name": "mssr_amplitude_dbm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmssr_amplitude_dbm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MSSR_AMPLITUDE_DBM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MSSR_AMPLITUDE_DBM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MSSR_AMPLITUDE_DBM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MSSR_AMPLITUDE_DBM"
                 }
             },
             "DBOVariableRadarmssr_replies_num0": {
@@ -2588,24 +1647,8 @@
                     "dimension": "",
                     "name": "mssr_replies_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarmssr_replies_num0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.MSSR_REPLIES_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.MSSR_REPLIES_NUM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.MSSR_REPLIES_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.MSSR_REPLIES_NUM"
                 }
             },
             "DBOVariableRadarpos_azm_deg0": {
@@ -2616,24 +1659,8 @@
                     "dimension": "Angle",
                     "name": "pos_azm_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_azm_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_AZM_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_AZM_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_AZM_DEG"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_radar.POS_AZM_DEG"
                 }
             },
             "DBOVariableRadarpos_azm_deg_calc0": {
@@ -2644,24 +1671,8 @@
                     "dimension": "",
                     "name": "pos_azm_deg_calc",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_azm_deg_calc0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_AZM_DEG_CALC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_AZM_DEG_CALC0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_AZM_DEG_CALC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_AZM_DEG_CALC"
                 }
             },
             "DBOVariableRadarpos_lat_deg0": {
@@ -2672,30 +1683,8 @@
                     "dimension": "Angle",
                     "name": "pos_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_lat_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LAT_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LAT_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LAT_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.latitude0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.latitude"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_ssr.latitude"
                 }
             },
             "DBOVariableRadarpos_local_x_nm0": {
@@ -2706,24 +1695,8 @@
                     "dimension": "Position",
                     "name": "pos_local_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": "Nautical Mile"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_local_x_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LOCAL_X_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LOCAL_X_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LOCAL_X_NM"
-                            }
-                        }
-                    }
+                    "unit": "Nautical Mile",
+                    "variable_identifier": "sd_radar.POS_LOCAL_X_NM"
                 }
             },
             "DBOVariableRadarpos_local_x_nm_calc0": {
@@ -2734,24 +1707,8 @@
                     "dimension": "",
                     "name": "pos_local_x_nm_calc",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_local_x_nm_calc0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LOCAL_X_NM_CALC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LOCAL_X_NM_CALC0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LOCAL_X_NM_CALC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_LOCAL_X_NM_CALC"
                 }
             },
             "DBOVariableRadarpos_local_y_nm0": {
@@ -2762,24 +1719,8 @@
                     "dimension": "Position",
                     "name": "pos_local_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": "Nautical Mile"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_local_y_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LOCAL_Y_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LOCAL_Y_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LOCAL_Y_NM"
-                            }
-                        }
-                    }
+                    "unit": "Nautical Mile",
+                    "variable_identifier": "sd_radar.POS_LOCAL_Y_NM"
                 }
             },
             "DBOVariableRadarpos_local_y_nm_calc0": {
@@ -2790,24 +1731,8 @@
                     "dimension": "",
                     "name": "pos_local_y_nm_calc",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_local_y_nm_calc0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LOCAL_Y_NM_CALC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LOCAL_Y_NM_CALC0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LOCAL_Y_NM_CALC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_LOCAL_Y_NM_CALC"
                 }
             },
             "DBOVariableRadarpos_long_deg0": {
@@ -2818,30 +1743,8 @@
                     "dimension": "Angle",
                     "name": "pos_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_long_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_LONG_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_LONG_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_LONG_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.longitude0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.longitude"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_ssr.longitude"
                 }
             },
             "DBOVariableRadarpos_range_nm0": {
@@ -2852,24 +1755,8 @@
                     "dimension": "Length",
                     "name": "pos_range_nm",
                     "representation_str": "STANDARD",
-                    "unit": "Nautical Mile"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_range_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_RANGE_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_RANGE_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_RANGE_NM"
-                            }
-                        }
-                    }
+                    "unit": "Nautical Mile",
+                    "variable_identifier": "sd_radar.POS_RANGE_NM"
                 }
             },
             "DBOVariableRadarpos_range_nm_calc0": {
@@ -2880,24 +1767,8 @@
                     "dimension": "",
                     "name": "pos_range_nm_calc",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_range_nm_calc0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_RANGE_NM_CALC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.PSR_RUNLENGTH_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_RANGE_NM_CALC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_RANGE_NM_CALC"
                 }
             },
             "DBOVariableRadarpos_sys_x_nm0": {
@@ -2908,24 +1779,8 @@
                     "dimension": "",
                     "name": "pos_sys_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_sys_x_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_SYS_X_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_SYS_X_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_SYS_X_NM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_SYS_X_NM"
                 }
             },
             "DBOVariableRadarpos_sys_y_nm0": {
@@ -2936,24 +1791,8 @@
                     "dimension": "",
                     "name": "pos_sys_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpos_sys_y_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.POS_SYS_Y_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.POS_SYS_Y_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.POS_SYS_Y_NM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.POS_SYS_Y_NM"
                 }
             },
             "DBOVariableRadarpsr_amplitude_dbm0": {
@@ -2964,24 +1803,8 @@
                     "dimension": "",
                     "name": "psr_amplitude_dbm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpsr_amplitude_dbm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.PSR_AMPLITUDE_DBM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.PSR_AMPLITUDE_DBM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.PSR_AMPLITUDE_DBM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.PSR_AMPLITUDE_DBM"
                 }
             },
             "DBOVariableRadarpsr_runlength_deg0": {
@@ -2992,24 +1815,8 @@
                     "dimension": "",
                     "name": "psr_runlength_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpsr_runlength_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.PSR_RUNLENGTH_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.PSR_RUNLENGTH_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.PSR_RUNLENGTH_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.PSR_RUNLENGTH_DEG"
                 }
             },
             "DBOVariableRadarpsr_ssr_azm_diff_deg0": {
@@ -3020,24 +1827,8 @@
                     "dimension": "",
                     "name": "psr_ssr_azm_diff_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpsr_ssr_azm_diff_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.PSR_SSR_AZM_DIFF_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.PSR_SSR_AZM_DIFF_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.PSR_SSR_AZM_DIFF_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.PSR_SSR_AZM_DIFF_DEG"
                 }
             },
             "DBOVariableRadarpsr_ssr_range_diff_nm0": {
@@ -3048,24 +1839,8 @@
                     "dimension": "",
                     "name": "psr_ssr_range_diff_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarpsr_ssr_range_diff_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.PSR_SSR_RANGE_DIFF_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.PSR_SSR_RANGE_DIFF_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.PSR_SSR_RANGE_DIFF_NM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.PSR_SSR_RANGE_DIFF_NM"
                 }
             },
             "DBOVariableRadarraw_msg0": {
@@ -3076,24 +1851,8 @@
                     "dimension": "",
                     "name": "raw_msg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarraw_msg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.RAW_MSG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.RAW_MSG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.RAW_MSG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.RAW_MSG"
                 }
             },
             "DBOVariableRadarrdp_chain0": {
@@ -3104,24 +1863,8 @@
                     "dimension": "",
                     "name": "rdp_chain",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarrdp_chain0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.RDP_CHAIN"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.RDP_CHAIN0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.RDP_CHAIN"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.RDP_CHAIN"
                 }
             },
             "DBOVariableRadarrec_num0": {
@@ -3132,30 +1875,8 @@
                     "dimension": "",
                     "name": "rec_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarrec_num0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.REC_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.REC_NUM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.REC_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.rec_num0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.rec_num"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_ssr.rec_num"
                 }
             },
             "DBOVariableRadarrec_time_ms0": {
@@ -3166,24 +1887,8 @@
                     "dimension": "",
                     "name": "rec_time_ms",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarrec_time_ms0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.REC_TIME_MS"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.REC_TIME_MS0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.REC_TIME_MS"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.REC_TIME_MS"
                 }
             },
             "DBOVariableRadarrec_time_posix0": {
@@ -3194,24 +1899,8 @@
                     "dimension": "",
                     "name": "rec_time_posix",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarrec_time_posix0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.REC_TIME_POSIX"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.REC_TIME_POSIX0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.REC_TIME_POSIX"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.REC_TIME_POSIX"
                 }
             },
             "DBOVariableRadarreport_type0": {
@@ -3222,24 +1911,8 @@
                     "dimension": "",
                     "name": "report_type",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarreport_type0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.REPORT_TYPE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.REPORT_TYPE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.REPORT_TYPE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.REPORT_TYPE"
                 }
             },
             "DBOVariableRadarsac0": {
@@ -3250,24 +1923,8 @@
                     "dimension": "",
                     "name": "sac",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsac0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SAC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SAC0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SAC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SAC"
                 }
             },
             "DBOVariableRadarscan_num0": {
@@ -3278,24 +1935,8 @@
                     "dimension": "",
                     "name": "scan_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarscan_num0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SCAN_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SCAN_NUM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SCAN_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SCAN_NUM"
                 }
             },
             "DBOVariableRadarsic0": {
@@ -3306,24 +1947,8 @@
                     "dimension": "",
                     "name": "sic",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SIC0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SIC"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsic0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SIC"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SIC"
                 }
             },
             "DBOVariableRadarsimulated_target0": {
@@ -3334,24 +1959,8 @@
                     "dimension": "",
                     "name": "simulated_target",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SIMULATED_TARGET0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SIMULATED_TARGET"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsimulated_target0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SIMULATED_TARGET"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SIMULATED_TARGET"
                 }
             },
             "DBOVariableRadarspi0": {
@@ -3362,24 +1971,8 @@
                     "dimension": "",
                     "name": "spi",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SPI0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SPI"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarspi0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SPI"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SPI"
                 }
             },
             "DBOVariableRadarssr_runlength_deg0": {
@@ -3390,24 +1983,8 @@
                     "dimension": "",
                     "name": "ssr_runlength_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.SSR_RUNLENGTH_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.SSR_RUNLENGTH_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarssr_runlength_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.SSR_RUNLENGTH_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.SSR_RUNLENGTH_DEG"
                 }
             },
             "DBOVariableRadartarget_addr0": {
@@ -3418,30 +1995,8 @@
                     "dimension": "",
                     "name": "target_addr",
                     "representation_str": "DEC_TO_HEX",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TARGET_ADDR0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TARGET_ADDR"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.target_address0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.target_address"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartarget_addr0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TARGET_ADDR"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TARGET_ADDR"
                 }
             },
             "DBOVariableRadartest_target0": {
@@ -3452,24 +2007,8 @@
                     "dimension": "",
                     "name": "test_target",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TEST_TARGET0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TEST_TARGET"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartest_target0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TEST_TARGET"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TEST_TARGET"
                 }
             },
             "DBOVariableRadartod0": {
@@ -3480,30 +2019,8 @@
                     "dimension": "Time",
                     "name": "tod",
                     "representation_str": "SECONDS_TO_TIME",
-                    "unit": "Second"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TOD0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TOD"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.time_detection0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.time_detection"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartod0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TOD"
-                            }
-                        }
-                    }
+                    "unit": "Second",
+                    "variable_identifier": "sd_radar.TOD"
                 }
             },
             "DBOVariableRadartod_calculated0": {
@@ -3514,24 +2031,8 @@
                     "dimension": "",
                     "name": "tod_calculated",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TOD_CALCULATED0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TOD_CALCULATED"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartod_calculated0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TOD_CALCULATED"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TOD_CALCULATED"
                 }
             },
             "DBOVariableRadartrack_climb_desc_mode0": {
@@ -3542,24 +2043,8 @@
                     "dimension": "",
                     "name": "track_climb_desc_mode",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_CLIMB_DESC_MODE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_CLIMB_DESC_MODE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_climb_desc_mode0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_CLIMB_DESC_MODE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_CLIMB_DESC_MODE"
                 }
             },
             "DBOVariableRadartrack_confirmed0": {
@@ -3570,24 +2055,8 @@
                     "dimension": "",
                     "name": "track_confirmed",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_CONFIRMED0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_CONFIRMED"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_confirmed0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_CONFIRMED"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_CONFIRMED"
                 }
             },
             "DBOVariableRadartrack_doubtful0": {
@@ -3598,24 +2067,8 @@
                     "dimension": "",
                     "name": "track_doubtful",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_DOUBTFUL0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_DOUBTFUL"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_doubtful0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_DOUBTFUL"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_DOUBTFUL"
                 }
             },
             "DBOVariableRadartrack_end0": {
@@ -3626,24 +2079,8 @@
                     "dimension": "",
                     "name": "track_end",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_END0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_END"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_end0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_END"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_END"
                 }
             },
             "DBOVariableRadartrack_ghost_target0": {
@@ -3654,24 +2091,8 @@
                     "dimension": "",
                     "name": "track_ghost_target",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_GHOST_TARGET0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_GHOST_TARGET"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_ghost_target0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_GHOST_TARGET"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_GHOST_TARGET"
                 }
             },
             "DBOVariableRadartrack_groundspeed_kt0": {
@@ -3682,24 +2103,8 @@
                     "dimension": "Speed",
                     "name": "track_groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_GROUNDSPEED_KT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_GROUNDSPEED_KT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_groundspeed_kt0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_GROUNDSPEED_KT"
-                            }
-                        }
-                    }
+                    "unit": "Knots",
+                    "variable_identifier": "sd_radar.TRACK_GROUNDSPEED_KT"
                 }
             },
             "DBOVariableRadartrack_heading_deg0": {
@@ -3710,24 +2115,8 @@
                     "dimension": "Angle",
                     "name": "track_heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree"
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_HEADING_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_HEADING_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_heading_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_HEADING_DEG"
-                            }
-                        }
-                    }
+                    "unit": "Degree",
+                    "variable_identifier": "sd_radar.TRACK_HEADING_DEG"
                 }
             },
             "DBOVariableRadartrack_manoeuvre_hori0": {
@@ -3738,24 +2127,8 @@
                     "dimension": "",
                     "name": "track_manoeuvre_hori",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_MANOEUVRE_HORI0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_MANOEUVRE_HORI"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_manoeuvre_hori0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_MANOEUVRE_HORI"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_MANOEUVRE_HORI"
                 }
             },
             "DBOVariableRadartrack_num0": {
@@ -3766,30 +2139,8 @@
                     "dimension": "",
                     "name": "track_num",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_NUM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_NUM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadarsd_ssr.track_num0": {
-                            "parameters": {
-                                "schema": "Simple",
-                                "variable_identifier": "sd_ssr.track_num"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_num0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_NUM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_NUM"
                 }
             },
             "DBOVariableRadartrack_rdp_chain0": {
@@ -3800,24 +2151,8 @@
                     "dimension": "",
                     "name": "track_rdp_chain",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_RDP_CHAIN0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_RDP_CHAIN"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_rdp_chain0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_RDP_CHAIN"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_RDP_CHAIN"
                 }
             },
             "DBOVariableRadartrack_sigma_h_deg0": {
@@ -3828,24 +2163,8 @@
                     "dimension": "",
                     "name": "track_sigma_h_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SIGMA_H_DEG0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_H_DEG"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_sigma_h_deg0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_H_DEG"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SIGMA_H_DEG"
                 }
             },
             "DBOVariableRadartrack_sigma_v_kt0": {
@@ -3856,24 +2175,8 @@
                     "dimension": "",
                     "name": "track_sigma_v_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SIGMA_V_KT0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_V_KT"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_sigma_v_kt0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_V_KT"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SIGMA_V_KT"
                 }
             },
             "DBOVariableRadartrack_sigma_x_nm0": {
@@ -3884,24 +2187,8 @@
                     "dimension": "",
                     "name": "track_sigma_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SIGMA_X_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_X_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_sigma_x_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_X_NM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SIGMA_X_NM"
                 }
             },
             "DBOVariableRadartrack_sigma_y_nm0": {
@@ -3912,24 +2199,8 @@
                     "dimension": "",
                     "name": "track_sigma_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SIGMA_Y_NM0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_Y_NM"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_sigma_y_nm0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SIGMA_Y_NM"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SIGMA_Y_NM"
                 }
             },
             "DBOVariableRadartrack_slant_corr0": {
@@ -3940,24 +2211,8 @@
                     "dimension": "",
                     "name": "track_slant_corr",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SLANT_CORR0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SLANT_CORR"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_slant_corr0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SLANT_CORR"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SLANT_CORR"
                 }
             },
             "DBOVariableRadartrack_sup0": {
@@ -3968,24 +2223,8 @@
                     "dimension": "",
                     "name": "track_sup",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_SUP0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_SUP"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_sup0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_SUP"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_SUP"
                 }
             },
             "DBOVariableRadartrack_type0": {
@@ -3996,24 +2235,8 @@
                     "dimension": "",
                     "name": "track_type",
                     "representation_str": "STANDARD",
-                    "unit": ""
-                },
-                "sub_configs": {
-                    "DBOSchemaVariableDefinition": {
-                        "DBOSchemaVariableDefinitionRadarsd_radar.TRACK_TYPE0": {
-                            "parameters": {
-                                "schema": "SCDB Extended",
-                                "variable_identifier": "sd_radar.TRACK_TYPE"
-                            }
-                        },
-                        "DBOSchemaVariableDefinitionRadartrack_type0": {
-                            "parameters": {
-                                "meta_table": "Radar",
-                                "schema": "SCDB",
-                                "variable_identifier": "sd_radar.TRACK_TYPE"
-                            }
-                        }
-                    }
+                    "unit": "",
+                    "variable_identifier": "sd_radar.TRACK_TYPE"
                 }
             }
         }

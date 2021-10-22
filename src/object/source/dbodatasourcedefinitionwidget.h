@@ -132,8 +132,7 @@ class DBODataSourceDefinitionWidget : public QWidget
     QComboBox* mode_s_ir_max_box_{nullptr};
 
     /// @brief Updates a variable selection box
-    void updateVariableSelectionBox(QComboBox* box, const std::string& schema_name,
-                                    const std::string& meta_table_name, const std::string& value,
+    void updateVariableSelectionBox(QComboBox* box, const std::string& meta_table_name, const std::string& value,
                                     bool empty_allowed = false);
 };
 

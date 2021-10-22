@@ -1177,7 +1177,6 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
             std::string dbo_name = parser_it.second.dbObject().name();
 
             DBObject& db_object = parser_it.second.dbObject();
-            assert(db_object.hasCurrentDataSourceDefinition());
 
             std::string data_source_var_name = parser_it.second.dataSourceVariableName();
             assert(data_source_var_name.size());
@@ -1225,8 +1224,6 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
         assert(object_manager.existsObject(dbo_name));
         DBObject& db_object = object_manager.object(dbo_name);
-
-        assert(db_object.hasCurrentDataSourceDefinition());
 
         ++insert_active_;
 

@@ -6,8 +6,8 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/dbovariable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbovariabledefinition.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariablewidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbovariableschema.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.h"

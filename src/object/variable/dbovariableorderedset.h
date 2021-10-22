@@ -20,6 +20,7 @@
 
 #include "configurable.h"
 #include "dbovariable.h"
+#include "dbovariabledefinition.h"
 #include "propertylist.h"
 
 class MetaDBOVariable;

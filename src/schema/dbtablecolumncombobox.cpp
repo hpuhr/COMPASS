@@ -24,35 +24,30 @@
 #include "dbtablecolumn.h"
 #include "metadbtable.h"
 
-DBTableColumnComboBox::DBTableColumnComboBox(const std::string& schema,
-                                             const std::string& meta_table, DBOVariable& variable,
+DBTableColumnComboBox::DBTableColumnComboBox(const std::string& meta_table, DBOVariable& variable,
                                              QWidget* parent)
-    : schema_(schema), meta_table_(meta_table), variable_(variable)
+    : meta_table_(meta_table), variable_(variable)
 {
     logdbg << "DBTableColumnComboBox: DBTableColumnComboBox";
 
-    assert(COMPASS::instance().schemaManager().hasSchema(schema_));
-    DBSchema& dbschema = COMPASS::instance().schemaManager().getSchema(schema_);
+    DBSchema& dbschema = COMPASS::instance().schemaManager().getCurrentSchema();
 
     assert(dbschema.hasMetaTable(meta_table));
     const MetaDBTable& meta = dbschema.metaTable(meta_table);
 
-    std::string variable_name;
-    if (variable_.hasSchema(schema) && variable.hasVariableName(schema))
-        variable_name = variable_.variableName(schema);
+    std::string variable_id = variable_.variableIdentifier();
 
     auto cols = meta.columns();
 
     addItem("");
 
-    logdbg << "DBTableColumnComboBox: DBTableColumnComboBox: schema " << schema << " varname '"
-           << variable_name << "'";
+    logdbg << "DBTableColumnComboBox: DBTableColumnComboBox: variable_id '" << variable_id << "'";
 
     int index = -1;
     unsigned int cnt = 1;
     for (auto it = cols.begin(); it != cols.end(); it++)
     {
-        if (variable_name == it->second.identifier())
+        if (variable_id == it->second.identifier())
             index = cnt;
 
         addItem(it->second.identifier().c_str());

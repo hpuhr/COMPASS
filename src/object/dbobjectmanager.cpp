@@ -100,9 +100,7 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
         logdbg << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert(objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair<std::string, DBObject*>(object->name(), object));
-        connect(this, &DBObjectManager::schemaChangedSignal, object, &DBObject::schemaChangedSlot);
-        // connect (this, &DBObjectManager::databaseContentChangedSignal, object,
-        // &DBObject::databaseContentChangedSlot);
+
         connect(object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
     }
@@ -520,55 +518,55 @@ void DBObjectManager::finishLoading()
     QApplication::restoreOverrideCursor();
 }
 
-void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)
-{
-    loginf << "DBObjectManager: removeDependenciesForSchema: " << schema_name;
+//void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)
+//{
+//    loginf << "DBObjectManager: removeDependenciesForSchema: " << schema_name;
 
-    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning dbos";
+//    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning dbos";
 
-    for (auto obj_it = objects_.begin(); obj_it != objects_.end();)
-    {
-        const std::map<std::string, DBOSchemaMetaTableDefinition>& meta_tables =
-            obj_it->second->metaTables();
+//    for (auto obj_it = objects_.begin(); obj_it != objects_.end();)
+//    {
+//        const std::map<std::string, DBOSchemaMetaTableDefinition>& meta_tables =
+//            obj_it->second->metaTables();
 
-        if (meta_tables.size() == 1 && meta_tables.count(schema_name) == 1)
-        {
-            loginf << "DBObjectManager: removeDependenciesForSchema: dbo " << obj_it->first
-                   << " exists only in schema to be removed, deleting";
-            delete obj_it->second;
-            objects_.erase(obj_it++);
-        }
-        else
-        {
-            obj_it->second->removeDependenciesForSchema(schema_name);
-            ++obj_it;
-        }
-    }
-    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning meta variables";
+//        if (meta_tables.size() == 1 && meta_tables.count(schema_name) == 1)
+//        {
+//            loginf << "DBObjectManager: removeDependenciesForSchema: dbo " << obj_it->first
+//                   << " exists only in schema to be removed, deleting";
+//            delete obj_it->second;
+//            objects_.erase(obj_it++);
+//        }
+//        else
+//        {
+//            obj_it->second->removeDependenciesForSchema(schema_name);
+//            ++obj_it;
+//        }
+//    }
+//    loginf << "DBObjectManager: removeDependenciesForSchema: cleaning meta variables";
 
-    for (auto meta_it = meta_variables_.begin(); meta_it != meta_variables_.end();)
-    {
-        meta_it->second->removeOutdatedVariables();
+//    for (auto meta_it = meta_variables_.begin(); meta_it != meta_variables_.end();)
+//    {
+//        meta_it->second->removeOutdatedVariables();
 
-        if (!meta_it->second->hasVariables())
-        {
-            loginf << "DBObjectManager: removeDependenciesForSchema: removing meta var "
-                   << meta_it->first;
-            delete meta_it->second;
-            meta_variables_.erase(meta_it++);
-        }
-        else
-            ++meta_it;
-    }
+//        if (!meta_it->second->hasVariables())
+//        {
+//            loginf << "DBObjectManager: removeDependenciesForSchema: removing meta var "
+//                   << meta_it->first;
+//            delete meta_it->second;
+//            meta_variables_.erase(meta_it++);
+//        }
+//        else
+//            ++meta_it;
+//    }
 
-    if (widget_)
-    {
-        widget_->updateDBOsSlot();
-        widget_->updateMetaVariablesSlot();
-    }
+//    if (widget_)
+//    {
+//        widget_->updateDBOsSlot();
+//        widget_->updateMetaVariablesSlot();
+//    }
 
-    emit updateSchemaInformationSlot();
-}
+//    emit updateSchemaInformationSlot();
+//}
 
 bool DBObjectManager::hasAssociations() const { return has_associations_; }
 

@@ -61,6 +61,9 @@ DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::str
 {
     registerParameter("name", &name_, "Undefined");
     registerParameter("info", &info_, "");
+    registerParameter("meta_table", &meta_table_name_, "");
+
+    assert (meta_table_name_.size());
 
     createSubConfigurables();
 
@@ -68,6 +71,9 @@ DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::str
 
     logdbg << "DBObject: constructor: created with instance_id " << instanceId() << " name "
            << name_;
+
+//    for (auto& var_it : variables_)
+//        var_it.second.configuration().removeSubConfigurations("DBOSchemaVariableDefinition");
 }
 
 /**
@@ -77,7 +83,7 @@ DBObject::~DBObject()
 {
     logdbg << "DBObject: dtor: " << name_;
 
-    current_meta_table_ = nullptr;
+    //current_meta_table_ = nullptr;
 }
 
 /**
@@ -102,34 +108,14 @@ void DBObject::generateSubConfigurable(const std::string& class_id, const std::s
             std::forward_as_tuple(var_name),                      // args for key
             std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
-    else if (class_id == "DBOSchemaMetaTableDefinition")
-    {
-        logdbg << "DBObject: generateSubConfigurable: creating DBOSchemaMetaTableDefinition";
-        std::string schema_name = configuration()
-                                      .getSubConfiguration(class_id, instance_id)
-                                      .getParameterConfigValueString("schema");
-
-        assert(meta_table_definitions_.find(schema_name) == meta_table_definitions_.end());
-
-        meta_table_definitions_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(schema_name),                   // args for key
-            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
-    }
     else if (class_id == "DBODataSourceDefinition")
     {
-        std::string schema_name = configuration()
-                                      .getSubConfiguration(class_id, instance_id)
-                                      .getParameterConfigValueString("schema");
+        assert (!data_source_definition_);
 
-        assert(data_source_definitions_.find(schema_name) == data_source_definitions_.end());
+        data_source_definition_.reset(new DBODataSourceDefinition(class_id, instance_id, this));
+        assert (data_source_definition_);
 
-        data_source_definitions_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(schema_name),                   // args for key
-            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
-
-        connect(&data_source_definitions_.at(schema_name), SIGNAL(definitionChangedSignal()), this,
+        connect(data_source_definition_.get(), SIGNAL(definitionChangedSignal()), this,
                 SLOT(dataSourceDefinitionChanged()));
     }
     else if (class_id == "DBOLabelDefinition")
@@ -149,6 +135,12 @@ void DBObject::checkSubConfigurables()
     {
         generateSubConfigurable("DBOLabelDefinition", "DBOLabelDefinition0");
         assert(label_definition_);
+    }
+
+    if (!data_source_definition_)
+    {
+        generateSubConfigurable("DBODataSourceDefinition", "DBODataSourceDefinition0");
+        assert(data_source_definition_);
     }
 }
 
@@ -202,62 +194,10 @@ bool DBObject::uses(const DBTableColumn& column) const
     return false;
 }
 
-bool DBObject::hasMetaTable(const std::string& schema) const
-{
-    return meta_table_definitions_.find(schema) != meta_table_definitions_.end();
-}
-
-const std::string& DBObject::metaTable(const std::string& schema) const
-{
-    assert(hasMetaTable(schema));
-    return meta_table_definitions_.at(schema).metaTable();
-}
-
-void DBObject::deleteMetaTable(const std::string& schema)
-{
-    assert(hasMetaTable(schema));
-
-    std::string meta_table_name = metaTable(schema);
-    meta_table_definitions_.erase(schema);
-    assert(!hasMetaTable(schema));
-
-    if (current_meta_table_->name() == meta_table_name)
-        current_meta_table_ = nullptr;
-
-    removeVariableInfoForSchema(schema);
-
-    if (widget_)
-        widget_->updateMetaTablesGridSlot();
-}
-
-/**
- * Returns if the current schema name exists in the data source definitions
- */
-bool DBObject::hasCurrentDataSourceDefinition() const
-{
-    if (!COMPASS::instance().schemaManager().hasCurrentSchema())
-        return false;
-
-    return (data_source_definitions_.find(
-                COMPASS::instance().schemaManager().getCurrentSchema().name()) !=
-            data_source_definitions_.end());
-}
-
 const DBODataSourceDefinition& DBObject::currentDataSourceDefinition() const
 {
-    assert(hasCurrentDataSourceDefinition());
-    return data_source_definitions_.at(COMPASS::instance().schemaManager().getCurrentSchema().name());
-}
-
-void DBObject::deleteDataSourceDefinition(const std::string& schema)
-{
-    assert(data_source_definitions_.count(schema) == 1);
-    data_source_definitions_.erase(schema);
-
-    if (widget_)
-        widget_->updateDataSourcesGridSlot();
-
-    buildDataSources();
+    assert(data_source_definition_);
+    return *data_source_definition_;
 }
 
 void DBObject::dataSourceDefinitionChanged()
@@ -271,21 +211,6 @@ void DBObject::buildDataSources()
     data_sources_.clear();
 
     logdbg << "DBObject: buildDataSources: building dbo " << name_;
-
-    //    if (!existsInDB() || !is_loadable_ || !hasCurrentDataSourceDefinition ())
-    //    {
-    //        logerr << "DBObject: buildDataSources: not processed, exists " << existsInDB()
-    //               << " is loadable " << is_loadable_
-    //               << " has data source " << hasCurrentDataSourceDefinition ();
-    //        return;
-    //    }
-
-    if (!hasCurrentDataSourceDefinition())
-    {
-        logerr << "DBObject: buildDataSources: has data source definition "
-               << hasCurrentDataSourceDefinition();
-        return;
-    }
 
     if (!COMPASS::instance().interface().hasDataSourceTables(*this))
     {
@@ -303,11 +228,18 @@ void DBObject::buildDataSources()
     catch (std::exception& e)
     {
         logerr << "DBObject: buildDataSources: failed with '" << e.what() << "', deleting entry";
-        deleteDataSourceDefinition(COMPASS::instance().schemaManager().getCurrentSchema().name());
-        assert(!hasCurrentDataSourceDefinition());
+
+        data_source_definition_ = nullptr;
     }
 
     logdbg << "DBObject: buildDataSources: end";
+}
+
+std::string DBObject::associationsTableName()
+{
+    assert (hasCurrentMetaTable());
+
+    return currentMetaTable().mainTableName() + "_assoc";
 }
 
 /**
@@ -315,7 +247,15 @@ void DBObject::buildDataSources()
  * meta_table_ entry for the current schema, and returns if the meta table for the current schema
  * exists in the current schema.
  */
-bool DBObject::hasCurrentMetaTable() const { return current_meta_table_ != nullptr; }
+bool DBObject::hasCurrentMetaTable() const
+{
+    assert (meta_table_name_.size());
+    DBSchema& schema = compass_.schemaManager().getCurrentSchema();
+
+    return schema.hasMetaTable(meta_table_name_);
+
+    //return current_meta_table_ != nullptr;
+}
 
 /**
  * If current_meta_table_ is not set, it is set be getting the current schema, and getting the
@@ -323,8 +263,9 @@ bool DBObject::hasCurrentMetaTable() const { return current_meta_table_ != nullp
  */
 MetaDBTable& DBObject::currentMetaTable() const
 {
-    assert(current_meta_table_);
-    return *current_meta_table_;
+    assert (hasCurrentMetaTable());
+
+    return compass_.schemaManager().getCurrentSchema().metaTable(meta_table_name_);
 }
 
 // void DBObject::checkVariables ()
@@ -389,7 +330,7 @@ DBOVariable& DBObject::getKeyVariable()
 void DBObject::addDataSource(int key_value, const std::string& name)
 {
     loginf << "DBObject: addDataSources: inserting source " << name;
-    assert(hasCurrentDataSourceDefinition());
+    assert(data_source_definition_);
 
     const DBODataSourceDefinition& mos_def = currentDataSourceDefinition();
     std::string meta_table_name = mos_def.metaTableName();
@@ -430,7 +371,7 @@ void DBObject::addDataSources(std::map<int, std::pair<int, int>>& sources)
 {
     loginf << "DBObject " << name_ << ": addDataSources:  inserting " << sources.size()
            << " sources";
-    assert(hasCurrentDataSourceDefinition());
+    assert(data_source_definition_);
 
     const DBODataSourceDefinition& mos_def = currentDataSourceDefinition();
     std::string meta_table_name = mos_def.metaTableName();
@@ -705,38 +646,38 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
     return label_definition_->widget();
 }
 
-void DBObject::schemaChangedSlot()
-{
-    loginf << "DBObject: schemaChangedSlot";
+//void DBObject::schemaChangedSlot()
+//{
+//    loginf << "DBObject: schemaChangedSlot";
 
-    if (compass_.schemaManager().hasCurrentSchema())
-    {
-        DBSchema& schema = compass_.schemaManager().getCurrentSchema();
+//    if (compass_.schemaManager().hasCurrentSchema())
+//    {
+//        DBSchema& schema = compass_.schemaManager().getCurrentSchema();
 
-        if (!hasMetaTable(schema.name()))
-        {
-            logwrn << "DBObject: schemaChangedSlot: object " << name_
-                   << " has not main meta table for current schema";
-            current_meta_table_ = nullptr;
-            associations_table_name_ = "";
+//        if (!hasMetaTable(schema.name()))
+//        {
+//            logwrn << "DBObject: schemaChangedSlot: object " << name_
+//                   << " has not main meta table for current schema";
+//            current_meta_table_ = nullptr;
+//            associations_table_name_ = "";
 
-            return;
-        }
+//            return;
+//        }
 
-        std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
-        assert(schema.hasMetaTable(meta_table_name));
-        current_meta_table_ = &schema.metaTable(meta_table_name);
+//        std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
+//        assert(schema.hasMetaTable(meta_table_name));
+//        current_meta_table_ = &schema.metaTable(meta_table_name);
 
-        associations_table_name_ = current_meta_table_->mainTableName() + "_assoc";
-    }
-    else
-    {
-        current_meta_table_ = nullptr;
-        associations_table_name_ = "";
-    }
+//        associations_table_name_ = current_meta_table_->mainTableName() + "_assoc";
+//    }
+//    else
+//    {
+//        current_meta_table_ = nullptr;
+//        associations_table_name_ = "";
+//    }
 
-    updateToDatabaseContent();
-}
+//    updateToDatabaseContent();
+//}
 
 void DBObject::loadingWanted(bool wanted)
 {
@@ -1106,7 +1047,7 @@ void DBObject::updateToDatabaseContent()
 {
     loginf << "DBObject " << name_ << ": updateToDatabaseContent";
 
-    if (!current_meta_table_)
+    if (!hasCurrentMetaTable())
     {
         logdbg << "DBObject: updateToDatabaseContent: object " << name_
                << " has no current meta table";
@@ -1114,21 +1055,20 @@ void DBObject::updateToDatabaseContent()
         return;
     }
 
-    assert(current_meta_table_);
-    std::string table_name = current_meta_table_->mainTableName();
-    associations_table_name_ = table_name + "_assoc";
+    std::string table_name = currentMetaTable().mainTableName();
+    std::string associations_table_name = associationsTableName();
 
-    is_loadable_ = current_meta_table_->existsInDB() &&
+    is_loadable_ = currentMetaTable().existsInDB() &&
                    COMPASS::instance().interface().tableInfo().count(table_name) > 0;
 
     if (is_loadable_)
         count_ = COMPASS::instance().interface().count(table_name);
 
     logdbg << "DBObject: " << name_ << " updateToDatabaseContent: exists in db "
-           << current_meta_table_->existsInDB() << " count " << count_;
+           << currentMetaTable().existsInDB() << " count " << count_;
 
     data_sources_.clear();
-    if (current_meta_table_->existsInDB())
+    if (currentMetaTable().existsInDB())
         buildDataSources();
 
     if (info_widget_)
@@ -1215,37 +1155,6 @@ void DBObject::print()
     loginf << "DBObject " << name() << ":\n" << ss.str();
 }
 
-void DBObject::removeDependenciesForSchema(const std::string& schema_name)
-{
-    loginf << "DBObject " << name() << ": removeDependenciesForSchema: " << schema_name;
-
-    if (meta_table_definitions_.count(schema_name))
-    {
-        loginf << "DBObject " << name() << ": removeDependenciesForSchema: removing meta-table";
-        deleteMetaTable(schema_name);
-    }
-}
-
-void DBObject::removeVariableInfoForSchema(const std::string& schema_name)
-{
-    loginf << "DBObject " << name() << ": removeVariableInfoForSchema: " << schema_name;
-
-    for (auto var_it = variables_.begin(); var_it != variables_.end();)
-    {
-        if (var_it->second.onlyExistsInSchema(schema_name))
-        {
-            loginf << "DBObject " << name() << ": removeVariableInfoForSchema: variable"
-                   << var_it->first << " exists only in schema to be removed, deleting";
-            variables_.erase(var_it++);
-        }
-        else
-        {
-            var_it->second.removeInfoForSchema(schema_name);
-            ++var_it;
-        }
-    }
-}
-
 void DBObject::loadAssociationsIfRequired()
 {
     if (manager_.hasAssociations() && !associations_loaded_)
@@ -1269,10 +1178,11 @@ void DBObject::loadAssociations()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    assert(associations_table_name_.size());
+    assert (hasCurrentMetaTable());
+    std::string associations_table_name = associationsTableName();
 
-    if (db_interface.existsTable(associations_table_name_))
-        associations_ = db_interface.getAssociations(associations_table_name_);
+    if (db_interface.existsTable(associations_table_name))
+        associations_ = db_interface.getAssociations(associations_table_name);
 
     associations_loaded_ = true;
 
@@ -1308,17 +1218,19 @@ void DBObject::saveAssociations()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    assert(associations_table_name_.size());
+    assert (hasCurrentMetaTable());
+    std::string associations_table_name = associationsTableName();
+    assert(associations_table_name.size());
 
-    if (db_interface.existsTable(associations_table_name_))
-        db_interface.clearTableContent(associations_table_name_);
+    if (db_interface.existsTable(associations_table_name))
+        db_interface.clearTableContent(associations_table_name);
     else
-        db_interface.createAssociationsTable(associations_table_name_);
+        db_interface.createAssociationsTable(associations_table_name);
 
     if (!hasAssociations())
         return;
 
-    assert(db_interface.existsTable(associations_table_name_));
+    assert(db_interface.existsTable(associations_table_name));
 
     // assoc_id INT, rec_num INT, utn INT
 
@@ -1345,7 +1257,7 @@ void DBObject::saveAssociations()
         ++cnt;
     }
 
-    db_interface.insertBuffer(associations_table_name_, buffer_ptr);
+    db_interface.insertBuffer(associations_table_name, buffer_ptr);
 
     associations_changed_ = false;
 

@@ -217,12 +217,12 @@ bool FilterManager::checkDBObject (const std::string& dbo_name)
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name);
 
-    if (!object.hasCurrentDataSourceDefinition())
-    {
-        loginf << "FilterManager: checkDBObject: failed because of missing data source definition in '"
-               << dbo_name << "'";
-        return false;
-    }
+//    if (!object.hasCurrentDataSourceDefinition())
+//    {
+//        loginf << "FilterManager: checkDBObject: failed because of missing data source definition in '"
+//               << dbo_name << "'";
+//        return false;
+//    }
 
     if (!object.hasDataSources())
     {
@@ -244,8 +244,8 @@ void FilterManager::checkSubConfigurables()
     // watch those sensors
     for (auto& obj_it : COMPASS::instance().objectManager())
     {
-        if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources() ||
-                !obj_it.second->existsInDB())
+        // !obj_it.second->hasCurrentDataSourceDefinition() ||
+        if (!obj_it.second->hasDataSources() || !obj_it.second->existsInDB())
             continue;
 
         bool exists = false;

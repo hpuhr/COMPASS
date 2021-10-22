@@ -42,32 +42,20 @@ class DBSchemaManagerWidget : public QWidget
   public slots:
     void databaseOpenedSlot();
 
-    void addSchemaSlot();
-    void deleteSchemaSlot();
     void lockSchemaSlot();
     /// @brief Sets the schema
-    void schemaSelectedSlot(const QString& value);
 
   public:
     void lock();
 
-    void updateSchemas();
-
   protected:
     DBSchemaManager& manager_;
 
-    /// Current schema selection field
-    QComboBox* schema_select_{nullptr};
-
-    QPushButton* add_button_{nullptr};
-    QPushButton* delete_button_{nullptr};
     QPushButton* lock_button_{nullptr};
 
     QStackedWidget* schema_widgets_{nullptr};
 
     bool locked_{false};
-
-    void showCurrentSchemaWidget();
 };
 
 #endif  // DBSCHEMAMANAGERWIDGET_H

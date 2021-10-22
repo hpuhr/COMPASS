@@ -55,12 +55,8 @@ class DBObjectWidget : public QWidget
 
     /// @brief Updates data sources grid
     void updateDataSourcesGridSlot();
-    /// @brief Adds a data source
-    void addDataSourceSlot();
     /// @brief Edits a data source
     void editDataSourceSlot();
-    /// @brief Deletes a data source
-    void deleteDataSourceSlot();
 
     /// @brief Changes DBO name
     void editNameSlot();
@@ -77,9 +73,8 @@ class DBObjectWidget : public QWidget
 
     /// @brief Updates the DBOVariables grid
     void updateDBOVarsGridSlot();
-    void deleteMetaTableSlot();
     /// @brief Updates meta tables grid
-    void updateMetaTablesGridSlot();
+    //void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
     void printSlot();
@@ -105,8 +100,6 @@ class DBObjectWidget : public QWidget
 
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_{nullptr};
-
-    QPushButton* new_ds_button_{nullptr};
 
     /// @brief grid with all meta tables per schema
     QGridLayout* meta_table_grid_{nullptr};

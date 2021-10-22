@@ -49,7 +49,7 @@ void DBOActiveDataSourcesDBJob::run()
 
     assert(db_interface_.existsPropertiesTable());
 
-    assert(object_.hasCurrentDataSourceDefinition());
+    //assert(object_.hasCurrentDataSourceDefinition());
 
     loginf << "DBOActiveDataSourcesDBJob: run: creating active sensors for dbo " << object_.name();
 

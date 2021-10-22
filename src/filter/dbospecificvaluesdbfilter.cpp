@@ -47,13 +47,13 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
     object_ = &COMPASS::instance().objectManager().object(dbo_name_);
     assert (object_);
 
-    if (!object_->hasCurrentDataSourceDefinition())
-    {
-        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
-               << dbo_name_ + " has no data sources";
-        disabled_ = true;
-        return;
-    }
+//    if (!object_->hasCurrentDataSourceDefinition())
+//    {
+//        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
+//               << dbo_name_ + " has no data sources";
+//        disabled_ = true;
+//        return;
+//    }
 
     if (!object_->hasDataSources())
     {

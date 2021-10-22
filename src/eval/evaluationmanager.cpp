@@ -1097,9 +1097,6 @@ bool EvaluationManager::hasValidReferenceDBO ()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-    if (!object.hasCurrentDataSourceDefinition())
-        return false;
-
     return object.hasDataSources();
 }
 
@@ -1138,9 +1135,6 @@ bool EvaluationManager::hasValidTestDBO ()
         return false;
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
-
-    if (!object.hasCurrentDataSourceDefinition())
-        return false;
 
     return object.hasDataSources();
 }

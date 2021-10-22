@@ -10,7 +10,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/metadbtable.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbtablecolumncombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbschema.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dbschemaselectioncombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbschemawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbschemamanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbschemamanagerwidget.h"
