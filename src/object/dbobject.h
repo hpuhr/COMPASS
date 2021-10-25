@@ -211,6 +211,8 @@ class DBObject : public QObject, public Configurable
     void updateToDatabaseContent();
 
 
+    std::string dbTableName() const;
+
 protected:
     COMPASS& compass_;
     DBObjectManager& manager_;
@@ -219,6 +221,7 @@ protected:
     /// DBO description
     std::string info_;
     std::string meta_table_name_;
+    std::string db_table_name_;
     /// DBO is loadable flag
     bool is_loadable_{false};  // loadable on its own
     bool loading_wanted_{false};

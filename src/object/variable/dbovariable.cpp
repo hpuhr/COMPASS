@@ -66,13 +66,17 @@ std::string DBOVariable::representationToString(Representation representation)
     return representation_2_string_.at(representation);
 }
 
+#include <boost/algorithm/string.hpp>
+
+
+
 DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id,
                          DBObject* parent)
     : Property(), Configurable(class_id, instance_id, parent), db_object_(parent)
 {
     registerParameter("name", &name_, "");
     registerParameter("description", &description_, "");
-    registerParameter("variable_identifier", &variable_identifier_, "");
+    registerParameter("db_column_name", &db_column_name_, "");
     registerParameter("data_type_str", &data_type_str_, "");
     registerParameter("representation_str", &representation_str_, "");
     registerParameter("dimension", &dimension_, "");
@@ -92,8 +96,8 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     // loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "'
     // unitunit '" << unit_unit_ << "'";
 
-    if (!variable_identifier_.size())
-        loginf  << "DBOVariable: constructor: name " << name_ << " has no variable_identifier";
+    assert (db_column_name_.size());
+    boost::algorithm::to_lower(db_column_name_); // modifies str
 
     createSubConfigurables();
 }
@@ -121,8 +125,8 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
     description_ = other.description_;
     other.description_ = "";
 
-    variable_identifier_ = other.variable_identifier_;
-    other.variable_identifier_ = "";
+    db_column_name_ = other.db_column_name_;
+    other.db_column_name_ = "";
 
     min_max_set_ = other.min_max_set_;
     other.min_max_set_ = false;
@@ -146,7 +150,7 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
 
     other.configuration().updateParameterPointer("name", &name_);
     other.configuration().updateParameterPointer("description", &description_);
-    other.configuration().updateParameterPointer("variable_identifier", &variable_identifier_);
+    other.configuration().updateParameterPointer("variable_identifier", &db_column_name_);
     other.configuration().updateParameterPointer("data_type_str", &data_type_str_);
     other.configuration().updateParameterPointer("representation_str", &representation_str_);
     other.configuration().updateParameterPointer("dimension", &dimension_);
@@ -229,18 +233,18 @@ void DBOVariable::name(const std::string& name)
 
 bool DBOVariable::hasVariableIdentifier() const
 {
-    return variable_identifier_.size();
+    return db_column_name_.size();
 }
 
-const std::string& DBOVariable::variableIdentifier() const
+const std::string& DBOVariable::dbColumnName() const
 {
     assert(hasVariableIdentifier());
-    return variable_identifier_;
+    return db_column_name_;
 }
 
-void DBOVariable::setVariableIdentifier(const std::string& value)
+void DBOVariable::dbColumnName(const std::string& value)
 {
-    variable_identifier_ = value;
+    db_column_name_ = value;
 }
 
 bool DBOVariable::hasCurrentDBColumn() const
@@ -256,7 +260,7 @@ bool DBOVariable::hasCurrentDBColumn() const
     std::string meta_tablename = currentMetaTableString();
 
     logdbg << "DBOVariable: hasCurrentDBColumn: meta " << meta_tablename << " variable id "
-           << variable_identifier_;
+           << db_column_name_;
 
     assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_tablename));
 
@@ -264,7 +268,7 @@ bool DBOVariable::hasCurrentDBColumn() const
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
-        .hasColumn(variable_identifier_);
+        .hasColumn(db_column_name_);
 }
 
 const DBTableColumn& DBOVariable::currentDBColumn() const
@@ -274,13 +278,13 @@ const DBTableColumn& DBOVariable::currentDBColumn() const
     std::string meta_tablename = currentMetaTableString();
 
     logdbg << "DBOVariable: currentDBColumn: meta " << meta_tablename << " variable id "
-           << variable_identifier_;
+           << db_column_name_;
 
     return COMPASS::instance()
         .schemaManager()
         .getCurrentSchema()
         .metaTable(meta_tablename)
-        .column(variable_identifier_);
+        .column(db_column_name_);
 }
 
 bool DBOVariable::isKey() { return hasCurrentDBColumn() && currentDBColumn().isKey(); }

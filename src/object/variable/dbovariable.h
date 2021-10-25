@@ -104,8 +104,8 @@ class DBOVariable : public QObject, public Property, public Configurable
 
     bool hasVariableIdentifier() const;
     /// @brief Returns variable identifier for a given schema
-    const std::string& variableIdentifier() const;
-    void setVariableIdentifier(const std::string& value);
+    const std::string& dbColumnName() const;
+    void dbColumnName(const std::string& value);
 
     bool hasCurrentDBColumn() const;
     const DBTableColumn& currentDBColumn() const;
@@ -218,7 +218,7 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// Description
     std::string description_;
 
-    std::string variable_identifier_;
+    std::string db_column_name_;
 
     bool min_max_set_{false};
     /// Minimum as string

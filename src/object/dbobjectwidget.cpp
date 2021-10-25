@@ -283,7 +283,7 @@ void DBObjectWidget::editDBOVariableDBColumnSlot(const QString& text)
     loginf << "DBObjectWidget: editDBOVariableDBColumnSlot: var " << variable->name()
            << " text '" << text.toStdString() << "'";
 
-    variable->setVariableIdentifier(text.toStdString());
+    variable->dbColumnName(text.toStdString());
 }
 
 void DBObjectWidget::deleteDBOVarSlot()

@@ -62,8 +62,10 @@ DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::str
     registerParameter("name", &name_, "Undefined");
     registerParameter("info", &info_, "");
     registerParameter("meta_table", &meta_table_name_, "");
+    registerParameter("db_table_name", &db_table_name_, "");
 
     assert (meta_table_name_.size());
+    assert (db_table_name_.size());
 
     createSubConfigurables();
 
@@ -1076,6 +1078,11 @@ void DBObject::updateToDatabaseContent()
 
     loginf << "DBObject: " << name_ << " updateToDatabaseContent: done, loadable " << is_loadable_
            << " count " << count_;
+}
+
+std::string DBObject::dbTableName() const
+{
+    return db_table_name_;
 }
 
 bool DBObject::associationsLoaded() const

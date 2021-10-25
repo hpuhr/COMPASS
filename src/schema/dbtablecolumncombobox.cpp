@@ -35,7 +35,7 @@ DBTableColumnComboBox::DBTableColumnComboBox(const std::string& meta_table, DBOV
     assert(dbschema.hasMetaTable(meta_table));
     const MetaDBTable& meta = dbschema.metaTable(meta_table);
 
-    std::string variable_id = variable_.variableIdentifier();
+    std::string variable_id = variable_.dbColumnName();
 
     auto cols = meta.columns();
 
