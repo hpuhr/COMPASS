@@ -87,7 +87,8 @@ class DBOVariable : public QObject, public Property, public Configurable
     std::string dbTableName() const;
     std::string dbColumnIdentifier() const;
 
-    bool isKey();
+    bool isKey() const;
+    void isKey(bool value);
 
     /// @brief Returns if dimension information is present
     bool hasDimension() { return dimension_.size() > 0; }
@@ -175,32 +176,29 @@ class DBOVariable : public QObject, public Property, public Configurable
 
     bool existsInDB() const;
 
-  private:
+private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
-    /// DBO parent
     DBObject* db_object_{nullptr};
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
     Representation representation_;
 
-    /// Description
     std::string description_;
-
     std::string db_column_name_;
-
-    bool min_max_set_{false};
-    /// Minimum as string
-    std::string min_;
-    /// Maximum as string
-    std::string max_;
+    bool is_key_ {false};
 
     /// Unit dimension such as time
     std::string dimension_;
     /// Unit unit such as seconds
     std::string unit_;
 
+    bool min_max_set_{false};
+    /// Minimum as string
+    std::string min_;
+    /// Maximum as string
+    std::string max_;
 
     DBOVariableWidget* widget_{nullptr};
 

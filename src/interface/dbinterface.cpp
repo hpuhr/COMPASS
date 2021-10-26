@@ -52,10 +52,6 @@ using namespace Utils;
 using namespace std;
 using namespace nlohmann;
 
-/**
- * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_,
- * count_), creates write_table_names_,
- */
 DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass), sql_generator_(*this)
 {
@@ -66,9 +62,6 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     createSubConfigurables();
 }
 
-/**
- * If required, deletes connection, sql_generator_ and buffer_writer_.
- */
 DBInterface::~DBInterface()
 {
     logdbg << "DBInterface: desctructor: start";
@@ -207,48 +200,33 @@ bool DBInterface::existsTable(const string& table_name)
     return table_info_.count(table_name) == 1;
 }
 
-void DBInterface::createTable(const std::string& table_name)
+void DBInterface::createTable(const DBObject& object)
 {
-    assert (false); // TODO
+    loginf << "DBInterface: createTable: obj " << object.name();
+    if (existsTable(object.dbTableName()))
+    {
+        logerr << "DBInterface: createTable: table " << object.dbTableName() << " already exists";
+        return;
+    }
 
+    string statement = sql_generator_.getCreateTableStatement(object);
 
-//    loginf << "DBInterface: createTable: " << table.name();
-//    if (existsTable(table.name()))
-//    {
-//        logerr << "DBInterface: createTable: table " << table.name() << " already exists";
-//        return;
-//    }
+    QMutexLocker locker(&connection_mutex_);
 
-//    string statement = sql_generator_.getCreateTableStatement(table);
+    current_connection_->executeSQL(statement);
 
-//    QMutexLocker locker(&connection_mutex_);
+    locker.unlock();
 
-//    current_connection_->executeSQL(statement);
+    updateTableInfo();
 
-//    locker.unlock();
-
-//    updateTableInfo();
-//    table.updateOnDatabase();
-
-//    loginf << "DBInterface: createTable: checking " << table.name();
-//    assert(existsTable(table.name()));
-//    assert(table.existsInDB());
+    loginf << "DBInterface: createTable: checking " << object.dbTableName();
+    assert(existsTable(object.dbTableName()));
 }
 
-/**
- * Returns existsTable for table name.
- */
 bool DBInterface::existsMinMaxTable() { return existsTable(TABLE_NAME_MINMAX); }
 
-/**
- * Returns existsTable for table name.
- */
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
-///**
-// * Gets SQL command for data sources list and packs the resulting buffer into a set, which is
-// returned.
-// */
 set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 {
     logdbg << "DBInterface: queryActiveSensorNumbers: start";
@@ -605,9 +583,6 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     loginf << "DBInterface: updateDataSource: update done";
 }
 
-///**
-// * Gets SQL command, executes it and returns resulting buffer.
-// */
 map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getDataSources: start";
@@ -1166,11 +1141,6 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
     return count_vec.get(0) != 0;
 }
 
-/**
- * If variable is a not meta variable, min/max values just for the variable. If it is, gets min/max
- * values for all subvariables and calculates the min/max for all subvariables. If the variable
- * needs a unit transformation, it is performed (locally in this thread).
- */
 pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
 {
     logdbg << "DBInterface: getMinMaxString: var " << var.name();
@@ -1418,9 +1388,6 @@ bool DBInterface::hasActiveDataSources(DBObject& object)
     return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
 }
 
-/**
- * Gets active sensor numbers as property, splits it and packs it into a set.
- */
 set<int> DBInterface::getActiveDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getActiveDataSources: start";
@@ -1446,75 +1413,6 @@ set<int> DBInterface::getActiveDataSources(DBObject& object)
     logdbg << "DBInterface: getActiveDataSources: end";
     return ret;
 }
-
-//void DBInterface::insertBuffer(MetaDBTable& meta_table, shared_ptr<Buffer> buffer)
-//{
-//    logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size "
-//           << buffer->size();
-//    assert (buffer->size());
-
-//    logdbg << "DBInterface: insertBuffer: main table " << meta_table.mainTable().name();
-//    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
-//    assert(partial_buffer->size());
-//    insertBuffer(meta_table.mainTable(), partial_buffer);
-
-//    for (auto& sub_it : meta_table.subTables())
-//    {
-//        logdbg << "DBInterface: insertBuffer: sub table " << sub_it.second.name();
-
-//        partial_buffer = getPartialBuffer(sub_it.second, buffer);
-//        assert(partial_buffer->size());
-//        insertBuffer(sub_it.second, partial_buffer);
-//    }
-//}
-
-//void DBInterface::insertBuffer(DBTable& table, shared_ptr<Buffer> buffer)
-//{
-//    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size "
-//           << buffer->size();
-
-//    assert(current_connection_);
-//    assert(buffer);
-
-//    const PropertyList& properties = buffer->properties();
-
-//    for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
-//    {
-//        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
-//               << "'";
-
-//        if (!table.hasColumn(properties.at(cnt).name()))
-//            throw runtime_error("DBInterface: insertBuffer: column '" +
-//                                properties.at(cnt).name() + "' does not exist in table " +
-//                                table.name());
-//    }
-
-//    if (!table.existsInDB() &&
-//            !existsTable(table.name()))  // check for both since information might not be updated yet
-//        createTable(table);
-
-//    assert(table.existsInDB());
-
-//    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
-
-//    QMutexLocker locker(&connection_mutex_);
-
-//    logdbg << "DBInterface: insertBuffer: preparing bind statement";
-//    current_connection_->prepareBindStatement(bind_statement);
-//    current_connection_->beginBindTransaction();
-
-//    logdbg << "DBInterface: insertBuffer: starting inserts";
-//    size_t size = buffer->size();
-//    for (unsigned int cnt = 0; cnt < size; ++cnt)
-//    {
-//        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
-//    }
-
-//    logdbg << "DBInterface: insertBuffer: ending bind transactions";
-//    current_connection_->endBindTransaction();
-//    logdbg << "DBInterface: insertBuffer: finalizing bind statement";
-//    current_connection_->finalizeBindStatement();
-//}
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
 {
@@ -1566,39 +1464,6 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
     logdbg << "DBInterface: insertBuffer: finalizing bind statement";
     current_connection_->finalizeBindStatement();
 }
-
-//shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
-//                                                 shared_ptr<Buffer> buffer)
-//{
-//    logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
-//           << buffer->size();
-//    assert (buffer->size());
-
-//    PropertyList org_properties = buffer->properties();
-//    PropertyList partial_properties;
-
-//    for (unsigned int cnt = 0; cnt < org_properties.size(); ++cnt)
-//    {
-//        Property org_prop = org_properties.at(cnt);
-
-//        if (table.hasColumn(org_prop.name()))
-//        {
-//            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property "
-//                   << org_prop.name();
-//            partial_properties.addProperty(org_prop);
-//        }
-//        else
-//            logdbg << "DBInterface: getPartialBuffer: table " << table.name()
-//                   << " skipping property " << org_prop.name();
-//    }
-
-//    shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
-
-//    logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
-//    assert (tmp_buffer->size());
-
-//    return tmp_buffer;
-//}
 
 //bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
 //                                    shared_ptr<Buffer> buffer)
@@ -1738,8 +1603,8 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
     connection_mutex_.lock();
 
     shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
-                dbobject, read_list, custom_filter_clause, filtered_variables, use_order,
-                order_variable, use_order_ascending, limit, true);
+                dbobject, read_list, custom_filter_clause, use_order,
+                order_variable, use_order_ascending, limit);
 
     logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
@@ -1842,7 +1707,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
 
     string connection_type = current_connection_->type();
 
-    assert(connection_type == MYSQL_IDENTIFIER || connection_type == SQLITE_IDENTIFIER);
+    assert(connection_type == SQLITE_IDENTIFIER);
 
     unsigned int index_cnt = 0;
 
@@ -1856,8 +1721,6 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
                << property.name() << " index cnt " << index_cnt;
 
         if (connection_type == SQLITE_IDENTIFIER)
-            index_cnt = cnt + 1;
-        else if (connection_type == MYSQL_IDENTIFIER)
             index_cnt = cnt + 1;
         else
             throw runtime_error(

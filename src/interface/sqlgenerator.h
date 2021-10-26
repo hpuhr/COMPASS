@@ -35,19 +35,18 @@ class SQLGenerator
     virtual ~SQLGenerator();
 
     std::string getCreateTableStatement(const DBObject& object);
-    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string tablename);
+    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
     std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
-                                         const std::string& key_col, std::string tablename);
+                                         const std::string& key_col_name, std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
-        const DBObject& object, DBOVariableSet read_list, const std::string& filter,
-        std::vector<DBOVariable*> filtered_variables, bool use_order = false,
+        const DBObject& object, DBOVariableSet read_list, const std::string& filter, bool use_order = false,
         DBOVariable* order_variable = nullptr, bool use_order_ascending = false,
-        const std::string& limit = "", bool left_join = false);
+        const std::string& limit = "");
 
-    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
-                                                const std::vector<std::string>& columns,
-                                                bool distinct = false);
+//    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
+//                                                const std::vector<std::string>& columns,
+//                                                bool distinct = false);
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand(DBObject& object);
 
     std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);

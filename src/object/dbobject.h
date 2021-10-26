@@ -95,6 +95,12 @@ class DBObject : public QObject, public Configurable
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }
 
+    //typedef MyIterator<const int*> const_iterator_type;
+
+    using const_DBOVariableIterator = typename std::map<std::string, DBOVariable>::const_iterator;
+    const_DBOVariableIterator cbegin() const { return variables_.cbegin(); }
+    const_DBOVariableIterator cend() const { return variables_.cend(); }
+
     /// @brief Returns number of existing variables
     size_t numVariables() const { return variables_.size(); }
 

@@ -71,6 +71,7 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     registerParameter("description", &description_, "");
     registerParameter("db_column_name", &db_column_name_, "");
     registerParameter("data_type_str", &data_type_str_, "");
+    registerParameter("is_key", &data_type_str_, "");
     registerParameter("representation_str", &representation_str_, "");
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
@@ -243,11 +244,6 @@ std::string DBOVariable::dbTableName() const
 std::string DBOVariable::dbColumnIdentifier() const
 {
     return dbTableName()+":"+dbColumnName();
-}
-
-bool DBOVariable::isKey()
-{
-    assert (false); // TODO
 }
 
 void DBOVariable::setMinMax()
@@ -691,6 +687,16 @@ bool DBOVariable::existsInDB() const
     assert(db_object_);
 
     assert (false); // TODO
+}
+
+bool DBOVariable::isKey() const
+{
+    return is_key_;
+}
+
+void DBOVariable::isKey(bool value)
+{
+    is_key_ = value;
 }
 
 std::string DBOVariable::getDataSourcesAsString(const std::string& value) const

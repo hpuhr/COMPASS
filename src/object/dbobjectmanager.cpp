@@ -443,7 +443,10 @@ void DBObjectManager::quitLoading()
     load_in_progress_ = true;  // TODO
 }
 
-void DBObjectManager::updateSchemaInformationSlot() { emit schemaChangedSignal(); }
+void DBObjectManager::updateSchemaInformationSlot()
+{
+    emit schemaChangedSignal();
+}
 
 void DBObjectManager::databaseContentChangedSlot()
 {

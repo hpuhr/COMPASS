@@ -34,7 +34,6 @@ static const std::string META_OBJECT_NAME="Meta";
 static const std::string NULL_STRING="NULL";
 
 static const std::string SQLITE_IDENTIFIER="sqlite";
-static const std::string MYSQL_IDENTIFIER="mysql";
 
 static const double DEG2RAD = 2*M_PI/360.0;
 static const double RAD2DEG = 1.0/DEG2RAD;
