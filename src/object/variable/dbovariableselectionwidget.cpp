@@ -109,9 +109,6 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
         for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_))
         {
-            if (show_existing_in_db_only_ && !var_it.second.existsInDB())
-                continue;
-
             if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
                 continue;
 
@@ -130,9 +127,6 @@ void DBOVariableSelectionWidget::updateMenuEntries()
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
             for (auto meta_it : COMPASS::instance().objectManager().metaVariables())
             {
-                if (show_existing_in_db_only_ && !meta_it.second->existsInDB())
-                    continue;
-
                 if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
                     continue;
 
@@ -154,9 +148,6 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
             for (auto& var_it : *object_it.second)
             {
-                if (show_existing_in_db_only_ && !var_it.second.existsInDB())
-                    continue;
-
                 if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
                     continue;
 
@@ -305,13 +296,6 @@ void DBOVariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
     updateMenuEntries();
 }
 
-bool DBOVariableSelectionWidget::showExistingInDBOnly() const { return show_existing_in_db_only_; }
-
-void DBOVariableSelectionWidget::showExistingInDBOnly(bool show)
-{
-    show_existing_in_db_only_ = show;
-}
-
 void DBOVariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types)
 {
     only_data_types_ = only_data_types;
@@ -324,8 +308,6 @@ void DBOVariableSelectionWidget::disableShowDataTypesOnly()
 {
     show_data_types_only_ = false;
 }
-
-bool DBOVariableSelectionWidget::showDBOOnly() const { return show_dbo_only_; }
 
 bool DBOVariableSelectionWidget::showMetaVariablesOnly() const { return show_meta_variables_only_; }
 

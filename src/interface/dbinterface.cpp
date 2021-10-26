@@ -1159,12 +1159,6 @@ pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
         return pair<string, string>(NULL_STRING, NULL_STRING);
     }
 
-    if (!var.existsInDB())  // variable doesn't exist in this database
-    {
-        logerr << "DBInterface: getMinMaxString: var " << var.name() << " does not exist in db";
-        return pair<string, string>(NULL_STRING, NULL_STRING);
-    }
-
     QMutexLocker locker(&connection_mutex_);
 
     PropertyList list;
@@ -1590,15 +1584,6 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
     assert(current_connection_);
 
     assert(dbobject.existsInDB());
-
-    for (auto& var_it : read_list.getSet())
-        assert(var_it->existsInDB());
-
-    for (auto& var_it : filtered_variables)
-        assert(var_it->existsInDB());
-
-    if (order_variable)
-        assert(order_variable->existsInDB());
 
     connection_mutex_.lock();
 

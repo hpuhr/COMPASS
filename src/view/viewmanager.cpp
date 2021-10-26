@@ -332,16 +332,10 @@ void ViewManager::doViewPointAfterLoad ()
         }
 
         const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
-        const DBOVariable& latitude_var =
-                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
-        const DBOVariable& longitude_var =
-                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
-
-        if (!tod_var.existsInDB() || !latitude_var.existsInDB() || !longitude_var.existsInDB())
-        {
-            logdbg << "ViewManager: doViewPointAfterLoad: required variables not in db for " << dbo_name;
-            continue;
-        }
+//        const DBOVariable& latitude_var =
+//                object_manager.metaVariable("pos_lat_deg").getFor(dbo_name);
+//        const DBOVariable& longitude_var =
+//                object_manager.metaVariable("pos_long_deg").getFor(dbo_name);
 
         std::shared_ptr<Buffer> buffer = dbo_it.second->data();
 
@@ -423,12 +417,6 @@ void ViewManager::selectTimeWindow(float time_min, float time_max)
         }
 
         const DBOVariable& tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
-
-        if (!tod_var.existsInDB())
-        {
-            logdbg << "ViewManager: selectTimeWindow: required variables not in db for " << dbo_name;
-            continue;
-        }
 
         std::shared_ptr<Buffer> buffer = dbo_it.second->data();
 

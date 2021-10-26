@@ -272,16 +272,6 @@ std::string MetaDBOVariable::getMaxStringRepresentation() const
     return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
 }
 
-bool MetaDBOVariable::existsInDB() const
-{
-    bool exists_in_db = false;
-
-    for (auto variable_it : variables_)
-        exists_in_db = exists_in_db | variable_it.second.existsInDB();
-
-    return exists_in_db;
-}
-
 void MetaDBOVariable::removeOutdatedVariables()
 {
     loginf << "MetaDBOVariable " << name() << ": removeOutdatedVariables";

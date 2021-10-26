@@ -63,9 +63,6 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
                                      variable_name_ + "' does not exist");
         meta_variable_ = &COMPASS::instance().objectManager().metaVariable(variable_name_);
         assert(meta_variable_);
-
-        if (!meta_variable_->existsInDB())
-            usable_ = false;
     }
     else
     {
@@ -81,9 +78,6 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
                 &COMPASS::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
 
         assert(variable_);
-
-        if (!variable_->existsInDB())
-            usable_ = false;
     }
 
     registerParameter("reset_value", &reset_value_, std::string(""));
@@ -133,12 +127,7 @@ bool DBFilterCondition::filters(const std::string& dbo_name)
     assert(usable_);
 
     if (meta_variable_)
-    {
-        if (meta_variable_->existsIn(dbo_name))
-            return meta_variable_->getFor(dbo_name).existsInDB();
-        else
-            return false;
-    }
+        return meta_variable_->existsIn(dbo_name);
     else
         return variable_dbo_name_ == dbo_name;
 }
@@ -168,24 +157,10 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
     {
         assert(meta_variable_->existsIn(dbo_name));
 
-        if (!meta_variable_->existsInDB())
-        {
-            logwrn << "DBFilterCondition: getConditionString: object " << dbo_name
-                   << " meta variable " << meta_variable_->name() << " does not exist in db";
-            return "";
-        }
-
         variable = &meta_variable_->getFor(dbo_name);
     }
     else
         variable = variable_;
-
-    if (!variable->existsInDB())
-    {
-        logwrn << "DBFilterCondition: getConditionString: object " << dbo_name << " variable "
-               << variable->name() << " does not exist in db";
-        return "";
-    }
 
     //const DBTableColumn& column = variable->currentDBColumn();
     std::string db_column_name = variable->dbColumnName();
@@ -374,10 +349,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
     if (meta_variable_)
     {
         for (auto var_it : meta_variable_->variables())
-        {
-            if (var_it.second.existsInDB())
-                variables.push_back(&var_it.second);
-        }
+            variables.push_back(&var_it.second);
     }
     else
         variables.push_back(variable_);
@@ -410,85 +382,41 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
                                                                     DBOVariable* variable)
 {
-    assert (false); // TODO
+    assert(variable);
 
-//    assert(variable);
-//    const DBTableColumn& column = variable->currentDBColumn();
-//    assert(column.existsInDB());
+    std::vector<std::string> value_strings;
+    std::vector<std::string> transformed_value_strings;
 
-//    std::vector<std::string> value_strings;
-//    std::vector<std::string> transformed_value_strings;
+    if (operator_ == "IN")
+    {
+        value_strings = String::split(untransformed_value, ',');
+    }
+    else
+    {
+        value_strings.push_back(untransformed_value);
+    }
 
-//    if (operator_ == "IN")
-//    {
-//        value_strings = String::split(untransformed_value, ',');
-//    }
-//    else
-//    {
-//        value_strings.push_back(untransformed_value);
-//    }
+    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
+           << boost::algorithm::join(value_strings, ",") << "'";
 
-//    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
-//           << boost::algorithm::join(value_strings, ",") << "'";
+    bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
 
-//    bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
+    if (null_set) // remove null value
+        value_strings.erase(find(value_strings.begin(), value_strings.end(), "NULL"));
 
-//    if (null_set) // remove null value
-//        value_strings.erase(find(value_strings.begin(), value_strings.end(), "NULL"));
+    std::string value_str;
 
-//    for (auto value_it : value_strings)
-//    {
-//        std::string value_str = value_it;
+    for (auto value_it : value_strings)
+    {
+        value_str = value_it;
 
-//        if (variable->representation() != DBOVariable::Representation::STANDARD)
-//            value_str =
-//                    variable->getValueStringFromRepresentation(value_str);  // fix representation
+        if (variable->representation() != DBOVariable::Representation::STANDARD)
+            value_str =
+                    variable->getValueStringFromRepresentation(value_str);  // fix representation
 
-//        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
+        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
 
-//        if (column.unit() != variable->unit())  // do unit conversion stuff
-//        {
-//            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-//                   << " of same dimension has different units " << column.unit() << " "
-//                   << variable->unit();
-
-//            if (!UnitManager::instance().hasDimension(variable->dimension()))
-//            {
-//                logerr << "DBFilterCondition: getTransformedValue: unknown dimension '"
-//                       << variable->dimension() << "'";
-//                throw std::runtime_error(
-//                            "DBFilterCondition: getTransformedValue: unknown dimension '" +
-//                            variable->dimension() + "'");
-//            }
-
-//            const Dimension& dimension = UnitManager::instance().dimension(variable->dimension());
-
-//            if (!dimension.hasUnit(column.unit()))
-//            {
-//                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-//                       << " has unknown column unit '" << column.unit() << "' in dimension "
-//                       << variable->dimension();
-//                //  no transformation possible
-//            }
-//            else if (!dimension.hasUnit(variable->unit()))
-//            {
-//                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-//                       << " has unknown variable unit '" << variable->unit() << "' in dimension "
-//                       << variable->dimension();
-//                //  no transformation possible
-//            }
-//            else
-//            {
-//                double factor = dimension.getFactor(column.unit(), variable->unit());
-//                logdbg << "DBFilterCondition: getTransformedValue: correct unit transformation "
-//                          "with factor "
-//                       << factor;
-
-//                value_str = variable->multiplyString(value_str, 1.0 / factor);
-//            }
-//        }
-
-//        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
+        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
 
 //        if (column.dataFormat() == "")
 //            ;
@@ -503,24 +431,22 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
 //        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string "
 //               << value_str;
 
-//        if (variable->dataType() == PropertyDataType::STRING)
-//            transformed_value_strings.push_back("'" + value_str + "'");
-//        else
-//            transformed_value_strings.push_back(value_str);
-//    }
+        if (variable->dataType() == PropertyDataType::STRING)
+            transformed_value_strings.push_back("'" + value_str + "'");
+        else
+            transformed_value_strings.push_back(value_str);
+    }
 
-//    string value_str;
+    if (transformed_value_strings.size()) // can be empty if only NULL
+    {
+        if (operator_ != "IN")
+        {
+            assert(transformed_value_strings.size() == 1);
+            value_str = transformed_value_strings.at(0);
+        }
+        else
+            value_str = "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
+    }
 
-//    if (transformed_value_strings.size()) // can be empty if only NULL
-//    {
-//        if (operator_ != "IN")
-//        {
-//            assert(transformed_value_strings.size() == 1);
-//            value_str = transformed_value_strings.at(0);
-//        }
-//        else
-//            value_str = "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
-//    }
-
-//    return {value_str, null_set};
+    return {value_str, null_set};
 }

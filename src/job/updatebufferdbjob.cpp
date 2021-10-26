@@ -36,7 +36,6 @@ UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBObject& dbobje
 {
     assert(buffer_);
     assert(dbobject_.existsInDB());
-    assert(key_var_.existsInDB());
 }
 
 UpdateBufferDBJob::~UpdateBufferDBJob() {}

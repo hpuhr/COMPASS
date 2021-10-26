@@ -119,9 +119,7 @@ void DBOLabelDefinition::updateReadList()
         if (it.second->show())
         {
             assert(db_object_->hasVariable(it.second->variableName()));
-
-            if (db_object_->variable(it.second->variableName()).existsInDB())
-                read_list_.add(db_object_->variable(it.second->variableName()));
+            read_list_.add(db_object_->variable(it.second->variableName()));
         }
     }
 }

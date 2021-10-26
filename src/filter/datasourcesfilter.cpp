@@ -109,13 +109,6 @@ std::string DataSourcesFilter::getConditionString(const std::string& dbo_name, b
                 return "";
             }
 
-            if (!object_->variable(ds_column_name_).existsInDB())
-            {
-                logwrn << "DataSourcesFilter: getConditionString: variable " << ds_column_name_
-                       << " not in db";
-                return "";
-            }
-
             filtered_variables.push_back(&object_->variable(ds_column_name_));
 
             bool got_one = false;

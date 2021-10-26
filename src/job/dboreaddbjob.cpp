@@ -41,15 +41,6 @@ DBOReadDBJob::DBOReadDBJob(DBInterface& db_interface, DBObject& dbobject, DBOVar
       limit_str_(limit_str)
 {
     assert(dbobject_.existsInDB());
-
-    for (auto& var_it : read_list_.getSet())
-        assert(var_it->existsInDB());
-
-    for (auto& var_it : filtered_variables_)
-        assert(var_it->existsInDB());
-
-    if (order_variable_)
-        assert(order_variable_->existsInDB());
 }
 
 DBOReadDBJob::~DBOReadDBJob() {}

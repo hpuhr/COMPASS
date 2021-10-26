@@ -174,8 +174,6 @@ class DBOVariable : public QObject, public Property, public Configurable
     const std::string& getSmallerValueString(const std::string& value_a_str,
                                              const std::string& value_b_str) const;
 
-    bool existsInDB() const;
-
 private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;

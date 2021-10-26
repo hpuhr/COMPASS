@@ -71,8 +71,6 @@ class MetaDBOVariable : public Configurable
     void unlock();
     void lock();
 
-    bool existsInDB() const;
-
     void removeOutdatedVariables();
 
   protected:

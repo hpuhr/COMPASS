@@ -65,7 +65,6 @@ class DBOVariableSet
 
     /// @brief Returns container with all variables
     std::vector<DBOVariable*>& getSet() { return set_; }
-    std::vector<DBOVariable*> getExistsInDBSet();
     /// @brief Returns variable at a given index
     DBOVariable& getVariable(unsigned int index) const;
 

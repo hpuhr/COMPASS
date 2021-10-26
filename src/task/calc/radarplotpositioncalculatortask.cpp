@@ -276,7 +276,6 @@ void RadarPlotPositionCalculatorTask::checkAndSetVariable(std::string& name_str,
             loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str
                    << " set";
             assert(var);
-            assert((*var)->existsInDB());
         }
     }
     else
@@ -312,15 +311,6 @@ bool RadarPlotPositionCalculatorTask::canRun()
         !object.hasVariable(range_var_str_) || !object.hasVariable(azimuth_var_str_) ||
         !object.hasVariable(altitude_var_str_) || !object.hasVariable(latitude_var_str_) ||
         !object.hasVariable(longitude_var_str_))
-        return false;
-
-    if (!object.variable(key_var_str_).existsInDB() ||
-        !object.variable(datasource_var_str_).existsInDB() ||
-        !object.variable(range_var_str_).existsInDB() ||
-        !object.variable(azimuth_var_str_).existsInDB() ||
-        !object.variable(altitude_var_str_).existsInDB() ||
-        !object.variable(latitude_var_str_).existsInDB() ||
-        !object.variable(longitude_var_str_).existsInDB())
         return false;
 
     return true;

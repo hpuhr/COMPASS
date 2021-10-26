@@ -82,7 +82,6 @@ class DBOVariableSelectionWidget : public QFrame
     void showDBOOnly(const std::string& only_dbo_name);
     void disableShowDBOOnly();
 
-    bool showDBOOnly() const;
     std::string onlyDBOName() const;
 
     bool showEmptyVariable() const;
@@ -109,8 +108,6 @@ class DBOVariableSelectionWidget : public QFrame
 
     bool show_meta_variables_{false};
     bool show_meta_variables_only_{false};
-
-    bool show_existing_in_db_only_{false};
 
     bool show_dbo_only_{false};
     std::string only_dbo_name_;

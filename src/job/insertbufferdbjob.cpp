@@ -54,8 +54,7 @@ void InsertBufferDBJob::run()
            << buffer_->size();
     assert(buffer_->size());
 
-    assert (false); // TODO
-    //db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
+    db_interface_.insertBuffer(dbobject_.dbTableName(), buffer_);
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;

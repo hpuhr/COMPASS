@@ -620,9 +620,6 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
             COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
     }
 
-    for (auto& var_it : filtered_variables)
-        assert(var_it->existsInDB());
-
     load(read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
          use_order_ascending, limit_str);
 }
@@ -638,12 +635,6 @@ void DBObject::load(DBOVariableSet& read_set, std::string custom_filter_clause,
     assert(existsInDB());
 
     // do not load associations, should be done in DBObjectManager::load
-
-    for (auto& var_it : read_set.getSet())
-        assert(var_it->existsInDB());
-
-    if (order_variable)
-        assert(order_variable->existsInDB());
 
     if (read_job_)
     {
@@ -736,9 +727,6 @@ void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
     assert(!update_job_);
 
     assert(existsInDB());
-    assert(key_var.existsInDB());
-
-    //buffer->transformVariables(list, false);  // back again
 
     update_job_ =
         std::make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
@@ -770,7 +758,6 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
 
     // TODO rework to key variable
     assert(hasVariable("rec_num"));
-    assert(variable("rec_num").existsInDB());
 
     custom_filter_clause = variable("rec_num").dbColumnIdentifier() + " in (";
     for (auto& rec_num : rec_nums)
@@ -788,9 +775,6 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
 
     if (!read_list.hasVariable(variable("rec_num")))
         read_list.add(variable("rec_num"));
-
-    for (auto& var_it : read_list.getSet())
-        assert(var_it->existsInDB());
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 

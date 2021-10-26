@@ -702,7 +702,6 @@ void CreateARTASAssociationsTask::checkAndSetVariable(std::string& name_str, DBO
         *var = &object.variable(name_str);
         loginf << "CreateARTASAssociationsTask: checkAndSetVariable: var " << name_str << " set";
         assert(var);
-        assert((*var)->existsInDB());
     }
 }
 

@@ -253,8 +253,7 @@ void DBOVariable::setMinMax()
     assert(db_object_);
     logdbg << "DBOVariable " << db_object_->name() << " " << name_ << ": setMinMax";
 
-    if (!dbObject().existsInDB()  // object doesn't exist in this database
-        || !dbObject().count() || !existsInDB())
+    if (!dbObject().existsInDB() || !dbObject().count())
     {
         min_ = NULL_STRING;
         max_ = NULL_STRING;
@@ -680,13 +679,6 @@ const std::string& DBOVariable::getSmallerValueString(const std::string& value_a
             throw std::runtime_error("DBOVariable: getSmallerValueString:: unknown property type " +
                                      Property::asString(data_type_));
     }
-}
-
-bool DBOVariable::existsInDB() const
-{
-    assert(db_object_);
-
-    assert (false); // TODO
 }
 
 bool DBOVariable::isKey() const

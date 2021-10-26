@@ -204,15 +204,3 @@ bool DBOVariableSet::hasVariable(const DBOVariable& variable)
     return find(set_.begin(), set_.end(), &variable) != set_.end();
 }
 
-std::vector<DBOVariable*> DBOVariableSet::getExistsInDBSet()
-{
-    std::vector<DBOVariable*> active_vars;
-
-    for (auto& var_it : set_)
-    {
-        if (var_it->existsInDB())
-            active_vars.push_back(var_it);
-    }
-
-    return active_vars;
-}

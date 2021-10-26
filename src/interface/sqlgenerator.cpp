@@ -298,46 +298,31 @@ shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBObject
 
 shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBObject& adsb_obj)
 {
-    assert (false); // TODO
 
-    //    vector<const DBTableColumn*> columns;
+    PropertyList list;
+    list.addProperty("TARGET_ADDR", PropertyDataType::INT);
+    list.addProperty("MOPS_VERSION", PropertyDataType::INT);
+    list.addProperty("MIN_NUCP_NIC", PropertyDataType::CHAR);
+    list.addProperty("MAX_NUCP_NIC", PropertyDataType::CHAR);
+    list.addProperty("MIN_NACP", PropertyDataType::CHAR);
+    list.addProperty("MAX_NACP", PropertyDataType::CHAR);
 
-    //    const DBTableColumn& ta_col = adsb_obj.variable("target_addr").currentDBColumn();
-    //    const DBTableColumn& mops_col = adsb_obj.variable("mops_version").currentDBColumn();
-    //    const DBTableColumn& nu_col = adsb_obj.variable("nucp_nic").currentDBColumn();
-    //    const DBTableColumn& na_col = adsb_obj.variable("nac_p").currentDBColumn();
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
-    //    columns.push_back(&mops_col);
-    //    columns.push_back(&ta_col);
-    //    columns.push_back(&nu_col);
-    //    columns.push_back(&na_col);
+    stringstream ss;
 
-    //    PropertyList list;
-    //    list.addProperty("TARGET_ADDR", PropertyDataType::INT);
-    //    list.addProperty("MOPS_VERSION", PropertyDataType::INT);
-    //    list.addProperty("MIN_NUCP_NIC", PropertyDataType::CHAR);
-    //    list.addProperty("MAX_NUCP_NIC", PropertyDataType::CHAR);
-    //    list.addProperty("MIN_NACP", PropertyDataType::CHAR);
-    //    list.addProperty("MAX_NACP", PropertyDataType::CHAR);
+    ss << "SELECT TARGET_ADDR, MOPS_VERSION, MIN(NUCP_NIC), MAX(NUCP_NIC), MIN(NAC_P), MAX(NAC_P)";
 
-    //    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
+    ss << " FROM ";
 
-    //    stringstream ss;
+    ss << adsb_obj.dbTableName();
 
-    //    ss << "SELECT TARGET_ADDR, MOPS_VERSION, MIN(NUCP_NIC), MAX(NUCP_NIC), MIN(NAC_P), MAX(NAC_P)";
+    ss << " group by TARGET_ADDR;";
 
-    //    ss << " FROM ";
+    command->set(ss.str());
+    command->list(list);
 
-    //    string main_table_name = adsb_obj.currentMetaTable().mainTableName();
-
-    //    ss << main_table_name;
-
-    //    ss << " group by TARGET_ADDR;";
-
-    //    command->set(ss.str());
-    //    command->list(list);
-
-    //    return command;
+    return command;
 }
 
 string SQLGenerator::getCreateAssociationTableStatement(const string& table_name)

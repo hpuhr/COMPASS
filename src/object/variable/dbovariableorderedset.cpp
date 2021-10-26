@@ -341,17 +341,14 @@ DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor(const std::string& dbo_
         if (it->second->dboName() == META_OBJECT_NAME)
         {
             assert(manager.existsMetaVariable(it->second->variableName()));
-            if (manager.metaVariable(it->second->variableName()).existsIn(dbo_name) &&
-                manager.metaVariable(it->second->variableName()).existsInDB() &&
-                manager.metaVariable(it->second->variableName()).getFor(dbo_name).existsInDB())
+            if (manager.metaVariable(it->second->variableName()).existsIn(dbo_name))
                 type_set.add(manager.metaVariable(it->second->variableName()).getFor(dbo_name));
         }
         else if (it->second->dboName() == dbo_name)
         {
             assert(manager.existsObject(dbo_name));
             assert(manager.object(dbo_name).hasVariable(it->second->variableName()));
-            if (manager.object(dbo_name).variable(it->second->variableName()).existsInDB())
-                type_set.add(manager.object(dbo_name).variable(it->second->variableName()));
+            type_set.add(manager.object(dbo_name).variable(it->second->variableName()));
         }
     }
 
