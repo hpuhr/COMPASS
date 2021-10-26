@@ -28,7 +28,6 @@
 
 class DBInterface;
 class DBObjectManager;
-class DBSchemaManager;
 class FilterManager;
 class TaskManager;
 class ViewManager;
@@ -38,16 +37,12 @@ class EvaluationManager;
 class COMPASS : public Configurable, public Singleton
 {
   public:
-    ///@brief Destructor.
     virtual ~COMPASS();
-
-    // void initialize ();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
     DBInterface& interface();
-    DBSchemaManager& schemaManager();
     DBObjectManager& objectManager();
     FilterManager& filterManager();
     TaskManager& taskManager();
@@ -57,18 +52,14 @@ class COMPASS : public Configurable, public Singleton
 
     bool ready();
 
-    ///@brief Shuts down the DB access.
     void shutdown();
 
   protected:
-    // bool initialized_ {false};
     bool shut_down_{false};
 
     std::unique_ptr<SimpleConfig> simple_config_;
-    /// DB interface, encapsulating all database functionality.
     std::unique_ptr<DBInterface> db_interface_;
     std::unique_ptr<DBObjectManager> dbo_manager_;
-    std::unique_ptr<DBSchemaManager> db_schema_manager_;
     std::unique_ptr<FilterManager> filter_manager_;
     std::unique_ptr<TaskManager> task_manager_;
     std::unique_ptr<ViewManager> view_manager_;
@@ -76,11 +67,9 @@ class COMPASS : public Configurable, public Singleton
 
     virtual void checkSubConfigurables();
 
-    ///@brief Constructor.
     COMPASS();
 
   public:
-    ///@brief Instance access function for Singleton.
     static COMPASS& instance()
     {
         static COMPASS instance;

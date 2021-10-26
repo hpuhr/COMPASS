@@ -33,7 +33,6 @@
 
 class COMPASS;
 class PropertyList;
-class MetaDBTable;
 
 class DBObjectWidget;
 class DBObjectInfoWidget;
@@ -64,8 +63,6 @@ class DBObject : public QObject, public Configurable
     void labelDefinitionChangedSignal();
 
   public slots:
-    //void schemaChangedSlot();
-
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
@@ -93,8 +90,6 @@ class DBObject : public QObject, public Configurable
     void renameVariable(const std::string& name, const std::string& new_name);
     /// @brief Deletes a variable identified by id
     void deleteVariable(const std::string& name);
-
-    bool uses(const DBTableColumn& column) const;
 
     using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
     DBOVariableIterator begin() { return variables_.begin(); }
@@ -149,11 +144,6 @@ class DBObject : public QObject, public Configurable
     size_t count();
     size_t loadedCount();
 
-    /// @brief Returns main meta table for current schema
-    MetaDBTable& currentMetaTable() const;
-    /// @brief Returns if current schema has main meta table
-    bool hasCurrentMetaTable() const;
-
     /// @brief Returns current data source definition
     const DBODataSourceDefinition& currentDataSourceDefinition() const;
 
@@ -167,7 +157,6 @@ class DBObject : public QObject, public Configurable
     DataSourceIterator dsBegin() { return data_sources_.begin(); }
     DataSourceIterator dsEnd() { return data_sources_.end(); }
 
-    ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources() { return data_sources_.size() > 0; }
     void addDataSource(int key_value, const std::string& name);  // needs postprocessing after
     void addDataSources(std::map<int, std::pair<int, int>>& sources);
@@ -196,8 +185,6 @@ class DBObject : public QObject, public Configurable
 
     bool existsInDB() const;
 
-    void print();
-
     // association stuff
     void loadAssociationsIfRequired();  // starts loading job if required
     void loadAssociations();            // actually loads associations, should be called from job
@@ -220,7 +207,6 @@ protected:
     std::string name_;
     /// DBO description
     std::string info_;
-    std::string meta_table_name_;
     std::string db_table_name_;
     /// DBO is loadable flag
     bool is_loadable_{false};  // loadable on its own
@@ -244,10 +230,6 @@ protected:
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;
 
-    /// Current (in the current schema) main meta table
-    //MetaDBTable* current_meta_table_{nullptr};  // TODO rework const?
-    //std::string associations_table_name_;
-
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
@@ -257,7 +239,6 @@ protected:
 
     virtual void checkSubConfigurables();
 
-    ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
 
     std::string associationsTableName();

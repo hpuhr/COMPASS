@@ -20,15 +20,10 @@
 #include "dbfilter.h"
 #include "dbfilterwidget.h"
 #include "datasourcesfilter.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbschemawidget.h"
-#include "dbtable.h"
 #include "filtergeneratorwidget.h"
 #include "filtermanager.h"
 #include "global.h"
 #include "logger.h"
-#include "metadbtable.h"
 
 #include <QComboBox>
 #include <QHBoxLayout>

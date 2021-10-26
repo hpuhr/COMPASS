@@ -29,25 +29,8 @@
 
 class DBTableColumn;
 class DBObject;
-class MetaDBTable;
 class DBOVariableWidget;
 
-/**
- * @brief Variable of a DBObject
- *
- * Abstracted variable, which has two basic mechanisms.
- *
- * For one, the variable might not really exist in a table, but is a surrogate abstraction for a
- * number of variables in different DBObjects (meta variable) which carry the same content. When
- * used, depending on the DBO type, one can get the really existing DBOVariable using the getFor
- * function.
- *
- * For the second, a DBOVariable is an abstraction of the underlying variable in the meta table
- * which may differ for different schemas. Therefore, a DBOSchemaVariableDefinition is used, which
- * defines the all possible underlying variables.
- *
- * Based on Property (data type definition).
- */
 class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
@@ -77,7 +60,6 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief Desctructor
     virtual ~DBOVariable();
 
-    // DBOVariable& operator=(DBOVariable&& other);
     /// @brief Comparison operator
     bool operator==(const DBOVariable& var);
 
@@ -99,25 +81,13 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief Sets variable description
     void description(const std::string& description) { description_ = description; }
 
-    /// @brief Returns meta table identifier for a given schema
-    //const std::string& metaTable() const;
-
-    bool hasVariableIdentifier() const;
-    /// @brief Returns variable identifier for a given schema
-    const std::string& dbColumnName() const;
+    std::string dbColumnName() const;
     void dbColumnName(const std::string& value);
 
-    bool hasCurrentDBColumn() const;
-    const DBTableColumn& currentDBColumn() const;
+    std::string dbTableName() const;
+    std::string dbColumnIdentifier() const;
 
     bool isKey();
-
-    /// @brief Returns meta table identifier for current schema
-    const std::string& currentMetaTableString() const;
-    /// @brief Returns meta table for current schema
-    const MetaDBTable& currentMetaTable() const;
-    /// @brief Returns variable identifier for current schema
-    //const std::string& currentVariableIdentifier() const;
 
     /// @brief Returns if dimension information is present
     bool hasDimension() { return dimension_.size() > 0; }
@@ -242,6 +212,5 @@ class DBOVariable : public QObject, public Property, public Configurable
 };
 
 Q_DECLARE_METATYPE(DBOVariable*)
-// Q_DECLARE_METATYPE(DBOVariable)
 
 #endif /* DBOVARIABLE_H_ */

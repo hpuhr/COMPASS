@@ -28,13 +28,9 @@
 #include "dbodatasource.h"
 #include "dbovariable.h"
 #include "dbresult.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbtable.h"
 #include "dbtableinfo.h"
 #include "dimension.h"
 #include "jobmanager.h"
-#include "metadbtable.h"
 #include "sqliteconnection.h"
 #include "stringconv.h"
 #include "unit.h"
@@ -211,29 +207,32 @@ bool DBInterface::existsTable(const string& table_name)
     return table_info_.count(table_name) == 1;
 }
 
-void DBInterface::createTable(DBTable& table)
+void DBInterface::createTable(const std::string& table_name)
 {
-    loginf << "DBInterface: createTable: " << table.name();
-    if (existsTable(table.name()))
-    {
-        logerr << "DBInterface: createTable: table " << table.name() << " already exists";
-        return;
-    }
+    assert (false); // TODO
 
-    string statement = sql_generator_.getCreateTableStatement(table);
 
-    QMutexLocker locker(&connection_mutex_);
+//    loginf << "DBInterface: createTable: " << table.name();
+//    if (existsTable(table.name()))
+//    {
+//        logerr << "DBInterface: createTable: table " << table.name() << " already exists";
+//        return;
+//    }
 
-    current_connection_->executeSQL(statement);
+//    string statement = sql_generator_.getCreateTableStatement(table);
 
-    locker.unlock();
+//    QMutexLocker locker(&connection_mutex_);
 
-    updateTableInfo();
-    table.updateOnDatabase();
+//    current_connection_->executeSQL(statement);
 
-    loginf << "DBInterface: createTable: checking " << table.name();
-    assert(existsTable(table.name()));
-    assert(table.existsInDB());
+//    locker.unlock();
+
+//    updateTableInfo();
+//    table.updateOnDatabase();
+
+//    loginf << "DBInterface: createTable: checking " << table.name();
+//    assert(existsTable(table.name()));
+//    assert(table.existsInDB());
 }
 
 /**
@@ -254,39 +253,41 @@ set<int> DBInterface::queryActiveSensorNumbers(DBObject& object)
 {
     logdbg << "DBInterface: queryActiveSensorNumbers: start";
 
-    assert(object.existsInDB());
+    assert (false); // TODO
 
-    QMutexLocker locker(&connection_mutex_);
+//    assert(object.existsInDB());
 
-    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-    assert(object.hasVariable(local_key_dbovar));
-    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
+//    QMutexLocker locker(&connection_mutex_);
 
-    set<int> data;
+//    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
+//    assert(object.hasVariable(local_key_dbovar));
+//    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
+//    set<int> data;
 
-    shared_ptr<DBResult> result = current_connection_->execute(*command);
+//    shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
 
-    assert(result->containsData());
+//    shared_ptr<DBResult> result = current_connection_->execute(*command);
 
-    shared_ptr<Buffer> buffer = result->buffer();
-    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
-    {
-        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
-        {
-            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
-                   << " has NULL ds_id's, which will be omitted";
-        }
-        else
-        {
-            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
-            data.insert(tmp);
-        }
-    }
+//    assert(result->containsData());
 
-    logdbg << "DBInterface: queryActiveSensorNumbers: done";
-    return data;
+//    shared_ptr<Buffer> buffer = result->buffer();
+//    for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
+//    {
+//        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
+//        {
+//            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
+//                   << " has NULL ds_id's, which will be omitted";
+//        }
+//        else
+//        {
+//            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
+//            data.insert(tmp);
+//        }
+//    }
+
+//    logdbg << "DBInterface: queryActiveSensorNumbers: done";
+//    return data;
 }
 
 
@@ -345,26 +346,28 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 
 bool DBInterface::hasDataSourceTables(DBObject& object)
 {
-    const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
+    assert (false); // TODO
 
-    if (!schema.hasMetaTable(ds.metaTableName()))
-        return false;
+//    const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
+//    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
 
-    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
+//    if (!schema.hasMetaTable(ds.metaTableName()))
+//        return false;
 
-    if (!meta.hasColumn(ds.foreignKey()))
-        return false;
+//    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
 
-    if (!meta.hasColumn(ds.nameColumn()))
-        return false;
+//    if (!meta.hasColumn(ds.foreignKey()))
+//        return false;
 
-    string main_table_name = meta.mainTableName();
+//    if (!meta.hasColumn(ds.nameColumn()))
+//        return false;
 
-    if (!existsTable(main_table_name))
-        return false;
+//    string main_table_name = meta.mainTableName();
 
-    return true;
+//    if (!existsTable(main_table_name))
+//        return false;
+
+//    return true;
 }
 
 void DBInterface::updateDataSource(DBODataSource& data_source)
@@ -372,230 +375,232 @@ void DBInterface::updateDataSource(DBODataSource& data_source)
     loginf << "DBInterface: updateDataSource: object " << data_source.object().name() << " source "
            << data_source.id();
 
-    DBObject& object = data_source.object();
-    shared_ptr<Buffer> buffer{new Buffer()};
+    assert (false); // TODO
 
-    const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
-    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
-    assert(schema.hasMetaTable(ds_def.metaTableName()));
+//    DBObject& object = data_source.object();
+//    shared_ptr<Buffer> buffer{new Buffer()};
 
-    MetaDBTable& meta = schema.metaTable(ds_def.metaTableName());
+//    const DBODataSourceDefinition& ds_def = object.currentDataSourceDefinition();
+//    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
+//    assert(schema.hasMetaTable(ds_def.metaTableName()));
 
-    const DBTableColumn& foreign_key_col = meta.column(ds_def.foreignKey());
+//    MetaDBTable& meta = schema.metaTable(ds_def.metaTableName());
 
-    const DBTableColumn& name_col = meta.column(ds_def.nameColumn());
-    assert(name_col.propertyType() == PropertyDataType::STRING);
-    buffer->addProperty(name_col.name(), name_col.propertyType());
-    buffer->get<string>(name_col.name()).set(0, data_source.name());
+//    const DBTableColumn& foreign_key_col = meta.column(ds_def.foreignKey());
 
-    if (ds_def.hasShortNameColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.shortNameColumn());
-        assert(col.propertyType() == PropertyDataType::STRING);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasShortName())
-            buffer->get<string>(col.name()).set(0, data_source.shortName());
-        else
-            buffer->get<string>(col.name()).setNull(0);
-    }
+//    const DBTableColumn& name_col = meta.column(ds_def.nameColumn());
+//    assert(name_col.propertyType() == PropertyDataType::STRING);
+//    buffer->addProperty(name_col.name(), name_col.propertyType());
+//    buffer->get<string>(name_col.name()).set(0, data_source.name());
 
-    if (ds_def.hasSacColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.sacColumn());
-        assert(col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSac())
-            buffer->get<char>(col.name()).set(0, data_source.sac());
-        else
-            buffer->get<char>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasShortNameColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.shortNameColumn());
+//        assert(col.propertyType() == PropertyDataType::STRING);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasShortName())
+//            buffer->get<string>(col.name()).set(0, data_source.shortName());
+//        else
+//            buffer->get<string>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasSicColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.sicColumn());
-        assert(col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSic())
-            buffer->get<char>(col.name()).set(0, data_source.sic());
-        else
-            buffer->get<char>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasSacColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.sacColumn());
+//        assert(col.propertyType() == PropertyDataType::CHAR);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSac())
+//            buffer->get<char>(col.name()).set(0, data_source.sac());
+//        else
+//            buffer->get<char>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasLatitudeColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.latitudeColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasLatitude())
-            buffer->get<double>(col.name()).set(0, data_source.latitude());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasSicColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.sicColumn());
+//        assert(col.propertyType() == PropertyDataType::CHAR);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSic())
+//            buffer->get<char>(col.name()).set(0, data_source.sic());
+//        else
+//            buffer->get<char>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasLongitudeColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.longitudeColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasLongitude())
-            buffer->get<double>(col.name()).set(0, data_source.longitude());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasLatitudeColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.latitudeColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasLatitude())
+//            buffer->get<double>(col.name()).set(0, data_source.latitude());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasAltitudeColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.altitudeColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasAltitude())
-            buffer->get<double>(col.name()).set(0, data_source.altitude());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasLongitudeColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.longitudeColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasLongitude())
+//            buffer->get<double>(col.name()).set(0, data_source.longitude());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    // psr
-    if (ds_def.hasPrimaryAzimuthStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.primaryAzimuthStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasPrimaryAzimuthStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.primaryAzimuthStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasAltitudeColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.altitudeColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasAltitude())
+//            buffer->get<double>(col.name()).set(0, data_source.altitude());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasPrimaryRangeStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.primaryRangeStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasPrimaryRangeStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.primaryRangeStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    // psr
+//    if (ds_def.hasPrimaryAzimuthStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.primaryAzimuthStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasPrimaryAzimuthStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.primaryAzimuthStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasPrimaryIRMinColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.primaryIRMinColumn());
-        assert(col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasPrimaryRangeMin())
-            buffer->get<char>(col.name()).set(0, data_source.primaryRangeMin());
-        else
-            buffer->get<char>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasPrimaryRangeStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.primaryRangeStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasPrimaryRangeStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.primaryRangeStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasPrimaryIRMaxColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.primaryIRMaxColumn());
-        assert(col.propertyType() == PropertyDataType::INT);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasPrimaryRangeMax())
-            buffer->get<int>(col.name()).set(0, data_source.primaryRangeMax());
-        else
-            buffer->get<int>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasPrimaryIRMinColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.primaryIRMinColumn());
+//        assert(col.propertyType() == PropertyDataType::CHAR);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasPrimaryRangeMin())
+//            buffer->get<char>(col.name()).set(0, data_source.primaryRangeMin());
+//        else
+//            buffer->get<char>(col.name()).setNull(0);
+//    }
 
-    // ssr
-    if (ds_def.hasSecondaryAzimuthStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.secondaryAzimuthStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSecondaryAzimuthStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.secondaryAzimuthStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasPrimaryIRMaxColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.primaryIRMaxColumn());
+//        assert(col.propertyType() == PropertyDataType::INT);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasPrimaryRangeMax())
+//            buffer->get<int>(col.name()).set(0, data_source.primaryRangeMax());
+//        else
+//            buffer->get<int>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasSecondaryRangeStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.secondaryRangeStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSecondaryRangeStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.secondaryRangeStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    // ssr
+//    if (ds_def.hasSecondaryAzimuthStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.secondaryAzimuthStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSecondaryAzimuthStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.secondaryAzimuthStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasSecondaryIRMinColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.secondaryIRMinColumn());
-        assert(col.propertyType() == PropertyDataType::INT);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSecondaryRangeMin())
-            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMin());
-        else
-            buffer->get<int>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasSecondaryRangeStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.secondaryRangeStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSecondaryRangeStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.secondaryRangeStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasSecondaryIRMaxColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.secondaryIRMaxColumn());
-        assert(col.propertyType() == PropertyDataType::INT);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasSecondaryRangeMax())
-            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMax());
-        else
-            buffer->get<int>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasSecondaryIRMinColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.secondaryIRMinColumn());
+//        assert(col.propertyType() == PropertyDataType::INT);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSecondaryRangeMin())
+//            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMin());
+//        else
+//            buffer->get<int>(col.name()).setNull(0);
+//    }
 
-    // mode s
-    if (ds_def.hasModeSAzimuthStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.modeSAzimuthStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasModeSAzimuthStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.modeSAzimuthStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasSecondaryIRMaxColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.secondaryIRMaxColumn());
+//        assert(col.propertyType() == PropertyDataType::INT);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasSecondaryRangeMax())
+//            buffer->get<int>(col.name()).set(0, data_source.secondaryRangeMax());
+//        else
+//            buffer->get<int>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasModeSRangeStdDevColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.modeSRangeStdDevColumn());
-        assert(col.propertyType() == PropertyDataType::DOUBLE);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasModeSRangeStdDev())
-            buffer->get<double>(col.name()).set(0, data_source.modeSRangeStdDev());
-        else
-            buffer->get<double>(col.name()).setNull(0);
-    }
+//    // mode s
+//    if (ds_def.hasModeSAzimuthStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.modeSAzimuthStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasModeSAzimuthStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.modeSAzimuthStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasModeSIRMinColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.modeSIRMinColumn());
-        assert(col.propertyType() == PropertyDataType::CHAR);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasModeSRangeMin())
-            buffer->get<char>(col.name()).set(0, data_source.modeSRangeMin());
-        else
-            buffer->get<char>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasModeSRangeStdDevColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.modeSRangeStdDevColumn());
+//        assert(col.propertyType() == PropertyDataType::DOUBLE);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasModeSRangeStdDev())
+//            buffer->get<double>(col.name()).set(0, data_source.modeSRangeStdDev());
+//        else
+//            buffer->get<double>(col.name()).setNull(0);
+//    }
 
-    if (ds_def.hasModeSIRMaxColumn())
-    {
-        const DBTableColumn& col = meta.column(ds_def.modeSIRMaxColumn());
-        assert(col.propertyType() == PropertyDataType::INT);
-        buffer->addProperty(col.name(), col.propertyType());
-        if (data_source.hasModeSRangeMax())
-            buffer->get<int>(col.name()).set(0, data_source.modeSRangeMax());
-        else
-            buffer->get<int>(col.name()).setNull(0);
-    }
+//    if (ds_def.hasModeSIRMinColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.modeSIRMinColumn());
+//        assert(col.propertyType() == PropertyDataType::CHAR);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasModeSRangeMin())
+//            buffer->get<char>(col.name()).set(0, data_source.modeSRangeMin());
+//        else
+//            buffer->get<char>(col.name()).setNull(0);
+//    }
 
-    assert(foreign_key_col.propertyType() == PropertyDataType::INT);
-    buffer->addProperty(foreign_key_col.name(), foreign_key_col.propertyType());
-    buffer->get<int>(foreign_key_col.name()).set(0, data_source.id());
+//    if (ds_def.hasModeSIRMaxColumn())
+//    {
+//        const DBTableColumn& col = meta.column(ds_def.modeSIRMaxColumn());
+//        assert(col.propertyType() == PropertyDataType::INT);
+//        buffer->addProperty(col.name(), col.propertyType());
+//        if (data_source.hasModeSRangeMax())
+//            buffer->get<int>(col.name()).set(0, data_source.modeSRangeMax());
+//        else
+//            buffer->get<int>(col.name()).setNull(0);
+//    }
 
-    loginf << "DBInterface: updateDataSource: updating";
+//    assert(foreign_key_col.propertyType() == PropertyDataType::INT);
+//    buffer->addProperty(foreign_key_col.name(), foreign_key_col.propertyType());
+//    buffer->get<int>(foreign_key_col.name()).set(0, data_source.id());
 
-    updateBuffer(meta, foreign_key_col, buffer);
+//    loginf << "DBInterface: updateDataSource: updating";
+
+//    updateBuffer(meta, foreign_key_col, buffer);
 
     loginf << "DBInterface: updateDataSource: update done";
 }
@@ -607,324 +612,326 @@ map<int, DBODataSource> DBInterface::getDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getDataSources: start";
 
-    QMutexLocker locker(&connection_mutex_);
+    assert (false); // TODO
 
-    shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
+//    QMutexLocker locker(&connection_mutex_);
 
-    logdbg << "DBInterface: getDataSources: sql '" << command->get() << "'";
+//    shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
-    shared_ptr<DBResult> result = current_connection_->execute(*command);
-    assert(result->containsData());
-    shared_ptr<Buffer> buffer = result->buffer();
+//    logdbg << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
-    logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
+//    shared_ptr<DBResult> result = current_connection_->execute(*command);
+//    assert(result->containsData());
+//    shared_ptr<Buffer> buffer = result->buffer();
 
-    const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
-    assert(schema.hasMetaTable(ds.metaTableName()));
+//    logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
 
-    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
+//    const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
+//    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
+//    assert(schema.hasMetaTable(ds.metaTableName()));
 
-    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
-    const DBTableColumn& name_col = meta.column(ds.nameColumn());
+//    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
 
-    assert(buffer->properties().hasProperty(foreign_key_col.name()));
-    assert(buffer->properties().get(foreign_key_col.name()).dataType() == PropertyDataType::INT);
-    assert(buffer->properties().hasProperty(name_col.name()));
-    assert(buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
+//    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
+//    const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
-    bool has_short_name = ds.hasShortNameColumn();
-    string short_name_col_name;
-    if (has_short_name)
-    {
-        short_name_col_name = meta.column(ds.shortNameColumn()).name();
-        assert(buffer->properties().hasProperty(short_name_col_name) &&
-               buffer->properties().get(short_name_col_name).dataType() ==
-               PropertyDataType::STRING);
-    }
+//    assert(buffer->properties().hasProperty(foreign_key_col.name()));
+//    assert(buffer->properties().get(foreign_key_col.name()).dataType() == PropertyDataType::INT);
+//    assert(buffer->properties().hasProperty(name_col.name()));
+//    assert(buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
 
-    bool has_sac = ds.hasSacColumn();
-    bool has_int_sacsic = false;
-    string sac_col_name;
-    if (has_sac)
-    {
-        sac_col_name = meta.column(ds.sacColumn()).name();
-        assert(buffer->properties().hasProperty(sac_col_name));
+//    bool has_short_name = ds.hasShortNameColumn();
+//    string short_name_col_name;
+//    if (has_short_name)
+//    {
+//        short_name_col_name = meta.column(ds.shortNameColumn()).name();
+//        assert(buffer->properties().hasProperty(short_name_col_name) &&
+//               buffer->properties().get(short_name_col_name).dataType() ==
+//               PropertyDataType::STRING);
+//    }
 
-        if (buffer->properties().get(sac_col_name).dataType() == PropertyDataType::INT)
-            has_int_sacsic = true;
-        else
-            assert(buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
-    }
+//    bool has_sac = ds.hasSacColumn();
+//    bool has_int_sacsic = false;
+//    string sac_col_name;
+//    if (has_sac)
+//    {
+//        sac_col_name = meta.column(ds.sacColumn()).name();
+//        assert(buffer->properties().hasProperty(sac_col_name));
 
-    bool has_sic = ds.hasSicColumn();
-    string sic_col_name;
-    if (has_sic)
-    {
-        sic_col_name = meta.column(ds.sicColumn()).name();
-        assert(buffer->properties().hasProperty(sic_col_name));
+//        if (buffer->properties().get(sac_col_name).dataType() == PropertyDataType::INT)
+//            has_int_sacsic = true;
+//        else
+//            assert(buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
+//    }
 
-        if (has_int_sacsic)
-            assert(buffer->properties().get(sic_col_name).dataType() == PropertyDataType::INT);
-        else
-            assert(buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
-    }
+//    bool has_sic = ds.hasSicColumn();
+//    string sic_col_name;
+//    if (has_sic)
+//    {
+//        sic_col_name = meta.column(ds.sicColumn()).name();
+//        assert(buffer->properties().hasProperty(sic_col_name));
 
-    bool has_latitude = ds.hasLatitudeColumn();
-    string latitude_col_name;
-    if (has_latitude)
-    {
-        latitude_col_name = meta.column(ds.latitudeColumn()).name();
-        assert(buffer->properties().hasProperty(latitude_col_name) &&
-               buffer->properties().get(latitude_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//        if (has_int_sacsic)
+//            assert(buffer->properties().get(sic_col_name).dataType() == PropertyDataType::INT);
+//        else
+//            assert(buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
+//    }
 
-    bool has_longitude = ds.hasLongitudeColumn();
-    string longitude_col_name;
-    if (has_longitude)
-    {
-        longitude_col_name = meta.column(ds.longitudeColumn()).name();
-        assert(buffer->properties().hasProperty(longitude_col_name) &&
-               buffer->properties().get(longitude_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    bool has_latitude = ds.hasLatitudeColumn();
+//    string latitude_col_name;
+//    if (has_latitude)
+//    {
+//        latitude_col_name = meta.column(ds.latitudeColumn()).name();
+//        assert(buffer->properties().hasProperty(latitude_col_name) &&
+//               buffer->properties().get(latitude_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_altitude = ds.hasAltitudeColumn();
-    string altitude_col_name;
-    if (has_altitude)
-    {
-        altitude_col_name = meta.column(ds.altitudeColumn()).name();
-        assert(buffer->properties().hasProperty(altitude_col_name) &&
-               buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    bool has_longitude = ds.hasLongitudeColumn();
+//    string longitude_col_name;
+//    if (has_longitude)
+//    {
+//        longitude_col_name = meta.column(ds.longitudeColumn()).name();
+//        assert(buffer->properties().hasProperty(longitude_col_name) &&
+//               buffer->properties().get(longitude_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    // psr
-    bool has_primary_azimuth_stddev = ds.hasPrimaryAzimuthStdDevColumn();
-    string primary_azimuth_stddev_col_name;
-    if (has_primary_azimuth_stddev)
-    {
-        primary_azimuth_stddev_col_name = meta.column(ds.primaryAzimuthStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(primary_azimuth_stddev_col_name) &&
-               buffer->properties().get(primary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    bool has_altitude = ds.hasAltitudeColumn();
+//    string altitude_col_name;
+//    if (has_altitude)
+//    {
+//        altitude_col_name = meta.column(ds.altitudeColumn()).name();
+//        assert(buffer->properties().hasProperty(altitude_col_name) &&
+//               buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_primary_range_stddev = ds.hasPrimaryRangeStdDevColumn();
-    string primary_range_stddev_col_name;
-    if (has_primary_range_stddev)
-    {
-        primary_range_stddev_col_name = meta.column(ds.primaryRangeStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(primary_range_stddev_col_name) &&
-               buffer->properties().get(primary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    // psr
+//    bool has_primary_azimuth_stddev = ds.hasPrimaryAzimuthStdDevColumn();
+//    string primary_azimuth_stddev_col_name;
+//    if (has_primary_azimuth_stddev)
+//    {
+//        primary_azimuth_stddev_col_name = meta.column(ds.primaryAzimuthStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(primary_azimuth_stddev_col_name) &&
+//               buffer->properties().get(primary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_primary_ir_min = ds.hasPrimaryIRMinColumn();
-    string primary_ir_min_col_name;
-    if (has_primary_ir_min)
-    {
-        primary_ir_min_col_name = meta.column(ds.primaryIRMinColumn()).name();
-        assert(buffer->properties().hasProperty(primary_ir_min_col_name) &&
-               buffer->properties().get(primary_ir_min_col_name).dataType() == PropertyDataType::CHAR);
-    }
+//    bool has_primary_range_stddev = ds.hasPrimaryRangeStdDevColumn();
+//    string primary_range_stddev_col_name;
+//    if (has_primary_range_stddev)
+//    {
+//        primary_range_stddev_col_name = meta.column(ds.primaryRangeStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(primary_range_stddev_col_name) &&
+//               buffer->properties().get(primary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_primary_ir_max = ds.hasPrimaryIRMaxColumn();
-    string primary_ir_max_col_name;
-    if (has_primary_ir_max)
-    {
-        primary_ir_max_col_name = meta.column(ds.primaryIRMaxColumn()).name();
-        assert(buffer->properties().hasProperty(primary_ir_max_col_name) &&
-               buffer->properties().get(primary_ir_max_col_name).dataType() == PropertyDataType::INT);
-    }
+//    bool has_primary_ir_min = ds.hasPrimaryIRMinColumn();
+//    string primary_ir_min_col_name;
+//    if (has_primary_ir_min)
+//    {
+//        primary_ir_min_col_name = meta.column(ds.primaryIRMinColumn()).name();
+//        assert(buffer->properties().hasProperty(primary_ir_min_col_name) &&
+//               buffer->properties().get(primary_ir_min_col_name).dataType() == PropertyDataType::CHAR);
+//    }
 
-    // ssr
-    bool has_secondary_azimuth_stddev = ds.hasSecondaryAzimuthStdDevColumn();
-    string secondary_azimuth_stddev_col_name;
-    if (has_secondary_azimuth_stddev)
-    {
-        secondary_azimuth_stddev_col_name = meta.column(ds.secondaryAzimuthStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(secondary_azimuth_stddev_col_name) &&
-               buffer->properties().get(secondary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    bool has_primary_ir_max = ds.hasPrimaryIRMaxColumn();
+//    string primary_ir_max_col_name;
+//    if (has_primary_ir_max)
+//    {
+//        primary_ir_max_col_name = meta.column(ds.primaryIRMaxColumn()).name();
+//        assert(buffer->properties().hasProperty(primary_ir_max_col_name) &&
+//               buffer->properties().get(primary_ir_max_col_name).dataType() == PropertyDataType::INT);
+//    }
 
-    bool has_secondary_range_stddev = ds.hasSecondaryRangeStdDevColumn();
-    string secondary_range_stddev_col_name;
-    if (has_secondary_range_stddev)
-    {
-        secondary_range_stddev_col_name = meta.column(ds.secondaryRangeStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(secondary_range_stddev_col_name) &&
-               buffer->properties().get(secondary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    // ssr
+//    bool has_secondary_azimuth_stddev = ds.hasSecondaryAzimuthStdDevColumn();
+//    string secondary_azimuth_stddev_col_name;
+//    if (has_secondary_azimuth_stddev)
+//    {
+//        secondary_azimuth_stddev_col_name = meta.column(ds.secondaryAzimuthStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(secondary_azimuth_stddev_col_name) &&
+//               buffer->properties().get(secondary_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_secondary_ir_min = ds.hasSecondaryIRMinColumn();
-    string secondary_ir_min_col_name;
-    if (has_secondary_ir_min)
-    {
-        secondary_ir_min_col_name = meta.column(ds.secondaryIRMinColumn()).name();
-        assert(buffer->properties().hasProperty(secondary_ir_min_col_name) &&
-               buffer->properties().get(secondary_ir_min_col_name).dataType() == PropertyDataType::INT);
-    }
+//    bool has_secondary_range_stddev = ds.hasSecondaryRangeStdDevColumn();
+//    string secondary_range_stddev_col_name;
+//    if (has_secondary_range_stddev)
+//    {
+//        secondary_range_stddev_col_name = meta.column(ds.secondaryRangeStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(secondary_range_stddev_col_name) &&
+//               buffer->properties().get(secondary_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_secondary_ir_max = ds.hasSecondaryIRMaxColumn();
-    string secondary_ir_max_col_name;
-    if (has_secondary_ir_max)
-    {
-        secondary_ir_max_col_name = meta.column(ds.secondaryIRMaxColumn()).name();
-        assert(buffer->properties().hasProperty(secondary_ir_max_col_name) &&
-               buffer->properties().get(secondary_ir_max_col_name).dataType() == PropertyDataType::INT);
-    }
+//    bool has_secondary_ir_min = ds.hasSecondaryIRMinColumn();
+//    string secondary_ir_min_col_name;
+//    if (has_secondary_ir_min)
+//    {
+//        secondary_ir_min_col_name = meta.column(ds.secondaryIRMinColumn()).name();
+//        assert(buffer->properties().hasProperty(secondary_ir_min_col_name) &&
+//               buffer->properties().get(secondary_ir_min_col_name).dataType() == PropertyDataType::INT);
+//    }
 
-    // mode s
-    bool has_mode_s_azimuth_stddev = ds.hasModeSAzimuthStdDevColumn();
-    string mode_s_azimuth_stddev_col_name;
-    if (has_mode_s_azimuth_stddev)
-    {
-        mode_s_azimuth_stddev_col_name = meta.column(ds.modeSAzimuthStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(mode_s_azimuth_stddev_col_name) &&
-               buffer->properties().get(mode_s_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    bool has_secondary_ir_max = ds.hasSecondaryIRMaxColumn();
+//    string secondary_ir_max_col_name;
+//    if (has_secondary_ir_max)
+//    {
+//        secondary_ir_max_col_name = meta.column(ds.secondaryIRMaxColumn()).name();
+//        assert(buffer->properties().hasProperty(secondary_ir_max_col_name) &&
+//               buffer->properties().get(secondary_ir_max_col_name).dataType() == PropertyDataType::INT);
+//    }
 
-    bool has_mode_s_range_stddev = ds.hasModeSRangeStdDevColumn();
-    string mode_s_range_stddev_col_name;
-    if (has_mode_s_range_stddev)
-    {
-        mode_s_range_stddev_col_name = meta.column(ds.modeSRangeStdDevColumn()).name();
-        assert(buffer->properties().hasProperty(mode_s_range_stddev_col_name) &&
-               buffer->properties().get(mode_s_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
-    }
+//    // mode s
+//    bool has_mode_s_azimuth_stddev = ds.hasModeSAzimuthStdDevColumn();
+//    string mode_s_azimuth_stddev_col_name;
+//    if (has_mode_s_azimuth_stddev)
+//    {
+//        mode_s_azimuth_stddev_col_name = meta.column(ds.modeSAzimuthStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(mode_s_azimuth_stddev_col_name) &&
+//               buffer->properties().get(mode_s_azimuth_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_mode_s_ir_min = ds.hasModeSIRMinColumn();
-    string mode_s_ir_min_col_name;
-    if (has_mode_s_ir_min)
-    {
-        mode_s_ir_min_col_name = meta.column(ds.modeSIRMinColumn()).name();
-        assert(buffer->properties().hasProperty(mode_s_ir_min_col_name) &&
-               buffer->properties().get(mode_s_ir_min_col_name).dataType() == PropertyDataType::CHAR);
-    }
+//    bool has_mode_s_range_stddev = ds.hasModeSRangeStdDevColumn();
+//    string mode_s_range_stddev_col_name;
+//    if (has_mode_s_range_stddev)
+//    {
+//        mode_s_range_stddev_col_name = meta.column(ds.modeSRangeStdDevColumn()).name();
+//        assert(buffer->properties().hasProperty(mode_s_range_stddev_col_name) &&
+//               buffer->properties().get(mode_s_range_stddev_col_name).dataType() == PropertyDataType::DOUBLE);
+//    }
 
-    bool has_mode_s_ir_max = ds.hasModeSIRMaxColumn();
-    string mode_s_ir_max_col_name;
-    if (has_mode_s_ir_max)
-    {
-        mode_s_ir_max_col_name = meta.column(ds.modeSIRMaxColumn()).name();
-        assert(buffer->properties().hasProperty(mode_s_ir_max_col_name) &&
-               buffer->properties().get(mode_s_ir_max_col_name).dataType() == PropertyDataType::INT);
-    }
+//    bool has_mode_s_ir_min = ds.hasModeSIRMinColumn();
+//    string mode_s_ir_min_col_name;
+//    if (has_mode_s_ir_min)
+//    {
+//        mode_s_ir_min_col_name = meta.column(ds.modeSIRMinColumn()).name();
+//        assert(buffer->properties().hasProperty(mode_s_ir_min_col_name) &&
+//               buffer->properties().get(mode_s_ir_min_col_name).dataType() == PropertyDataType::CHAR);
+//    }
 
-    map<int, DBODataSource> sources;
+//    bool has_mode_s_ir_max = ds.hasModeSIRMaxColumn();
+//    string mode_s_ir_max_col_name;
+//    if (has_mode_s_ir_max)
+//    {
+//        mode_s_ir_max_col_name = meta.column(ds.modeSIRMaxColumn()).name();
+//        assert(buffer->properties().hasProperty(mode_s_ir_max_col_name) &&
+//               buffer->properties().get(mode_s_ir_max_col_name).dataType() == PropertyDataType::INT);
+//    }
 
-    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
-    {
-        if (buffer->get<int>(foreign_key_col.name()).isNull(cnt))
-        {
-            loginf << "DBInterface: getDataSources: object " << object.name()
-                   << " has NULL key, which will be omitted";
-            continue;
-        }
+//    map<int, DBODataSource> sources;
 
-        if (buffer->get<string>(name_col.name()).isNull(cnt))
-        {
-            loginf << "DBInterface: getDataSources: object " << object.name()
-                   << " has NULL name, which will be omitted";
-            continue;
-        }
+//    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
+//    {
+//        if (buffer->get<int>(foreign_key_col.name()).isNull(cnt))
+//        {
+//            loginf << "DBInterface: getDataSources: object " << object.name()
+//                   << " has NULL key, which will be omitted";
+//            continue;
+//        }
 
-        int key = buffer->get<int>(foreign_key_col.name()).get(cnt);
-        string name = buffer->get<string>(name_col.name()).get(cnt);
+//        if (buffer->get<string>(name_col.name()).isNull(cnt))
+//        {
+//            loginf << "DBInterface: getDataSources: object " << object.name()
+//                   << " has NULL name, which will be omitted";
+//            continue;
+//        }
 
-        assert(sources.count(key) == 0);
-        logdbg << "DBInterface: getDataSources: object " << object.name() << " key " << key
-               << " name " << name;
-        // sources.insert(make_pair(key, DBODataSource(key, name)));
+//        int key = buffer->get<int>(foreign_key_col.name()).get(cnt);
+//        string name = buffer->get<string>(name_col.name()).get(cnt);
 
-        sources.emplace(piecewise_construct,
-                        forward_as_tuple(key),                 // args for key
-                        forward_as_tuple(object, key, name));  // args for mapped value
+//        assert(sources.count(key) == 0);
+//        logdbg << "DBInterface: getDataSources: object " << object.name() << " key " << key
+//               << " name " << name;
+//        // sources.insert(make_pair(key, DBODataSource(key, name)));
 
-        if (has_short_name && !buffer->get<string>(short_name_col_name).isNull(cnt))
-            sources.at(key).shortName(buffer->get<string>(short_name_col_name).get(cnt));
+//        sources.emplace(piecewise_construct,
+//                        forward_as_tuple(key),                 // args for key
+//                        forward_as_tuple(object, key, name));  // args for mapped value
 
-        if (has_sac)
-        {
-            if (has_int_sacsic)
-            {
-                if (!buffer->get<int>(sac_col_name).isNull(cnt))
-                    sources.at(key).sac(buffer->get<int>(sac_col_name).get(cnt));
-            }
-            else
-            {
-                if (!buffer->get<char>(sac_col_name).isNull(cnt))
-                    sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
-            }
-        }
+//        if (has_short_name && !buffer->get<string>(short_name_col_name).isNull(cnt))
+//            sources.at(key).shortName(buffer->get<string>(short_name_col_name).get(cnt));
 
-        if (has_sic)
-        {
-            if (has_int_sacsic)
-            {
-                if (!buffer->get<int>(sic_col_name).isNull(cnt))
-                    sources.at(key).sic(buffer->get<int>(sic_col_name).get(cnt));
-            }
-            else
-            {
-                if (!buffer->get<char>(sic_col_name).isNull(cnt))
-                    sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
-            }
-        }
+//        if (has_sac)
+//        {
+//            if (has_int_sacsic)
+//            {
+//                if (!buffer->get<int>(sac_col_name).isNull(cnt))
+//                    sources.at(key).sac(buffer->get<int>(sac_col_name).get(cnt));
+//            }
+//            else
+//            {
+//                if (!buffer->get<char>(sac_col_name).isNull(cnt))
+//                    sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
+//            }
+//        }
 
-        if (has_latitude && !buffer->get<double>(latitude_col_name).isNull(cnt))
-            sources.at(key).latitude(buffer->get<double>(latitude_col_name).get(cnt));
+//        if (has_sic)
+//        {
+//            if (has_int_sacsic)
+//            {
+//                if (!buffer->get<int>(sic_col_name).isNull(cnt))
+//                    sources.at(key).sic(buffer->get<int>(sic_col_name).get(cnt));
+//            }
+//            else
+//            {
+//                if (!buffer->get<char>(sic_col_name).isNull(cnt))
+//                    sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
+//            }
+//        }
 
-        if (has_longitude && !buffer->get<double>(longitude_col_name).isNull(cnt))
-            sources.at(key).longitude(buffer->get<double>(longitude_col_name).get(cnt));
+//        if (has_latitude && !buffer->get<double>(latitude_col_name).isNull(cnt))
+//            sources.at(key).latitude(buffer->get<double>(latitude_col_name).get(cnt));
 
-        if (has_altitude && !buffer->get<double>(altitude_col_name).isNull(cnt))
-            sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
+//        if (has_longitude && !buffer->get<double>(longitude_col_name).isNull(cnt))
+//            sources.at(key).longitude(buffer->get<double>(longitude_col_name).get(cnt));
 
-        // psr
-        if (has_primary_azimuth_stddev && !buffer->get<double>(primary_azimuth_stddev_col_name).isNull(cnt))
-            sources.at(key).primaryAzimuthStdDev(buffer->get<double>(primary_azimuth_stddev_col_name).get(cnt));
+//        if (has_altitude && !buffer->get<double>(altitude_col_name).isNull(cnt))
+//            sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
 
-        if (has_primary_range_stddev && !buffer->get<double>(primary_range_stddev_col_name).isNull(cnt))
-            sources.at(key).primaryRangeStdDev(buffer->get<double>(primary_range_stddev_col_name).get(cnt));
+//        // psr
+//        if (has_primary_azimuth_stddev && !buffer->get<double>(primary_azimuth_stddev_col_name).isNull(cnt))
+//            sources.at(key).primaryAzimuthStdDev(buffer->get<double>(primary_azimuth_stddev_col_name).get(cnt));
 
-        if (has_primary_ir_min && !buffer->get<char>(primary_ir_min_col_name).isNull(cnt))
-            sources.at(key).primaryRangeMin(buffer->get<char>(primary_ir_min_col_name).get(cnt));
+//        if (has_primary_range_stddev && !buffer->get<double>(primary_range_stddev_col_name).isNull(cnt))
+//            sources.at(key).primaryRangeStdDev(buffer->get<double>(primary_range_stddev_col_name).get(cnt));
 
-        if (has_primary_ir_max && !buffer->get<int>(primary_ir_max_col_name).isNull(cnt))
-            sources.at(key).primaryRangeMax(buffer->get<int>(primary_ir_max_col_name).get(cnt));
+//        if (has_primary_ir_min && !buffer->get<char>(primary_ir_min_col_name).isNull(cnt))
+//            sources.at(key).primaryRangeMin(buffer->get<char>(primary_ir_min_col_name).get(cnt));
 
-        // ssr
-        if (has_secondary_azimuth_stddev && !buffer->get<double>(secondary_azimuth_stddev_col_name).isNull(cnt))
-            sources.at(key).secondaryAzimuthStdDev(buffer->get<double>(secondary_azimuth_stddev_col_name).get(cnt));
+//        if (has_primary_ir_max && !buffer->get<int>(primary_ir_max_col_name).isNull(cnt))
+//            sources.at(key).primaryRangeMax(buffer->get<int>(primary_ir_max_col_name).get(cnt));
 
-        if (has_secondary_range_stddev && !buffer->get<double>(secondary_range_stddev_col_name).isNull(cnt))
-            sources.at(key).secondaryRangeStdDev(buffer->get<double>(secondary_range_stddev_col_name).get(cnt));
+//        // ssr
+//        if (has_secondary_azimuth_stddev && !buffer->get<double>(secondary_azimuth_stddev_col_name).isNull(cnt))
+//            sources.at(key).secondaryAzimuthStdDev(buffer->get<double>(secondary_azimuth_stddev_col_name).get(cnt));
 
-        if (has_secondary_ir_min && !buffer->get<int>(secondary_ir_min_col_name).isNull(cnt))
-            sources.at(key).secondaryRangeMin(buffer->get<int>(secondary_ir_min_col_name).get(cnt));
+//        if (has_secondary_range_stddev && !buffer->get<double>(secondary_range_stddev_col_name).isNull(cnt))
+//            sources.at(key).secondaryRangeStdDev(buffer->get<double>(secondary_range_stddev_col_name).get(cnt));
 
-        if (has_secondary_ir_max && !buffer->get<int>(secondary_ir_max_col_name).isNull(cnt))
-            sources.at(key).secondaryRangeMax(buffer->get<int>(secondary_ir_max_col_name).get(cnt));
+//        if (has_secondary_ir_min && !buffer->get<int>(secondary_ir_min_col_name).isNull(cnt))
+//            sources.at(key).secondaryRangeMin(buffer->get<int>(secondary_ir_min_col_name).get(cnt));
 
-        // mode s
-        if (has_mode_s_azimuth_stddev && !buffer->get<double>(mode_s_azimuth_stddev_col_name).isNull(cnt))
-            sources.at(key).modeSAzimuthStdDev(buffer->get<double>(mode_s_azimuth_stddev_col_name).get(cnt));
+//        if (has_secondary_ir_max && !buffer->get<int>(secondary_ir_max_col_name).isNull(cnt))
+//            sources.at(key).secondaryRangeMax(buffer->get<int>(secondary_ir_max_col_name).get(cnt));
 
-        if (has_mode_s_range_stddev && !buffer->get<double>(mode_s_range_stddev_col_name).isNull(cnt))
-            sources.at(key).modeSRangeStdDev(buffer->get<double>(mode_s_range_stddev_col_name).get(cnt));
+//        // mode s
+//        if (has_mode_s_azimuth_stddev && !buffer->get<double>(mode_s_azimuth_stddev_col_name).isNull(cnt))
+//            sources.at(key).modeSAzimuthStdDev(buffer->get<double>(mode_s_azimuth_stddev_col_name).get(cnt));
 
-        if (has_mode_s_ir_min && !buffer->get<char>(mode_s_ir_min_col_name).isNull(cnt))
-            sources.at(key).modeSRangeMin(buffer->get<char>(mode_s_ir_min_col_name).get(cnt));
+//        if (has_mode_s_range_stddev && !buffer->get<double>(mode_s_range_stddev_col_name).isNull(cnt))
+//            sources.at(key).modeSRangeStdDev(buffer->get<double>(mode_s_range_stddev_col_name).get(cnt));
 
-        if (has_mode_s_ir_max && !buffer->get<int>(mode_s_ir_max_col_name).isNull(cnt))
-            sources.at(key).modeSRangeMax(buffer->get<int>(mode_s_ir_max_col_name).get(cnt));
+//        if (has_mode_s_ir_min && !buffer->get<char>(mode_s_ir_min_col_name).isNull(cnt))
+//            sources.at(key).modeSRangeMin(buffer->get<char>(mode_s_ir_min_col_name).get(cnt));
 
-        // removed json content
+//        if (has_mode_s_ir_max && !buffer->get<int>(mode_s_ir_max_col_name).isNull(cnt))
+//            sources.at(key).modeSRangeMax(buffer->get<int>(mode_s_ir_max_col_name).get(cnt));
 
-        //sources.at(key).dbContent(buffer->asJSON());
+//        // removed json content
 
-        //sources.at(key).print();
-    }
+//        //sources.at(key).dbContent(buffer->asJSON());
 
-    return sources;
+//        //sources.at(key).print();
+//    }
+
+//    return sources;
 }
 
 size_t DBInterface::count(const string& table)
@@ -1198,7 +1205,7 @@ pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
 
     DBCommand command;
     command.set(
-                sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
+                sql_generator_.getSelectMinMaxStatement(var.dbColumnName(), var.dboName()));
     command.list(list);
 
     logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
@@ -1226,35 +1233,6 @@ pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
 
     string min = buffer->get<string>("min").get(0);
     string max = buffer->get<string>("max").get(0);
-
-    logdbg << "DBInterface: getMinMaxString: minstr '" << min << " maxstr " << max;
-
-    const DBTableColumn& column = var.currentDBColumn();
-    if (column.unit() != var.unitConst())  // do unit conversion stuff
-    {
-        if (!UnitManager::instance().hasDimension(var.dimensionConst()))
-        {
-            logerr << "DBInterface: getMinMaxString: unknown dimension '" << var.dimensionConst()
-                   << "'";
-            throw runtime_error("DBInterface: getMinMaxString: unknown dimension '" +
-                                var.dimensionConst() + "'");
-        }
-
-        const Dimension& dimension = UnitManager::instance().dimension(var.dimensionConst());
-
-        if (!dimension.hasUnit(column.unit()))
-            logerr << "DBInterface: getMinMaxString: dimension '" << var.dimensionConst()
-                   << "' has unknown unit '" << column.unit() << "'";
-
-        if (!dimension.hasUnit(var.unitConst()))
-            logerr << "DBInterface: getMinMaxString: dimension '" << var.dimensionConst()
-                   << "' has unknown unit '" << var.unitConst() << "'";
-
-        double factor = dimension.getFactor(column.unit(), var.unitConst());
-
-        min = var.multiplyString(min, factor);
-        max = var.multiplyString(max, factor);
-    }
 
     logdbg << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max "
            << max;
@@ -1469,74 +1447,74 @@ set<int> DBInterface::getActiveDataSources(DBObject& object)
     return ret;
 }
 
-void DBInterface::insertBuffer(MetaDBTable& meta_table, shared_ptr<Buffer> buffer)
-{
-    logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size "
-           << buffer->size();
-    assert (buffer->size());
+//void DBInterface::insertBuffer(MetaDBTable& meta_table, shared_ptr<Buffer> buffer)
+//{
+//    logdbg << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size "
+//           << buffer->size();
+//    assert (buffer->size());
 
-    logdbg << "DBInterface: insertBuffer: main table " << meta_table.mainTable().name();
-    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
-    assert(partial_buffer->size());
-    insertBuffer(meta_table.mainTable(), partial_buffer);
+//    logdbg << "DBInterface: insertBuffer: main table " << meta_table.mainTable().name();
+//    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+//    assert(partial_buffer->size());
+//    insertBuffer(meta_table.mainTable(), partial_buffer);
 
-    for (auto& sub_it : meta_table.subTables())
-    {
-        logdbg << "DBInterface: insertBuffer: sub table " << sub_it.second.name();
+//    for (auto& sub_it : meta_table.subTables())
+//    {
+//        logdbg << "DBInterface: insertBuffer: sub table " << sub_it.second.name();
 
-        partial_buffer = getPartialBuffer(sub_it.second, buffer);
-        assert(partial_buffer->size());
-        insertBuffer(sub_it.second, partial_buffer);
-    }
-}
+//        partial_buffer = getPartialBuffer(sub_it.second, buffer);
+//        assert(partial_buffer->size());
+//        insertBuffer(sub_it.second, partial_buffer);
+//    }
+//}
 
-void DBInterface::insertBuffer(DBTable& table, shared_ptr<Buffer> buffer)
-{
-    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size "
-           << buffer->size();
+//void DBInterface::insertBuffer(DBTable& table, shared_ptr<Buffer> buffer)
+//{
+//    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size "
+//           << buffer->size();
 
-    assert(current_connection_);
-    assert(buffer);
+//    assert(current_connection_);
+//    assert(buffer);
 
-    const PropertyList& properties = buffer->properties();
+//    const PropertyList& properties = buffer->properties();
 
-    for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
-    {
-        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
-               << "'";
+//    for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
+//    {
+//        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
+//               << "'";
 
-        if (!table.hasColumn(properties.at(cnt).name()))
-            throw runtime_error("DBInterface: insertBuffer: column '" +
-                                properties.at(cnt).name() + "' does not exist in table " +
-                                table.name());
-    }
+//        if (!table.hasColumn(properties.at(cnt).name()))
+//            throw runtime_error("DBInterface: insertBuffer: column '" +
+//                                properties.at(cnt).name() + "' does not exist in table " +
+//                                table.name());
+//    }
 
-    if (!table.existsInDB() &&
-            !existsTable(table.name()))  // check for both since information might not be updated yet
-        createTable(table);
+//    if (!table.existsInDB() &&
+//            !existsTable(table.name()))  // check for both since information might not be updated yet
+//        createTable(table);
 
-    assert(table.existsInDB());
+//    assert(table.existsInDB());
 
-    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
+//    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
 
-    QMutexLocker locker(&connection_mutex_);
+//    QMutexLocker locker(&connection_mutex_);
 
-    logdbg << "DBInterface: insertBuffer: preparing bind statement";
-    current_connection_->prepareBindStatement(bind_statement);
-    current_connection_->beginBindTransaction();
+//    logdbg << "DBInterface: insertBuffer: preparing bind statement";
+//    current_connection_->prepareBindStatement(bind_statement);
+//    current_connection_->beginBindTransaction();
 
-    logdbg << "DBInterface: insertBuffer: starting inserts";
-    size_t size = buffer->size();
-    for (unsigned int cnt = 0; cnt < size; ++cnt)
-    {
-        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
-    }
+//    logdbg << "DBInterface: insertBuffer: starting inserts";
+//    size_t size = buffer->size();
+//    for (unsigned int cnt = 0; cnt < size; ++cnt)
+//    {
+//        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+//    }
 
-    logdbg << "DBInterface: insertBuffer: ending bind transactions";
-    current_connection_->endBindTransaction();
-    logdbg << "DBInterface: insertBuffer: finalizing bind statement";
-    current_connection_->finalizeBindStatement();
-}
+//    logdbg << "DBInterface: insertBuffer: ending bind transactions";
+//    current_connection_->endBindTransaction();
+//    logdbg << "DBInterface: insertBuffer: finalizing bind statement";
+//    current_connection_->finalizeBindStatement();
+//}
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
 {
@@ -1589,138 +1567,130 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
     current_connection_->finalizeBindStatement();
 }
 
-shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
-                                                 shared_ptr<Buffer> buffer)
-{
-    logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
-           << buffer->size();
-    assert (buffer->size());
+//shared_ptr<Buffer> DBInterface::getPartialBuffer(DBTable& table,
+//                                                 shared_ptr<Buffer> buffer)
+//{
+//    logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size "
+//           << buffer->size();
+//    assert (buffer->size());
 
-    PropertyList org_properties = buffer->properties();
-    PropertyList partial_properties;
+//    PropertyList org_properties = buffer->properties();
+//    PropertyList partial_properties;
 
-    for (unsigned int cnt = 0; cnt < org_properties.size(); ++cnt)
-    {
-        Property org_prop = org_properties.at(cnt);
+//    for (unsigned int cnt = 0; cnt < org_properties.size(); ++cnt)
+//    {
+//        Property org_prop = org_properties.at(cnt);
 
-        if (table.hasColumn(org_prop.name()))
-        {
-            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property "
-                   << org_prop.name();
-            partial_properties.addProperty(org_prop);
-        }
-        else
-            logdbg << "DBInterface: getPartialBuffer: table " << table.name()
-                   << " skipping property " << org_prop.name();
-    }
+//        if (table.hasColumn(org_prop.name()))
+//        {
+//            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property "
+//                   << org_prop.name();
+//            partial_properties.addProperty(org_prop);
+//        }
+//        else
+//            logdbg << "DBInterface: getPartialBuffer: table " << table.name()
+//                   << " skipping property " << org_prop.name();
+//    }
 
-    shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
+//    shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
 
-    logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
-    assert (tmp_buffer->size());
+//    logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
+//    assert (tmp_buffer->size());
 
-    return tmp_buffer;
-}
+//    return tmp_buffer;
+//}
 
-bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
-                                    shared_ptr<Buffer> buffer)
-{
-    if (!object.existsInDB())
-        return false;
+//bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
+//                                    shared_ptr<Buffer> buffer)
+//{
+//    if (!object.existsInDB())
+//        return false;
 
-    if (!key_var.existsInDB())
-        return false;
+//    if (!key_var.existsInDB())
+//        return false;
 
-    const DBTable& table = object.currentMetaTable().mainTable();
+//    const DBTable& table = object.currentMetaTable().mainTable();
 
-    if (!table.existsInDB())  // might be redundant
-        return false;
+//    if (!table.existsInDB())  // might be redundant
+//        return false;
 
-    const PropertyList& properties = buffer->properties();
+//    const PropertyList& properties = buffer->properties();
 
-    for (auto& var_it : list.getSet())
-    {
-        if (!properties.hasProperty(var_it->name()))
-            return false;
+//    for (auto& var_it : list.getSet())
+//    {
+//        if (!properties.hasProperty(var_it->name()))
+//            return false;
 
-        if (!var_it->hasCurrentDBColumn())
-            return false;
+//        if (!var_it->hasCurrentDBColumn())
+//            return false;
 
-        const DBTableColumn& col = var_it->currentDBColumn();
+//        const DBTableColumn& col = var_it->currentDBColumn();
 
-        if (!col.existsInDB())
-            return false;
-    }
+//        if (!col.existsInDB())
+//            return false;
+//    }
 
-    //    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
-    //    {
-    //        if (!table.hasColumn(properties.at(cnt).name()))
-    //            return false;
+//    return true;
+//}
 
-    //        if (!table.column(properties.at(cnt).name()).existsInDB())
-    //            return false;
-    //    }
+//void DBInterface::updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
+//                               shared_ptr<Buffer> buffer, int from_index, int to_index)
+//{
+//    logdbg << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size "
+//           << buffer->size() << " key " << key_col.identifier();
 
-    return true;
-}
+//    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+//    assert(partial_buffer->size());
+//    updateBuffer(meta_table.mainTable(), key_col, partial_buffer, from_index, to_index);
 
-void DBInterface::updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
+//    for (auto& sub_it : meta_table.subTables())
+//    {
+//        if (sub_it.second.hasColumn(key_col.name()))
+//        {
+//            const DBTableColumn& sub_key_col = sub_it.second.column(key_col.name());
+//            logdbg << "DBInterface: updateBuffer: got sub table " << sub_it.second.name()
+//                   << " key col " << sub_key_col.identifier();
+
+//            partial_buffer = getPartialBuffer(sub_it.second, buffer);
+//            if (partial_buffer->size())
+//            {
+//                logdbg << "DBInterface: updateBuffer: doing update for sub table "
+//                       << sub_it.second.name();
+//                updateBuffer(sub_it.second, sub_key_col, partial_buffer, from_index, to_index);
+//            }
+//            else
+//                logdbg << "DBInterface: updateBuffer: empty buffer for sub table "
+//                       << sub_it.second.name();
+//        }
+//        else
+//            logdbg << "DBInterface: updateBuffer: key not found in sub table "
+//                   << sub_it.second.name();
+//    }
+//}
+
+void DBInterface::updateBuffer(const std::string& table_name, const std::string& key_col,
                                shared_ptr<Buffer> buffer, int from_index, int to_index)
 {
-    logdbg << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size "
-           << buffer->size() << " key " << key_col.identifier();
-
-    shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
-    assert(partial_buffer->size());
-    updateBuffer(meta_table.mainTable(), key_col, partial_buffer, from_index, to_index);
-
-    for (auto& sub_it : meta_table.subTables())
-    {
-        if (sub_it.second.hasColumn(key_col.name()))
-        {
-            const DBTableColumn& sub_key_col = sub_it.second.column(key_col.name());
-            logdbg << "DBInterface: updateBuffer: got sub table " << sub_it.second.name()
-                   << " key col " << sub_key_col.identifier();
-
-            partial_buffer = getPartialBuffer(sub_it.second, buffer);
-            if (partial_buffer->size())
-            {
-                logdbg << "DBInterface: updateBuffer: doing update for sub table "
-                       << sub_it.second.name();
-                updateBuffer(sub_it.second, sub_key_col, partial_buffer, from_index, to_index);
-            }
-            else
-                logdbg << "DBInterface: updateBuffer: empty buffer for sub table "
-                       << sub_it.second.name();
-        }
-        else
-            logdbg << "DBInterface: updateBuffer: key not found in sub table "
-                   << sub_it.second.name();
-    }
-}
-
-void DBInterface::updateBuffer(DBTable& table, const DBTableColumn& key_col,
-                               shared_ptr<Buffer> buffer, int from_index, int to_index)
-{
-    logdbg << "DBInterface: updateBuffer: table " << table.name() << " buffer size "
-           << buffer->size() << " key " << key_col.identifier();
+    logdbg << "DBInterface: updateBuffer: table " << table_name << " buffer size "
+           << buffer->size() << " key " << key_col;
 
     // assert (checkUpdateBuffer(object, key_var, buffer));
     assert(current_connection_);
     assert(buffer);
 
-    const PropertyList& properties = buffer->properties();
+    // TODO check
+//    const PropertyList& properties = buffer->properties();
 
-    for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
-    {
-        if (!table.hasColumn(properties.at(cnt).name()))
-            throw runtime_error("DBInterface: updateBuffer: column '" +
-                                properties.at(cnt).name() + "' does not exist in table " +
-                                table.name());
-    }
+//    for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
+//    {
+//        if (!table.hasColumn(properties.at(cnt).name()))
+//            throw runtime_error("DBInterface: updateBuffer: column '" +
+//                                properties.at(cnt).name() + "' does not exist in table " +
+//                                table.name());
+//    }
 
     string bind_statement =
-            sql_generator_.createDBUpdateStringBind(buffer, key_col, table.name());
+            sql_generator_.createDBUpdateStringBind(buffer, key_col, table_name);
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -1768,7 +1738,7 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
     connection_mutex_.lock();
 
     shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
-                dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,
+                dbobject, read_list, custom_filter_clause, filtered_variables, use_order,
                 order_variable, use_order_ascending, limit, true);
 
     logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
@@ -1846,16 +1816,18 @@ void DBInterface::clearTableContent(const string& table_name)
     current_connection_->executeSQL("DELETE FROM " + table_name + ";");
 }
 
-shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const DBTable& table)
+shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const std::string& table_name)
 {
-    QMutexLocker locker(&connection_mutex_);
-    logdbg << "DBInterface: queryMinMaxForTable: getting command";
-    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
+    assert (false); // TODO
 
-    // loginf  << "DBInterface: queryMinMaxForTable: executing command '" <<
-    // command->getCommandString() << "'";
-    shared_ptr<DBResult> result = current_connection_->execute(*command);
-    return result;
+    //    QMutexLocker locker(&connection_mutex_);
+//    logdbg << "DBInterface: queryMinMaxForTable: getting command";
+//    shared_ptr<DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement(table);
+
+//    // loginf  << "DBInterface: queryMinMaxForTable: executing command '" <<
+//    // command->getCommandString() << "'";
+//    shared_ptr<DBResult> result = current_connection_->execute(*command);
+//    return result;
 }
 
 void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,

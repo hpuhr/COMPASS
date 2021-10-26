@@ -19,7 +19,6 @@
 
 #include "compass.h"
 #include "dbinterface.h"
-#include "dbschemamanager.h"
 #include "managedbobjectstaskwidget.h"
 #include "taskmanager.h"
 
@@ -60,5 +59,5 @@ bool ManageDBObjectsTask::checkPrerequisites()
     if (!COMPASS::instance().interface().ready())
         return false;
 
-    return COMPASS::instance().schemaManager().isLocked();
+    return true;
 }

@@ -27,7 +27,6 @@ class QPushButton;
 class QTextEdit;
 
 class DBOVariable;
-class DBTableColumnComboBox;
 class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class UnitSelectionWidget;
@@ -66,7 +65,6 @@ class DBOVariableWidget : public QWidget
     /// @brief DBObject to be managed
     DBOVariable* variable_{nullptr};
     QGridLayout* properties_layout_{nullptr};
-    int schema_boxes_row_{0};
 
     bool locked_{false};
 
@@ -77,10 +75,6 @@ class DBOVariableWidget : public QWidget
     DBOVariableDataTypeComboBox* type_combo_{nullptr};
     StringRepresentationComboBox* representation_box_{nullptr};
     UnitSelectionWidget* unit_sel_{nullptr};
-
-    std::map<std::string, DBTableColumnComboBox*> schema_boxes_;
-
-    void createSchemaBoxes();
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

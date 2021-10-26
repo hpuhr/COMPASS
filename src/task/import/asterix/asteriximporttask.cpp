@@ -27,8 +27,6 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
@@ -39,7 +37,6 @@
 #include "system.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
-#include "metadbtable.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -1354,7 +1351,7 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
         if (num_radar_inserted_)
         {
             bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
-                        COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                        COMPASS::instance().objectManager().object("Radar").dbTableName(),
                         {"pos_lat_deg","pos_long_deg"});
 
             loginf << "ASTERIXImportTask: insertDoneSlot: radar has null positions " << has_null_positions;

@@ -28,7 +28,6 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "dbovariableset.h"
-#include "dbtablecolumn.h"
 #include "postprocesstask.h"
 #include "managedatasourcestask.h"
 
@@ -215,9 +214,6 @@ bool GPSTrailImportTask::checkPrerequisites()
         done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!COMPASS::instance().objectManager().existsObject("RefTraj"))
-        return false;
-
-    if (!COMPASS::instance().objectManager().object("RefTraj").hasCurrentMetaTable())
         return false;
 
     return true;
@@ -517,7 +513,6 @@ void GPSTrailImportTask::run()
     assert (obj_man.existsObject("RefTraj"));
 
     DBObject& reftraj_obj = obj_man.object("RefTraj");
-    assert (reftraj_obj.hasCurrentMetaTable());
 
     assert (reftraj_obj.hasVariable("sac"));
     assert (reftraj_obj.hasVariable("sic"));

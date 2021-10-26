@@ -29,7 +29,6 @@
 #include "dbodatasource.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
-#include "dbtablecolumn.h"
 #include "logger.h"
 #include "projection.h"
 #include "projectionmanager.h"

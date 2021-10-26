@@ -21,12 +21,7 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
 #include "metadbovariable.h"
-#include "metadbtable.h"
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -192,9 +187,9 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
         return "";
     }
 
-    const DBTableColumn& column = variable->currentDBColumn();
-    const MetaDBTable& meta_table = variable->currentMetaTable();
-    std::string table_db_name = meta_table.tableFor(column.identifier()).name();
+    //const DBTableColumn& column = variable->currentDBColumn();
+    std::string db_column_name = variable->dbColumnName();
+    std::string db_table_name = variable->dbTableName();
 
     if (!first)
     {
@@ -216,18 +211,18 @@ std::string DBFilterCondition::getConditionString(const std::string& dbo_name, b
 
         if (val_str.size())
         {
-            ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+            ss << variable_prefix << db_table_name << "." << db_column_name << variable_suffix;
             ss << " " << operator_ << val_str << " OR ";
         }
 
-        ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+        ss << variable_prefix << db_table_name << "." << db_column_name << variable_suffix;
         ss << " IS NULL";
 
         ss << ")";
     }
     else
     {
-        ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix;
+        ss << variable_prefix << db_table_name << "." << db_column_name << variable_suffix;
         ss << " " << operator_ << val_str;
     }
 
@@ -415,115 +410,117 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::string& untransformed_value,
                                                                     DBOVariable* variable)
 {
-    assert(variable);
-    const DBTableColumn& column = variable->currentDBColumn();
-    assert(column.existsInDB());
+    assert (false); // TODO
 
-    std::vector<std::string> value_strings;
-    std::vector<std::string> transformed_value_strings;
+//    assert(variable);
+//    const DBTableColumn& column = variable->currentDBColumn();
+//    assert(column.existsInDB());
 
-    if (operator_ == "IN")
-    {
-        value_strings = String::split(untransformed_value, ',');
-    }
-    else
-    {
-        value_strings.push_back(untransformed_value);
-    }
+//    std::vector<std::string> value_strings;
+//    std::vector<std::string> transformed_value_strings;
 
-    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
-           << boost::algorithm::join(value_strings, ",") << "'";
+//    if (operator_ == "IN")
+//    {
+//        value_strings = String::split(untransformed_value, ',');
+//    }
+//    else
+//    {
+//        value_strings.push_back(untransformed_value);
+//    }
 
-    bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
+//    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
+//           << boost::algorithm::join(value_strings, ",") << "'";
 
-    if (null_set) // remove null value
-        value_strings.erase(find(value_strings.begin(), value_strings.end(), "NULL"));
+//    bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
 
-    for (auto value_it : value_strings)
-    {
-        std::string value_str = value_it;
+//    if (null_set) // remove null value
+//        value_strings.erase(find(value_strings.begin(), value_strings.end(), "NULL"));
 
-        if (variable->representation() != DBOVariable::Representation::STANDARD)
-            value_str =
-                    variable->getValueStringFromRepresentation(value_str);  // fix representation
+//    for (auto value_it : value_strings)
+//    {
+//        std::string value_str = value_it;
 
-        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
+//        if (variable->representation() != DBOVariable::Representation::STANDARD)
+//            value_str =
+//                    variable->getValueStringFromRepresentation(value_str);  // fix representation
 
-        if (column.unit() != variable->unit())  // do unit conversion stuff
-        {
-            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-                   << " of same dimension has different units " << column.unit() << " "
-                   << variable->unit();
+//        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
 
-            if (!UnitManager::instance().hasDimension(variable->dimension()))
-            {
-                logerr << "DBFilterCondition: getTransformedValue: unknown dimension '"
-                       << variable->dimension() << "'";
-                throw std::runtime_error(
-                            "DBFilterCondition: getTransformedValue: unknown dimension '" +
-                            variable->dimension() + "'");
-            }
+//        if (column.unit() != variable->unit())  // do unit conversion stuff
+//        {
+//            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+//                   << " of same dimension has different units " << column.unit() << " "
+//                   << variable->unit();
 
-            const Dimension& dimension = UnitManager::instance().dimension(variable->dimension());
+//            if (!UnitManager::instance().hasDimension(variable->dimension()))
+//            {
+//                logerr << "DBFilterCondition: getTransformedValue: unknown dimension '"
+//                       << variable->dimension() << "'";
+//                throw std::runtime_error(
+//                            "DBFilterCondition: getTransformedValue: unknown dimension '" +
+//                            variable->dimension() + "'");
+//            }
 
-            if (!dimension.hasUnit(column.unit()))
-            {
-                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-                       << " has unknown column unit '" << column.unit() << "' in dimension "
-                       << variable->dimension();
-                //  no transformation possible
-            }
-            else if (!dimension.hasUnit(variable->unit()))
-            {
-                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
-                       << " has unknown variable unit '" << variable->unit() << "' in dimension "
-                       << variable->dimension();
-                //  no transformation possible
-            }
-            else
-            {
-                double factor = dimension.getFactor(column.unit(), variable->unit());
-                logdbg << "DBFilterCondition: getTransformedValue: correct unit transformation "
-                          "with factor "
-                       << factor;
+//            const Dimension& dimension = UnitManager::instance().dimension(variable->dimension());
 
-                value_str = variable->multiplyString(value_str, 1.0 / factor);
-            }
-        }
+//            if (!dimension.hasUnit(column.unit()))
+//            {
+//                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+//                       << " has unknown column unit '" << column.unit() << "' in dimension "
+//                       << variable->dimension();
+//                //  no transformation possible
+//            }
+//            else if (!dimension.hasUnit(variable->unit()))
+//            {
+//                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+//                       << " has unknown variable unit '" << variable->unit() << "' in dimension "
+//                       << variable->dimension();
+//                //  no transformation possible
+//            }
+//            else
+//            {
+//                double factor = dimension.getFactor(column.unit(), variable->unit());
+//                logdbg << "DBFilterCondition: getTransformedValue: correct unit transformation "
+//                          "with factor "
+//                       << factor;
 
-        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
+//                value_str = variable->multiplyString(value_str, 1.0 / factor);
+//            }
+//        }
 
-        if (column.dataFormat() == "")
-            ;
-        else if (column.dataFormat() == "hexadecimal")
-            value_str = String::hexStringFromInt(std::stoi(value_str));
-        else if (column.dataFormat() == "octal")
-            value_str = String::octStringFromInt(std::stoi(value_str));
-        else
-            logwrn << "DBFilterCondition: getTransformedValue: variable '" << variable->name()
-                   << "' unknown format '" << column.dataFormat() << "'";
+//        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
 
-        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string "
-               << value_str;
+//        if (column.dataFormat() == "")
+//            ;
+//        else if (column.dataFormat() == "hexadecimal")
+//            value_str = String::hexStringFromInt(std::stoi(value_str));
+//        else if (column.dataFormat() == "octal")
+//            value_str = String::octStringFromInt(std::stoi(value_str));
+//        else
+//            logwrn << "DBFilterCondition: getTransformedValue: variable '" << variable->name()
+//                   << "' unknown format '" << column.dataFormat() << "'";
 
-        if (variable->dataType() == PropertyDataType::STRING)
-            transformed_value_strings.push_back("'" + value_str + "'");
-        else
-            transformed_value_strings.push_back(value_str);
-    }
+//        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string "
+//               << value_str;
 
-    string value_str;
+//        if (variable->dataType() == PropertyDataType::STRING)
+//            transformed_value_strings.push_back("'" + value_str + "'");
+//        else
+//            transformed_value_strings.push_back(value_str);
+//    }
 
-    if (transformed_value_strings.size()) // can be empty if only NULL
-    {
-        if (operator_ != "IN")
-        {
-            assert(transformed_value_strings.size() == 1);
-            value_str = transformed_value_strings.at(0);
-        }
-        else
-            value_str = "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
-    }
+//    string value_str;
 
-    return {value_str, null_set};
+//    if (transformed_value_strings.size()) // can be empty if only NULL
+//    {
+//        if (operator_ != "IN")
+//        {
+//            assert(transformed_value_strings.size() == 1);
+//            value_str = transformed_value_strings.at(0);
+//        }
+//        else
+//            value_str = "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
+//    }
+
+//    return {value_str, null_set};
 }

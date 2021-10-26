@@ -22,9 +22,6 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
-#include "metadbtable.h"
 #include "stringconv.h"
 
 using namespace Utils::String;
@@ -57,7 +54,8 @@ void InsertBufferDBJob::run()
            << buffer_->size();
     assert(buffer_->size());
 
-    db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
+    assert (false); // TODO
+    //db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;

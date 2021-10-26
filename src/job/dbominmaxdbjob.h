@@ -22,7 +22,6 @@
 
 class DBObject;
 class DBInterface;
-class DBTable;
 
 /**
  * @brief Post-processing Job
@@ -45,7 +44,7 @@ class DBOMinMaxDBJob : public Job
     /// @brief Creates minimum/maximum table and values
     // void createMinMaxValuesSpecial ();
     void createMinMaxValuesNormal();
-    void processTable(const DBTable& table);
+    //void processTable(const DBTable& table);
 };
 
 #endif /* DBOMINMAXDBJOB_H_ */

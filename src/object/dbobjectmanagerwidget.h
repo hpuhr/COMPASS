@@ -24,7 +24,6 @@
 class DBObject;
 class DBObjectWidget;
 class DBObjectManager;
-class DBSchemaManager;
 class MetaDBOVariable;
 class MetaDBOVariableWidget;
 class QGridLayout;
@@ -72,7 +71,7 @@ class DBObjectManagerWidget : public QWidget
 
   private:
     DBObjectManager& object_manager_;
-    DBSchemaManager& schema_manager_;
+
     /// Grid with all DBObjects
     QGridLayout* dbobjects_grid_{nullptr};
     QGridLayout* meta_variables_grid_{nullptr};

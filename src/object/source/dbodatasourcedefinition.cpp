@@ -25,7 +25,6 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string& class_id,
     : Configurable(class_id, instance_id, object), object_(object)
 {
     registerParameter("local_key", &local_key_, "");
-    registerParameter("meta_table", &meta_table_, "");
     registerParameter("foreign_key", &foreign_key_, "");
     registerParameter("short_name_column", &short_name_column_, "");
     registerParameter("name_column", &name_column_, "");
@@ -273,13 +272,6 @@ void DBODataSourceDefinition::localKey(const std::string& local_key)
 {
     loginf << "DBODataSourceDefinition: localKey: value " << local_key;
     local_key_ = local_key;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::metaTable(const std::string& meta_table)
-{
-    loginf << "DBODataSourceDefinition: metaTable: value " << meta_table;
-    meta_table_ = meta_table;
     emit definitionChangedSignal();
 }
 

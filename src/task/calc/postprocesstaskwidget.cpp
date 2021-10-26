@@ -23,8 +23,6 @@
 #include <QVBoxLayout>
 
 #include "compass.h"
-#include "dbschemamanager.h"
-#include "dbschemamanagerwidget.h"
 #include "postprocesstask.h"
 
 PostProcessTaskWidget::PostProcessTaskWidget(PostProcessTask& task, QWidget* parent)

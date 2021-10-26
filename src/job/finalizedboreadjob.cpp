@@ -37,7 +37,6 @@ void FinalizeDBOReadJob::run()
     logdbg << "FinalizeDBOReadJob: run: read_list size " << read_list_.getSize();
     started_ = true;
 
-    buffer_->transformVariables(read_list_, true);
     buffer_->addProperty("selected", PropertyDataType::BOOL);  // add boolean to indicate selection
 
     logdbg << "FinalizeDBOReadJob: run: done";

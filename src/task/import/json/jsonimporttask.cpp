@@ -23,15 +23,12 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
 #include "files.h"
 #include "jobmanager.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonmappingjob.h"
 #include "jsonparsejob.h"
 #include "jsonparsingschema.h"
-#include "metadbtable.h"
 #include "propertylist.h"
 #include "radarplotpositioncalculatortask.h"
 #include "readjsonfilejob.h"
@@ -845,7 +842,7 @@ void JSONImportTask::checkAllDone()
             if (num_radar_inserted_)
             {
                 bool has_null_positions = COMPASS::instance().interface().areColumnsNull(
-                            COMPASS::instance().objectManager().object("Radar").currentMetaTable().mainTableName(),
+                            COMPASS::instance().objectManager().object("Radar").dbTableName(),
                             {"pos_lat_deg","pos_long_deg"});
 
                 loginf << "JSONImporterTask: insertDoneSlot: radar has null positions " << has_null_positions;

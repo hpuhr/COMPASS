@@ -26,11 +26,6 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariablewidget.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbtable.h"
-#include "dbtablecolumn.h"
-#include "metadbtable.h"
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -66,9 +61,7 @@ std::string DBOVariable::representationToString(Representation representation)
     return representation_2_string_.at(representation);
 }
 
-#include <boost/algorithm/string.hpp>
-
-
+//#include <boost/algorithm/string.hpp>
 
 DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id,
                          DBObject* parent)
@@ -97,7 +90,7 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     // unitunit '" << unit_unit_ << "'";
 
     assert (db_column_name_.size());
-    boost::algorithm::to_lower(db_column_name_); // modifies str
+    //boost::algorithm::to_lower(db_column_name_); // modifies str
 
     createSubConfigurables();
 }
@@ -231,14 +224,8 @@ void DBOVariable::name(const std::string& name)
 //    return db_object_->currentMetaTable();
 //}
 
-bool DBOVariable::hasVariableIdentifier() const
+std::string DBOVariable::dbColumnName() const
 {
-    return db_column_name_.size();
-}
-
-const std::string& DBOVariable::dbColumnName() const
-{
-    assert(hasVariableIdentifier());
     return db_column_name_;
 }
 
@@ -247,60 +234,20 @@ void DBOVariable::dbColumnName(const std::string& value)
     db_column_name_ = value;
 }
 
-bool DBOVariable::hasCurrentDBColumn() const
+std::string DBOVariable::dbTableName() const
 {
-    assert(db_object_);
-
-    if (!db_object_->hasCurrentMetaTable())
-        return false;
-
-    if (!hasVariableIdentifier())
-        return false;
-
-    std::string meta_tablename = currentMetaTableString();
-
-    logdbg << "DBOVariable: hasCurrentDBColumn: meta " << meta_tablename << " variable id "
-           << db_column_name_;
-
-    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_tablename));
-
-    return COMPASS::instance()
-        .schemaManager()
-        .getCurrentSchema()
-        .metaTable(meta_tablename)
-        .hasColumn(db_column_name_);
+    assert (db_object_);
+    return db_object_->dbTableName();
 }
 
-const DBTableColumn& DBOVariable::currentDBColumn() const
+std::string DBOVariable::dbColumnIdentifier() const
 {
-    assert(hasCurrentDBColumn());
-
-    std::string meta_tablename = currentMetaTableString();
-
-    logdbg << "DBOVariable: currentDBColumn: meta " << meta_tablename << " variable id "
-           << db_column_name_;
-
-    return COMPASS::instance()
-        .schemaManager()
-        .getCurrentSchema()
-        .metaTable(meta_tablename)
-        .column(db_column_name_);
+    return dbTableName()+":"+dbColumnName();
 }
 
-bool DBOVariable::isKey() { return hasCurrentDBColumn() && currentDBColumn().isKey(); }
-
-const std::string& DBOVariable::currentMetaTableString() const
+bool DBOVariable::isKey()
 {
-    assert(db_object_);
-    assert(db_object_->hasCurrentMetaTable());
-    return db_object_->currentMetaTable().name();
-}
-
-const MetaDBTable& DBOVariable::currentMetaTable() const
-{
-    assert(db_object_);
-    assert(db_object_->hasCurrentMetaTable());
-    return db_object_->currentMetaTable();
+    assert (false); // TODO
 }
 
 void DBOVariable::setMinMax()
@@ -743,13 +690,7 @@ bool DBOVariable::existsInDB() const
 {
     assert(db_object_);
 
-    if (!db_object_->hasCurrentMetaTable())
-        return false;
-
-    if (!hasCurrentDBColumn())
-        return false;
-    else
-        return currentDBColumn().existsInDB();
+    assert (false); // TODO
 }
 
 std::string DBOVariable::getDataSourcesAsString(const std::string& value) const

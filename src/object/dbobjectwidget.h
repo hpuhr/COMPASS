@@ -34,7 +34,6 @@ class DBOVariable;
 class DBSchemaSelectionComboBox;
 class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
-class DBSchemaManager;
 
 /**
  * @brief Edit widget for a DBObject
@@ -48,11 +47,6 @@ class DBObjectWidget : public QWidget
     void changedDBOSignal();
 
   public slots:
-    /// @brief Adds all new DBOVariables
-    void updateVariablesSlot();
-    /// @brief Adds a MetaDBTable
-    void addMetaTableSlot();
-
     /// @brief Updates data sources grid
     void updateDataSourcesGridSlot();
     /// @brief Edits a data source
@@ -77,11 +71,10 @@ class DBObjectWidget : public QWidget
     //void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
-    void printSlot();
 
   public:
     /// @brief Constructor
-    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent = 0,
+    DBObjectWidget(DBObject* object, QWidget* parent = 0,
                    Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBObjectWidget();
@@ -89,7 +82,6 @@ class DBObjectWidget : public QWidget
   private:
     /// @brief DBObject to be managed
     DBObject* object_{nullptr};
-    DBSchemaManager& schema_manager_;
 
     /// @brief DBO name
     QLineEdit* name_edit_{nullptr};
@@ -108,8 +100,6 @@ class DBObjectWidget : public QWidget
 
     /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_{nullptr};
-
-    QPushButton* update_variables_button_{nullptr};
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

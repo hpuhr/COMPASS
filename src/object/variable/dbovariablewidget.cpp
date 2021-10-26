@@ -33,12 +33,7 @@
 #include "dbobject.h"
 #include "dbovariable.h"
 #include "dbovariabledatatypecombobox.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "dbtablecolumn.h"
-#include "dbtablecolumncombobox.h"
 #include "logger.h"
-#include "metadbtable.h"
 #include "stringconv.h"
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
@@ -103,9 +98,6 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     properties_layout_->addWidget(unit_sel_, row, 1);
     row++;
 
-    schema_boxes_row_ = row;
-    createSchemaBoxes();
-
     main_layout->addLayout(properties_layout_);
     main_layout->addStretch();
 
@@ -127,9 +119,6 @@ void DBOVariableWidget::lock()
     representation_box_->setDisabled(true);
     unit_sel_->setDisabled(true);
 
-    for (auto& box_it : schema_boxes_)
-        box_it.second->setDisabled(true);
-
     locked_ = true;
 }
 
@@ -143,9 +132,6 @@ void DBOVariableWidget::unlock()
     type_combo_->setDisabled(false);
     representation_box_->setDisabled(false);
     unit_sel_->setDisabled(false);
-
-    for (auto& box_it : schema_boxes_)
-        box_it.second->setDisabled(false);
 
     locked_ = false;
 }
@@ -164,8 +150,6 @@ void DBOVariableWidget::update()
     type_combo_->setVariable(*variable_);
     representation_box_->setVariable(*variable_);
     unit_sel_->update(variable_->dimension(), variable_->unit());
-
-    createSchemaBoxes();
 }
 
 void DBOVariableWidget::editNameSlot()
@@ -197,42 +181,3 @@ void DBOVariableWidget::editDataTypeSlot()
     emit dboVariableChangedSignal();
 }
 
-void DBOVariableWidget::createSchemaBoxes()
-{
-    loginf << "DBOVariableWidget: createSchemaBoxes";
-
-    //    auto& meta_tables = variable_->dbObject().metaTables();
-    //    auto& schemas = COMPASS::instance().schemaManager().getSchemas();
-
-    assert(properties_layout_);
-    schema_boxes_.clear();
-
-    int row = schema_boxes_row_;
-
-    //std::string schema_name;
-
-    //    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
-    //    {
-    //        schema_name = sit->first;
-
-    //        if (meta_tables.find(schema_name) == meta_tables.end())
-    //            continue;
-
-    std::string schema_string = "Schema";
-    QLabel* label = new QLabel(schema_string.c_str());
-    properties_layout_->addWidget(label, row, 0);
-
-    //assert(meta_tables.count(schema_name) == 1);
-    std::string meta_table_name = variable_->currentMetaTable().name();
-    DBTableColumnComboBox* box = new DBTableColumnComboBox(meta_table_name, *variable_);
-
-    properties_layout_->addWidget(box, schema_boxes_row_, 1);
-
-    assert(schema_boxes_.count(meta_table_name) == 0);
-    schema_boxes_[meta_table_name] = box; // TODO
-
-    row++;
-    //    }
-
-    loginf << "DBOVariableWidget: createSchemaBoxes: done";
-}

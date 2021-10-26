@@ -41,12 +41,10 @@ class Buffer;
 class BufferWriter;
 class SQLiteConnection;
 class DBOVariable;
-class DBTable;
 class QProgressDialog;
 class DBObject;
 class DBODataSource;
 class DBResult;
-class DBTableColumn;
 class DBTableInfo;
 class DBInterfaceInfoWidget;
 class Job;
@@ -106,19 +104,19 @@ class DBInterface : public QObject, public Configurable
     /// @brief Returns a set with all active data source ids for a DBO type
     std::set<int> getActiveDataSources(DBObject& object);
 
-    void insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
-    void insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
+    //void insertBuffer(MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
+    //void insertBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
-    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
-                           std::shared_ptr<Buffer> buffer);
-    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
-                      std::shared_ptr<Buffer> buffer, int from_index = -1,
-                      int to_index = -1);  // no indexes means full buffer
-    void updateBuffer(DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+//    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
+//                           std::shared_ptr<Buffer> buffer);
+//    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
+//                      std::shared_ptr<Buffer> buffer, int from_index = -1,
+//                      int to_index = -1);  // no indexes means full buffer
+    void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
-    std::shared_ptr<Buffer> getPartialBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
+    //std::shared_ptr<Buffer> getPartialBuffer(DBTable& table, std::shared_ptr<Buffer> buffer);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
@@ -145,7 +143,7 @@ class DBInterface : public QObject, public Configurable
     bool hasProperty(const std::string& id);
 
     bool existsTable(const std::string& table_name);
-    void createTable(DBTable& table);
+    void createTable(const std::string& table_name);
     /// @brief Returns if minimum/maximum table exists
     bool existsMinMaxTable();
     /// @brief Returns the minimum/maximum table
@@ -180,7 +178,7 @@ class DBInterface : public QObject, public Configurable
     void clearTableContent(const std::string& table_name);
 
     /// @brief Returns minimum/maximum information for all columns in a table
-    std::shared_ptr<DBResult> queryMinMaxNormalForTable(const DBTable& table);
+    std::shared_ptr<DBResult> queryMinMaxNormalForTable(const std::string& table_name);
 
     /// @brief Executes query and returns numbers for all active sensors
     std::set<int> queryActiveSensorNumbers(DBObject& object);

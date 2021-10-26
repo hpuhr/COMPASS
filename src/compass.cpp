@@ -25,7 +25,6 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "dbschemamanager.h"
 #include "dbtableinfo.h"
 #include "filtermanager.h"
 #include "global.h"
@@ -38,9 +37,6 @@
 
 using namespace std;
 
-/**
- * Sets init state, creates members, starts the thread using go.
- */
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
@@ -52,25 +48,15 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     createSubConfigurables();
 
     assert(db_interface_);
-    assert(db_schema_manager_);
     assert(dbo_manager_);
     assert(filter_manager_);
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
 
-    QObject::connect(db_schema_manager_.get(), &DBSchemaManager::schemaChangedSignal,
-                     dbo_manager_.get(), &DBObjectManager::updateSchemaInformationSlot);
-    // QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_,
-    // SLOT(schemaLockedSlot()));
-    QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
-                     db_schema_manager_.get(), &DBSchemaManager::databaseContentChangedSlot,
-                     Qt::QueuedConnection);
     QObject::connect(db_interface_.get(), &DBInterface::databaseContentChangedSignal,
                      dbo_manager_.get(), &DBObjectManager::databaseContentChangedSlot,
                      Qt::QueuedConnection);
-    // QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_,
-    // SLOT(databaseOpenedSlot()));
 
     QObject::connect(dbo_manager_.get(), &DBObjectManager::dbObjectsChangedSignal,
                      task_manager_.get(), &TaskManager::dbObjectsChangedSlot);
@@ -82,16 +68,6 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     logdbg << "COMPASS: constructor: end";
 }
 
-// void COMPASS::initialize()
-//{
-//    assert (!initialized_);
-//    initialized_=true;
-
-//}
-
-/**
- * Deletes members.
- */
 COMPASS::~COMPASS()
 {
     logdbg << "COMPASS: destructor: start";
@@ -102,10 +78,7 @@ COMPASS::~COMPASS()
         shutdown();
     }
 
-    // assert (!initialized_);
-
     assert(!dbo_manager_);
-    assert(!db_schema_manager_);
     assert(!db_interface_);
     assert(!filter_manager_);
     assert(!task_manager_);
@@ -130,13 +103,6 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         assert(!dbo_manager_);
         dbo_manager_.reset(new DBObjectManager(class_id, instance_id, this));
         assert(dbo_manager_);
-    }
-    else if (class_id == "DBSchemaManager")
-    {
-        assert(db_interface_);
-        assert(!db_schema_manager_);
-        db_schema_manager_.reset(new DBSchemaManager(class_id, instance_id, this, *db_interface_));
-        assert(db_schema_manager_);
     }
     else if (class_id == "FilterManager")
     {
@@ -181,12 +147,6 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurable("DBObjectManager", "DBObjectManager0");
         assert(dbo_manager_);
     }
-    if (!db_schema_manager_)
-    {
-        addNewSubConfiguration("DBSchemaManager", "DBSchemaManager0");
-        generateSubConfigurable("DBSchemaManager", "DBSchemaManager0");
-        assert(dbo_manager_);
-    }
     if (!filter_manager_)
     {
         addNewSubConfiguration("FilterManager", "FilterManager0");
@@ -216,48 +176,35 @@ void COMPASS::checkSubConfigurables()
 DBInterface& COMPASS::interface()
 {
     assert(db_interface_);
-    // assert (initialized_);
     return *db_interface_;
-}
-
-DBSchemaManager& COMPASS::schemaManager()
-{
-    assert(db_schema_manager_);
-    // assert (initialized_);
-    return *db_schema_manager_;
 }
 
 DBObjectManager& COMPASS::objectManager()
 {
     assert(dbo_manager_);
-    // assert (initialized_);
     return *dbo_manager_;
 }
 
 FilterManager& COMPASS::filterManager()
 {
     assert(filter_manager_);
-    // assert (initialized_);
     return *filter_manager_;
 }
 
 TaskManager& COMPASS::taskManager()
 {
     assert(task_manager_);
-    // assert (initialized_);
     return *task_manager_;
 }
 
 ViewManager& COMPASS::viewManager()
 {
     assert(view_manager_);
-    // assert (initialized_);
     return *view_manager_;
 }
 
 SimpleConfig& COMPASS::config()
 {
-    // assert (initialized_);
     assert(simple_config_);
     return *simple_config_;
 }
@@ -276,10 +223,6 @@ bool COMPASS::ready()
     return db_interface_->ready();
 }
 
-///**
-// * Calls stop. If data was written uning the StructureReader, this process is finished correctly.
-// * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
-// */
 void COMPASS::shutdown()
 {
     loginf << "COMPASS: database shutdown";
@@ -306,9 +249,6 @@ void COMPASS::shutdown()
 
     assert(dbo_manager_);
     dbo_manager_ = nullptr;
-
-    assert(db_schema_manager_);
-    db_schema_manager_ = nullptr;
 
     assert(task_manager_);
     task_manager_->shutdown();

@@ -122,8 +122,8 @@ class Buffer
 
     bool isNone(const Property& property, unsigned int row_cnt);
 
-    void transformVariables(DBOVariableSet& list,
-                            bool tc2dbovar);  // tc2dbovar true for db->dbo, false dbo->db
+//    void transformVariables(DBOVariableSet& list,
+//                            bool tc2dbovar);  // tc2dbovar true for db->dbo, false dbo->db
 
     std::shared_ptr<Buffer> getPartialCopy(const PropertyList& partial_properties);
 
@@ -148,8 +148,8 @@ class Buffer
   private:
     template <typename T>
     inline std::map<std::string, std::shared_ptr<NullableVector<T>>>& getArrayListMap();
-    template <typename T>
-    void renameArrayListMapEntry(const std::string& id, const std::string& id_new);
+//    template <typename T>
+//    void renameArrayListMapEntry(const std::string& id, const std::string& id_new);
     template <typename T>
     void seizeArrayListMap(Buffer& org_buffer);
 };
@@ -177,16 +177,16 @@ NullableVector<T>& Buffer::get(const std::string& id)
                 .at(id);
 }
 
-template <typename T>
-void Buffer::rename(const std::string& id, const std::string& id_new)
-{
-    renameArrayListMapEntry<T>(id, id_new);
+//template <typename T>
+//void Buffer::rename(const std::string& id, const std::string& id_new)
+//{
+//    renameArrayListMapEntry<T>(id, id_new);
 
-    assert(properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
+//    assert(properties_.hasProperty(id));
+//    Property old_property = properties_.get(id);
+//    properties_.removeProperty(id);
+//    properties_.addProperty(id_new, old_property.dataType());
+//}
 
 // private stuff
 
@@ -197,15 +197,15 @@ std::map<std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListM
         Index<std::map<std::string, std::shared_ptr<NullableVector<T>>>, ArrayListMapTupel>::value>(
         array_list_tuple_);
 }
-template <typename T>
-void Buffer::renameArrayListMapEntry(const std::string& id, const std::string& id_new)
-{
-    assert(getArrayListMap<T>().count(id) == 1);
-    assert(getArrayListMap<T>().count(id_new) == 0);
-    std::shared_ptr<NullableVector<T>> array_list = getArrayListMap<T>().at(id);
-    getArrayListMap<T>().erase(id);
-    getArrayListMap<T>()[id_new] = array_list;
-}
+//template <typename T>
+//void Buffer::renameArrayListMapEntry(const std::string& id, const std::string& id_new)
+//{
+//    assert(getArrayListMap<T>().count(id) == 1);
+//    assert(getArrayListMap<T>().count(id_new) == 0);
+//    std::shared_ptr<NullableVector<T>> array_list = getArrayListMap<T>().at(id);
+//    getArrayListMap<T>().erase(id);
+//    getArrayListMap<T>()[id_new] = array_list;
+//}
 
 template <typename T>
 void Buffer::seizeArrayListMap(Buffer& org_buffer)

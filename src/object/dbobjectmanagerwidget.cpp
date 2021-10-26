@@ -17,6 +17,19 @@
 
 #include "dbobjectmanagerwidget.h"
 
+#include "compass.h"
+#include "configuration.h"
+#include "configurationmanager.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "dbobjectwidget.h"
+#include "dbovariable.h"
+#include "files.h"
+#include "global.h"
+#include "metadbovariable.h"
+#include "metadbovariablewidget.h"
+#include "stringconv.h"
+
 #include <QComboBox>
 #include <QGridLayout>
 #include <QInputDialog>
@@ -26,27 +39,10 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-#include "compass.h"
-#include "configuration.h"
-#include "configurationmanager.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbobjectwidget.h"
-#include "dbovariable.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "files.h"
-#include "global.h"
-#include "metadbovariable.h"
-#include "metadbovariablewidget.h"
-#include "metadbtable.h"
-#include "stringconv.h"
-//#include "MetaDBObjectEditWidget.h"
-
 using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager& object_manager)
-    : object_manager_(object_manager), schema_manager_(COMPASS::instance().schemaManager())
+    : object_manager_(object_manager)
 {
     // unsigned int frame_width = FRAME_SIZE;
     setContentsMargins(0, 0, 0, 0);
@@ -181,35 +177,15 @@ void DBObjectManagerWidget::addDBOSlot()
             return;
         }
 
-        auto metas = schema_manager_.getCurrentSchema().metaTables();
-        QStringList items;
-
-        for (auto it = metas.begin(); it != metas.end(); it++)
-        {
-            items.append(it->second->name().c_str());
-        }
-
-        bool ok;
-        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"),
-                                             tr("Select:"), items, 0, false, &ok);
-        if (ok && !item.isEmpty())
-        {
-            std::string meta_table_name = item.toStdString();
-
             std::string instance = "DBObject" + name + "0";
 
             Configuration& config = object_manager_.addNewSubConfiguration("DBObject", instance);
             config.addParameterString("name", name);
-             config.addParameterString ("meta_table", meta_table_name);
-//            Configuration& metatable_config =
-//                config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
-//            metatable_config.addParameterString("schema", schema_manager_.getCurrentSchemaName());
-//            metatable_config.addParameterString("meta_table", meta_table_name);
+             //config.addParameterString ("meta_table", meta_table_name); // TODO add db_table_name
 
             object_manager_.generateSubConfigurable("DBObject", instance);
 
             updateDBOsSlot();
-        }
     }
 }
 
@@ -270,10 +246,6 @@ void DBObjectManagerWidget::updateDBOsSlot()
     numel_label->setFont(font_bold);
     dbobjects_grid_->addWidget(numel_label, 0, 1);
 
-    QLabel* meta_label = new QLabel("Meta Table");
-    meta_label->setFont(font_bold);
-    dbobjects_grid_->addWidget(meta_label, 0, 2);
-
     unsigned int row = 1;
 
     for (auto& obj_it : object_manager_)
@@ -289,12 +261,6 @@ void DBObjectManagerWidget::updateDBOsSlot()
 
         QLabel* numel = new QLabel((std::to_string(obj_it.second->numVariables())).c_str());
         dbobjects_grid_->addWidget(numel, row, 1);
-
-        bool active = obj_it.second->hasCurrentMetaTable();
-        QLabel* meta = new QLabel("None");
-        if (active)
-            meta->setText(obj_it.second->currentMetaTable().name().c_str());
-        dbobjects_grid_->addWidget(meta, row, 2);
 
         QPushButton* edit = new QPushButton();
         edit->setIcon(edit_icon);
