@@ -90,8 +90,8 @@ class DBInterface : public QObject, public Configurable
     bool hasDataSourceTables(DBObject& object);
     std::map<int, DBODataSource> getDataSources(DBObject& object);
     void updateDataSource(DBODataSource& data_source);
-    bool hasActiveDataSources(DBObject& object);
-    std::set<int> getActiveDataSources(DBObject& object);
+//    bool hasActiveDataSources(DBObject& object);
+//    std::set<int> getActiveDataSources(DBObject& object);
 
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 

@@ -68,7 +68,7 @@ class DataSourcesFilter : public DBFilter
     /// @brief Load data sources and updates data_sources_ container
     void updateDataSources();
     /// @brief Updates the data sources active in data information
-    void updateDataSourcesActive();
+    //void updateDataSourcesActive();
 
     /// @brief Does nothing.
     virtual void checkSubConfigurables();

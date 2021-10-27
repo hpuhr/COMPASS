@@ -503,15 +503,15 @@ const std::string& DBObject::getNameOfSensor(int id)
     return data_sources_.at(id).name();
 }
 
-bool DBObject::hasActiveDataSourcesInfo()
-{
-    return COMPASS::instance().interface().hasActiveDataSources(*this);
-}
+//bool DBObject::hasActiveDataSourcesInfo()
+//{
+//    return COMPASS::instance().interface().hasActiveDataSources(*this);
+//}
 
-const std::set<int> DBObject::getActiveDataSources()
-{
-    return COMPASS::instance().interface().getActiveDataSources(*this);
-}
+//const std::set<int> DBObject::getActiveDataSources()
+//{
+//    return COMPASS::instance().interface().getActiveDataSources(*this);
+//}
 
 std::string DBObject::status()
 {

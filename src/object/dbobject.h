@@ -174,10 +174,10 @@ class DBObject : public QObject, public Configurable
     const std::map<int, DBODataSource>& dataSources() const { return data_sources_; }
 
     /// @brief Return if active data sources info is available
-    bool hasActiveDataSourcesInfo();
+//    bool hasActiveDataSourcesInfo();
 
-    /// @brief Returns container with the active data sources information
-    const std::set<int> getActiveDataSources();
+//    /// @brief Returns container with the active data sources information
+//    const std::set<int> getActiveDataSources();
 
     std::string status();
 

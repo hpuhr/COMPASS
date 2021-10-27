@@ -1332,8 +1332,8 @@ void EvaluationManager::updateReferenceDBO()
     if (object.hasDataSources())
         updateReferenceDataSources();
 
-    if (object.hasActiveDataSourcesInfo())
-        updateReferenceDataSourcesActive();
+//    if (object.hasActiveDataSourcesInfo())
+//        updateReferenceDataSourcesActive();
 }
 
 void EvaluationManager::updateReferenceDataSources()
@@ -1363,32 +1363,32 @@ void EvaluationManager::updateReferenceDataSources()
     }
 }
 
-void EvaluationManager::updateReferenceDataSourcesActive()
-{
-    loginf << "EvaluationManager: updateReferenceDataSourcesActive";
+//void EvaluationManager::updateReferenceDataSourcesActive()
+//{
+//    loginf << "EvaluationManager: updateReferenceDataSourcesActive";
 
-    assert (hasValidReferenceDBO());
+//    assert (hasValidReferenceDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-    assert (object.hasActiveDataSourcesInfo());
+//    assert (object.hasActiveDataSourcesInfo());
 
-    for (auto& srcit : data_sources_ref_)
-        srcit.second.setActiveInData(false);
+//    for (auto& srcit : data_sources_ref_)
+//        srcit.second.setActiveInData(false);
 
-    for (auto& it : object.getActiveDataSources())
-    {
-        assert(data_sources_ref_.find(it) != data_sources_ref_.end());
-        ActiveDataSource& src = data_sources_ref_.at(it);
-        src.setActiveInData(true);
-    }
+//    for (auto& it : object.getActiveDataSources())
+//    {
+//        assert(data_sources_ref_.find(it) != data_sources_ref_.end());
+//        ActiveDataSource& src = data_sources_ref_.at(it);
+//        src.setActiveInData(true);
+//    }
 
-    for (auto& srcit : data_sources_ref_)
-    {
-        if (!srcit.second.isActiveInData())
-            srcit.second.setActive(false);
-    }
-}
+//    for (auto& srcit : data_sources_ref_)
+//    {
+//        if (!srcit.second.isActiveInData())
+//            srcit.second.setActive(false);
+//    }
+//}
 
 void EvaluationManager::updateTestDBO()
 {
@@ -1405,8 +1405,8 @@ void EvaluationManager::updateTestDBO()
     if (object.hasDataSources())
         updateTestDataSources();
 
-    if (object.hasActiveDataSourcesInfo())
-        updateTestDataSourcesActive();
+//    if (object.hasActiveDataSourcesInfo())
+//        updateTestDataSourcesActive();
 }
 
 void EvaluationManager::updateTestDataSources()
@@ -1436,32 +1436,32 @@ void EvaluationManager::updateTestDataSources()
     }
 }
 
-void EvaluationManager::updateTestDataSourcesActive()
-{
-    loginf << "EvaluationManager: updateTestDataSourcesActive";
+//void EvaluationManager::updateTestDataSourcesActive()
+//{
+//    loginf << "EvaluationManager: updateTestDataSourcesActive";
 
-    assert (hasValidTestDBO());
+//    assert (hasValidTestDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
-    assert (object.hasActiveDataSourcesInfo());
+//    assert (object.hasActiveDataSourcesInfo());
 
-    for (auto& srcit : data_sources_tst_)
-        srcit.second.setActiveInData(false);
+//    for (auto& srcit : data_sources_tst_)
+//        srcit.second.setActiveInData(false);
 
-    for (auto& it : object.getActiveDataSources())
-    {
-        assert(data_sources_tst_.find(it) != data_sources_tst_.end());
-        ActiveDataSource& src = data_sources_tst_.at(it);
-        src.setActiveInData(true);
-    }
+//    for (auto& it : object.getActiveDataSources())
+//    {
+//        assert(data_sources_tst_.find(it) != data_sources_tst_.end());
+//        ActiveDataSource& src = data_sources_tst_.at(it);
+//        src.setActiveInData(true);
+//    }
 
-    for (auto& srcit : data_sources_tst_)
-    {
-        if (!srcit.second.isActiveInData())
-            srcit.second.setActive(false);
-    }
-}
+//    for (auto& srcit : data_sources_tst_)
+//    {
+//        if (!srcit.second.isActiveInData())
+//            srcit.second.setActive(false);
+//    }
+//}
 
 void EvaluationManager::setViewableDataConfig (const nlohmann::json::object_t& data)
 {

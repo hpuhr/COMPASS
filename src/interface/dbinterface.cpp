@@ -1371,45 +1371,45 @@ void DBInterface::deleteAllSectors()
 }
 
 
-bool DBInterface::hasActiveDataSources(DBObject& object)
-{
-//    if (!object.existsInDB())
-//        return false;
+//bool DBInterface::hasActiveDataSources(DBObject& object)
+//{
+////    if (!object.existsInDB())
+////        return false;
 
-//    if (!existsPropertiesTable())
-//        return false;
+////    if (!existsPropertiesTable())
+////        return false;
 
-//    return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
-    assert (false); // TODO
-}
+////    return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+//    assert (false); // TODO
+//}
 
-set<int> DBInterface::getActiveDataSources(DBObject& object)
-{
-    logdbg << "DBInterface: getActiveDataSources: start";
+//set<int> DBInterface::getActiveDataSources(DBObject& object)
+//{
+//    logdbg << "DBInterface: getActiveDataSources: start";
 
-    assert (false); // TODO
+//    assert (false); // TODO
 
-//    assert(hasActiveDataSources(object));
+////    assert(hasActiveDataSources(object));
 
-//    string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+////    string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
 
-//    set<int> ret;
+////    set<int> ret;
 
-//    vector<string> tmp2 = String::split(tmp, ',');
+////    vector<string> tmp2 = String::split(tmp, ',');
 
-//    loginf << "DBInterface: getActiveDataSources: got " << tmp2.size() << " parts from '" << tmp
-//           << "'";
+////    loginf << "DBInterface: getActiveDataSources: got " << tmp2.size() << " parts from '" << tmp
+////           << "'";
 
-//    for (unsigned int cnt = 0; cnt < tmp2.size(); cnt++)
-//    {
-//        ret.insert(stoi(tmp2.at(cnt)));
-//        loginf << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
-//               << stoi(tmp2.at(cnt)) << "'";
-//    }
+////    for (unsigned int cnt = 0; cnt < tmp2.size(); cnt++)
+////    {
+////        ret.insert(stoi(tmp2.at(cnt)));
+////        loginf << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
+////               << stoi(tmp2.at(cnt)) << "'";
+////    }
 
-//    logdbg << "DBInterface: getActiveDataSources: end";
-//    return ret;
-}
+////    logdbg << "DBInterface: getActiveDataSources: end";
+////    return ret;
+//}
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
 {

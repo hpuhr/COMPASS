@@ -69,8 +69,8 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
     if (object_->hasDataSources())
         updateDataSources();
 
-    if (object_->hasActiveDataSourcesInfo())
-        updateDataSourcesActive();
+//    if (object_->hasActiveDataSourcesInfo())
+//        updateDataSourcesActive();
 
     createSubConfigurables();
 
@@ -182,33 +182,33 @@ void DataSourcesFilter::updateDataSources()
     }
 }
 
-void DataSourcesFilter::updateDataSourcesActive()
-{
-    logdbg << "DataSourcesFilter: updateDataSourcesActive";
+//void DataSourcesFilter::updateDataSourcesActive()
+//{
+//    logdbg << "DataSourcesFilter: updateDataSourcesActive";
 
-    if (!object_->hasActiveDataSourcesInfo())
-    {
-        logerr << "DataSourcesFilter: updateDataSourcesActive: type " << object_->name()
-               << " has no active data sources info";
-        return;
-    }
+//    if (!object_->hasActiveDataSourcesInfo())
+//    {
+//        logerr << "DataSourcesFilter: updateDataSourcesActive: type " << object_->name()
+//               << " has no active data sources info";
+//        return;
+//    }
 
-    for (auto& srcit : data_sources_)
-        srcit.second.setActiveInData(false);
+//    for (auto& srcit : data_sources_)
+//        srcit.second.setActiveInData(false);
 
-    for (auto& it : object_->getActiveDataSources())
-    {
-        assert(data_sources_.find(it) != data_sources_.end());
-        ActiveDataSource& src = data_sources_.at(it);
-        src.setActiveInData(true);
-    }
+//    for (auto& it : object_->getActiveDataSources())
+//    {
+//        assert(data_sources_.find(it) != data_sources_.end());
+//        ActiveDataSource& src = data_sources_.at(it);
+//        src.setActiveInData(true);
+//    }
 
-    for (auto& srcit : data_sources_)
-    {
-        if (!srcit.second.isActiveInData())
-            srcit.second.setActive(false);
-    }
-}
+//    for (auto& srcit : data_sources_)
+//    {
+//        if (!srcit.second.isActiveInData())
+//            srcit.second.setActive(false);
+//    }
+//}
 
 void DataSourcesFilter::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
