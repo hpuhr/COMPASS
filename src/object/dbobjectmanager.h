@@ -42,8 +42,6 @@ class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-    const static std::vector<std::string> db_content_types_;
-
 public slots:
     // void schemaLockedSlot ();
     void loadSlot();
@@ -59,12 +57,11 @@ signals:
     void allLoadingDoneSignal();
 
 public:
-    /// @brief Constructor
+    const static std::vector<std::string> db_content_types_;
+
     DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
-    /// @brief Returns if an object of type exists
     bool existsObject(const std::string& dbo_name);
-    /// @brief Returns the object of type, if existing
     DBObject& object(const std::string& dbo_name);
     void deleteObject(const std::string& dbo_name);
     bool hasData();
@@ -75,10 +72,8 @@ public:
     size_t size() { return objects_.size(); }
 
     bool existsMetaVariable(const std::string& var_name);
-    /// @brief Returns the a meta variable, if existing
     MetaDBOVariable& metaVariable(const std::string& var_name);
     void deleteMetaVariable(const std::string& var_name);
-    /// @brief Returns container with all MetaVariables
     std::map<std::string, MetaDBOVariable*>& metaVariables() { return meta_variables_; }
 
     bool usedInMetaVariable(const DBOVariable& variable);
@@ -86,7 +81,6 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    /// @brief Destructor
     virtual ~DBObjectManager();
 
     DBObjectManagerWidget* widget();
@@ -167,6 +161,9 @@ protected:
 
     virtual void checkSubConfigurables();
     void finishLoading();
+
+    bool hasConfigDataSource (unsigned int sac, unsigned int sic);
+    DBContent::ConfigurationDataSource& getConfigDataSource (unsigned int sac, unsigned int sic);
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

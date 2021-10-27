@@ -2,6 +2,10 @@
 #include "dbobjectmanager.h"
 #include "logger.h"
 
+#include <algorithm>
+
+using namespace std;
+
 namespace DBContent
 {
 
@@ -18,6 +22,17 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
     registerParameter("short_name", &short_name_, "");
 
     registerParameter("info", &info_, {});
+
+    assert (db_content_type_.size());
+    assert (find(DBObjectManager::db_content_types_.begin(),
+                 DBObjectManager::db_content_types_.end(), db_content_type_)
+            != DBObjectManager::db_content_types_.end());
+
+    assert (name_.size());
+
+    if (has_short_name_)
+        assert (short_name_.size());
+
 }
 
 ConfigurationDataSource::~ConfigurationDataSource()
