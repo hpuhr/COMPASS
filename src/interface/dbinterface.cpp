@@ -223,7 +223,7 @@ void DBInterface::createTable(const DBObject& object)
     assert(existsTable(object.dbTableName()));
 }
 
-bool DBInterface::existsMinMaxTable() { return existsTable(TABLE_NAME_MINMAX); }
+//bool DBInterface::existsMinMaxTable() { return existsTable(TABLE_NAME_MINMAX); }
 
 bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
 
@@ -1100,14 +1100,14 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
     return sector_layers;
 }
 
-void DBInterface::insertMinMax(const string& id, const string& object_name,
-                               const string& min, const string& max)
-{
-    QMutexLocker locker(&connection_mutex_);
+//void DBInterface::insertMinMax(const string& id, const string& object_name,
+//                               const string& min, const string& max)
+//{
+//    QMutexLocker locker(&connection_mutex_);
 
-    string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
-    current_connection_->executeSQL(str);
-}
+//    string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
+//    current_connection_->executeSQL(str);
+//}
 
 bool DBInterface::areColumnsNull (const std::string& table_name, const std::vector<std::string> columns)
 {
@@ -1141,67 +1141,67 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
     return count_vec.get(0) != 0;
 }
 
-pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
-{
-    logdbg << "DBInterface: getMinMaxString: var " << var.name();
+//pair<string, string> DBInterface::getMinMaxString(const DBOVariable& var)
+//{
+//    logdbg << "DBInterface: getMinMaxString: var " << var.name();
 
-    if (!var.dbObject().existsInDB())  // object doesn't exist in this database
-    {
-        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
-               << " does not exist in db";
-        return pair<string, string>(NULL_STRING, NULL_STRING);
-    }
+//    if (!var.dbObject().existsInDB())  // object doesn't exist in this database
+//    {
+//        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
+//               << " does not exist in db";
+//        return pair<string, string>(NULL_STRING, NULL_STRING);
+//    }
 
-    if (!var.dbObject().count())  // object doesn't exist in this database
-    {
-        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
-               << " has no data in db";
-        return pair<string, string>(NULL_STRING, NULL_STRING);
-    }
+//    if (!var.dbObject().count())  // object doesn't exist in this database
+//    {
+//        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name()
+//               << " has no data in db";
+//        return pair<string, string>(NULL_STRING, NULL_STRING);
+//    }
 
-    QMutexLocker locker(&connection_mutex_);
+//    QMutexLocker locker(&connection_mutex_);
 
-    PropertyList list;
-    list.addProperty("min", PropertyDataType::STRING);
-    list.addProperty("max", PropertyDataType::STRING);
+//    PropertyList list;
+//    list.addProperty("min", PropertyDataType::STRING);
+//    list.addProperty("max", PropertyDataType::STRING);
 
-    // get min max as strings
+//    // get min max as strings
 
-    DBCommand command;
-    command.set(
-                sql_generator_.getSelectMinMaxStatement(var.dbColumnName(), var.dboName()));
-    command.list(list);
+//    DBCommand command;
+//    command.set(
+//                sql_generator_.getSelectMinMaxStatement(var.dbColumnName(), var.dboName()));
+//    command.list(list);
 
-    logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
+//    logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+//    shared_ptr<DBResult> result = current_connection_->execute(command);
 
-    assert(result);
-    assert(result->containsData());
-    shared_ptr<Buffer> buffer = result->buffer();
+//    assert(result);
+//    assert(result->containsData());
+//    shared_ptr<Buffer> buffer = result->buffer();
 
-    assert(buffer);
-    if (buffer->size() != 1)
-    {
-        logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has "
-               << buffer->size() << " minmax values";
-        return pair<string, string>(NULL_STRING, NULL_STRING);
-    }
+//    assert(buffer);
+//    if (buffer->size() != 1)
+//    {
+//        logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has "
+//               << buffer->size() << " minmax values";
+//        return pair<string, string>(NULL_STRING, NULL_STRING);
+//    }
 
-    if (buffer->get<string>("min").isNull(0) || buffer->get<string>("max").isNull(0))
-    {
-        logerr << "DBInterface: getMinMaxString: variable " << var.name()
-               << " has NULL minimum/maximum";
-        return pair<string, string>(NULL_STRING, NULL_STRING);
-    }
+//    if (buffer->get<string>("min").isNull(0) || buffer->get<string>("max").isNull(0))
+//    {
+//        logerr << "DBInterface: getMinMaxString: variable " << var.name()
+//               << " has NULL minimum/maximum";
+//        return pair<string, string>(NULL_STRING, NULL_STRING);
+//    }
 
-    string min = buffer->get<string>("min").get(0);
-    string max = buffer->get<string>("max").get(0);
+//    string min = buffer->get<string>("min").get(0);
+//    string max = buffer->get<string>("max").get(0);
 
-    logdbg << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max "
-           << max;
-    return pair<string, string>(min, max);
-}
+//    logdbg << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max "
+//           << max;
+//    return pair<string, string>(min, max);
+//}
 
 bool DBInterface::existsViewPointsTable()
 {
@@ -1373,39 +1373,42 @@ void DBInterface::deleteAllSectors()
 
 bool DBInterface::hasActiveDataSources(DBObject& object)
 {
-    if (!object.existsInDB())
-        return false;
+//    if (!object.existsInDB())
+//        return false;
 
-    if (!existsPropertiesTable())
-        return false;
+//    if (!existsPropertiesTable())
+//        return false;
 
-    return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+//    return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+    assert (false); // TODO
 }
 
 set<int> DBInterface::getActiveDataSources(DBObject& object)
 {
     logdbg << "DBInterface: getActiveDataSources: start";
 
-    assert(hasActiveDataSources(object));
+    assert (false); // TODO
 
-    string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
+//    assert(hasActiveDataSources(object));
 
-    set<int> ret;
+//    string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX + object.name());
 
-    vector<string> tmp2 = String::split(tmp, ',');
+//    set<int> ret;
 
-    loginf << "DBInterface: getActiveDataSources: got " << tmp2.size() << " parts from '" << tmp
-           << "'";
+//    vector<string> tmp2 = String::split(tmp, ',');
 
-    for (unsigned int cnt = 0; cnt < tmp2.size(); cnt++)
-    {
-        ret.insert(stoi(tmp2.at(cnt)));
-        loginf << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
-               << stoi(tmp2.at(cnt)) << "'";
-    }
+//    loginf << "DBInterface: getActiveDataSources: got " << tmp2.size() << " parts from '" << tmp
+//           << "'";
 
-    logdbg << "DBInterface: getActiveDataSources: end";
-    return ret;
+//    for (unsigned int cnt = 0; cnt < tmp2.size(); cnt++)
+//    {
+//        ret.insert(stoi(tmp2.at(cnt)));
+//        loginf << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
+//               << stoi(tmp2.at(cnt)) << "'";
+//    }
+
+//    logdbg << "DBInterface: getActiveDataSources: end";
+//    return ret;
 }
 
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
@@ -1649,15 +1652,15 @@ void DBInterface::createPropertiesTable()
     updateTableInfo();
 }
 
-void DBInterface::createMinMaxTable()
-{
-    assert(!existsMinMaxTable());
-    connection_mutex_.lock();
-    current_connection_->executeSQL(sql_generator_.getTableMinMaxCreateStatement());
-    connection_mutex_.unlock();
+//void DBInterface::createMinMaxTable()
+//{
+//    assert(!existsMinMaxTable());
+//    connection_mutex_.lock();
+//    current_connection_->executeSQL(sql_generator_.getTableMinMaxCreateStatement());
+//    connection_mutex_.unlock();
 
-    updateTableInfo();
-}
+//    updateTableInfo();
+//}
 
 void DBInterface::clearTableContent(const string& table_name)
 {

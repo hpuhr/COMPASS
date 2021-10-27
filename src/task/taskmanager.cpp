@@ -35,8 +35,8 @@
 #include "manageschemataskwidget.h"
 #include "managesectorstask.h"
 #include "managesectorstaskwidget.h"
-#include "postprocesstask.h"
-#include "postprocesstaskwidget.h"
+//#include "postprocesstask.h"
+//#include "postprocesstaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "taskmanagerlogwidget.h"
@@ -191,13 +191,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(create_associations_task_);
         addTask(class_id, create_associations_task_.get());
     }
-    else if (class_id.compare("PostProcessTask") == 0)
-    {
-        assert(!post_process_task_);
-        post_process_task_.reset(new PostProcessTask(class_id, instance_id, *this));
-        assert(post_process_task_);
-        addTask(class_id, post_process_task_.get());
-    }
+//    else if (class_id.compare("PostProcessTask") == 0)
+//    {
+//        assert(!post_process_task_);
+//        post_process_task_.reset(new PostProcessTask(class_id, instance_id, *this));
+//        assert(post_process_task_);
+//        addTask(class_id, post_process_task_.get());
+//    }
     else
         throw std::runtime_error("TaskManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
@@ -289,11 +289,11 @@ void TaskManager::checkSubConfigurables()
         assert(create_associations_task_);
     }
 
-    if (!post_process_task_)
-    {
-        generateSubConfigurable("PostProcessTask", "PostProcessTask0");
-        assert(post_process_task_);
-    }
+//    if (!post_process_task_)
+//    {
+//        generateSubConfigurable("PostProcessTask", "PostProcessTask0");
+//        assert(post_process_task_);
+//    }
 }
 
 std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
@@ -378,7 +378,7 @@ void TaskManager::shutdown()
     manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
-    post_process_task_ = nullptr;
+    //post_process_task_ = nullptr;
     create_associations_task_ = nullptr;
 
     widget_ = nullptr;
@@ -488,11 +488,11 @@ CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
     return *create_artas_associations_task_;
 }
 
-PostProcessTask& TaskManager::postProcessTask() const
-{
-    assert(post_process_task_);
-    return *post_process_task_;
-}
+//PostProcessTask& TaskManager::postProcessTask() const
+//{
+//    assert(post_process_task_);
+//    return *post_process_task_;
+//}
 
 CreateAssociationsTask& TaskManager::createAssociationsTask() const
 {
@@ -965,32 +965,32 @@ void TaskManager::performAutomaticTasks ()
         }
 
         // post-process
-        loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
+//        loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
 
-        if (!post_process_task_->isRecommended())
-        {
+//        if (!post_process_task_->isRecommended())
+//        {
 
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
+//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                   << "' selected, aborting";
+//            return;
+//        }
 
-        assert(post_process_task_->isRecommended());
-        assert(post_process_task_->isRequired());
+//        assert(post_process_task_->isRecommended());
+//        assert(post_process_task_->isRequired());
 
-        widget_->setCurrentTask(*post_process_task_);
-        if(widget_->getCurrentTaskName() != post_process_task_->name())
-            widget_->setCurrentTask(*post_process_task_);
+//        widget_->setCurrentTask(*post_process_task_);
+//        if(widget_->getCurrentTaskName() != post_process_task_->name())
+//            widget_->setCurrentTask(*post_process_task_);
 
-        widget_->runTask(*post_process_task_);
+//        widget_->runTask(*post_process_task_);
 
-        while (!post_process_task_->done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
+//        while (!post_process_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
 
-        loginf << "TaskManager: performAutomaticTasks: post-processing task done";
+//        loginf << "TaskManager: performAutomaticTasks: post-processing task done";
 
         // artas assocs
         if (create_artas_associations_task_->isRecommended())

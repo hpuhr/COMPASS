@@ -28,7 +28,7 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "dbovariableset.h"
-#include "postprocesstask.h"
+//#include "postprocesstask.h"
 #include "managedatasourcestask.h"
 
 #include <iostream>
@@ -711,7 +711,7 @@ void GPSTrailImportTask::insertDoneSlot(DBObject& object)
     task_manager_.appendSuccess("GPSTrailImportTask: imported " + to_string(gps_fixes_.size())
                                 +" GPS fixes");
 
-    COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+    //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
     COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 

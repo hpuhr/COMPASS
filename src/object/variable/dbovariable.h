@@ -105,10 +105,10 @@ class DBOVariable : public QObject, public Property, public Configurable
         return *db_object_;
     }
 
-    std::string getMinString();
-    std::string getMaxString();
-    std::string getMinStringRepresentation();
-    std::string getMaxStringRepresentation();
+//    std::string getMinString();
+//    std::string getMaxString();
+//    std::string getMinStringRepresentation();
+//    std::string getMaxStringRepresentation();
 
     DBOVariableWidget* widget();
 
@@ -192,11 +192,11 @@ private:
     /// Unit unit such as seconds
     std::string unit_;
 
-    bool min_max_set_{false};
-    /// Minimum as string
-    std::string min_;
-    /// Maximum as string
-    std::string max_;
+//    bool min_max_set_{false};
+//    /// Minimum as string
+//    std::string min_;
+//    /// Maximum as string
+//    std::string max_;
 
     DBOVariableWidget* widget_{nullptr};
 
@@ -204,7 +204,7 @@ private:
 
   protected:
     virtual void checkSubConfigurables();
-    void setMinMax();
+    //void setMinMax();
 };
 
 Q_DECLARE_METATYPE(DBOVariable*)

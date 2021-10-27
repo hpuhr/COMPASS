@@ -61,10 +61,10 @@ class MetaDBOVariable : public Configurable
     std::string description() const;
     void description(const std::string& description);
 
-    std::string getMinString() const;
-    std::string getMaxString() const;
-    std::string getMinStringRepresentation() const;
-    std::string getMaxStringRepresentation() const;
+//    std::string getMinString() const;
+//    std::string getMaxString() const;
+//    std::string getMinStringRepresentation() const;
+//    std::string getMaxStringRepresentation() const;
 
     MetaDBOVariableWidget* widget();
 

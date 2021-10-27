@@ -122,14 +122,14 @@ DBOVariable& DBOVariable::operator=(DBOVariable&& other)
     db_column_name_ = other.db_column_name_;
     other.db_column_name_ = "";
 
-    min_max_set_ = other.min_max_set_;
-    other.min_max_set_ = false;
+//    min_max_set_ = other.min_max_set_;
+//    other.min_max_set_ = false;
 
-    min_ = other.min_;
-    other.min_ = "";
+//    min_ = other.min_;
+//    other.min_ = "";
 
-    max_ = other.max_;
-    other.max_ = "";
+//    max_ = other.max_;
+//    other.max_ = "";
 
     dimension_ = other.dimension_;
     other.dimension_ = "";
@@ -246,71 +246,71 @@ std::string DBOVariable::dbColumnIdentifier() const
     return dbTableName()+":"+dbColumnName();
 }
 
-void DBOVariable::setMinMax()
-{
-    assert(!min_max_set_);
+//void DBOVariable::setMinMax()
+//{
+//    assert(!min_max_set_);
 
-    assert(db_object_);
-    logdbg << "DBOVariable " << db_object_->name() << " " << name_ << ": setMinMax";
+//    assert(db_object_);
+//    logdbg << "DBOVariable " << db_object_->name() << " " << name_ << ": setMinMax";
 
-    if (!dbObject().existsInDB() || !dbObject().count())
-    {
-        min_ = NULL_STRING;
-        max_ = NULL_STRING;
-    }
-    else
-    {
-        std::pair<std::string, std::string> min_max =
-            COMPASS::instance().interface().getMinMaxString(*this);
+//    if (!dbObject().existsInDB() || !dbObject().count())
+//    {
+//        min_ = NULL_STRING;
+//        max_ = NULL_STRING;
+//    }
+//    else
+//    {
+//        std::pair<std::string, std::string> min_max =
+//            COMPASS::instance().interface().getMinMaxString(*this);
 
-        min_ = min_max.first;
-        max_ = min_max.second;
-    }
+//        min_ = min_max.first;
+//        max_ = min_max.second;
+//    }
 
-    min_max_set_ = true;
+//    min_max_set_ = true;
 
-    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
-}
+//    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
+//}
 
-std::string DBOVariable::getMinString()
-{
-    if (!min_max_set_)
-        setMinMax();  // already unit transformed
+//std::string DBOVariable::getMinString()
+//{
+//    if (!min_max_set_)
+//        setMinMax();  // already unit transformed
 
-    assert(min_max_set_);
+//    assert(min_max_set_);
 
-    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name()
-           << " returning " << min_;
-    return min_;
-}
+//    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name()
+//           << " returning " << min_;
+//    return min_;
+//}
 
-std::string DBOVariable::getMaxString()
-{
-    if (!min_max_set_)
-        setMinMax();  // is already unit transformed
+//std::string DBOVariable::getMaxString()
+//{
+//    if (!min_max_set_)
+//        setMinMax();  // is already unit transformed
 
-    assert(min_max_set_);
+//    assert(min_max_set_);
 
-    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name()
-           << " returning " << max_;
-    return max_;
-}
+//    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name()
+//           << " returning " << max_;
+//    return max_;
+//}
 
-std::string DBOVariable::getMinStringRepresentation()
-{
-    if (representation_ == Representation::STANDARD)
-        return getMinString();
-    else
-        return getRepresentationStringFromValue(getMinString());
-}
+//std::string DBOVariable::getMinStringRepresentation()
+//{
+//    if (representation_ == Representation::STANDARD)
+//        return getMinString();
+//    else
+//        return getRepresentationStringFromValue(getMinString());
+//}
 
-std::string DBOVariable::getMaxStringRepresentation()
-{
-    if (representation_ == Representation::STANDARD)
-        return getMaxString();
-    else
-        return getRepresentationStringFromValue(getMaxString());
-}
+//std::string DBOVariable::getMaxStringRepresentation()
+//{
+//    if (representation_ == Representation::STANDARD)
+//        return getMaxString();
+//    else
+//        return getRepresentationStringFromValue(getMaxString());
+//}
 
 DBOVariableWidget* DBOVariable::widget()
 {

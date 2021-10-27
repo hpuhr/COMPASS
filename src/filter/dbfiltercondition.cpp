@@ -286,39 +286,39 @@ void DBFilterCondition::reset()
 
     std::string value;
 
-    if (reset_value_.compare("MIN") == 0 || reset_value_.compare("MAX") == 0)
-    {
-        if (reset_value_.compare("MIN") == 0)
-        {
-            if (variable_)
-            {
-                value = variable_->getMinStringRepresentation();
-                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
-            }
-            else
-            {
-                assert(meta_variable_);
-                value = meta_variable_->getMinStringRepresentation();
-                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
-            }
-        }
-        else if (reset_value_.compare("MAX") == 0)
-        {
-            if (variable_)
-            {
-                value = variable_->getMaxStringRepresentation();
-                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
-            }
-            else
-            {
-                assert(meta_variable_);
-                value = meta_variable_->getMaxStringRepresentation();
-                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
-            }
-        }
-    }
-    else
-        value = reset_value_;
+//    if (reset_value_.compare("MIN") == 0 || reset_value_.compare("MAX") == 0)
+//    {
+//        if (reset_value_.compare("MIN") == 0)
+//        {
+//            if (variable_)
+//            {
+//                value = variable_->getMinStringRepresentation();
+//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//            }
+//            else
+//            {
+//                assert(meta_variable_);
+//                value = meta_variable_->getMinStringRepresentation();
+//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//            }
+//        }
+//        else if (reset_value_.compare("MAX") == 0)
+//        {
+//            if (variable_)
+//            {
+//                value = variable_->getMaxStringRepresentation();
+//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//            }
+//            else
+//            {
+//                assert(meta_variable_);
+//                value = meta_variable_->getMaxStringRepresentation();
+//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//            }
+//        }
+//    }
+//    else
+    value = reset_value_;
 
     value_ = value;
     value_invalid_ = checkValueInvalid(value_);

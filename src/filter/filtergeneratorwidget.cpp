@@ -161,50 +161,50 @@ void FilterGeneratorWidget::createGUIElements()
     setLayout(layout);
 }
 
-void FilterGeneratorWidget::loadMin()
-{
-    assert(condition_variable_widget_);
+//void FilterGeneratorWidget::loadMin()
+//{
+//    assert(condition_variable_widget_);
 
-    std::string value;
-    if (condition_variable_widget_->hasVariable())
-    {
-        value = condition_variable_widget_->selectedVariable().getMinStringRepresentation();
-    }
-    else if (condition_variable_widget_->hasMetaVariable())
-    {
-        value = condition_variable_widget_->selectedMetaVariable().getMinStringRepresentation();
-    }
-    else
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Error: No variable selected.");
-        msgBox.exec();
-        return;
-    }
-    condition_value_->setText(tr(value.c_str()));
-}
-void FilterGeneratorWidget::loadMax()
-{
-    assert(condition_variable_widget_);
+//    std::string value;
+//    if (condition_variable_widget_->hasVariable())
+//    {
+//        value = condition_variable_widget_->selectedVariable().getMinStringRepresentation();
+//    }
+//    else if (condition_variable_widget_->hasMetaVariable())
+//    {
+//        value = condition_variable_widget_->selectedMetaVariable().getMinStringRepresentation();
+//    }
+//    else
+//    {
+//        QMessageBox msgBox;
+//        msgBox.setText("Error: No variable selected.");
+//        msgBox.exec();
+//        return;
+//    }
+//    condition_value_->setText(tr(value.c_str()));
+//}
+//void FilterGeneratorWidget::loadMax()
+//{
+//    assert(condition_variable_widget_);
 
-    std::string value;
-    if (condition_variable_widget_->hasVariable())
-    {
-        value = condition_variable_widget_->selectedVariable().getMaxStringRepresentation();
-    }
-    else if (condition_variable_widget_->hasMetaVariable())
-    {
-        value = condition_variable_widget_->selectedMetaVariable().getMaxStringRepresentation();
-    }
-    else
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Error: No variable selected.");
-        msgBox.exec();
-        return;
-    }
-    condition_value_->setText(tr(value.c_str()));
-}
+//    std::string value;
+//    if (condition_variable_widget_->hasVariable())
+//    {
+//        value = condition_variable_widget_->selectedVariable().getMaxStringRepresentation();
+//    }
+//    else if (condition_variable_widget_->hasMetaVariable())
+//    {
+//        value = condition_variable_widget_->selectedMetaVariable().getMaxStringRepresentation();
+//    }
+//    else
+//    {
+//        QMessageBox msgBox;
+//        msgBox.setText("Error: No variable selected.");
+//        msgBox.exec();
+//        return;
+//    }
+//    condition_value_->setText(tr(value.c_str()));
+//}
 
 void FilterGeneratorWidget::addCondition()
 {

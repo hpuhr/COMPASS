@@ -30,7 +30,7 @@
 #include "files.h"
 #include "jobmanager.h"
 #include "logger.h"
-#include "postprocesstask.h"
+//#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "savedfile.h"
 #include "stringconv.h"
@@ -1360,7 +1360,7 @@ void ASTERIXImportTask::insertDoneSlot(DBObject& object)
                         RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, to_string(!has_null_positions));
         }
 
-        COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
+        //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
         COMPASS::instance().interface().setProperty(
             CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 

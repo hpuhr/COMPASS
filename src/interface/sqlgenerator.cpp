@@ -41,12 +41,12 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
 {
     stringstream ss;
 
-    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
-       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max "
-          "VARCHAR(255),"
-          "PRIMARY KEY (variable_name, object_name));";
-    table_minmax_create_statement_ = ss.str();
-    ss.str(string());
+//    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
+//       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max "
+//          "VARCHAR(255),"
+//          "PRIMARY KEY (variable_name, object_name));";
+//    table_minmax_create_statement_ = ss.str();
+//    ss.str(string());
 
     ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
        << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
@@ -465,30 +465,30 @@ string SQLGenerator::getSelectAllSectorsStatement()
     return ss.str();
 }
 
-string SQLGenerator::getInsertMinMaxStatement(const string& variable_name,
-                                              const string& object_name,
-                                              const string& min, const string& max)
-{
-    stringstream ss;
-    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << variable_name << "', '"
-       << object_name << "', '" << min << "', '" << max << "');";
-    return ss.str();
-}
-string SQLGenerator::getSelectMinMaxStatement(const string& variable_name,
-                                              const string& object_name)
-{
-    stringstream ss;
-    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX << " WHERE variable_name = '" << variable_name
-       << "' AND object_name = '" << object_name << "';";
-    return ss.str();
-}
+//string SQLGenerator::getInsertMinMaxStatement(const string& variable_name,
+//                                              const string& object_name,
+//                                              const string& min, const string& max)
+//{
+//    stringstream ss;
+//    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << variable_name << "', '"
+//       << object_name << "', '" << min << "', '" << max << "');";
+//    return ss.str();
+//}
+//string SQLGenerator::getSelectMinMaxStatement(const string& variable_name,
+//                                              const string& object_name)
+//{
+//    stringstream ss;
+//    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX << " WHERE variable_name = '" << variable_name
+//       << "' AND object_name = '" << object_name << "';";
+//    return ss.str();
+//}
 
-string SQLGenerator::getSelectMinMaxStatement()
-{
-    stringstream ss;
-    ss << "SELECT variable_name,object_name,min,max FROM " << TABLE_NAME_MINMAX << ";";
-    return ss.str();
-}
+//string SQLGenerator::getSelectMinMaxStatement()
+//{
+//    stringstream ss;
+//    ss << "SELECT variable_name,object_name,min,max FROM " << TABLE_NAME_MINMAX << ";";
+//    return ss.str();
+//}
 
 string SQLGenerator::getSelectNullCount (const string& table_name, const vector<string> columns)
 {
@@ -510,7 +510,7 @@ string SQLGenerator::getSelectNullCount (const string& table_name, const vector<
     return ss.str();
 }
 
-string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_create_statement_; }
+//string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_create_statement_; }
 
 string SQLGenerator::getTablePropertiesCreateStatement()
 {

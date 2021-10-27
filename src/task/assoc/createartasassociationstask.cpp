@@ -28,7 +28,7 @@
 #include "dbovariableset.h"
 #include "jobmanager.h"
 #include "metadbovariable.h"
-#include "postprocesstask.h"
+//#include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "sqliteconnection.h"
@@ -132,17 +132,17 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
         return false;
 
     // check if was post-processed
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
-        return false;
+//    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+//        return false;
 
-    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateARTASAssociationsTask: checkPrerequisites: post2 "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
-        return false;
+//    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+//        return false;
 
     // check if hash var exists in all data
     DBObjectManager& object_man = COMPASS::instance().objectManager();
@@ -154,9 +154,9 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
     if (!tracker_obj.hasData()) // check if tracker data exists
         return false;
 
-    DBOVariable& tracker_hash_var = object_man.metaVariable(hash_var_str_).getFor("Tracker");
-    if (tracker_hash_var.getMinString() == NULL_STRING || tracker_hash_var.getMaxString() == NULL_STRING)
-        return false;  // tracker needs hash info no hashes
+//    DBOVariable& tracker_hash_var = object_man.metaVariable(hash_var_str_).getFor("Tracker");
+//    if (tracker_hash_var.getMinString() == NULL_STRING || tracker_hash_var.getMaxString() == NULL_STRING)
+//        return false;  // tracker needs hash info no hashes
 
 
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: sensor hashes";
@@ -167,9 +167,9 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
             !dbo_it.second->hasData())  // DBO other than tracker no data is acceptable
             continue;
 
-        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
-        if (hash_var.getMinString() != NULL_STRING && hash_var.getMaxString() != NULL_STRING)
-            any_data_found = true;  // has data and hashes
+//        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
+//        if (hash_var.getMinString() != NULL_STRING && hash_var.getMaxString() != NULL_STRING)
+        any_data_found = true;  // TODO no data check
     }
     if (!any_data_found)
         return false; // sensor data needed

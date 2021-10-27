@@ -34,7 +34,7 @@
 #include "mainwindow.h"
 #include "managedatasourcestask.h"
 #include "managedatasourcestaskwidget.h"
-#include "postprocesstask.h"
+//#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "sqliteconnectionwidget.h"
 #include "taskmanager.h"
@@ -162,19 +162,19 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
         client.processEvents();
 
     // post-process
-    PostProcessTask& post_process_task = task_manager.postProcessTask();
+//    PostProcessTask& post_process_task = task_manager.postProcessTask();
 
-    task_manager_widget->setCurrentTask(post_process_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
-    REQUIRE(post_process_task.isRecommended());
-    REQUIRE(post_process_task.isRequired());
+//    task_manager_widget->setCurrentTask(post_process_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == post_process_task.name());
+//    REQUIRE(post_process_task.isRecommended());
+//    REQUIRE(post_process_task.isRequired());
 
-    task_manager_widget->runCurrentTaskSlot();
+//    task_manager_widget->runCurrentTaskSlot();
 
-    QThread::msleep(100);
+//    QThread::msleep(100);
 
-    while (client.hasPendingEvents() || !post_process_task.done())
-        client.processEvents();
+//    while (client.hasPendingEvents() || !post_process_task.done())
+//        client.processEvents();
 
     QThread::msleep(100);  // delay
 

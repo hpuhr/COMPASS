@@ -57,7 +57,7 @@ class SQLGenerator
 
     std::string getCountStatement(const std::string& table);
 
-    std::string getTableMinMaxCreateStatement();
+    //std::string getTableMinMaxCreateStatement();
     std::string getTablePropertiesCreateStatement();
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
@@ -67,12 +67,12 @@ class SQLGenerator
     std::string getSelectPropertyStatement(const std::string& id);
     std::string getSelectAllPropertiesStatement();
 
-    std::string getInsertMinMaxStatement(const std::string& variable_name,
-                                         const std::string& object_name, const std::string& min,
-                                         const std::string& max);
-    std::string getSelectMinMaxStatement(const std::string& variable_name,
-                                         const std::string& object_name);
-    std::string getSelectMinMaxStatement();
+//    std::string getInsertMinMaxStatement(const std::string& variable_name,
+//                                         const std::string& object_name, const std::string& min,
+//                                         const std::string& max);
+//    std::string getSelectMinMaxStatement(const std::string& variable_name,
+//                                         const std::string& object_name);
+//    std::string getSelectMinMaxStatement();
 
     std::string getSelectNullCount (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -88,7 +88,7 @@ class SQLGenerator
   protected:
     DBInterface& db_interface_;
 
-    std::string table_minmax_create_statement_;
+    //std::string table_minmax_create_statement_;
     std::string table_properties_create_statement_;
     std::string table_sectors_create_statement_;
     std::string table_view_points_create_statement_;

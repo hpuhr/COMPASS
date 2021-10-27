@@ -228,49 +228,49 @@ DBOVariable::Representation MetaDBOVariable::representation()
     return representation;
 }
 
-std::string MetaDBOVariable::getMinString() const
-{
-    std::string value_string;
+//std::string MetaDBOVariable::getMinString() const
+//{
+//    std::string value_string;
 
-    for (auto variable_it : variables_)
-    {
-        if (value_string.size() == 0)
-            value_string = variable_it.second.getMinString();
-        else
-            value_string = variable_it.second.getSmallerValueString(
-                value_string, variable_it.second.getMinString());
-    }
-    // assert (value_string.size());
-    return value_string;
-}
+//    for (auto variable_it : variables_)
+//    {
+//        if (value_string.size() == 0)
+//            value_string = variable_it.second.getMinString();
+//        else
+//            value_string = variable_it.second.getSmallerValueString(
+//                value_string, variable_it.second.getMinString());
+//    }
+//    // assert (value_string.size());
+//    return value_string;
+//}
 
-std::string MetaDBOVariable::getMaxString() const
-{
-    std::string value_string;
+//std::string MetaDBOVariable::getMaxString() const
+//{
+//    std::string value_string;
 
-    for (auto variable_it : variables_)
-    {
-        if (value_string.size() == 0)
-            value_string = variable_it.second.getMaxString();
-        else
-            value_string = variable_it.second.getLargerValueString(
-                value_string, variable_it.second.getMaxString());
-    }
-    // assert (value_string.size());
-    return value_string;
-}
+//    for (auto variable_it : variables_)
+//    {
+//        if (value_string.size() == 0)
+//            value_string = variable_it.second.getMaxString();
+//        else
+//            value_string = variable_it.second.getLargerValueString(
+//                value_string, variable_it.second.getMaxString());
+//    }
+//    // assert (value_string.size());
+//    return value_string;
+//}
 
-std::string MetaDBOVariable::getMinStringRepresentation() const
-{
-    assert(variables_.size());
-    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
-}
+//std::string MetaDBOVariable::getMinStringRepresentation() const
+//{
+//    assert(variables_.size());
+//    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
+//}
 
-std::string MetaDBOVariable::getMaxStringRepresentation() const
-{
-    assert(variables_.size());
-    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
-}
+//std::string MetaDBOVariable::getMaxStringRepresentation() const
+//{
+//    assert(variables_.size());
+//    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
+//}
 
 void MetaDBOVariable::removeOutdatedVariables()
 {

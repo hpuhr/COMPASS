@@ -30,11 +30,11 @@
 #include <memory>
 #include <set>
 
-static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_";
-static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
-static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
-static const std::string TABLE_NAME_SECTORS = "atsdb_sectors";
-static const std::string TABLE_NAME_VIEWPOINTS = "atsdb_viewpoints";
+//static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX = "activeDataSources_"; // TODO remove
+static const std::string TABLE_NAME_PROPERTIES = "properties";
+//static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
+static const std::string TABLE_NAME_SECTORS = "sectors";
+static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
 
 class COMPASS;
 class Buffer;
@@ -55,15 +55,6 @@ class SectorLayer;
 class SQLGenerator;
 class QWidget;
 
-/**
- * @brief Encapsulates all dedicated database functionality
- *
- * After instantiation, initConnection has to be called to create a database connection. After this
- * step, a number of functions provide read/write/other methods. Simply delete to close database
- * connection.
- *
- * \todo Context reference point gets lost
- */
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
@@ -130,13 +121,13 @@ class DBInterface : public QObject, public Configurable
 
     bool existsTable(const std::string& table_name);
     void createTable(const DBObject& object);
-    bool existsMinMaxTable();
-    void createMinMaxTable();
-    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
-    /// (dbo type, id) -> (min, max)
-    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string>> getMinMaxInfo();
-    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
-                      const std::string& max);
+//    bool existsMinMaxTable();
+//    void createMinMaxTable();
+//    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
+//    /// (dbo type, id) -> (min, max)
+//    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string>> getMinMaxInfo();
+//    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
+//                      const std::string& max);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
 

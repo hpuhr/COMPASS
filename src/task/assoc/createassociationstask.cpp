@@ -28,7 +28,7 @@
 #include "dbovariableset.h"
 #include "jobmanager.h"
 #include "metadbovariable.h"
-#include "postprocesstask.h"
+//#include "postprocesstask.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "buffer.h"
@@ -134,17 +134,17 @@ bool CreateAssociationsTask::checkPrerequisites()
         return false;
 
     // check if was post-processed
-    logdbg << "CreateAssociationsTask: checkPrerequisites: post "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateAssociationsTask: checkPrerequisites: post "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
-        return false;
+//    if (!COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+//        return false;
 
-    logdbg << "CreateAssociationsTask: checkPrerequisites: post2 "
-           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
+//    logdbg << "CreateAssociationsTask: checkPrerequisites: post2 "
+//           << COMPASS::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME);
 
-    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
-        return false;
+//    if (COMPASS::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+//        return false;
 
     // check if hash var exists in all data
     DBObjectManager& object_man = COMPASS::instance().objectManager();
