@@ -18,11 +18,6 @@
 #ifndef DBOBJECT_H_
 #define DBOBJECT_H_
 
-#include <qobject.h>
-
-#include <memory>
-#include <string>
-
 #include "configurable.h"
 #include "dboassociationcollection.h"
 #include "dbodatasource.h"
@@ -30,6 +25,12 @@
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "global.h"
+
+#include <qobject.h>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 class COMPASS;
 class PropertyList;
@@ -50,6 +51,7 @@ class DBObjectManager;
 class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
+
   signals:
     void newDataSignal(DBObject& object);
     void loadingDoneSignal(DBObject& object);

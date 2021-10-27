@@ -18,11 +18,12 @@
 #ifndef STOREDDBODATASOURCE_H
 #define STOREDDBODATASOURCE_H
 
+#include "configurable.h"
+
 #include <QWidget>
+
 #include <memory>
 #include <string>
-
-#include "configurable.h"
 
 class ManageDataSourcesTask;
 class DBODataSource;

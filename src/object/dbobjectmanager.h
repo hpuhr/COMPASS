@@ -18,13 +18,16 @@
 #ifndef DBOBJECTMANAGER_H_
 #define DBOBJECTMANAGER_H_
 
+#include "configurable.h"
+#include "dbcontentconfigurationdatasource.h"
+#include "dbcontentdbdatasource.h"
+#include "global.h"
+#include "singleton.h"
+
+
 #include <qobject.h>
 
 #include <vector>
-
-#include "configurable.h"
-#include "global.h"
-#include "singleton.h"
 
 class COMPASS;
 class DBObject;
@@ -35,30 +38,27 @@ class MetaDBOVariable;
 class DBOVariableSet;
 class DBSchemaManager;
 
-/**
- * @brief For management of all DBObjects
- *
- * Singleton which creates and holds all DBObjects defined in its configuration.
- */
 class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-  public slots:
+    const static std::vector<std::string> db_content_types_;
+
+public slots:
     // void schemaLockedSlot ();
     void loadSlot();
     void updateSchemaInformationSlot();
     void databaseContentChangedSlot();
     void loadingDoneSlot(DBObject& object);
 
-  signals:
+signals:
     void dbObjectsChangedSignal();
     void schemaChangedSignal();
 
     void loadingStartedSignal();
     void allLoadingDoneSignal();
 
-  public:
+public:
     /// @brief Constructor
     DBObjectManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
@@ -135,7 +135,7 @@ class DBObjectManager : public QObject, public Configurable
 
     bool loadInProgress() const;
 
-  protected:
+protected:
     COMPASS& compass_;
 
     bool use_order_{false};
@@ -158,6 +158,9 @@ class DBObjectManager : public QObject, public Configurable
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map<std::string, DBObject*> objects_;
     std::map<std::string, MetaDBOVariable*> meta_variables_;
+
+    std::vector<std::unique_ptr<DBContent::ConfigurationDataSource>> config_data_sources_;
+    std::vector<std::unique_ptr<DBContent::DBDataSource>> db_data_sources_;
 
     DBObjectManagerWidget* widget_{nullptr};
     DBObjectManagerLoadWidget* load_widget_{nullptr};

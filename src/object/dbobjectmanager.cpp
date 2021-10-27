@@ -38,9 +38,8 @@
 
 using namespace Utils::String;
 
-/**
- * Creates sub-configurables.
- */
+const std::vector<std::string> DBObjectManager::db_content_types_ {"Radar", "MLAT", "ADS-B", "RefTraj"};
+
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_object.json"), compass_(*compass)
