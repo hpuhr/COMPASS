@@ -28,12 +28,12 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "dboeditdatasourceswidget.h"
+//#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "logger.h"
 #include "mainwindow.h"
-#include "managedatasourcestask.h"
-#include "managedatasourcestaskwidget.h"
+//#include "managedatasourcestask.h"
+//#include "managedatasourcestaskwidget.h"
 //#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "sqliteconnectionwidget.h"
@@ -99,10 +99,11 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
         client.processEvents();
 
     // clear previous data sources
-    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
-    manage_ds_task.clearConfigDataSources();
+    TODO_ASSERT
+//    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+//    manage_ds_task.clearConfigDataSources();
 
     while (client.hasPendingEvents())
         client.processEvents();
@@ -130,15 +131,17 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     while (client.hasPendingEvents() || !asterix_import_task.done())
         client.processEvents();
 
-    // set data sources
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+    TODO_ASSERT
 
-    std::string ds_filename = data_path + "ds.json";
-    REQUIRE(Files::fileExists(ds_filename));
+//    // set data sources
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
 
-    manage_ds_task.importConfigDataSources(ds_filename);
-    manage_ds_task.autoSyncAllConfigDataSourcesToDB();
+//    std::string ds_filename = data_path + "ds.json";
+//    REQUIRE(Files::fileExists(ds_filename));
+
+//    manage_ds_task.importConfigDataSources(ds_filename);
+//    manage_ds_task.autoSyncAllConfigDataSourcesToDB();
 
     while (client.hasPendingEvents())
         client.processEvents();

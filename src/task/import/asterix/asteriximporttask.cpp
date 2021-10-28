@@ -1177,7 +1177,6 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
             std::string data_source_var_name = parser_it.second.dataSourceVariableName();
             assert(data_source_var_name.size());
-            assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
 
             DBOVariableSet set = parser_it.second.variableList();
 
@@ -1240,11 +1239,13 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         logdbg << "ASTERIXImportTask: insertData: adding new data sources in dbo "
                << db_object.name() << " ds varname '" << data_source_var_name << "'";
 
+        TODO_ASSERT
+
         // collect existing datasources
-        std::set<int> datasources_existing;
-        if (db_object.hasDataSources())
-            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-                datasources_existing.insert(ds_it->first);
+//        std::set<int> datasources_existing;
+//        if (db_object.hasDataSources())
+//            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+//                datasources_existing.insert(ds_it->first);
 
         // getting key list and distinct values
         assert(buffer->properties().hasProperty(data_source_var_name));
@@ -1267,8 +1268,9 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
             {
                 key_val = data_source_key_list.get(cnt);
 
-                if (datasources_existing.count(key_val) != 0)
-                    continue;
+                TODO_ASSERT
+//                if (datasources_existing.count(key_val) != 0)
+//                    continue;
 
                 if (sac_sics.count(key_val) == 0)
                 {
@@ -1289,28 +1291,30 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         // adding datasources
         std::map<int, std::pair<int, int>> datasources_to_add;
 
-        for (auto ds_key_it : data_source_keys)
-            if (datasources_existing.count(ds_key_it) == 0 &&
-                added_data_sources_.count(ds_key_it) == 0)
-            {
-                if (datasources_to_add.count(ds_key_it) == 0)
-                {
-                    logdbg << "ASTERIXImportTask: insertData: adding new data source "
-                           << ds_key_it;
-                    if (sac_sics.count(ds_key_it) == 0)
-                        datasources_to_add[ds_key_it] = {-1, -1};
-                    else
-                        datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
-                                                         sac_sics.at(ds_key_it).second};
+        TODO_ASSERT
 
-                    added_data_sources_.insert(ds_key_it);
-                }
-            }
+//        for (auto ds_key_it : data_source_keys)
+//            if (datasources_existing.count(ds_key_it) == 0 &&
+//                added_data_sources_.count(ds_key_it) == 0)
+//            {
+//                if (datasources_to_add.count(ds_key_it) == 0)
+//                {
+//                    logdbg << "ASTERIXImportTask: insertData: adding new data source "
+//                           << ds_key_it;
+//                    if (sac_sics.count(ds_key_it) == 0)
+//                        datasources_to_add[ds_key_it] = {-1, -1};
+//                    else
+//                        datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
+//                                                         sac_sics.at(ds_key_it).second};
 
-        if (datasources_to_add.size())
-        {
-            db_object.addDataSources(datasources_to_add);
-        }
+//                    added_data_sources_.insert(ds_key_it);
+//                }
+//            }
+
+//        if (datasources_to_add.size())
+//        {
+//            db_object.addDataSources(datasources_to_add);
+//        }
 
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
         db_object.insertData(set, buffer, false);

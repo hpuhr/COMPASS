@@ -26,15 +26,15 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "dboeditdatasourceswidget.h"
+//#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 #include "logger.h"
 #include "mainwindow.h"
-#include "managedatasourcestask.h"
-#include "managedatasourcestaskwidget.h"
+//#include "managedatasourcestask.h"
+//#include "managedatasourcestaskwidget.h"
 //#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
 #include "sqliteconnectionwidget.h"
@@ -100,11 +100,13 @@ TEST_CASE("COMPASS Import JSON", "[COMPASS]")
     while (client.hasPendingEvents())
         client.processEvents();
 
+    TODO_ASSERT
+
     // clear previous data sources
-    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
-    task_manager_widget->setCurrentTask(manage_ds_task);
-    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
-    manage_ds_task.clearConfigDataSources();
+//    ManageDataSourcesTask& manage_ds_task = task_manager.manageDataSourcesTask();
+//    task_manager_widget->setCurrentTask(manage_ds_task);
+//    REQUIRE(task_manager_widget->getCurrentTaskName() == manage_ds_task.name());
+//    manage_ds_task.clearConfigDataSources();
 
     while (client.hasPendingEvents())
         client.processEvents();

@@ -354,7 +354,8 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createReferen
     {
         loginf << "CreateAssociationsJob: createReferenceUTNs: processing ds_id " << ds_it.first;
 
-        string ds_name = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
+        TODO_ASSERT
+        string ds_name; // = object_man.object("RefTraj").dataSources().at(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createReferenceUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -420,7 +421,8 @@ void CreateAssociationsJob::createTrackerUTNs(std::map<unsigned int, Association
     {
         loginf << "CreateAssociationsJob: createTrackerUTNs: processing ds_id " << ds_it.first;
 
-        string ds_name = object_man.object("Tracker").dataSources().at(ds_it.first).name();
+        TODO_ASSERT
+        string ds_name;// = object_man.object("Tracker").dataSources().at(ds_it.first).name();
 
         loginf << "CreateAssociationsJob: createTrackerUTNs: creating tmp targets for ds_id " << ds_it.first;
 
@@ -507,7 +509,8 @@ void CreateAssociationsJob::createNonTrackerUTNS(std::map<unsigned int, Associat
             assert (num_data_sources);
             done_perc = (unsigned int)(100.0 * (float)ds_cnt/(float)num_data_sources);
 
-            string ds_name = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
+            TODO_ASSERT
+            string ds_name;// = object_man.object(dbo_it.first).dataSources().at(ds_it.first).name();
             emit statusSignal(("Creating "+dbo_it.first+" "+ds_name+" UTNs ("+to_string(done_perc)+"%)").c_str());
 
             std::vector<Association::TargetReport>& target_reports = ds_it.second;
@@ -752,8 +755,9 @@ std::map<unsigned int, Association::Target> CreateAssociationsJob::createTracked
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
-    assert (object_man.object(dbo_name).dataSources().count(ds_id));
-    string ds_name = object_man.object(dbo_name).dataSources().at(ds_id).name();
+    TODO_ASSERT
+    //assert (object_man.object(dbo_name).dataSources().count(ds_id));
+    string ds_name;// = object_man.object(dbo_name).dataSources().at(ds_id).name();
 
     std::map<unsigned int, std::vector<Association::TargetReport>>& ds_id_trs = target_reports_.at(dbo_name);
 

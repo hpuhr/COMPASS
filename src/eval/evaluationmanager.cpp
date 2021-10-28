@@ -1095,9 +1095,11 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!COMPASS::instance().objectManager().existsObject(dbo_name_ref_))
         return false;
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+    TODO_ASSERT
 
-    return object.hasDataSources();
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+
+//    return object.hasDataSources();
 }
 
 
@@ -1136,7 +1138,8 @@ bool EvaluationManager::hasValidTestDBO ()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
-    return object.hasDataSources();
+    TODO_ASSERT
+    //return object.hasDataSources();
 }
 
 std::set<int> EvaluationManager::activeDataSourcesTst()
@@ -1329,8 +1332,10 @@ void EvaluationManager::updateReferenceDBO()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-    if (object.hasDataSources())
-        updateReferenceDataSources();
+    TODO_ASSERT
+
+//    if (object.hasDataSources())
+//        updateReferenceDataSources();
 
 //    if (object.hasActiveDataSourcesInfo())
 //        updateReferenceDataSourcesActive();
@@ -1342,25 +1347,27 @@ void EvaluationManager::updateReferenceDataSources()
 
     assert (hasValidReferenceDBO());
 
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
+//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
-    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
-    {
-        if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
-        {
-            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
-                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
+    TODO_ASSERT
 
-            // needed for old compiler
-            json::boolean_t& active
-                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+//    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+//    {
+//        if (data_sources_ref_.find(ds_it->first) == data_sources_ref_.end())
+//        {
+//            if (!active_sources_ref_[dbo_name_ref_].contains(to_string(ds_it->first)))
+//                active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)] = true; // init with default true
 
-            data_sources_ref_.emplace(std::piecewise_construct,
-                                      std::forward_as_tuple(ds_it->first),  // args for key
-                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                            active));
-        }
-    }
+//            // needed for old compiler
+//            json::boolean_t& active
+//                    = active_sources_ref_[dbo_name_ref_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+//            data_sources_ref_.emplace(std::piecewise_construct,
+//                                      std::forward_as_tuple(ds_it->first),  // args for key
+//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+//                                                            active));
+//        }
+//    }
 }
 
 //void EvaluationManager::updateReferenceDataSourcesActive()
@@ -1402,8 +1409,10 @@ void EvaluationManager::updateTestDBO()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
-    if (object.hasDataSources())
-        updateTestDataSources();
+    TODO_ASSERT
+
+//    if (object.hasDataSources())
+//        updateTestDataSources();
 
 //    if (object.hasActiveDataSourcesInfo())
 //        updateTestDataSourcesActive();
@@ -1417,23 +1426,25 @@ void EvaluationManager::updateTestDataSources()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
-    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
-    {
-        if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
-        {
-            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
-                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
+    TODO_ASSERT
 
-            // needed for old compiler
-            json::boolean_t& active =
-                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+//    for (auto ds_it = object.dsBegin(); ds_it != object.dsEnd(); ++ds_it)
+//    {
+//        if (data_sources_tst_.find(ds_it->first) == data_sources_tst_.end())
+//        {
+//            if (!active_sources_tst_[dbo_name_tst_].contains(to_string(ds_it->first)))
+//                active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)] = true; // init with default true
 
-            data_sources_tst_.emplace(std::piecewise_construct,
-                                      std::forward_as_tuple(ds_it->first),  // args for key
-                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                            active));
-        }
-    }
+//            // needed for old compiler
+//            json::boolean_t& active =
+//                    active_sources_tst_[dbo_name_tst_][to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+//            data_sources_tst_.emplace(std::piecewise_construct,
+//                                      std::forward_as_tuple(ds_it->first),  // args for key
+//                                      std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+//                                                            active));
+//        }
+//    }
 }
 
 //void EvaluationManager::updateTestDataSourcesActive()

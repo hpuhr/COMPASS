@@ -5,6 +5,17 @@ using namespace nlohmann;
 
 namespace DBContent {
 
+const std::string DBDataSource::table_name_{"data_sources"};
+
+const Property DBDataSource::id_column_{"ds_id", PropertyDataType::UINT};
+const Property DBDataSource::db_content_type_column_{"db_content_type", PropertyDataType::STRING};
+const Property DBDataSource::sac_column_{"sac", PropertyDataType::UINT};
+const Property DBDataSource::sic_column_{"sic", PropertyDataType::UINT};
+const Property DBDataSource::name_column_{"name", PropertyDataType::STRING};
+const Property DBDataSource::short_name_{"short_name", PropertyDataType::STRING};
+const Property DBDataSource::info_column_{"info", PropertyDataType::STRING};
+const Property DBDataSource::counts_column_{"counts", PropertyDataType::STRING};
+
 DBDataSource::DBDataSource()
 {
 
@@ -15,9 +26,19 @@ DBDataSource::~DBDataSource()
 
 }
 
+void DBDataSource::counts (const std::string& counts)
+{
+    counts_ = json::parse(counts);
+}
+
 nlohmann::json& DBDataSource::counts()
 {
     return counts_;
+}
+
+std::string DBDataSource::countsStr()
+{
+    return counts_.dump();
 }
 
 //json DBDataSource::getAsJSON()

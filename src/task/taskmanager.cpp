@@ -23,12 +23,12 @@
 #include "databaseopentask.h"
 #include "databaseopentaskwidget.h"
 #include "dbobjectmanager.h"
-#include "dboeditdatasourceswidget.h"
+//#include "dboeditdatasourceswidget.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
-#include "managedatasourcestask.h"
-#include "managedatasourcestaskwidget.h"
+//#include "managedatasourcestask.h"
+//#include "managedatasourcestaskwidget.h"
 #include "managedbobjectstask.h"
 #include "managedbobjectstaskwidget.h"
 #include "manageschematask.h"
@@ -89,8 +89,8 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 #endif
 
     task_list_.insert(task_list_.end(), {"JSONImportTask", "GPSTrailImportTask", // "MySQLDBImportTask",
-                                         "ManageDataSourcesTask", "ManageSectorsTask",
-                                         "RadarPlotPositionCalculatorTask", "PostProcessTask",
+                                         "ManageSectorsTask", // "ManageDataSourcesTask",
+                                         "RadarPlotPositionCalculatorTask", //"PostProcessTask",
                                          "CreateAssociationsTask", "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_)  // check that all tasks in list exist
@@ -153,13 +153,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(gps_trail_import_task_);
         addTask(class_id, gps_trail_import_task_.get());
     }
-    else if (class_id.compare("ManageDataSourcesTask") == 0)
-    {
-        assert(!manage_datasources_task_);
-        manage_datasources_task_.reset(new ManageDataSourcesTask(class_id, instance_id, *this));
-        assert(manage_datasources_task_);
-        addTask(class_id, manage_datasources_task_.get());
-    }
+//    else if (class_id.compare("ManageDataSourcesTask") == 0)
+//    {
+//        assert(!manage_datasources_task_);
+//        manage_datasources_task_.reset(new ManageDataSourcesTask(class_id, instance_id, *this));
+//        assert(manage_datasources_task_);
+//        addTask(class_id, manage_datasources_task_.get());
+//    }
     else if (class_id.compare("ManageSectorsTask") == 0)
     {
         assert(!manage_sectors_task_);
@@ -258,11 +258,11 @@ void TaskManager::checkSubConfigurables()
         assert(gps_trail_import_task_);
     }
 
-    if (!manage_datasources_task_)
-    {
-        generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
-        assert(manage_datasources_task_);
-    }
+//    if (!manage_datasources_task_)
+//    {
+//        generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
+//        assert(manage_datasources_task_);
+//    }
 
     if (!manage_sectors_task_)
     {
@@ -374,7 +374,7 @@ void TaskManager::shutdown()
     view_points_import_task_ = nullptr;
     json_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
-    manage_datasources_task_ = nullptr;
+    //manage_datasources_task_ = nullptr;
     manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
@@ -437,11 +437,11 @@ ManageSchemaTask& TaskManager::manageSchemaTask() const
     return *manage_schema_task_;
 }
 
-ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const
-{
-    assert(manage_datasources_task_);
-    return *manage_datasources_task_;
-}
+//ManageDataSourcesTask& TaskManager::manageDataSourcesTask() const
+//{
+//    assert(manage_datasources_task_);
+//    return *manage_datasources_task_;
+//}
 
 ManageSectorsTask& TaskManager::manageSectorsTask() const
 {

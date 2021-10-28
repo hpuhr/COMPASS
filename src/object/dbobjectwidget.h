@@ -43,54 +43,35 @@ class DBObjectWidget : public QWidget
     Q_OBJECT
 
   signals:
-    /// @brief Emitted if DBObject was changed
     void changedDBOSignal();
 
   public slots:
-    /// @brief Updates data sources grid
     void updateDataSourcesGridSlot();
-    /// @brief Edits a data source
-    void editDataSourceSlot();
 
-    /// @brief Changes DBO name
     void editNameSlot();
-    /// @brief Changes DBO info
     void editInfoSlot();
 
-    /// @brief Edits a DBOVariable
-    // void editDBOVarSlot();
     void editDBOVariableNameSlot();
     void editDBOVariableDescriptionSlot();
     void editDBOVariableDBColumnSlot(const QString& text);
-    /// @brief Deletes a DBOVariable
     void deleteDBOVarSlot();
 
-    /// @brief Updates the DBOVariables grid
     void updateDBOVarsGridSlot();
-    /// @brief Updates meta tables grid
-    //void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
 
   public:
-    /// @brief Constructor
-    DBObjectWidget(DBObject* object, QWidget* parent = 0,
-                   Qt::WindowFlags f = 0);
-    /// @brief Destructor
+    DBObjectWidget(DBObject* object, QWidget* parent = 0, Qt::WindowFlags f = 0);
     virtual ~DBObjectWidget();
 
   private:
-    /// @brief DBObject to be managed
     DBObject* object_{nullptr};
 
-    /// @brief DBO name
     QLineEdit* name_edit_{nullptr};
-    /// @brief DBO info
     QLineEdit* info_edit_{nullptr};
 
     QPushButton* edit_label_button_{nullptr};
 
-    /// @brief Grid with all data sources
     QGridLayout* ds_grid_{nullptr};
 
     /// @brief grid with all meta tables per schema

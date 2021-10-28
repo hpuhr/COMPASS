@@ -23,7 +23,6 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "configurable.h"
-#include "dbodatasource.h"
 #include "task.h"
 
 class Buffer;

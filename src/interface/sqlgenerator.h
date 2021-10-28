@@ -47,9 +47,9 @@ class SQLGenerator
 //    std::shared_ptr<DBCommand> getSelectCommand(const DBObject& object,
 //                                                const std::vector<std::string>& columns,
 //                                                bool distinct = false);
-    std::shared_ptr<DBCommand> getDataSourcesSelectCommand(DBObject& object);
+    std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
 
-    std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
+    //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBObject& object);
     std::shared_ptr<DBCommand> getADSBInfoCommand(DBObject& adsb_obj);
 
     std::string getCreateAssociationTableStatement(const std::string& table_name);

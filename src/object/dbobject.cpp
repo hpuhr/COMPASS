@@ -33,7 +33,6 @@
 #include "finalizedboreadjob.h"
 #include "insertbufferdbjob.h"
 #include "jobmanager.h"
-#include "managedatasourcestask.h"
 #include "propertylist.h"
 #include "stringconv.h"
 #include "taskmanager.h"
@@ -45,9 +44,6 @@
 
 using namespace Utils;
 
-/**
- * Registers parameters, creates sub configurables
- */
 DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
                    DBObjectManager* manager)
     : Configurable(class_id, instance_id, manager,
@@ -69,17 +65,11 @@ DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::str
            << name_;
 }
 
-/**
- * Deletes data source definitions, schema & meta table definitions and variables
- */
 DBObject::~DBObject()
 {
     logdbg << "DBObject: dtor: " << name_;
 }
 
-/**
- * Can generate DBOVariables, DBOSchemaMetaTableDefinitions and DBODataSourceDefinitions.
- */
 void DBObject::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
     logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id;
@@ -99,16 +89,6 @@ void DBObject::generateSubConfigurable(const std::string& class_id, const std::s
             std::forward_as_tuple(var_name),                      // args for key
             std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
-    else if (class_id == "DBODataSourceDefinition")
-    {
-        assert (!data_source_definition_);
-
-        data_source_definition_.reset(new DBODataSourceDefinition(class_id, instance_id, this));
-        assert (data_source_definition_);
-
-        connect(data_source_definition_.get(), SIGNAL(definitionChangedSignal()), this,
-                SLOT(dataSourceDefinitionChanged()));
-    }
     else if (class_id == "DBOLabelDefinition")
     {
         assert(!label_definition_);
@@ -126,12 +106,6 @@ void DBObject::checkSubConfigurables()
     {
         generateSubConfigurable("DBOLabelDefinition", "DBOLabelDefinition0");
         assert(label_definition_);
-    }
-
-    if (!data_source_definition_)
-    {
-        generateSubConfigurable("DBODataSourceDefinition", "DBODataSourceDefinition0");
-        assert(data_source_definition_);
     }
 }
 
@@ -167,47 +141,6 @@ void DBObject::deleteVariable(const std::string& name)
     assert(!hasVariable(name));
 }
 
-const DBODataSourceDefinition& DBObject::currentDataSourceDefinition() const
-{
-    assert(data_source_definition_);
-    return *data_source_definition_;
-}
-
-void DBObject::dataSourceDefinitionChanged()
-{
-    logdbg << "DBObject: " << name_ << " dataSourceDefinitionChanged";
-}
-
-void DBObject::buildDataSources()
-{
-    logdbg << "DBObject: buildDataSources: start";
-    data_sources_.clear();
-
-    logdbg << "DBObject: buildDataSources: building dbo " << name_;
-
-    if (!COMPASS::instance().interface().hasDataSourceTables(*this))
-    {
-        logwrn << "DBObject: buildDataSources: object " << name_
-               << " has data sources but no respective tables";
-        return;
-    }
-
-    logdbg << "DBObject: buildDataSources: building data sources for " << name_;
-
-    try
-    {
-        data_sources_ = COMPASS::instance().interface().getDataSources(*this);
-    }
-    catch (std::exception& e)
-    {
-        logerr << "DBObject: buildDataSources: failed with '" << e.what() << "', deleting entry";
-
-        data_source_definition_ = nullptr;
-    }
-
-    logdbg << "DBObject: buildDataSources: end";
-}
-
 std::string DBObject::associationsTableName()
 {
     assert (db_table_name_.size());
@@ -238,280 +171,6 @@ DBOVariable& DBObject::getKeyVariable()
 
     throw std::runtime_error("DBObject: getKeyVariable: no key variable found");
 }
-
-void DBObject::addDataSource(int key_value, const std::string& name)
-{
-    loginf << "DBObject: addDataSources: inserting source " << name;
-    assert(data_source_definition_);
-
-    assert (false); // TODO
-
-
-//    const DBODataSourceDefinition& mos_def = currentDataSourceDefinition();
-//    std::string meta_table_name = mos_def.metaTableName();
-//    std::string key_col_name = mos_def.foreignKey();
-//    std::string name_col_name = mos_def.nameColumn();
-
-//    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
-//    assert(schema.hasMetaTable(meta_table_name));
-
-//    const MetaDBTable& meta = schema.metaTable(meta_table_name);
-//    assert(meta.hasColumn(key_col_name));
-//    assert(meta.hasColumn(name_col_name));
-
-//    const DBTableColumn& foreign_key_col = meta.column(key_col_name);
-//    const DBTableColumn& name_col = meta.column(name_col_name);
-
-//    PropertyList list;
-//    list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
-//    list.addProperty(name_col.name(), PropertyDataType::STRING);
-
-//    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer>(new Buffer(list, name_));
-
-//    buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
-//    buffer_ptr->get<std::string>(name_col.name()).set(0, name);
-
-//    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
-//    MetaDBTable& meta_table =
-//        COMPASS::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
-
-//    DBInterface& db_interface = COMPASS::instance().interface();
-//    db_interface.insertBuffer(meta_table, buffer_ptr);
-
-//    logdbg << "DBObject: addDataSources: emitting signal";
-//    emit db_interface.databaseContentChangedSignal();
-}
-
-void DBObject::addDataSources(std::map<int, std::pair<int, int>>& sources)
-{
-    loginf << "DBObject " << name_ << ": addDataSources:  inserting " << sources.size()
-           << " sources";
-    assert(data_source_definition_);
-
-    assert (false); // TODO
-
-//    const DBODataSourceDefinition& mos_def = currentDataSourceDefinition();
-//    std::string meta_table_name = mos_def.metaTableName();
-
-//    std::string key_col_name = mos_def.foreignKey();
-//    std::string name_col_name = mos_def.nameColumn();
-//    std::string short_name_col_name = mos_def.shortNameColumn();
-//    std::string sac_col_name = mos_def.sacColumn();
-//    std::string sic_col_name = mos_def.sicColumn();
-//    std::string latitude_col_name = mos_def.latitudeColumn();
-//    std::string longitude_col_name = mos_def.longitudeColumn();
-//    std::string altitude_col_name = mos_def.altitudeColumn();
-
-//    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
-//    assert(schema.hasMetaTable(meta_table_name));
-
-//    const MetaDBTable& meta = schema.metaTable(meta_table_name);
-//    assert(meta.hasColumn(key_col_name));
-//    assert(meta.hasColumn(name_col_name));
-//    assert(meta.hasColumn(short_name_col_name));
-//    assert(meta.hasColumn(sac_col_name));
-//    assert(meta.hasColumn(sic_col_name));
-
-//    bool has_lat_long = meta.hasColumn(latitude_col_name) && meta.hasColumn(longitude_col_name);
-//    bool has_altitude = meta.hasColumn(altitude_col_name);
-
-//    const DBTableColumn& foreign_key_col = meta.column(key_col_name);
-//    const DBTableColumn& name_col = meta.column(name_col_name);
-//    const DBTableColumn& short_name_col = meta.column(short_name_col_name);
-//    const DBTableColumn& sac_col = meta.column(sac_col_name);
-//    const DBTableColumn& sic_col = meta.column(sic_col_name);
-//    // const DBTableColumn& latitude_col = meta.column(latitude_col_name);
-//    // const DBTableColumn& longitude_col = meta.column(longitude_col_name);
-//    // const DBTableColumn& altitude_col = meta.column(altitude_col_name);
-
-//    PropertyList list;
-//    list.addProperty(foreign_key_col.name(), foreign_key_col.propertyType());
-//    list.addProperty(name_col.name(), name_col.propertyType());
-//    list.addProperty(short_name_col.name(), short_name_col.propertyType());
-//    list.addProperty(sac_col.name(), sac_col.propertyType());
-//    list.addProperty(sic_col.name(), sic_col.propertyType());
-
-//    if (has_lat_long)
-//    {
-//        list.addProperty(meta.column(latitude_col_name).name(),
-//                         meta.column(latitude_col_name).propertyType());
-//        list.addProperty(meta.column(longitude_col_name).name(),
-//                         meta.column(longitude_col_name).propertyType());
-//    }
-
-//    if (has_altitude)
-//        list.addProperty(meta.column(altitude_col_name).name(),
-//                         meta.column(altitude_col_name).propertyType());
-
-//    loginf << "DBObject: addDataSources: " << name() << " has lat/long " << has_lat_long
-//           << " has alt " << has_altitude;
-
-//    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer>(new Buffer(list, name_));
-
-//    ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
-//    const std::map<unsigned int, StoredDBODataSource>& stored_data_sources =
-//        ds_task.storedDataSources(name_);
-
-//    unsigned int cnt = 0;
-//    int sac, sic;
-//    bool has_sac_sic;
-//    std::string name;
-
-//    for (auto& src_it : sources)
-//    {
-//        sac = src_it.second.first;
-//        sic = src_it.second.second;
-//        has_sac_sic = (sac >= 0) && (sic >= 0);
-
-//        name = std::to_string(src_it.first);
-
-//        if (has_sac_sic)
-//        {
-//            bool stored_found = false;
-//            unsigned int stored_id{0};
-
-//            for (auto& stored_it : stored_data_sources)
-//            {
-//                if (stored_it.second.sac() == sac && stored_it.second.sic() == sic)
-//                {
-//                    stored_found = true;
-//                    stored_id = stored_it.first;
-//                    break;
-//                }
-//            }
-
-//            if (stored_found)
-//            {
-//                assert(ds_task.hasStoredDataSource(name_, stored_id));
-//                StoredDBODataSource& src = ds_task.storedDataSource(name_, stored_id);
-
-//                name = src.name();
-//                if (src.hasShortName())
-//                    buffer_ptr->get<std::string>(short_name_col.name()).set(cnt, src.shortName());
-
-//                buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
-//                buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
-
-//                loginf << "DBObject " << name_ << ": addDataSources: id " << src_it.first << " sac "
-//                       << sac << " sic " << sic << " found stored name " << name << " id "
-//                       << stored_id << " sac " << static_cast<int>(src.sac()) << " sic "
-//                       << static_cast<int>(src.sic());
-
-//                if (has_lat_long)
-//                {
-//                    loginf << "DBObject: addDataSources: " << name << " stored found has lat/long";
-
-//                    if (src.hasLatitude())
-//                        buffer_ptr->get<double>(meta.column(latitude_col_name).name())
-//                            .set(cnt, src.latitude());
-//                    else
-//                        buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
-
-//                    if (src.hasLongitude())
-//                        buffer_ptr->get<double>(meta.column(longitude_col_name).name())
-//                            .set(cnt, src.longitude());
-//                    else
-//                        buffer_ptr->get<double>(meta.column(longitude_col_name).name())
-//                            .setNull(cnt);
-//                }
-//                //                else
-//                //                {
-//                //                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt,
-//                //                    src.latitude());
-//                //                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt,
-//                //                    src.longitude());
-//                //                }
-
-//                if (has_altitude)
-//                {
-//                    loginf << "DBObject: addDataSources: " << name << " stored found has alt";
-//                    if (src.hasAltitude())
-//                        buffer_ptr->get<double>(meta.column(altitude_col_name).name())
-//                            .set(cnt, src.altitude());
-//                    else
-//                        buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
-//                }
-//            }
-//            else
-//            {
-//                buffer_ptr->get<std::string>(short_name_col.name()).setNull(cnt);
-//                buffer_ptr->get<char>(sac_col.name()).set(cnt, sac);
-//                buffer_ptr->get<char>(sic_col.name()).set(cnt, sic);
-
-//                if (has_lat_long)
-//                {
-//                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
-//                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNull(cnt);
-//                }
-
-//                if (has_altitude)
-//                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
-//            }
-//        }
-//        else
-//        {
-//            buffer_ptr->get<std::string>(short_name_col.name()).setNull(cnt);
-//            buffer_ptr->get<char>(sac_col.name()).setNull(cnt);
-//            buffer_ptr->get<char>(sic_col.name()).setNull(cnt);
-
-//            if (has_lat_long)
-//            {
-//                buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
-//                buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNull(cnt);
-//            }
-
-//            if (has_altitude)
-//                buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
-//        }
-
-//        buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
-//        buffer_ptr->get<std::string>(name_col.name()).set(cnt, name);
-//        cnt++;
-//    }
-
-//    assert(COMPASS::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
-//    MetaDBTable& meta_table =
-//        COMPASS::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
-
-//    DBInterface& db_interface = COMPASS::instance().interface();
-//    db_interface.insertBuffer(meta_table, buffer_ptr);
-//    db_interface.updateTableInfo();
-
-//    updateToDatabaseContent();
-//    // logdbg << "DBObject: addDataSources: emitting signal";
-//    // emit db_interface.databaseContentChangedSignal();
-}
-
-bool DBObject::hasDataSource(int id) { return data_sources_.count(id) > 0; }
-
-DBODataSource& DBObject::getDataSource(int id)
-{
-    assert(hasDataSource(id));
-    return data_sources_.at(id);
-}
-
-void DBObject::updateDataSource(int id)
-{
-    assert(hasDataSource(id));
-    COMPASS::instance().interface().updateDataSource(getDataSource(id));
-}
-
-const std::string& DBObject::getNameOfSensor(int id)
-{
-    assert(hasDataSource(id));
-
-    return data_sources_.at(id).name();
-}
-
-//bool DBObject::hasActiveDataSourcesInfo()
-//{
-//    return COMPASS::instance().interface().hasActiveDataSources(*this);
-//}
-
-//const std::set<int> DBObject::getActiveDataSources()
-//{
-//    return COMPASS::instance().interface().getActiveDataSources(*this);
-//}
 
 std::string DBObject::status()
 {
@@ -951,11 +610,6 @@ void DBObject::updateToDatabaseContent()
 
     logdbg << "DBObject: " << name_ << " updateToDatabaseContent: table " << db_table_name_
            << " count " << count_;
-
-    data_sources_.clear();
-
-    if (count_)
-        buildDataSources();
 
     if (info_widget_)
         info_widget_->updateSlot();

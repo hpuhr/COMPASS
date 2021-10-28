@@ -26,7 +26,6 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "dbodatasource.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "logger.h"
@@ -476,7 +475,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
     bool has_altitude;
     // double altitude_angle;
 
-    assert(db_object_->hasDataSources());
+    TODO_ASSERT
+    //assert(db_object_->hasDataSources());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
     // double sys_x, sys_y;
@@ -540,21 +540,22 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
         else
             altitude_ft = 0.0;  // has to assumed in projection later on
 
-        if (!db_object_->hasDataSource(sensor_id))
-        {
-            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
-                   << " unkown";
-            transformation_errors++;
-            continue;
-        }
+        TODO_ASSERT
+//        if (!db_object_->hasDataSource(sensor_id))
+//        {
+//            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id
+//                   << " unkown";
+//            transformation_errors++;
+//            continue;
+//        }
 
-        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+//        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
 
-        if (!data_source.hasLatitude() || !data_source.hasLongitude())
-        {
-            transformation_errors++;
-            continue;
-        }
+//        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+//        {
+//            transformation_errors++;
+//            continue;
+//        }
 
         pos_azm_rad = pos_azm_deg * DEG2RAD;
 
@@ -621,17 +622,18 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot(DBObject& object)
         //            }
         //        }
 
-        if (!projection.hasCoordinateSystem(data_source.id()))
-        {
-            assert(data_source.hasLatitude());
-            assert(data_source.hasLongitude());
-            assert(data_source.hasAltitude());
-            projection.addCoordinateSystem(data_source.id(), data_source.latitude(),
-                                           data_source.longitude(), data_source.altitude());
-        }
+        TODO_ASSERT
+//        if (!projection.hasCoordinateSystem(data_source.id()))
+//        {
+//            assert(data_source.hasLatitude());
+//            assert(data_source.hasLongitude());
+//            assert(data_source.hasAltitude());
+//            projection.addCoordinateSystem(data_source.id(), data_source.latitude(),
+//                                           data_source.longitude(), data_source.altitude());
+//        }
 
-        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude,
-                                      altitude_ft, lat, lon);
+//        ret = projection.polarToWGS84(data_source.id(), pos_azm_rad, pos_range_m, has_altitude,
+//                                      altitude_ft, lat, lon);
 
         if (!ret)
         {

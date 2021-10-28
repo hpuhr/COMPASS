@@ -44,6 +44,8 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
 
     object_ = &COMPASS::instance().objectManager().object(dbo_name_);
 
+    TODO_ASSERT
+
 //    if (!object_->hasCurrentDataSourceDefinition())
 //    {
 //        logerr << "DataSourcesFilter: DataSourcesFilter: instance " + instance_id + " object "
@@ -52,22 +54,22 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
 //        return;
 //    }
 
-    if (!object_->hasDataSources())
-    {
-        disabled_ = true;
-        return;
-    }
+//    if (!object_->hasDataSources())
+//    {
+//        disabled_ = true;
+//        return;
+//    }
 
-    if (!object_->existsInDB())
-    {
-        disabled_ = true;
-        return;
-    }
+//    if (!object_->existsInDB())
+//    {
+//        disabled_ = true;
+//        return;
+//    }
 
-    ds_column_name_ = object_->currentDataSourceDefinition().localKey();
+//    ds_column_name_ = object_->currentDataSourceDefinition().localKey();
 
-    if (object_->hasDataSources())
-        updateDataSources();
+//    if (object_->hasDataSources())
+//        updateDataSources();
 
 //    if (object_->hasActiveDataSourcesInfo())
 //        updateDataSourcesActive();
@@ -157,29 +159,31 @@ std::string DataSourcesFilter::getConditionString(const std::string& dbo_name, b
 
 void DataSourcesFilter::updateDataSources()
 {
-    if (!object_->hasDataSources())
-    {
-        logerr << "DataSourcesFilter: updateDataSources: type " << dbo_name_
-               << " has no data sources";
-        return;
-    }
+    TODO_ASSERT
 
-    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
-    {
-        if (data_sources_.find(ds_it->first) == data_sources_.end())
-        {
-            if (!active_sources_.contains(to_string(ds_it->first)))
-                active_sources_[to_string(ds_it->first)] = true; // init with default true
+//    if (!object_->hasDataSources())
+//    {
+//        logerr << "DataSourcesFilter: updateDataSources: type " << dbo_name_
+//               << " has no data sources";
+//        return;
+//    }
 
-            // needed for old compiler
-            json::boolean_t& active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+//    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
+//    {
+//        if (data_sources_.find(ds_it->first) == data_sources_.end())
+//        {
+//            if (!active_sources_.contains(to_string(ds_it->first)))
+//                active_sources_[to_string(ds_it->first)] = true; // init with default true
 
-            data_sources_.emplace(std::piecewise_construct,
-                                  std::forward_as_tuple(ds_it->first),  // args for key
-                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
-                                                        active));
-        }
-    }
+//            // needed for old compiler
+//            json::boolean_t& active = active_sources_[to_string(ds_it->first)].get_ref<json::boolean_t&>();
+
+//            data_sources_.emplace(std::piecewise_construct,
+//                                  std::forward_as_tuple(ds_it->first),  // args for key
+//                                  std::forward_as_tuple(ds_it->first, ds_it->second.name(),
+//                                                        active));
+//        }
+//    }
 }
 
 //void DataSourcesFilter::updateDataSourcesActive()

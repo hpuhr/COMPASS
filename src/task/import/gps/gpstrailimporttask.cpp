@@ -29,7 +29,7 @@
 #include "buffer.h"
 #include "dbovariableset.h"
 //#include "postprocesstask.h"
-#include "managedatasourcestask.h"
+//#include "managedatasourcestask.h"
 
 #include <iostream>
 #include <fstream>
@@ -605,27 +605,29 @@ void GPSTrailImportTask::run()
 
     // config data source
     {
-        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+        TODO_ASSERT
 
-        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
-        {
-            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
-                   << ds_sac_ << "/" << ds_sic_;
-            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
-            new_ds.name(ds_name_);
-            new_ds.sac(ds_sac_);
-            new_ds.sic(ds_sic_);
-        }
-        else // set name if existing
-        {
-            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
-                   << ds_sac_ << "/" << ds_sic_;
-            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
-            ds.name(ds_name_);
-        }
+//        ManageDataSourcesTask& ds_task = COMPASS::instance().taskManager().manageDataSourcesTask();
+
+//        if (!ds_task.hasDataSource("RefTraj", ds_sac_, ds_sic_)) // add if not existing
+//        {
+//            loginf << "GPSTrailImportTask: run: adding data source '" << ds_name_ << "' "
+//                   << ds_sac_ << "/" << ds_sic_;
+//            StoredDBODataSource& new_ds = ds_task.addNewStoredDataSource("RefTraj");
+//            new_ds.name(ds_name_);
+//            new_ds.sac(ds_sac_);
+//            new_ds.sic(ds_sic_);
+//        }
+//        else // set name if existing
+//        {
+//            loginf << "GPSTrailImportTask: run: setting data source '" << ds_name_ << "' "
+//                   << ds_sac_ << "/" << ds_sic_;
+//            StoredDBODataSource& ds = ds_task.getDataSource("RefTraj", ds_sac_, ds_sic_);
+//            ds.name(ds_name_);
+//        }
     }
 
-    bool has_ds = reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
+    bool has_ds = false; //reftraj_obj.hasDataSources() && reftraj_obj.hasDataSource(ds_id);
 
     float tod;
 
@@ -680,7 +682,9 @@ void GPSTrailImportTask::run()
 
         datasources_to_add[ds_id] = {ds_sac_, ds_sic_};
 
-        reftraj_obj.addDataSources(datasources_to_add);
+        TODO_ASSERT
+
+        //reftraj_obj.addDataSources(datasources_to_add);
     }
 
     //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);

@@ -23,7 +23,7 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
-#include "dbodatasource.h"
+//#include "dbodatasource.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "jobmanager.h"
@@ -207,30 +207,32 @@ bool CreateARTASAssociationsTask::canRun()
         return false;
 
     // no data sources
-    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
-           << (tracker_object.dsBegin() == tracker_object.dsEnd());
-    if (tracker_object.dsBegin() == tracker_object.dsEnd())
-        return false;
+    TODO_ASSERT
 
-    bool ds_found{false};
-    for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
-    {
-        if ((ds_it->second.hasShortName() &&
-             ds_it->second.shortName() == current_data_source_name_) ||
-            (ds_it->second.name() == current_data_source_name_))
-        {
-            ds_found = true;
-            break;
-        }
-    }
+//    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
+//           << (tracker_object.dsBegin() == tracker_object.dsEnd());
+//    if (tracker_object.dsBegin() == tracker_object.dsEnd())
+//        return false;
 
-    logdbg << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
-    if (!ds_found)
-    {
-        logdbg << "CreateARTASAssociationsTask: canRun: resetting current source to "
-               << tracker_object.dsBegin()->second.name();
-        current_data_source_name_ = tracker_object.dsBegin()->second.name();
-    }
+//    bool ds_found{false};
+//    for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+//    {
+//        if ((ds_it->second.hasShortName() &&
+//             ds_it->second.shortName() == current_data_source_name_) ||
+//            (ds_it->second.name() == current_data_source_name_))
+//        {
+//            ds_found = true;
+//            break;
+//        }
+//    }
+
+//    logdbg << "CreateARTASAssociationsTask: canRun: tracker ds_found " << ds_found;
+//    if (!ds_found)
+//    {
+//        logdbg << "CreateARTASAssociationsTask: canRun: resetting current source to "
+//               << tracker_object.dsBegin()->second.name();
+//        current_data_source_name_ = tracker_object.dsBegin()->second.name();
+//    }
 
     loginf << "CreateARTASAssociationsTask: canRun: tracker vars";
     if (!tracker_object.hasVariable(tracker_track_num_var_str_) ||
@@ -318,18 +320,21 @@ void CreateARTASAssociationsTask::run()
 
             bool ds_found{false};
             int ds_id{-1};
-            for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
-            {
-                if ((ds_it->second.hasShortName() &&
-                     ds_it->second.shortName() == current_data_source_name_) ||
-                    (!ds_it->second.hasShortName() &&
-                     ds_it->second.name() == current_data_source_name_))
-                {
-                    ds_found = true;
-                    ds_id = ds_it->first;
-                    break;
-                }
-            }
+
+            TODO_ASSERT
+
+//            for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+//            {
+//                if ((ds_it->second.hasShortName() &&
+//                     ds_it->second.shortName() == current_data_source_name_) ||
+//                    (!ds_it->second.hasShortName() &&
+//                     ds_it->second.name() == current_data_source_name_))
+//                {
+//                    ds_found = true;
+//                    ds_id = ds_it->first;
+//                    break;
+//                }
+//            }
 
             assert(ds_found);
             std::string custom_filter_clause{tracker_ds_id_var_str_ + " in (" +

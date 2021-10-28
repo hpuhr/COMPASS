@@ -71,9 +71,19 @@ const std::string& DataSourceBase::shortName() const
     return short_name_;
 }
 
+void DataSourceBase::info(const std::string& info)
+{
+    info_ = json::parse(info);
+}
+
 nlohmann::json& DataSourceBase::info()
 {
     return info_;
+}
+
+std::string DataSourceBase::infoStr()
+{
+    return info_.dump();
 }
 
 

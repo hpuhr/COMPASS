@@ -4,7 +4,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/calc/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/import/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/manage/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/open/CMakeLists.txt")
-include("${CMAKE_CURRENT_LIST_DIR}/source/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"

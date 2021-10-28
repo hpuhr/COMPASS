@@ -16,11 +16,6 @@
  */
 
 #include "sqlgenerator.h"
-
-#include <algorithm>
-#include <iomanip>
-#include <string>
-
 #include "compass.h"
 #include "buffer.h"
 #include "dbcommand.h"
@@ -33,6 +28,13 @@
 #include "logger.h"
 #include "propertylist.h"
 #include "stringconv.h"
+#include "dbcontentdbdatasource.h"
+
+#include <algorithm>
+#include <iomanip>
+#include <string>
+
+
 
 using namespace Utils;
 using namespace std;
@@ -41,12 +43,12 @@ SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interfa
 {
     stringstream ss;
 
-//    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
-//       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max "
-//          "VARCHAR(255),"
-//          "PRIMARY KEY (variable_name, object_name));";
-//    table_minmax_create_statement_ = ss.str();
-//    ss.str(string());
+    //    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
+    //       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max "
+    //          "VARCHAR(255),"
+    //          "PRIMARY KEY (variable_name, object_name));";
+    //    table_minmax_create_statement_ = ss.str();
+    //    ss.str(string());
 
     ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
        << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
@@ -125,176 +127,71 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
     return ss.str();
 }
 
-shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand(DBObject& object)
+shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 {
-    assert (false); // TODO
+    using namespace DBContent;
 
-    //    const DBODataSourceDefinition& ds = object.currentDataSourceDefinition();
-    //    const DBSchema& schema = COMPASS::instance().schemaManager().getCurrentSchema();
+    PropertyList list;
+    list.addProperty(DBDataSource::id_column_);
+    list.addProperty(DBDataSource::db_content_type_column_);
+    list.addProperty(DBDataSource::sac_column_);
+    list.addProperty(DBDataSource::sic_column_);
+    list.addProperty(DBDataSource::name_column_);
+    list.addProperty(DBDataSource::short_name_);
+    list.addProperty(DBDataSource::info_column_);
+    list.addProperty(DBDataSource::counts_column_);
 
-    //    if (!schema.hasMetaTable(ds.metaTableName()))
-    //        throw invalid_argument(
-    //                "SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table " +
-    //                ds.metaTableName());
+    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
-    //    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
-    //    logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name()
-    //           << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col "
-    //           << ds.nameColumn();
+    stringstream ss;
 
-    //    if (!meta.hasColumn(ds.foreignKey()))
-    //        throw runtime_error(
-    //                "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-    //                ds.foreignKey());
+    ss << "SELECT ";
 
-    //    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
+    bool first = true;
 
-    //    if (!meta.hasColumn(ds.nameColumn()))
-    //        throw runtime_error(
-    //                "SQLGenerator: getDataSourcesSelectCommand: meta table has no column " +
-    //                ds.foreignKey());
+    for (const auto& prop_it : list.properties())
+    {
+        if (!first)
+            ss << ",";
 
-    //    const DBTableColumn& name_col = meta.column(ds.nameColumn());
+        ss << " " << prop_it.name();
 
-    //    vector<const DBTableColumn*> columns;
-    //    columns.push_back(&foreign_key_col);
-    //    columns.push_back(&name_col);
+        first = false;
+    }
 
-    //    if (ds.hasShortNameColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.shortNameColumn()));
-    //        columns.push_back(&meta.column(ds.shortNameColumn()));
-    //    }
+    ss << " FROM ";
 
-    //    if (ds.hasSacColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.sacColumn()));
-    //        columns.push_back(&meta.column(ds.sacColumn()));
-    //    }
+    ss << DBDataSource::table_name_;
 
-    //    if (ds.hasSicColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.sicColumn()));
-    //        columns.push_back(&meta.column(ds.sicColumn()));
-    //    }
+    ss << ";";
 
-    //    if (ds.hasLatitudeColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.latitudeColumn()));
-    //        columns.push_back(&meta.column(ds.latitudeColumn()));
-    //    }
+    command->set(ss.str());
+    command->list(list);
 
-    //    if (ds.hasLongitudeColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.longitudeColumn()));
-    //        columns.push_back(&meta.column(ds.longitudeColumn()));
-    //    }
-
-    //    if (ds.hasAltitudeColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.altitudeColumn()));
-    //        columns.push_back(&meta.column(ds.altitudeColumn()));
-    //    }
-
-    //    // psr
-    //    if (ds.hasPrimaryAzimuthStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.primaryAzimuthStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.primaryAzimuthStdDevColumn()));
-    //    }
-
-    //    if (ds.hasPrimaryRangeStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.primaryRangeStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.primaryRangeStdDevColumn()));
-    //    }
-
-    //    if (ds.hasPrimaryIRMinColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.primaryIRMinColumn()));
-    //        columns.push_back(&meta.column(ds.primaryIRMinColumn()));
-    //    }
-
-    //    if (ds.hasPrimaryIRMaxColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.primaryIRMaxColumn()));
-    //        columns.push_back(&meta.column(ds.primaryIRMaxColumn()));
-    //    }
-
-    //    // ssr
-    //    if (ds.hasSecondaryAzimuthStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.secondaryAzimuthStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.secondaryAzimuthStdDevColumn()));
-    //    }
-
-    //    if (ds.hasSecondaryRangeStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.secondaryRangeStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.secondaryRangeStdDevColumn()));
-    //    }
-
-    //    if (ds.hasSecondaryIRMinColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.secondaryIRMinColumn()));
-    //        columns.push_back(&meta.column(ds.secondaryIRMinColumn()));
-    //    }
-
-    //    if (ds.hasSecondaryIRMaxColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.secondaryIRMaxColumn()));
-    //        columns.push_back(&meta.column(ds.secondaryIRMaxColumn()));
-    //    }
-
-    //    // mode s
-    //    if (ds.hasModeSAzimuthStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.modeSAzimuthStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.modeSAzimuthStdDevColumn()));
-    //    }
-
-    //    if (ds.hasModeSRangeStdDevColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.modeSRangeStdDevColumn()));
-    //        columns.push_back(&meta.column(ds.modeSRangeStdDevColumn()));
-    //    }
-
-    //    if (ds.hasModeSIRMinColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.modeSIRMinColumn()));
-    //        columns.push_back(&meta.column(ds.modeSIRMinColumn()));
-    //    }
-
-    //    if (ds.hasModeSIRMaxColumn())
-    //    {
-    //        assert (meta.hasColumn(ds.modeSIRMaxColumn()));
-    //        columns.push_back(&meta.column(ds.modeSIRMaxColumn()));
-    //    }
-
-    //    return getSelectCommand(meta, columns);
+    return command;
 }
 
-shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBObject& object)
-{
-    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
-    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
-    // sensor_number__value;";
-    // return distinct_radar_numbers_statement_;
+//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBObject& object)
+//{
+//    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
+//    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
+//    // sensor_number__value;";
+//    // return distinct_radar_numbers_statement_;
 
-    assert (false); // TODO
+//    assert (false); // TODO
 
-    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-    //    assert(object.hasVariable(local_key_dbovar));
-    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
+//    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
+//    //    assert(object.hasVariable(local_key_dbovar));
+//    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-    //    vector<const DBTableColumn*> columns;
-    //    columns.push_back(&local_key_col);
+//    //    vector<const DBTableColumn*> columns;
+//    //    columns.push_back(&local_key_col);
 
-    //    PropertyList list;
-    //    list.addProperty(local_key_col.name(), PropertyDataType::INT);
+//    //    PropertyList list;
+//    //    list.addProperty(local_key_col.name(), PropertyDataType::INT);
 
-    //    return getSelectCommand(object.currentMetaTable(), columns, true);
-}
+//    //    return getSelectCommand(object.currentMetaTable(), columns, true);
+//}
 
 shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBObject& adsb_obj)
 {

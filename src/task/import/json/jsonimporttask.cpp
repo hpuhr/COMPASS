@@ -621,7 +621,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
             std::string data_source_var_name = parser_it.second.dataSourceVariableName();
             assert(data_source_var_name.size());
-            assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
+            //assert(db_object.currentDataSourceDefinition().localKey() == data_source_var_name);
 
             DBOVariableSet set = parser_it.second.variableList();
 
@@ -702,11 +702,13 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
         logdbg << "JSONImportTask: insertData: adding new data sources in dbo " << db_object.name()
                << " ds varname '" << data_source_var_name << "'";
 
+        TODO_ASSERT
+
         // collect existing datasources
         std::set<int> datasources_existing;
-        if (db_object.hasDataSources())
-            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-                datasources_existing.insert(ds_it->first);
+//        if (db_object.hasDataSources())
+//            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+//                datasources_existing.insert(ds_it->first);
 
         // getting key list and distinct values
         assert(buffer->properties().hasProperty(data_source_var_name));
@@ -768,10 +770,12 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
                 }
             }
 
-        if (datasources_to_add.size())
-        {
-            db_object.addDataSources(datasources_to_add);
-        }
+        TODO_ASSERT
+
+//        if (datasources_to_add.size())
+//        {
+//            db_object.addDataSources(datasources_to_add);
+//        }
 
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
 

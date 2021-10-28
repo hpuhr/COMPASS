@@ -55,6 +55,11 @@ class SectorLayer;
 class SQLGenerator;
 class QWidget;
 
+namespace DBContent
+{
+class DBDataSource;
+}
+
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
@@ -88,11 +93,10 @@ class DBInterface : public QObject, public Configurable
 
     SQLiteConnection& connection();
 
-    bool hasDataSourceTables(DBObject& object);
-    std::map<int, DBODataSource> getDataSources(DBObject& object);
-    void updateDataSource(DBODataSource& data_source);
-//    bool hasActiveDataSources(DBObject& object);
-//    std::set<int> getActiveDataSources(DBObject& object);
+    bool hasDataSources();
+    std::vector<std::unique_ptr<DBContent::DBDataSource>> getDataSources();
+    void saveDataSources(const std::vector<std::unique_ptr<DBContent::DBDataSource>>& data_sources);
+    // clears previous and saves new ones
 
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 

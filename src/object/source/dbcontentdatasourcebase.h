@@ -30,7 +30,9 @@ public:
     void shortName(const std::string& short_name);
     const std::string& shortName() const;
 
+    void info(const std::string& info);
     nlohmann::json& info(); // for direct use, var->value
+    std::string infoStr();
 
 protected:
     std::string db_content_type_;

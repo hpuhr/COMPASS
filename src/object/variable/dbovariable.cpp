@@ -432,19 +432,22 @@ std::string DBOVariable::getValueStringFromRepresentation(
     else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
     {
         assert(db_object_);
-        if (db_object_->hasDataSources())
-        {
-            for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-            {
-                if ((ds_it->second.hasShortName() &&
-                     representation_str == ds_it->second.shortName()) ||
-                    representation_str == ds_it->second.name())
-                {
-                    return std::to_string(ds_it->first);
-                }
-            }
-            // not found, return original
-        }
+
+        TODO_ASSERT
+
+//        if (db_object_->hasDataSources())
+//        {
+//            for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
+//            {
+//                if ((ds_it->second.hasShortName() &&
+//                     representation_str == ds_it->second.shortName()) ||
+//                    representation_str == ds_it->second.name())
+//                {
+//                    return std::to_string(ds_it->first);
+//                }
+//            }
+//            // not found, return original
+//        }
         // has no datasources, return original
 
         return representation_str;
@@ -694,39 +697,43 @@ void DBOVariable::isKey(bool value)
 std::string DBOVariable::getDataSourcesAsString(const std::string& value) const
 {
     assert(db_object_);
-    if (db_object_->hasDataSources())
-    {
-        for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
-        {
-            if (std::to_string(ds_it->first) == value)
-            {
-                if (ds_it->second.hasShortName())
-                    return ds_it->second.shortName();
-                else
-                    return ds_it->second.name();
-            }
-        }
-        // not found, return original
-    }
 
-    // search for data sources in other dbos
-    for (auto& dbo_it : COMPASS::instance().objectManager())
-    {
-        if (dbo_it.second->hasDataSources())
-        {
-            for (auto ds_it = dbo_it.second->dsBegin(); ds_it != dbo_it.second->dsEnd(); ++ds_it)
-            {
-                if (std::to_string(ds_it->first) == value)
-                {
-                    if (ds_it->second.hasShortName())
-                        return ds_it->second.shortName();
-                    else
-                        return ds_it->second.name();
-                }
-            }
-            // not found, return original
-        }
-    }
+    TODO_ASSERT
+
+
+//    if (db_object_->hasDataSources())
+//    {
+//        for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
+//        {
+//            if (std::to_string(ds_it->first) == value)
+//            {
+//                if (ds_it->second.hasShortName())
+//                    return ds_it->second.shortName();
+//                else
+//                    return ds_it->second.name();
+//            }
+//        }
+//        // not found, return original
+//    }
+
+//    // search for data sources in other dbos
+//    for (auto& dbo_it : COMPASS::instance().objectManager())
+//    {
+//        if (dbo_it.second->hasDataSources())
+//        {
+//            for (auto ds_it = dbo_it.second->dsBegin(); ds_it != dbo_it.second->dsEnd(); ++ds_it)
+//            {
+//                if (std::to_string(ds_it->first) == value)
+//                {
+//                    if (ds_it->second.hasShortName())
+//                        return ds_it->second.shortName();
+//                    else
+//                        return ds_it->second.name();
+//                }
+//            }
+//            // not found, return original
+//        }
+//    }
 
     // has no datasources, return original
     //loginf << "DBOVariable: getDataSourcesAsString: ds '" << value << "' not found";

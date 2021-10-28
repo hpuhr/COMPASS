@@ -33,8 +33,8 @@
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
-#include "dbodatasourcedefinitionwidget.h"
-#include "dboeditdatasourceswidget.h"
+//#include "dbodatasourcedefinitionwidget.h"
+//#include "dboeditdatasourceswidget.h"
 #include "dbolabeldefinitionwidget.h"
 #include "dbovariable.h"
 #include "dbovariabledatatypecombobox.h"
@@ -304,31 +304,7 @@ void DBObjectWidget::updateDataSourcesGridSlot()
 
     unsigned int row = 1;
 
-    const DBODataSourceDefinition& ds_def = object_->currentDataSourceDefinition();
-
-    QVariant data = QVariant::fromValue(&ds_def);
-
-    QPushButton* edit = new QPushButton();
-    edit->setIcon(edit_icon);
-    edit->setFixedSize(UI_ICON_SIZE);
-    edit->setFlat(UI_ICON_BUTTON_FLAT);
-    connect(edit, SIGNAL(clicked()), this, SLOT(editDataSourceSlot()));
-    edit->setProperty("data_source", data);
-    ds_grid_->addWidget(edit, row, 0);
 }
-
-void DBObjectWidget::editDataSourceSlot()
-{
-    logdbg << "DBObjectWidget: editDataSource";
-    QPushButton* button = static_cast<QPushButton*>(sender());
-    QVariant data = button->property("data_source");
-
-    DBODataSourceDefinition* definition = data.value<DBODataSourceDefinition*>();
-    assert(definition);
-    definition->widget()->show();
-}
-
-
 
 void DBObjectWidget::showLabelDefinitionWidgetSlot()
 {

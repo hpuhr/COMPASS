@@ -18,12 +18,16 @@
 #include "createartasassociationstaskwidget.h"
 
 #include "createartasassociationstask.h"
-#include "dbodatasourceselectioncombobox.h"
+//#include "dbodatasourceselectioncombobox.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
 #include "logger.h"
 #include "metadbovariable.h"
 #include "taskmanager.h"
+#include "QDoubleValidator"
 
 #include <QCheckBox>
 #include <QGridLayout>
@@ -47,17 +51,19 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         QGridLayout* grid = new QGridLayout();
         int row_cnt = 0;
 
+        TODO_ASSERT
+
         // tracker data source
-        grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
+//        grid->addWidget(new QLabel("Tracker Data Source"), row_cnt, 0);
 
-        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
-        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
+//        assert(COMPASS::instance().objectManager().existsObject("Tracker"));
+//        DBObject& dbo_tracker = COMPASS::instance().objectManager().object("Tracker");
 
-        ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
-        connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
-                &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
+//        ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
+//        connect(ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal, this,
+//                &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
 
-        grid->addWidget(ds_combo_, row_cnt, 1);
+//        grid->addWidget(ds_combo_, row_cnt, 1);
 
         // tracker vars
         row_cnt++;
@@ -223,20 +229,22 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
 
 CreateARTASAssociationsTaskWidget::~CreateARTASAssociationsTaskWidget() {}
 
-void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
-{
-    assert(ds_combo_);
-    task_.currentDataSourceName(ds_combo_->getDSName());
-}
+//void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
+//{
+//    assert(ds_combo_);
+//    task_.currentDataSourceName(ds_combo_->getDSName());
+//}
 
 void CreateARTASAssociationsTaskWidget::update()
 {
-    if (task_.currentDataSourceName().size() &&
-            ds_combo_->hasDataSource(task_.currentDataSourceName()))
-        ds_combo_->setDataSource(task_.currentDataSourceName());
+    TODO_ASSERT
 
-    if (ds_combo_->getDSName() != task_.currentDataSourceName())
-        task_.currentDataSourceName(ds_combo_->getDSName());
+//    if (task_.currentDataSourceName().size() &&
+//            ds_combo_->hasDataSource(task_.currentDataSourceName()))
+//        ds_combo_->setDataSource(task_.currentDataSourceName());
+
+//    if (ds_combo_->getDSName() != task_.currentDataSourceName())
+//        task_.currentDataSourceName(ds_combo_->getDSName());
 
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
