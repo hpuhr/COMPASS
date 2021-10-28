@@ -73,21 +73,26 @@ DBInterface::~DBInterface()
     logdbg << "DBInterface: desctructor: end";
 }
 
-void DBInterface::databaseContentChanged()
+void DBInterface::databaseOpenend()
 {
-    updateTableInfo();
-
     if (!existsPropertiesTable())
         createPropertiesTable();
 
-    if (!properties_loaded_)
-        loadProperties();
+    //if (!properties_loaded_)
+    loadProperties();
 
-    if (!existsSectorsTable())
-        createSectorsTable();
+    //if (!existsSectorsTable())
+    createSectorsTable();
 
-    if (!COMPASS::instance().evaluationManager().sectorsLoaded())
-        COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
+    //if (!COMPASS::instance().evaluationManager().sectorsLoaded())
+    COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
+
+    COMPASS::instance().objectManager().databaseOpenendSlot();
+}
+
+void DBInterface::databaseContentChanged()
+{
+    updateTableInfo();
 
     emit databaseContentChangedSignal();
 }

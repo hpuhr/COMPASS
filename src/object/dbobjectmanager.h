@@ -46,6 +46,7 @@ public slots:
     // void schemaLockedSlot ();
     void loadSlot();
     void updateSchemaInformationSlot();
+    void databaseOpenendSlot();
     void databaseContentChangedSlot();
     void loadingDoneSlot(DBObject& object);
 
@@ -164,6 +165,8 @@ protected:
 
     bool hasConfigDataSource (unsigned int sac, unsigned int sic);
     DBContent::ConfigurationDataSource& getConfigDataSource (unsigned int sac, unsigned int sic);
+
+    void buildDataSources();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

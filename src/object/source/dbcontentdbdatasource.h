@@ -13,10 +13,15 @@ public:
 
     nlohmann::json& counts(); // for direct use, "cat048"->uint
 
-    virtual nlohmann::json getAsJSON();
-    virtual void setFromJSON(nlohmann::json& j);
+//    virtual nlohmann::json getAsJSON();
+//    virtual void setFromJSON(nlohmann::json& j);
+
+    unsigned int id() const;
+    void id(unsigned int id);
 
 protected:
+    unsigned int id_{0};
+
     nlohmann::json counts_;
 };
 

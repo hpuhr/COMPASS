@@ -114,7 +114,7 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
                << meta_var->name();
         assert(meta_variables_.find(meta_var->name()) == meta_variables_.end());
         meta_variables_.insert(
-            std::pair<std::string, MetaDBOVariable*>(meta_var->name(), meta_var));
+                    std::pair<std::string, MetaDBOVariable*>(meta_var->name(), meta_var));
     }
     else if (class_id.compare("DBContentConfigurationDataSource") == 0)
     {
@@ -460,6 +460,11 @@ void DBObjectManager::updateSchemaInformationSlot()
     emit schemaChangedSignal();
 }
 
+void DBObjectManager::databaseOpenendSlot()
+{
+    buildDataSources();
+}
+
 void DBObjectManager::databaseContentChangedSlot()
 {
     // emit databaseContentChangedSignal();
@@ -474,7 +479,7 @@ void DBObjectManager::databaseContentChangedSlot()
         assert(COMPASS::instance().interface().hasProperty("associations_ds"));
 
         has_associations_ =
-            COMPASS::instance().interface().getProperty("associations_generated") == "1";
+                COMPASS::instance().interface().getProperty("associations_generated") == "1";
         associations_dbo_ = COMPASS::instance().interface().getProperty("associations_dbo");
         associations_ds_ = COMPASS::instance().interface().getProperty("associations_ds");
     }
@@ -546,8 +551,13 @@ DBContent::ConfigurationDataSource& DBObjectManager::getConfigDataSource (unsign
     assert (hasConfigDataSource(sac, sic));
 
     return *find_if(config_data_sources_.begin(), config_data_sources_.end(),
-                   [sac,sic] (const std::unique_ptr<DBContent::ConfigurationDataSource>& s)
+                    [sac,sic] (const std::unique_ptr<DBContent::ConfigurationDataSource>& s)
     { return s->sac() == sac && s->sic() == sic; } )->get();
+}
+
+void DBObjectManager::buildDataSources()
+{
+    assert (!db_data_sources_.size());
 }
 
 //void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)

@@ -83,6 +83,7 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     connection_ready_ = true;
 
+    interface_.databaseOpenend();
     interface_.databaseContentChanged();
 
     emit connectedSignal();

@@ -76,53 +76,7 @@ nlohmann::json& DataSourceBase::info()
     return info_;
 }
 
-json DataSourceBase::getAsJSON()
-{
-    json j;
 
-    j["db_content_type"] = db_content_type_;
-
-    j["sac"] = sac_;
-    j["sic"] = sic_;
-
-    j["name"] = name_;
-
-    if (has_short_name_)
-        j["short_name"] = short_name_;
-
-    j["info"] = info_;
-
-
-    return j;
-}
-
-void DataSourceBase::setFromJSON(json& j)
-{
-    j["db_content_type"] = db_content_type_;
-
-    j["sac"] = sac_;
-    j["sic"] = sic_;
-
-    j["name"] = name_;
-
-    if (has_short_name_)
-        j["short_name"] = short_name_;
-
-    j["info"] = info_;
-
-    db_content_type_ = j.at("db_content_type");
-
-    sac_ = j.at("sac");
-    sic_ = j.at("sic");
-
-    name_ = j.at("name");
-
-    has_short_name_ = j.contains("short_name");
-    if (has_short_name_)
-        short_name_ = j.at("short_name");
-
-    info_ = j.at("info");
-}
 
 
 } // namespace DBContent

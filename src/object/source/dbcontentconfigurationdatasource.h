@@ -17,6 +17,9 @@ public:
     //ConfigurationDataSource() = default;
     virtual ~ConfigurationDataSource();
 
+    virtual nlohmann::json getAsJSON();
+    virtual void setFromJSON(nlohmann::json& j);
+
 protected:
     virtual void checkSubConfigurables() {}
 };

@@ -32,9 +32,6 @@ public:
 
     nlohmann::json& info(); // for direct use, var->value
 
-    virtual nlohmann::json getAsJSON();
-    virtual void setFromJSON(nlohmann::json& j);
-
 protected:
     std::string db_content_type_;
 

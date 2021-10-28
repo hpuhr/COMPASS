@@ -67,6 +67,7 @@ class DBInterface : public QObject, public Configurable
     /// @brief Destructor
     virtual ~DBInterface();
 
+    void databaseOpenend();
     void databaseContentChanged();
     void closeConnection();
 
