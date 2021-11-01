@@ -16,25 +16,57 @@
  */
 
 #include "property.h"
-
-#include <boost/assign/list_of.hpp>
-#include <limits>
-
 #include "logger.h"
 
-std::map<PropertyDataType, std::string> Property::data_types_2_strings_ =
-    boost::assign::map_list_of(PropertyDataType::BOOL, "BOOL")(PropertyDataType::CHAR, "CHAR")(
-        PropertyDataType::UCHAR, "UCHAR")(PropertyDataType::INT, "INT")(
-        PropertyDataType::UINT, "UINT")(PropertyDataType::LONGINT, "LONGINT")(
-        PropertyDataType::ULONGINT, "ULONGINT")(PropertyDataType::FLOAT, "FLOAT")(
-        PropertyDataType::DOUBLE, "DOUBLE")(PropertyDataType::STRING, "STRING");
+#include <boost/assign/list_of.hpp>
 
-std::map<std::string, PropertyDataType> Property::strings_2_data_types_ =
-    boost::assign::map_list_of("BOOL", PropertyDataType::BOOL)("CHAR", PropertyDataType::CHAR)(
-        "UCHAR", PropertyDataType::UCHAR)("INT", PropertyDataType::INT)(
-        "UINT", PropertyDataType::UINT)("LONGINT", PropertyDataType::LONGINT)(
-        "ULONGINT", PropertyDataType::ULONGINT)("FLOAT", PropertyDataType::FLOAT)(
-        "DOUBLE", PropertyDataType::DOUBLE)("STRING", PropertyDataType::STRING);
+#include <limits>
+
+//const std::map<PropertyDataType, std::string> Property::data_types_2_strings_ =
+//        boost::assign::map_list_of(PropertyDataType::BOOL, "BOOL")(PropertyDataType::CHAR, "CHAR")(
+//            PropertyDataType::UCHAR, "UCHAR")(PropertyDataType::INT, "INT")(
+//            PropertyDataType::UINT, "UINT")(PropertyDataType::LONGINT, "LONGINT")(
+//            PropertyDataType::ULONGINT, "ULONGINT")(PropertyDataType::FLOAT, "FLOAT")(
+//            PropertyDataType::DOUBLE, "DOUBLE")(PropertyDataType::STRING, "STRING");
+
+//const std::map<std::string, PropertyDataType> Property::strings_2_data_types_ =
+//        boost::assign::map_list_of("BOOL", PropertyDataType::BOOL)("CHAR", PropertyDataType::CHAR)(
+//            "UCHAR", PropertyDataType::UCHAR)("INT", PropertyDataType::INT)(
+//            "UINT", PropertyDataType::UINT)("LONGINT", PropertyDataType::LONGINT)(
+//            "ULONGINT", PropertyDataType::ULONGINT)("FLOAT", PropertyDataType::FLOAT)(
+//            "DOUBLE", PropertyDataType::DOUBLE)("STRING", PropertyDataType::STRING);
+
+const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
+{
+    static const auto* map = new std::map<PropertyDataType, std::string>
+    {{PropertyDataType::BOOL, "BOOL"},
+        {PropertyDataType::CHAR, "CHAR"},
+        {PropertyDataType::UCHAR, "UCHAR"},
+        {PropertyDataType::INT, "INT"},
+        {PropertyDataType::UINT, "UINT"},
+        {PropertyDataType::LONGINT, "LONGINT"},
+        {PropertyDataType::ULONGINT, "ULONGINT"},
+        {PropertyDataType::FLOAT, "FLOAT"},
+        {PropertyDataType::DOUBLE, "DOUBLE"},
+        {PropertyDataType::STRING, "STRING"}};
+    return *map;
+}
+
+const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
+{
+    static const auto* map = new std::map<std::string, PropertyDataType>
+    {{"BOOL", PropertyDataType::BOOL},
+        {"CHAR", PropertyDataType::CHAR},
+        {"UCHAR", PropertyDataType::UCHAR},
+        {"INT", PropertyDataType::INT},
+        {"UINT", PropertyDataType::UINT},
+        {"LONGINT", PropertyDataType::LONGINT},
+        {"ULONGINT", PropertyDataType::ULONGINT},
+        {"FLOAT", PropertyDataType::FLOAT},
+        {"DOUBLE", PropertyDataType::DOUBLE},
+        {"STRING", PropertyDataType::STRING}};
+    return *map;
+}
 
 Property::Property(std::string id, PropertyDataType type) : data_type_(type), name_(id)
 {
@@ -43,22 +75,28 @@ Property::Property(std::string id, PropertyDataType type) : data_type_(type), na
 
 const std::string& Property::asString(PropertyDataType type)
 {
-    if (!data_types_2_strings_.count(type))
+    if (!dataTypes2Strings().count(type))
+    {
+        std::cout << "Property: asString: unkown type " << (unsigned int) type << std::endl;
         logerr << "Property: asString: unkown type " << (unsigned int) type;
+    }
 
-    assert(data_types_2_strings_.count(type) > 0);
-    return data_types_2_strings_.at(type);
+    assert(dataTypes2Strings().count(type) > 0);
+    return dataTypes2Strings().at(type);
 }
 
-PropertyDataType& Property::asDataType(const std::string& type)
+PropertyDataType Property::asDataType(const std::string& type)
 {
     logdbg << "Property: asDataType: " << type;
 
-    if (!strings_2_data_types_.count(type))
+    if (!strings2DataTypes().count(type))
+    {
+        std::cout << "Property: asDataType: unkown type " << type << std::endl;
         logerr << "Property: asDataType: unkown type " << type;
+    }
 
-    assert(strings_2_data_types_.count(type) > 0);
-    return strings_2_data_types_.at(type);
+    assert(strings2DataTypes().count(type) > 0);
+    return strings2DataTypes().at(type);
 }
 
 // PROPERTY_DATA_TYPE Property::getDataType() const

@@ -65,16 +65,10 @@ class Property
     const std::string& name() const { return name_; }
 
     static const std::string& asString(PropertyDataType type);
-    static PropertyDataType& asDataType(const std::string& type);
+    static PropertyDataType asDataType(const std::string& type);
 
-    static const std::map<PropertyDataType, std::string>& dataTypes2Strings()
-    {
-        return data_types_2_strings_;
-    }
-    static const std::map<std::string, PropertyDataType>& strings2DataTypes()
-    {
-        return strings_2_data_types_;
-    }
+    static const std::map<PropertyDataType, std::string>& dataTypes2Strings();
+    static const std::map<std::string, PropertyDataType>& strings2DataTypes();
 
   protected:
     /// Data type
@@ -84,8 +78,8 @@ class Property
     std::string name_;
 
     /// Mappings from PropertyDataType to strings, and back.
-    static std::map<PropertyDataType, std::string> data_types_2_strings_;
-    static std::map<std::string, PropertyDataType> strings_2_data_types_;
+//    static const std::map<PropertyDataType, std::string> data_types_2_strings_;
+//    static const std::map<std::string, PropertyDataType> strings_2_data_types_;
 };
 
 #endif /* PROPERTY_H_ */
