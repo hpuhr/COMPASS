@@ -42,7 +42,7 @@ using namespace std;
 using namespace Utils::String;
 using namespace DBContent;
 
-const std::vector<std::string> DBObjectManager::db_content_types_ {"Radar", "MLAT", "ADS-B", "RefTraj"};
+const std::vector<std::string> DBObjectManager::db_content_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
 
 DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id,
                                  COMPASS* compass)
@@ -119,8 +119,8 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id.compare("DBContentConfigurationDataSource") == 0)
     {
         unique_ptr<ConfigurationDataSource> ds {new ConfigurationDataSource(class_id, instance_id, *this)};
-        logdbg << "DBObjectManager: generateSubConfigurable: adding config ds "
-               << ds->name() <<  ds->sac() << "/" << ds->sic();
+        loginf << "DBObjectManager: generateSubConfigurable: adding config ds "
+               << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
         assert (!hasConfigDataSource(ds->sac(), ds->sic()));
         config_data_sources_.emplace_back(move(ds));
@@ -542,7 +542,7 @@ bool DBObjectManager::hasConfigDataSource (unsigned int sac, unsigned int sic)
 {
     return find_if(config_data_sources_.begin(), config_data_sources_.end(),
                    [sac,sic] (const std::unique_ptr<DBContent::ConfigurationDataSource>& s)
-    { return s->sac() == sac && s->sic() == sic; } ) == config_data_sources_.end();
+    { return s->sac() == sac && s->sic() == sic; } ) != config_data_sources_.end();
 
 }
 

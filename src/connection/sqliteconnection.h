@@ -138,6 +138,8 @@ protected:
 
     std::vector<std::string> getTableList();
     DBTableInfo getColumnList(const std::string& table);
+
+    virtual void checkSubConfigurables() override {};
 };
 
 #endif /* DBINTERFACE_H_ */

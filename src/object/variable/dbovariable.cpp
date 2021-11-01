@@ -71,12 +71,20 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     registerParameter("description", &description_, "");
     registerParameter("db_column_name", &db_column_name_, "");
     registerParameter("data_type_str", &data_type_str_, "");
-    registerParameter("is_key", &data_type_str_, "");
+    registerParameter("is_key", &is_key_, false);
     registerParameter("representation_str", &representation_str_, "");
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
+    if (name_.size() == 0)
+        logerr << "DBOVariable: constructor: instance " << instance_id << " has no name";
+
+
     assert(name_.size() > 0);
+
+    if (data_type_str_.size() == 0)
+        logerr << "DBOVariable: constructor: name " << name_ << " has no data type";
+
     assert(data_type_str_.size() > 0);
     data_type_ = Property::asDataType(data_type_str_);
 
