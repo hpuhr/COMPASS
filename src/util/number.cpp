@@ -43,7 +43,22 @@ double calculateAngle(double degrees, double minutes, double seconds)
     return degrees + minutes / 60.0 + seconds / 3600.0;
 }
 
+unsigned int dsIdFrom (unsigned int sac, unsigned int sic)
+{
+    return sac * 255 + sic;
+}
+
+unsigned int sacFromDsId (unsigned int ds_id)
+{
+    return ds_id / 255;
+}
+unsigned int sicFromDsId (unsigned int ds_id)
+{
+    return ds_id & 255;
+}
+
 }  // namespace Number
 
-void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}
+//void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}
+
 }  // namespace Utils

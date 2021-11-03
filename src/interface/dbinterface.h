@@ -98,6 +98,7 @@ class DBInterface : public QObject, public Configurable
     void saveDataSources(const std::vector<std::unique_ptr<DBContent::DBDataSource>>& data_sources);
     // clears previous and saves new ones
 
+    void insertBuffer(const DBObject& dbobject, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
 //    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,

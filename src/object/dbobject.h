@@ -199,6 +199,8 @@ protected:
 
     virtual void checkSubConfigurables();
 
+    void doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer);
+
     std::string associationsTableName();
 };
 

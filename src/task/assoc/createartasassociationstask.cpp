@@ -188,6 +188,10 @@ bool CreateARTASAssociationsTask::isRecommended()
 
 bool CreateARTASAssociationsTask::canRun()
 {
+    return false;
+
+    TODO_ASSERT
+
     DBObjectManager& object_man = COMPASS::instance().objectManager();
 
     logdbg << "CreateARTASAssociationsTask: canRun: tracker " << object_man.existsObject("Tracker");
@@ -207,7 +211,7 @@ bool CreateARTASAssociationsTask::canRun()
         return false;
 
     // no data sources
-    TODO_ASSERT
+
 
 //    logdbg << "CreateARTASAssociationsTask: canRun: no tracker data sources "
 //           << (tracker_object.dsBegin() == tracker_object.dsEnd());

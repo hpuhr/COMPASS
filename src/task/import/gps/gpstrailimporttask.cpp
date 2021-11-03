@@ -28,6 +28,7 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "dbovariableset.h"
+#include "util/number.h"
 //#include "postprocesstask.h"
 //#include "managedatasourcestask.h"
 
@@ -601,7 +602,7 @@ void GPSTrailImportTask::run()
     NullableVector<double>& spd_vec = buffer_->get<double>("groundspeed_kt");
 
     unsigned int cnt = 0;
-    int ds_id = ds_sac_*255+ds_sic_;
+    int ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     // config data source
     {

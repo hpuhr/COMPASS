@@ -32,6 +32,7 @@
 #include "jobmanager.h"
 #include "evaluationmanager.h"
 #include "filtermanager.h"
+#include "util/number.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -39,7 +40,7 @@
 #include <algorithm>
 
 using namespace std;
-using namespace Utils::String;
+using namespace Utils;
 using namespace DBContent;
 
 const std::vector<std::string> DBObjectManager::db_content_types_ {"Radar", "MLAT", "ADSB", "Tracker", "RefTraj"};
@@ -462,7 +463,7 @@ void DBObjectManager::updateSchemaInformationSlot()
 
 void DBObjectManager::databaseOpenendSlot()
 {
-    buildDataSources();
+    loadDBDataSources();
 }
 
 void DBObjectManager::databaseContentChangedSlot()
@@ -555,10 +556,63 @@ DBContent::ConfigurationDataSource& DBObjectManager::getConfigDataSource (unsign
     { return s->sac() == sac && s->sic() == sic; } )->get();
 }
 
-void DBObjectManager::buildDataSources()
+void DBObjectManager::loadDBDataSources()
 {
     assert (!db_data_sources_.size());
+
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+    if (db_interface.hasDataSources())
+        db_data_sources_ = db_interface.getDataSources();
 }
+
+void DBObjectManager::saveDBDataSources()
+{
+    DBInterface& db_interface = COMPASS::instance().interface();
+    db_interface.saveDataSources(db_data_sources_);
+}
+
+bool DBObjectManager::hasDataSource(unsigned int ds_id)
+{
+    return find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                   [ds_id] (const std::unique_ptr<DBContent::DBDataSource>& s)
+    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } ) != db_data_sources_.end();
+}
+
+void DBObjectManager::addNewDataSource (unsigned int ds_id)
+{
+    assert (!hasDataSource(ds_id));
+
+    if (hasConfigDataSource(Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id)))
+    {
+        DBContent::ConfigurationDataSource& cfg_ds = getConfigDataSource(
+                    Number::sacFromDsId(ds_id), Number::sicFromDsId(ds_id));
+
+        db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
+    }
+    else
+    {
+        DBContent::DBDataSource* new_ds = new DBContent::DBDataSource();
+        new_ds->id(ds_id);
+        new_ds->sac(Number::sacFromDsId(ds_id));
+        new_ds->sic(Number::sicFromDsId(ds_id));
+        new_ds->name(to_string(ds_id));
+
+        db_data_sources_.emplace_back(move(new_ds));
+    }
+
+    assert (hasDataSource(ds_id));
+}
+
+DBContent::DBDataSource& DBObjectManager::dataSource(unsigned int ds_id)
+{
+    assert (hasDataSource(ds_id));
+
+    return *find_if(db_data_sources_.begin(), db_data_sources_.end(),
+                   [ds_id] (const std::unique_ptr<DBContent::DBDataSource>& s)
+    { return Number::dsIdFrom(s->sac(), s->sic()) == ds_id; } )->get();
+}
+
 
 //void DBObjectManager::removeDependenciesForSchema(const std::string& schema_name)
 //{

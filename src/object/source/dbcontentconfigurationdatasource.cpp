@@ -1,11 +1,14 @@
 #include "dbcontentconfigurationdatasource.h"
+#include "dbcontentdbdatasource.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
+#include "util/number.h"
 
 #include <algorithm>
 
 using namespace std;
 using namespace nlohmann;
+using namespace Utils;
 
 namespace DBContent
 {
@@ -97,4 +100,22 @@ void ConfigurationDataSource::setFromJSON(json& j)
 
     info_ = j.at("info");
 }
+
+DBDataSource* ConfigurationDataSource::getAsNewDBDS()
+{
+    DBContent::DBDataSource* new_ds = new DBContent::DBDataSource();
+    new_ds->id(Number::dsIdFrom(sac_, sic_));
+    new_ds->sac(sac_);
+    new_ds->sic(sic_);
+    new_ds->name(name_);
+
+    if (has_short_name_)
+        new_ds->shortName(short_name_);
+
+    new_ds->info(info_);
+
+    return new_ds;
+}
+
+
 }

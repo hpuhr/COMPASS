@@ -1223,98 +1223,10 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
         ++insert_active_;
 
-        has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic") &&
-                      buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
-
-        logdbg << "ASTERIXImportTask: insertData: " << db_object.name() << " has sac/sic "
-               << has_sac_sic << " buffer size " << buffer->size();
-
         connect(&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
                 Qt::UniqueConnection);
         connect(&db_object, &DBObject::insertProgressSignal, this,
                 &ASTERIXImportTask::insertProgressSlot, Qt::UniqueConnection);
-
-        std::string data_source_var_name = std::get<0>(dbo_variable_sets_.at(dbo_name));
-
-        logdbg << "ASTERIXImportTask: insertData: adding new data sources in dbo "
-               << db_object.name() << " ds varname '" << data_source_var_name << "'";
-
-        TODO_ASSERT
-
-        // collect existing datasources
-//        std::set<int> datasources_existing;
-//        if (db_object.hasDataSources())
-//            for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-//                datasources_existing.insert(ds_it->first);
-
-        // getting key list and distinct values
-        assert(buffer->properties().hasProperty(data_source_var_name));
-        assert(buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
-
-        assert(buffer->has<int>(data_source_var_name));
-        NullableVector<int>& data_source_key_list = buffer->get<int>(data_source_var_name);
-        std::set<int> data_source_keys = data_source_key_list.distinctValues();
-
-        std::map<int, std::pair<unsigned char, unsigned char>> sac_sics;  // keyvar->(sac,sic)
-        // collect sac/sics
-        if (has_sac_sic)
-        {
-            NullableVector<unsigned char>& sac_list = buffer->get<unsigned char>("sac");
-            NullableVector<unsigned char>& sic_list = buffer->get<unsigned char>("sic");
-
-            size_t size = buffer->size();
-            int key_val;
-            for (unsigned int cnt = 0; cnt < size; ++cnt)
-            {
-                key_val = data_source_key_list.get(cnt);
-
-                TODO_ASSERT
-//                if (datasources_existing.count(key_val) != 0)
-//                    continue;
-
-                if (sac_sics.count(key_val) == 0)
-                {
-                    logdbg << "ASTERIXImportTask: insertData: found new ds " << key_val
-                           << " for sac/sic";
-
-                    assert(!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
-                    sac_sics[key_val] = std::pair<unsigned char, unsigned char>(sac_list.get(cnt),
-                                                                                sic_list.get(cnt));
-
-                    logdbg << "ASTERIXImportTask: insertData: source " << key_val << " sac "
-                           << static_cast<int>(sac_list.get(cnt)) << " sic "
-                           << static_cast<int>(sic_list.get(cnt));
-                }
-            }
-        }
-
-        // adding datasources
-        std::map<int, std::pair<int, int>> datasources_to_add;
-
-        TODO_ASSERT
-
-//        for (auto ds_key_it : data_source_keys)
-//            if (datasources_existing.count(ds_key_it) == 0 &&
-//                added_data_sources_.count(ds_key_it) == 0)
-//            {
-//                if (datasources_to_add.count(ds_key_it) == 0)
-//                {
-//                    logdbg << "ASTERIXImportTask: insertData: adding new data source "
-//                           << ds_key_it;
-//                    if (sac_sics.count(ds_key_it) == 0)
-//                        datasources_to_add[ds_key_it] = {-1, -1};
-//                    else
-//                        datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
-//                                                         sac_sics.at(ds_key_it).second};
-
-//                    added_data_sources_.insert(ds_key_it);
-//                }
-//            }
-
-//        if (datasources_to_add.size())
-//        {
-//            db_object.addDataSources(datasources_to_add);
-//        }
 
         DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
         db_object.insertData(set, buffer, false);

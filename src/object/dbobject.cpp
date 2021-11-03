@@ -37,6 +37,7 @@
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "updatebufferdbjob.h"
+#include "util/number.h"
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -76,8 +77,8 @@ void DBObject::generateSubConfigurable(const std::string& class_id, const std::s
     if (class_id == "DBOVariable")
     {
         std::string var_name = configuration()
-                                   .getSubConfiguration(class_id, instance_id)
-                                   .getParameterConfigValueString("name");
+                .getSubConfiguration(class_id, instance_id)
+                .getParameterConfigValueString("name");
 
         assert(variables_.find(var_name) == variables_.end());
 
@@ -85,9 +86,9 @@ void DBObject::generateSubConfigurable(const std::string& class_id, const std::s
                << " with name " << var_name;
 
         variables_.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(var_name),                      // args for key
-            std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+                    std::piecewise_construct,
+                    std::forward_as_tuple(var_name),                      // args for key
+                    std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id == "DBOLabelDefinition")
     {
@@ -276,7 +277,7 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
     if (use_filters)
     {
         custom_filter_clause =
-            COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
+                COMPASS::instance().filterManager().getSQLCondition(name_, filtered_variables);
     }
 
     load(read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
@@ -312,8 +313,8 @@ void DBObject::load(DBOVariableSet& read_set, std::string custom_filter_clause,
     //    custom_filter_clause, DBOVariable *order, const std::string &limit_str
 
     read_job_ = std::shared_ptr<DBOReadDBJob>(new DBOReadDBJob(
-        COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
-        use_order, order_variable, use_order_ascending, limit_str));
+                                                  COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
+                                                  use_order, order_variable, use_order_ascending, limit_str));
 
     connect(read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this,
             SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
@@ -369,6 +370,66 @@ void DBObject::insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, 
     logdbg << "DBObject: insertData: end";
 }
 
+void DBObject::doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer)
+{
+    logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert";
+
+    bool has_sac_sic = hasVariable("sac") && hasVariable("sic") &&
+            buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
+
+    logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert: has sac/sic "
+           << has_sac_sic << " buffer size " << buffer->size();
+
+    assert (has_sac_sic);
+
+    NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char>("sac");
+    NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char>("sic");
+
+    std::string data_source_var_name = "ds_id";
+
+    // getting key list and distinct values
+    assert(buffer->properties().hasProperty(data_source_var_name));
+    assert(buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
+
+    assert(buffer->has<int>(data_source_var_name));
+
+    NullableVector<int>& data_source_key_vec = buffer->get<int>(data_source_var_name);
+
+    std::set<int> data_source_keys = data_source_key_vec.distinctValues();
+
+    std::map<int, unsigned int> ds_id_counts;  // keyvar->count
+    // collect sac/sics
+
+    size_t bufsize = buffer->size();
+
+
+    unsigned int key_val, sac, sic;
+
+    for (unsigned int cnt = 0; cnt < bufsize; ++cnt)
+    {
+        assert(!data_source_key_vec.isNull(cnt));
+        key_val = data_source_key_vec.get(cnt);
+
+        assert(!sac_vec.isNull(cnt) && !sic_vec.isNull(cnt));
+        sac = sac_vec.get(cnt);
+        sic = sic_vec.get(cnt);
+
+        assert (Number::dsIdFrom(sac, sic) == key_val); // must be same
+
+        ++ds_id_counts[key_val];
+    }
+
+    for (auto& ds_id_cnt : ds_id_counts)
+    {
+        if (!manager_.hasDataSource(ds_id_cnt.first))
+            manager_.addNewDataSource(ds_id_cnt.first);
+
+        // TODO add record count
+
+    }
+}
+
+
 void DBObject::insertProgressSlot(float percent) { emit insertProgressSignal(percent); }
 
 void DBObject::insertDoneSlot()
@@ -388,7 +449,7 @@ void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
     assert(existsInDB());
 
     update_job_ =
-        std::make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
+            std::make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
 
     connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot,
             Qt::QueuedConnection);
@@ -451,7 +512,7 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
     assert(buffer->size() == rec_nums.size());
 
     std::map<int, std::string> labels =
-        label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
+            label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
 
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
@@ -654,7 +715,7 @@ void DBObject::loadAssociationsIfRequired()
     if (manager_.hasAssociations() && !associations_loaded_)
     {
         std::shared_ptr<DBOReadAssociationsJob> read_job =
-            std::make_shared<DBOReadAssociationsJob>(*this);
+                std::make_shared<DBOReadAssociationsJob>(*this);
         JobManager::instance().addDBJob(read_job);  // fire and forget
     }
 }

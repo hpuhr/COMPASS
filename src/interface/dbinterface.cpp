@@ -75,16 +75,18 @@ DBInterface::~DBInterface()
 
 void DBInterface::databaseOpenend()
 {
+    loginf << "DBInterface: databaseOpenend";
+
+    updateTableInfo();
+
     if (!existsPropertiesTable())
         createPropertiesTable();
 
-    //if (!properties_loaded_)
     loadProperties();
 
-    //if (!existsSectorsTable())
-    createSectorsTable();
+    if (!existsSectorsTable())
+        createSectorsTable();
 
-    //if (!COMPASS::instance().evaluationManager().sectorsLoaded())
     COMPASS::instance().evaluationManager().loadSectors(); // init done in mainwindow
 
     COMPASS::instance().objectManager().databaseOpenendSlot();
@@ -92,6 +94,8 @@ void DBInterface::databaseOpenend()
 
 void DBInterface::databaseContentChanged()
 {
+    loginf << "DBInterface: databaseContentChanged";
+
     updateTableInfo();
 
     emit databaseContentChangedSignal();
@@ -968,9 +972,20 @@ void DBInterface::deleteAllSectors()
 ////    return ret;
 //}
 
+void DBInterface::insertBuffer(const DBObject& dbobject, std::shared_ptr<Buffer> buffer)
+{
+    logdbg << "DBInterface: insertBuffer: dbo " << dbobject.name() << " buffer size "
+           << buffer->size();
+
+    if (!existsTable(dbobject.dbTableName()))
+        createTable(dbobject);
+
+    insertBuffer(dbobject.dbTableName(), buffer);
+}
+
 void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: insertBuffer: table name " << table_name << " buffer size "
+    logdbg << "DBInterface: insertBuffer: table name " << table_name << " buffer size "
            << buffer->size();
 
     assert(current_connection_);

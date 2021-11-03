@@ -79,6 +79,11 @@ public:
 
     bool usedInMetaVariable(const DBOVariable& variable);
 
+    bool hasDataSource(unsigned int ds_id);
+    void addNewDataSource (unsigned int ds_id);
+    DBContent::DBDataSource& dataSource(unsigned int ds_id);
+    void saveDBDataSources();
+
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
@@ -166,7 +171,7 @@ protected:
     bool hasConfigDataSource (unsigned int sac, unsigned int sic);
     DBContent::ConfigurationDataSource& getConfigDataSource (unsigned int sac, unsigned int sic);
 
-    void buildDataSources();
+    void loadDBDataSources();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

@@ -9,6 +9,8 @@ class DBObjectManager;
 namespace DBContent
 {
 
+class DBDataSource;
+
 class ConfigurationDataSource : public Configurable, public DataSourceBase
 {
 public:
@@ -19,6 +21,8 @@ public:
 
     virtual nlohmann::json getAsJSON();
     virtual void setFromJSON(nlohmann::json& j);
+
+    DBDataSource* getAsNewDBDS();
 
 protected:
     virtual void checkSubConfigurables() {}
