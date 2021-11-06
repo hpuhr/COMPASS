@@ -24,8 +24,8 @@
 #include "databaseopentaskwidget.h"
 #include "dbobjectmanager.h"
 //#include "dboeditdatasourceswidget.h"
-#include "jsonimporttask.h"
-#include "jsonimporttaskwidget.h"
+//#include "jsonimporttask.h"
+//#include "jsonimporttaskwidget.h"
 #include "jsonparsingschema.h"
 //#include "managedatasourcestask.h"
 //#include "managedatasourcestaskwidget.h"
@@ -88,7 +88,7 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert(task_list_.end(), {"JSONImportTask", "GPSTrailImportTask", // "MySQLDBImportTask",
+    task_list_.insert(task_list_.end(), {"GPSTrailImportTask", // "MySQLDBImportTask","JSONImportTask",
                                          "ManageSectorsTask", // "ManageDataSourcesTask",
                                          "RadarPlotPositionCalculatorTask", //"PostProcessTask",
                                          "CreateAssociationsTask", "CreateARTASAssociationsTask"});
@@ -139,13 +139,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(view_points_import_task_);
         addTask(class_id, view_points_import_task_.get());
     }
-    else if (class_id.compare("JSONImportTask") == 0)
-    {
-        assert(!json_import_task_);
-        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
-        assert(json_import_task_);
-        addTask(class_id, json_import_task_.get());
-    }
+//    else if (class_id.compare("JSONImportTask") == 0)
+//    {
+//        assert(!json_import_task_);
+//        json_import_task_.reset(new JSONImportTask(class_id, instance_id, *this));
+//        assert(json_import_task_);
+//        addTask(class_id, json_import_task_.get());
+//    }
     else if (class_id.compare("GPSTrailImportTask") == 0)
     {
         assert(!gps_trail_import_task_);
@@ -246,11 +246,11 @@ void TaskManager::checkSubConfigurables()
         assert(view_points_import_task_);
     }
 
-    if (!json_import_task_)
-    {
-        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
-        assert(json_import_task_);
-    }
+//    if (!json_import_task_)
+//    {
+//        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
+//        assert(json_import_task_);
+//    }
 
     if (!gps_trail_import_task_)
     {
@@ -372,7 +372,7 @@ void TaskManager::shutdown()
 #endif
 
     view_points_import_task_ = nullptr;
-    json_import_task_ = nullptr;
+    //json_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
     //manage_datasources_task_ = nullptr;
     manage_sectors_task_ = nullptr;
@@ -463,11 +463,11 @@ ViewPointsImportTask& TaskManager::viewPointsImportTask() const
     return *view_points_import_task_;
 }
 
-JSONImportTask& TaskManager::jsonImporterTask() const
-{
-    assert(json_import_task_);
-    return *json_import_task_;
-}
+//JSONImportTask& TaskManager::jsonImporterTask() const
+//{
+//    assert(json_import_task_);
+//    return *json_import_task_;
+//}
 
 GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
 {
@@ -806,56 +806,56 @@ void TaskManager::performAutomaticTasks ()
     }
 #endif
 
-    if (json_import_file_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
-               << json_import_filename_ << "'";
+//    if (json_import_file_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
+//               << json_import_filename_ << "'";
 
-#if USE_JASTERIX
-        if (!Files::fileExists(json_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
-                   << "' does not exist";
-            return;
-        }
-#endif
+//#if USE_JASTERIX
+//        if (!Files::fileExists(json_import_filename_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
+//                   << "' does not exist";
+//            return;
+//        }
+//#endif
 
-        if(!json_import_task_->hasSchema(json_import_schema_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
-                   << "' does not exist";
-            return;
-        }
+//        if(!json_import_task_->hasSchema(json_import_schema_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
+//                   << "' does not exist";
+//            return;
+//        }
 
-        widget_->setCurrentTask(*json_import_task_);
-        if(widget_->getCurrentTaskName() != json_import_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
+//        widget_->setCurrentTask(*json_import_task_);
+//        if(widget_->getCurrentTaskName() != json_import_task_->name())
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                   << "' selected, aborting";
+//            return;
+//        }
 
-        JSONImportTaskWidget* json_import_task_widget =
-                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
-        assert(json_import_task_widget);
+//        JSONImportTaskWidget* json_import_task_widget =
+//                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+//        assert(json_import_task_widget);
 
-        json_import_task_widget->addFile(json_import_filename_);
-        json_import_task_widget->selectFile(json_import_filename_);
-        json_import_task_widget->selectSchema(json_import_schema_);
+//        json_import_task_widget->addFile(json_import_filename_);
+//        json_import_task_widget->selectFile(json_import_filename_);
+//        json_import_task_widget->selectSchema(json_import_schema_);
 
-        assert(json_import_task_->canRun());
-        json_import_task_->showDoneSummary(false);
+//        assert(json_import_task_->canRun());
+//        json_import_task_->showDoneSummary(false);
 
-        widget_->runTask(*json_import_task_);
+//        widget_->runTask(*json_import_task_);
 
-        while (!json_import_task_->done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
+//        while (!json_import_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
 
-        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
-    }
+//        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
+//    }
 
     if (gps_trail_import_file_)
     {
