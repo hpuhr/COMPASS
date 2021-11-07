@@ -36,6 +36,7 @@
 #include <QVBoxLayout>
 
 using namespace Utils;
+using namespace std;
 
 ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent,
                                                  Qt::WindowFlags f)
@@ -117,11 +118,6 @@ void ASTERIXImportTaskWidget::addMainTab()
                 &ASTERIXImportTaskWidget::limitRAMChangedSlot);
         main_tab_layout->addWidget(limit_ram_check_);
 
-        create_mapping_stubs_button_ = new QPushButton("Create Mapping Stubs");
-        connect(create_mapping_stubs_button_, &QPushButton::clicked, this,
-                &ASTERIXImportTaskWidget::createMappingsSlot);
-        main_tab_layout->addWidget(create_mapping_stubs_button_);
-
         test_button_ = new QPushButton("Test Import");
         connect(test_button_, &QPushButton::clicked, this,
                 &ASTERIXImportTaskWidget::testImportSlot);
@@ -163,7 +159,7 @@ void ASTERIXImportTaskWidget::addMappingsTab()
     parser_manage_layout->addWidget(object_parser_box_);
 
     add_object_parser_button_ = new QPushButton("Add");
-    connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
+    connect(add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addParserSlot()));
     parser_manage_layout->addWidget(add_object_parser_button_);
 
     delete_object_parser_button_ = new QPushButton("Remove");
@@ -273,7 +269,7 @@ void ASTERIXImportTaskWidget::updateFileListSlot()
     }
 }
 
-void ASTERIXImportTaskWidget::addObjectParserSlot()
+void ASTERIXImportTaskWidget::addParserSlot()
 {
     if (task_.schema() == nullptr)
     {
@@ -290,26 +286,26 @@ void ASTERIXImportTaskWidget::addObjectParserSlot()
 
     if (ret == QDialog::Accepted)
     {
-        std::string name = dialog.name();
+        unsigned int cat = dialog.category();
         std::string dbo_name = dialog.selectedObject();
-        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: name " << name << " obj "
+        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: cat " << cat << " obj "
                << dbo_name;
 
-        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+        std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
-        if (!name.size() || current->hasObjectParser(name))
+        if (current->hasObjectParser(cat))
         {
-            QMessageBox m_warning(QMessageBox::Warning, "JSON Object Parser Adding Failed",
-                                  "Object parser name empty or already defined.", QMessageBox::Ok);
+            QMessageBox m_warning(QMessageBox::Warning, "ASTERIX JSON Parser Adding Failed",
+                                  "ASTERIX parser for category already defined.", QMessageBox::Ok);
 
             m_warning.exec();
             return;
         }
 
-        std::string instance = "JSONObjectParser" + name + dbo_name + "0";
+        std::string instance = "ASTERIXJSONParserCAT" + to_string(cat) + "0";
 
-        Configuration& config = current->addNewSubConfiguration("JSONObjectParser", instance);
-        config.addParameterString("name", name);
+        Configuration& config = current->addNewSubConfiguration("ASTERIXJSONParser", instance);
+        config.addParameterUnsignedInt("category", cat);
         config.addParameterString("db_object_name", dbo_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
@@ -324,13 +320,13 @@ void ASTERIXImportTaskWidget::removeObjectParserSlot()
 
     if (object_parser_box_->currentIndex() >= 0)
     {
-        std::string name = object_parser_box_->currentText().toStdString();
+        unsigned int cat = object_parser_box_->currentText().toUInt();
 
         assert(task_.schema() != nullptr);
-        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+        std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
 
-        assert(current->hasObjectParser(name));
-        current->removeParser(name);
+        assert(current->hasObjectParser(cat));
+        current->removeParser(cat);
 
         updateParserBox();
         selectedObjectParserSlot(object_parser_box_->currentText());
@@ -354,15 +350,15 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
     assert(text.size());
 
     assert(object_parser_box_);
-    std::string name = text.toStdString();
+    unsigned int cat = text.toUInt();
 
     assert(task_.schema() != nullptr);
-    assert(task_.schema()->hasObjectParser(name));
+    assert(task_.schema()->hasObjectParser(cat));
 
-    if (object_parser_widget_->indexOf(task_.schema()->parser(name).widget()) < 0)
-        object_parser_widget_->addWidget(task_.schema()->parser(name).widget());
+    if (object_parser_widget_->indexOf(task_.schema()->parser(cat).widget()) < 0)
+        object_parser_widget_->addWidget(task_.schema()->parser(cat).widget());
 
-    object_parser_widget_->setCurrentWidget(task_.schema()->parser(name).widget());
+    object_parser_widget_->setCurrentWidget(task_.schema()->parser(cat).widget());
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()
@@ -376,7 +372,7 @@ void ASTERIXImportTaskWidget::updateParserBox()
     {
         for (auto& parser_it : *task_.schema())  // over all object parsers
         {
-            object_parser_box_->addItem(parser_it.first.c_str());
+            object_parser_box_->addItem(QString::number(parser_it.first));
         }
     }
 }
@@ -397,19 +393,31 @@ void ASTERIXImportTaskWidget::limitRAMChangedSlot()
     task_.limitRAM(box->checkState() == Qt::Checked);
 }
 
-void ASTERIXImportTaskWidget::createMappingsSlot()
+void ASTERIXImportTaskWidget::expertModeChangedSlot() {}
+
+void ASTERIXImportTaskWidget::updateLimitRAM()
 {
-    loginf << "ASTERIXImportTaskWidget: createMappingsSlot";
+    assert(limit_ram_check_);
+    limit_ram_check_->setChecked(task_.limitRAM());
+}
 
-    if (!task_.canImportFile())
-    {
-        QMessageBox m_warning(QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
-                              "Please select a file in the list.", QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
+void ASTERIXImportTaskWidget::runStarted()
+{
+    loginf << "ASTERIXImportTaskWidget: runStarted";
 
-    task_.run(false, true);
+    test_button_->setDisabled(true);
+}
+
+void ASTERIXImportTaskWidget::runDone()
+{
+    loginf << "ASTERIXImportTaskWidget: runDone";
+
+    test_button_->setDisabled(false);
+}
+
+ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
+{
+    return override_widget_;
 }
 
 void ASTERIXImportTaskWidget::testImportSlot()
@@ -424,34 +432,5 @@ void ASTERIXImportTaskWidget::testImportSlot()
         return;
     }
 
-    task_.run(true, false);
-}
-
-void ASTERIXImportTaskWidget::expertModeChangedSlot() {}
-
-void ASTERIXImportTaskWidget::updateLimitRAM()
-{
-    assert(limit_ram_check_);
-    limit_ram_check_->setChecked(task_.limitRAM());
-}
-
-void ASTERIXImportTaskWidget::runStarted()
-{
-    loginf << "ASTERIXImportTaskWidget: runStarted";
-
-    create_mapping_stubs_button_->setDisabled(true);
-    test_button_->setDisabled(true);
-}
-
-void ASTERIXImportTaskWidget::runDone()
-{
-    loginf << "ASTERIXImportTaskWidget: runDone";
-
-    create_mapping_stubs_button_->setDisabled(false);
-    test_button_->setDisabled(false);
-}
-
-ASTERIXOverrideWidget* ASTERIXImportTaskWidget::overrideWidget() const
-{
-    return override_widget_;
+    task_.run(true);
 }

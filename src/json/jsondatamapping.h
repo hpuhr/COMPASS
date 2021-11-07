@@ -34,7 +34,7 @@ class JSONDataMapping : public Configurable
 {
   public:
     JSONDataMapping(const std::string& class_id, const std::string& instance_id,
-                    JSONObjectParser& parent);
+                    Configurable& parent);
     JSONDataMapping() = default;
     JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 

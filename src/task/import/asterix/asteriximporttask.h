@@ -27,9 +27,9 @@
 #include "asterixpostprocess.h"
 #include "configurable.h"
 #include "json.hpp"
-#include "jsonmappingjob.h"
+#include "asterixjsonmappingjob.h"
 #include "jsonmappingstubsjob.h"
-#include "jsonparsingschema.h"
+#include "asterixjsonparsingschema.h"
 #include "task.h"
 
 //#include <tbb/concurrent_queue.h>
@@ -57,9 +57,6 @@ class ASTERIXImportTask : public Task, public Configurable
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
-    void mapStubsDoneSlot();
-    void mapStubsObsoleteSlot();
-
     void insertProgressSlot(float percent);
     void insertDoneSlot(DBObject& object);
 
@@ -82,7 +79,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool canImportFile();
     virtual bool canRun();
     virtual void run();
-    void run(bool test, bool create_mapping_stubs);
+    void run(bool test); // , bool create_mapping_stubs
 
     const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
@@ -109,7 +106,7 @@ class ASTERIXImportTask : public Task, public Configurable
     std::string spfEditionForCategory(unsigned int category);
     void spfEditionForCategory(unsigned int category, const std::string& spf);
 
-    std::shared_ptr<JSONParsingSchema> schema() const;
+    std::shared_ptr<ASTERIXJSONParsingSchema> schema() const;
 
     bool debug() const;
     void debug(bool debug);
@@ -139,9 +136,10 @@ class ASTERIXImportTask : public Task, public Configurable
     float overrideTodOffset() const;
     void overrideTodOffset(float value);
 
-    std::vector<std::string> getPossibleMappings (unsigned int cat);
-    std::string getActiveMapping (unsigned int cat);
-    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
+//    bool hasParser(unsigned int cat);
+//    std::string getPossibleMappings (unsigned int cat);
+//    std::string getActiveMapping (unsigned int cat);
+//    void setActiveMapping (unsigned int cat, const std::string& mapping_name);
 
   protected:
     bool debug_jasterix_;
@@ -154,21 +152,21 @@ class ASTERIXImportTask : public Task, public Configurable
     std::string current_framing_;
 
     bool test_{false};
-    bool create_mapping_stubs_{false};
+    //bool create_mapping_stubs_{false};
 
     std::unique_ptr<ASTERIXImportTaskWidget> widget_;
 
     std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
 
-    std::shared_ptr<JSONParsingSchema> schema_;
+    std::shared_ptr<ASTERIXJSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    std::shared_ptr<JSONMappingJob> json_map_job_;
+    std::shared_ptr<ASTERIXJSONMappingJob> json_map_job_;
     // std::deque <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     // std::mutex map_jobs_mutex_;
     // bool waiting_for_map_ {false};
-    std::shared_ptr<JSONMappingStubsJob> json_map_stub_job_;
+    //std::shared_ptr<JSONMappingStubsJob> json_map_stub_job_;
 
     bool error_{false};
     std::string error_message_;

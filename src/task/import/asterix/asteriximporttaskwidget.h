@@ -46,13 +46,12 @@ class ASTERIXImportTaskWidget : public TaskWidget
     void selectedFileSlot();
     void updateFileListSlot();
 
-    void addObjectParserSlot();
+    void addParserSlot();
     void removeObjectParserSlot();
     void selectedObjectParserSlot(const QString& text);
 
     void debugChangedSlot();
     void limitRAMChangedSlot();
-    void createMappingsSlot();
     void testImportSlot();
 
     void expertModeChangedSlot();
@@ -94,7 +93,6 @@ protected:
 
     QCheckBox* debug_check_{nullptr};
     QCheckBox* limit_ram_check_{nullptr};
-    QPushButton* create_mapping_stubs_button_{nullptr};
     QPushButton* test_button_{nullptr};
 
     void addMainTab();

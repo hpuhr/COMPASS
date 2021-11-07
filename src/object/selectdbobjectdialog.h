@@ -26,6 +26,7 @@
 #include <QLineEdit>
 
 #include "dbobjectcombobox.h"
+#include "textfielddoublevalidator.h"
 
 class SelectDBObjectDialog : public QDialog
 {
@@ -38,8 +39,8 @@ class SelectDBObjectDialog : public QDialog
 
         QVBoxLayout* main_layout = new QVBoxLayout();
 
-        name_edit_ = new QLineEdit("Name");
-        main_layout->addWidget(name_edit_);
+        cat_edit_ = new QLineEdit("Category"); // TODO validate to uint´
+        main_layout->addWidget(cat_edit_);
 
         object_box_ = new DBObjectComboBox(false);
         main_layout->addWidget(object_box_);
@@ -56,10 +57,10 @@ class SelectDBObjectDialog : public QDialog
         setWindowTitle(tr("Select Name and DBObject"));
     }
 
-    std::string name()
+    unsigned int category()
     {
-        assert(name_edit_);
-        return name_edit_->text().toStdString();
+        assert(cat_edit_);
+        return cat_edit_->text().toUInt();
     }
 
     std::string selectedObject()
@@ -69,7 +70,7 @@ class SelectDBObjectDialog : public QDialog
     }
 
   protected:
-    QLineEdit* name_edit_{nullptr};
+    QLineEdit* cat_edit_{nullptr};
     DBObjectComboBox* object_box_{nullptr};
 };
 

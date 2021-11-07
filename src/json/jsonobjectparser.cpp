@@ -17,8 +17,6 @@
 
 #include "jsonobjectparser.h"
 
-#include <algorithm>
-
 #include "compass.h"
 #include "buffer.h"
 #include "configuration.h"
@@ -28,6 +26,8 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "util/json.h"
+
+#include <algorithm>
 
 using namespace std;
 using namespace nlohmann;
@@ -106,7 +106,7 @@ void JSONObjectParser::generateSubConfigurable(const std::string& class_id,
         data_mappings_.emplace_back(class_id, instance_id, *this);
     }
     else
-        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+        throw std::runtime_error("JSONObjectParser: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 DBObject& JSONObjectParser::dbObject() const

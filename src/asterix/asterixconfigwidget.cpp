@@ -21,7 +21,6 @@
 #include "asteriximporttask.h"
 #include "asterixrefeditioncombobox.h"
 #include "asterixspfeditioncombobox.h"
-#include "asterixmappingcombobox.h"
 #include "files.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -300,15 +299,16 @@ void ASTERIXConfigWidget::updateCategories()
         spf_edit_buttons_[category] = spf_edit;
 
         // mapping
-        ASTERIXMappingComboBox* map_combo = new ASTERIXMappingComboBox(task_, category);
-        map_combo->setMapping(task_.getActiveMapping(category));
-        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category << " mapping '"
-               << task_.getActiveMapping(category) << "'";
+        // TODO
+//        ASTERIXMappingComboBox* map_combo = new ASTERIXMappingComboBox(task_, category);
+//        map_combo->setMapping(task_.getActiveMapping(category));
+//        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category << " mapping '"
+//               << task_.getActiveMapping(category) << "'";
 
-        connect(map_combo, &ASTERIXMappingComboBox::changedMappingSignal,
-                this, &ASTERIXConfigWidget::categoryMappingChangedSlot);
+//        connect(map_combo, &ASTERIXMappingComboBox::changedMappingSignal,
+//                this, &ASTERIXConfigWidget::categoryMappingChangedSlot);
 
-        categories_grid_->addWidget(map_combo, row, 7);
+//        categories_grid_->addWidget(map_combo, row, 7);
 
 
         row++;
@@ -447,10 +447,10 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
 
-void ASTERIXConfigWidget::categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str)
-{
-    loginf << "ASTERIXConfigWidget: categoryMappingChangedSlot: cat " << cat
-           << " mapping '" << mapping_str << "'";
+//void ASTERIXConfigWidget::categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str)
+//{
+//    loginf << "ASTERIXConfigWidget: categoryMappingChangedSlot: cat " << cat
+//           << " mapping '" << mapping_str << "'";
 
-    task_.setActiveMapping(cat, mapping_str);
-}
+//    task_.setActiveMapping(cat, mapping_str);
+//}

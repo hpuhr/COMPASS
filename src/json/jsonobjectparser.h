@@ -18,9 +18,6 @@
 #ifndef JSONOBJECTPARSER_H
 #define JSONOBJECTPARSER_H
 
-#include <memory>
-#include <string>
-
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
@@ -29,6 +26,9 @@
 #include "jsonobjectparserwidget.h"
 #include "propertylist.h"
 #include "stringconv.h"
+
+#include <memory>
+#include <string>
 
 class DBObject;
 class DBOVariable;

@@ -17,15 +17,6 @@
 
 #include "jsonobjectparserwidget.h"
 
-#include <QCheckBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QScrollArea>
-#include <QVBoxLayout>
-
 #include "configuration.h"
 #include "datatypeformatselectionwidget.h"
 #include "dbovariable.h"
@@ -34,6 +25,15 @@
 #include "jsonobjectparser.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
+
+#include <QCheckBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QVBoxLayout>
 
 using namespace Utils;
 

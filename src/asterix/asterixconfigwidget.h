@@ -48,7 +48,7 @@ class ASTERIXConfigWidget : public QWidget
     void categoryEditionEditSlot();
     void categoryREFEditionEditSlot();
     void categorySPFEditionEditSlot();
-    void categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str);
+    //void categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str);
 
     void editDataBlockSlot();
     void editCategoriesSlot();

@@ -31,7 +31,7 @@
 using namespace Utils;
 
 JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string& instance_id,
-                                 JSONObjectParser& parent)
+                                 Configurable& parent)
     : Configurable(class_id, instance_id, &parent)
 {
     logdbg << "JSONDataMapping: constructor: this " << this;
