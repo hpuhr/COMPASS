@@ -9,6 +9,10 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "util/json.h"
+#include "asteriximporttask.h"
+
+#include <jasterix/jasterix.h>
+#include <jasterix/iteminfo.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -20,9 +24,10 @@ using namespace Utils;
 
 
 ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
-                                     Configurable* parent)
+                                     Configurable* parent, ASTERIXImportTask& task)
     : Configurable(class_id, instance_id, parent,
-                   "task_import_asterix_" + boost::algorithm::to_lower_copy(instance_id) + ".json")
+                   "task_import_asterix_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
+      task_(task)
 {
     registerParameter("name", &name_, "");
     registerParameter("category", &category_, 0);
@@ -36,46 +41,11 @@ ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::str
 
     assert(name_.size());
 
+    assert (task_.jASTERIX()->hasCategory(category_));
+    item_info_ = task_.jASTERIX()->category(category_)->itemInfo();
+
     createSubConfigurables();
 }
-
-//ASTERIXJSONParser& ASTERIXJSONParser::operator=(ASTERIXJSONParser&& other)
-//{
-//    name_ = other.name_;
-//    db_object_name_ = other.db_object_name_;
-//    db_object_ = other.db_object_;
-
-//    json_container_key_ = other.json_container_key_;
-//    json_key_ = other.json_key_;
-//    json_value_ = other.json_value_;
-//    json_values_vector_ = other.json_values_vector_;
-
-//    data_mappings_ = std::move(other.data_mappings_);
-
-//    var_list_ = other.var_list_;
-
-//    override_data_source_ = other.override_data_source_;
-//    data_source_variable_name_ = other.data_source_variable_name_;
-
-//    initialized_ = other.initialized_;
-
-//    not_parse_all_ = other.not_parse_all_;
-
-//    list_ = other.list_;
-
-//    other.configuration().updateParameterPointer("name", &name_);
-//    other.configuration().updateParameterPointer("db_object_name", &db_object_name_);
-//    other.configuration().updateParameterPointer("json_key", &json_key_);
-//    other.configuration().updateParameterPointer("json_value", &json_value_);
-//    other.configuration().updateParameterPointer("override_data_source", &override_data_source_);
-
-//    widget_ = std::move(other.widget_);
-//    if (widget_)
-//        widget_->setParser(*this);
-//    other.widget_ = nullptr;
-
-//    return static_cast<ASTERIXJSONParser&>(Configurable::operator=(std::move(other)));
-//}
 
 void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
@@ -515,3 +485,114 @@ unsigned int ASTERIXJSONParser::category() const
     return category_;
 }
 
+// item stuff
+
+int ASTERIXJSONParser::rowCount(const QModelIndex& parent) const
+{
+    return data_mappings_.size();
+}
+
+int ASTERIXJSONParser::columnCount(const QModelIndex& parent) const
+{
+    return table_columns_.size();
+}
+
+QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
+{
+    if (!index.isValid())
+        return QVariant();
+
+    switch (role)
+    {
+        case Qt::DisplayRole:
+        //case Qt::EditRole:
+            {
+                logdbg << "ASTERIXJSONParser: data: display role: row " << index.row() << " col " << index.column();
+
+                assert (index.row() >= 0);
+                assert (index.row() < data_mappings_.size());
+
+                const JSONDataMapping& vp = data_mappings_.at(index.row());
+
+                logdbg << "ASTERIXJSONParser: data: got json key " << vp.jsonKey();
+
+                assert (index.column() < table_columns_.size());
+                std::string col_name = table_columns_.at(index.column()).toStdString();
+
+                if (col_name == "JSON Key")
+                    return vp.jsonKey().c_str();
+                else if (col_name == "DBObject Variable")
+                    return vp.dboVariableName().c_str();
+                else if (col_name == "Comment")
+                    return vp.comment().c_str();
+                else
+                    return QVariant();
+            }
+        case Qt::DecorationRole:
+            {
+//                assert (index.column() < table_columns_.size());
+
+//                if (table_columns_.at(index.column()) == "status")
+//                {
+//                    assert (index.row() >= 0);
+//                    assert (index.row() < view_points_.size());
+
+//                    const ViewPoint& vp = view_points_.at(index.row());
+
+//                    const json& data = vp.data().at("status");
+//                    assert (data.is_string());
+
+//                    std::string status = data;
+
+//                    if (status == "open")
+//                        return open_icon_;
+//                    else if (status == "closed")
+//                        return closed_icon_;
+//                    else if (status == "todo")
+//                        return todo_icon_;
+//                    else
+//                        return unknown_icon_;
+//                }
+//                else
+                    return QVariant();
+            }
+        default:
+            {
+                return QVariant();
+            }
+    }
+}
+
+QVariant ASTERIXJSONParser::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        assert (section < table_columns_.size());
+        return table_columns_.at(section);
+    }
+
+    return QVariant();
+}
+
+QModelIndex ASTERIXJSONParser::index(int row, int column, const QModelIndex& parent) const
+{
+    return createIndex(row, column);
+}
+
+QModelIndex ASTERIXJSONParser::parent(const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
+Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    assert (index.column() < table_columns_.size());
+
+//    if (table_columns_.at(index.column()) == "comment")
+//        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+//    else
+    return QAbstractItemModel::flags(index);
+}

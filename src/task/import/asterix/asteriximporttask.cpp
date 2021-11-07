@@ -81,8 +81,6 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     registerParameter("override_sic_new", &post_process_.override_sic_new_, 1);
     registerParameter("override_tod_offset", &post_process_.override_tod_offset_, 0.0);
 
-    createSubConfigurables();
-
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 
     loginf << "ASTERIXImportTask: constructor: jasterix definition path '"
@@ -102,6 +100,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
                                                      debug_jasterix_, true);
+
+        createSubConfigurables();
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
@@ -161,7 +161,7 @@ void ASTERIXImportTask::generateSubConfigurable(const std::string& class_id,
         logdbg << "ASTERIXImportTask: generateSubConfigurable: generating schema " << instance_id
                << " with name " << name;
 
-        schema_.reset(new ASTERIXJSONParsingSchema(class_id, instance_id, this));
+        schema_.reset(new ASTERIXJSONParsingSchema(class_id, instance_id, *this));
     }
     else
         throw std::runtime_error("ASTERIXImportTask: generateSubConfigurable: unknown class_id " +

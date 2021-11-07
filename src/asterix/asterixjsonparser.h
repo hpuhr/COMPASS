@@ -10,25 +10,25 @@
 #include "propertylist.h"
 #include "stringconv.h"
 
+#include <jasterix/iteminfo.h>
+
+#include <QAbstractItemModel>
+
 #include <memory>
 #include <string>
 
 class DBObject;
 class DBOVariable;
 class Buffer;
+class ASTERIXImportTask;
 
-class ASTERIXJSONParser : public Configurable
+class ASTERIXJSONParser : public Configurable,  public QAbstractItemModel
 {
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
 
 public:
     ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
-                      Configurable* parent);
-//     ASTERIXJSONParser() = default;
-     //ASTERIXJSONParser(JSONObjectParser&& other) { *this = std::move(other); }
-
-     /// @brief Move constructor
-     //ASTERIXJSONParser& operator=(ASTERIXJSONParser&& other);
+                      Configurable* parent, ASTERIXImportTask& task);
 
      DBObject& dbObject() const;
 
@@ -37,7 +37,7 @@ public:
      bool hasMapping(unsigned int index) const;
      void removeMapping(unsigned int index);
 
-     // returs true on successful parse
+     // returns true on successful parse
      bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
      void createMappingStubs(nlohmann::json& j);
 
@@ -65,12 +65,26 @@ public:
 
      unsigned int category() const;
 
+     // item stuff
+
+     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+     QModelIndex parent(const QModelIndex& index) const override;
+
+     Qt::ItemFlags flags(const QModelIndex &index) const override;
+
 private:
+     ASTERIXImportTask& task_;
      std::string name_;
      unsigned int category_;
 
      std::string db_object_name_;
      DBObject* db_object_{nullptr};
+
+     jASTERIX::CategoryItemInfo item_info_;
 
      DBOVariableSet var_list_;
 
@@ -81,6 +95,8 @@ private:
      std::unique_ptr<ASTERIXJSONParserWidget> widget_;
 
      std::vector<JSONDataMapping> data_mappings_;
+
+     QStringList table_columns_ {"JSON Key", "DBObject Variable", "Comment"};
 
      // returns true on successful parse
      bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;

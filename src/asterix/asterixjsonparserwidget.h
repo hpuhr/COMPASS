@@ -5,18 +5,28 @@
 
 class ASTERIXJSONParser;
 
+class QTableView;
+class QSortFilterProxyModel;
+
+
 class ASTERIXJSONParserWidget : public QWidget
 {
     Q_OBJECT
-  public slots:
+public slots:
+    void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
 
 public:
-  explicit ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWidget* parent = nullptr);
+    explicit ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWidget* parent = nullptr);
 
-  void setParser(ASTERIXJSONParser& parser);
+    void setParser(ASTERIXJSONParser& parser);
+
+    void resizeColumnsToContents();
 
 private:
-  ASTERIXJSONParser* parser_{nullptr};
+    ASTERIXJSONParser* parser_{nullptr};
+
+    QTableView* table_view_{nullptr};
+    QSortFilterProxyModel* proxy_model_{nullptr};
 };
 
 #endif // ASTERIXJSONPARSERWIDGET_H

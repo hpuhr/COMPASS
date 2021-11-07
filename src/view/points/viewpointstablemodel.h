@@ -18,12 +18,12 @@
 #ifndef VIEWPOINTSTABLEMODEL_H
 #define VIEWPOINTSTABLEMODEL_H
 
+#include "viewpoint.h"
+
 #include <QAbstractItemModel>
 #include <QIcon>
 
 #include "json.hpp"
-
-#include "viewpoint.h"
 
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>

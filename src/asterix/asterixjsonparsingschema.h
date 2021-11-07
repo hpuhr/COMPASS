@@ -4,8 +4,12 @@
 #include "configurable.h"
 #include "asterixjsonparser.h"
 
+#include <jasterix/iteminfo.h>
+
 #include <vector>
 #include <memory>
+
+class ASTERIXImportTask;
 
 class ASTERIXJSONParsingSchema : public Configurable
 {
@@ -13,7 +17,7 @@ class ASTERIXJSONParsingSchema : public Configurable
 
 public:
     ASTERIXJSONParsingSchema(const std::string& class_id, const std::string& instance_id,
-                             Configurable* parent);
+                             ASTERIXImportTask& task);
     /// @brief Move constructor
 //    ASTERIXJSONParsingSchema& operator=(ASTERIXJSONParsingSchema&& other);
 
@@ -33,7 +37,9 @@ public:
 
     void updateMappings();
 
-  private:
+private:
+    ASTERIXImportTask& task_;
+
     std::string name_;
     std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>> parsers_;
 

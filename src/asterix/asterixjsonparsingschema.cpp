@@ -1,8 +1,9 @@
 #include "asterixjsonparsingschema.h"
+#include "asteriximporttask.h"
 
 ASTERIXJSONParsingSchema::ASTERIXJSONParsingSchema(const std::string& class_id, const std::string& instance_id,
-                                                   Configurable* parent)
-    : Configurable(class_id, instance_id, parent)
+                                                   ASTERIXImportTask& task)
+    : Configurable(class_id, instance_id, &task), task_(task)
 {
     registerParameter("name", &name_, "");
 
@@ -44,7 +45,7 @@ void ASTERIXJSONParsingSchema::generateSubConfigurable(const std::string& class_
         logdbg << "ASTERIXJSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
                << " for cat  " << category;
 
-        parsers_[category].reset(new ASTERIXJSONParser(class_id, instance_id, this));
+        parsers_[category].reset(new ASTERIXJSONParser(class_id, instance_id, this, task_));
     }
     else
         throw std::runtime_error("ASTERIXJSONParsingSchema: generateSubConfigurable: unknown class_id " +
@@ -72,3 +73,4 @@ void ASTERIXJSONParsingSchema::updateMappings()
     for (auto& p_it : parsers_)
         p_it.second->updateMappings();
 }
+
