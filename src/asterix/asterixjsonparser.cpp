@@ -10,6 +10,8 @@
 #include "unitmanager.h"
 #include "util/json.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <algorithm>
 
 using namespace std;
@@ -19,7 +21,8 @@ using namespace Utils;
 
 ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
                                      Configurable* parent)
-    : Configurable(class_id, instance_id, parent)
+    : Configurable(class_id, instance_id, parent,
+                   "task_import_asterix_" + boost::algorithm::to_lower_copy(instance_id) + ".json")
 {
     registerParameter("name", &name_, "");
     registerParameter("category", &category_, 0);
