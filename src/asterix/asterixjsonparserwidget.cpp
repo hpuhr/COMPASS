@@ -1,9 +1,11 @@
 #include "asterixjsonparserwidget.h"
+#include "asterixjsonparserdetailwidget.h"
 #include "asterixjsonparser.h"
 #include "logger.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
@@ -13,12 +15,14 @@
 #include <QShortcut>
 
 ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWidget* parent)
-    : QWidget(parent), parser_(&parser)
+    : QWidget(parent), parser_(parser)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
+    QHBoxLayout* v_layout = new QHBoxLayout();
+
     proxy_model_ = new QSortFilterProxyModel();
-    proxy_model_->setSourceModel(parser_);
+    proxy_model_->setSourceModel(&parser_);
 
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
@@ -39,7 +43,12 @@ ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWid
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
-    main_layout->addWidget(table_view_);
+    v_layout->addWidget(table_view_);
+
+    detail_widget_ = new ASTERIXJSONParserDetailWidget(parser_, this);
+
+    v_layout->addWidget(detail_widget_);
+    main_layout->addLayout(v_layout);
 
     setLayout(main_layout);
 }
@@ -65,4 +74,7 @@ void ASTERIXJSONParserWidget::currentRowChanged(const QModelIndex& current, cons
     unsigned int index = source_index.row();
 
     loginf << "ASTERIXJSONParserWidget: currentRowChanged: current index " << index;
+
+    assert (detail_widget_);
+    detail_widget_->currentIndexChangedSlot(index);
 }

@@ -19,6 +19,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixstatusdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparser.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserwidget.h"        
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserdetailwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparsingschema.h"        
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.cpp"
@@ -26,6 +27,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/asterixoverridewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparser.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparserdetailwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/asterixjsonparsingschema.cpp"
 )
 

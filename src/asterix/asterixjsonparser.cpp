@@ -98,18 +98,43 @@ void ASTERIXJSONParser::doMappingChecks()
     mapping_checks_dirty_ = false;
 }
 
-bool ASTERIXJSONParser::hasJSONKeyMapped (std::string key)
+unsigned int ASTERIXJSONParser::totalEntrySize () const
+{
+    return data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size();
+}
+
+bool ASTERIXJSONParser::existsJSONKeyInCATInfo(const std::string& key)
+{
+    return !not_existing_json_keys_.count(key);
+}
+
+bool ASTERIXJSONParser::hasJSONKeyMapped (const std::string& key)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
                  [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; })
             != data_mappings_.end();
 }
 
-bool ASTERIXJSONParser::hasDBOVariableMapped (std::string var_name)
+bool ASTERIXJSONParser::hasDBOVariableMapped (const std::string& var_name)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
                  [var_name](const JSONDataMapping& mapping) -> bool { return mapping.dboVariableName() == var_name; })
             != data_mappings_.end();
+}
+
+const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
+{
+    return not_added_json_keys_;
+}
+
+const std::vector<std::string>& ASTERIXJSONParser::notAddedDBOVariables() const
+{
+    return not_added_dbo_variables_;
+}
+
+std::vector<JSONDataMapping>& ASTERIXJSONParser::dataMappings()
+{
+    return data_mappings_;
 }
 
 DBObject& ASTERIXJSONParser::dbObject() const
@@ -541,7 +566,7 @@ int ASTERIXJSONParser::rowCount(const QModelIndex& parent) const
 {
     assert (!mapping_checks_dirty_);
 
-    return data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size();
+    return totalEntrySize();
 }
 
 int ASTERIXJSONParser::columnCount(const QModelIndex& parent) const
@@ -560,8 +585,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
 
     assert (index.row() >= 0);
 
-    assert (index.row() <
-            data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size());
+    assert (index.row() < totalEntrySize());
 
     unsigned int row = index.row();
 
@@ -585,8 +609,6 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
                         return mapping.jsonKey().c_str();
                     else if (col_name == "DBObject Variable")
                         return mapping.dboVariableName().c_str();
-                    else if (col_name == "Comment")
-                        return mapping.comment().c_str();
                     else
                         return QVariant();
                 }

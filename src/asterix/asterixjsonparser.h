@@ -38,6 +38,10 @@ public:
      bool hasMapping(unsigned int index) const;
      void removeMapping(unsigned int index);
 
+     std::vector<JSONDataMapping>& dataMappings();
+     const std::vector<std::string>& notAddedJSONKeys() const;
+     const std::vector<std::string>& notAddedDBOVariables() const;
+
      // returns true on successful parse
      bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
      void createMappingStubs(nlohmann::json& j);
@@ -81,6 +85,11 @@ public:
      void mappingChecksDirty(bool mapping_checks_dirty);
      void doMappingChecks();
 
+     unsigned int totalEntrySize () const;
+     bool existsJSONKeyInCATInfo(const std::string& key);
+     bool hasJSONKeyMapped (const std::string& key);
+     bool hasDBOVariableMapped (const std::string& var_name);
+
 
 private:
      ASTERIXImportTask& task_;
@@ -106,7 +115,7 @@ private:
      std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
 
 
-     QStringList table_columns_ {"JSON Key", "DBObject Variable", "Comment"};
+     QStringList table_columns_ {"JSON Key", "DBObject Variable"};
 
      QIcon todo_icon_;
      QIcon unknown_icon_;
@@ -122,8 +131,6 @@ private:
    protected:
      virtual void checkSubConfigurables() {}
 
-     bool hasJSONKeyMapped (std::string key);
-     bool hasDBOVariableMapped (std::string var_name);
 };
 
 #endif // ASTERIXJSONPARSER_H
