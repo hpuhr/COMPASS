@@ -10,6 +10,7 @@
 #include "unitmanager.h"
 #include "util/json.h"
 #include "asteriximporttask.h"
+#include "files.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/iteminfo.h>
@@ -45,6 +46,10 @@ ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::str
     item_info_ = task_.jASTERIX()->category(category_)->itemInfo();
 
     createSubConfigurables();
+
+    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
+    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+    hint_icon_ = QIcon(Files::getIconFilepath("hint.png").c_str());
 }
 
 void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
@@ -53,30 +58,74 @@ void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
     if (class_id == "JSONDataMapping")
     {
         data_mappings_.emplace_back(class_id, instance_id, *this);
+
+        mapping_checks_dirty_ = true;
     }
     else
         throw std::runtime_error("ASTERIXJSONParser: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-DBObject& ASTERIXJSONParser::dbObject() const
+void ASTERIXJSONParser::doMappingChecks()
 {
-    assert(db_object_);
-    return *db_object_;
+    // update non existing keys
+    not_existing_json_keys_.clear();
+
+    for (auto& map_it : data_mappings_)
+    {
+        if (!item_info_.count(map_it.jsonKey()))
+            not_existing_json_keys_.insert(map_it.jsonKey());
+    }
+
+    // update not mapped json keys
+    not_added_json_keys_.clear();
+
+    for (auto& info_it : item_info_)
+    {
+        if (!hasJSONKeyMapped(info_it.first))
+            not_added_json_keys_.push_back(info_it.first);
+    }
+
+    // update not mapped dbo vars
+    not_added_dbo_variables_.clear();
+
+
+    for (auto& dbovar_it : dbObject())
+    {
+        if (!hasDBOVariableMapped(dbovar_it.first))
+            not_added_dbo_variables_.push_back(dbovar_it.first);
+    }
+
+    mapping_checks_dirty_ = false;
 }
 
-void ASTERIXJSONParser::initialize()
+bool ASTERIXJSONParser::hasJSONKeyMapped (std::string key)
 {
-    assert(!db_object_);
+    return std::find_if(data_mappings_.begin(), data_mappings_.end(),
+                 [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; })
+            != data_mappings_.end();
+}
+
+bool ASTERIXJSONParser::hasDBOVariableMapped (std::string var_name)
+{
+    return std::find_if(data_mappings_.begin(), data_mappings_.end(),
+                 [var_name](const JSONDataMapping& mapping) -> bool { return mapping.dboVariableName() == var_name; })
+            != data_mappings_.end();
+}
+
+DBObject& ASTERIXJSONParser::dbObject() const
+{
 
     DBObjectManager& obj_man = COMPASS::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
-        logwrn << "ASTERIXJSONParser: initialize: dbobject '" << db_object_name_
-               << "' does not exist";
+        throw runtime_error ("ASTERIXJSONParser: dbObject: dbobject '" + db_object_name_+ "' does not exist");
     else
-        db_object_ = &obj_man.object(db_object_name_);
+        return obj_man.object(db_object_name_);
+}
 
-    assert(db_object_);
+void ASTERIXJSONParser::initialize()
+{
+    loginf << "ASTERIXJSONParser: initialize: name " << name_;
 
     if (!initialized_)
     {
@@ -101,14 +150,12 @@ void ASTERIXJSONParser::initialize()
 std::shared_ptr<Buffer> ASTERIXJSONParser::getNewBuffer() const
 {
     assert(initialized_);
-    assert(db_object_);
-    return std::make_shared<Buffer>(list_, db_object_->name());
+    return std::make_shared<Buffer>(list_, db_object_name_);
 }
 
 void ASTERIXJSONParser::appendVariablesToBuffer(Buffer& buffer) const
 {
     assert(initialized_);
-    assert(db_object_);
 
     for (auto& p_it : list_.properties())
     {
@@ -438,6 +485,9 @@ const DBOVariableSet& ASTERIXJSONParser::variableList() const { return var_list_
 
 ASTERIXJSONParserWidget* ASTERIXJSONParser::widget()
 {
+    if (mapping_checks_dirty_)
+        doMappingChecks();
+
     if (!widget_)
     {
         widget_.reset(new ASTERIXJSONParserWidget(*this));
@@ -489,18 +539,34 @@ unsigned int ASTERIXJSONParser::category() const
 
 int ASTERIXJSONParser::rowCount(const QModelIndex& parent) const
 {
-    return data_mappings_.size();
+    assert (!mapping_checks_dirty_);
+
+    return data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size();
 }
 
 int ASTERIXJSONParser::columnCount(const QModelIndex& parent) const
 {
+    assert (!mapping_checks_dirty_);
+
     return table_columns_.size();
 }
 
 QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
 {
+    assert (!mapping_checks_dirty_);
+
     if (!index.isValid())
         return QVariant();
+
+    assert (index.row() >= 0);
+
+    assert (index.row() <
+            data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size());
+
+    unsigned int row = index.row();
+
+    assert (index.column() < table_columns_.size());
+    std::string col_name = table_columns_.at(index.column()).toStdString();
 
     switch (role)
     {
@@ -509,51 +575,77 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
             {
                 logdbg << "ASTERIXJSONParser: data: display role: row " << index.row() << " col " << index.column();
 
-                assert (index.row() >= 0);
-                assert (index.row() < data_mappings_.size());
+                if (row < data_mappings_.size()) // is actual mapping
+                {
+                    const JSONDataMapping& mapping = data_mappings_.at(index.row());
 
-                const JSONDataMapping& vp = data_mappings_.at(index.row());
+                    logdbg << "ASTERIXJSONParser: data: got json key " << mapping.jsonKey();
 
-                logdbg << "ASTERIXJSONParser: data: got json key " << vp.jsonKey();
+                    if (col_name == "JSON Key")
+                        return mapping.jsonKey().c_str();
+                    else if (col_name == "DBObject Variable")
+                        return mapping.dboVariableName().c_str();
+                    else if (col_name == "Comment")
+                        return mapping.comment().c_str();
+                    else
+                        return QVariant();
+                }
 
-                assert (index.column() < table_columns_.size());
-                std::string col_name = table_columns_.at(index.column()).toStdString();
+                row -= data_mappings_.size();
 
-                if (col_name == "JSON Key")
-                    return vp.jsonKey().c_str();
-                else if (col_name == "DBObject Variable")
-                    return vp.dboVariableName().c_str();
-                else if (col_name == "Comment")
-                    return vp.comment().c_str();
+                if (row < not_added_json_keys_.size())
+                {
+                    if (col_name == "JSON Key")
+                        return not_added_json_keys_[row].c_str();
+                    else
+                        return QVariant();
+                }
+
+                row -= not_added_json_keys_.size();
+
+                assert (row < not_added_dbo_variables_.size());
+
+                if (col_name == "DBObject Variable")
+                    return not_added_dbo_variables_[row].c_str();
                 else
                     return QVariant();
-            }
+    }
         case Qt::DecorationRole:
             {
-//                assert (index.column() < table_columns_.size());
+                if (row < data_mappings_.size()) // is actual mapping
+                {
+                    const JSONDataMapping& mapping = data_mappings_.at(index.row());
 
-//                if (table_columns_.at(index.column()) == "status")
-//                {
-//                    assert (index.row() >= 0);
-//                    assert (index.row() < view_points_.size());
+                    logdbg << "ASTERIXJSONParser: data: got json key " << mapping.jsonKey();
 
-//                    const ViewPoint& vp = view_points_.at(index.row());
+                    if (col_name == "JSON Key")
+                    {
+                        if (not_existing_json_keys_.count(mapping.jsonKey()))
+                            return hint_icon_;
+                        else
+                            return QVariant();
+                    }
+                    else
+                        return QVariant();
+                }
 
-//                    const json& data = vp.data().at("status");
-//                    assert (data.is_string());
+                row -= data_mappings_.size();
 
-//                    std::string status = data;
+                if (row < not_added_json_keys_.size())
+                {
+                    if (col_name == "JSON Key")
+                        return todo_icon_;
+                    else
+                        return QVariant();
+                }
 
-//                    if (status == "open")
-//                        return open_icon_;
-//                    else if (status == "closed")
-//                        return closed_icon_;
-//                    else if (status == "todo")
-//                        return todo_icon_;
-//                    else
-//                        return unknown_icon_;
-//                }
-//                else
+                row -= not_added_json_keys_.size();
+
+                assert (row < not_added_dbo_variables_.size());
+
+                if (col_name == "DBObject Variable")
+                    return todo_icon_;
+                else
                     return QVariant();
             }
         default:
@@ -595,4 +687,14 @@ Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex &index) const
 //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 //    else
     return QAbstractItemModel::flags(index);
+}
+
+bool ASTERIXJSONParser::mappingChecksDirty() const
+{
+    return mapping_checks_dirty_;
+}
+
+void ASTERIXJSONParser::mappingChecksDirty(bool mapping_checks_dirty)
+{
+    mapping_checks_dirty_ = mapping_checks_dirty;
 }

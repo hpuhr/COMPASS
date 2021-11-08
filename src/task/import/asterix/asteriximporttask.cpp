@@ -101,7 +101,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     jasterix_ = std::make_shared<jASTERIX::jASTERIX>(jasterix_definition_path, false,
                                                      debug_jasterix_, true);
 
-        createSubConfigurables();
+    createSubConfigurables();
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())

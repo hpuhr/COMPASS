@@ -13,6 +13,7 @@
 #include <jasterix/iteminfo.h>
 
 #include <QAbstractItemModel>
+#include <QIcon>
 
 #include <memory>
 #include <string>
@@ -76,13 +77,17 @@ public:
 
      Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+     bool mappingChecksDirty() const;
+     void mappingChecksDirty(bool mapping_checks_dirty);
+     void doMappingChecks();
+
+
 private:
      ASTERIXImportTask& task_;
      std::string name_;
      unsigned int category_;
 
      std::string db_object_name_;
-     DBObject* db_object_{nullptr};
 
      jASTERIX::CategoryItemInfo item_info_;
 
@@ -95,8 +100,17 @@ private:
      std::unique_ptr<ASTERIXJSONParserWidget> widget_;
 
      std::vector<JSONDataMapping> data_mappings_;
+     bool mapping_checks_dirty_ {true};
+     std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
+     std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings
+     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
+
 
      QStringList table_columns_ {"JSON Key", "DBObject Variable", "Comment"};
+
+     QIcon todo_icon_;
+     QIcon unknown_icon_;
+     QIcon hint_icon_;
 
      // returns true on successful parse
      bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
@@ -107,6 +121,9 @@ private:
 
    protected:
      virtual void checkSubConfigurables() {}
+
+     bool hasJSONKeyMapped (std::string key);
+     bool hasDBOVariableMapped (std::string var_name);
 };
 
 #endif // ASTERIXJSONPARSER_H
