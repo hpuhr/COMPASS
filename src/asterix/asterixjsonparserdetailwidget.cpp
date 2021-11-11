@@ -37,7 +37,7 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     info_label_ = new QLabel();
     form_layout->addRow("Info", info_label_);
 
-//    QCheckBox* active_check_ {nullptr};
+    //    QCheckBox* active_check_ {nullptr};
     active_check_ = new QCheckBox();
     active_check_->setDisabled(true);
     //active_check->setChecked(map_it.second.second->active());
@@ -51,10 +51,10 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
 
 
-//    QLineEdit* comment_edit_ {nullptr};
+    //    QLineEdit* comment_edit_ {nullptr};
 
-//    QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
-//    QPushButton* dbovar_button_ {nullptr}; // displays current action: create new dbovar
+    //    QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
+    //    QPushButton* dbovar_button_ {nullptr}; // displays current action: create new dbovar
 
     //    QLabel* json_key_label_ {nullptr};
     QLabel* asterix_label = new QLabel("ASTERIX");
@@ -91,14 +91,9 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
 
 
-//    data_format_widget = new DataTypeFormatSelectionWidget(
-//                map_it.second.second->formatDataTypeRef(), map_it.second.second->jsonValueFormatRef());
-
-//    UnitSelectionWidget* unit_sel = new UnitSelectionWidget();
-//    mappings_grid_->addWidget(unit_sel, row, 5);
-
     //    DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
-
+    data_format_widget_ = new DataTypeFormatSelectionWidget();
+    form_layout->addRow("Format", data_format_widget_);
 
     QFrame* line2 = new QFrame();
     line2->setFrameShape(QFrame::HLine);
@@ -124,6 +119,32 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
     main_layout->addLayout(form_layout);
 
+    // buttons
+
+    dbovar_new_button_ = new QPushButton("New DBOVariable");
+    dbovar_new_button_->setHidden(true);
+    connect(dbovar_new_button_, &QPushButton::clicked,
+            this, &ASTERIXJSONParserDetailWidget::createNewDBVariableSlot);
+    main_layout->addWidget(dbovar_new_button_);
+
+    dbovar_rename_button_ = new QPushButton("Rename DBOVariable");
+    dbovar_rename_button_->setHidden(true);
+    connect(dbovar_rename_button_, &QPushButton::clicked,
+            this, &ASTERIXJSONParserDetailWidget::renameDBVariableSlot);
+    main_layout->addWidget(dbovar_rename_button_);
+
+    dbovar_delete_button_ = new QPushButton("Delete DBOVariable");
+    dbovar_delete_button_->setHidden(true);
+    connect(dbovar_delete_button_, &QPushButton::clicked,
+            this, &ASTERIXJSONParserDetailWidget::deleteDBVariableSlot);
+    main_layout->addWidget(dbovar_delete_button_);
+
+    mapping_button_ = new QPushButton();
+    mapping_button_->setHidden(true);
+    connect(mapping_button_, &QPushButton::clicked,
+            this, &ASTERIXJSONParserDetailWidget::mappingActionSlot);
+    main_layout->addWidget(mapping_button_);
+
     setLayout(main_layout);
 }
 
@@ -137,6 +158,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     assert (active_check_);
     assert (json_key_label_);
     assert (unit_sel_);
+    assert (data_format_widget_);
 
     // existing mapping
 
@@ -158,8 +180,12 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         showJSONKey(mapping.jsonKey());
 
         unit_sel_->update(mapping.dimensionRef(), mapping.unitRef());
+        data_format_widget_->update(mapping.formatDataTypeRef(), mapping.jsonValueFormatRef());
 
-        showDBOVariable(mapping.dboVariableName());
+        showDBOVariable(mapping.dboVariableName(), true);
+
+        mapping_button_->setText("Delete Mapping");
+        mapping_button_->setHidden(false);
 
         return;
     }
@@ -182,7 +208,11 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         showJSONKey(key);
         unit_sel_->clear();
+        data_format_widget_->clear();
         showDBOVariable("");
+
+        mapping_button_->setText("Add Mapping");
+        mapping_button_->setHidden(false);
 
         return;
     }
@@ -202,7 +232,11 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
     showJSONKey("");
     unit_sel_->clear();
+    data_format_widget_->clear();
     showDBOVariable(dbovar);
+
+    mapping_button_->setText("");
+    mapping_button_->setHidden(true);
 }
 
 void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key)
@@ -228,7 +262,7 @@ void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key)
     }
 }
 
-void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name)
+void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name, bool mapping_exists)
 {
     assert (dbo_var_sel_);
 
@@ -238,45 +272,72 @@ void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name
 
         assert (parser_.dbObject().hasVariable(var_name));
         dbo_var_sel_->selectedVariable(parser_.dbObject().variable(var_name));
+
+        dbovar_new_button_->setHidden(true);
+        dbovar_rename_button_->setHidden(false);
+        dbovar_delete_button_->setHidden(false);
     }
     else
     {
         dbo_var_sel_->setDisabled(true);
         dbo_var_sel_->selectEmptyVariable();
+
+        dbovar_new_button_->setHidden(!mapping_exists);
+        dbovar_rename_button_->setHidden(true);
+        dbovar_delete_button_->setHidden(true);
     }
 }
 
 
 void ASTERIXJSONParserDetailWidget::mappingActiveChangedSlot()
 {
-
+    loginf << "ASTERIXJSONParserDetailWidget: mappingActiveChangedSlot";
 }
 
 void ASTERIXJSONParserDetailWidget::mappingInArrayChangedSlot()
 {
-
+    loginf << "ASTERIXJSONParserDetailWidget: mappingInArrayChangedSlot";
 }
 
 void ASTERIXJSONParserDetailWidget::mappingAppendChangedSlot()
 {
-
-}
-
-void ASTERIXJSONParserDetailWidget::mappingCommentChangedSlot()
-{
-
+    loginf << "ASTERIXJSONParserDetailWidget: mappingAppendChangedSlot";
 }
 
 void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 {
+    loginf << "ASTERIXJSONParserDetailWidget: createNewDBVariableSlot";
 
 }
+
+void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
+{
+    loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot";
+}
+void ASTERIXJSONParserDetailWidget::renameDBVariableSlot()
+{
+    loginf << "ASTERIXJSONParserDetailWidget: renameDBVariableSlot";
+}
+
 void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
 {
-
+    loginf << "ASTERIXJSONParserDetailWidget: mappingDBOVariableChangedSlot";
 }
 
-void ASTERIXJSONParserDetailWidget::mappingDeleteSlot()
-{
 
+void ASTERIXJSONParserDetailWidget::mappingActionSlot()
+{
+    assert (mapping_button_);
+
+    if (mapping_button_->text().toStdString() == "Add Mapping")
+    {
+        loginf << "ASTERIXJSONParserDetailWidget: mappingActionSlot: add";
+    }
+    else if (mapping_button_->text().toStdString() == "Delete Mapping")
+    {
+        loginf << "ASTERIXJSONParserDetailWidget: mappingActionSlot: delete";
+    }
+    else
+        throw runtime_error("ASTERIXJSONParserDetailWidget: mappingActionSlot: unknown action'"
+            + mapping_button_->text().toStdString() + "'");
 }

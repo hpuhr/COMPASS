@@ -49,6 +49,13 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("format_data_type", &format_data_type_, "");
     registerParameter("json_value_format", &json_value_format_, "");
 
+//    if (format_data_type_.size())
+//    {
+//        logdbg << "JSONDataMapping: ctor: setting format from dt " << format_data_type_
+//               << " format " << json_value_format_;
+//        json_value_format_ = Format(Property::asDataType(format_data_type_), json_value_format_);
+//    }
+
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
@@ -167,15 +174,11 @@ void JSONDataMapping::mandatory(bool mandatory)
 
 Format JSONDataMapping::jsonValueFormat() const
 {
-    assert(initialized_);
-    // assert (json_value_format_);
     return json_value_format_;
 }
 
 Format& JSONDataMapping::jsonValueFormatRef()
 {
-    assert(initialized_);
-    // assert (json_value_format_);
     return json_value_format_;
 }
 
@@ -256,19 +259,6 @@ void JSONDataMapping::initialize()
             dbovariable_name_.size() && obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
         variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
 
-    if (format_data_type_.size())
-    {
-        logdbg << "JSONDataMapping: initialize: setting format from dt " << format_data_type_
-               << " format " << json_value_format_;
-        json_value_format_ = Format(Property::asDataType(format_data_type_), json_value_format_);
-    }
-    else if (variable_)
-    {
-        logdbg << "JSONDataMapping: initialize: setting format from variable " << variable_->name();
-        json_value_format_ = Format(variable_->dataType(), json_value_format_);
-    }
-    else
-        logdbg << "JSONDataMapping: initialize: variable not set";
 
     if (append_value_)
     {

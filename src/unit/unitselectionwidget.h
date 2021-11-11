@@ -48,10 +48,10 @@ class UnitSelectionWidget : public QPushButton
     bool pointers_set_ {false};
 
     /// Unit dimension reference
-    std::string* dimension_;
+    std::string* dimension_ {nullptr};
 
     /// Unit unit reference
-    std::string* unit_;
+    std::string* unit_ {nullptr};
 
     QMenu menu_;
 

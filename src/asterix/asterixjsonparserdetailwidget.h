@@ -26,12 +26,13 @@ public slots:
     void mappingInArrayChangedSlot();
     void mappingAppendChangedSlot();
 
-    void mappingCommentChangedSlot();
-
-    void createNewDBVariableSlot();
     void mappingDBOVariableChangedSlot();
 
-    void mappingDeleteSlot();
+    void createNewDBVariableSlot();
+    void renameDBVariableSlot();
+    void deleteDBVariableSlot();
+
+    void mappingActionSlot();
 
 signals:
 
@@ -57,10 +58,13 @@ private:
     QLineEdit* comment_edit_ {nullptr};
 
     QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
-    QPushButton* dbovar_button_ {nullptr}; // displays current action: create new dbovar
+
+    QPushButton* dbovar_new_button_ {nullptr};
+    QPushButton* dbovar_rename_button_ {nullptr};
+    QPushButton* dbovar_delete_button_ {nullptr};
 
     void showJSONKey (const std::string& key);
-    void showDBOVariable (const std::string& var_name);
+    void showDBOVariable (const std::string& var_name, bool mapping_exists=false);
 
 };
 

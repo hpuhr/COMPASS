@@ -95,6 +95,9 @@ void UnitSelectionWidget::clear()
 {
     pointers_set_ = false;
 
+    dimension_ = nullptr;
+    unit_ = nullptr;
+
     setText("");
 
     setDisabled(true);

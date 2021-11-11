@@ -21,26 +21,65 @@
 
 DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget(std::string& data_type_str,
                                                              Format& format)
-    : QPushButton(), data_type_str_(data_type_str), format_(format)
+    : QPushButton(), data_type_str_(&data_type_str), format_(&format)
 {
     logdbg << "DataTypeFormatSelectionWidget: constructor";
 
+    pointers_set_ = true;
+
     showValues();
+
     createMenu();
 
-    connect(&menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-    connect(this, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    connect(this, &DataTypeFormatSelectionWidget::clicked, this, &DataTypeFormatSelectionWidget::showMenuSlot);
+
+    setDisabled(false);
+}
+
+DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget()
+{
+    pointers_set_ = false;
+
+    connect(this, &DataTypeFormatSelectionWidget::clicked, this, &DataTypeFormatSelectionWidget::showMenuSlot);
+
+    setDisabled(true);
 }
 
 DataTypeFormatSelectionWidget::~DataTypeFormatSelectionWidget() {}
 
+
+void DataTypeFormatSelectionWidget::update(std::string& data_type_str, Format& format)
+{
+    data_type_str_ = &data_type_str;
+    format_ = &format;
+
+    pointers_set_ = true;
+
+    showValues();
+    createMenu();
+
+    setDisabled(false);
+}
+
+void DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget::clear()
+{
+    pointers_set_ = false;
+
+    data_type_str_ = nullptr;
+    format_ = nullptr;
+
+    setText("");
+    menu_ = nullptr;
+
+    setDisabled(true);
+}
+
 void DataTypeFormatSelectionWidget::showValues()
 {
-    if (data_type_str_.size() && format_.size())
-    {
-        std::string tmp_str = data_type_str_ + +":" + format_;
-        setText(QString::fromStdString(tmp_str));
-    }
+    assert (pointers_set_);
+
+    if (data_type_str_->size() && format_->size())
+        setText(QString::fromStdString(*data_type_str_ + ":" + *format_));
     else
         setText("");
 }
@@ -49,13 +88,17 @@ void DataTypeFormatSelectionWidget::createMenu()
 {
     logdbg << "DataTypeFormatSelectionWidget: createMenu";
 
-    for (auto dt_it : format_.getAllFormatOptions())
+    assert (pointers_set_);
+
+    menu_.reset(new QMenu());
+
+    for (auto dt_it : format_->getAllFormatOptions())
     {
         logdbg << "DataTypeFormatSelectionWidget: createMenu: dt "
                << static_cast<unsigned>(dt_it.first);
         std::string data_type_str = Property::asString(dt_it.first);
         logdbg << "DataTypeFormatSelectionWidget: createMenu: dt str " << data_type_str;
-        QMenu* m2 = menu_.addMenu(QString::fromStdString(data_type_str));
+        QMenu* m2 = menu_->addMenu(QString::fromStdString(data_type_str));
 
         for (auto ft_it : dt_it.second)
         {
@@ -68,6 +111,9 @@ void DataTypeFormatSelectionWidget::createMenu()
             action->setData(QVariant(vmap));
         }
     }
+
+    connect(menu_.get(), &QMenu::triggered, this, &DataTypeFormatSelectionWidget::triggerSlot);
+
     logdbg << "DataTypeFormatSelectionWidget: createMenu: end";
 }
 
@@ -75,12 +121,17 @@ void DataTypeFormatSelectionWidget::showMenuSlot()
 {
     logdbg << "DataTypeFormatSelectionWidget: showMenuSlot";
 
-    menu_.exec(QCursor::pos());
+    assert (pointers_set_);
+    assert (menu_);
+
+    menu_->exec(QCursor::pos());
 }
 
 void DataTypeFormatSelectionWidget::triggerSlot(QAction* action)
 {
     loginf << "DataTypeFormatSelectionWidget: triggerSlot";
+
+    assert (pointers_set_);
 
     QVariantMap vmap = action->data().toMap();
     std::string data_type_str, format_str;
@@ -97,15 +148,15 @@ void DataTypeFormatSelectionWidget::triggerSlot(QAction* action)
     if (data_type_str.size() && format_str.size())
     {
         PropertyDataType data_type = Property::asDataType(data_type_str);
-        data_type_str_ = data_type_str;
-        format_.set(data_type, format_str);
+        *data_type_str_ = data_type_str;
+        format_->set(data_type, format_str);
 
-        std::string tmp_str = data_type_str + ":" + format_;
+        std::string tmp_str = data_type_str + ":" + *format_;
         setText(QString::fromStdString(tmp_str));
     }
     else
     {
-        format_.set(PropertyDataType::BOOL, "");
+        format_->set(PropertyDataType::BOOL, "");
         setText("");
     }
 }
