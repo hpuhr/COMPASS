@@ -1,11 +1,24 @@
 #include "asterixjsonparserdetailwidget.h"
 
 #include "asterixjsonparser.h"
+#include "datatypeformatselectionwidget.h"
+#include "dbovariable.h"
+#include "dbovariableselectionwidget.h"
+#include "files.h"
+#include "jsonobjectparser.h"
 #include "logger.h"
+#include "unitselectionwidget.h"
+#include "compass.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
 
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QCheckBox>
 #include <QFormLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 
 using namespace std;
 
@@ -17,18 +30,97 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     QFormLayout* form_layout = new QFormLayout;
     form_layout->setFormAlignment(Qt::AlignLeft | Qt::AlignTop);
 
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    //    QLabel* info_label_ {nullptr}; // shows type of mapping, or missing details
     info_label_ = new QLabel();
     form_layout->addRow("Info", info_label_);
 
-    form_layout->addRow(new QLabel("ASTERIX"));
+//    QCheckBox* active_check_ {nullptr};
+    active_check_ = new QCheckBox();
+    active_check_->setDisabled(true);
+    //active_check->setChecked(map_it.second.second->active());
+    connect(active_check_, SIGNAL(stateChanged(int)), this, SLOT(mappingActiveChangedSlot()));
+    form_layout->addRow("Active", active_check_);
+
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    form_layout->addRow(line);
+
+
+
+//    QLineEdit* comment_edit_ {nullptr};
+
+//    QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
+//    QPushButton* dbovar_button_ {nullptr}; // displays current action: create new dbovar
+
+    //    QLabel* json_key_label_ {nullptr};
+    QLabel* asterix_label = new QLabel("ASTERIX");
+    asterix_label->setFont(font_bold);
+    form_layout->addRow(asterix_label);
 
     json_key_label_ = new QLabel();
+    json_key_label_->setTextInteractionFlags(Qt::TextSelectableByMouse);
     form_layout->addRow("JSON Key", json_key_label_);
 
-    form_layout->addRow(new QLabel("DBOVariable"));
+    asterix_desc_label_ = new QLabel();
+    asterix_desc_label_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    asterix_desc_label_->setTextFormat(Qt::TextFormat::PlainText);
+    asterix_desc_label_->setWordWrap(true);
+    form_layout->addRow("Description", asterix_desc_label_);
 
-    dbo_var_label_ = new QLabel();
-    form_layout->addRow("Name", dbo_var_label_);
+    //    QCheckBox* in_array_check_ {nullptr};
+
+    in_array_check_ = new QCheckBox();
+    in_array_check_->setDisabled(true);
+    connect(in_array_check_, SIGNAL(stateChanged(int)), this, SLOT(mappingInArrayChangedSlot()));
+    form_layout->addRow("In Array", in_array_check_);
+
+    //    QCheckBox* append_check {nullptr};
+    append_check = new QCheckBox();
+    append_check->setDisabled(true);
+    connect(append_check, SIGNAL(stateChanged(int)), this, SLOT(mappingAppendChangedSlot()));
+    form_layout->addRow("Append", append_check);
+
+
+    //    UnitSelectionWidget* unit_sel_ {nullptr};
+    unit_sel_ = new UnitSelectionWidget();
+    form_layout->addRow("Unit", unit_sel_);
+
+
+
+//    data_format_widget = new DataTypeFormatSelectionWidget(
+//                map_it.second.second->formatDataTypeRef(), map_it.second.second->jsonValueFormatRef());
+
+//    UnitSelectionWidget* unit_sel = new UnitSelectionWidget();
+//    mappings_grid_->addWidget(unit_sel, row, 5);
+
+    //    DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
+
+
+    QFrame* line2 = new QFrame();
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
+    form_layout->addRow(line2);
+
+    // dbo var
+
+    QLabel* dbovar_label = new QLabel("DBOVariable");
+    dbovar_label->setFont(font_bold);
+    form_layout->addRow(dbovar_label);
+
+    //    DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
+    dbo_var_sel_ = new DBOVariableSelectionWidget();
+    dbo_var_sel_->showMetaVariables(false);
+    dbo_var_sel_->showDBOOnly(parser_.dbObjectName());
+    dbo_var_sel_->showEmptyVariable(true);
+    dbo_var_sel_->setDisabled(true);
+
+    connect(dbo_var_sel_, &DBOVariableSelectionWidget::selectionChanged,
+            this, &ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot);
+    form_layout->addRow("Name", dbo_var_sel_);
 
     main_layout->addLayout(form_layout);
 
@@ -42,9 +134,11 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     assert (index < parser_.totalEntrySize());
 
     assert (info_label_);
+    assert (active_check_);
     assert (json_key_label_);
-    assert (dbo_var_label_);
+    assert (unit_sel_);
 
+    // existing mapping
 
     if (index < parser_.dataMappings().size()) // is actual mapping
     {
@@ -58,11 +152,22 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         else
             info_label_->setText("Existing Mapping");
 
-        json_key_label_->setText(mapping.jsonKey().c_str());
-        dbo_var_label_->setText(mapping.dboVariableName().c_str());
+        active_check_->setDisabled(false);
+        active_check_->setChecked(mapping.active());
+
+        showJSONKey(mapping.jsonKey());
+
+        unit_sel_->update(mapping.dimensionRef(), mapping.unitRef());
+
+        showDBOVariable(mapping.dboVariableName());
 
         return;
     }
+
+    active_check_->setDisabled(true);
+    active_check_->setChecked(false);
+
+    // unmapped JSON key
 
     index -= parser_.dataMappings().size();
 
@@ -75,11 +180,14 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added JSON " << index
                << " key '" << key << "'";
 
-        json_key_label_->setText(key.c_str());
-        dbo_var_label_->setText("");
+        showJSONKey(key);
+        unit_sel_->clear();
+        showDBOVariable("");
 
         return;
     }
+
+    // not mapped DBOVariable
 
     index -= parser_.notAddedJSONKeys().size();
 
@@ -91,8 +199,84 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added dbovar " << index
            << " key '" << dbovar << "'";
 
-    json_key_label_->setText("");
-    dbo_var_label_->setText(dbovar.c_str());
+
+    showJSONKey("");
+    unit_sel_->clear();
+    showDBOVariable(dbovar);
+}
+
+void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key)
+{
+    assert (json_key_label_);
+    assert (asterix_desc_label_);
+
+    if (!key.size())
+    {
+        json_key_label_->setText("");
+        asterix_desc_label_->setText("");
+    }
+    else
+    {
+        json_key_label_->setText(key.c_str());
+
+        const jASTERIX::CategoryItemInfo& item_info = parser_.itemInfo();
+
+        if (item_info.count(key))
+            asterix_desc_label_->setText(item_info.at(key).description_.c_str());
+        else
+            asterix_desc_label_->setText("");
+    }
+}
+
+void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name)
+{
+    assert (dbo_var_sel_);
+
+    if (var_name.size())
+    {
+        dbo_var_sel_->setDisabled(false);
+
+        assert (parser_.dbObject().hasVariable(var_name));
+        dbo_var_sel_->selectedVariable(parser_.dbObject().variable(var_name));
+    }
+    else
+    {
+        dbo_var_sel_->setDisabled(true);
+        dbo_var_sel_->selectEmptyVariable();
+    }
+}
+
+
+void ASTERIXJSONParserDetailWidget::mappingActiveChangedSlot()
+{
 
 }
 
+void ASTERIXJSONParserDetailWidget::mappingInArrayChangedSlot()
+{
+
+}
+
+void ASTERIXJSONParserDetailWidget::mappingAppendChangedSlot()
+{
+
+}
+
+void ASTERIXJSONParserDetailWidget::mappingCommentChangedSlot()
+{
+
+}
+
+void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
+{
+
+}
+void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
+{
+
+}
+
+void ASTERIXJSONParserDetailWidget::mappingDeleteSlot()
+{
+
+}

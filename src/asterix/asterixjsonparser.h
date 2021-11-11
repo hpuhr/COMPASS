@@ -91,6 +91,8 @@ public:
      bool hasDBOVariableMapped (const std::string& var_name);
 
 
+     const jASTERIX::CategoryItemInfo& itemInfo() const;
+
 private:
      ASTERIXImportTask& task_;
      std::string name_;

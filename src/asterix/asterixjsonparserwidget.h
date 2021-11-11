@@ -6,6 +6,7 @@
 class ASTERIXJSONParser;
 class ASTERIXJSONParserDetailWidget;
 
+class QSplitter;
 class QTableView;
 class QSortFilterProxyModel;
 
@@ -18,12 +19,14 @@ public slots:
 
 public:
     explicit ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWidget* parent = nullptr);
+    virtual ~ASTERIXJSONParserWidget();
 
     void resizeColumnsToContents();
 
 private:
     ASTERIXJSONParser& parser_;
 
+    QSplitter* splitter_{nullptr};
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
 

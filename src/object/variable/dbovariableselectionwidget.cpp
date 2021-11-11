@@ -224,6 +224,20 @@ void DBOVariableSelectionWidget::selectedVariable(DBOVariable& variable)
     meta_variable_selected_ = false;
 }
 
+void DBOVariableSelectionWidget::selectEmptyVariable()
+{
+    assert (show_empty_variable_);
+
+    assert(object_label_);
+    assert(variable_label_);
+
+    object_label_->setText("");
+    variable_label_->setText("");
+
+    variable_selected_ = false;
+    meta_variable_selected_ = false;
+}
+
 /*
  */
 DBOVariable& DBOVariableSelectionWidget::selectedVariable() const
@@ -274,6 +288,9 @@ void DBOVariableSelectionWidget::showDBOOnly(const std::string& only_dbo_name)
     show_dbo_only_ = true;
     only_dbo_name_ = only_dbo_name;
 
+    assert(object_label_);
+    object_label_->hide();
+
     updateMenuEntries();
 }
 
@@ -281,6 +298,9 @@ void DBOVariableSelectionWidget::disableShowDBOOnly()
 {
     show_dbo_only_ = false;
     only_dbo_name_ = "";
+
+    assert(object_label_);
+    object_label_->show();
 
     updateMenuEntries();
 }

@@ -122,6 +122,11 @@ bool ASTERIXJSONParser::hasDBOVariableMapped (const std::string& var_name)
             != data_mappings_.end();
 }
 
+const jASTERIX::CategoryItemInfo& ASTERIXJSONParser::itemInfo() const
+{
+    return item_info_;
+}
+
 const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
 {
     return not_added_json_keys_;

@@ -65,6 +65,7 @@ class DBOVariableSelectionWidget : public QFrame
     DBOVariable& selectedVariable() const;
     /// @brief Sets the selected variable
     void selectedVariable(DBOVariable& variable);
+    void selectEmptyVariable();
 
     /// @brief Returns if a variable is selected
     bool hasMetaVariable() const { return meta_variable_selected_; }

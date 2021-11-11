@@ -3,6 +3,8 @@
 #include "asterixjsonparser.h"
 #include "logger.h"
 
+#include <QSplitter>
+#include <QSettings>
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -19,7 +21,12 @@ ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWid
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
-    QHBoxLayout* v_layout = new QHBoxLayout();
+    //QHBoxLayout* v_layout = new QHBoxLayout();
+
+    splitter_ = new QSplitter();
+    splitter_->setOrientation(Qt::Horizontal);
+
+    QSettings settings("COMPASS", ("ASTERIXJSONParserWidget"+parser_.name()).c_str());
 
     proxy_model_ = new QSortFilterProxyModel();
     proxy_model_->setSourceModel(&parser_);
@@ -43,14 +50,22 @@ ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWid
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
-    v_layout->addWidget(table_view_);
+    splitter_->addWidget(table_view_);
 
     detail_widget_ = new ASTERIXJSONParserDetailWidget(parser_, this);
 
-    v_layout->addWidget(detail_widget_);
-    main_layout->addLayout(v_layout);
+    splitter_->addWidget(detail_widget_);
+    splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
+
+    main_layout->addWidget(splitter_);
 
     setLayout(main_layout);
+}
+
+ASTERIXJSONParserWidget::~ASTERIXJSONParserWidget()
+{
+    QSettings settings("COMPASS", ("ASTERIXJSONParserWidget"+parser_.name()).c_str());
+    settings.setValue("mainSplitterSizes", splitter_->saveState());
 }
 
 void ASTERIXJSONParserWidget::resizeColumnsToContents()
