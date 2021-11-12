@@ -68,9 +68,9 @@ void ASTERIXJSONParsingSchema::removeParser(unsigned int category)
     parsers_.erase(category);
 }
 
-void ASTERIXJSONParsingSchema::updateMappings()
-{
-    for (auto& p_it : parsers_)
-        p_it.second->updateMappings();
-}
+//void ASTERIXJSONParsingSchema::updateMappings()
+//{
+//    for (auto& p_it : parsers_)
+//        p_it.second->updateMappings();
+//}
 

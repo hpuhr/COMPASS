@@ -75,6 +75,17 @@ void ASTERIXJSONParserWidget::resizeColumnsToContents()
     table_view_->resizeColumnsToContents();
 }
 
+void ASTERIXJSONParserWidget::selectModelRow (unsigned int row)
+{
+    assert (table_view_);
+    assert (proxy_model_);
+
+    auto const proxy_index = proxy_model_->mapFromSource(parser_.index(row, 0));
+
+    table_view_->selectRow(proxy_index.row());
+
+}
+
 void ASTERIXJSONParserWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
     if (!current.isValid())

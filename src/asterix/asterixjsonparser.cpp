@@ -12,6 +12,8 @@
 #include "asteriximporttask.h"
 #include "files.h"
 
+#include <QTableView>
+
 #include <jasterix/jasterix.h>
 #include <jasterix/iteminfo.h>
 
@@ -67,6 +69,8 @@ void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
 
 void ASTERIXJSONParser::doMappingChecks()
 {
+    beginResetModel();
+
     // update non existing keys
     not_existing_json_keys_.clear();
 
@@ -96,6 +100,8 @@ void ASTERIXJSONParser::doMappingChecks()
     }
 
     mapping_checks_dirty_ = false;
+
+    endResetModel();
 }
 
 unsigned int ASTERIXJSONParser::totalEntrySize () const
@@ -111,35 +117,77 @@ bool ASTERIXJSONParser::existsJSONKeyInCATInfo(const std::string& key)
 bool ASTERIXJSONParser::hasJSONKeyMapped (const std::string& key)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
-                 [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; })
+                        [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; })
             != data_mappings_.end();
 }
 
 bool ASTERIXJSONParser::hasDBOVariableMapped (const std::string& var_name)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
-                 [var_name](const JSONDataMapping& mapping) -> bool { return mapping.dboVariableName() == var_name; })
+                        [var_name](const JSONDataMapping& mapping) -> bool { return mapping.dboVariableName() == var_name; })
             != data_mappings_.end();
 }
 
-const jASTERIX::CategoryItemInfo& ASTERIXJSONParser::itemInfo() const
+void ASTERIXJSONParser::selectMapping (unsigned int index)
+{
+    loginf << "ASTERIXJSONParser: selectMapping: index " << index;
+
+    assert (widget_);
+    widget_->selectModelRow(index);
+}
+
+//void ASTERIXJSONParser::updateToChangedIndex (unsigned int row_index)
+//{
+//    assert (row_index < totalEntrySize());
+//    emit dataChanged(index(row_index, 0), index(row_index, table_columns_.size()-1));
+//}
+
+ASTERIXJSONParser::EntryType ASTERIXJSONParser::entryType (unsigned int index) const
+{
+    if (index < data_mappings_.size()) // is actual mapping
+        return ASTERIXJSONParser::EntryType::ExistingMapping;
+
+    index -= data_mappings_.size();
+
+    if (index < not_added_json_keys_.size())
+        return ASTERIXJSONParser::EntryType::UnmappedJSONKey;
+
+    index -= not_added_json_keys_.size();
+
+    assert (index < not_added_dbo_variables_.size());
+
+    return ASTERIXJSONParser::EntryType::UnmappedDBOVariable;
+}
+
+JSONDataMapping& ASTERIXJSONParser::mapping (unsigned int index)
+{
+    assert (entryType(index) == ASTERIXJSONParser::EntryType::ExistingMapping);
+
+    return data_mappings_.at(index);
+}
+
+const JSONDataMapping& ASTERIXJSONParser::mapping (unsigned int index) const
+{
+    assert (entryType(index) == ASTERIXJSONParser::EntryType::ExistingMapping);
+
+    return data_mappings_.at(index);
+}
+
+const std::string& ASTERIXJSONParser::unmappedJSONKey (unsigned int index) const
+{
+    assert (entryType(index) == ASTERIXJSONParser::EntryType::UnmappedJSONKey);
+    return not_added_json_keys_.at(index - data_mappings_.size());
+}
+
+const std::string& ASTERIXJSONParser::unmappedDBOVariable (unsigned int index) const
+{
+    assert (entryType(index) == ASTERIXJSONParser::EntryType::UnmappedDBOVariable);
+    return not_added_dbo_variables_.at(index - data_mappings_.size() - not_added_json_keys_.size());
+}
+
+const jASTERIX::CategoryItemInfo& ASTERIXJSONParser::categoryItemInfo() const
 {
     return item_info_;
-}
-
-const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
-{
-    return not_added_json_keys_;
-}
-
-const std::vector<std::string>& ASTERIXJSONParser::notAddedDBOVariables() const
-{
-    return not_added_dbo_variables_;
-}
-
-std::vector<JSONDataMapping>& ASTERIXJSONParser::dataMappings()
-{
-    return data_mappings_;
 }
 
 DBObject& ASTERIXJSONParser::dbObject() const
@@ -201,7 +249,6 @@ bool ASTERIXJSONParser::parseJSON(nlohmann::json& j, Buffer& buffer) const
     assert(initialized_);
 
     size_t row_cnt = buffer.size();
-    size_t skipped_cnt = 0;
 
     bool parsed_any = false;
 
@@ -550,11 +597,11 @@ void ASTERIXJSONParser::setMappingActive(JSONDataMapping& mapping, bool active)
     mapping.active(active);
 }
 
-void ASTERIXJSONParser::updateMappings()
-{
-//    if (widget_)
-//        widget_->updateMappingsGrid();
-}
+//void ASTERIXJSONParser::updateMappings()
+//{
+////    if (widget_)
+////        widget_->updateMappingsGrid();
+//}
 
 std::string ASTERIXJSONParser::name() const { return name_; }
 
@@ -589,96 +636,92 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
         return QVariant();
 
     assert (index.row() >= 0);
-
-    assert (index.row() < totalEntrySize());
-
     unsigned int row = index.row();
+
+    assert (row < totalEntrySize());
 
     assert (index.column() < table_columns_.size());
     std::string col_name = table_columns_.at(index.column()).toStdString();
 
+    ASTERIXJSONParser::EntryType entry_type = entryType(row);
+
     switch (role)
     {
-        case Qt::DisplayRole:
+    case Qt::DisplayRole:
         //case Qt::EditRole:
-            {
-                logdbg << "ASTERIXJSONParser: data: display role: row " << index.row() << " col " << index.column();
+    {
+        logdbg << "ASTERIXJSONParser: data: display role: row " << index.row() << " col " << index.column();
 
-                if (row < data_mappings_.size()) // is actual mapping
-                {
-                    const JSONDataMapping& mapping = data_mappings_.at(index.row());
+        if (entry_type == ASTERIXJSONParser::EntryType::ExistingMapping)
+        {
+            const JSONDataMapping& current_mapping = mapping(row);
 
-                    logdbg << "ASTERIXJSONParser: data: got json key " << mapping.jsonKey();
+            logdbg << "ASTERIXJSONParser: data: got json key " << current_mapping.jsonKey();
 
-                    if (col_name == "JSON Key")
-                        return mapping.jsonKey().c_str();
-                    else if (col_name == "DBObject Variable")
-                        return mapping.dboVariableName().c_str();
-                    else
-                        return QVariant();
-                }
-
-                row -= data_mappings_.size();
-
-                if (row < not_added_json_keys_.size())
-                {
-                    if (col_name == "JSON Key")
-                        return not_added_json_keys_[row].c_str();
-                    else
-                        return QVariant();
-                }
-
-                row -= not_added_json_keys_.size();
-
-                assert (row < not_added_dbo_variables_.size());
-
-                if (col_name == "DBObject Variable")
-                    return not_added_dbo_variables_[row].c_str();
-                else
-                    return QVariant();
-    }
-        case Qt::DecorationRole:
-            {
-                if (row < data_mappings_.size()) // is actual mapping
-                {
-                    const JSONDataMapping& mapping = data_mappings_.at(index.row());
-
-                    logdbg << "ASTERIXJSONParser: data: got json key " << mapping.jsonKey();
-
-                    if (col_name == "JSON Key")
-                    {
-                        if (not_existing_json_keys_.count(mapping.jsonKey()))
-                            return hint_icon_;
-                        else
-                            return QVariant();
-                    }
-                    else
-                        return QVariant();
-                }
-
-                row -= data_mappings_.size();
-
-                if (row < not_added_json_keys_.size())
-                {
-                    if (col_name == "JSON Key")
-                        return todo_icon_;
-                    else
-                        return QVariant();
-                }
-
-                row -= not_added_json_keys_.size();
-
-                assert (row < not_added_dbo_variables_.size());
-
-                if (col_name == "DBObject Variable")
-                    return todo_icon_;
-                else
-                    return QVariant();
-            }
-        default:
-            {
+            if (col_name == "JSON Key")
+                return current_mapping.jsonKey().c_str();
+            else if (col_name == "DBObject Variable")
+                return current_mapping.dboVariableName().c_str();
+            else
                 return QVariant();
+        }
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedJSONKey)
+        {
+            if (col_name == "JSON Key")
+                return unmappedJSONKey(row).c_str();
+            else
+                return QVariant();
+        }
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+        {
+            if (col_name == "DBObject Variable")
+                return unmappedDBOVariable(row).c_str();
+            else
+                return QVariant();
+        }
+        else
+            return QVariant();
+    }
+    case Qt::DecorationRole:
+    {
+        if (entry_type == ASTERIXJSONParser::EntryType::ExistingMapping)
+        {
+            const JSONDataMapping& mapping = data_mappings_.at(index.row());
+
+            logdbg << "ASTERIXJSONParser: data: got json key " << mapping.jsonKey();
+
+            if (col_name == "JSON Key")
+            {
+                if (not_existing_json_keys_.count(mapping.jsonKey()))
+                    return hint_icon_;
+                else
+                    return QVariant();
             }
+            else
+                return QVariant();
+        }
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedJSONKey)
+        {
+            if (col_name == "JSON Key")
+                return todo_icon_;
+            else
+                return QVariant();
+        }
+        else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+        {
+
+            if (col_name == "DBObject Variable")
+                return todo_icon_;
+            else
+                return QVariant();
+        }
+        else
+            return QVariant();
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -710,9 +753,9 @@ Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-//    if (table_columns_.at(index.column()) == "comment")
-//        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-//    else
+    //    if (table_columns_.at(index.column()) == "comment")
+    //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    //    else
     return QAbstractItemModel::flags(index);
 }
 

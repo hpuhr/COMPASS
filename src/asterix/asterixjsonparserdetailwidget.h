@@ -1,9 +1,10 @@
 #ifndef ASTERIXJSONPARSERDETAILWIDGET_H
 #define ASTERIXJSONPARSERDETAILWIDGET_H
 
+#include "asterixjsonparser.h"
+
 #include <QWidget>
 
-class ASTERIXJSONParser;
 class DBOVariableSelectionWidget;
 
 class UnitSelectionWidget;
@@ -13,6 +14,7 @@ class QLabel;
 class QLineEdit;
 class QCheckBox;
 class QPushButton;
+class QTextEdit;
 
 class ASTERIXJSONParserDetailWidget : public QWidget
 {
@@ -27,9 +29,10 @@ public slots:
     void mappingAppendChangedSlot();
 
     void mappingDBOVariableChangedSlot();
+    void dboVariableCommentChangedSlot();
 
     void createNewDBVariableSlot();
-    void renameDBVariableSlot();
+    void editDBVariableSlot();
     void deleteDBVariableSlot();
 
     void mappingActionSlot();
@@ -43,6 +46,10 @@ public:
 private:
     ASTERIXJSONParser& parser_;
 
+    bool has_current_entry_ {false};
+    ASTERIXJSONParser::EntryType entry_type_;
+    unsigned int entry_index_;
+
     QLabel* info_label_ {nullptr}; // shows type of mapping, or missing details
     QCheckBox* active_check_ {nullptr};
 
@@ -55,12 +62,12 @@ private:
 
     DBOVariableSelectionWidget* dbo_var_sel_ {nullptr};
 
-    QLineEdit* comment_edit_ {nullptr};
+    QTextEdit* dbo_var_comment_edit_ {nullptr};
 
     QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
 
     QPushButton* dbovar_new_button_ {nullptr};
-    QPushButton* dbovar_rename_button_ {nullptr};
+    QPushButton* dbovar_edit_button_ {nullptr};
     QPushButton* dbovar_delete_button_ {nullptr};
 
     void showJSONKey (const std::string& key);

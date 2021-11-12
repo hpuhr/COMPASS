@@ -28,110 +28,120 @@ class ASTERIXJSONParser : public Configurable,  public QAbstractItemModel
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
 
 public:
+    enum EntryType {
+        ExistingMapping=0, UnmappedJSONKey, UnmappedDBOVariable
+    };
+
+
     ASTERIXJSONParser(const std::string& class_id, const std::string& instance_id,
                       Configurable* parent, ASTERIXImportTask& task);
 
-     DBObject& dbObject() const;
+    DBObject& dbObject() const;
 
-     MappingIterator begin() { return data_mappings_.begin(); }
-     MappingIterator end() { return data_mappings_.end(); }
-     bool hasMapping(unsigned int index) const;
-     void removeMapping(unsigned int index);
+    MappingIterator begin() { return data_mappings_.begin(); }
+    MappingIterator end() { return data_mappings_.end(); }
+    bool hasMapping(unsigned int index) const;
+    void removeMapping(unsigned int index);
 
-     std::vector<JSONDataMapping>& dataMappings();
-     const std::vector<std::string>& notAddedJSONKeys() const;
-     const std::vector<std::string>& notAddedDBOVariables() const;
+    // returns true on successful parse
+    bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
+    void createMappingStubs(nlohmann::json& j);
 
-     // returns true on successful parse
-     bool parseJSON(nlohmann::json& j, Buffer& buffer) const;
-     void createMappingStubs(nlohmann::json& j);
+    const DBOVariableSet& variableList() const;
 
-     const DBOVariableSet& variableList() const;
+    bool initialized() const { return initialized_; }
+    void initialize();
 
-     bool initialized() const { return initialized_; }
-     void initialize();
+    std::shared_ptr<Buffer> getNewBuffer() const;
+    void appendVariablesToBuffer(Buffer& buffer) const;
 
-     std::shared_ptr<Buffer> getNewBuffer() const;
-     void appendVariablesToBuffer(Buffer& buffer) const;
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id);
 
-     virtual void generateSubConfigurable(const std::string& class_id,
-                                          const std::string& instance_id);
+    ASTERIXJSONParserWidget* widget();
 
-     ASTERIXJSONParserWidget* widget();
+    std::string dbObjectName() const;
 
-     std::string dbObjectName() const;
+    void setMappingActive(JSONDataMapping& mapping, bool active);
 
-     void setMappingActive(JSONDataMapping& mapping, bool active);
+    //void updateMappings();
 
-     void updateMappings();
+    std::string name() const;
+    void name(const std::string& name);
 
-     std::string name() const;
-     void name(const std::string& name);
+    unsigned int category() const;
 
-     unsigned int category() const;
+    // item stuff
 
-     // item stuff
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
 
-     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-     QModelIndex parent(const QModelIndex& index) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-     Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool mappingChecksDirty() const;
+    void mappingChecksDirty(bool mapping_checks_dirty);
+    void doMappingChecks();  // to be called when total size is changed
 
-     bool mappingChecksDirty() const;
-     void mappingChecksDirty(bool mapping_checks_dirty);
-     void doMappingChecks();
+    unsigned int totalEntrySize () const;
+    bool existsJSONKeyInCATInfo(const std::string& key);
+    bool hasJSONKeyMapped (const std::string& key);
+    bool hasDBOVariableMapped (const std::string& var_name);
 
-     unsigned int totalEntrySize () const;
-     bool existsJSONKeyInCATInfo(const std::string& key);
-     bool hasJSONKeyMapped (const std::string& key);
-     bool hasDBOVariableMapped (const std::string& var_name);
+    //void updateToChangedIndex (unsigned int index); // to be called when existing row is changed
+    void selectMapping (unsigned int index);
 
+    // index is not model index but directly in data_mappings_ + not_added_json_keys_ + not_added_dbo_variables_
+    EntryType entryType (unsigned int index) const;
+    JSONDataMapping& mapping (unsigned int index);
+    const JSONDataMapping& mapping (unsigned int index) const;
+    const std::string& unmappedJSONKey (unsigned int index) const;
+    const std::string& unmappedDBOVariable (unsigned int index) const;
 
-     const jASTERIX::CategoryItemInfo& itemInfo() const;
+    const jASTERIX::CategoryItemInfo& categoryItemInfo() const;
 
 private:
-     ASTERIXImportTask& task_;
-     std::string name_;
-     unsigned int category_;
+    ASTERIXImportTask& task_;
+    std::string name_;
+    unsigned int category_;
 
-     std::string db_object_name_;
+    std::string db_object_name_;
 
-     jASTERIX::CategoryItemInfo item_info_;
+    jASTERIX::CategoryItemInfo item_info_;
 
-     DBOVariableSet var_list_;
+    DBOVariableSet var_list_;
 
-     bool initialized_{false};
+    bool initialized_{false};
 
-     PropertyList list_;
+    PropertyList list_;
 
-     std::unique_ptr<ASTERIXJSONParserWidget> widget_;
+    std::unique_ptr<ASTERIXJSONParserWidget> widget_;
 
-     std::vector<JSONDataMapping> data_mappings_;
-     bool mapping_checks_dirty_ {true};
-     std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
-     std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings
-     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
+    std::vector<JSONDataMapping> data_mappings_;
+    bool mapping_checks_dirty_ {true};
+    std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
+    std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings
+    std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
 
 
-     QStringList table_columns_ {"JSON Key", "DBObject Variable"};
+    QStringList table_columns_ {"JSON Key", "DBObject Variable"};
 
-     QIcon todo_icon_;
-     QIcon unknown_icon_;
-     QIcon hint_icon_;
+    QIcon todo_icon_;
+    QIcon unknown_icon_;
+    QIcon hint_icon_;
 
-     // returns true on successful parse
-     bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
-     void createMappingsFromTargetReport(const nlohmann::json& tr);
+    // returns true on successful parse
+    bool parseTargetReport(const nlohmann::json& tr, Buffer& buffer, size_t row_cnt) const;
+    void createMappingsFromTargetReport(const nlohmann::json& tr);
 
-     void checkIfKeysExistsInMappings(const std::string& location, const nlohmann::json& tr,
-                                      bool is_in_array = false);
+    void checkIfKeysExistsInMappings(const std::string& location, const nlohmann::json& tr,
+                                     bool is_in_array = false);
 
-   protected:
-     virtual void checkSubConfigurables() {}
+protected:
+    virtual void checkSubConfigurables() {}
 
 };
 

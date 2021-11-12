@@ -35,7 +35,7 @@ public:
     std::string name() const;
     void name(const std::string& name);
 
-    void updateMappings();
+    //void updateMappings();
 
 private:
     ASTERIXImportTask& task_;

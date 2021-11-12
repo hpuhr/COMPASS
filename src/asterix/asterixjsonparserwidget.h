@@ -23,6 +23,8 @@ public:
 
     void resizeColumnsToContents();
 
+    void selectModelRow (unsigned int row);
+
 private:
     ASTERIXJSONParser& parser_;
 
