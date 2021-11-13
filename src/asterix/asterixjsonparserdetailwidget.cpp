@@ -1,6 +1,4 @@
 #include "asterixjsonparserdetailwidget.h"
-
-
 #include "datatypeformatselectionwidget.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
@@ -11,6 +9,7 @@
 #include "compass.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "dbovariableeditdialog.h"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -352,7 +351,12 @@ void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
 
 void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
 {
+    assert (has_current_entry_);
+    assert (dbo_var_sel_);
+    assert (dbo_var_sel_->hasVariable());
+    assert (dbo_var_comment_edit_);
 
+    dbo_var_sel_->selectedVariable().description(dbo_var_comment_edit_->document()->toPlainText().toStdString());
 }
 
 
@@ -415,11 +419,21 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 }
 void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 {
-    loginf << "ASTERIXJSONParserDetailWidget: renameDBVariableSlot";
+    loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot";
+
+    assert (has_current_entry_);
+    assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
+            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable);
+    assert (dbo_var_sel_);
+
+    assert (dbo_var_sel_->hasVariable());
+
+    DBOVariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
+
+    dialog.exec();
+
+    loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot: done";
 }
-
-
-
 
 void ASTERIXJSONParserDetailWidget::mappingActionSlot()
 {

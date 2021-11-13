@@ -13,6 +13,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariabledatatypecombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableselectionwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbovariableeditdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.h"
     PRIVATE
@@ -22,6 +23,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedset.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableselectionwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbovariableeditdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.cpp"
 )

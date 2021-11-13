@@ -174,11 +174,17 @@ class DBOVariable : public QObject, public Property, public Configurable
     const std::string& getSmallerValueString(const std::string& value_a_str,
                                              const std::string& value_b_str) const;
 
+    bool hasShortName() const;
+    std::string shortName() const;
+    void shortName(const std::string& short_name);
+
 private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
     DBObject* db_object_{nullptr};
+
+    std::string short_name_;
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
     Representation representation_;

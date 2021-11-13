@@ -17,18 +17,6 @@
 
 #include "dbobjectwidget.h"
 
-#include <QCheckBox>
-#include <QComboBox>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QScrollArea>
-#include <QTextEdit>
-#include <QVBoxLayout>
-#include <boost/algorithm/string.hpp>
-
 #include "compass.h"
 #include "configuration.h"
 #include "configurationmanager.h"
@@ -44,6 +32,20 @@
 #include "stringconv.h"
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
+
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QTextEdit>
+#include <QVBoxLayout>
+
+#include <boost/algorithm/string.hpp>
+
 
 using namespace Utils;
 

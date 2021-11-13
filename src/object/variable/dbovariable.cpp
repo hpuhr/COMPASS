@@ -692,6 +692,21 @@ const std::string& DBOVariable::getSmallerValueString(const std::string& value_a
     }
 }
 
+bool DBOVariable::hasShortName() const
+{
+    return short_name_.size();
+}
+
+std::string DBOVariable::shortName() const
+{
+    return short_name_;
+}
+
+void DBOVariable::shortName(const std::string& short_name)
+{
+    short_name_ = short_name;
+}
+
 bool DBOVariable::isKey() const
 {
     return is_key_;
