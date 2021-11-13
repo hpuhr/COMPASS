@@ -54,9 +54,9 @@ class DBOVariable : public QObject, public Property, public Configurable
 
     /// @brief Constructor
     DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
-    DBOVariable() = default;
+    //DBOVariable() = default;
     /// @brief Move constructor
-    DBOVariable& operator=(DBOVariable&& other);
+    //DBOVariable& operator=(DBOVariable&& other);
     /// @brief Desctructor
     virtual ~DBOVariable();
 
@@ -74,6 +74,7 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief Sets variable identifier
     void name(const std::string& name);
 
+    DBObject& object() const;
     const std::string& dboName() const;
 
     /// @brief Returns variable description

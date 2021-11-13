@@ -97,13 +97,13 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
     assert (db_interface_.connection().type() == SQLITE_IDENTIFIER);;
 
     unsigned int cnt = 0;
-    for (auto var_it = object.cbegin(); var_it != object.cend(); ++var_it)
+    for (auto& var_it : object.variables())
     {
-        ss << var_it->second.name();
+        ss << var_it->name();
 
-        data_type = var_it->second.dataTypeString();
+        data_type = var_it->dataTypeString();
 
-        if (var_it->second.isKey())
+        if (var_it->isKey())
         {
             if (data_type == "int")  // mysql defaults autoincrement
                 ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
@@ -273,18 +273,18 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
 
     bool first = true;
 
-    for (auto var_it = object.cbegin(); var_it != object.cend(); ++var_it)
+    for (auto& var_it : object.variables())
     {
         logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name "
-               << var_it->first;
+               << var_it->name();
 
         if (!first)
             ss << ",";
 
-        ss << "MIN(" << var_it->second.dbColumnName() << "),MAX(" << var_it->second.dbColumnName() << ")";
+        ss << "MIN(" << var_it->dbColumnName() << "),MAX(" << var_it->dbColumnName() << ")";
 
-        command_list.addProperty(var_it->first + "MIN", PropertyDataType::STRING);
-        command_list.addProperty(var_it->first + "MAX", PropertyDataType::STRING);
+        command_list.addProperty(var_it->name() + "MIN", PropertyDataType::STRING);
+        command_list.addProperty(var_it->name() + "MAX", PropertyDataType::STRING);
 
         first = false;
     }

@@ -128,12 +128,12 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     {
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-        for (auto& var_it : *object_it.second)
+        for (auto& var_it : object_it.second->variables())
         {
-            QAction* action = m2->addAction(QString::fromStdString(var_it.first));
+            QAction* action = m2->addAction(QString::fromStdString(var_it->name()));
 
             QVariantMap vmap;
-            vmap.insert(QString::fromStdString(var_it.first),
+            vmap.insert(QString::fromStdString(var_it->name()),
                         QVariant(QString::fromStdString(object_it.first)));
             action->setData(QVariant(vmap));
         }

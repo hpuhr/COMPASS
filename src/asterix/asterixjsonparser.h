@@ -93,6 +93,7 @@ public:
 
     //void updateToChangedIndex (unsigned int index); // to be called when existing row is changed
     void selectMapping (unsigned int index);
+    void selectUnmappedDBOVariable (const std::string& name);
 
     // index is not model index but directly in data_mappings_ + not_added_json_keys_ + not_added_dbo_variables_
     EntryType entryType (unsigned int index) const;

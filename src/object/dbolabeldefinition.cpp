@@ -133,11 +133,11 @@ void DBOLabelDefinition::checkLabelDefintions()
     std::string prefix;
     std::string suffix;
 
-    for (auto& var_it : *db_object_)
+    for (auto& var_it : db_object_->variables())
     {
-        if (entries_.find(var_it.second.name()) == entries_.end())
+        if (entries_.find(var_it->name()) == entries_.end())
         {
-            variable_name = var_it.second.name();
+            variable_name = var_it->name();
             show = false;
             prefix = "";
             suffix = "";

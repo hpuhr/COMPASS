@@ -107,15 +107,15 @@ void DBOVariableSelectionWidget::updateMenuEntries()
     {
         assert(COMPASS::instance().objectManager().existsObject(only_dbo_name_));
 
-        for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_))
+        for (auto& var_it : COMPASS::instance().objectManager().object(only_dbo_name_).variables())
         {
-            if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
+            if (show_data_types_only_ && !showDataType(var_it->dataType()))
                 continue;
 
-            QAction* action = menu_.addAction(QString::fromStdString(var_it.first));
+            QAction* action = menu_.addAction(QString::fromStdString(var_it->name()));
 
             QVariantMap vmap;
-            vmap.insert(QString::fromStdString(var_it.first),
+            vmap.insert(QString::fromStdString(var_it->name()),
                         QVariant(QString::fromStdString(only_dbo_name_)));
             action->setData(QVariant(vmap));
         }
@@ -146,15 +146,15 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         {
             QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-            for (auto& var_it : *object_it.second)
+            for (auto& var_it : object_it.second->variables())
             {
-                if (show_data_types_only_ && !showDataType(var_it.second.dataType()))
+                if (show_data_types_only_ && !showDataType(var_it->dataType()))
                     continue;
 
-                QAction* action = m2->addAction(QString::fromStdString(var_it.first));
+                QAction* action = m2->addAction(QString::fromStdString(var_it->name()));
 
                 QVariantMap vmap;
-                vmap.insert(QString::fromStdString(var_it.first),
+                vmap.insert(QString::fromStdString(var_it->name()),
                             QVariant(QString::fromStdString(object_it.first)));
                 action->setData(QVariant(vmap));
             }

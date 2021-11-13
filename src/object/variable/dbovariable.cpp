@@ -68,6 +68,7 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     : Property(), Configurable(class_id, instance_id, parent), db_object_(parent)
 {
     registerParameter("name", &name_, "");
+    registerParameter("short_name", &short_name_, "");
     registerParameter("description", &description_, "");
     registerParameter("db_column_name", &db_column_name_, "");
     registerParameter("data_type_str", &data_type_str_, "");
@@ -104,63 +105,63 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 }
 
-DBOVariable& DBOVariable::operator=(DBOVariable&& other)
-//: Configurable(std::move(other))
-{
-    loginf << "DBOVariable: move operator: moving";
+//DBOVariable& DBOVariable::operator=(DBOVariable&& other)
+////: Configurable(std::move(other))
+//{
+//    loginf << "DBOVariable: move operator: moving";
 
-    data_type_ = other.data_type_;
-    data_type_str_ = other.data_type_str_;
+//    data_type_ = other.data_type_;
+//    data_type_str_ = other.data_type_str_;
 
-    name_ = other.name_;
-    other.name_ = "";
+//    name_ = other.name_;
+//    other.name_ = "";
 
-    db_object_ = other.db_object_;
-    other.db_object_ = nullptr;
+//    db_object_ = other.db_object_;
+//    other.db_object_ = nullptr;
 
-    representation_str_ = other.representation_str_;
-    other.representation_str_ = "";
+//    representation_str_ = other.representation_str_;
+//    other.representation_str_ = "";
 
-    representation_ = other.representation_;
-    other.representation_ = Representation::STANDARD;
+//    representation_ = other.representation_;
+//    other.representation_ = Representation::STANDARD;
 
-    description_ = other.description_;
-    other.description_ = "";
+//    description_ = other.description_;
+//    other.description_ = "";
 
-    db_column_name_ = other.db_column_name_;
-    other.db_column_name_ = "";
+//    db_column_name_ = other.db_column_name_;
+//    other.db_column_name_ = "";
 
-//    min_max_set_ = other.min_max_set_;
-//    other.min_max_set_ = false;
+////    min_max_set_ = other.min_max_set_;
+////    other.min_max_set_ = false;
 
-//    min_ = other.min_;
-//    other.min_ = "";
+////    min_ = other.min_;
+////    other.min_ = "";
 
-//    max_ = other.max_;
-//    other.max_ = "";
+////    max_ = other.max_;
+////    other.max_ = "";
 
-    dimension_ = other.dimension_;
-    other.dimension_ = "";
+//    dimension_ = other.dimension_;
+//    other.dimension_ = "";
 
-    unit_ = other.unit_;
-    other.unit_ = "";
+//    unit_ = other.unit_;
+//    other.unit_ = "";
 
-    widget_ = other.widget_;
-    if (widget_)
-        widget_->setVariable(*this);
-    other.widget_ = nullptr;
+//    widget_ = other.widget_;
+//    if (widget_)
+//        widget_->setVariable(*this);
+//    other.widget_ = nullptr;
 
-    other.configuration().updateParameterPointer("name", &name_);
-    other.configuration().updateParameterPointer("description", &description_);
-    other.configuration().updateParameterPointer("variable_identifier", &db_column_name_);
-    other.configuration().updateParameterPointer("data_type_str", &data_type_str_);
-    other.configuration().updateParameterPointer("representation_str", &representation_str_);
-    other.configuration().updateParameterPointer("dimension", &dimension_);
-    other.configuration().updateParameterPointer("unit", &unit_);
+//    other.configuration().updateParameterPointer("name", &name_);
+//    other.configuration().updateParameterPointer("description", &description_);
+//    other.configuration().updateParameterPointer("variable_identifier", &db_column_name_);
+//    other.configuration().updateParameterPointer("data_type_str", &data_type_str_);
+//    other.configuration().updateParameterPointer("representation_str", &representation_str_);
+//    other.configuration().updateParameterPointer("dimension", &dimension_);
+//    other.configuration().updateParameterPointer("unit", &unit_);
 
-    // return *this;
-    return static_cast<DBOVariable&>(Configurable::operator=(std::move(other)));
-}
+//    // return *this;
+//    return static_cast<DBOVariable&>(Configurable::operator=(std::move(other)));
+//}
 
 DBOVariable::~DBOVariable()
 {
@@ -213,6 +214,12 @@ void DBOVariable::print()
 
 void DBOVariable::checkSubConfigurables()
 {
+}
+
+DBObject& DBOVariable::object() const
+{
+    assert(db_object_);
+    return *db_object_;
 }
 
 const std::string& DBOVariable::dboName() const

@@ -322,12 +322,12 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot()
 
     for (auto& obj_it : object_manager_)
     {
-        for (auto& var_it : *obj_it.second)
+        for (auto& var_it : obj_it.second->variables())
         {
-            if (object_manager_.usedInMetaVariable(var_it.second))
+            if (object_manager_.usedInMetaVariable(*var_it.get()))
             {
                 loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
-                       << var_it.first << " since already used";
+                       << var_it->name() << " since already used";
                 continue;
             }
 
@@ -339,8 +339,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) &&
-                    var_it.second.dataType() == obj_it2.second->variable(var_it.first).dataType())
+                if (obj_it2.second->hasVariable(var_it->name()) &&
+                    var_it->dataType() == obj_it2.second->variable(var_it->name()).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -348,23 +348,23 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot()
 
             if (found_dbos.size() > 1)
             {
-                if (!object_manager_.existsMetaVariable(var_it.first))
+                if (!object_manager_.existsMetaVariable(var_it->name()))
                 {
                     loginf
                         << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
-                        << var_it.first;
+                        << var_it->name();
 
-                    std::string instance = "MetaDBOVariable" + var_it.first + "0";
+                    std::string instance = "MetaDBOVariable" + var_it->name() + "0";
 
                     Configuration& config =
                         object_manager_.addNewSubConfiguration("MetaDBOVariable", instance);
-                    config.addParameterString("name", var_it.first);
+                    config.addParameterString("name", var_it->name());
 
                     object_manager_.generateSubConfigurable("MetaDBOVariable", instance);
                 }
 
-                assert(object_manager_.existsMetaVariable(var_it.first));
-                MetaDBOVariable& meta_var = object_manager_.metaVariable(var_it.first);
+                assert(object_manager_.existsMetaVariable(var_it->name()));
+                MetaDBOVariable& meta_var = object_manager_.metaVariable(var_it->name());
 
                 for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
                 {
@@ -372,8 +372,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot()
                     {
                         loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta "
                                   "variable "
-                               << var_it.first << " dbo variable " << var_it.first;
-                        meta_var.addVariable(*dbo_it2, var_it.first);
+                               << var_it->name() << " dbo variable " << var_it->name();
+                        meta_var.addVariable(*dbo_it2, var_it->name());
                     }
                 }
 

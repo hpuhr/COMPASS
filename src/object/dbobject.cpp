@@ -43,9 +43,10 @@
 #include <boost/algorithm/string.hpp>
 #include <memory>
 
+using namespace std;
 using namespace Utils;
 
-DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
+DBObject::DBObject(COMPASS& compass, const string& class_id, const string& instance_id,
                    DBObjectManager* manager)
     : Configurable(class_id, instance_id, manager,
                    "db_object_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
@@ -60,7 +61,7 @@ DBObject::DBObject(COMPASS& compass, const std::string& class_id, const std::str
 
     createSubConfigurables();
 
-    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
+    qRegisterMetaType<shared_ptr<Buffer>>("shared_ptr<Buffer>");
 
     logdbg << "DBObject: constructor: created with instance_id " << instanceId() << " name "
            << name_;
@@ -71,24 +72,26 @@ DBObject::~DBObject()
     logdbg << "DBObject: dtor: " << name_;
 }
 
-void DBObject::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
+void DBObject::generateSubConfigurable(const string& class_id, const string& instance_id)
 {
     logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "DBOVariable")
     {
-        std::string var_name = configuration()
+        string var_name = configuration()
                 .getSubConfiguration(class_id, instance_id)
                 .getParameterConfigValueString("name");
 
-        assert(variables_.find(var_name) == variables_.end());
+        assert(!hasVariable(var_name));
 
         logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var_name;
 
-        variables_.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(var_name),                      // args for key
-                    std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+        variables_.emplace_back(new DBOVariable(class_id, instance_id, this));
+
+//        variables_.emplace(
+//                    piecewise_construct,
+//                    forward_as_tuple(var_name),                      // args for key
+//                    forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id == "DBOLabelDefinition")
     {
@@ -96,7 +99,7 @@ void DBObject::generateSubConfigurable(const std::string& class_id, const std::s
         label_definition_.reset(new DBOLabelDefinition(class_id, instance_id, this));
     }
     else
-        throw std::runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+        throw runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void DBObject::checkSubConfigurables()
@@ -110,39 +113,60 @@ void DBObject::checkSubConfigurables()
     }
 }
 
-bool DBObject::hasVariable(const std::string& name) const
+bool DBObject::hasVariable(const string& name) const
 {
-    return variables_.find(name) != variables_.end();
+    auto iter = find_if(variables_.begin(), variables_.end(),
+    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+
+    return iter != variables_.end();
+
+    //return variables_.find(name) != variables_.end();
 }
 
-DBOVariable& DBObject::variable(const std::string& name)
+DBOVariable& DBObject::variable(const string& name)
 {
     assert(hasVariable(name));
-    return variables_.at(name);
+
+    auto iter = find_if(variables_.begin(), variables_.end(),
+    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+
+    assert (iter != variables_.end());
+    assert (iter->get());
+
+    return *iter->get();
 }
 
-void DBObject::renameVariable(const std::string& name, const std::string& new_name)
+void DBObject::renameVariable(const string& name, const string& new_name)
 {
     loginf << "DBObject: renameVariable: name " << name << " new_name " << new_name;
 
-    assert(hasVariable(name));
+    string old_name = name; // since passed by reference, which will be changed
+
+    assert(hasVariable(old_name));
     assert(!hasVariable(new_name));
 
-    variables_[new_name] = std::move(variables_.at(name));
-    variables_.erase(name);
+    variable(old_name).name(new_name);
 
+    loginf << "DBObject: renameVariable: has old var '" << old_name << "' " << hasVariable(old_name);
+    assert(!hasVariable(old_name));
+    loginf << "DBObject: renameVariable: has var '" << new_name << "' " << hasVariable(new_name);
     assert(hasVariable(new_name));
-    variables_.at(new_name).name(new_name);
+
 }
 
-void DBObject::deleteVariable(const std::string& name)
+void DBObject::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
-    variables_.erase(name);
+
+    auto iter = find_if(variables_.begin(), variables_.end(),
+    [name](const unique_ptr<DBOVariable>& var) { return var->name() == name;});
+    assert (iter != variables_.end());
+
+    variables_.erase(iter);
     assert(!hasVariable(name));
 }
 
-std::string DBObject::associationsTableName()
+string DBObject::associationsTableName()
 {
     assert (db_table_name_.size());
     return db_table_name_ + "_assoc";
@@ -152,7 +176,7 @@ std::string DBObject::associationsTableName()
 bool DBObject::hasKeyVariable()
 {
     for (auto& var_it : variables_)
-        if (var_it.second.isKey())
+        if (var_it->isKey())
             return true;
 
     return false;
@@ -163,17 +187,17 @@ DBOVariable& DBObject::getKeyVariable()
     assert(hasKeyVariable());
 
     for (auto& var_it : variables_)  // search in any
-        if (var_it.second.isKey())
+        if (var_it->isKey())
         {
             loginf << "DBObject " << name() << ": getKeyVariable: returning first found var "
-                   << var_it.second.name();
-            return var_it.second;
+                   << var_it->name();
+            return *var_it.get();
         }
 
-    throw std::runtime_error("DBObject: getKeyVariable: no key variable found");
+    throw runtime_error("DBObject: getKeyVariable: no key variable found");
 }
 
-std::string DBObject::status()
+string DBObject::status()
 {
     if (read_job_)
     {
@@ -241,7 +265,7 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
 //            return;
 //        }
 
-//        std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
+//        string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
 //        assert(schema.hasMetaTable(meta_table_name));
 //        current_meta_table_ = &schema.metaTable(meta_table_name);
 
@@ -269,10 +293,10 @@ void DBObject::loadingWanted(bool wanted)
 
 void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
-                    const std::string& limit_str)
+                    const string& limit_str)
 {
-    std::string custom_filter_clause;
-    std::vector<DBOVariable*> filtered_variables;
+    string custom_filter_clause;
+    vector<DBOVariable*> filtered_variables;
 
     if (use_filters)
     {
@@ -284,10 +308,10 @@ void DBObject::load(DBOVariableSet& read_set, bool use_filters, bool use_order,
          use_order_ascending, limit_str);
 }
 
-void DBObject::load(DBOVariableSet& read_set, std::string custom_filter_clause,
-                    std::vector<DBOVariable*> filtered_variables, bool use_order,
+void DBObject::load(DBOVariableSet& read_set, string custom_filter_clause,
+                    vector<DBOVariable*> filtered_variables, bool use_order,
                     DBOVariable* order_variable, bool use_order_ascending,
-                    const std::string& limit_str)
+                    const string& limit_str)
 {
     logdbg << "DBObject: load: name " << name_ << " loadable " << is_loadable_;
 
@@ -309,15 +333,15 @@ void DBObject::load(DBOVariableSet& read_set, std::string custom_filter_clause,
 
     clearData();
 
-    //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string
-    //    custom_filter_clause, DBOVariable *order, const std::string &limit_str
+    //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, string
+    //    custom_filter_clause, DBOVariable *order, const string &limit_str
 
-    read_job_ = std::shared_ptr<DBOReadDBJob>(new DBOReadDBJob(
+    read_job_ = shared_ptr<DBOReadDBJob>(new DBOReadDBJob(
                                                   COMPASS::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables,
                                                   use_order, order_variable, use_order_ascending, limit_str));
 
-    connect(read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this,
-            SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
+    connect(read_job_.get(), SIGNAL(intermediateSignal(shared_ptr<Buffer>)), this,
+            SLOT(readJobIntermediateSlot(shared_ptr<Buffer>)), Qt::QueuedConnection);
     connect(read_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()),
             Qt::QueuedConnection);
     connect(read_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()),
@@ -350,14 +374,14 @@ void DBObject::clearData()
     }
 }
 
-void DBObject::insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
+void DBObject::insertData(DBOVariableSet& list, shared_ptr<Buffer> buffer, bool emit_change)
 {
     logdbg << "DBObject " << name_ << ": insertData: list " << list.getSize()
            << " buffer " << buffer->size();
 
     assert(!insert_job_);
 
-    insert_job_ = std::make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
+    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer,
                                                       emit_change);
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot,
@@ -370,7 +394,7 @@ void DBObject::insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, 
     logdbg << "DBObject: insertData: end";
 }
 
-void DBObject::doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer)
+void DBObject::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
 {
     logdbg << "DBObject " << name_ << ": doDataSourcesBeforeInsert";
 
@@ -385,7 +409,7 @@ void DBObject::doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer)
     NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char>("sac");
     NullableVector<unsigned char>& sic_vec = buffer->get<unsigned char>("sic");
 
-    std::string data_source_var_name = "ds_id";
+    string data_source_var_name = "ds_id";
 
     // getting key list and distinct values
     assert(buffer->properties().hasProperty(data_source_var_name));
@@ -395,9 +419,9 @@ void DBObject::doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer)
 
     NullableVector<int>& data_source_key_vec = buffer->get<int>(data_source_var_name);
 
-    std::set<int> data_source_keys = data_source_key_vec.distinctValues();
+    set<int> data_source_keys = data_source_key_vec.distinctValues();
 
-    std::map<int, unsigned int> ds_id_counts;  // keyvar->count
+    map<int, unsigned int> ds_id_counts;  // keyvar->count
     // collect sac/sics
 
     size_t bufsize = buffer->size();
@@ -442,14 +466,14 @@ void DBObject::insertDoneSlot()
 }
 
 void DBObject::updateData(DBOVariable& key_var, DBOVariableSet& list,
-                          std::shared_ptr<Buffer> buffer)
+                          shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
 
     assert(existsInDB());
 
     update_job_ =
-            std::make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
+            make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
 
     connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot,
             Qt::QueuedConnection);
@@ -468,12 +492,12 @@ void DBObject::updateDoneSlot()
     emit updateDoneSignal(*this);
 }
 
-std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, int break_item_cnt)
+map<int, string> DBObject::loadLabelData(vector<int> rec_nums, int break_item_cnt)
 {
     assert(is_loadable_);
     assert(existsInDB());
 
-    std::string custom_filter_clause;
+    string custom_filter_clause;
     bool first = true;
 
     // TODO rework to key variable
@@ -487,7 +511,7 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
         else
             custom_filter_clause += ",";
 
-        custom_filter_clause += std::to_string(rec_num);
+        custom_filter_clause += to_string(rec_num);
     }
     custom_filter_clause += ")";
 
@@ -501,17 +525,17 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
     DBInterface& db_interface = COMPASS::instance().interface();
 
     db_interface.prepareRead(*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
-    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
+    shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
     db_interface.finalizeReadStatement(*this);
 
     if (buffer->size() != rec_nums.size())
-        throw std::runtime_error("DBObject " + name_ +
+        throw runtime_error("DBObject " + name_ +
                                  ": loadLabelData: failed to load label for " +
                                  custom_filter_clause);
 
     assert(buffer->size() == rec_nums.size());
 
-    std::map<int, std::string> labels =
+    map<int, string> labels =
             label_definition_->generateLabels(rec_nums, buffer, break_item_cnt);
 
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
@@ -522,7 +546,7 @@ std::map<int, std::string> DBObject::loadLabelData(std::vector<int> rec_nums, in
     return labels;
 }
 
-void DBObject::readJobIntermediateSlot(std::shared_ptr<Buffer> buffer)
+void DBObject::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
     logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
@@ -536,7 +560,7 @@ void DBObject::readJobIntermediateSlot(std::shared_ptr<Buffer> buffer)
     }
     assert(sender == read_job_.get());
 
-    std::vector<DBOVariable*>& variables = sender->readList().getSet();
+    vector<DBOVariable*>& variables = sender->readList().getSet();
     const PropertyList& properties = buffer->properties();
 
     for (auto var_it : variables)
@@ -553,7 +577,7 @@ void DBObject::readJobIntermediateSlot(std::shared_ptr<Buffer> buffer)
 
     FinalizeDBOReadJob* job = new FinalizeDBOReadJob(*this, sender->readList(), buffer);
 
-    std::shared_ptr<FinalizeDBOReadJob> job_ptr = std::shared_ptr<FinalizeDBOReadJob>(job);
+    shared_ptr<FinalizeDBOReadJob> job_ptr = shared_ptr<FinalizeDBOReadJob>(job);
     connect(job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
     finalize_jobs_.push_back(job_ptr);
 
@@ -602,14 +626,14 @@ void DBObject::finalizeReadJobDoneSlot()
         return;
     }
 
-    std::shared_ptr<Buffer> buffer = sender->buffer();
+    shared_ptr<Buffer> buffer = sender->buffer();
 
     bool found = false;
     for (auto final_it : finalize_jobs_)
     {
         if (final_it.get() == sender)
         {
-            finalize_jobs_.erase(std::find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
+            finalize_jobs_.erase(find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
             found = true;
             break;
         }
@@ -662,7 +686,7 @@ void DBObject::updateToDatabaseContent()
 {
     loginf << "DBObject " << name_ << ": updateToDatabaseContent";
 
-    std::string associations_table_name = associationsTableName();
+    string associations_table_name = associationsTableName();
 
     is_loadable_ = existsInDB();
 
@@ -679,7 +703,7 @@ void DBObject::updateToDatabaseContent()
            << " count " << count_;
 }
 
-std::string DBObject::dbTableName() const
+string DBObject::dbTableName() const
 {
     return db_table_name_;
 }
@@ -714,8 +738,8 @@ void DBObject::loadAssociationsIfRequired()
 {
     if (manager_.hasAssociations() && !associations_loaded_)
     {
-        std::shared_ptr<DBOReadAssociationsJob> read_job =
-                std::make_shared<DBOReadAssociationsJob>(*this);
+        shared_ptr<DBOReadAssociationsJob> read_job =
+                make_shared<DBOReadAssociationsJob>(*this);
         JobManager::instance().addDBJob(read_job);  // fire and forget
     }
 }
@@ -733,7 +757,7 @@ void DBObject::loadAssociations()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    std::string associations_table_name = associationsTableName();
+    string associations_table_name = associationsTableName();
 
     if (db_interface.existsTable(associations_table_name))
         associations_ = db_interface.getAssociations(associations_table_name);
@@ -772,7 +796,7 @@ void DBObject::saveAssociations()
 
     DBInterface& db_interface = COMPASS::instance().interface();
 
-    std::string associations_table_name = associationsTableName();
+    string associations_table_name = associationsTableName();
     assert(associations_table_name.size());
 
     if (db_interface.existsTable(associations_table_name))
@@ -792,7 +816,7 @@ void DBObject::saveAssociations()
     list.addProperty("utn", PropertyDataType::INT);
     list.addProperty("src_rec_num", PropertyDataType::INT);
 
-    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer>(new Buffer(list, name_));
+    shared_ptr<Buffer> buffer_ptr = shared_ptr<Buffer>(new Buffer(list, name_));
 
     NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
     NullableVector<int>& utns = buffer_ptr->get<int>("utn");

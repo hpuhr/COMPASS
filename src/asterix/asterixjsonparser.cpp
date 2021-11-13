@@ -69,6 +69,8 @@ void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
 
 void ASTERIXJSONParser::doMappingChecks()
 {
+    loginf << "ASTERIXJSONParser: doMappingChecks";
+
     beginResetModel();
 
     // update non existing keys
@@ -93,10 +95,10 @@ void ASTERIXJSONParser::doMappingChecks()
     not_added_dbo_variables_.clear();
 
 
-    for (auto& dbovar_it : dbObject())
+    for (auto& dbovar_it : dbObject().variables())
     {
-        if (!hasDBOVariableMapped(dbovar_it.first))
-            not_added_dbo_variables_.push_back(dbovar_it.first);
+        if (!hasDBOVariableMapped(dbovar_it->name()))
+            not_added_dbo_variables_.push_back(dbovar_it->name());
     }
 
     mapping_checks_dirty_ = false;
@@ -134,6 +136,20 @@ void ASTERIXJSONParser::selectMapping (unsigned int index)
 
     assert (widget_);
     widget_->selectModelRow(index);
+}
+
+void ASTERIXJSONParser::selectUnmappedDBOVariable (const std::string& name)
+{
+    assert (widget_);
+
+    auto iter = find(not_added_dbo_variables_.begin(), not_added_dbo_variables_.end(), name);
+    assert (iter != not_added_dbo_variables_.end());
+
+    unsigned int pos = iter - not_added_dbo_variables_.begin();
+
+    assert (pos < not_added_dbo_variables_.size());
+
+    widget_->selectModelRow(data_mappings_.size() + not_added_json_keys_.size() + pos);
 }
 
 //void ASTERIXJSONParser::updateToChangedIndex (unsigned int row_index)

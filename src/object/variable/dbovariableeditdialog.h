@@ -28,6 +28,10 @@ public slots:
 public:
     DBOVariableEditDialog(DBOVariable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
+    bool variableEdited() const;
+
+    DBOVariable &variable() const;
+
 protected:
     DBOVariable& variable_;
 
@@ -40,6 +44,11 @@ protected:
     QLineEdit* db_column_edit_ {nullptr};
 
     QPushButton* done_button_ {nullptr};
+
+    std::string invalid_bg_str_;
+    std::string valid_bg_str_;
+
+    bool variable_edited_ {false};
 };
 
 

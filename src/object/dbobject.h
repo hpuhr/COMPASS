@@ -86,13 +86,15 @@ class DBObject : public QObject, public Configurable
     void renameVariable(const std::string& name, const std::string& new_name);
     void deleteVariable(const std::string& name);
 
-    using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
-    DBOVariableIterator begin() { return variables_.begin(); }
-    DBOVariableIterator end() { return variables_.end(); }
+    const std::vector<std::unique_ptr<DBOVariable>>& variables() const { return variables_; }
 
-    using const_DBOVariableIterator = typename std::map<std::string, DBOVariable>::const_iterator;
-    const_DBOVariableIterator cbegin() const { return variables_.cbegin(); }
-    const_DBOVariableIterator cend() const { return variables_.cend(); }
+//    using DBOVariableIterator = typename std::vector<std::unique_ptr<DBOVariable>>::iterator;
+//    DBOVariableIterator begin() { return variables_.begin(); }
+//    DBOVariableIterator end() { return variables_.end(); }
+
+//    using const_DBOVariableIterator = typename std::vector<std::unique_ptr<DBOVariable>>::const_iterator;
+//    const_DBOVariableIterator cbegin() const { return variables_.cbegin(); }
+//    const_DBOVariableIterator cend() const { return variables_.cend(); }
 
     size_t numVariables() const { return variables_.size(); }
 
@@ -188,7 +190,7 @@ protected:
     std::shared_ptr<Buffer> data_;
 
     /// Container with all variables (variable identifier -> variable pointer)
-    std::map<std::string, DBOVariable> variables_;
+    std::vector<std::unique_ptr<DBOVariable>> variables_;
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;

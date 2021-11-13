@@ -70,6 +70,8 @@ private:
     QPushButton* dbovar_edit_button_ {nullptr};
     QPushButton* dbovar_delete_button_ {nullptr};
 
+    bool setting_new_content_ {false};
+
     void showJSONKey (const std::string& key);
     void showDBOVariable (const std::string& var_name, bool mapping_exists=false);
 
