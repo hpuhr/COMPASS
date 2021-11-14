@@ -114,7 +114,9 @@ class DBOVariable : public QObject, public Property, public Configurable
     DBOVariableWidget* widget();
 
     Representation representation() const;
+    Representation& representationRef() { return representation_; } // have to take care of representation_str
     const std::string& representationString() const;
+    std::string& representationStringRef() { return representation_str_; }
     void representation(const Representation& representation);
 
     template <typename T>

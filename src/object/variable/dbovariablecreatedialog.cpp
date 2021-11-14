@@ -1,4 +1,4 @@
-#include "dbovariableeditdialog.h"
+#include "dbovariablecreatedialog.h"
 #include "dbovariable.h"
 #include "dbovariabledatatypecombobox.h"
 #include "stringrepresentationcombobox.h"
@@ -19,12 +19,12 @@
 
 using namespace std;
 
-DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
-    : QDialog(parent, f), variable_(variable)
+DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, QWidget* parent, Qt::WindowFlags f)
+    : QDialog(parent, f), object_(object)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint); //  | Qt::CustomizeWindowHint
 
-    setWindowTitle("Edit DBOVariable");
+    setWindowTitle("Create DBOVariable");
 
     setModal(true);
 
@@ -35,13 +35,13 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
 
     //    QLineEdit* name_edit_ {nullptr};
 
-    name_edit_ = new QLineEdit(variable_.name().c_str());
-    connect(name_edit_, &QLineEdit::textChanged, this, &DBOVariableEditDialog::nameChangedSlot);
+    name_edit_ = new QLineEdit();
+    connect(name_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::nameChangedSlot);
     form_layout->addRow("Name", name_edit_);
 
     //    QLineEdit* short_name_edit_ {nullptr};
-    short_name_edit_ = new QLineEdit(variable_.shortName().c_str());
-    connect(short_name_edit_, &QLineEdit::textChanged, this, &DBOVariableEditDialog::shortNameChangedSlot);
+    short_name_edit_ = new QLineEdit();
+    connect(short_name_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::shortNameChangedSlot);
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
@@ -49,32 +49,31 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
     description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
-            &DBOVariableEditDialog::commentChangedSlot);
+            &DBOVariableCreateDialog::commentChangedSlot);
 
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new DBOVariableDataTypeComboBox(variable_.dataTypeRef());
+    type_combo_ = new DBOVariableDataTypeComboBox(data_type_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
-    unit_sel_ = new UnitSelectionWidget(variable_.dimension(), variable_.unit());
+    unit_sel_ = new UnitSelectionWidget(dimension_, unit_);
     form_layout->addRow("Unit", type_combo_);
 
     //    StringRepresentationComboBox* representation_box_ {nullptr};
-    representation_box_ = new StringRepresentationComboBox(variable_.representationRef(),
-                                                           variable_.representationStringRef());
+    representation_box_ = new StringRepresentationComboBox(representation_, representation_str_);
     form_layout->addRow("Representation", representation_box_);
 
     //    QLineEdit* db_column_edit_ {nullptr};
-    db_column_edit_ = new QLineEdit(variable_.dbColumnName().c_str());
-    connect(db_column_edit_, &QLineEdit::textChanged, this, &DBOVariableEditDialog::dbColumnChangedSlot);
+    db_column_edit_ = new QLineEdit();
+    connect(db_column_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::dbColumnChangedSlot);
     form_layout->addRow("DBColumn", db_column_edit_);
 
     main_layout->addLayout(form_layout);
 
     done_button_ = new QPushButton("Done");
-    connect(done_button_, &QPushButton::clicked, this, &DBOVariableEditDialog::doneSlot);
+    connect(done_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::doneSlot);
     main_layout->addWidget(done_button_);
 
     setLayout(main_layout);
@@ -86,24 +85,14 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
                     " rgb(200, 200, 200); }";
 }
 
-bool DBOVariableEditDialog::variableEdited() const
+void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
 {
-    return variable_edited_;
-}
-
-DBOVariable &DBOVariableEditDialog::variable() const
-{
-    return variable_;
-}
-
-void DBOVariableEditDialog::nameChangedSlot(const QString& name)
-{
-    loginf << "DBOVariableEditDialog: nameChangedSlot: name '" << name.toStdString() << "'";
+    loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
 
     assert (name_edit_);
     string new_name = name.toStdString();
 
-    if (new_name == variable_.name())
+    if (new_name == name_)
         return;
 
     if (!new_name.size())
@@ -112,9 +101,9 @@ void DBOVariableEditDialog::nameChangedSlot(const QString& name)
         return;
     }
 
-    if (variable_.object().hasVariable(new_name))
+    if (object_.hasVariable(new_name))
     {
-        logwrn << "DBOVariableEditDialog: nameChangedSlot: name '" << new_name << "' already in use";
+        logwrn << "DBOVariableCreateDialog: nameChangedSlot: name '" << new_name << "' already in use";
 
         name_edit_->setStyleSheet(invalid_bg_str_.c_str());
         name_edit_->setToolTip(("Variable name '"+new_name+"' already in use").c_str());
@@ -122,34 +111,28 @@ void DBOVariableEditDialog::nameChangedSlot(const QString& name)
     }
 
     // ok, rename
+    name_ = new_name;
 
     name_edit_->setStyleSheet(valid_bg_str_.c_str());
     name_edit_->setToolTip("");
-
-    loginf << "DBOVariableEditDialog: nameChangedSlot: renaming '" << variable_.name() << "' to '" << new_name << "'";
-    variable_.object().renameVariable(variable_.name(), new_name);
-
-    variable_edited_ = true;
 }
 
-void DBOVariableEditDialog::shortNameChangedSlot(const QString& name)
+void DBOVariableCreateDialog::shortNameChangedSlot(const QString& name)
 {
 
 }
 
-void DBOVariableEditDialog::commentChangedSlot()
+void DBOVariableCreateDialog::commentChangedSlot()
 {
 
 }
 
-void DBOVariableEditDialog::dbColumnChangedSlot(const QString& name)
+void DBOVariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
 
 }
 
-void DBOVariableEditDialog::doneSlot()
+void DBOVariableCreateDialog::doneSlot()
 {
-    loginf << "DBOVariableEditDialog: doneSlot";
-
     accept();
 }

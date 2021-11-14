@@ -47,7 +47,7 @@ class DBOVariableWidget : public QWidget
     void editNameSlot();
     /// @brief Changes DBO info
     void editDescriptionSlot();
-    void editDataTypeSlot();
+    //void editDataTypeSlot();
 
   public:
     /// @brief Constructor

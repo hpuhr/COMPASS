@@ -41,13 +41,16 @@ class StringRepresentationComboBox : public QComboBox
     void changedSlot()
     {
         loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
-        variable_->representation(representation());
+
+        representation_ = representation();
+        representation_str_ = DBOVariable::representationToString(representation_);
     }
 
   public:
     /// @brief Constructor
-    StringRepresentationComboBox(DBOVariable& variable, QWidget* parent = 0)
-        : QComboBox(parent), variable_(&variable)
+    StringRepresentationComboBox(DBOVariable::Representation& representation, std::string& representation_str,
+                                 QWidget* parent = 0)
+        : QComboBox(parent), representation_(representation), representation_str_(representation_str)
     {
         for (auto it : DBOVariable::Representations())
             addItem(it.second.c_str());
@@ -70,25 +73,28 @@ class StringRepresentationComboBox : public QComboBox
     }
 
     /// @brief Sets the currently selected representation
-    void representation(DBOVariable::Representation type)
-    {
-        setCurrentText(DBOVariable::representationToString(type).c_str());
-    }
+//    void representation(DBOVariable::Representation representation)
+//    {
+//        setCurrentText(DBOVariable::representationToString(representation).c_str());
+//    }
 
-    void setVariable(DBOVariable& variable)
+    void setRepresentation(DBOVariable::Representation& representation,
+                           std::string& representation_str)
     {
-        variable_ = &variable;
+        representation_ = representation;
+        representation_str_ = representation_str;
 
         update();
     }
 
   protected:
     /// Used variable
-    DBOVariable* variable_{nullptr};
+    DBOVariable::Representation& representation_;
+    std::string& representation_str_;
 
     void update()
     {
-        setCurrentText(DBOVariable::representationToString(variable_->representation()).c_str());
+        setCurrentText(DBOVariable::representationToString(representation_).c_str());
     }
 };
 

@@ -80,14 +80,14 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     QLabel* type_label = new QLabel("Data Type");
     properties_layout_->addWidget(type_label, row, 0);
 
-    type_combo_ = new DBOVariableDataTypeComboBox(*variable_);
-    connect(type_combo_, SIGNAL(changedType()), this, SLOT(editDataTypeSlot()));
+    type_combo_ = new DBOVariableDataTypeComboBox(variable_->dataTypeRef());
     properties_layout_->addWidget(type_combo_, row, 1);
     row++;
 
     properties_layout_->addWidget(new QLabel("Representation"), row, 0);
 
-    representation_box_ = new StringRepresentationComboBox(*variable_);
+    representation_box_ = new StringRepresentationComboBox(variable_->representationRef(),
+                                                           variable_->representationStringRef());
     properties_layout_->addWidget(representation_box_, row, 1);
     row++;
 
@@ -147,8 +147,9 @@ void DBOVariableWidget::update()
 {
     name_edit_->setText(variable_->name().c_str());
     description_edit_->setText(variable_->description().c_str());
-    type_combo_->setVariable(*variable_);
-    representation_box_->setVariable(*variable_);
+    type_combo_->setType(variable_->dataTypeRef());
+    representation_box_->setRepresentation(variable_->representationRef(),
+                                     variable_->representationStringRef());
     unit_sel_->update(variable_->dimension(), variable_->unit());
 }
 
@@ -173,11 +174,11 @@ void DBOVariableWidget::editDescriptionSlot()
     emit dboVariableChangedSignal();
 }
 
-void DBOVariableWidget::editDataTypeSlot()
-{
-    logdbg << "DBOVariableWidget: editDataTypeSlot";
-    assert(type_combo_);
-    variable_->dataType(type_combo_->getType());
-    emit dboVariableChangedSignal();
-}
+//void DBOVariableWidget::editDataTypeSlot()
+//{
+//    logdbg << "DBOVariableWidget: editDataTypeSlot";
+//    assert(type_combo_);
+//    variable_->dataType(type_combo_->getType());
+//    emit dboVariableChangedSignal();
+//}
 

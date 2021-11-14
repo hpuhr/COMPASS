@@ -380,11 +380,11 @@ void DBObjectWidget::updateDBOVarsGridSlot()
         row++;
         col = 0;
 
-        DBOVariable& test = *var_it.get();
+        DBOVariable& variable = *var_it.get();
 
         // QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         // QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
-        QVariant data = QVariant::fromValue(&test);
+        QVariant data = QVariant::fromValue(&variable);
 
         // logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first
         // << " name";
@@ -405,7 +405,7 @@ void DBObjectWidget::updateDBOVarsGridSlot()
         dbovars_grid_->addWidget(description_edit, row, col);
 
         col++;
-        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox(test);
+        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox(variable.dataTypeRef());
         dbovars_grid_->addWidget(type_combo, row, col);
 
         col++;
@@ -415,7 +415,7 @@ void DBObjectWidget::updateDBOVarsGridSlot()
 
         col++;
         StringRepresentationComboBox* representation_box =
-            new StringRepresentationComboBox(test);
+            new StringRepresentationComboBox(variable.representationRef(), variable.representationStringRef());
         dbovars_grid_->addWidget(representation_box, row, col);
 
         col++;

@@ -55,6 +55,8 @@ class Property
     virtual ~Property() {}
 
     PropertyDataType dataType() const { return data_type_; }
+    PropertyDataType& dataTypeRef() { return data_type_; }
+
     const std::string& dataTypeString() const { return data_type_str_; }
     void dataType(PropertyDataType type)
     {

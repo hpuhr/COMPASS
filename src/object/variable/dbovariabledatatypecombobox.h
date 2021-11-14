@@ -32,59 +32,46 @@ class DBOVariableDataTypeComboBox : public QComboBox
 {
     Q_OBJECT
 
-  signals:
-    /// @brief Emitted if type was changed
-    void changedType();
-
   public slots:
     /// @brief Sets the data type
-    void changed() { variable_->dataType(getType()); }
+    void changed()
+    {
+        data_type_ = Property::asDataType(currentText().toStdString());
+    }
 
   public:
     /// @brief Constructor
-    DBOVariableDataTypeComboBox(DBOVariable& variable, QWidget* parent = 0)
-        : QComboBox(parent), variable_(&variable)
+    DBOVariableDataTypeComboBox(PropertyDataType& data_type, QWidget* parent = 0)
+        : QComboBox(parent), data_type_(data_type)
     {
-        const std::map<PropertyDataType, std::string>& datatypes2str =
-            Property::dataTypes2Strings();
-        for (auto it = datatypes2str.begin(); it != datatypes2str.end(); it++)
+        for (auto& type_it : Property::dataTypes2Strings())
         {
-            addItem(it->second.c_str());
+            addItem(type_it.second.c_str());
         }
 
         update();
 
-        connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedType()));
+        //connect(this, SIGNAL(activated(const QString&)), this, SIGNAL(changedType()));
         connect(this, SIGNAL(activated(const QString&)), this, SLOT(changed()));
     }
     /// @brief Destructor
     virtual ~DBOVariableDataTypeComboBox() {}
 
-    /// @brief Returns the currently selected data type
-    PropertyDataType getType() { return Property::asDataType(currentText().toStdString()); }
-
     /// @brief Sets the currently selected data type
-    void setType(PropertyDataType type)
+    void setType(PropertyDataType& type)
     {
-        int index = findText(QString(Property::asString(type).c_str()));
-        assert(index >= 0);
-        setCurrentIndex(index);
-    }
-
-    void setVariable(DBOVariable& variable)
-    {
-        variable_ = &variable;
+        data_type_ = type;
 
         update();
     }
 
   protected:
     /// Used variable
-    DBOVariable* variable_{nullptr};
+    PropertyDataType& data_type_;
 
     void update()
     {
-        int index = findText(QString(variable_->dataTypeString().c_str()));
+        int index = findText(QString(Property::asString(data_type_).c_str()));
         assert(index >= 0);
         setCurrentIndex(index);
     }
