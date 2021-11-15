@@ -70,7 +70,7 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
     unit_sel_ = new UnitSelectionWidget(dimension_, unit_);
-    form_layout->addRow("Unit", type_combo_);
+    form_layout->addRow("Unit", unit_sel_);
 
     //    StringRepresentationComboBox* representation_box_ {nullptr};
     representation_box_ = new StringRepresentationComboBox(representation_, representation_str_);
@@ -169,7 +169,22 @@ void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
 
+    assert (db_column_edit_);
+
     name_ = name.toStdString();
+
+    if (name_.size())
+    {
+        db_column_name_ = name.toStdString();
+
+        std::replace_if(db_column_name_.begin(), db_column_name_.end(), [](char ch) {
+                return !(isalnum(ch) || ch == '_');
+            }, '_');
+
+        boost::algorithm::to_lower(db_column_name_);
+
+        db_column_edit_->setText(db_column_name_.c_str());
+    }
 
     checkSettings();
 }

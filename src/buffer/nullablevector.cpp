@@ -38,6 +38,38 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 }
 
 template <>
+void NullableVector<bool>::setFromFormat(unsigned int index, const std::string& format,
+                                      const std::string& value_str, bool debug)
+{
+    logdbg << "NullableVector " << property_.name() << ": setFromFormat";
+    bool value;
+
+    if (format == "invert")
+    {
+        if (value_str == "0")
+            value = 1;
+        else if (value_str == "1")
+            value = 0;
+        else
+        {
+            logerr << "NullableVector: setFromFormat: unknown bool value '" << value_str << "'";
+            assert(false);
+        }
+    }
+    else
+    {
+        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
+        assert(false);
+    }
+
+    if (debug)
+        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
+               << "' value '" << value << "'";
+
+    set(index, value);
+}
+
+template <>
 void NullableVector<bool>::append(unsigned int index, bool value)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"

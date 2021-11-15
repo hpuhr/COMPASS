@@ -328,7 +328,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
     }
     else
     {
-        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: appendFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 

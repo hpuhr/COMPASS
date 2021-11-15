@@ -24,10 +24,11 @@
 #include "logger.h"
 
 const std::vector<std::string> no_format = {""};
+const std::vector<std::string> bool_format = {"", "invert"};
 const std::vector<std::string> integer_formats{"", "decimal", "hexadecimal", "octal"};
 
 const std::map<PropertyDataType, std::vector<std::string>> Format::format_options_{
-    {PropertyDataType::BOOL, no_format},
+    {PropertyDataType::BOOL, bool_format},
     {PropertyDataType::CHAR, integer_formats},
     {PropertyDataType::UCHAR, integer_formats},
     {PropertyDataType::INT, integer_formats},

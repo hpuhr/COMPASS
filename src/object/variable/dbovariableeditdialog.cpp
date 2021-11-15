@@ -17,6 +17,8 @@
 #include <QFormLayout>
 #include <QTextEdit>
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
@@ -45,7 +47,8 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
-    description_edit_ = new QTextEdit(variable_.description().c_str());
+    description_edit_ = new QTextEdit();
+    description_edit_->document()->setPlainText(variable_.description().c_str());
     description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
@@ -59,7 +62,7 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};
     unit_sel_ = new UnitSelectionWidget(variable_.dimension(), variable_.unit());
-    form_layout->addRow("Unit", type_combo_);
+    form_layout->addRow("Unit", unit_sel_);
 
     //    StringRepresentationComboBox* representation_box_ {nullptr};
     representation_box_ = new StringRepresentationComboBox(variable_.representationRef(),
@@ -128,6 +131,20 @@ void DBOVariableEditDialog::nameChangedSlot(const QString& name)
 
     loginf << "DBOVariableEditDialog: nameChangedSlot: renaming '" << variable_.name() << "' to '" << new_name << "'";
     variable_.object().renameVariable(variable_.name(), new_name);
+
+    if (new_name.size())
+    {
+        string db_column_name = name.toStdString();
+
+        std::replace_if(db_column_name.begin(), db_column_name.end(), [](char ch) {
+                return !(isalnum(ch) || ch == '_');
+            }, '_');
+
+        boost::algorithm::to_lower(db_column_name);
+
+        db_column_edit_->setText(db_column_name.c_str());
+        dbColumnChangedSlot(db_column_name.c_str());
+    }
 
     variable_edited_ = true;
 }
