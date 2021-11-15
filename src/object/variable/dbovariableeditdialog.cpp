@@ -45,7 +45,7 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
-    description_edit_ = new QTextEdit();
+    description_edit_ = new QTextEdit(variable_.description().c_str());
     description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
@@ -134,17 +134,53 @@ void DBOVariableEditDialog::nameChangedSlot(const QString& name)
 
 void DBOVariableEditDialog::shortNameChangedSlot(const QString& name)
 {
+    loginf << "DBOVariableEditDialog: shortNameChangedSlot: name '" << name.toStdString() << "'";
 
+    variable_.shortName(name.toStdString());
+
+    variable_edited_ = true;
 }
 
 void DBOVariableEditDialog::commentChangedSlot()
 {
+    assert (description_edit_);
 
+    variable_.description(description_edit_->document()->toPlainText().toStdString());
+
+    variable_edited_ = true;
 }
 
 void DBOVariableEditDialog::dbColumnChangedSlot(const QString& name)
 {
+    assert (db_column_edit_);
+    string new_name = name.toStdString();
 
+    if (new_name == variable_.dbColumnName())
+        return;
+
+    if (!new_name.size())
+    {
+        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        return;
+    }
+
+    if (variable_.object().hasVariableDBColumnName(new_name))
+    {
+        logwrn << "DBOVariableEditDialog: dbColumnChangedSlot: name '" << new_name << "' already in use";
+
+        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        db_column_edit_->setToolTip(("Variable DB Column name '"+new_name+"' already in use").c_str());
+        return;
+    }
+
+    db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
+    db_column_edit_->setToolTip("");
+
+    loginf << "DBOVariableEditDialog: dbColumnChangedSlot: changing '" << variable_.dbColumnName()
+           << "' to '" << new_name << "'";
+    variable_.dbColumnName(new_name);
+
+    variable_edited_ = true;
 }
 
 void DBOVariableEditDialog::doneSlot()

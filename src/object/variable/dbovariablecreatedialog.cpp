@@ -19,7 +19,9 @@
 
 using namespace std;
 
-DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, QWidget* parent, Qt::WindowFlags f)
+DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::string name,
+                                                 const std::string description,
+                                                 QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f), object_(object)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint); //  | Qt::CustomizeWindowHint
@@ -35,7 +37,9 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, QWidget* pare
 
     //    QLineEdit* name_edit_ {nullptr};
 
-    name_edit_ = new QLineEdit();
+    name_ = name;
+
+    name_edit_ = new QLineEdit(name_.c_str());
     connect(name_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::nameChangedSlot);
     form_layout->addRow("Name", name_edit_);
 
@@ -45,8 +49,12 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, QWidget* pare
     form_layout->addRow("Short Name", short_name_edit_);
 
     //    QTextEdit* description_edit_ {nullptr};
+
+    description_ = description;
+
     description_edit_ = new QTextEdit();
-    description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
+    description_edit_->document()->setPlainText(description_.c_str());
+    //description_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
     connect(description_edit_, &QTextEdit::textChanged, this,
             &DBOVariableCreateDialog::commentChangedSlot);
@@ -72,9 +80,23 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, QWidget* pare
 
     main_layout->addLayout(form_layout);
 
-    done_button_ = new QPushButton("Done");
-    connect(done_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::doneSlot);
-    main_layout->addWidget(done_button_);
+    main_layout->addStretch();
+
+    // buttons
+
+    QHBoxLayout* button_layout = new QHBoxLayout();
+
+    cancel_button_ = new QPushButton("Cancel");
+    connect(cancel_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::reject);
+    button_layout->addWidget(cancel_button_);
+
+    button_layout->addStretch();
+
+    ok_button_ = new QPushButton("OK");
+    connect(ok_button_, &QPushButton::clicked, this, &DBOVariableCreateDialog::accept);
+    button_layout->addWidget(ok_button_);
+
+    main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
 
@@ -119,20 +141,43 @@ void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
 
 void DBOVariableCreateDialog::shortNameChangedSlot(const QString& name)
 {
-
+    short_name_ = name.toStdString();
 }
 
 void DBOVariableCreateDialog::commentChangedSlot()
 {
+    assert (description_edit_);
 
+    description_ = description_edit_->document()->toPlainText().toStdString();
 }
 
 void DBOVariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
+    assert (db_column_edit_);
+    string new_name = name.toStdString();
 
+    if (new_name == name_)
+        return;
+
+    if (!new_name.size())
+    {
+        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        return;
+    }
+
+    if (object_.hasVariableDBColumnName(new_name))
+    {
+        logwrn << "DBOVariableCreateDialog: dbColumnChangedSlot: name '" << new_name << "' already in use";
+
+        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        db_column_edit_->setToolTip(("Variable DB Column name '"+new_name+"' already in use").c_str());
+        return;
+    }
+
+    // ok, rename
+    db_column_name_ = new_name;
+
+    db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
+    db_column_edit_->setToolTip("");
 }
 
-void DBOVariableCreateDialog::doneSlot()
-{
-    accept();
-}

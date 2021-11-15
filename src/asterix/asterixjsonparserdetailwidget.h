@@ -31,11 +31,11 @@ public slots:
     void mappingDBOVariableChangedSlot();
     void dboVariableCommentChangedSlot();
 
-    void createNewDBVariableSlot();
+    void createNewDBVariableSlot(); // create new dbovar, and mapping if required
     void editDBVariableSlot();
     void deleteDBVariableSlot();
 
-    void mappingActionSlot();
+    void deleteMappingSlot();
 
 signals:
 
@@ -55,6 +55,7 @@ private:
 
     QLabel* json_key_label_ {nullptr};
     QLabel* asterix_desc_label_ {nullptr};
+    QLabel* asterix_editions_label_ {nullptr};
     QCheckBox* in_array_check_ {nullptr};
     QCheckBox* append_check {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
@@ -64,9 +65,9 @@ private:
 
     QTextEdit* dbo_var_comment_edit_ {nullptr};
 
-    QPushButton* mapping_button_ {nullptr}; // displays current action: add/delete mapping
+    QPushButton* delete_mapping_button_ {nullptr}; // delete mapping
+    QPushButton* new_dbovar_button_ {nullptr}; // create new dbovar, and mapping if required
 
-    QPushButton* dbovar_new_button_ {nullptr};
     QPushButton* dbovar_edit_button_ {nullptr};
     QPushButton* dbovar_delete_button_ {nullptr};
 

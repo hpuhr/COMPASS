@@ -25,10 +25,10 @@ public slots:
     void commentChangedSlot();
     void dbColumnChangedSlot(const QString& name);
 
-    void doneSlot();
-
 public:
-    DBOVariableCreateDialog(DBObject& object, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    DBOVariableCreateDialog(DBObject& object, const std::string name="",
+                            const std::string description="",
+                            QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
 protected:
     DBObject& object_;
@@ -41,7 +41,8 @@ protected:
     StringRepresentationComboBox* representation_box_ {nullptr};
     QLineEdit* db_column_edit_ {nullptr};
 
-    QPushButton* done_button_ {nullptr};
+    QPushButton* cancel_button_ {nullptr};
+    QPushButton* ok_button_ {nullptr};
 
     std::string invalid_bg_str_;
     std::string valid_bg_str_;
@@ -49,12 +50,12 @@ protected:
     std::string name_;
     std::string short_name_;
 
-    PropertyDataType data_type_;
+    PropertyDataType data_type_ {PropertyDataType::BOOL};
     std::string dimension_;
     std::string unit_;
 
-    DBOVariable::Representation representation_;
-    std::string representation_str_;
+    DBOVariable::Representation representation_ {DBOVariable::Representation::STANDARD};
+    std::string representation_str_ {"STANDARD"};
 
     std::string description_;
     std::string db_column_name_;

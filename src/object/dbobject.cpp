@@ -166,6 +166,14 @@ void DBObject::deleteVariable(const string& name)
     assert(!hasVariable(name));
 }
 
+bool DBObject::hasVariableDBColumnName(const std::string& name) const
+{
+    auto iter = find_if(variables_.begin(), variables_.end(),
+    [name](const unique_ptr<DBOVariable>& var) { return var->dbColumnName() == name;});
+
+    return iter != variables_.end();
+}
+
 string DBObject::associationsTableName()
 {
     assert (db_table_name_.size());

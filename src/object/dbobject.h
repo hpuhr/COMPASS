@@ -88,6 +88,8 @@ class DBObject : public QObject, public Configurable
 
     const std::vector<std::unique_ptr<DBOVariable>>& variables() const { return variables_; }
 
+    bool hasVariableDBColumnName(const std::string& name) const;
+
 //    using DBOVariableIterator = typename std::vector<std::unique_ptr<DBOVariable>>::iterator;
 //    DBOVariableIterator begin() { return variables_.begin(); }
 //    DBOVariableIterator end() { return variables_.end(); }
