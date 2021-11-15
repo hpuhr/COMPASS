@@ -130,6 +130,29 @@ bool ASTERIXJSONParser::hasDBOVariableMapped (const std::string& var_name)
             != data_mappings_.end();
 }
 
+bool ASTERIXJSONParser::hasJSONKeyInMapping (const std::string& key)
+{
+    return std::find_if(data_mappings_.begin(), data_mappings_.end(),
+                        [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; })
+            != data_mappings_.end();
+}
+
+unsigned int ASTERIXJSONParser::indexOfJSONKeyInMapping (const std::string& key)
+{
+    assert (hasJSONKeyInMapping(key));
+
+    auto iter = std::find_if(data_mappings_.begin(), data_mappings_.end(),
+                             [key](const JSONDataMapping& mapping) -> bool { return mapping.jsonKey() == key; });
+
+    assert (iter != data_mappings_.end());
+
+    unsigned int pos = iter - data_mappings_.begin();
+
+    assert (pos < data_mappings_.size());
+
+    return pos;
+}
+
 void ASTERIXJSONParser::selectMapping (unsigned int index)
 {
     loginf << "ASTERIXJSONParser: selectMapping: index " << index;

@@ -30,6 +30,22 @@ public:
                             const std::string description="",
                             QWidget* parent = nullptr, Qt::WindowFlags f = 0);
 
+    std::string name() const;
+
+    std::string shortName() const;
+
+    std::string dataTypeStr() const;
+
+    std::string dimension() const;
+
+    std::string unit() const;
+
+    std::string  representationStr() const;
+
+    std::string description() const;
+
+    std::string dbColumnName() const;
+
 protected:
     DBObject& object_;
 

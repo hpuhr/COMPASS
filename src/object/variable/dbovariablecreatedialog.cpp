@@ -125,6 +125,46 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     checkSettings();
 }
 
+std::string DBOVariableCreateDialog::name() const
+{
+    return name_;
+}
+
+std::string DBOVariableCreateDialog::shortName() const
+{
+    return short_name_;
+}
+
+std::string DBOVariableCreateDialog::dataTypeStr() const
+{
+    return Property::asString(data_type_);
+}
+
+std::string DBOVariableCreateDialog::dimension() const
+{
+    return dimension_;
+}
+
+std::string DBOVariableCreateDialog::unit() const
+{
+    return unit_;
+}
+
+std::string DBOVariableCreateDialog::representationStr() const
+{
+    return representation_str_;
+}
+
+std::string DBOVariableCreateDialog::description() const
+{
+    return description_;
+}
+
+std::string DBOVariableCreateDialog::dbColumnName() const
+{
+    return db_column_name_;
+}
+
 void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";

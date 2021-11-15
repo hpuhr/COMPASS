@@ -436,15 +436,17 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
             || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedJSONKey);
     assert (dbo_var_sel_);
 
-    string name;
+    string json_key;
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
-        name = parser_.mapping(entry_index_).jsonKey();
+        json_key = parser_.mapping(entry_index_).jsonKey();
     else
-        name = parser_.unmappedJSONKey(entry_index_);
+        json_key = parser_.unmappedJSONKey(entry_index_);
 
     // set description
-    string description {"From "+name};
+    string description {"From "+json_key};
+
+    string name {json_key};
 
     if (parser_.categoryItemInfo().count(name))
     {
@@ -485,27 +487,48 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
         // create new dbo var
         {
-//            Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
-//            new_cfg.addParameterString("json_key", location);
-//            new_cfg.addParameterString("db_object_name", db_object_name_);
+            assert (!parser_.dbObject().hasVariable(dialog.name()));
 
-//            if (is_in_array)
-//                new_cfg.addParameterBool("in_array", true);
+            Configuration& new_cfg = parser_.dbObject().configuration().addNewSubConfiguration("DBOVariable");
+            new_cfg.addParameterString("name", dialog.name());
+            new_cfg.addParameterString("short_name", dialog.shortName());
+            new_cfg.addParameterString("description", dialog.description());
+            new_cfg.addParameterString("db_column_name", dialog.dbColumnName());
+            new_cfg.addParameterString("data_type_str", dialog.dataTypeStr());
+            new_cfg.addParameterString("representation_str", dialog.representationStr());
+            new_cfg.addParameterString("dimension", dialog.dimension());
+            new_cfg.addParameterString("unit", dialog.unit());
 
-//            std::stringstream ss;
-//            ss << "Type " << j.type_name() << ", value " << j.dump();
-//            new_cfg.addParameterString("comment", ss.str());
+            parser_.dbObject().generateSubConfigurable("DBOVariable", new_cfg.getInstanceId());
 
-//            generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+            assert (parser_.dbObject().hasVariable(dialog.name()));
         }
 
 
         if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping) // set in existing mapping
         {
+            parser_.mapping(entry_index_).dboVariableName(dialog.name());
+
+            parser_.doMappingChecks();
+
+            parser_.selectMapping(entry_index_);
         }
         else // create new mapping
         {
+            assert (!parser_.hasJSONKeyInMapping(json_key));
 
+            Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
+            new_cfg.addParameterString("json_key", json_key);
+            new_cfg.addParameterString("db_object_name", parser_.dbObjectName());
+            new_cfg.addParameterString("dbovariable_name", dialog.name());
+
+            parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+
+            parser_.doMappingChecks();
+
+            assert (parser_.hasJSONKeyInMapping(json_key));
+
+            parser_.selectMapping(parser_.indexOfJSONKeyInMapping(json_key));
         }
     }
     else

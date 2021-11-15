@@ -91,6 +91,9 @@ public:
     bool hasJSONKeyMapped (const std::string& key);
     bool hasDBOVariableMapped (const std::string& var_name);
 
+    bool hasJSONKeyInMapping (const std::string& key);
+    unsigned int indexOfJSONKeyInMapping (const std::string& key);
+
     //void updateToChangedIndex (unsigned int index); // to be called when existing row is changed
     void selectMapping (unsigned int index);
     void selectUnmappedDBOVariable (const std::string& name);
