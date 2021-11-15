@@ -48,6 +48,7 @@ protected:
     std::string valid_bg_str_;
 
     std::string name_;
+    bool name_ok_ {false};
     std::string short_name_;
 
     PropertyDataType data_type_ {PropertyDataType::BOOL};
@@ -59,7 +60,9 @@ protected:
 
     std::string description_;
     std::string db_column_name_;
+    bool db_column_name_ok_ {false};
 
+    void checkSettings();
 };
 
 

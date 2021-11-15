@@ -438,7 +438,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
     string name;
 
-    if (ASTERIXJSONParser::EntryType::ExistingMapping)
+    if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
         name = parser_.mapping(entry_index_).jsonKey();
     else
         name = parser_.unmappedJSONKey(entry_index_);
@@ -484,6 +484,21 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
         loginf << "ASTERIXJSONParserDetailWidget: createNewDBVariableSlot: accept";
 
         // create new dbo var
+        {
+//            Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
+//            new_cfg.addParameterString("json_key", location);
+//            new_cfg.addParameterString("db_object_name", db_object_name_);
+
+//            if (is_in_array)
+//                new_cfg.addParameterBool("in_array", true);
+
+//            std::stringstream ss;
+//            ss << "Type " << j.type_name() << ", value " << j.dump();
+//            new_cfg.addParameterString("comment", ss.str());
+
+//            generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+        }
+
 
         if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping) // set in existing mapping
         {

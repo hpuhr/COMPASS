@@ -17,6 +17,9 @@
 #include <QFormLayout>
 #include <QTextEdit>
 
+#include <boost/algorithm/string.hpp>
+
+
 using namespace std;
 
 DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::string name,
@@ -74,7 +77,20 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     form_layout->addRow("Representation", representation_box_);
 
     //    QLineEdit* db_column_edit_ {nullptr};
-    db_column_edit_ = new QLineEdit();
+
+    if (name_.size())
+    {
+        db_column_name_ = name;
+
+        std::replace_if(db_column_name_.begin(), db_column_name_.end(), [](char ch) {
+                return !(isalnum(ch) || ch == '_');
+            }, '_');
+
+        boost::algorithm::to_lower(db_column_name_);
+    }
+
+    db_column_edit_ = new QLineEdit(db_column_name_.c_str());
+
     connect(db_column_edit_, &QLineEdit::textChanged, this, &DBOVariableCreateDialog::dbColumnChangedSlot);
     form_layout->addRow("DBColumn", db_column_edit_);
 
@@ -105,38 +121,17 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
 
     valid_bg_str_ = "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
                     " rgb(200, 200, 200); }";
+
+    checkSettings();
 }
 
 void DBOVariableCreateDialog::nameChangedSlot(const QString& name)
 {
     loginf << "DBOVariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
 
-    assert (name_edit_);
-    string new_name = name.toStdString();
+    name_ = name.toStdString();
 
-    if (new_name == name_)
-        return;
-
-    if (!new_name.size())
-    {
-        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
-        return;
-    }
-
-    if (object_.hasVariable(new_name))
-    {
-        logwrn << "DBOVariableCreateDialog: nameChangedSlot: name '" << new_name << "' already in use";
-
-        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
-        name_edit_->setToolTip(("Variable name '"+new_name+"' already in use").c_str());
-        return;
-    }
-
-    // ok, rename
-    name_ = new_name;
-
-    name_edit_->setStyleSheet(valid_bg_str_.c_str());
-    name_edit_->setToolTip("");
+    checkSettings();
 }
 
 void DBOVariableCreateDialog::shortNameChangedSlot(const QString& name)
@@ -153,31 +148,86 @@ void DBOVariableCreateDialog::commentChangedSlot()
 
 void DBOVariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
+    loginf << "DBOVariableCreateDialog: dbColumnChangedSlot: name '" << name.toStdString() << "'";
+
     assert (db_column_edit_);
-    string new_name = name.toStdString();
 
-    if (new_name == name_)
-        return;
+    db_column_name_ = name.toStdString();
 
-    if (!new_name.size())
+    // check lower case lower case
+
+    string lower = db_column_name_;
+    boost::algorithm::to_lower(lower);
+
+    if (db_column_name_ != lower)
     {
-        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
-        return;
+        db_column_name_ = lower;
+        db_column_edit_->setText(db_column_name_.c_str());
     }
 
-    if (object_.hasVariableDBColumnName(new_name))
-    {
-        logwrn << "DBOVariableCreateDialog: dbColumnChangedSlot: name '" << new_name << "' already in use";
-
-        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
-        db_column_edit_->setToolTip(("Variable DB Column name '"+new_name+"' already in use").c_str());
-        return;
-    }
-
-    // ok, rename
-    db_column_name_ = new_name;
-
-    db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
-    db_column_edit_->setToolTip("");
+    checkSettings();
 }
 
+void DBOVariableCreateDialog::checkSettings()
+{
+    assert (name_edit_);
+    assert (db_column_edit_);
+    assert (ok_button_);
+
+    // check name
+    string name_quicktip;
+
+    if (!name_.size())
+    {
+        name_ok_ = false;
+        name_quicktip = "Can not be empty";
+    }
+    else if (object_.hasVariable(name_))
+    {
+        name_ok_ = false;
+        name_quicktip = "Name '"+name_+"' already in use";
+    }
+    else // ok
+        name_ok_ = true;
+
+    if (name_ok_)
+        name_edit_->setStyleSheet(valid_bg_str_.c_str());
+    else
+        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
+
+    name_edit_->setToolTip(name_quicktip.c_str());
+
+    // check db column name
+    string db_column_quicktip;
+
+    if (!db_column_name_.size())
+    {
+        db_column_name_ok_ = false;
+        db_column_quicktip = "Can not be empty";
+    }
+    else if (object_.hasVariableDBColumnName(db_column_name_))
+    {
+        db_column_name_ok_ = false;
+        db_column_quicktip = "Column name '"+db_column_name_+"' already in use";
+    }
+    else if (find_if(db_column_name_.begin(), db_column_name_.end(), [](char ch) {
+                        return !(isalnum(ch) || ch == '_');
+                    }) != db_column_name_.end())
+    {
+        db_column_name_ok_ = false;
+        db_column_quicktip = "Column name '"+db_column_name_
+                +"' can only contain alphanumeric characters and underscores";
+    }
+    else // ok
+        db_column_name_ok_ = true;
+
+
+    if (db_column_name_ok_)
+        db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
+    else
+        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+
+    db_column_edit_->setToolTip(db_column_quicktip.c_str());
+
+    ok_button_->setDisabled(!name_ok_ || !db_column_name_ok_);
+}

@@ -171,6 +171,8 @@ bool DBObject::hasVariableDBColumnName(const std::string& name) const
     auto iter = find_if(variables_.begin(), variables_.end(),
     [name](const unique_ptr<DBOVariable>& var) { return var->dbColumnName() == name;});
 
+    logdbg << "DBObject: hasVariableDBColumnName: name '" << name << "' " << (iter != variables_.end());
+
     return iter != variables_.end();
 }
 
