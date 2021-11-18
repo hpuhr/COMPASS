@@ -78,6 +78,13 @@ void ASTERIXJSONParser::doMappingChecks()
 
     for (auto& map_it : data_mappings_)
     {
+        if (!dbObject().hasVariable(map_it.dboVariableName()))
+            map_it.dboVariableName("");
+
+    }
+
+    for (auto& map_it : data_mappings_)
+    {
         if (!item_info_.count(map_it.jsonKey()))
             not_existing_json_keys_.insert(map_it.jsonKey());
     }
@@ -227,6 +234,11 @@ const std::string& ASTERIXJSONParser::unmappedDBOVariable (unsigned int index) c
 const jASTERIX::CategoryItemInfo& ASTERIXJSONParser::categoryItemInfo() const
 {
     return item_info_;
+}
+
+const std::vector<std::string>& ASTERIXJSONParser::notAddedJSONKeys() const
+{
+    return not_added_json_keys_;
 }
 
 DBObject& ASTERIXJSONParser::dbObject() const
@@ -583,11 +595,12 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
 
     logdbg << "ASTERIXJSONParser: removeMapping: size " << data_mappings_.size();
 
-    if (mapping.active() && mapping.initialized())
+    if (mapping.active() && mapping.initialized() && mapping.hasVariable())
     {
-        if (list_.hasProperty(mapping.variable().name()))
-            list_.removeProperty(mapping.variable().name());
-        if (mapping.hasVariable() && var_list_.hasVariable(mapping.variable()))
+        if (list_.hasProperty(mapping.dboVariableName()))
+            list_.removeProperty(mapping.dboVariableName());
+
+        if (var_list_.hasVariable(mapping.variable()))
             var_list_.removeVariable(mapping.variable());
     }
 

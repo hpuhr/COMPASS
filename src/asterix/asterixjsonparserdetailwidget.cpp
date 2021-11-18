@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QComboBox>
 
 using namespace std;
 using namespace Utils;
@@ -60,9 +61,12 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     asterix_label->setFont(font_bold);
     form_layout->addRow(asterix_label);
 
-    json_key_label_ = new QLabel();
-    json_key_label_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    form_layout->addRow("JSON Key", json_key_label_);
+    json_key_box_ = new QComboBox();
+    json_key_box_->setEditable(false);
+    //json_key_box_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    connect(json_key_box_, SIGNAL(currentIndexChanged(const QString &)),
+            this, SLOT(mappingJSONKeyChangedSlot(const QString &)));
+    form_layout->addRow("JSON Key", json_key_box_);
 
     asterix_desc_label_ = new QLabel();
     asterix_desc_label_->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -174,7 +178,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
     assert (info_label_);
     assert (active_check_);
-    assert (json_key_label_);
+    assert (json_key_box_);
     assert (unit_sel_);
     assert (data_format_widget_);
 
@@ -197,7 +201,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         active_check_->setDisabled(false);
         active_check_->setChecked(mapping.active());
 
-        showJSONKey(mapping.jsonKey());
+        showJSONKey(mapping.jsonKey(), !parser_.existsJSONKeyInCATInfo(mapping.jsonKey()));
 
         unit_sel_->update(mapping.dimensionRef(), mapping.unitRef());
         data_format_widget_->update(mapping.formatDataTypeRef(), mapping.jsonValueFormatRef());
@@ -223,7 +227,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added JSON " << entry_index_
                << " key '" << key << "'";
 
-        showJSONKey(key);
+        showJSONKey(key, false);
         unit_sel_->clear();
         data_format_widget_->clear();
         showDBOVariable("");
@@ -246,7 +250,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added dbovar " << entry_index_
                << " key '" << dbovar << "'";
 
-        showJSONKey("");
+        showJSONKey("", false);
         unit_sel_->clear();
         data_format_widget_->clear();
         showDBOVariable(dbovar);
@@ -260,20 +264,42 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
 }
 
-void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key)
+void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool unmapped_selectable)
 {
-    assert (json_key_label_);
+    assert (json_key_box_);
     assert (asterix_desc_label_);
 
-    if (!key.size())
+    json_key_box_->clear();
+
+    if (!key.size()) // shown none
     {
-        json_key_label_->setText("");
+        assert (!unmapped_selectable);
+
+        json_key_box_->addItem("");
+        json_key_box_->setCurrentText("");
+        json_key_box_->setDisabled(true);
+
         asterix_desc_label_->setText("");
         asterix_editions_label_->setText("");
     }
     else
     {
-        json_key_label_->setText(key.c_str());
+        json_key_box_->addItem(key.c_str());
+        json_key_box_->setCurrentText(key.c_str());
+
+        if (unmapped_selectable)
+        {
+            for (const auto& jkey_it : parser_.notAddedJSONKeys())
+            {
+                if (jkey_it != key)
+                    json_key_box_->addItem(jkey_it.c_str());
+
+            }
+
+            json_key_box_->setDisabled(false);
+        }
+        else
+            json_key_box_->setDisabled(true);
 
         const jASTERIX::CategoryItemInfo& item_info = parser_.categoryItemInfo();
 
@@ -364,6 +390,24 @@ void ASTERIXJSONParserDetailWidget::mappingActiveChangedSlot()
     parser_.mapping(entry_index_).active(active_check_->checkState() == Qt::Checked);
 }
 
+void ASTERIXJSONParserDetailWidget::mappingJSONKeyChangedSlot (const QString& text)
+{
+    if (setting_new_content_)
+        return;
+
+    loginf << "ASTERIXJSONParserDetailWidget: mappingJSONKeyChangedSlot";
+
+    assert (has_current_entry_);
+    assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
+    assert (in_array_check_);
+
+    parser_.mapping(entry_index_).jsonKey(text.toStdString());
+
+    parser_.doMappingChecks();
+
+    parser_.selectMapping(entry_index_);
+}
+
 void ASTERIXJSONParserDetailWidget::mappingInArrayChangedSlot()
 {
     if (setting_new_content_)
@@ -400,17 +444,42 @@ void ASTERIXJSONParserDetailWidget::mappingDBOVariableChangedSlot()
     loginf << "ASTERIXJSONParserDetailWidget: mappingDBOVariableChangedSlot";
 
     assert (has_current_entry_);
-    assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
+    assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
+            || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedJSONKey);
     assert (dbo_var_sel_);
 
-    if (dbo_var_sel_->hasVariable())
-        parser_.mapping(entry_index_).dboVariableName(dbo_var_sel_->selectedVariable().name());
-    else
-        parser_.mapping(entry_index_).dboVariableName("");
+    if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
+    {
+        // setting variable in existing mapping
 
-    parser_.doMappingChecks();
+        if (dbo_var_sel_->hasVariable())
+            parser_.mapping(entry_index_).dboVariableName(dbo_var_sel_->selectedVariable().name());
+        else
+            parser_.mapping(entry_index_).dboVariableName("");
 
-    parser_.selectMapping(entry_index_);
+        parser_.doMappingChecks();
+
+        parser_.selectMapping(entry_index_);
+    }
+    else if (dbo_var_sel_->hasVariable())
+    {
+        // create new mapping
+
+        string json_key = parser_.unmappedJSONKey(entry_index_);
+
+        Configuration& new_cfg = parser_.configuration().addNewSubConfiguration("JSONDataMapping");
+        new_cfg.addParameterString("json_key", json_key);
+        new_cfg.addParameterString("db_object_name", parser_.dbObjectName());
+        new_cfg.addParameterString("dbovariable_name", dbo_var_sel_->selectedVariable().name());
+
+        parser_.generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+
+        parser_.doMappingChecks();
+
+        assert (parser_.hasJSONKeyInMapping(json_key));
+
+        parser_.selectMapping(parser_.indexOfJSONKeyInMapping(json_key));
+    }
 }
 
 void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
@@ -598,7 +667,7 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
         active_check_->setDisabled(true);
         active_check_->setChecked(false);
 
-        showJSONKey("");
+        showJSONKey("", false);
         unit_sel_->clear();
         data_format_widget_->clear();
         showDBOVariable("");
@@ -668,7 +737,7 @@ void ASTERIXJSONParserDetailWidget::deleteMappingSlot()
     active_check_->setDisabled(true);
     active_check_->setChecked(false);
 
-    showJSONKey("");
+    showJSONKey("", false);
     unit_sel_->clear();
     data_format_widget_->clear();
     showDBOVariable("");

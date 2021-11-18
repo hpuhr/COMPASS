@@ -107,6 +107,8 @@ public:
 
     const jASTERIX::CategoryItemInfo& categoryItemInfo() const;
 
+    const std::vector<std::string>& notAddedJSONKeys() const;
+
 private:
     ASTERIXImportTask& task_;
     std::string name_;

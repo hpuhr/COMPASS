@@ -15,6 +15,7 @@ class QLineEdit;
 class QCheckBox;
 class QPushButton;
 class QTextEdit;
+class QComboBox;
 
 class ASTERIXJSONParserDetailWidget : public QWidget
 {
@@ -25,6 +26,7 @@ public slots:
 
     void mappingActiveChangedSlot();
 
+    void mappingJSONKeyChangedSlot (const QString &text);
     void mappingInArrayChangedSlot();
     void mappingAppendChangedSlot();
 
@@ -53,7 +55,7 @@ private:
     QLabel* info_label_ {nullptr}; // shows type of mapping, or missing details
     QCheckBox* active_check_ {nullptr};
 
-    QLabel* json_key_label_ {nullptr};
+    QComboBox* json_key_box_ {nullptr};
     QLabel* asterix_desc_label_ {nullptr};
     QLabel* asterix_editions_label_ {nullptr};
     QCheckBox* in_array_check_ {nullptr};
@@ -73,7 +75,7 @@ private:
 
     bool setting_new_content_ {false};
 
-    void showJSONKey (const std::string& key);
+    void showJSONKey (const std::string& key, bool unmapped_selectable);
     void showDBOVariable (const std::string& var_name, bool mapping_exists=false);
 
 };

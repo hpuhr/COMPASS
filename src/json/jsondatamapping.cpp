@@ -196,6 +196,9 @@ void JSONDataMapping::dboVariableName(const std::string& name)
     dbovariable_name_ = name;
     initialized_ = false;
 
+    if (!dbovariable_name_.size())
+        active_ = false;
+
     initialize();
 }
 
@@ -217,6 +220,9 @@ void JSONDataMapping::jsonKey(const std::string& json_key)
         last_key_ = sub_keys_.end() - 1;
     if (sub_keys_.size() > 1)
         second_to_last_key_ = sub_keys_.end() - 2;
+
+    if (!json_key_.size())
+        active_ = false;
 }
 
 // JSONDataMappingWidget* JSONDataMapping::widget ()
