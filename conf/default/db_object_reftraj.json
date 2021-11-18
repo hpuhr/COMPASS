@@ -1,38 +1,10 @@
 {
     "parameters": {
+        "db_table_name": "sd_reftraj",
         "info": "",
-        "meta_table": "RefTraj",
         "name": "RefTraj"
     },
     "sub_configs": {
-        "DBODataSourceDefinition": {
-            "DBODataSourceDefinitionRefTraj0": {
-                "parameters": {
-                    "altitude_column": "ds_reftraj.WGS_ELEV_CARTESIAN_M",
-                    "foreign_key": "le_ds.DS_ID",
-                    "latitude_column": "ds_reftraj.POS_LAT_DEG",
-                    "local_key": "ds_id",
-                    "longitude_column": "ds_reftraj.POS_LONG_DEG",
-                    "meta_table": "RefTrajDataSources",
-                    "mode_s_azimuth_stddev_column": "",
-                    "mode_s_ir_max_column": "",
-                    "mode_s_ir_min_column": "",
-                    "mode_s_range_stddev_column": "",
-                    "name_column": "le_ds.DS_NAME",
-                    "primary_azimuth_stddev_column": "",
-                    "primary_ir_max_column": "",
-                    "primary_ir_min_column": "",
-                    "primary_range_stddev_column": "",
-                    "sac_column": "le_ds.SAC",
-                    "secondary_azimuth_stddev_column": "",
-                    "secondary_ir_max_column": "",
-                    "secondary_ir_min_column": "",
-                    "secondary_range_stddev_column": "",
-                    "short_name_column": "le_ds.DS_SHORT_NAME",
-                    "sic_column": "le_ds.SIC"
-                }
-            }
-        },
         "DBOLabelDefinition": {
             "DBOLabelDefinition0": {
                 "parameters": null,
@@ -326,421 +298,491 @@
             "DBOVariableRefTrajacceleration_ms20": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "acceleration_ms2",
                     "dbo_name": "RefTraj",
                     "description": "Acceleration in meters per square second",
                     "dimension": "",
+                    "is_key": false,
                     "name": "acceleration_ms2",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.ACCELERATION_MS2"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajalt_baro_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "alt_baro_ft",
                     "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "Height",
+                    "is_key": false,
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_reftraj.ALT_BARO_FT"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableRefTrajalt_baro_std_dev_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_baro_std_dev_ft",
                     "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "alt_baro_std_dev_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.ALT_BARO_STD_DEV_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajalt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_geo_ft",
                     "dbo_name": "RefTraj",
                     "description": "Geometric altitude",
                     "dimension": "Height",
+                    "is_key": false,
                     "name": "alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_reftraj.ALT_GEO_FT"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableRefTrajalt_geo_std_dev_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "alt_geo_std_dev_ft",
                     "dbo_name": "RefTraj",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "alt_geo_std_dev_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.ALT_GEO_STD_DEV_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajcalc_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "calc_vertical_rate_ftm",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "calc_vertical_rate_ftm",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.CALC_VERTICAL_RATE_FTM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajcallsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "callsign",
                     "dbo_name": "RefTraj",
                     "description": "Aircraft identification",
                     "dimension": "",
+                    "is_key": false,
                     "name": "callsign",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.CALLSIGN"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajcivil_emergency0": {
                 "parameters": {
                     "data_type_str": "CHAR",
+                    "db_column_name": "civil_emergency",
                     "dbo_name": "RefTraj",
                     "description": "Civil emergency",
                     "dimension": "",
+                    "is_key": false,
                     "name": "civil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.CIVIL_EMERGENCY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajds_id0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "ds_id",
                     "dbo_name": "RefTraj",
                     "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
                     "dimension": "",
+                    "is_key": false,
                     "name": "ds_id",
                     "representation_str": "DATA_SRC_NAME",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.DS_ID"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajgroundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "groundspeed_kt",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "Speed",
+                    "is_key": false,
                     "name": "groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots",
-                    "variable_identifier": "sd_reftraj.GROUNDSPEED_KT"
+                    "short_name": "",
+                    "unit": "Knots"
                 }
             },
             "DBOVariableRefTrajheading_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "heading_deg",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_reftraj.HEADING_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableRefTrajmanoeuvre_hori0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "manoeuvre_hori",
                     "dbo_name": "RefTraj",
                     "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
                     "dimension": "",
+                    "is_key": false,
                     "name": "manoeuvre_hori",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MANOEUVRE_HORI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajmil_emergency0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "mil_emergency",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mil_emergency",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MIL_EMERGENCY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajmode3a_code0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "mode3a_code",
                     "dbo_name": "RefTraj",
                     "description": "Code, 4 octels",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mode3a_code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MODE3A_CODE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajmodec_code_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "modec_code_ft",
                     "dbo_name": "RefTraj",
                     "description": "Flight Level / Altitude in Ft",
                     "dimension": "Height",
+                    "is_key": false,
                     "name": "modec_code_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_reftraj.MODEC_CODE_FT"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableRefTrajmof_long0": {
                 "parameters": {
                     "data_type_str": "CHAR",
+                    "db_column_name": "mof_long",
                     "dbo_name": "RefTraj",
                     "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mof_long",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MOF_LONG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajmof_trans0": {
                 "parameters": {
                     "data_type_str": "CHAR",
+                    "db_column_name": "mof_trans",
                     "dbo_name": "RefTraj",
                     "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mof_trans",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MOF_TRANS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajmof_vert0": {
                 "parameters": {
                     "data_type_str": "CHAR",
+                    "db_column_name": "mof_vert",
                     "dbo_name": "RefTraj",
                     "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mof_vert",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.MOF_VERT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_lat_deg",
                     "dbo_name": "RefTraj",
                     "description": "WGS84 latitude position",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "pos_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_reftraj.POS_LAT_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableRefTrajpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_long_deg",
                     "dbo_name": "RefTraj",
                     "description": "WGS84 longitude position",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "pos_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_reftraj.POS_LONG_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableRefTrajpos_std_dev_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_lat_deg",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_std_dev_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LAT_DEG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajpos_std_dev_latlong_corr_coeff0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_latlong_corr_coeff",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_std_dev_latlong_corr_coeff",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LATLONG_CORR_COEFF"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajpos_std_dev_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "pos_std_dev_long_deg",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_std_dev_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.POS_STD_DEV_LONG_DEG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajrec_num0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "rec_num",
                     "dbo_name": "RefTraj",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
+                    "is_key": false,
                     "name": "rec_num",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.REC_NUM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
+                    "db_column_name": "sac",
                     "dbo_name": "RefTraj",
                     "description": "ASTERIX System Area Code",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sac",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.SAC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
+                    "db_column_name": "sic",
                     "dbo_name": "RefTraj",
                     "description": "ASTERIX System Identification Code",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sic",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.SIC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajspi0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "spi",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "spi",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.SPI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajtarget_addr0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "target_addr",
                     "dbo_name": "RefTraj",
                     "description": "24 bit target address / aircraft address / Mode-S address",
                     "dimension": "",
+                    "is_key": false,
                     "name": "target_addr",
                     "representation_str": "DEC_TO_HEX",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TARGET_ADDR"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajtimestamp0": {
                 "parameters": {
                     "data_type_str": "LONGINT",
+                    "db_column_name": "timestamp",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "timestamp",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TIMESTAMP"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajtod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
+                    "db_column_name": "tod",
                     "dbo_name": "RefTraj",
                     "description": "Time of Message / Time of Day (= ms since last midnight)",
                     "dimension": "Time",
+                    "is_key": false,
                     "name": "tod",
                     "representation_str": "SECONDS_TO_TIME",
-                    "unit": "Second",
-                    "variable_identifier": "sd_reftraj.TOD"
+                    "short_name": "",
+                    "unit": "Second"
                 }
             },
             "DBOVariableRefTrajtrack_created0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "track_created",
                     "dbo_name": "RefTraj",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "track_created",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TRACK_CREATED"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajtrack_end0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "track_end",
                     "dbo_name": "RefTraj",
                     "description": "Y = End of track, N = Track is still alive",
                     "dimension": "",
+                    "is_key": false,
                     "name": "track_end",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TRACK_END"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajtrack_num0": {
                 "parameters": {
                     "data_type_str": "INT",
+                    "db_column_name": "track_num",
                     "dbo_name": "RefTraj",
                     "description": "Track number",
                     "dimension": "",
+                    "is_key": false,
                     "name": "track_num",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TRACK_NUM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajturnrate_degps0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
+                    "db_column_name": "turnrate_degps",
                     "dbo_name": "RefTraj",
                     "description": "Turn rate in Deg/sec",
                     "dimension": "",
+                    "is_key": false,
                     "name": "turnrate_degps",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.TURNRATE_DEGPS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRefTrajusable0": {
                 "parameters": {
                     "data_type_str": "STRING",
+                    "db_column_name": "usable",
                     "dbo_name": "RefTraj",
                     "description": "Y = to be used for evaluation, N = not to be used",
                     "dimension": "",
+                    "is_key": false,
                     "name": "usable",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_reftraj.USABLE"
+                    "short_name": "",
+                    "unit": ""
                 }
             }
         }

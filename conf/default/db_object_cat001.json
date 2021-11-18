@@ -1,38 +1,10 @@
 {
     "parameters": {
+        "db_table_name": "data_cat001",
         "info": "",
-        "meta_table": "Radar",
-        "name": "Radar"
+        "name": "CAT001"
     },
     "sub_configs": {
-        "DBODataSourceDefinition": {
-            "DBODataSourceDefinitionRadar0": {
-                "parameters": {
-                    "altitude_column": "ds_radar.GROUND_ALTITUDE_AMSL_M",
-                    "foreign_key": "le_ds.DS_ID",
-                    "latitude_column": "ds_radar.POS_LAT_DEG",
-                    "local_key": "ds_id",
-                    "longitude_column": "ds_radar.POS_LONG_DEG",
-                    "meta_table": "RadarDataSources",
-                    "mode_s_azimuth_stddev_column": "ds_radar.MODES_AZIMUTH_ERROR_SD_DEG",
-                    "mode_s_ir_max_column": "ds_radar.MODES_MAX_IR_NM",
-                    "mode_s_ir_min_column": "ds_radar.MODES_MIN_IR_NM",
-                    "mode_s_range_stddev_column": "ds_radar.MODES_RANGE_ERROR_SD_M",
-                    "name_column": "le_ds.DS_NAME",
-                    "primary_azimuth_stddev_column": "ds_radar.PRI_AZIMUTH_ERROR_SD_DEG",
-                    "primary_ir_max_column": "ds_radar.PRI_MAX_IR_NM",
-                    "primary_ir_min_column": "ds_radar.PRI_MIN_IR_NM",
-                    "primary_range_stddev_column": "ds_radar.PRI_RANGE_ERROR_SD_M",
-                    "sac_column": "le_ds.SAC",
-                    "secondary_azimuth_stddev_column": "ds_radar.SSR_AZIMUTH_ERROR_SD_DEG",
-                    "secondary_ir_max_column": "ds_radar.SSR_MAX_IR_NM",
-                    "secondary_ir_min_column": "ds_radar.SSR_MIN_IR_NM",
-                    "secondary_range_stddev_column": "ds_radar.SSR_RANGE_ERROR_SD_M",
-                    "short_name_column": "le_ds.DS_SHORT_NAME",
-                    "sic_column": "le_ds.SIC"
-                }
-            }
-        },
         "DBOLabelDefinition": {
             "DBOLabelDefinition0": {
                 "parameters": null,
@@ -979,1264 +951,556 @@
             }
         },
         "DBOVariable": {
-            "DBOVariableRadaracas_aircraft_identification0": {
+            "DBOVariable10": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: ACAS Aircraft identification capability? (Y/N) [I048/230 AIC]",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "antenna",
+                    "description": "From 020.ANT\n\n0 Target report from antenna\n1 Target report from antenna 2",
                     "dimension": "",
-                    "name": "acas_aircraft_identification",
+                    "is_key": false,
+                    "name": "Antenna",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_AIRCRAFT_IDENTIFICATION"
+                    "short_name": "ANT",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadaracas_alt_capability_ft0": {
+            "DBOVariable11": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Altitude reporting capability, currently 25 or 100, replaces old ACAS_25FT_REPORTING column",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "ds1_ds2",
+                    "description": "From 020.DS1/DS2\n\n0 Default\n1 Unlawful interference (code 7500)\n2 Radio-communication failure (code 7600)\n3 Emergency (code 7700)",
                     "dimension": "",
-                    "name": "acas_alt_capability_ft",
+                    "is_key": false,
+                    "name": "DS1/DS2",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_ALT_CAPABILITY_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadaracas_bds_1_a0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "BDS 1,0 bit 16 [I048/230 B1A]",
-                    "dimension": "",
-                    "name": "acas_bds_1_a",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_BDS_1_A"
-                }
-            },
-            "DBOVariableRadaracas_bds_1_b0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "BDS 1,0 bits 37-40 [I048/230 B1B]",
-                    "dimension": "",
-                    "name": "acas_bds_1_b",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_BDS_1_B"
-                }
-            },
-            "DBOVariableRadaracas_comm_capability0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "ACAS Communications capability of the transponder, see X__SD_ACAS_COMMS [I048/230 COM]",
-                    "dimension": "",
-                    "name": "acas_comm_capability",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_COMM_CAPABILITY"
-                }
-            },
-            "DBOVariableRadaracas_flight_status0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "ACAS Flight status, see X__SD_ACAS_FLIGHT_STATUS [I048/230 STAT]",
-                    "dimension": "",
-                    "name": "acas_flight_status",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_FLIGHT_STATUS"
-                }
-            },
-            "DBOVariableRadaracas_modes_service0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: ACAS Mode-S specifific service capability? (Y/N) [I048/230 MMSC]",
-                    "dimension": "",
-                    "name": "acas_modes_service",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ACAS_MODES_SERVICE"
-                }
-            },
-            "DBOVariableRadaralt_baro_ft0": {
+            "DBOVariable12": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "",
-                    "dimension": "Height",
-                    "name": "alt_baro_ft",
-                    "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_radar.ALT_BARO_FT"
-                }
-            },
-            "DBOVariableRadaralt_baro_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "",
+                    "db_column_name": "received_power",
+                    "description": "From 131.POWER\n\nDecimal logarithm of the power received in dBm.\n POWER = 0 for 0 dBm",
                     "dimension": "",
-                    "name": "alt_baro_g",
+                    "is_key": false,
+                    "name": "Received Power",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ALT_BARO_G"
+                    "short_name": "Power",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadaralt_baro_v0": {
+            "DBOVariable13": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "truncated_time_of_day",
+                    "description": "From 141.Truncated Time of Day",
                     "dimension": "",
-                    "name": "alt_baro_v",
+                    "is_key": false,
+                    "name": "Truncated Time of Day",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ALT_BARO_V"
+                    "short_name": "Trun ToD",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadarantenna0": {
+            "DBOVariable14": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Antenna 1 or 2",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "rdp_chain",
+                    "description": "From 170.RDPC\n\nRadar Data Processing Chain\n0 RDP Chain 1\n1 RDP Chain 2",
                     "dimension": "",
-                    "name": "antenna",
+                    "is_key": false,
+                    "name": "RDP Chain",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.ANTENNA"
+                    "short_name": "RDP",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadarcalc_alt_geo_ft0": {
+            "DBOVariable3": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Calculated Geographical Altitude",
-                    "dimension": "Height",
-                    "name": "calc_alt_geo_ft",
+                    "db_column_name": "x",
+                    "description": "From 042.X-Component\n\nMax. range = +/-256 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "X",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_radar.CALC_ALT_GEO_FT"
+                    "short_name": "",
+                    "unit": "Meter"
                 }
             },
-            "DBOVariableRadarcallsign0": {
+            "DBOVariable4": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "aircraft identification when flight plan is available or the plan is available [I021/170, I048/240]",
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "y",
+                    "description": "From 042.Y-Component\n\nMax. range = +/-256 NM",
                     "dimension": "",
-                    "name": "callsign",
+                    "is_key": false,
+                    "name": "Y",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ssr.target_identification"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
-            "DBOVariableRadarcat0": {
+            "DBOVariable7": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "ASTERIX Category",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "track_sensor_types",
+                    "description": "From 170.RAD\n\nType of Sensor(s) maintaining Track\n0 Combined Track\n1 PSR Track\n2 SSR/Mode S Track\n3 Invalid",
                     "dimension": "",
-                    "name": "cat",
+                    "is_key": false,
+                    "name": "Track Sensor Types",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.CAT"
-                }
-            },
-            "DBOVariableRadarcivil_emergency0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "0 = default, 5 = code 7500 (unlawful interference), 6 = code 7600 (radio comunnication failure), 7 = code 7700 (emergency) [I001/020 DS1/DS2]",
-                    "dimension": "",
-                    "name": "civil_emergency",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.CIVIL_EMERGENCY"
+                    "short_name": "RAD",
+                    "unit": ""
                 }
             },
             "DBOVariableRadardetection_type0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "Detection type [I030/080 TYPE, I062/340 #6 TYP], see X__SD_DETECTION_TYPES",
+                    "db_column_name": "type",
+                    "dbo_name": "CAT048",
+                    "description": "Radar detection in last antenna scan, as follows:\n0 No detection;\n1 Sole primary detection;\n2 Sole secondary detection;\n3 Combined primary and secondary detection.",
                     "dimension": "",
-                    "name": "detection_type",
+                    "is_key": false,
+                    "name": "Type",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.DETECTION_TYPE"
-                }
-            },
-            "DBOVariableRadardisplay_state0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": " ",
-                    "dimension": "",
-                    "name": "display_state",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.DISPLAY_STATE"
-                }
-            },
-            "DBOVariableRadardom_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Day of message in posix time.",
-                    "dimension": "",
-                    "name": "dom_posix",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.DOM_POSIX"
+                    "short_name": "TYP",
+                    "unit": ""
                 }
             },
             "DBOVariableRadards_id0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
+                    "db_column_name": "ds_id",
+                    "dbo_name": "CAT048",
+                    "description": "Data Source ID",
                     "dimension": "",
-                    "name": "ds_id",
+                    "is_key": false,
+                    "name": "DS ID",
                     "representation_str": "DATA_SRC_NAME",
-                    "unit": "",
-                    "variable_identifier": "sd_ssr.sensor_id"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarfrom_fft0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = from Fixed Field Transponder, N = from Aircraft [I001/020 RAB, , I021/040 RAB, I048/020 RAB]",
+                    "db_column_name": "fft",
+                    "dbo_name": "CAT048",
+                    "description": "0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
                     "dimension": "",
-                    "name": "from_fft",
+                    "is_key": false,
+                    "name": "FFT",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.FROM_FFT"
-                }
-            },
-            "DBOVariableRadargeo_area_mask0": {
-                "parameters": {
-                    "data_type_str": "LONGINT",
-                    "dbo_name": "Radar",
-                    "description": "Geographical area bit mask",
-                    "dimension": "",
-                    "name": "geo_area_mask",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.GEO_AREA_MASK"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarground_bit0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
+                    "db_column_name": "ground_bit",
+                    "dbo_name": "CAT048",
                     "description": "",
                     "dimension": "",
-                    "name": "ground_bit",
+                    "is_key": false,
+                    "name": "Ground Bit",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.GROUND_BIT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
+                    "db_column_name": "artas_hash",
+                    "dbo_name": "CAT048",
                     "description": "ARTAS MD5 Hash Code",
                     "dimension": "",
-                    "name": "hash_code",
+                    "is_key": false,
+                    "name": "ARTAS Hash",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.HASH_CODE"
-                }
-            },
-            "DBOVariableRadarheight_3d_ft0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Height in Ft measured by a 3D radar [048/110]",
-                    "dimension": "Height",
-                    "name": "height_3d_ft",
-                    "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_radar.HEIGHT_3D_FT"
-                }
-            },
-            "DBOVariableRadaric_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Non-ASTERIX source id",
-                    "dimension": "",
-                    "name": "ic_code",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.IC_CODE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarline_id0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
+                    "db_column_name": "line_id",
+                    "dbo_name": "CAT048",
                     "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
                     "dimension": "",
+                    "is_key": false,
                     "name": "line_id",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.LINE_ID"
-                }
-            },
-            "DBOVariableRadarmas_track_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": " ",
-                    "dimension": "",
-                    "name": "mas_track_num",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MAS_TRACK_NUM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmil_emergency0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: military emergency? (Y/N) [I001/020 MI, I048/020 ME]",
+                    "db_column_name": "military_emergency",
+                    "dbo_name": "CAT048",
+                    "description": "0 No military emergency \n1 Military emergency",
                     "dimension": "",
-                    "name": "mil_emergency",
+                    "is_key": false,
+                    "name": "Military Emergency",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MIL_EMERGENCY"
+                    "short_name": "ME",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmil_ident0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = military, N = default [I001/020 MI, I048/020 MI, I062/080 MI]",
+                    "db_column_name": "military_identification",
+                    "dbo_name": "CAT048",
+                    "description": "0 No military identification\n1 Military identification",
                     "dimension": "",
-                    "name": "mil_ident",
+                    "is_key": false,
+                    "name": "Military Identification",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MIL_IDENT"
-                }
-            },
-            "DBOVariableRadarmode1_code0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "Mode-1 Code in octal representation [I001/055, I048/055]",
-                    "dimension": "",
-                    "name": "mode1_code",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE1_CODE"
-                }
-            },
-            "DBOVariableRadarmode1_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-1 garbled? (Y,N) [I001/055 G, I048/055 G]",
-                    "dimension": "",
-                    "name": "mode1_g",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE1_G"
-                }
-            },
-            "DBOVariableRadarmode1_qx0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "Mode-1 Confidence indicator, 6 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/065 QXi, I048/065 QXi]",
-                    "dimension": "",
-                    "name": "mode1_qx",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE1_QX"
-                }
-            },
-            "DBOVariableRadarmode1_smo0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Mode-1 is smoothed, N = Mode-1 as derived from the reply of the transponder [I001/055 L, I048/055 L]",
-                    "dimension": "",
-                    "name": "mode1_smo",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE1_SMO"
-                }
-            },
-            "DBOVariableRadarmode1_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-1 valid? (Y,N) [I001/055 V, I048/055 V]",
-                    "dimension": "",
-                    "name": "mode1_v",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE1_V"
-                }
-            },
-            "DBOVariableRadarmode2_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-2 Code in octal representation [I001/050, I048/050]",
-                    "dimension": "",
-                    "name": "mode2_code",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE2_CODE"
-                }
-            },
-            "DBOVariableRadarmode2_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-2 garbled? (Y,N) [I001/050 G, I048/050 G]",
-                    "dimension": "",
-                    "name": "mode2_g",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE2_G"
-                }
-            },
-            "DBOVariableRadarmode2_qx0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-2 Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]",
-                    "dimension": "",
-                    "name": "mode2_qx",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE2_QX"
-                }
-            },
-            "DBOVariableRadarmode2_smo0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Mode-2 is smoothed, N = Mode-2 as derived from the reply of the transponder [I001/050 L, I048/050 L]",
-                    "dimension": "",
-                    "name": "mode2_smo",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE2_SMO"
-                }
-            },
-            "DBOVariableRadarmode2_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-2 valid? (Y,N) [I001/050 V, I048/050 V]",
-                    "dimension": "",
-                    "name": "mode2_v",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE2_V"
+                    "short_name": "MI",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmode3a_code0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-3/A Code in octal representation [I001/070, I048/070]",
+                    "db_column_name": "mode_3a_code",
+                    "dbo_name": "CAT048",
+                    "description": "070.Mode-3/A reply in decimal\nrepresentation",
                     "dimension": "",
-                    "name": "mode3a_code",
+                    "is_key": false,
+                    "name": "Mode 3/A Code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "unit": "",
-                    "variable_identifier": "sd_ssr.mode_a_code"
+                    "short_name": "MA",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmode3a_g0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-3/A garbled? (Y,N) [I001/070 G, I048/070 G]",
+                    "db_column_name": "mode_3a_garbled",
+                    "dbo_name": "CAT048",
+                    "description": "0 Default\n1 Garbled code",
                     "dimension": "",
-                    "name": "mode3a_g",
+                    "is_key": false,
+                    "name": "Mode 3/A Garbled",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE3A_G"
-                }
-            },
-            "DBOVariableRadarmode3a_qx0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-3/A Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/080 QXi, I048/080 QXi]",
-                    "dimension": "",
-                    "name": "mode3a_qx",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE3A_QX"
+                    "short_name": "MA G",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmode3a_smo0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Mode-3/A is smoothed, i.e. not extracted during last scan, N = Mode-3/A as derived from the reply of the transponder [I001/070 L, I048/070 L]",
+                    "db_column_name": "mode_3a_smoothed",
+                    "dbo_name": "CAT048",
+                    "description": "0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
                     "dimension": "",
-                    "name": "mode3a_smo",
+                    "is_key": false,
+                    "name": "Mode 3/A Smoothed",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE3A_SMO"
+                    "short_name": "MA S",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmode3a_v0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-3/A valid? (Y,N) [I001/070 V, I048/070 V]",
+                    "db_column_name": "mode_3a_valid",
+                    "dbo_name": "CAT048",
+                    "description": "0 Code not validated\n1 Code validated\n",
                     "dimension": "",
-                    "name": "mode3a_v",
+                    "is_key": false,
+                    "name": "Mode 3/A Valid",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE3A_V"
-                }
-            },
-            "DBOVariableRadarmode4_friendly0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-4 interrorgation type: - = no interrogation, F = Friendly target, U = Unknown Target, N = No Reply [I048/020 FOE/FRI]",
-                    "dimension": "",
-                    "name": "mode4_friendly",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODE4_FRIENDLY"
+                    "short_name": "MA V",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmodec_code_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C Code Flight Level in Ft [I001/090, I048/090]",
+                    "db_column_name": "mode_c_code",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.Flight Level\n\nThis data item shall be sent when Mode C code or Mode S altitude code is present and decodable. It represents the flight level of the plot, even if associated\nwith a track.",
                     "dimension": "Height",
-                    "name": "modec_code_ft",
+                    "is_key": false,
+                    "name": "Mode C Code",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_ssr.flight_level"
-                }
-            },
-            "DBOVariableRadarmodec_code_gray0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C Code as received from the transponder [I001/100, I048/100]",
-                    "dimension": "",
-                    "name": "modec_code_gray",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_CODE_GRAY"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableRadarmodec_g0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C garbled? (Y,N) [I001/090 G, I048/090 G]",
+                    "db_column_name": "mode_c_garbled",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.G\n\n0 Default\n1 Garbled code",
                     "dimension": "",
-                    "name": "modec_g",
+                    "is_key": false,
+                    "name": "Mode C Garbled",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_G"
-                }
-            },
-            "DBOVariableRadarmodec_g_gray0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C garbled? (Y,N) [I001/100 G, I048/100 G]",
-                    "dimension": "",
-                    "name": "modec_g_gray",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_G_GRAY"
-                }
-            },
-            "DBOVariableRadarmodec_qx_gray0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]",
-                    "dimension": "",
-                    "name": "modec_qx_gray",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_QX_GRAY"
+                    "short_name": "MC G",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarmodec_v0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C valid? (Y,N) [I001/090 V, I048/090 V]",
+                    "db_column_name": "mode_c_valid",
+                    "dbo_name": "CAT048",
+                    "description": "From 090.V\n\n0 Code not validated\n1 Code validated",
                     "dimension": "",
-                    "name": "modec_v",
+                    "is_key": false,
+                    "name": "Mode C Valid",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_V"
-                }
-            },
-            "DBOVariableRadarmodec_v_gray0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Mode-C valid? (Y,N) [I001/100 V, I048/100 V]",
-                    "dimension": "",
-                    "name": "modec_v_gray",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODEC_V_GRAY"
-                }
-            },
-            "DBOVariableRadarmodes_mb_data0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Raw Mode S MB Data (= BDS registers)",
-                    "dimension": "",
-                    "name": "modes_mb_data",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MODES_MB_DATA"
-                }
-            },
-            "DBOVariableRadarmsg_fmt0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "Protocol type as defined in X__SD_MSG_FMTS, contents shall be ASTERIX, Aircat 500, Alenia, FPS117, RAT31SL, RSRP, TRS22, RDIF, MADREC, EUROCONTROL, DDE, CD2, Ericsson",
-                    "dimension": "",
-                    "name": "msg_fmt",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MSG_FMT"
-                }
-            },
-            "DBOVariableRadarmssr_amplitude_dbm0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Amplitude of (M)SSR reply in dBm [048/130 #3 SAM]",
-                    "dimension": "",
-                    "name": "mssr_amplitude_dbm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MSSR_AMPLITUDE_DBM"
-                }
-            },
-            "DBOVariableRadarmssr_replies_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Number of received replies from (M)SSR [048/130 #2 SRR]",
-                    "dimension": "",
-                    "name": "mssr_replies_num",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.MSSR_REPLIES_NUM"
+                    "short_name": "MC V",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarpos_azm_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]",
+                    "db_column_name": "azimuth",
+                    "dbo_name": "CAT048",
+                    "description": "Measured position of an aircraft in local polar co-ordinates",
                     "dimension": "Angle",
-                    "name": "pos_azm_deg",
+                    "is_key": false,
+                    "name": "Azimuth",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_radar.POS_AZM_DEG"
-                }
-            },
-            "DBOVariableRadarpos_azm_deg_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "name": "pos_azm_deg_calc",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_AZM_DEG_CALC"
-                }
-            },
-            "DBOVariableRadarpos_lat_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "WGS84 coordinate latitude",
-                    "dimension": "Angle",
-                    "name": "pos_lat_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_ssr.latitude"
-                }
-            },
-            "DBOVariableRadarpos_local_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Calculated x position in Cartesian coordinates [I001/042, I048/042]",
-                    "dimension": "Position",
-                    "name": "pos_local_x_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "Nautical Mile",
-                    "variable_identifier": "sd_radar.POS_LOCAL_X_NM"
-                }
-            },
-            "DBOVariableRadarpos_local_x_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "name": "pos_local_x_nm_calc",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_LOCAL_X_NM_CALC"
-                }
-            },
-            "DBOVariableRadarpos_local_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Calculated y position in Cartesian coordinates [I001/042, I048/042]",
-                    "dimension": "Position",
-                    "name": "pos_local_y_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "Nautical Mile",
-                    "variable_identifier": "sd_radar.POS_LOCAL_Y_NM"
-                }
-            },
-            "DBOVariableRadarpos_local_y_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "name": "pos_local_y_nm_calc",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_LOCAL_Y_NM_CALC"
-                }
-            },
-            "DBOVariableRadarpos_long_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "WGS84 coordinate longitude",
-                    "dimension": "Angle",
-                    "name": "pos_long_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_ssr.longitude"
+                    "short_name": "Azm",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableRadarpos_range_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Measured position in polar coordinates: Rho in NM [I001/040, I048/040]",
+                    "db_column_name": "range",
+                    "dbo_name": "CAT048",
+                    "description": "Measured position of an aircraft in local polar co-ordinates\n\nMax. range = 256 NM",
                     "dimension": "Length",
-                    "name": "pos_range_nm",
+                    "is_key": false,
+                    "name": "Range",
                     "representation_str": "STANDARD",
-                    "unit": "Nautical Mile",
-                    "variable_identifier": "sd_radar.POS_RANGE_NM"
-                }
-            },
-            "DBOVariableRadarpos_range_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "name": "pos_range_nm_calc",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_RANGE_NM_CALC"
-                }
-            },
-            "DBOVariableRadarpos_sys_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "System coordinate x",
-                    "dimension": "",
-                    "name": "pos_sys_x_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_SYS_X_NM"
-                }
-            },
-            "DBOVariableRadarpos_sys_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "System coordinate y",
-                    "dimension": "",
-                    "name": "pos_sys_y_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.POS_SYS_Y_NM"
-                }
-            },
-            "DBOVariableRadarpsr_amplitude_dbm0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Amplitude of primary plot in dBm [048/130 #5 PAM]",
-                    "dimension": "",
-                    "name": "psr_amplitude_dbm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.PSR_AMPLITUDE_DBM"
-                }
-            },
-            "DBOVariableRadarpsr_runlength_deg0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Primary plot runlength in ¿¿ [048/130 #4 PRL]",
-                    "dimension": "",
-                    "name": "psr_runlength_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.PSR_RUNLENGTH_DEG"
-                }
-            },
-            "DBOVariableRadarpsr_ssr_azm_diff_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Difference in azimuth between PSR and SSR plot in NM [048/130 #6 RDP]",
-                    "dimension": "",
-                    "name": "psr_ssr_azm_diff_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.PSR_SSR_AZM_DIFF_DEG"
-                }
-            },
-            "DBOVariableRadarpsr_ssr_range_diff_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Difference in range between PSR and SSR plot in NM [048/130 #6 RDP]",
-                    "dimension": "",
-                    "name": "psr_ssr_range_diff_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.PSR_SSR_RANGE_DIFF_NM"
-                }
-            },
-            "DBOVariableRadarraw_msg0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Binary representation",
-                    "dimension": "",
-                    "name": "raw_msg",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.RAW_MSG"
-                }
-            },
-            "DBOVariableRadarrdp_chain0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Report from which RDP Chain number: 1 or 2 [I001/020 RDP, I048/020 RDP]",
-                    "dimension": "",
-                    "name": "rdp_chain",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.RDP_CHAIN"
+                    "short_name": "",
+                    "unit": "Nautical Mile"
                 }
             },
             "DBOVariableRadarrec_num0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
+                    "db_column_name": "sd_ssr.rec_num",
+                    "dbo_name": "CAT048",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
+                    "is_key": false,
                     "name": "rec_num",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ssr.rec_num"
-                }
-            },
-            "DBOVariableRadarrec_time_ms0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "ms fraction of REC_TIME_POSIX",
-                    "dimension": "",
-                    "name": "rec_time_ms",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.REC_TIME_MS"
-                }
-            },
-            "DBOVariableRadarrec_time_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Recording time with accuracy of 1s; is stamped by the communication process",
-                    "dimension": "",
-                    "name": "rec_time_posix",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.REC_TIME_POSIX"
-                }
-            },
-            "DBOVariableRadarreport_type0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "dbo_name": "Radar",
-                    "description": "Report classification [I001/020, I048/020, etc] as enrichment, see X__SD_REPORT_TYPES",
-                    "dimension": "",
-                    "name": "report_type",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.REPORT_TYPE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "dbo_name": "Radar",
-                    "description": "ASTERIX System Area Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]",
+                    "db_column_name": "sac",
+                    "dbo_name": "CAT048",
+                    "description": "Data Source Identifier System Area Code",
                     "dimension": "",
-                    "name": "sac",
+                    "is_key": false,
+                    "name": "SAC",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SAC"
-                }
-            },
-            "DBOVariableRadarscan_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Scan number",
-                    "dimension": "",
-                    "name": "scan_num",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SCAN_NUM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "dbo_name": "Radar",
-                    "description": "ASTERIX System Identification Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]",
+                    "db_column_name": "sic",
+                    "dbo_name": "CAT048",
+                    "description": "Data Source Identifier System Identification Code",
                     "dimension": "",
-                    "name": "sic",
+                    "is_key": false,
+                    "name": "SIC",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SIC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarsimulated_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Simulated, N = actual plot/track (I001/020 SIM, I021/040 SIM, I048/020 SIM]",
+                    "db_column_name": "simulated",
+                    "dbo_name": "CAT048",
+                    "description": "0  Actual target report\n1 Simulated target report",
                     "dimension": "",
-                    "name": "simulated_target",
+                    "is_key": false,
+                    "name": "Simulated",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SIMULATED_TARGET"
+                    "short_name": "SIM",
+                    "unit": ""
                 }
             },
             "DBOVariableRadarspi0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Special position indication? (Y/N) [I001/020 SPI, I021/040 SPI, , I048/020 SPI]",
+                    "db_column_name": "spi",
+                    "dbo_name": "CAT048",
+                    "description": "0 Absence of SPI\n1 Special Position Identification",
                     "dimension": "",
-                    "name": "spi",
+                    "is_key": false,
+                    "name": "SPI",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SPI"
-                }
-            },
-            "DBOVariableRadarssr_runlength_deg0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "SSR plot runlength in degree [048/130 #1 SRL]",
-                    "dimension": "",
-                    "name": "ssr_runlength_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.SSR_RUNLENGTH_DEG"
-                }
-            },
-            "DBOVariableRadartarget_addr0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "24 bit target addreess / aircraft address / Mode-S address assigned uniquely to each aircraft [I021/080, I048/220]",
-                    "dimension": "",
-                    "name": "target_addr",
-                    "representation_str": "DEC_TO_HEX",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TARGET_ADDR"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartest_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Test target report, N = Real target report (I001/020 TST, I021/040 TST, I048/020 TST]",
+                    "db_column_name": "test",
+                    "dbo_name": "CAT048",
+                    "description": "0 Real target report\n1 Test target report",
                     "dimension": "",
-                    "name": "test_target",
+                    "is_key": false,
+                    "name": "Test",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TEST_TARGET"
+                    "short_name": "TST",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "dbo_name": "Radar",
-                    "description": "Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]",
+                    "db_column_name": "time_of_day",
+                    "dbo_name": "CAT048",
+                    "description": "Absolute time stamping expressed as Co-ordinated Universal Time (UTC)",
                     "dimension": "Time",
-                    "name": "tod",
+                    "is_key": false,
+                    "name": "Time of Day",
                     "representation_str": "SECONDS_TO_TIME",
-                    "unit": "Second",
-                    "variable_identifier": "sd_radar.TOD"
-                }
-            },
-            "DBOVariableRadartod_calculated0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "C:Calculated, R:Recording time, N:From data, L:Local time transform",
-                    "dimension": "",
-                    "name": "tod_calculated",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TOD_CALCULATED"
-                }
-            },
-            "DBOVariableRadartrack_climb_desc_mode0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Climb/Descend Mode: M = Maintaining, C = Climbing, D = Descending, I = Invalid [I048/170 CDM]",
-                    "dimension": "",
-                    "name": "track_climb_desc_mode",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_CLIMB_DESC_MODE"
+                    "short_name": "ToD",
+                    "unit": "Second"
                 }
             },
             "DBOVariableRadartrack_confirmed0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Track confirmed? [I001/170 CON, I048/170 CNF]",
+                    "db_column_name": "track_confirmed",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.CNF\n\nConfirmed vs. Tentative Track\n0 Tentative Track\n1 Confirmed Track",
                     "dimension": "",
-                    "name": "track_confirmed",
+                    "is_key": false,
+                    "name": "Track Confirmed",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_CONFIRMED"
+                    "short_name": "CNF",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartrack_doubtful0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Plot to Track association doubtful? [I001/170 DOU, I048/170 DOU]",
+                    "db_column_name": "track_doubtful",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.DOU\n\nSignals level of confidence in plot to track association process\n0 Normal confidence\n1 Low confidence in plot to track association.",
                     "dimension": "",
-                    "name": "track_doubtful",
+                    "is_key": false,
+                    "name": "Track Doubtful",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_DOUBTFUL"
+                    "short_name": "DOU",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartrack_end0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: End of Track? [I001/170 TRE, I048/170 TRE]",
+                    "db_column_name": "track_end",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.TRE\n\nSignal for End_of_Track\n0 Track still alive\n1 End of track lifetime(last report for this track)",
                     "dimension": "",
-                    "name": "track_end",
+                    "is_key": false,
+                    "name": "Track End",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_END"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartrack_ghost_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Y = Ghost Target, N = True Target [I001/170 GHO, I048/170 GHO]",
+                    "db_column_name": "track_ghost_target",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.GHO\n\nGhost vs. true target\n0 True target track.\n1 Ghost target track.",
                     "dimension": "",
-                    "name": "track_ghost_target",
+                    "is_key": false,
+                    "name": "Track Ghost Target",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_GHOST_TARGET"
+                    "short_name": "GHO",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartrack_groundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Calculated track velocity expressed in polar coordinates, groundspeed in Kt [I001/200, I021/160, I048/200]",
+                    "db_column_name": "track_groundspeed",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated track velocity expressed in polar co-ordinates.",
                     "dimension": "Speed",
-                    "name": "track_groundspeed_kt",
+                    "is_key": false,
+                    "name": "Track Groundspeed",
                     "representation_str": "STANDARD",
-                    "unit": "Knots",
-                    "variable_identifier": "sd_radar.TRACK_GROUNDSPEED_KT"
+                    "short_name": "GSpd",
+                    "unit": "Knots"
                 }
             },
             "DBOVariableRadartrack_heading_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Calculated track velocity expressed in polar coordinates, angle in ¿¿ [I001/200, I021/160, I048/200]",
+                    "db_column_name": "track_angle",
+                    "dbo_name": "CAT048",
+                    "description": "Calculated track velocity expressed in polar co-ordinates.\n\nWas called Track Heading previously, but renamed since it refers to  the direction of movement.",
                     "dimension": "Angle",
-                    "name": "track_heading_deg",
+                    "is_key": false,
+                    "name": "Track Angle",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_radar.TRACK_HEADING_DEG"
+                    "short_name": "Ang",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableRadartrack_manoeuvre_hori0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Horizontal manoeuvring? [I001/170 MAN, I048/170 MAN]",
+                    "db_column_name": "track_horizontal_manoeuvre",
+                    "dbo_name": "CAT048",
+                    "description": "From 170.MAH\n\nManoeuvre detection in Horizontal Sense\n0 No horizontal man.sensed\n1 Horizontal man. sensed",
                     "dimension": "",
-                    "name": "track_manoeuvre_hori",
+                    "is_key": false,
+                    "name": "Track Horizontal Manoeuvre",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_MANOEUVRE_HORI"
+                    "short_name": "MAH",
+                    "unit": ""
                 }
             },
             "DBOVariableRadartrack_num0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "Radar",
-                    "description": "Track number, can also be plot number for CAT 001",
+                    "db_column_name": "track_number",
+                    "dbo_name": "CAT048",
+                    "description": "An integer value representing a unique reference to a\ntrack/plot record within a particular track/plot file.",
                     "dimension": "",
-                    "name": "track_num",
+                    "is_key": false,
+                    "name": "Track Number",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_NUM"
-                }
-            },
-            "DBOVariableRadartrack_rdp_chain0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "RDP Chain 1 or 2 [I001/170 RDPC]",
-                    "dimension": "",
-                    "name": "track_rdp_chain",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_RDP_CHAIN"
-                }
-            },
-            "DBOVariableRadartrack_sigma_h_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Standard deviation on the angle within the local grid system [I048/210 Sigma(H)]]",
-                    "dimension": "",
-                    "name": "track_sigma_h_deg",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SIGMA_H_DEG"
-                }
-            },
-            "DBOVariableRadartrack_sigma_v_kt0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Standard deviation on the groundspeed within the local grid system [I048/210 Sigma(V)]]",
-                    "dimension": "",
-                    "name": "track_sigma_v_kt",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SIGMA_V_KT"
-                }
-            },
-            "DBOVariableRadartrack_sigma_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Standard deviation on the horizontal axis of the local grid system [I048/210 Sigma(X)]]",
-                    "dimension": "",
-                    "name": "track_sigma_x_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SIGMA_X_NM"
-                }
-            },
-            "DBOVariableRadartrack_sigma_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "dbo_name": "Radar",
-                    "description": "Standard deviation on the vertical axis of the local grid system [I048/210 Sigma(Y)]]",
-                    "dimension": "",
-                    "name": "track_sigma_y_nm",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SIGMA_Y_NM"
-                }
-            },
-            "DBOVariableRadartrack_slant_corr0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Type of plot coordinate transformation mechanism in slant range correction technique? [I048/170 TCC]",
-                    "dimension": "",
-                    "name": "track_slant_corr",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SLANT_CORR"
-                }
-            },
-            "DBOVariableRadartrack_sup0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "Flag: Track maintained with track information from neighbouring Node B on the cluster, or network? [I048/170 SUP]",
-                    "dimension": "",
-                    "name": "track_sup",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_SUP"
-                }
-            },
-            "DBOVariableRadartrack_type0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "dbo_name": "Radar",
-                    "description": "P (Primary), S(SSR), C(Combined), N(Not primary, SSR/Combined), I(Invalid)",
-                    "dimension": "",
-                    "name": "track_type",
-                    "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_radar.TRACK_TYPE"
+                    "short_name": "TN",
+                    "unit": ""
                 }
             }
         }

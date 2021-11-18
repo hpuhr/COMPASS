@@ -1,38 +1,10 @@
 {
     "parameters": {
+        "db_table_name": "data_cat021",
         "info": "",
-        "meta_table": "ADSB",
-        "name": "ADSB"
+        "name": "CAT021"
     },
     "sub_configs": {
-        "DBODataSourceDefinition": {
-            "DBODataSourceDefinitionADSB0": {
-                "parameters": {
-                    "altitude_column": "",
-                    "foreign_key": "ds_ads.DS_ID",
-                    "latitude_column": "ds_ads.POS_LAT_DEG",
-                    "local_key": "ds_id",
-                    "longitude_column": "ds_ads.POS_LONG_DEG",
-                    "meta_table": "ADSBDataSources",
-                    "mode_s_azimuth_stddev_column": "",
-                    "mode_s_ir_max_column": "",
-                    "mode_s_ir_min_column": "",
-                    "mode_s_range_stddev_column": "",
-                    "name_column": "le_ds.DS_NAME",
-                    "primary_azimuth_stddev_column": "",
-                    "primary_ir_max_column": "",
-                    "primary_ir_min_column": "",
-                    "primary_range_stddev_column": "",
-                    "sac_column": "le_ds.SAC",
-                    "secondary_azimuth_stddev_column": "",
-                    "secondary_ir_max_column": "",
-                    "secondary_ir_min_column": "",
-                    "secondary_range_stddev_column": "",
-                    "short_name_column": "le_ds.DS_SHORT_NAME",
-                    "sic_column": "le_ds.SIC"
-                }
-            }
-        },
         "DBOLabelDefinition": {
             "DBOLabelDefinition0": {
                 "parameters": null,
@@ -1486,1141 +1458,1331 @@
             "DBOVariableADSBaircraft_leng_width0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "aircraft_leng_width",
+                    "dbo_name": "CAT021",
                     "description": "Aircraft L+W",
                     "dimension": "",
+                    "is_key": false,
                     "name": "aircraft_leng_width",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.AIRCRAFT_LENG_WIDTH"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBairspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "airspeed_kt",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "Speed",
+                    "is_key": false,
                     "name": "airspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots",
-                    "variable_identifier": "sd_ads.AIRSPEED_KT"
+                    "short_name": "",
+                    "unit": "Knots"
                 }
             },
             "DBOVariableADSBairspeed_mach0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "airspeed_mach",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "Speed",
+                    "is_key": false,
                     "name": "airspeed_mach",
                     "representation_str": "STANDARD",
-                    "unit": "Mach",
-                    "variable_identifier": "sd_ads.AIRSPEED_MACH"
+                    "short_name": "",
+                    "unit": "Mach"
                 }
             },
             "DBOVariableADSBalt_baro_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "alt_baro_ft",
+                    "dbo_name": "CAT021",
                     "description": "Barometric altitude, Mode C",
                     "dimension": "Height",
+                    "is_key": false,
                     "name": "alt_baro_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_ads.ALT_BARO_FT"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableADSBalt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "alt_geo_ft",
+                    "dbo_name": "CAT021",
                     "description": "Geometric altitude, 3D Height",
                     "dimension": "Height",
+                    "is_key": false,
                     "name": "alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": "Feet",
-                    "variable_identifier": "sd_ads.ALT_GEO_FT"
+                    "short_name": "",
+                    "unit": "Feet"
                 }
             },
             "DBOVariableADSBalt_reporting_capability_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "alt_reporting_capability_ft",
+                    "dbo_name": "CAT021",
                     "description": "currently 25 or 100",
                     "dimension": "",
+                    "is_key": false,
                     "name": "alt_reporting_capability_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBbaro_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "baro_vertical_rate_ftm",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "baro_vertical_rate_ftm",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_FTM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBbaro_vertical_rate_re0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "baro_vertical_rate_re",
+                    "dbo_name": "CAT021",
                     "description": "Range Exceeded?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "baro_vertical_rate_re",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.BARO_VERTICAL_RATE_RE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBcalc_alt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "calc_alt_geo_ft",
+                    "dbo_name": "CAT021",
                     "description": "Calculated Geographical Altitude",
                     "dimension": "",
+                    "is_key": false,
                     "name": "calc_alt_geo_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.CALC_ALT_GEO_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBcallsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "callsign",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "callsign",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.CALLSIGN"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBcat0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "cat",
+                    "dbo_name": "CAT021",
                     "description": "ASTERIX CAT",
                     "dimension": "",
+                    "is_key": false,
                     "name": "cat",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.CAT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBdescriptor_atp0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "descriptor_atp",
+                    "dbo_name": "CAT021",
                     "description": "Non unique, 24-bit ICAO, surface vehicle or anonymous address.!!! 24 bit? !!!",
                     "dimension": "",
+                    "is_key": false,
                     "name": "descriptor_atp",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.DESCRIPTOR_ATP"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBdifferential_correction0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "differential_correction",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "differential_correction",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.DIFFERENTIAL_CORRECTION"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBdisplay_state0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "display_state",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "display_state",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.DISPLAY_STATE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBdom_posix0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "dom_posix",
+                    "dbo_name": "CAT021",
                     "description": "Day of message in posix time.",
                     "dimension": "",
+                    "is_key": false,
                     "name": "dom_posix",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.DOM_POSIX"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBds_id0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "ds_id",
+                    "dbo_name": "CAT021",
                     "description": "Common Source Description ID, derived from SAC/SIC, Station Code etc.",
                     "dimension": "",
+                    "is_key": false,
                     "name": "ds_id",
                     "representation_str": "DATA_SRC_NAME",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.DS_ID"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBemitter_category0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "emitter_category",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "emitter_category",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.EMITTER_CATEGORY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfigure_of_merit_acas0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "figure_of_merit_acas",
+                    "dbo_name": "CAT021",
                     "description": "unknown, ACAS (not) operational",
                     "dimension": "",
+                    "is_key": false,
                     "name": "figure_of_merit_acas",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FIGURE_OF_MERIT_ACAS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfigure_of_merit_differential0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "figure_of_merit_differential",
+                    "dbo_name": "CAT021",
                     "description": "unknown, (no) differential correction",
                     "dimension": "",
+                    "is_key": false,
                     "name": "figure_of_merit_differential",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FIGURE_OF_MERIT_DIFFERENTIAL"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfigure_of_merit_multiple0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "figure_of_merit_multiple",
+                    "dbo_name": "CAT021",
                     "description": "unknown, multiple navigational aids (not) operational",
                     "dimension": "",
+                    "is_key": false,
                     "name": "figure_of_merit_multiple",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FIGURE_OF_MERIT_MULTIPLE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfinal_sel_altitude_approach0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "final_sel_altitude_approach",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "final_sel_altitude_approach",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_APPROACH"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfinal_sel_altitude_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "final_sel_altitude_ft",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "final_sel_altitude_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfinal_sel_altitude_hold0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "final_sel_altitude_hold",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "final_sel_altitude_hold",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_HOLD"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfinal_sel_altitude_vertical0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "final_sel_altitude_vertical",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "final_sel_altitude_vertical",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FINAL_SEL_ALTITUDE_VERTICAL"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBfrom_fft0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "from_fft",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "from_fft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.FROM_FFT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBgeo_area_mask0": {
                 "parameters": {
                     "data_type_str": "LONGINT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "geo_area_mask",
+                    "dbo_name": "CAT021",
                     "description": "Geographical area bit mask",
                     "dimension": "",
+                    "is_key": false,
                     "name": "geo_area_mask",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.GEO_AREA_MASK"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBgeo_height_accuracy0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "geo_height_accuracy",
+                    "dbo_name": "CAT021",
                     "description": "Geometric Altitude Accuracy",
                     "dimension": "",
+                    "is_key": false,
                     "name": "geo_height_accuracy",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.GEO_HEIGHT_ACCURACY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBgeo_vertical_rate_ftm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "geo_vertical_rate_ftm",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "geo_vertical_rate_ftm",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_FTM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBgeo_vertical_rate_re0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "geo_vertical_rate_re",
+                    "dbo_name": "CAT021",
                     "description": "Range Exceeded?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "geo_vertical_rate_re",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.GEO_VERTICAL_RATE_RE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBground_bit0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "ground_bit",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "ground_bit",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.GROUND_BIT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBgroundspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "groundspeed_kt",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "Speed",
+                    "is_key": false,
                     "name": "groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots",
-                    "variable_identifier": "sd_ads.GROUNDSPEED_KT"
+                    "short_name": "",
+                    "unit": "Knots"
                 }
             },
             "DBOVariableADSBhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "hash_code",
+                    "dbo_name": "CAT021",
                     "description": "ARTAS MD5 Hash Code ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "hash_code",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.HASH_CODE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBinter_sel_altitude_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "inter_sel_altitude_ft",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "inter_sel_altitude_ft",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_FT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBinter_sel_altitude_info0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "inter_sel_altitude_info",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "inter_sel_altitude_info",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_INFO"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBinter_sel_altitude_source0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "inter_sel_altitude_source",
+                    "dbo_name": "CAT021",
                     "description": "unknown, aircraft, FCU/MSP selected, FMS selected altitude",
                     "dimension": "",
+                    "is_key": false,
                     "name": "inter_sel_altitude_source",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.INTER_SEL_ALTITUDE_SOURCE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBline_id0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "line_id",
+                    "dbo_name": "CAT021",
                     "description": "Communication line ID",
                     "dimension": "",
+                    "is_key": false,
                     "name": "line_id",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINE_ID"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBlink_technology_cdti0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "link_technology_cdti",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "link_technology_cdti",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINK_TECHNOLOGY_CDTI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBlink_technology_mds0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "link_technology_mds",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "link_technology_mds",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINK_TECHNOLOGY_MDS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBlink_technology_other0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "link_technology_other",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "link_technology_other",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINK_TECHNOLOGY_OTHER"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBlink_technology_uat0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "link_technology_uat",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "link_technology_uat",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINK_TECHNOLOGY_UAT"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBlink_technology_vdl0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "link_technology_vdl",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "link_technology_vdl",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.LINK_TECHNOLOGY_VDL"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBmagnetic_heading_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "magnetic_heading_deg",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "magnetic_heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.MAGNETIC_HEADING_DEG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBmilitary_emergency0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "military_emergency",
+                    "dbo_name": "CAT021",
                     "description": "Target Status Military Emergency",
                     "dimension": "",
+                    "is_key": false,
                     "name": "military_emergency",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.MILITARY_EMERGENCY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBmode3a_code0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "mode3a_code",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mode3a_code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.MODE3A_CODE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBmops_version0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "mops_version",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "mops_version",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.MOPS_VERSION"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBnac_p0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "nac_p",
+                    "dbo_name": "CAT021",
                     "description": "Navigation Accuracy Category for Position",
                     "dimension": "",
+                    "is_key": false,
                     "name": "nac_p",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.NAC_P"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBnic_baro0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "nic_baro",
+                    "dbo_name": "CAT021",
                     "description": "Navigation Integrity Category for Barometric Altitude",
                     "dimension": "",
+                    "is_key": false,
                     "name": "nic_baro",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.NIC_BARO"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBnucp_nic0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "nucp_nic",
+                    "dbo_name": "CAT021",
                     "description": "NUCp or NIC",
                     "dimension": "",
+                    "is_key": false,
                     "name": "nucp_nic",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.NUCP_NIC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBnucr_nacv0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "nucr_nacv",
+                    "dbo_name": "CAT021",
                     "description": "NUCr or NACv",
                     "dimension": "",
+                    "is_key": false,
                     "name": "nucr_nacv",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.NUCR_NACV"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBop_status_ra0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "op_status_ra",
+                    "dbo_name": "CAT021",
                     "description": "Resolution Advisory?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "op_status_ra",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.OP_STATUS_RA"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBop_status_sa0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "op_status_sa",
+                    "dbo_name": "CAT021",
                     "description": "Single Antenna?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "op_status_sa",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.OP_STATUS_SA"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBop_status_tcas0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "op_status_tcas",
+                    "dbo_name": "CAT021",
                     "description": "TCAS System Status?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "op_status_tcas",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.OP_STATUS_TCAS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBpic0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pic",
+                    "dbo_name": "CAT021",
                     "description": "Position Integrity Category",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pic",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.PIC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pos_lat_deg",
+                    "dbo_name": "CAT021",
                     "description": "WGS84 coordinate latitude",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "pos_lat_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_ads.POS_LAT_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableADSBpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pos_long_deg",
+                    "dbo_name": "CAT021",
                     "description": "WGS84 coordinate longitude",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "pos_long_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_ads.POS_LONG_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableADSBpos_offset_applied0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pos_offset_applied",
+                    "dbo_name": "CAT021",
                     "description": "Position Offset Applied",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_offset_applied",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.POS_OFFSET_APPLIED"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBpos_sys_x_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pos_sys_x_nm",
+                    "dbo_name": "CAT021",
                     "description": "System coordinate x",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_sys_x_nm",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.POS_SYS_X_NM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBpos_sys_y_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "pos_sys_y_nm",
+                    "dbo_name": "CAT021",
                     "description": "System coordinate y",
                     "dimension": "",
+                    "is_key": false,
                     "name": "pos_sys_y_nm",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.POS_SYS_Y_NM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBposition_accuracy0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "position_accuracy",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "position_accuracy",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.POSITION_ACCURACY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBraw_msg0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "raw_msg",
+                    "dbo_name": "CAT021",
                     "description": "Binary represetation",
                     "dimension": "",
+                    "is_key": false,
                     "name": "raw_msg",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.RAW_MSG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBrec_num0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "rec_num",
+                    "dbo_name": "CAT021",
                     "description": "Ascending record number",
                     "dimension": "",
+                    "is_key": false,
                     "name": "rec_num",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.REC_NUM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBrec_time_ms0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "rec_time_ms",
+                    "dbo_name": "CAT021",
                     "description": "ms fraction",
                     "dimension": "",
+                    "is_key": false,
                     "name": "rec_time_ms",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.REC_TIME_MS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBrec_time_posix0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "rec_time_posix",
+                    "dbo_name": "CAT021",
                     "description": "POSIX recording time stamped by I/O process",
                     "dimension": "",
+                    "is_key": false,
                     "name": "rec_time_posix",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.REC_TIME_POSIX"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBreceiver_id0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "receiver_id",
+                    "dbo_name": "CAT021",
                     "description": "Receiver Identification",
                     "dimension": "",
+                    "is_key": false,
                     "name": "receiver_id",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.RECEIVER_ID"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBreport_type0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "report_type",
+                    "dbo_name": "CAT021",
                     "description": "ADS-B only",
                     "dimension": "",
+                    "is_key": false,
                     "name": "report_type",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.REPORT_TYPE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBroll_angle_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "roll_angle_deg",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "roll_angle_deg",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.ROLL_ANGLE_DEG"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "sac",
+                    "dbo_name": "CAT021",
                     "description": "ASTERIX SAC",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sac",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SAC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsam0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "sam",
+                    "dbo_name": "CAT021",
                     "description": "Signal Amplitude",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sam",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SAM"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBselected_alt_capability0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "selected_alt_capability",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "selected_alt_capability",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SELECTED_ALT_CAPABILITY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBservice_id0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "service_id",
+                    "dbo_name": "CAT021",
                     "description": "Service identification",
                     "dimension": "",
+                    "is_key": false,
                     "name": "service_id",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SERVICE_ID"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "sic",
+                    "dbo_name": "CAT021",
                     "description": "ASTERIX SIC",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sic",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SIC"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsil0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "sil",
+                    "dbo_name": "CAT021",
                     "description": "Surveillance Integrity Level",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sil",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SIL"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsils0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "sils",
+                    "dbo_name": "CAT021",
                     "description": "SIL-Supplement",
                     "dimension": "",
+                    "is_key": false,
                     "name": "sils",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SILS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsimulated_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "simulated_target",
+                    "dbo_name": "CAT021",
                     "description": "Simulated Plot/Track?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "simulated_target",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SIMULATED_TARGET"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBspi0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "spi",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "spi",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SPI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBsurveillance_status0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "surveillance_status",
+                    "dbo_name": "CAT021",
                     "description": "Target Surveillance Status",
                     "dimension": "",
+                    "is_key": false,
                     "name": "surveillance_status",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.SURVEILLANCE_STATUS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtarget_addr0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "target_addr",
+                    "dbo_name": "CAT021",
                     "description": "24 bit target address / aircraft address / Mode-S address",
                     "dimension": "",
+                    "is_key": false,
                     "name": "target_addr",
                     "representation_str": "DEC_TO_HEX",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TARGET_ADDR"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtarget_status0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "target_status",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "target_status",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TARGET_STATUS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtest_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "test_target",
+                    "dbo_name": "CAT021",
                     "description": "Test Plot/Track?",
                     "dimension": "",
+                    "is_key": false,
                     "name": "test_target",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TEST_TARGET"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtoap0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "toap",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "toap",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TOAP"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtoav0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "toav",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "toav",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TOAV"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "tod",
+                    "dbo_name": "CAT021",
                     "description": "Time of Day (1/128 sec from midnight)",
                     "dimension": "Time",
+                    "is_key": false,
                     "name": "tod",
                     "representation_str": "SECONDS_TO_TIME",
-                    "unit": "Second",
-                    "variable_identifier": "sd_ads.TOD"
+                    "short_name": "",
+                    "unit": "Second"
                 }
             },
             "DBOVariableADSBtod_accuracy0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "tod_accuracy",
+                    "dbo_name": "CAT021",
                     "description": "in 1/256 secs",
                     "dimension": "",
+                    "is_key": false,
                     "name": "tod_accuracy",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TOD_ACCURACY"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtod_calculated0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "tod_calculated",
+                    "dbo_name": "CAT021",
                     "description": "C:Calculated, R:Recording time, N:From data, L:Local time transform",
                     "dimension": "",
+                    "is_key": false,
                     "name": "tod_calculated",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TOD_CALCULATED"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorp0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torp",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torp",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORP"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorp_fsi0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torp_fsi",
+                    "dbo_name": "CAT021",
                     "description": "Time of Reception HP Full Second Indication",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torp_fsi",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORP_FSI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorp_precise0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torp_precise",
+                    "dbo_name": "CAT021",
                     "description": "Time of Reception HP",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torp_precise",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORP_PRECISE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorv0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torv",
+                    "dbo_name": "CAT021",
                     "description": "",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torv",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORV"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorv_fsi0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torv_fsi",
+                    "dbo_name": "CAT021",
                     "description": "Time of Velocity HP Full Second Indication",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torv_fsi",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORV_FSI"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtorv_precise0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "torv_precise",
+                    "dbo_name": "CAT021",
                     "description": "Time of Velocity HP",
                     "dimension": "",
+                    "is_key": false,
                     "name": "torv_precise",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TORV_PRECISE"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBtrack_angle_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "track_angle_deg",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "Angle",
+                    "is_key": false,
                     "name": "track_angle_deg",
                     "representation_str": "STANDARD",
-                    "unit": "Degree",
-                    "variable_identifier": "sd_ads.TRACK_ANGLE_DEG"
+                    "short_name": "",
+                    "unit": "Degree"
                 }
             },
             "DBOVariableADSBtrue_airspeed_kt0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "true_airspeed_kt",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "Speed",
+                    "is_key": false,
                     "name": "true_airspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": "Knots",
-                    "variable_identifier": "sd_ads.TRUE_AIRSPEED_KT"
+                    "short_name": "",
+                    "unit": "Knots"
                 }
             },
             "DBOVariableADSBturnrate_degps0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "turnrate_degps",
+                    "dbo_name": "CAT021",
                     "description": "turn rate in Deg/sec",
                     "dimension": "",
+                    "is_key": false,
                     "name": "turnrate_degps",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TURNRATE_DEGPS"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBturnrate_indicator0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "turnrate_indicator",
+                    "dbo_name": "CAT021",
                     "description": "N/A, left, right, straight",
                     "dimension": "",
+                    "is_key": false,
                     "name": "turnrate_indicator",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.TURNRATE_INDICATOR"
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableADSBvelocity_accuracy0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "dbo_name": "ADSB",
+                    "db_column_name": "velocity_accuracy",
+                    "dbo_name": "CAT021",
                     "description": " ",
                     "dimension": "",
+                    "is_key": false,
                     "name": "velocity_accuracy",
                     "representation_str": "STANDARD",
-                    "unit": "",
-                    "variable_identifier": "sd_ads.VELOCITY_ACCURACY"
+                    "short_name": "",
+                    "unit": ""
                 }
             }
         }

@@ -12,31 +12,582 @@
     "sub_config_files": [
         {
             "class_id": "DBObject",
-            "instance_id": "ADSB",
-            "path": "db_object_adsb.json"
+            "instance_id": "CAT001",
+            "path": "db_object_cat001.json"
         },
         {
             "class_id": "DBObject",
-            "instance_id": "MLAT",
-            "path": "db_object_mlat.json"
+            "instance_id": "CAT020",
+            "path": "db_object_cat020.json"
         },
         {
             "class_id": "DBObject",
-            "instance_id": "Radar",
-            "path": "db_object_radar.json"
+            "instance_id": "CAT021",
+            "path": "db_object_cat021.json"
+        },
+        {
+            "class_id": "DBObject",
+            "instance_id": "CAT048",
+            "path": "db_object_cat048.json"
+        },
+        {
+            "class_id": "DBObject",
+            "instance_id": "CAT062",
+            "path": "db_object_cat062.json"
         },
         {
             "class_id": "DBObject",
             "instance_id": "RefTraj",
             "path": "db_object_reftraj.json"
-        },
-        {
-            "class_id": "DBObject",
-            "instance_id": "Tracker",
-            "path": "db_object_tracker.json"
         }
     ],
     "sub_configs": {
+        "DBContentConfigurationDataSource": {
+            "DBContentConfigurationDataSourceADSB0": {
+                "parameters": {
+                    "db_content_type": "ADSB",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-ADS-B",
+                    "sac": 50,
+                    "short_name": "WADS",
+                    "sic": 80
+                }
+            },
+            "DBContentConfigurationDataSourceADSB1": {
+                "parameters": {
+                    "db_content_type": "ADSB",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "KITYRA",
+                    "sac": 2,
+                    "short_name": "",
+                    "sic": 37
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT0": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-VIE",
+                    "sac": 50,
+                    "short_name": "WVIE",
+                    "sic": 70
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT1": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-LNZ",
+                    "sac": 50,
+                    "short_name": "WLNZ",
+                    "sic": 71
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT2": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-SBG",
+                    "sac": 50,
+                    "short_name": "WSBG",
+                    "sic": 72
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT3": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-IN",
+                    "sac": 50,
+                    "short_name": "WINN",
+                    "sic": 73
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT4": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-KFT",
+                    "sac": 50,
+                    "short_name": "WKFT",
+                    "sic": 74
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT5": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-GRZ",
+                    "sac": 50,
+                    "short_name": "WGRZ",
+                    "sic": 75
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT6": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-LOWER-WEST",
+                    "sac": 50,
+                    "short_name": "WWES",
+                    "sic": 76
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT7": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-LOWER-EAST",
+                    "sac": 50,
+                    "short_name": "WEAS",
+                    "sic": 77
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT8": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-UPPER",
+                    "sac": 50,
+                    "short_name": "WUPP",
+                    "sic": 78
+                }
+            },
+            "DBContentConfigurationDataSourceMLAT9": {
+                "parameters": {
+                    "db_content_type": "MLAT",
+                    "has_short_name": true,
+                    "info": {},
+                    "name": "AWAM-GND",
+                    "sac": 50,
+                    "short_name": "WGND",
+                    "sic": 81
+                }
+            },
+            "DBContentConfigurationDataSourceRadar0": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 667.0,
+                        "latitude": 48.2607138,
+                        "longitude": 17.1632861
+                    },
+                    "name": "Velky Javornik",
+                    "sac": 48,
+                    "short_name": "Jav",
+                    "sic": 1
+                }
+            },
+            "DBContentConfigurationDataSourceRadar1": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 323.0,
+                        "latitude": 48.2390277777778,
+                        "longitude": 14.1821888888889
+                    },
+                    "name": "Linz",
+                    "sac": 50,
+                    "short_name": "LNZ1",
+                    "sic": 0
+                }
+            },
+            "DBContentConfigurationDataSourceRadar10": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 280.0,
+                        "latitude": 48.1043694444,
+                        "longitude": 16.560975
+                    },
+                    "name": "Schwechat",
+                    "sac": 50,
+                    "short_name": "Vie",
+                    "sic": 11
+                }
+            },
+            "DBContentConfigurationDataSourceRadar11": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 880.0,
+                        "latitude": 49.6596444444,
+                        "longitude": 16.1333916667
+                    },
+                    "name": "Bukop",
+                    "sac": 49,
+                    "short_name": "Buk",
+                    "sic": 144
+                }
+            },
+            "DBContentConfigurationDataSourceRadar12": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 587.0,
+                        "latitude": 48.5769972222,
+                        "longitude": 16.3956305556
+                    },
+                    "name": "Buschberg",
+                    "sac": 50,
+                    "short_name": "Bub",
+                    "sic": 9
+                }
+            },
+            "DBContentConfigurationDataSourceRadar13": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 410.0,
+                        "latitude": 46.9866777778,
+                        "longitude": 15.4319916667
+                    },
+                    "name": "Graz",
+                    "sac": 50,
+                    "short_name": "Grz",
+                    "sic": 12
+                }
+            },
+            "DBContentConfigurationDataSourceRadar14": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 183.0,
+                        "latitude": 48.12258625,
+                        "longitude": 16.5616853611
+                    },
+                    "name": "SMR-Nord",
+                    "sac": 50,
+                    "short_name": "SMRN",
+                    "sic": 101
+                }
+            },
+            "DBContentConfigurationDataSourceRadar15": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 183.0,
+                        "latitude": 48.12925,
+                        "longitude": 16.536783
+                    },
+                    "name": "SMR-West",
+                    "sac": 50,
+                    "short_name": "SMRW",
+                    "sic": 103
+                }
+            },
+            "DBContentConfigurationDataSourceRadar16": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 497.0,
+                        "latitude": 36.2277444444,
+                        "longitude": 22.9405888889
+                    },
+                    "name": "Kityra",
+                    "sac": 2,
+                    "short_name": "KI",
+                    "sic": 1
+                }
+            },
+            "DBContentConfigurationDataSourceRadar17": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_sac": true,
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 1146.0,
+                        "latitude": 38.7078527778,
+                        "longitude": 20.6491083333
+                    },
+                    "name": "Lefkas",
+                    "sac": 2,
+                    "short_name": "LE",
+                    "sic": 2
+                }
+            },
+            "DBContentConfigurationDataSourceRadar18": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 220.0,
+                        "latitude": 38.7079361111,
+                        "longitude": 13.1772833333
+                    },
+                    "name": "Ustica",
+                    "sac": 34,
+                    "short_name": "US",
+                    "sic": 11
+                }
+            },
+            "DBContentConfigurationDataSourceRadar19": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 91.0,
+                        "latitude": 35.8519444444,
+                        "longitude": 14.4719444444
+                    },
+                    "name": "Luqa",
+                    "sac": 120,
+                    "short_name": "LQ",
+                    "sic": 1
+                }
+            },
+            "DBContentConfigurationDataSourceRadar2": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 226.0,
+                        "latitude": 48.1005611111111,
+                        "longitude": 16.5778083333333
+                    },
+                    "name": "ViennaModeS",
+                    "sac": 50,
+                    "short_name": "VIMS",
+                    "sic": 13
+                }
+            },
+            "DBContentConfigurationDataSourceRadar20": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 309.0,
+                        "latitude": 35.852375,
+                        "longitude": 14.3816361111
+                    },
+                    "name": "Dingli",
+                    "sac": 120,
+                    "short_name": "DG",
+                    "sic": 2
+                }
+            },
+            "DBContentConfigurationDataSourceRadar21": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 110.0,
+                        "latitude": 35.8214916667,
+                        "longitude": 14.5048222222
+                    },
+                    "name": "Hal-Far",
+                    "sac": 120,
+                    "short_name": "HF",
+                    "sic": 3
+                }
+            },
+            "DBContentConfigurationDataSourceRadar22": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 250.0,
+                        "latitude": 35.8419694444,
+                        "longitude": 14.4155555556
+                    },
+                    "name": "Fawwara",
+                    "sac": 120,
+                    "short_name": "FW",
+                    "sic": 4
+                }
+            },
+            "DBContentConfigurationDataSourceRadar3": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 2203.0,
+                        "latitude": 46.7871083333,
+                        "longitude": 14.9713333333
+                    },
+                    "name": "ModeS_Koralpe",
+                    "sac": 50,
+                    "short_name": "Kor",
+                    "sic": 20
+                }
+            },
+            "DBContentConfigurationDataSourceRadar4": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 672.0,
+                        "latitude": 47.1798611111111,
+                        "longitude": 14.7498611111111
+                    },
+                    "name": "Zeltweg",
+                    "sac": 50,
+                    "short_name": "ZWG1",
+                    "sic": 48
+                }
+            },
+            "DBContentConfigurationDataSourceRadar5": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 461.0,
+                        "latitude": 48.311075,
+                        "longitude": 11.8144611111111
+                    },
+                    "name": "MunichSouth",
+                    "sac": 98,
+                    "short_name": "MUSA",
+                    "sic": 16
+                }
+            },
+            "DBContentConfigurationDataSourceRadar6": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 821.0,
+                        "latitude": 45.9309333333,
+                        "longitude": 14.2981333333
+                    },
+                    "name": "Vrhnika",
+                    "sac": 147,
+                    "short_name": "Vrh",
+                    "sic": 9
+                }
+            },
+            "DBContentConfigurationDataSourceRadar7": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 859.0,
+                        "latitude": 48.4708583333,
+                        "longitude": 13.6853194444
+                    },
+                    "name": "Feichtberg",
+                    "sac": 50,
+                    "short_name": "Fei",
+                    "sic": 10
+                }
+            },
+            "DBContentConfigurationDataSourceRadar8": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 461.0,
+                        "latitude": 48.3822916666667,
+                        "longitude": 11.8014277777778
+                    },
+                    "name": "MunichNord",
+                    "sac": 98,
+                    "short_name": "MUN1",
+                    "sic": 15
+                }
+            },
+            "DBContentConfigurationDataSourceRadar9": {
+                "parameters": {
+                    "db_content_type": "Radar",
+                    "has_short_name": true,
+                    "info": {
+                        "altitude": 870.0,
+                        "latitude": 47.9181333333333,
+                        "longitude": 13.0046166666667
+                    },
+                    "name": "Salzburg",
+                    "sac": 50,
+                    "short_name": "SBG1",
+                    "sic": 7
+                }
+            },
+            "DBContentConfigurationDataSourceRefTraj0": {
+                "parameters": {
+                    "db_content_type": "RefTraj",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "GPS Trail",
+                    "sac": 0,
+                    "short_name": "",
+                    "sic": 1
+                }
+            },
+            "DBContentConfigurationDataSourceTracker0": {
+                "parameters": {
+                    "db_content_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "MSTS",
+                    "sac": 50,
+                    "short_name": "",
+                    "sic": 244
+                }
+            },
+            "DBContentConfigurationDataSourceTracker1": {
+                "parameters": {
+                    "db_content_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "ARTAS",
+                    "sac": 50,
+                    "short_name": "",
+                    "sic": 240
+                }
+            },
+            "DBContentConfigurationDataSourceTracker2": {
+                "parameters": {
+                    "db_content_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "MRTS",
+                    "sac": 120,
+                    "short_name": "",
+                    "sic": 49
+                }
+            },
+            "DBContentConfigurationDataSourceTracker3": {
+                "parameters": {
+                    "db_content_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "ARTAS_OPS",
+                    "sac": 120,
+                    "short_name": "",
+                    "sic": 50
+                }
+            },
+            "DBContentConfigurationDataSourceTracker4": {
+                "parameters": {
+                    "db_content_type": "Tracker",
+                    "has_short_name": false,
+                    "info": {},
+                    "name": "ARTAS_NEW",
+                    "sac": 120,
+                    "short_name": "",
+                    "sic": 52
+                }
+            }
+        },
         "MetaDBOVariable": {
             "MetaDBOVariableacas_aircraft_identification0": {
                 "parameters": {
