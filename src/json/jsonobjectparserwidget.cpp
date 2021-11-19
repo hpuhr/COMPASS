@@ -404,7 +404,7 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
         return;
     }
 
-    parser_->setMappingActive(*mapping, widget->checkState() == Qt::Checked);
+    mapping->active(widget->checkState() == Qt::Checked);
 }
 
 void JSONObjectParserWidget::mappingKeyChangedSlot()

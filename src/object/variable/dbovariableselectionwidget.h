@@ -94,6 +94,8 @@ class DBOVariableSelectionWidget : public QFrame
     void showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types);
     void disableShowDataTypesOnly();
 
+    void updateMenuEntries();
+
   private:
     /// Variable type information
     QLabel* object_label_{nullptr};
@@ -117,7 +119,6 @@ class DBOVariableSelectionWidget : public QFrame
     std::vector<PropertyDataType> only_data_types_;
 
     /// @brief Updates selection menu entries
-    void updateMenuEntries();
 
     bool showDataType(PropertyDataType type);
 };

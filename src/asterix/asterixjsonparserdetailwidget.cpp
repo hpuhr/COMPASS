@@ -166,6 +166,9 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     main_layout->addWidget(delete_mapping_button_);
 
     setLayout(main_layout);
+
+    connect(&parser_, &ASTERIXJSONParser::rowContentChangedSignal,
+            this, &ASTERIXJSONParserDetailWidget::rowContentChangedSlot);
 }
 
 void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
@@ -264,6 +267,16 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
 }
 
+void ASTERIXJSONParserDetailWidget::rowContentChangedSlot (unsigned int index)
+{
+    loginf << "ASTERIXJSONParserDetailWidget: rowChangedSlot: index " << index;
+
+    if (has_current_entry_ && entry_index_ == index)
+    {
+        currentIndexChangedSlot(index);
+    }
+}
+
 void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool unmapped_selectable)
 {
     assert (json_key_box_);
@@ -332,6 +345,8 @@ void ASTERIXJSONParserDetailWidget::showDBOVariable (const std::string& var_name
 
     if (var_name.size())
     {
+        dbo_var_sel_->updateMenuEntries();
+
         dbo_var_sel_->setDisabled(false);
 
         assert (parser_.dbObject().hasVariable(var_name));
@@ -388,6 +403,10 @@ void ASTERIXJSONParserDetailWidget::mappingActiveChangedSlot()
     assert (active_check_);
 
     parser_.mapping(entry_index_).active(active_check_->checkState() == Qt::Checked);
+
+    parser_.doMappingChecks();
+
+    parser_.selectMapping(entry_index_);
 }
 
 void ASTERIXJSONParserDetailWidget::mappingJSONKeyChangedSlot (const QString& text)

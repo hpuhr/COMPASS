@@ -78,9 +78,7 @@ void ASTERIXJSONParser::doMappingChecks()
 
     for (auto& map_it : data_mappings_)
     {
-        if (!dbObject().hasVariable(map_it.dboVariableName()))
-            map_it.dboVariableName("");
-
+        map_it.check();
     }
 
     for (auto& map_it : data_mappings_)
@@ -699,6 +697,18 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
+    case Qt::CheckStateRole:
+    {
+        if (index.column() == 0 && entryType(row) == EntryType::ExistingMapping)  // selected special case
+        {
+            if (mapping(row).active())
+                return Qt::Checked;
+            else
+                return Qt::Unchecked;
+        }
+        else
+            return QVariant();
+    }
     case Qt::DisplayRole:
         //case Qt::EditRole:
     {
@@ -710,7 +720,9 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
 
             logdbg << "ASTERIXJSONParser: data: got json key " << current_mapping.jsonKey();
 
-            if (col_name == "JSON Key")
+            if (col_name == "Active")
+                return QVariant();
+            else if (col_name == "JSON Key")
                 return current_mapping.jsonKey().c_str();
             else if (col_name == "DBObject Variable")
                 return current_mapping.dboVariableName().c_str();
@@ -777,6 +789,22 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
     }
 }
 
+bool ASTERIXJSONParser::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+        unsigned int row = index.row();
+
+        assert (row < totalEntrySize());
+        assert (entryType(row) == EntryType::ExistingMapping);
+        mapping(row).active(!mapping(row).active());
+
+        emit rowContentChangedSignal(row);
+    }
+
+    return true;
+}
+
 QVariant ASTERIXJSONParser::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -798,17 +826,31 @@ QModelIndex ASTERIXJSONParser::parent(const QModelIndex& index) const
     return QModelIndex();
 }
 
-Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex &index) const
+Qt::ItemFlags ASTERIXJSONParser::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::ItemIsEnabled;
 
     assert (index.column() < table_columns_.size());
 
-    //    if (table_columns_.at(index.column()) == "comment")
-    //        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    //    else
-    return QAbstractItemModel::flags(index);
+    unsigned int row = index.row();
+    assert (row < totalEntrySize());
+
+    if (index.column() == 0 && entryType(row) == EntryType::ExistingMapping)
+    {
+        Qt::ItemFlags flags;
+
+        if (mapping(row).canBeActive())
+        {
+            flags |= Qt::ItemIsEnabled;
+            flags |= Qt::ItemIsUserCheckable;
+            flags |= Qt::ItemIsEditable;
+        }
+
+        return flags;
+    }
+    else
+        return QAbstractItemModel::flags(index);
 }
 
 bool ASTERIXJSONParser::mappingChecksDirty() const

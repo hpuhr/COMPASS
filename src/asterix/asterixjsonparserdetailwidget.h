@@ -22,6 +22,7 @@ class ASTERIXJSONParserDetailWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void rowContentChangedSlot (unsigned int index);
     void currentIndexChangedSlot (unsigned int index);
 
     void mappingActiveChangedSlot();

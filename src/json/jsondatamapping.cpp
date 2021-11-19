@@ -157,6 +157,25 @@ bool JSONDataMapping::inArray() const { return in_array_; }
 
 void JSONDataMapping::inArray(bool in_array) { in_array_ = in_array; }
 
+
+void JSONDataMapping::check()
+{
+    DBObjectManager& obj_man = COMPASS::instance().objectManager();
+
+    if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
+        assert (false);
+
+    DBObject& db_object = obj_man.object(db_object_name_);
+
+    if (dbovariable_name_.size() && !db_object.hasVariable(dbovariable_name_))
+        dbovariable_name_ = "";
+
+    if (active_ && !canBeActive())
+    {
+        active_ = false;
+    }
+}
+
 DBOVariable& JSONDataMapping::variable() const
 {
     assert(initialized_);
@@ -242,6 +261,11 @@ void JSONDataMapping::active(bool active)
 {
     loginf << "JSONDataMapping: active: " << active;
     active_ = active;
+}
+
+bool JSONDataMapping::canBeActive() const
+{
+    return json_key_.size() && dbovariable_name_.size();
 }
 
 void JSONDataMapping::initialize()

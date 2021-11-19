@@ -23,8 +23,14 @@ class DBOVariable;
 class Buffer;
 class ASTERIXImportTask;
 
-class ASTERIXJSONParser : public Configurable,  public QAbstractItemModel
+class ASTERIXJSONParser : public QAbstractItemModel, public Configurable
 {
+    Q_OBJECT
+
+signals:
+    void rowContentChangedSignal (unsigned int row_index); // emitted when something in the index was changed
+
+private:
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
 
 public:
@@ -74,6 +80,7 @@ public:
     // item stuff
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -133,7 +140,7 @@ private:
     std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
 
 
-    QStringList table_columns_ {"JSON Key", "DBObject Variable"};
+    QStringList table_columns_ {"Active", "JSON Key", "DBObject Variable"};
 
     QIcon todo_icon_;
     QIcon unknown_icon_;

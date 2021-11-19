@@ -61,6 +61,7 @@ class JSONDataMapping : public Configurable
 
     bool active() const;
     void active(bool active);
+    bool canBeActive() const;
 
     bool hasVariable() { return variable_ != nullptr; }
     DBOVariable& variable() const;
@@ -95,6 +96,8 @@ class JSONDataMapping : public Configurable
 
     bool inArray() const;
     void inArray(bool inArray);
+
+    void check();
 
   private:
     bool initialized_{false};
