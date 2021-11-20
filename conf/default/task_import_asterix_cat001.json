@@ -40,7 +40,7 @@
             },
             "JSONDataMapping108": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -56,7 +56,7 @@
             },
             "JSONDataMapping109": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -72,7 +72,7 @@
             },
             "JSONDataMapping110": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -88,7 +88,7 @@
             },
             "JSONDataMapping111": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -104,7 +104,7 @@
             },
             "JSONDataMapping112": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -120,7 +120,7 @@
             },
             "JSONDataMapping113": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -136,7 +136,7 @@
             },
             "JSONDataMapping114": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -152,7 +152,7 @@
             },
             "JSONDataMapping115": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT001",
@@ -376,7 +376,7 @@
             },
             "JSONDataMapping38": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 2",
                     "db_object_name": "CAT001",

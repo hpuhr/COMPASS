@@ -1431,43 +1431,94 @@
             }
         },
         "DBOVariable": {
-            "DBOVariableMLATacas_aircraft_identification0": {
+            "DBOVariable41": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "acas_aircraft_identification",
-                    "dbo_name": "CAT020",
-                    "description": "Aircraft identification capability",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "corrupted",
+                    "description": "From 020.CRT\n\n0 No Corrupted reply in multilateration\n1 Corrupted replies in multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_aircraft_identification",
+                    "name": "Corrupted",
+                    "representation_str": "STANDARD",
+                    "short_name": "CRT",
+                    "unit": ""
+                }
+            },
+            "DBOVariable42": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "ot",
+                    "description": "From 020.OT\n\n1 Other Technology Multilateration\n0 No Other Technology Multilateration",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "OT",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "DBOVariableMLATacas_alt_capability_ft0": {
+            "DBOVariable43": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "acas_alt_capability_ft",
-                    "dbo_name": "CAT020",
-                    "description": "Altitude reporting capability, currently 25 or 100",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fft",
+                    "description": "From 020.RAB\n\n0 Report from target transponder\n1 Report from field monitor (fixed transponder)",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_alt_capability_ft",
+                    "name": "FFT",
                     "representation_str": "STANDARD",
                     "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable44": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "altitude_reporting_capability_",
+                    "description": "From 230.ARC\n\nAltitude reporting capability\n0 100 ft resolution\n1 25 ft resolution",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Altitude Reporting Capability\n",
+                    "representation_str": "STANDARD",
+                    "short_name": "ARC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable45": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "acid_source",
+                    "description": "From 245.STI\n\n0 Callsign or registration not downlinked from transponder\n1 Registration downlinked from transponder\n2 Callsign downlinked from transponder\n3 Not defined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACID Source",
+                    "representation_str": "STANDARD",
+                    "short_name": "STI",
+                    "unit": ""
+                }
+            },
+            "DBOVariableMLATacas_aircraft_identification0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "acid_capability",
+                    "dbo_name": "CAT020",
+                    "description": "\nFrom 230.AIC\n\nAircraft identification capability\n0 No\n1 Yes\n",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACID Capability",
+                    "representation_str": "STANDARD",
+                    "short_name": "AIC",
                     "unit": ""
                 }
             },
             "DBOVariableMLATacas_bds_1_a0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "db_column_name": "acas_bds_1_a",
+                    "db_column_name": "b1a",
                     "dbo_name": "CAT020",
-                    "description": "BDS 1,0: bit 16",
+                    "description": "BDS 1,0 bit 16",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_bds_1_a",
+                    "name": "B1A",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1476,12 +1527,12 @@
             "DBOVariableMLATacas_bds_1_b0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "db_column_name": "acas_bds_1_b",
+                    "db_column_name": "b1b",
                     "dbo_name": "CAT020",
-                    "description": "BDS 1,0: bits 37-40",
+                    "description": "BDS 1,0 bits 37/40",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_bds_1_b",
+                    "name": "B1B",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1490,54 +1541,54 @@
             "DBOVariableMLATacas_comm_capability0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "db_column_name": "acas_comm_capability",
+                    "db_column_name": "transponder_com_capability",
                     "dbo_name": "CAT020",
-                    "description": "Communications capability of the transponder, see X__SD_ACAS_COMMS",
+                    "description": "Communications capability of the transponder\n0 No communications capability (surveillance only)\n1 Comm. A and Comm. B capability\n2 Comm. A, Comm. B and Uplink ELM\n3 Comm. A, Comm. B, Uplink ELM and Downlink ELM\n4 Level 5 Transponder capability\n5 to 7 Not assigned",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_comm_capability",
+                    "name": "Transponder Com. Capability",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "COM",
                     "unit": ""
                 }
             },
             "DBOVariableMLATacas_flight_status0": {
                 "parameters": {
                     "data_type_str": "CHAR",
-                    "db_column_name": "acas_flight_status",
+                    "db_column_name": "flight_status",
                     "dbo_name": "CAT020",
-                    "description": "Flight status, see X__SD_ACAS_FLIGHT_STATUSES",
+                    "description": "Flight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground\n6– Not assigned \n7 Information not yet extracted",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_flight_status",
+                    "name": "Flight Status",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "STAT",
                     "unit": ""
                 }
             },
             "DBOVariableMLATacas_modes_service0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "acas_modes_service",
+                    "db_column_name": "mode_s_specific_service_capability",
                     "dbo_name": "CAT020",
-                    "description": "Mode-S specific service capability?",
+                    "description": "Mode-S Specific Service Capability\n0 No\n1 Yes",
                     "dimension": "",
                     "is_key": false,
-                    "name": "acas_modes_service",
+                    "name": "Mode S Specific Service Capability",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MSSC",
                     "unit": ""
                 }
             },
             "DBOVariableMLATaccel_ax_ms20": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "accel_ax_ms2",
+                    "db_column_name": "ax",
                     "dbo_name": "CAT020",
-                    "description": "x acceleration in meters per square second",
+                    "description": "Calculated Acceleration of the target in m/s^2",
                     "dimension": "",
                     "is_key": false,
-                    "name": "accel_ax_ms2",
+                    "name": "Ax",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1546,40 +1597,12 @@
             "DBOVariableMLATaccel_ay_ms20": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "accel_ay_ms2",
+                    "db_column_name": "ay",
                     "dbo_name": "CAT020",
-                    "description": "y acceleration in meters per square second",
+                    "description": "Calculated Acceleration of the target in m/s^2",
                     "dimension": "",
                     "is_key": false,
-                    "name": "accel_ay_ms2",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATalt_baro_ft0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "alt_baro_ft",
-                    "dbo_name": "CAT020",
-                    "description": "",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "alt_baro_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
-                }
-            },
-            "DBOVariableMLATalt_baro_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "alt_baro_g",
-                    "dbo_name": "CAT020",
-                    "description": "",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "alt_baro_g",
+                    "name": "Ay",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1588,98 +1611,56 @@
             "DBOVariableMLATalt_baro_v0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "alt_baro_v",
+                    "db_column_name": "mode_c_valid",
                     "dbo_name": "CAT020",
-                    "description": "",
+                    "description": "0 Code not validated\n1 Code validated",
                     "dimension": "",
                     "is_key": false,
-                    "name": "alt_baro_v",
+                    "name": "Mode C Valid",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC V",
                     "unit": ""
                 }
             },
             "DBOVariableMLATalt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "db_column_name": "alt_geo_ft",
+                    "db_column_name": "geometric_height",
                     "dbo_name": "CAT020",
                     "description": "Height above WGS-84 ellipsoid in feet",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "alt_geo_ft",
+                    "name": "Geometric Height",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GH",
                     "unit": "Feet"
                 }
             },
             "DBOVariableMLATcalc_alt_geo_ft0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "calc_alt_geo_ft",
+                    "db_column_name": "measured_height",
                     "dbo_name": "CAT020",
-                    "description": "Calculated Geographical Altitude in feet",
+                    "description": "Height above local 2D co-ordinate system in reference to the\nMLT System Reference Point as defined in item I019/610, in\ntwo’s complement form, based on a direct measurement not\nrelated to barometric pressure.",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "calc_alt_geo_ft",
+                    "name": "Measured Height",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MH",
                     "unit": "Feet"
                 }
             },
             "DBOVariableMLATcallsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "callsign",
+                    "db_column_name": "aircraft_identification",
                     "dbo_name": "CAT020",
                     "description": "Aircraft identification",
                     "dimension": "",
                     "is_key": false,
-                    "name": "callsign",
+                    "name": "Aircraft Identification",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATcat0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "cat",
-                    "dbo_name": "CAT020",
-                    "description": "normally ASTERIX CAT 20",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "cat",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATdisplay_state0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "display_state",
-                    "dbo_name": "CAT020",
-                    "description": "See table x__SD_DISPLAY_STATES",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "display_state",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATdom_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "dom_posix",
-                    "dbo_name": "CAT020",
-                    "description": "Day of message in posix time.",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "dom_posix",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "ACID",
                     "unit": ""
                 }
             },
@@ -1700,84 +1681,28 @@
             "DBOVariableMLATflight_level_ft0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "db_column_name": "flight_level_ft",
+                    "db_column_name": "mode_c_code",
                     "dbo_name": "CAT020",
                     "description": "Flight level in feet",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "flight_level_ft",
+                    "name": "Mode C Code",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC",
                     "unit": "Feet"
                 }
             },
             "DBOVariableMLATflight_level_g0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "flight_level_g",
+                    "db_column_name": "mode_c_garbled",
                     "dbo_name": "CAT020",
-                    "description": "Flight level Garbled? Y, N",
+                    "description": "0 Default\n1 Garbled code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "flight_level_g",
+                    "name": "Mode C Garbled",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATflight_level_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "flight_level_v",
-                    "dbo_name": "CAT020",
-                    "description": "Flight level Validated? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "flight_level_v",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATgeo_alt_std_dev_ft0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "geo_alt_std_dev_ft",
-                    "dbo_name": "CAT020",
-                    "description": "",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "geo_alt_std_dev_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATgeo_alt_std_dev_m0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "geo_alt_std_dev_m",
-                    "dbo_name": "CAT020",
-                    "description": "Standard deviation of geometric altitude in meters",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "geo_alt_std_dev_m",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATgeo_area_mask0": {
-                "parameters": {
-                    "data_type_str": "LONGINT",
-                    "db_column_name": "geo_area_mask",
-                    "dbo_name": "CAT020",
-                    "description": "Geographical area bit mask",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "geo_area_mask",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC G",
                     "unit": ""
                 }
             },
@@ -1786,12 +1711,12 @@
                     "data_type_str": "STRING",
                     "db_column_name": "ground_bit",
                     "dbo_name": "CAT020",
-                    "description": "Transponder ground bit set?",
+                    "description": "0 Transponder Ground bit not set\n1 Transponder Ground bit set",
                     "dimension": "",
                     "is_key": false,
-                    "name": "ground_bit",
+                    "name": "Ground Bit",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GBS",
                     "unit": ""
                 }
             },
@@ -1809,20 +1734,6 @@
                     "unit": ""
                 }
             },
-            "DBOVariableMLATheight_3d_ft0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "height_3d_ft",
-                    "dbo_name": "CAT020",
-                    "description": "Height above local coordinate system in feet",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "height_3d_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
-                }
-            },
             "DBOVariableMLATline_id0": {
                 "parameters": {
                     "data_type_str": "INT",
@@ -1837,169 +1748,43 @@
                     "unit": ""
                 }
             },
-            "DBOVariableMLATmas_track_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "mas_track_num",
-                    "dbo_name": "CAT020",
-                    "description": "MAS unique track number",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mas_track_num",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode1_code0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mode1_code",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-1 Code",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode1_code",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode1_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode1_g",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-1 Garbled? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode1_g",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode1_smo0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode1_smo",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-1 Smoothed? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode1_smo",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode1_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode1_v",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-1 Validated? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode1_v",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode2_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "mode2_code",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-2 Code",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode2_code",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode2_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode2_g",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-2 Garbled? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode2_g",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode2_smo0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode2_smo",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-2 Smoothed? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode2_smo",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmode2_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode2_v",
-                    "dbo_name": "CAT020",
-                    "description": "Mode-2 Validated? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode2_v",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
             "DBOVariableMLATmode3a_code0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "db_column_name": "mode3a_code",
+                    "db_column_name": "mode_3_a_code",
                     "dbo_name": "CAT020",
                     "description": "Mode-3/A Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_code",
+                    "name": "Mode 3/A Code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "short_name": "",
+                    "short_name": "MA",
                     "unit": ""
                 }
             },
             "DBOVariableMLATmode3a_g0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "mode3a_g",
+                    "db_column_name": "mode_3a_garbled",
                     "dbo_name": "CAT020",
-                    "description": "Mode-3/A Garbled? Y, N",
+                    "description": "0 Default\n1 Garbled code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_g",
+                    "name": "Mode 3/A Garbled",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA G",
                     "unit": ""
                 }
             },
             "DBOVariableMLATmode3a_smo0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "mode3a_smo",
+                    "db_column_name": "mode_3a_smoothed",
                     "dbo_name": "CAT020",
-                    "description": "Mode-3/A Smoothed? Y, N",
+                    "description": "0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last update period",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_smo",
+                    "name": "Mode 3/A Smoothed",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2008,54 +1793,26 @@
             "DBOVariableMLATmode3a_v0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "mode3a_v",
+                    "db_column_name": "mode_3a_valid",
                     "dbo_name": "CAT020",
-                    "description": "Mode-3/A Validated? Y, N",
+                    "description": "0 Code not validated\n1 Code validated",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_v",
+                    "name": "Mode 3/A Valid",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmodes_mb_data0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "modes_mb_data",
-                    "dbo_name": "CAT020",
-                    "description": "Raw Mode S MB Data (= BDS registers)",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "modes_mb_data",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATmsg_fmt0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "msg_fmt",
-                    "dbo_name": "CAT020",
-                    "description": "Message Format (usually ASTERIX), see X__SD_MSG_FMTS",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "msg_fmt",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA V",
                     "unit": ""
                 }
             },
             "DBOVariableMLATpos_dop_x0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_dop_x",
+                    "db_column_name": "x_dop",
                     "dbo_name": "CAT020",
-                    "description": "Dilution of precision along the x axis",
+                    "description": "Dilution of Precision along x axis",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_dop_x",
+                    "name": "X DoP",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2064,26 +1821,12 @@
             "DBOVariableMLATpos_dop_xy0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_dop_xy",
+                    "db_column_name": "x_y_dop_cov",
                     "dbo_name": "CAT020",
-                    "description": "Square root of dilution of precision in the x-y plane ",
+                    "description": "Dilution of Precision Covariance Component",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_dop_xy",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_dop_xy_correlation_coeff0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_dop_xy_correlation_coeff",
-                    "dbo_name": "CAT020",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_dop_xy_correlation_coeff",
+                    "name": "X/Y DoP Cov",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2092,12 +1835,12 @@
             "DBOVariableMLATpos_dop_y0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_dop_y",
+                    "db_column_name": "y_dop",
                     "dbo_name": "CAT020",
-                    "description": "Dilution of precision along the y axis",
+                    "description": "Dilution of Precision along y axis",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_dop_y",
+                    "name": "Y DoP",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2106,138 +1849,82 @@
             "DBOVariableMLATpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_lat_deg",
+                    "db_column_name": "latitude",
                     "dbo_name": "CAT020",
-                    "description": "latitude in degrees",
+                    "description": "Position in WGS-84 Coordinates\nRange -90 <= latitude <= 90 deg.",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_lat_deg",
+                    "name": "Latitude",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lat",
                     "unit": "Degree"
-                }
-            },
-            "DBOVariableMLATpos_lat_deg_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_lat_deg_calc",
-                    "dbo_name": "CAT020",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_lat_deg_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableMLATpos_local_x_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_local_x_nm",
+                    "db_column_name": "x",
                     "dbo_name": "CAT020",
-                    "description": "x coordinate in nautical miles",
-                    "dimension": "Position",
+                    "description": "Position in Cartesian Coordinates\n\nmax range=+/-4194.3km (~2265 NM)\n",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "pos_local_x_nm",
+                    "name": "X",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Nautical Mile"
-                }
-            },
-            "DBOVariableMLATpos_local_x_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_local_x_nm_calc",
-                    "dbo_name": "CAT020",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_x_nm_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "DBOVariableMLATpos_local_y_nm0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_local_y_nm",
+                    "db_column_name": "y",
                     "dbo_name": "CAT020",
-                    "description": "y coordinate in nautical miles",
-                    "dimension": "Position",
+                    "description": "Position in Cartesian Coordinates\n\nmax range=+/-4194.3km (~2265 NM)",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "pos_local_y_nm",
+                    "name": "Y",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Nautical Mile"
-                }
-            },
-            "DBOVariableMLATpos_local_y_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_local_y_nm_calc",
-                    "dbo_name": "CAT020",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_y_nm_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "DBOVariableMLATpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_long_deg",
+                    "db_column_name": "longitude",
                     "dbo_name": "CAT020",
-                    "description": "longitude in degrees",
+                    "description": "Position in WGS-84 Coordinates\nRange -180 <= longitude < 180 deg.",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_long_deg",
+                    "name": "Longitude",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lon",
                     "unit": "Degree"
-                }
-            },
-            "DBOVariableMLATpos_long_deg_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_long_deg_calc",
-                    "dbo_name": "CAT020",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_long_deg_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableMLATpos_smoothed0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "pos_smoothed",
+                    "db_column_name": "smoothed_position",
                     "dbo_name": "CAT020",
-                    "description": "Y = smoothed position, N = measured position",
+                    "description": "0 Measured position\n1 Smoothed position",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_smoothed",
+                    "name": "Smoothed Position",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "STH",
                     "unit": ""
                 }
             },
             "DBOVariableMLATpos_std_dev_correlation_coeff0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_correlation_coeff",
+                    "db_column_name": "x_y_stddev_cov",
                     "dbo_name": "CAT020",
-                    "description": "Correlation coefficient of x and y components",
+                    "description": "XY Covariance Component",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_correlation_coeff",
+                    "name": "X/Y StdDev Cov",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2246,54 +1933,26 @@
             "DBOVariableMLATpos_std_dev_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_lat_deg",
+                    "db_column_name": "latitude_stddev",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "Standard Deviation of Position of the target expressed in WGS-84",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_lat_deg",
+                    "name": "Latitude StdDev",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_std_dev_lat_m0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_lat_m",
-                    "dbo_name": "CAT020",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_std_dev_lat_m",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lat StdDev",
                     "unit": ""
                 }
             },
             "DBOVariableMLATpos_std_dev_latlong_corr_coeff0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_latlong_corr_coeff",
+                    "db_column_name": "lat_lon_cov",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "Lat/Long Covariance Component",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_latlong_corr_coeff",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_std_dev_latlong_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_latlong_deg",
-                    "dbo_name": "CAT020",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_std_dev_latlong_deg",
+                    "name": "Lat/Lon Cov",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2302,40 +1961,26 @@
             "DBOVariableMLATpos_std_dev_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_long_deg",
+                    "db_column_name": "longitude_stddev",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "Standard Deviation of Position of the target expressed in WGS-84",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_long_deg",
+                    "name": "Longitude StdDev",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_std_dev_long_m0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_long_m",
-                    "dbo_name": "CAT020",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_std_dev_long_m",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lon StdDev",
                     "unit": ""
                 }
             },
             "DBOVariableMLATpos_std_dev_x_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_x_m",
+                    "db_column_name": "x_stddev",
                     "dbo_name": "CAT020",
-                    "description": "Standard deviation of x component in meters",
+                    "description": "Standard Deviation of Position of the target expressed in Cartesian coordinates",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_x_m",
+                    "name": "X StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2344,54 +1989,12 @@
             "DBOVariableMLATpos_std_dev_y_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_y_m",
+                    "db_column_name": "y_stddev",
                     "dbo_name": "CAT020",
-                    "description": "Standard deviation of y component in meters",
+                    "description": "Standard Deviation of Position of the target expressed in Cartesian coordinates",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_y_m",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_sys_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_sys_x_nm",
-                    "dbo_name": "CAT020",
-                    "description": "System coordinate x in nautical miles",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_sys_x_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATpos_sys_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_sys_y_nm",
-                    "dbo_name": "CAT020",
-                    "description": "System coordinate y in nautical miles",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_sys_y_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATraw_msg0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "raw_msg",
-                    "dbo_name": "CAT020",
-                    "description": "binary represetation",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "raw_msg",
+                    "name": "Y StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2400,14 +2003,14 @@
             "DBOVariableMLATrdp_chain0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "rdp_chain",
+                    "db_column_name": "chain",
                     "dbo_name": "CAT020",
-                    "description": "RDP Chain 1 or 2",
+                    "description": "From 020.CHN\n\n0 Chain 1\n1 Chain 2",
                     "dimension": "",
                     "is_key": false,
-                    "name": "rdp_chain",
+                    "name": "Chain",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "CHN",
                     "unit": ""
                 }
             },
@@ -2425,57 +2028,15 @@
                     "unit": ""
                 }
             },
-            "DBOVariableMLATrec_time_ms0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_time_ms",
-                    "dbo_name": "CAT020",
-                    "description": "ms fraction",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "rec_time_ms",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATrec_time_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_time_posix",
-                    "dbo_name": "CAT020",
-                    "description": "POSIX recording time stamped by I/O process",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "rec_time_posix",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableMLATreport_type0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "report_type",
-                    "dbo_name": "CAT020",
-                    "description": "MLAT (11)",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "report_type",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
             "DBOVariableMLATsac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
                     "dbo_name": "CAT020",
-                    "description": "ASTERIX SAC",
+                    "description": "System Area Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sac",
+                    "name": "SAC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2486,10 +2047,10 @@
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
                     "dbo_name": "CAT020",
-                    "description": "ASTERIX SIC",
+                    "description": "System Identification Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sic",
+                    "name": "SIC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2498,14 +2059,14 @@
             "DBOVariableMLATsimulated_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "simulated_target",
+                    "db_column_name": "simulated",
                     "dbo_name": "CAT020",
-                    "description": "Simulated track?",
+                    "description": "0 Actual target report\n1 Simulated target report",
                     "dimension": "",
                     "is_key": false,
-                    "name": "simulated_target",
+                    "name": "Simulated",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "SIM",
                     "unit": ""
                 }
             },
@@ -2514,10 +2075,10 @@
                     "data_type_str": "STRING",
                     "db_column_name": "spi",
                     "dbo_name": "CAT020",
-                    "description": "Special position identification?",
+                    "description": "0 Absence of SPI\n1 Special Position Identification",
                     "dimension": "",
                     "is_key": false,
-                    "name": "spi",
+                    "name": "SPI",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2526,70 +2087,56 @@
             "DBOVariableMLATtarget_addr0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "db_column_name": "target_addr",
+                    "db_column_name": "aircraft_address",
                     "dbo_name": "CAT020",
-                    "description": "24 bit target address / aircraft address / Mode-S address",
+                    "description": "24-bits Mode S address\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "target_addr",
+                    "name": "Aircraft Address",
                     "representation_str": "DEC_TO_HEX",
-                    "short_name": "",
+                    "short_name": "ACAD",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtest_target0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "test_target",
+                    "db_column_name": "test",
                     "dbo_name": "CAT020",
-                    "description": "Test track?",
+                    "description": "0 Default\n1 Test Target",
                     "dimension": "",
                     "is_key": false,
-                    "name": "test_target",
+                    "name": "Test",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TST",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "db_column_name": "tod",
+                    "db_column_name": "time_of_day",
                     "dbo_name": "CAT020",
                     "description": "Time of Day (1/128 sec from midnight)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "tod",
+                    "name": "Time of Day",
                     "representation_str": "SECONDS_TO_TIME",
-                    "short_name": "",
+                    "short_name": "ToD",
                     "unit": "Second"
-                }
-            },
-            "DBOVariableMLATtod_calculated0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "tod_calculated",
-                    "dbo_name": "CAT020",
-                    "description": "C:Calculated, R:Recording time, N:From data, L:Local time transform",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "tod_calculated",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableMLATtrack_climb_desc_mode0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "track_climb_desc_mode",
+                    "db_column_name": "track_climbing_descending",
                     "dbo_name": "CAT020",
-                    "description": "See X__SD_TRACK_CLIMB_DESC_MODES",
+                    "description": "0 Maintaining\n1 Climbing\n2 Descending\n3 Invalid",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_climb_desc_mode",
+                    "name": "Track Climbing/Descending",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "CDM",
                     "unit": ""
                 }
             },
@@ -2598,10 +2145,10 @@
                     "data_type_str": "STRING",
                     "db_column_name": "track_coasted",
                     "dbo_name": "CAT020",
-                    "description": "Coasted? Y, N",
+                    "description": "0 Not extrapolated\n1 Extrapolated",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_coasted",
+                    "name": "Track Coasted",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2612,12 +2159,12 @@
                     "data_type_str": "STRING",
                     "db_column_name": "track_confirmed",
                     "dbo_name": "CAT020",
-                    "description": "Y = firm track, N = tentative track",
+                    "description": "0 Track in initiation phase\n1 Confirmed track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_confirmed",
+                    "name": "Track Confirmed",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "CNF",
                     "unit": ""
                 }
             },
@@ -2626,12 +2173,12 @@
                     "data_type_str": "STRING",
                     "db_column_name": "track_end",
                     "dbo_name": "CAT020",
-                    "description": "Y = End of track, N = Track is still alive",
+                    "description": "0 Default\n1 Last report for a track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_end",
+                    "name": "Track End",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TRE",
                     "unit": ""
                 }
             },
@@ -2640,66 +2187,66 @@
                     "data_type_str": "STRING",
                     "db_column_name": "track_ghost_target",
                     "dbo_name": "CAT020",
-                    "description": "Y = Ghost Target, N = True Target",
+                    "description": "0 Default\n1 Ghost track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_ghost_target",
+                    "name": "Track Ghost Target",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GHO",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtrack_manoeuvre_hori0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "track_manoeuvre_hori",
+                    "db_column_name": "track_horizontal_manoeuvre",
                     "dbo_name": "CAT020",
-                    "description": "Y = horizontal Manoeuvre, N = No Manoeuvre",
+                    "description": "0 Default\n1 Horizontal manoeuvre",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_manoeuvre_hori",
+                    "name": "Track Horizontal Manoeuvre",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MAH",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtrack_num0": {
                 "parameters": {
                     "data_type_str": "INT",
-                    "db_column_name": "track_num",
+                    "db_column_name": "track_number",
                     "dbo_name": "CAT020",
-                    "description": "Track number",
+                    "description": "An integer value representing a unique reference to a track\nrecord within a particular track file.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_num",
+                    "name": "Track number",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TN",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtrd_dme0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_dme",
+                    "db_column_name": "dme_tacan",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 DME/TACAN multilateration\n0 no DME/TACAN multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_dme",
+                    "name": "DME/TACAN",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "DME",
                     "unit": ""
                 }
             },
             "DBOVariableMLATtrd_hf0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_hf",
+                    "db_column_name": "hf",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 HF multilateration\n0 no HF multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_hf",
+                    "name": "HF",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2708,12 +2255,12 @@
             "DBOVariableMLATtrd_ms0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_ms",
+                    "db_column_name": "ms",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 Mode-S 1090 MHz multilateration\n0 no Mode-S 1090 MHz multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_ms",
+                    "name": "MS",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2722,12 +2269,12 @@
             "DBOVariableMLATtrd_ssr0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_ssr",
+                    "db_column_name": "ssr",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 Non-Mode S 1090MHz multilateration\n0 no Non-Mode S 1090MHz multilat.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_ssr",
+                    "name": "SSR",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2736,12 +2283,12 @@
             "DBOVariableMLATtrd_uat0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_uat",
+                    "db_column_name": "uat",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 UAT multilateration\n0 no UAT multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_uat",
+                    "name": "UAT",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2750,12 +2297,12 @@
             "DBOVariableMLATtrd_vdl40": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "trd_vdl4",
+                    "db_column_name": "vdl4",
                     "dbo_name": "CAT020",
-                    "description": " ",
+                    "description": "1 VDL Mode 4 multilateration\n0 no VDL Mode 4 multilateration",
                     "dimension": "",
                     "is_key": false,
-                    "name": "trd_vdl4",
+                    "name": "VDL4",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2764,12 +2311,12 @@
             "DBOVariableMLATvelocity_vx_ms0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "velocity_vx_ms",
+                    "db_column_name": "vx",
                     "dbo_name": "CAT020",
-                    "description": "x velocity in meters per second",
+                    "description": "Calculated Track Velocity in Cartesian Coordinates",
                     "dimension": "Speed",
                     "is_key": false,
-                    "name": "velocity_vx_ms",
+                    "name": "Vx",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Meter/Second"
@@ -2778,12 +2325,12 @@
             "DBOVariableMLATvelocity_vy_ms0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "velocity_vy_ms",
+                    "db_column_name": "vy",
                     "dbo_name": "CAT020",
-                    "description": "y velocity in meters per second",
+                    "description": "Calculated Track Velocity in Cartesian Coordinates",
                     "dimension": "Speed",
                     "is_key": false,
-                    "name": "velocity_vy_ms",
+                    "name": "Vy",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Meter/Second"
