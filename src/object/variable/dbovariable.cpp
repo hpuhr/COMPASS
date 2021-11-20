@@ -327,6 +327,14 @@ std::string DBOVariable::dbColumnIdentifier() const
 //        return getRepresentationStringFromValue(getMaxString());
 //}
 
+std::string DBOVariable::dimensionUnitStr()
+{
+    if (dimension_.size())
+        return dimension_ + ":" + unit_;
+    else
+        return "";
+}
+
 DBOVariableWidget* DBOVariable::widget()
 {
     if (!widget_)

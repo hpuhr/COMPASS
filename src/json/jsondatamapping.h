@@ -55,6 +55,7 @@ class JSONDataMapping : public Configurable
     /// @brief Returns unit
     std::string& unitRef() { return unit_; }
     const std::string& unit() const { return unit_; }
+    std::string dimensionUnitStr();
 
     const std::string& jsonKey() const;
     void jsonKey(const std::string& json_key);

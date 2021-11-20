@@ -59,7 +59,13 @@ DBObject::DBObject(COMPASS& compass, const string& class_id, const string& insta
 
     assert (db_table_name_.size());
 
+    constructor_active_ = true;
+
     createSubConfigurables();
+
+    constructor_active_ = false;
+
+    sortContent();
 
     qRegisterMetaType<shared_ptr<Buffer>>("shared_ptr<Buffer>");
 
@@ -87,11 +93,6 @@ void DBObject::generateSubConfigurable(const string& class_id, const string& ins
                << " with name " << var_name;
 
         variables_.emplace_back(new DBOVariable(class_id, instance_id, this));
-
-//        variables_.emplace(
-//                    piecewise_construct,
-//                    forward_as_tuple(var_name),                      // args for key
-//                    forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id == "DBOLabelDefinition")
     {
@@ -100,6 +101,9 @@ void DBObject::generateSubConfigurable(const string& class_id, const string& ins
     }
     else
         throw runtime_error("DBObject: generateSubConfigurable: unknown class_id " + class_id);
+
+    if (!constructor_active_)
+        sortContent();
 }
 
 void DBObject::checkSubConfigurables()
@@ -850,3 +854,13 @@ void DBObject::saveAssociations()
 
     loginf << "DBObject " << name_ << ": saveAssociations: done";
 }
+
+void DBObject::sortContent()
+{
+    sort(variables_.begin(), variables_.end(),
+        [](const std::unique_ptr<DBOVariable>& a, const std::unique_ptr<DBOVariable>& b) -> bool
+    {
+        return a->name() > b->name();
+    });
+}
+

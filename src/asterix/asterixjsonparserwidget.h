@@ -33,6 +33,8 @@ private:
     QSortFilterProxyModel* proxy_model_{nullptr};
 
     ASTERIXJSONParserDetailWidget* detail_widget_{nullptr};
+
+    virtual void keyPressEvent(QKeyEvent* event);
 };
 
 #endif // ASTERIXJSONPARSERWIDGET_H

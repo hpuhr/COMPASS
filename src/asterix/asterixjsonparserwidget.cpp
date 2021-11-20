@@ -1,6 +1,8 @@
 #include "asterixjsonparserwidget.h"
 #include "asterixjsonparserdetailwidget.h"
 #include "asterixjsonparser.h"
+#include "dbobject.h"
+#include "dbovariable.h"
 #include "logger.h"
 
 #include <QSplitter>
@@ -15,6 +17,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QKeyEvent>
+#include <QApplication>
+#include <QClipboard>
+
+#include <sstream>
+
+using namespace std;
 
 ASTERIXJSONParserWidget::ASTERIXJSONParserWidget(ASTERIXJSONParser& parser, QWidget* parent)
     : QWidget(parent), parser_(parser)
@@ -103,4 +112,153 @@ void ASTERIXJSONParserWidget::currentRowChanged(const QModelIndex& current, cons
 
     assert (detail_widget_);
     detail_widget_->currentIndexChangedSlot(index);
+}
+
+
+void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
+{
+
+    if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_C)
+    {
+        loginf << "ASTERIXJSONParserWidget: keyPressEvent: copy";
+
+        unsigned int num_rows = parser_.rowCount();
+        unsigned int num_cols = parser_.columnCount();
+
+        std::ostringstream ss;
+
+        // add header
+        //        for (unsigned int col_cnt = 0; col_cnt < num_cols; ++col_cnt)
+        //        {
+        //            if (col_cnt != 0)
+        //                ss << ";";
+
+        //            ss << "\"" << parser_.headerData(col_cnt, Qt::Horizontal).toString().toStdString() << "\"";
+        //        }
+
+        ss << "\"Active\"";
+        ss << ";\"JSON Key\"";
+        ss << ";\"JSON Comment\"";
+        ss << ";\"JSON Unit\"";
+        ss << ";\"DBOVariable\"";
+        ss << ";\"DBOVar SN\"";
+        ss << ";\"DBOVar Comment\"";
+        ss << ";\"DBOVar Unit\"";
+        ss << ";\"DBOVar DBColumn\"";
+        ss << "\n";
+
+        // copy content
+
+        DBObject& db_object = parser_.dbObject();
+        const auto& cat_info = parser_.categoryItemInfo();
+        string dbovar_name;
+        string json_key;
+
+        unsigned int model_row;
+        for (unsigned int row_cnt=0; row_cnt < num_rows; ++row_cnt)
+        {
+            QModelIndex proxy_index = proxy_model_->index(row_cnt, 0);
+            assert (proxy_index.isValid());
+
+            QModelIndex model_index = proxy_model_->mapToSource(proxy_index); // row in model
+            assert (model_index.isValid());
+
+            model_row = model_index.row();
+            ASTERIXJSONParser::EntryType entry_type = parser_.entryType(model_row);
+
+            if (entry_type == ASTERIXJSONParser::EntryType::ExistingMapping)
+            {
+                auto& mapping = parser_.mapping(model_row);
+
+                dbovar_name = mapping.dboVariableName();
+                json_key = mapping.jsonKey();
+
+                ss << "\"" << (mapping.active() ? "Y" : "N") << "\""; // Active
+                ss << ";\"" << json_key << "\""; // JSON Key
+
+                if (cat_info.count(json_key))
+                    ss << ";\"" << cat_info.at(json_key).description_ << "\""; // JSON Comment
+                else
+                    ss << ";"; // JSON Comment
+
+                ss << ";\"" << mapping.dimensionUnitStr() << "\""; // JSON Unit
+
+                ss << ";\"" << dbovar_name << "\""; // DBOVar
+
+                if (db_object.hasVariable(dbovar_name))
+                {
+                    if (db_object.variable(dbovar_name).hasShortName())
+                        ss << ";\"" << db_object.variable(dbovar_name).shortName() << "\""; // DBOVar SN
+                    else
+                        ss << ";"; // DBOVar SN
+
+                    ss << ";\"" << db_object.variable(dbovar_name).description() << "\""; // DBOVar Comment
+                    ss << ";\"" << db_object.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
+                    ss << ";\"" << db_object.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
+                }
+                else
+                {
+                    ss << ";"; // DBOVar Comment
+                    ss << ";"; // DBOVar Unit
+                    ss << ";"; // DBOVar DBColumn
+                }
+
+            }
+            else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedJSONKey)
+            {
+                json_key = parser_.unmappedJSONKey(model_row);
+
+                ss << ""; // Active
+                ss << ";\"" << json_key << "\""; // JSON Key
+
+                if (cat_info.count(json_key))
+                    ss << ";\"" << cat_info.at(json_key).description_ << "\""; // JSON Comment
+                else
+                    ss << ";"; // JSON Comment
+
+                ss << ";"; // JSON Unit
+                ss << ";"; // DBOVar
+                ss << ";"; // DBOVar SN
+                ss << ";"; // DBOVar Comment
+                ss << ";"; // DBOVar Unit
+                ss << ";"; // DBOVar DBColumn
+            }
+            else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
+            {
+                dbovar_name = parser_.unmappedDBOVariable(model_row);
+
+                ss << ""; // Active
+                ss << ";"; // JSON Key
+                ss << ";"; // JSON Comment
+                ss << ";"; // JSON Unit
+                ss << ";\"" << dbovar_name << "\""; // DBOVar
+
+                if (db_object.hasVariable(dbovar_name))
+                {
+                    if (db_object.variable(dbovar_name).hasShortName())
+                        ss << ";\"" << db_object.variable(dbovar_name).shortName() << "\""; // DBOVar SN
+                    else
+                        ss << ";"; // DBOVar SN
+
+                    ss << ";\"" << db_object.variable(dbovar_name).description() << "\""; // DBOVar Comment
+                    ss << ";\"" << db_object.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
+                    ss << ";\"" << db_object.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
+                }
+                else
+                {
+                    ss << ";"; // DBOVar SN
+                    ss << ";"; // DBOVar Comment
+                    ss << ";"; // DBOVar Unit
+                    ss << ";"; // DBOVar DBColumn
+                }
+            }
+
+            ss << "\n";
+        }
+
+
+        loginf << "'" << ss.str() << "'";
+
+        QApplication::clipboard()->setText(ss.str().c_str());
+    }
 }

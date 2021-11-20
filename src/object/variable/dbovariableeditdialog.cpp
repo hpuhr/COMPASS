@@ -101,10 +101,10 @@ DBOVariable &DBOVariableEditDialog::variable() const
 
 void DBOVariableEditDialog::nameChangedSlot(const QString& name)
 {
-    loginf << "DBOVariableEditDialog: nameChangedSlot: name '" << name.toStdString() << "'";
+    loginf << "DBOVariableEditDialog: nameChangedSlot: name '" << name.trimmed().toStdString() << "'";
 
     assert (name_edit_);
-    string new_name = name.toStdString();
+    string new_name = name.trimmed().toStdString();
 
     if (new_name == variable_.name())
         return;
@@ -151,9 +151,9 @@ void DBOVariableEditDialog::nameChangedSlot(const QString& name)
 
 void DBOVariableEditDialog::shortNameChangedSlot(const QString& name)
 {
-    loginf << "DBOVariableEditDialog: shortNameChangedSlot: name '" << name.toStdString() << "'";
+    loginf << "DBOVariableEditDialog: shortNameChangedSlot: name '" << name.trimmed().toStdString() << "'";
 
-    variable_.shortName(name.toStdString());
+    variable_.shortName(name.trimmed().toStdString());
 
     variable_edited_ = true;
 }
@@ -162,7 +162,7 @@ void DBOVariableEditDialog::commentChangedSlot()
 {
     assert (description_edit_);
 
-    variable_.description(description_edit_->document()->toPlainText().toStdString());
+    variable_.description(description_edit_->document()->toPlainText().trimmed().toStdString());
 
     variable_edited_ = true;
 }
@@ -170,7 +170,7 @@ void DBOVariableEditDialog::commentChangedSlot()
 void DBOVariableEditDialog::dbColumnChangedSlot(const QString& name)
 {
     assert (db_column_edit_);
-    string new_name = name.toStdString();
+    string new_name = name.trimmed().toStdString();
 
     if (new_name == variable_.dbColumnName())
         return;

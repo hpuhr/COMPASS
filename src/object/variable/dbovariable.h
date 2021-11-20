@@ -99,6 +99,7 @@ class DBOVariable : public QObject, public Property, public Configurable
     /// @brief  Returns unit unit
     const std::string& unitConst() const { return unit_; }
     std::string& unit() { return unit_; }
+    std::string dimensionUnitStr();
 
     DBObject& dbObject() const
     {

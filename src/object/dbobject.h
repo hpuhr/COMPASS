@@ -166,7 +166,6 @@ class DBObject : public QObject, public Configurable
 
     void updateToDatabaseContent();
 
-
     std::string dbTableName() const;
 
 protected:
@@ -175,6 +174,8 @@ protected:
     std::string name_;
     std::string info_;
     std::string db_table_name_;
+
+    bool constructor_active_ {false};
 
     bool is_loadable_{false};  // loadable on its own
     bool loading_wanted_{false};
@@ -206,6 +207,9 @@ protected:
     void doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer);
 
     std::string associationsTableName();
+
+    void sortContent();
+
 };
 
 #endif /* DBOBJECT_H_ */

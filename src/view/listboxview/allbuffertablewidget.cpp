@@ -18,6 +18,15 @@
 //#include <iostream>
 
 #include "allbuffertablewidget.h"
+#include "allbuffertablemodel.h"
+#include "buffer.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "dbovariable.h"
+#include "dbovariableset.h"
+#include "listboxviewdatasource.h"
+#include "logger.h"
+#include "viewselection.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -28,16 +37,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 
-#include "allbuffertablemodel.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "buffer.h"
-#include "dbobject.h"
-#include "dbobjectmanager.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
-#include "listboxviewdatasource.h"
-#include "logger.h"
-#include "viewselection.h"
 
 // using namespace Utils;
 

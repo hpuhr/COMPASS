@@ -223,6 +223,14 @@ void JSONDataMapping::dboVariableName(const std::string& name)
 
 std::string JSONDataMapping::dboVariableName() const { return dbovariable_name_; }
 
+std::string JSONDataMapping::dimensionUnitStr()
+{
+    if (dimension_.size())
+        return dimension_ + ":" + unit_;
+    else
+        return "";
+}
+
 const std::string& JSONDataMapping::jsonKey() const { return json_key_; }
 
 void JSONDataMapping::jsonKey(const std::string& json_key)
