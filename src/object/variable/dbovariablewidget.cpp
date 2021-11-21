@@ -80,7 +80,7 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     QLabel* type_label = new QLabel("Data Type");
     properties_layout_->addWidget(type_label, row, 0);
 
-    type_combo_ = new DBOVariableDataTypeComboBox(variable_->dataTypeRef());
+    type_combo_ = new DBOVariableDataTypeComboBox(variable_->dataTypeRef(), variable_->dataTypeStringRef());
     properties_layout_->addWidget(type_combo_, row, 1);
     row++;
 
@@ -147,7 +147,7 @@ void DBOVariableWidget::update()
 {
     name_edit_->setText(variable_->name().c_str());
     description_edit_->setText(variable_->description().c_str());
-    type_combo_->setType(variable_->dataTypeRef());
+    type_combo_->setType(variable_->dataTypeRef(), variable_->dataTypeStringRef());
     representation_box_->setRepresentation(variable_->representationRef(),
                                      variable_->representationStringRef());
     unit_sel_->update(variable_->dimension(), variable_->unit());

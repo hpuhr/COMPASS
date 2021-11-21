@@ -65,7 +65,7 @@ DBOVariableCreateDialog::DBOVariableCreateDialog(DBObject& object, const std::st
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new DBOVariableDataTypeComboBox(data_type_);
+    type_combo_ = new DBOVariableDataTypeComboBox(data_type_, data_type_str_);
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};

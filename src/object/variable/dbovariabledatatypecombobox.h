@@ -36,13 +36,16 @@ class DBOVariableDataTypeComboBox : public QComboBox
     /// @brief Sets the data type
     void changed()
     {
-        data_type_ = Property::asDataType(currentText().toStdString());
+        loginf << "DBOVariableDataTypeComboBox: changed: " << currentText().toStdString();
+
+        data_type_str_ = currentText().toStdString();
+        data_type_ = Property::asDataType(data_type_str_);
     }
 
   public:
     /// @brief Constructor
-    DBOVariableDataTypeComboBox(PropertyDataType& data_type, QWidget* parent = 0)
-        : QComboBox(parent), data_type_(data_type)
+    DBOVariableDataTypeComboBox(PropertyDataType& data_type, std::string& data_type_str, QWidget* parent = 0)
+        : QComboBox(parent), data_type_(data_type), data_type_str_(data_type_str)
     {
         for (auto& type_it : Property::dataTypes2Strings())
         {
@@ -58,9 +61,10 @@ class DBOVariableDataTypeComboBox : public QComboBox
     virtual ~DBOVariableDataTypeComboBox() {}
 
     /// @brief Sets the currently selected data type
-    void setType(PropertyDataType& type)
+    void setType(PropertyDataType& type, std::string& data_type_str)
     {
         data_type_ = type;
+        data_type_str_ = data_type_str;
 
         update();
     }
@@ -68,6 +72,7 @@ class DBOVariableDataTypeComboBox : public QComboBox
   protected:
     /// Used variable
     PropertyDataType& data_type_;
+    std::string& data_type_str_;
 
     void update()
     {

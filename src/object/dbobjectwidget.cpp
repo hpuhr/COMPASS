@@ -405,7 +405,8 @@ void DBObjectWidget::updateDBOVarsGridSlot()
         dbovars_grid_->addWidget(description_edit, row, col);
 
         col++;
-        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox(variable.dataTypeRef());
+        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox(
+                    variable.dataTypeRef(), variable.dataTypeStringRef());
         dbovars_grid_->addWidget(type_combo, row, col);
 
         col++;

@@ -68,6 +68,7 @@ protected:
     std::string short_name_;
 
     PropertyDataType data_type_ {PropertyDataType::BOOL};
+    std::string data_type_str_ {"BOOL"};
     std::string dimension_;
     std::string unit_;
 

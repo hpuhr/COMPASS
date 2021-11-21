@@ -58,6 +58,7 @@ class Property
     PropertyDataType& dataTypeRef() { return data_type_; }
 
     const std::string& dataTypeString() const { return data_type_str_; }
+    std::string& dataTypeStringRef() { return data_type_str_; }
     void dataType(PropertyDataType type)
     {
         data_type_ = type;

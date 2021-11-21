@@ -57,7 +57,7 @@ DBOVariableEditDialog::DBOVariableEditDialog(DBOVariable& variable, QWidget* par
     form_layout->addRow("Comment", description_edit_);
 
     //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
-    type_combo_ = new DBOVariableDataTypeComboBox(variable_.dataTypeRef());
+    type_combo_ = new DBOVariableDataTypeComboBox(variable_.dataTypeRef(), variable_.dataTypeStringRef());
     form_layout->addRow("Data Type", type_combo_);
 
     //    UnitSelectionWidget* unit_sel_ {nullptr};

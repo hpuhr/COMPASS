@@ -167,7 +167,7 @@
                     "items":[
                         {
                             "name":"RE",
-                            "comment":"\"Range Exceeded\" Indicator\n0 Value in defined range\n1 Value exceeds defined range",
+                            "comment":"'Range Exceeded' Indicator\n0 Value in defined range\n1 Value exceeds defined range",
                             "type":"fixed_bits",
                             "start_bit":15,
                             "bit_length":1
@@ -184,7 +184,7 @@
                 },
                 {
                     "name":"Track Angle",
-                    "comment":"Track Angle clockwise reference to \"True North\"",
+                    "comment":"Track Angle clockwise reference to 'True North'",
                     "type":"fixed_bytes",
                     "length":2,
                     "data_type":"uint",

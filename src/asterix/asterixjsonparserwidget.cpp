@@ -142,6 +142,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
         ss << ";\"JSON Unit\"";
         ss << ";\"DBOVariable\"";
         ss << ";\"DBOVar SN\"";
+        ss << ";\"DBOVar DataType\"";
         ss << ";\"DBOVar Comment\"";
         ss << ";\"DBOVar Unit\"";
         ss << ";\"DBOVar DBColumn\"";
@@ -192,12 +193,15 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                     else
                         ss << ";"; // DBOVar SN
 
+                    ss << ";\"" << db_object.variable(dbovar_name).dataTypeString() << "\""; // DBOVar DataType
+
                     ss << ";\"" << db_object.variable(dbovar_name).description() << "\""; // DBOVar Comment
                     ss << ";\"" << db_object.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
                     ss << ";\"" << db_object.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
                 }
                 else
                 {
+                    ss << ";"; // DBOVar DataType
                     ss << ";"; // DBOVar Comment
                     ss << ";"; // DBOVar Unit
                     ss << ";"; // DBOVar DBColumn
@@ -219,6 +223,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                 ss << ";"; // JSON Unit
                 ss << ";"; // DBOVar
                 ss << ";"; // DBOVar SN
+                ss << ";"; // DBOVar DataType
                 ss << ";"; // DBOVar Comment
                 ss << ";"; // DBOVar Unit
                 ss << ";"; // DBOVar DBColumn
@@ -240,6 +245,8 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                     else
                         ss << ";"; // DBOVar SN
 
+                    ss << ";\"" << db_object.variable(dbovar_name).dataTypeString() << "\""; // DBOVar DataType
+
                     ss << ";\"" << db_object.variable(dbovar_name).description() << "\""; // DBOVar Comment
                     ss << ";\"" << db_object.variable(dbovar_name).dimensionUnitStr() << "\""; // DBOVar Unit
                     ss << ";\"" << db_object.variable(dbovar_name).dbColumnName() << "\""; // DBOVar DBColumn
@@ -247,6 +254,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
                 else
                 {
                     ss << ";"; // DBOVar SN
+                    ss << ";"; // DBOVar DataType
                     ss << ";"; // DBOVar Comment
                     ss << ";"; // DBOVar Unit
                     ss << ";"; // DBOVar DBColumn
