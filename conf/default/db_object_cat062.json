@@ -887,171 +887,1646 @@
             }
         },
         "DBOVariable": {
-            "DBOVariableTrackeraircraft_derived0": {
+            "DBOVariable1": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "aircraft_derived",
-                    "dbo_name": "CAT062",
-                    "description": " ",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "service_identification",
+                    "description": "From 015.Service Identification",
                     "dimension": "",
                     "is_key": false,
-                    "name": "aircraft_derived",
+                    "name": "Service Identification",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
             },
-            "DBOVariableTrackeralt_baro_ft0": {
+            "DBOVariable10": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "alt_baro_ft",
-                    "dbo_name": "CAT062",
-                    "description": "Calculated barometric altitude [I030/130,I062/135 dependend on I062/080 SRC]",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "md5_reply",
+                    "description": "From 080.MD5\n\n0 No Mode 5 interrogation\n1 Friendly target\n2 Unknown target\n3 No reply",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MD5 Reply",
+                    "representation_str": "STANDARD",
+                    "short_name": "MD5",
+                    "unit": ""
+                }
+            },
+            "DBOVariable100": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "destination_airport_fpl",
+                    "description": "From 390.DST.Destination Airport",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Destination Airport FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable101": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "runway_designation_nu1_fpl",
+                    "description": "From 390.RDS.NU1\n\nFirst number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Runway Designation NU1 FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable102": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "runway_designation_nu2_fpl",
+                    "description": "From 390.RDS.NU2\n\nSecond number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Runway Designation NU2 FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable103": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "runway_designation_ltr_fpl",
+                    "description": "From 390.RDS.LTR\n\nLetter",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Runway Designation LTR FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable104": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "current_cleared_flight_level_fpl",
+                    "description": "From 390.CFL.CFL",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "alt_baro_ft",
+                    "name": "Current Cleared Flight Level FPL",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Feet"
+                }
+            },
+            "DBOVariable105": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "centre_fpl",
+                    "description": "From 390.CTL.Centre\n\n8-bit group Identification code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Centre FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable106": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "position_fpl",
+                    "description": "From 390.CTL.Position\n\n8-bit Control Position identification code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Position FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable107": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "aircraft_stand_fpl",
+                    "description": "From 390.AST.Aircraft Stand",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Stand FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable108": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "stand_status_avl_fpl",
+                    "description": "From 390.STS.AVL\n\n0 Available\n1 Not available\n2 Unknown\n3 Invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Stand Status AVL FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable109": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "stand_status_emp_fpl",
+                    "description": "From 390.STS.EMP\n\n0 Empty\n1 Occupied\n2 Unknown\n3 Invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Stand Status EMP FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable11": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mds_coasting",
+                    "description": "From 080.MDS\n\n0 Default value\n1 Age of the last received Mode S track update is higher than system dependent threshold",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MDS Coasting",
+                    "representation_str": "STANDARD",
+                    "short_name": "MDS C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable110": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "standard_instrument_arrival_fpl",
+                    "description": "From 390.STA.Standard Instrument Arrival",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Standard Instrument Arrival FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable111": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "standard_instrument_departure_fpl",
+                    "description": "From 390.STD.Standard Instrument Departure",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Standard Instrument Departure FPl",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable112": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "mode_3a_code_pre_em_fpl",
+                    "description": "From 390.PEM.Mode-3/A reply\n\nIn octal representation",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Code Pre-Em FPL",
+                    "representation_str": "DEC_TO_OCTAL",
+                    "short_name": "MA PEm FPL",
+                    "unit": ""
+                }
+            },
+            "DBOVariable113": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_code_pre_em_valid_fpl",
+                    "description": "From 390.PEM.VA\n\nValidity\n0 No valid Mode 3/A available\n1 Valid Mode 3/A available",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Code Pre-Em Valid FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA PEm V FPL",
+                    "unit": ""
+                }
+            },
+            "DBOVariable114": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "callsign_pre_em_fpl",
+                    "description": "From 390.PEC.Pre-Emergency Callsign",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Callsign Pre-Em FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable115": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude_stddev",
+                    "description": "From 500.AGA.AGA\n\nEstimated accuracy (i.e. standard deviation) of the calculated geometric altitude of a target.",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "Geometric Altitude StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "GA StdDev",
+                    "unit": "Feet"
+                }
+            },
+            "DBOVariable116": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "vx_stddev",
+                    "description": "From 500.ATV.ATV (X-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Vx StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "DBOVariable117": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "vy_stddev",
+                    "description": "From 500.ATV.ATV (Y-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Vy StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "DBOVariable118": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ax_stddev",
+                    "description": "From 500.AA.AA (X-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated acceleration in Cartesian co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ax StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable119": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ay_stddev",
+                    "description": "From 500.AA.AA (Y-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated acceleration in Cartesian co-ordinates.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ay StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable12": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "adsb_coasting",
+                    "description": "From 080.ADS\n\n0 Default value\n1 Age of the last received ADS-B track update is higher than system dependent threshold",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ADS-B Coasting",
+                    "representation_str": "STANDARD",
+                    "short_name": "ADS C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable120": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "rate_of_climb_descent_stddev",
+                    "description": "From 500.ARC.ARC\n\nEstimated accuracy (i.e. standard deviation) of the calculated rate of Climb/Descent of an aircraft.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Rate Of Climb/Descent StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable121": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_altitude_calculated_stddev",
+                    "description": "From 500.ABA.ABA\n\nEstimated accuracy (i.e. standard deviation) of the calculated barometric altitude of the track.",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "Barometric Altitude Calculated StdDev",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "DBOVariable13": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "psr_coasting",
+                    "description": "From 080.PSR\n\n0 Default value\n1 Age of the last received PSR track update is higher than system dependent threshold",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "PSR Coasting",
+                    "representation_str": "STANDARD",
+                    "short_name": "PSR C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable14": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "ssr_coasting",
+                    "description": "From 080.SSR\n\n0 Default value\n1 Age of the last received SSR track update is higher than system dependent threshold",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SSR Coasting",
+                    "representation_str": "STANDARD",
+                    "short_name": "SSR C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable15": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "special_used_mode_3a",
+                    "description": "From 080.SUC\n\n0 Default value\n1 Special Used Code (Mode A codes to be defined in the system to mark a track with special interest)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Special Used Mode 3/A",
+                    "representation_str": "STANDARD",
+                    "short_name": "SUC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable16": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_conflict",
+                    "description": "From 080.AAC\n\n0 Default value\n1 Assigned Mode A Code Conflict (same discrete Mode A Code assigned to another track)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Conflict",
+                    "representation_str": "STANDARD",
+                    "short_name": "AAC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable17": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "surveillance_data_status",
+                    "description": "From 080.SDS\n\nSurveillance Data Status\n0 Combined\n1 Co-operative only\n2 Non-Cooperative only\n3 Not defined",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Surveillance Data Status",
+                    "representation_str": "STANDARD",
+                    "short_name": "SDS",
+                    "unit": ""
+                }
+            },
+            "DBOVariable18": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "potential_false_track",
+                    "description": "From 080.PFT\n\n0 No indication\n1 Potential False Track Indication",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Potential False Track",
+                    "representation_str": "STANDARD",
+                    "short_name": "PFT",
+                    "unit": ""
+                }
+            },
+            "DBOVariable19": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "flight_plan_track",
+                    "description": "From 080.FPLT\n\n0 Default value\n1 Track created / updated with FPL data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Plan Track",
+                    "representation_str": "STANDARD",
+                    "short_name": "FPLT",
+                    "unit": ""
+                }
+            },
+            "DBOVariable2": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_change",
+                    "description": "From 060.CH\n\nChange in Mode 3/A\n0 No Change\n1 Mode 3/A has changed",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Change",
+                    "representation_str": "STANDARD",
+                    "short_name": "MA C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable20": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_duplicate",
+                    "description": "From 080.DUPT\n\n0 Default value\n1 Duplicate Mode 3/A Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Mode 3/A Duplicate",
+                    "representation_str": "STANDARD",
+                    "short_name": "DUPT",
+                    "unit": ""
+                }
+            },
+            "DBOVariable21": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "flight_plan_duplicate",
+                    "description": "From 080.DUPF\n\n0 Default value\n1 Duplicate Flight Plan",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Plan Duplicate",
+                    "representation_str": "STANDARD",
+                    "short_name": "DUPF",
+                    "unit": ""
+                }
+            },
+            "DBOVariable22": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "flight_plan_manual_duplicate",
+                    "description": "From 080.DUPM\n\n0 Default value\n1 Duplicate Flight Plan due to manual correlation",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Plan Manual Duplicate",
+                    "representation_str": "STANDARD",
+                    "short_name": "DUPM",
+                    "unit": ""
+                }
+            },
+            "DBOVariable23": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "aircraft_identification_duplicate",
+                    "description": "From 080.IDD\n\n0 No indication\n1 Duplicate Flight-ID",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Identification Duplicate",
+                    "representation_str": "STANDARD",
+                    "short_name": "ACID D",
+                    "unit": ""
+                }
+            },
+            "DBOVariable24": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "emergency_code_inconsistent",
+                    "description": "From 080.IEC\n\n0 Default value\n1 Inconsistent Emergency Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Emergency Code Inconsistent",
+                    "representation_str": "STANDARD",
+                    "short_name": "IEC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable25": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "surface_target",
+                    "description": "From 080.SFC\n\n0 Default value\n1 Surface target",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Surface Target",
+                    "representation_str": "STANDARD",
+                    "short_name": "SFC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable26": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "x",
+                    "description": "From 100.X\n\nCalculated position in Cartesian co-ordinates with a resolution of\n0.5m",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "X",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable27": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "y",
+                    "description": "From 100.Y\n\nCalculated position in Cartesian co-ordinates with a resolution of\n0.5m",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Y",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable28": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "barometric_altitude_qnh_corrected",
+                    "description": "From 135.QNH\n\n0 No QNH correction applied\n1 QNH correction applied",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Barometric Altitude QNH Corrected",
+                    "representation_str": "STANDARD",
+                    "short_name": "BA QNH C C",
+                    "unit": ""
+                }
+            },
+            "DBOVariable29": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "vx",
+                    "description": "From 185.Vx\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Vx",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter/Second"
+                }
+            },
+            "DBOVariable3": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "geometric_altitude_calculated_src",
+                    "description": "From 080.SRC\nSource of calculated track altitude for I062/130\n0 no source\n1 GNSS\n2 3D radar\n3 triangulation\n4 height from coverage\n5 speed look-up table\n6 default height\n7 multilateration",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Geometric Altitude Calculated Src",
+                    "representation_str": "STANDARD",
+                    "short_name": "GA C Src",
+                    "unit": ""
+                }
+            },
+            "DBOVariable30": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "vy",
+                    "description": "From 185.Vy\n\nCalculated track velocity expressed in Cartesian co-ordinates\n\n(LSB) = 0.25 m/s\n\n-8192m/s <= Vx <= 8191.75m/s",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Vy",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter/Second"
+                }
+            },
+            "DBOVariable31": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mom_altitude_discrepancy",
+                    "description": "From 200.ADF\n\nMode of Movement\n\nAltitude Discrepancy Flag\n0 No altitude discrepancy\n1 Altitude discrepancy",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MOM Altitude Discrepancy",
+                    "representation_str": "STANDARD",
+                    "short_name": "MON ADF",
+                    "unit": ""
+                }
+            },
+            "DBOVariable32": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ax",
+                    "description": "From 210.Ax\n\nCalculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ax",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable33": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ay",
+                    "description": "From 210.Ay\n\nCalculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ay",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable34": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "aircraft_identification_sti",
+                    "description": "From 245.STI\n\n0 Callsign or registration downlinked from target\n1 Callsign not downlinked from target\n2 Registration not downlinked from target\n3 Invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Identification STI",
+                    "representation_str": "STANDARD",
+                    "short_name": "ACID STI",
+                    "unit": ""
+                }
+            },
+            "DBOVariable35": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "aircraft_identification",
+                    "description": "From 245.Target Identification",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Aircraft Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "ACID",
+                    "unit": ""
+                }
+            },
+            "DBOVariable36": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "target_length",
+                    "description": "From 270.LENGTH\n\nWhen the length only is sent, the largest dimension is provided.",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Target Length",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "DBOVariable37": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "target_orientation",
+                    "description": "From 270.ORIENTATION\n\nThe orientation gives the direction which the target nose is pointing to, relative to the Geographical North.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Target Orientation",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable38": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "target_width",
+                    "description": "From 270.WIDTH",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Target Width",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Meter"
+                }
+            },
+            "DBOVariable39": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "adsc_update_age",
+                    "description": "From 290.ADS.Age\n\nAge of the last ADS-C report used to update the track",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "ADS-C Update Age",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "DBOVariable4": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "flight_plan_correlated",
+                    "description": "From 080.FPC\n\n0 Not flight-plan correlated\n1 Flight plan correlated",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Plan Correlated",
+                    "representation_str": "STANDARD",
+                    "short_name": "FPC",
+                    "unit": ""
+                }
+            },
+            "DBOVariable40": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "loop_update_age",
+                    "description": "From 290.LOP.Age\n\nAge of the last magnetic loop detection",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "Loop Update Age",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "DBOVariable41": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "track_age",
+                    "description": "From 290.TRK.Age\n\nActual track age since occurence",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "Track Age",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "DBOVariable42": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "adsb_uat_age",
+                    "description": "From 290.UAT.Age\n\nAge of the last UAT ADS-B report used to update the track",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "ADS-B UAT Age",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "DBOVariable43": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "adsb_vdl_update_age",
+                    "description": "From 290.VDL.Age\n\nAge of the last VDL Mode 4 ADS-B report used to update the track",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "ADS-B VDL Update Age",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "DBOVariable44": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "vehicle_fleet_identification",
+                    "description": "From 300.VFI\n\n0 Unknown\n1 ATC equipment maintenance\n2 Airport maintenance\n3 Fire\n4 Bird scarer\n5 Snow plough\n6 Runway sweeper\n7 Emergency\n8 Police\n9 Bus\n10 Tug (push/tow)\n11 Grass cutter\n12 Fuel\n13 Baggage\n14 Catering\n15 Aircraft maintenance\n16 Flyco (follow me)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Vehicle Fleet Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "VFI",
+                    "unit": ""
+                }
+            },
+            "DBOVariable45": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "range_lm",
+                    "description": "From 340.POS.RHO\n\nMax. range = 256 NM",
+                    "dimension": "Length",
+                    "is_key": false,
+                    "name": "Range LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Nautical Mile"
+                }
+            },
+            "DBOVariable46": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "azimuth_lm",
+                    "description": "From 340.POS.THETA",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Azimuth LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable47": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "3d_height_lm",
+                    "description": "From 340.HEI.HEIGHT\n\nMeasured 3-D Height\n\nThe reference level for this height information is the same as the\nreference level applied by the sensor system providing this information.",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "3D Height LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "DBOVariable48": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fft_lm",
+                    "description": "From 340.TYP.RAB\n\n0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FFT LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable49": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "simulated_lm",
+                    "description": "From 340.TYP.SIM\n\n0  Actual target report\n1 Simulated target report",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Simulated LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "SIM LM",
+                    "unit": ""
+                }
+            },
+            "DBOVariable5": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "adsb_data_inconsistent",
+                    "description": "From 080.AFF\n\n0 default value\n1 ADS-B data inconsistent with other surveillance information",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ADS-B Data Inconsistent",
+                    "representation_str": "STANDARD",
+                    "short_name": "AFF",
+                    "unit": ""
+                }
+            },
+            "DBOVariable50": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "test_lm",
+                    "description": "From 340.TYP.TST\n\n0 Real target report\n 1 Test target report",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Test LM",
+                    "representation_str": "STANDARD",
+                    "short_name": "TST LM",
+                    "unit": ""
+                }
+            },
+            "DBOVariable51": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "magnetic_heading_add",
+                    "description": "From 380.MHG.Magnetic Heading",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Magnetic Heading ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "MH ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable52": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "air_speed_add",
+                    "description": "From 380.AIS.Air Speed\n\nAir Speed (IAS or Mach)",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Air Speed ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "ASpd ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable53": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "true_airspeed_add",
+                    "description": "From 380.TAS.True Airspeed\n\n0 <= True Air Speed <= 2046 knots",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "True Airspeed ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "TASpd ADD",
+                    "unit": "Knots"
+                }
+            },
+            "DBOVariable54": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "selected_altitude_source_av_add",
+                    "description": "From 380.SAL.SAS\n\n0 No source information provided\n1 Source Information provided",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Selected Altitude Source Av ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "SA Src Av\nADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable55": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fs_sa_ah_add",
+                    "description": "From 380.FSS.AH\n\nFinal State Selected Altitude\n\nAltitude Hold\n0 Not active\n1 Active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FS SA AH ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable56": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fs_sa_am_add",
+                    "description": "From 380.FSS.AM\n\nFinal State Selected Altitude\n\nApproach Mode\n0 Not active\n1 Active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FS SA AM ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable57": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "fs_sa_add",
+                    "description": "From 380.FSS.Altitude\n\nFinal State Selected Altitude\n\nBarometric Altitude\n-1300ft <= Altitude <= 100000ft",
+                    "dimension": "Height",
+                    "is_key": false,
+                    "name": "FS SA ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": "Feet"
+                }
+            },
+            "DBOVariable58": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "fs_sa_mv_add",
+                    "description": "From 380.FSS.MV\n\nFinal State Selected Altitude\n\nManage Vertical Mode\n0 Not active\n1 Active",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "FS SA MV ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable59": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "acid_capability_add",
+                    "description": "From 380.COM.AIC\n\nAircraft identification capability\n0 No\n1 Yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACID Capability ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "AIC ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable6": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "slave_track_promotion",
+                    "description": "From 080.STP\n\n0 default value\n1 Slave Track Promotion",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Slave Track Promotion",
+                    "representation_str": "STANDARD",
+                    "short_name": "STP",
+                    "unit": ""
+                }
+            },
+            "DBOVariable60": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "altitude_reporting_capability_add",
+                    "description": "From 380.COM.ARC\n\nAltitude reporting capability\n0 100 ft resolution\n1 25 ft resolution",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Altitude Reporting Capability ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "ARC ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable61": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "b1a_add",
+                    "description": "From 380.COM.B1A\n\nBDS 1,0 bit 16",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "B1A ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable62": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "b1b_add",
+                    "description": "From 380.COM.B1B\n\nBDS 1,0 bits 37/40",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "B1B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable63": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "transponder_com_capability_add",
+                    "description": "From 380.COM.COM\n\nCommunications capability of the transponder\n0 No communications capability (surveillance only)\n1 Comm. A and Comm. B capability\n2 Comm. A, Comm. B and Uplink ELM\n3 Comm. A, Comm. B, Uplink ELM and Downlink ELM\n4 Level 5 Transponder capability\n5 to 7 Not assigned",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Transponder Com. Capability ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "COM ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable64": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "ssc_add",
+                    "description": "From 380.COM.SSC\n\nSpecific Service Capability\n0 No\n1 Yes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SSC ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable65": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "flight_status_add",
+                    "description": "From 380.COM.STAT\n\nFlight Status\n0 No alert, no SPI, aircraft airborne\n1 No alert, no SPI, aircraft on ground\n2 Alert, no SPI, aircraft airborne\n3 Alert, no SPI, aircraft on ground\n4 Alert, SPI, aircraft airborne or on ground\n5 No alert, SPI, aircraft airborne or on ground",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Status ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "STAT ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable66": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "acas_status_adsb_add",
+                    "description": "From 380.SAB.AC\n\n0 unknown\n1 ACAS not operational\n2 ACAS operational\n3 invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "ACAS Status ADS-B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "AC ADSB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable67": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "differential_correction_adsb_add",
+                    "description": "From 380.SAB.DC\n\n0 unknown\n1 Differential correction\n2 No differential correction\n3 invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Differential Correction ADS-B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "DC ADSB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable68": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "ground_bit_adsb_add",
+                    "description": "From 380.SAB.GBS\n\n0 Transponder Ground Bit not set or unknown\n1 Transponder Ground Bit set",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Ground Bit ADS-B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "GBS ADSB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable69": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "multiple_navigational_aids_adsb_add",
+                    "description": "From 380.SAB.MN\n\n0 unknown\n1 Multiple navigational aids not operating\n2 Multiple navigational aids operating\n3 invalid",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Multiple Navigational Aids ADS-B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "MN ADSB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable7": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "background_service_used",
+                    "description": "From 080.KOS\n\n0 Complementary service used\n1 Background service used",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Background Service Used",
+                    "representation_str": "STANDARD",
+                    "short_name": "KOS",
+                    "unit": ""
+                }
+            },
+            "DBOVariable70": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "priority_status_adsb_add",
+                    "description": "From 380.SAB.STAT\n\nFlight Status\n0 No emergency\n1 General emergency\n2 Lifeguard / medical\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 'Downed' Aircraft\n7 Unknown",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Priority Status ADS-B ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "PS ADSB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable71": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "barometric_vertical_rate_add",
+                    "description": "From 380.BVR.Barometric Vertical Rate\n\nUnit:  feet/minute",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Barometric Vertical Rate ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "BVR ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable72": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "geometric_vertical_rate_add",
+                    "description": "From 380.GVR.Geometric Vertical Rate\n\nUnit: feet/minute",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Geometric Vertical Rate ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "GVR ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable73": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "roll_angle_add",
+                    "description": "From 380.RAN.Roll Angle\n\nRoll Angle\n-180 <= Roll Angle <= 180\n",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Roll Angle ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "RAN ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable74": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "track_angle_add",
+                    "description": "From 380.TAN.Track Angle",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Track Angle ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "TAN ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable75": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "track_angle_rate_ti_add",
+                    "description": "From 380.TAR.TI\n\nTurn Indicator\n0 Not available\n1 Left\n2 Right\n3 Straight",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Track Angle Rate TI ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "TAR TI ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable76": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "ground_speed_add",
+                    "description": "From 380.GSP.Ground Speed\n\nGround Speed in two's complement form referenced to WGS84\n-2 NM/s <= Ground Speed < 2 NM/s",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Ground Speed ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "GSP ADD",
+                    "unit": "NM/Second"
+                }
+            },
+            "DBOVariable77": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "velocity_uncertainty_add",
+                    "description": "From 380.VUN.Velocity Uncertainty Category",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Velocity Uncertainty ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "VUN ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable78": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "wind_speed_add",
+                    "description": "From 380.MET.WS.Wind Speed\n\n0 <= Wind Speed <= 300",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Wind Speed ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "WS ADD",
+                    "unit": "Knots"
+                }
+            },
+            "DBOVariable79": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "wind_direction_add",
+                    "description": "From 380.MET.WD.Wind Direction\n\n1 <= Wind Direction <= 360",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Wind Direction ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "WD ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable8": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "md4_reply",
+                    "description": "From 080.MD4\n\n0 No Mode 4 interrogation\n1 Friendly target\n2 Unknown target\n3 No reply",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "MD4 Reply",
+                    "representation_str": "STANDARD",
+                    "short_name": "MD4",
+                    "unit": ""
+                }
+            },
+            "DBOVariable80": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "temperature_add",
+                    "description": "From 380.MET.TMP.Temperature\n\nTemperature in degrees celsius\n-100 °C <= Temperature <= 100 °C",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Temperature ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "TMP ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable81": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "turbulence_add",
+                    "description": "From 380.MET.TRB.Turbulence\n\nInteger between 0 and 15 inclusive",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Turbulence ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "TRB ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable82": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "emitter_category_add",
+                    "description": "From 380.EMC.ECAT\n\n1 light aircraft ≤ 7000 kg\n2 reserved\n3 7000 kg < medium aircraft < 136000 kg\n4 reserved\n5 136000 kg ≤ heavy aircraft\n6 highly manoeuvrable (5g acceleration capability) and high speed (>400 knots cruise)\n7 to 9 reserved\n10 rotocraft\n11 glider / sailplane\n12 lighter-than-air\n13 unmanned aerial vehicle\n14 space / transatmospheric vehicle\n15 ultralight / handglider / paraglider\n16 parachutist / skydiver\n17 to 19 reserved\n20 surface emergency vehicle\n21 surface service vehicle\n22 fixed ground or tethered obstruction\n23 to 24 reserved",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Emitter Category ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "ECAT ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable83": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "latitude_add",
+                    "description": "From 380.POS.Latitude\n\nIn WGS.84 in two’s complement form.\nRange -90 <= latitude <= 90 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Latitude ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lat ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable84": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "longitude_add",
+                    "description": "From 380.POS.Longitude\n\nIn WGS.84 in two’s complement form.\nRange -180 <= longitude < 180 deg.",
+                    "dimension": "Angle",
+                    "is_key": false,
+                    "name": "Longitude ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "Lon ADD",
+                    "unit": "Degree"
+                }
+            },
+            "DBOVariable85": {
+                "parameters": {
+                    "data_type_str": "CHAR",
+                    "db_column_name": "position_uncertainty_add",
+                    "description": "From 380.PUN.Position Uncertainty",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Position Uncertainty ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "PUN ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable86": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "indicated_air_speed_add",
+                    "description": "From 380.IAR.Indicated Air Speed\n\n0 Kt <= Indicated Airspeed <= 1100 Kt\n",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Indicated Air Speed ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "IASpd ADD",
+                    "unit": "Knots"
+                }
+            },
+            "DBOVariable87": {
+                "parameters": {
+                    "data_type_str": "DOUBLE",
+                    "db_column_name": "mach_number_add",
+                    "description": "From 380.MAC.Mach Number\n\n0 <= Mach Number <= 4.096",
+                    "dimension": "Speed",
+                    "is_key": false,
+                    "name": "Mach Number ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "MAC ADD",
+                    "unit": "Mach"
+                }
+            },
+            "DBOVariable88": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_pressure_setting_add",
+                    "description": "From 380.BPS.Barometric Pressure Setting\n\nDerived from Mode S BDS 4,0\n\n-0mb <= BPS <= 409.5 mb\n\nBPS is the barometric pressure setting of the aircraft minus 800 mb.",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Barometric Pressure Setting ADD",
+                    "representation_str": "STANDARD",
+                    "short_name": "BPS ADD",
+                    "unit": ""
+                }
+            },
+            "DBOVariable89": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sac_fpl",
+                    "description": "From 390.TAG.SAC\n\nFlight Plan Related Data\nSystem Area Code from ",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SAC FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable9": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "military_identification",
+                    "description": "From 080.MI\n\n0 default value\n1 Military Identification present in the last report received from a sensor capable of decoding this data",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Military Identification",
+                    "representation_str": "STANDARD",
+                    "short_name": "MI",
+                    "unit": ""
+                }
+            },
+            "DBOVariable90": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "sic_fpl",
+                    "description": "From 390.TAG.SIC\n\nFlight Plan Related Data\nSystem Identity Code",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "SIC FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable91": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "ifps_flight_id_typ_fpl",
+                    "description": "From 390.IFI.TYP\n\n0 Plan Number\n1 Unit 1 internal flight number\n2 Unit 2 internal flight number\n3 Unit 3 internal flight number",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "IFPS_FLIGHT_ID TYP FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable92": {
+                "parameters": {
+                    "data_type_str": "UINT",
+                    "db_column_name": "ifps_flight_id_nbr_fpl",
+                    "description": "From 390.IFI.NBR\n\nNumber from 0 to 99 999 999",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "IFPS_FLIGHT_ID NBR FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable93": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "flight_category_gat_oat_fpl",
+                    "description": "From 390.FCT.GAT/OAT\n\n0 Unknown\n1 General Air Traffic\n2 Operational Air Traffic\n3 Not applicable",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Category GAT/OAT FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable94": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "flight_category_fr1_fr2_fpl",
+                    "description": "From 390.FCT.FR1/FR2\n\n0 Instrument Flight Rules\n1 Visual Flight Rules\n2 Not applicable\n3 Controlled Visual Flight Rules",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Category FR1/FR2 FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable95": {
+                "parameters": {
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "flight_category_rvsm_fpl",
+                    "description": "From 390.FCT.RVSM\n\n0 Unknown\n1 Approved\n2 Exempt\n3 Not Approved",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Category RVSM FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable96": {
+                "parameters": {
+                    "data_type_str": "BOOL",
+                    "db_column_name": "flight_category_hpr_fpl",
+                    "description": "From 390.FCT.HPR\n\n0 Normal Priority Flight\n1 High Priority Flight",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Flight Category HPR FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable97": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "type_of_aircraft_fpl",
+                    "description": "From 390.TAC.Type of Aircraft",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Type of Aircraft FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable98": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "wake_turbulence_category_fpl",
+                    "description": "From 390.WTC.Wake Turbulence Category\n\nWake Turbulence Category is an ASCII character\ncode which should be one of the following\nvalues:\nL = Light\nM = Medium\nH = Heavy\nJ = 'Super'",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Wake Turbulence Category FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
+                }
+            },
+            "DBOVariable99": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "departure_airport_fpl",
+                    "description": "From 390.DEP.Departure Airport",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Departure Airport FPL",
+                    "representation_str": "STANDARD",
+                    "short_name": "",
+                    "unit": ""
                 }
             },
             "DBOVariableTrackeralt_baro_more_reliable0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "alt_baro_more_reliable",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "most_reliable_height",
                     "dbo_name": "CAT062",
-                    "description": "Barometric altitude more reliable? Y, N",
+                    "description": "From 080.MRH\n\n0 Barometric altitude (Mode C) more reliable\n1 Geometric altitude more reliable",
                     "dimension": "",
                     "is_key": false,
-                    "name": "alt_baro_more_reliable",
+                    "name": "Most Reliable Height",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MRH",
                     "unit": ""
-                }
-            },
-            "DBOVariableTrackeralt_geo_ft0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "alt_geo_ft",
-                    "dbo_name": "CAT062",
-                    "description": "Calculated geometric altitude  [I030/130,I062/130 dependend on I062/080 SRC]",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "alt_geo_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
                 }
             },
             "DBOVariableTrackercalc_alt_geo_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "calc_alt_geo_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude_calculated",
                     "dbo_name": "CAT062",
-                    "description": "Calculated Geographical Altitude",
+                    "description": "From 130.Altitude\n\nCalculated Track Geometric Altitude\n\nVertical distance between the target and the projection of its position on the earth’s ellipsoid, as defined by WGS84",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "calc_alt_geo_ft",
+                    "name": "Geometric Altitude Calculated",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GA C",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackercalc_vertical_rate_ftm0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "calc_vertical_rate_ftm",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "rate_of_climb_descent",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 220.Rate of Climb/Descent\n\nCalculated rate of Climb/Descent of an aircraft",
                     "dimension": "",
                     "is_key": false,
-                    "name": "calc_vertical_rate_ftm",
+                    "name": "Rate Of Climb/Descent",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "RoCD",
                     "unit": ""
                 }
             },
             "DBOVariableTrackercallsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "callsign",
+                    "db_column_name": "aircraft_identification_add",
                     "dbo_name": "CAT062",
-                    "description": "Aircraft identification",
+                    "description": "From 380.ID.Target Identification\n\nAircraft identification\n\nCharacters 1-8 (coded on 6 bits each) defining a target identification when flight plan is available or the registration marking when no flight plan is available.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "callsign",
+                    "name": "Aircraft Identification ADD",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackercat0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "cat",
-                    "dbo_name": "CAT062",
-                    "description": "ASTERIX Category",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "cat",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "ACID ADD",
                     "unit": ""
                 }
             },
             "DBOVariableTrackercivil_emergency0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "civil_emergency",
                     "dbo_name": "CAT062",
-                    "description": "Civil emergency",
+                    "description": "From 080.EMS\n\nEmergency Status Indication\n0 No emergency\n1 General emergency\n2 Lifeguard / medical\n3 Minimum fuel\n4 No communications\n5 Unlawful interference\n6 \"Downed\" Aircraft\n7 Undefined",
                     "dimension": "",
                     "is_key": false,
-                    "name": "civil_emergency",
+                    "name": "Civil Emergency",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerdetection_type0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "detection_type",
-                    "dbo_name": "CAT062",
-                    "description": "PSR, SSR, CMB, INV, (MISS)?, ...",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "detection_type",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerdisplay_state0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "display_state",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "display_state",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerdom_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "dom_posix",
-                    "dbo_name": "CAT062",
-                    "description": "Day of message in posix time.",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "dom_posix",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "EMS",
                     "unit": ""
                 }
             },
@@ -1060,25 +2535,11 @@
                     "data_type_str": "INT",
                     "db_column_name": "ds_id",
                     "dbo_name": "CAT062",
-                    "description": "DATA SOURCE ID, is derived from table DS and its sub tables",
+                    "description": "Data Source Identifier",
                     "dimension": "",
                     "is_key": false,
-                    "name": "ds_id",
+                    "name": "DS ID",
                     "representation_str": "DATA_SRC_NAME",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerformation_flight0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "formation_flight",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "formation_flight",
-                    "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
                 }
@@ -1086,98 +2547,28 @@
             "DBOVariableTrackerfpl_callsign0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "fpl_callsign",
+                    "db_column_name": "callsign_fpl",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 390.CSN.Callsign\n\nFlight Plan Related Data\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "fpl_callsign",
+                    "name": "Callsign FPL",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "CS FPL",
                     "unit": ""
-                }
-            },
-            "DBOVariableTrackergeo_area_mask0": {
-                "parameters": {
-                    "data_type_str": "LONGINT",
-                    "db_column_name": "geo_area_mask",
-                    "dbo_name": "CAT062",
-                    "description": "Geographical area bit mask",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "geo_area_mask",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerground_bit0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "ground_bit",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "ground_bit",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackergroundspeed_kt0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "groundspeed_kt",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "Speed",
-                    "is_key": false,
-                    "name": "groundspeed_kt",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Knots"
                 }
             },
             "DBOVariableTrackerhash_code0": {
                 "parameters": {
                     "data_type_str": "STRING",
-                    "db_column_name": "hash_code",
+                    "db_column_name": "target_report_identifiers",
                     "dbo_name": "CAT062",
-                    "description": "ARTAS MD5 Hash Code",
+                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS MD5 Hash Codes",
                     "dimension": "",
                     "is_key": false,
-                    "name": "hash_code",
+                    "name": "Target Report Identifiers",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerheading_deg0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "heading_deg",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "Angle",
-                    "is_key": false,
-                    "name": "heading_deg",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Degree"
-                }
-            },
-            "DBOVariableTrackeric_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "ic_code",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "ic_code",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TRI",
                     "unit": ""
                 }
             },
@@ -1197,545 +2588,335 @@
             },
             "DBOVariableTrackerlm_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "lm_alt_baro_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_c_code_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDC.Last Measured Mode C Code\n\nLast Measured Mode C Code",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "lm_alt_baro_ft",
+                    "name": "Mode C Code LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC LM",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackerlm_alt_baro_g0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "lm_alt_baro_g",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_garbled_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDC.G\n\n0 Default\n1 Garbled code\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_alt_baro_g",
+                    "name": "Mode C Garbled LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC G LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerlm_alt_baro_v0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "lm_alt_baro_v",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_c_valid_lm_",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDC.V\n\n0 Code not validated\n1 Code validated\n\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_alt_baro_v",
+                    "name": "Mode C Valid LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC V LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerlm_alt_geo_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "lm_alt_geo_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude_add",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 380.GAL.Geometric Altitude\n\n-1500 ft <= Altitude <= 150000 ft",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "lm_alt_geo_ft",
+                    "name": "Geometric Altitude ADD",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GA ADD",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackerlm_mode3a_code0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "lm_mode3a_code",
+                    "data_type_str": "UINT",
+                    "db_column_name": "mode_3a_code_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDA.Mode-3/A reply\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_mode3a_code",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "name": "Mode 3/A Code LM",
+                    "representation_str": "DEC_TO_OCTAL",
+                    "short_name": "MA LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerlm_mode3a_g0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "lm_mode3a_g",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_garbled_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDA.G\n\n0 Default\n1 Garbled code\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_mode3a_g",
+                    "name": "Mode 3/A Garbled LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA G LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerlm_mode3a_s0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "lm_mode3a_s",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_smoothed_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDA.L\n\n0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan\n\nSmoothed MODE 3/A data (L = 1) will be used in case of absence of\nMODE 3/A code information in the plot or in case of difference between plot and sensor local track MODE 3/A code information.\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_mode3a_s",
+                    "name": "Mode 3/A Smoothed LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA S LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerlm_mode3a_v0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "lm_mode3a_v",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_valid_lm",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 340.MDA.V\n\n0 Code not validated\n1 Code validated\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "lm_mode3a_v",
+                    "name": "Mode 3/A Valid LM",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermas_track_num0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "mas_track_num",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mas_track_num",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA V LM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermeasured_alt_baro_age_s0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "measured_alt_baro_age_s",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "flight_level_measured_age",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 295.MFL.Age\n\nAge of the last valid and credible Mode C code or barometric altitude from ADS-B used to update the track (I062/136)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "measured_alt_baro_age_s",
+                    "name": "Flight Level Measured Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "FL M Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackermeasured_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "measured_alt_baro_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "flight_level_measured",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 136.Measured Flight Level\n\nLast valid and credible flight level used to update the track.",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "measured_alt_baro_ft",
+                    "name": "Flight Level Measured",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "FL M",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackermeasured_mode3a_age_s0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "measured_mode3a_age_s",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_3a_age",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 295.MDA.Age\n\nAge of the last valid and credible Mode 3/A code used to update the track (I062/060)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "measured_mode3a_age_s",
+                    "name": "Mode 3/A Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackermil_emergency0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mil_emergency",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "military_emergency",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 080.ME\n\n0 default value\n1 Military Emergency present in the last report received from a sensor capable of decoding this data",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mil_emergency",
+                    "name": "Military Emergency",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermode3a_code0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "mode3a_code",
-                    "dbo_name": "CAT062",
-                    "description": "Code, 4 octels",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "mode3a_code",
-                    "representation_str": "DEC_TO_OCTAL",
-                    "short_name": "",
+                    "short_name": "ME",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermode3a_g0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode3a_g",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_garbled",
                     "dbo_name": "CAT062",
-                    "description": "Mode-3/A Garbled? Y, N",
+                    "description": "From 060.G\n\nMode-3/A Garbled\n\n0 Default\n1 Garbled Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_g",
+                    "name": "Mode 3/A Garbled",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA G",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermode3a_v0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "mode3a_v",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "mode_3a_valid",
                     "dbo_name": "CAT062",
-                    "description": "Mode-3/A Valid? Y, N",
+                    "description": "From 060.V\n\n0 Code not validated\n1 Code validated",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mode3a_v",
+                    "name": "Mode 3/A Valid",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermodec_age0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "modec_age",
-                    "dbo_name": "CAT062",
-                    "description": "",
-                    "dimension": "Time",
-                    "is_key": false,
-                    "name": "modec_age",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Second"
-                }
-            },
-            "DBOVariableTrackermodec_code_ft0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "modec_code_ft",
-                    "dbo_name": "CAT062",
-                    "description": "Flight Level / Altitude in Ft",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "modec_code_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
-                }
-            },
-            "DBOVariableTrackermodec_g0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "modec_g",
-                    "dbo_name": "CAT062",
-                    "description": "Mode-C Garbled? ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "modec_g",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermodec_source0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "modec_source",
-                    "dbo_name": "CAT062",
-                    "description": "",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "modec_source",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermodec_v0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "modec_v",
-                    "dbo_name": "CAT062",
-                    "description": "Mode-C Valid? Y, N",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "modec_v",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermodes_mb_data0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "modes_mb_data",
-                    "dbo_name": "CAT062",
-                    "description": "Raw Mode S MB Data (= BDS registers)",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "modes_mb_data",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA V",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermof_long0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_long",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_longitudinal_acc",
                     "dbo_name": "CAT062",
-                    "description": "Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined, see also X__SD_MOF_LONG [I030/200 LONGI, I062/200 LONG]",
+                    "description": "From 200.LONG\n\nMode of Movement\n\nLongitudinal Acceleration :\n0 Constant Groundspeed\n1 Increasing Groundspeed\n2 Decreasing Groundspeed\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_long",
+                    "name": "MOM Longitudinal Acc",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MON LONG",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermof_trans0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_trans",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_transversal_acc",
                     "dbo_name": "CAT062",
-                    "description": "Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined, see also X__SD_MOF_TRANS [I030/200 TRANS, I062/200 TRANS]",
+                    "description": "From 200.TRANS\n\nMode of Movement\n\nTransversal Acceleration:\n0 Constant Course\n1 Right Turn\n2 Left Turn\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_trans",
+                    "name": "MOM Transversal Acc",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MOM TRANS",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermof_vert0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "mof_vert",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "mom_vertical_rate",
                     "dbo_name": "CAT062",
-                    "description": "Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined, see also X__SD_MOF_VERT [I030/200 LONGI, I062/200 LONG]",
+                    "description": "From 200.VERT\n\nMode of Movement\n\nVertical Rate :\n0 Level\n1 Climb\n2 Descent\n3 Undetermined",
                     "dimension": "",
                     "is_key": false,
-                    "name": "mof_vert",
+                    "name": "MOM Vertical Rate",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackermsg_fmt0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "msg_fmt",
-                    "dbo_name": "CAT062",
-                    "description": "Message format as defined in X__SD_MSG_FMTS, contents shall be ASTERIX, Aircat 500, Alenia, FPS117, RAT31SL, RSRP, TRS22, RDIF, MADREC, EUROCONTROL, DDE, CD2, Ericsson",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "msg_fmt",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MOM VERT",
                     "unit": ""
                 }
             },
             "DBOVariableTrackermultiple_sources0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "multiple_sources",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "monosensor",
                     "dbo_name": "CAT062",
-                    "description": "Is the source a multiple-data-source [Y] or single-data-source [N]",
+                    "description": "From 080.MON\n\n0 Multisensor track\n1 Monosensor track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "multiple_sources",
+                    "name": "Monosensor",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MON",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerpos_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_lat_deg",
+                    "db_column_name": "latitude",
                     "dbo_name": "CAT062",
-                    "description": "Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]",
+                    "description": "From 105.Latitude\n\nCalculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_lat_deg",
+                    "name": "Latitude",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lat",
                     "unit": "Degree"
-                }
-            },
-            "DBOVariableTrackerpos_lat_deg_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_lat_deg_calc",
-                    "dbo_name": "CAT062",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_lat_deg_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_local_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_local_x_nm",
-                    "dbo_name": "CAT062",
-                    "description": "Calculated Cartesian track X position (low or high resolution) [I030/110, I062/100 or I062/101]",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_x_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_local_x_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_local_x_nm_calc",
-                    "dbo_name": "CAT062",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_x_nm_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_local_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_local_y_nm",
-                    "dbo_name": "CAT062",
-                    "description": "Calculated Cartesian track Y position (low or high resolution) [I030/110, I062/100 or I062/101]",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_y_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_local_y_nm_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_local_y_nm_calc",
-                    "dbo_name": "CAT062",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_local_y_nm_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableTrackerpos_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_long_deg",
+                    "db_column_name": "longitude",
                     "dbo_name": "CAT062",
-                    "description": "Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]",
+                    "description": "From 105.Longitude\n\nCalculated Position in WGS-84 Co-ordinates with a resolution of\n180/2^25 degrees",
                     "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_long_deg",
+                    "name": "Longitude",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "Lon",
                     "unit": "Degree"
-                }
-            },
-            "DBOVariableTrackerpos_long_deg_calc0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "pos_long_deg_calc",
-                    "dbo_name": "CAT062",
-                    "description": "C = computed, R = reported",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_long_deg_calc",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableTrackerpos_std_dev_lat_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_lat_deg",
+                    "db_column_name": "latitude_stddev",
                     "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
+                    "description": "From 500.APW.APW (Latitude Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.\n ",
+                    "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_std_dev_lat_deg",
+                    "name": "Latitude StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "DBOVariableTrackerpos_std_dev_long_deg0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_long_deg",
+                    "db_column_name": "longitude_stddev",
                     "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
+                    "description": "From 500.APW.APW (Longitude Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated position of a target expressed in WGS-84.",
+                    "dimension": "Angle",
                     "is_key": false,
-                    "name": "pos_std_dev_long_deg",
+                    "name": "Longitude StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "DBOVariableTrackerpos_std_dev_x_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_x_m",
+                    "db_column_name": "x_stddev",
                     "dbo_name": "CAT062",
-                    "description": "Standard deviation of x component in meters",
-                    "dimension": "",
+                    "description": "From 500.APC.APC (X-Component)\n\nStandard deviation of x component in meters",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "pos_std_dev_x_m",
+                    "name": "X StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "DBOVariableTrackerpos_std_dev_xy_corr_coeff0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_xy_corr_coeff",
+                    "db_column_name": "x_y_covariance",
                     "dbo_name": "CAT062",
-                    "description": "Correlation coefficient of xy in meters",
+                    "description": "From 500.COV.COV (XY Covariance Component)\n\nXY Covariance Component\n\n1. XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}\n2. The maximum value for the (unsigned) XY covariance component is 16.383 km.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "pos_std_dev_xy_corr_coeff",
+                    "name": "X/Y Covariance",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1744,57 +2925,15 @@
             "DBOVariableTrackerpos_std_dev_y_m0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_std_dev_y_m",
+                    "db_column_name": "y_stddev",
                     "dbo_name": "CAT062",
-                    "description": "Standard deviation of y component in meters",
-                    "dimension": "",
+                    "description": "From 500.APC.APC (Y-Component)\n\nStandard deviation of y component in meters",
+                    "dimension": "Length",
                     "is_key": false,
-                    "name": "pos_std_dev_y_m",
+                    "name": "Y StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_sys_x_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_sys_x_nm",
-                    "dbo_name": "CAT062",
-                    "description": "System coordinate x",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_sys_x_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerpos_sys_y_nm0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "pos_sys_y_nm",
-                    "dbo_name": "CAT062",
-                    "description": "System coordinate y",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "pos_sys_y_nm",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerraw_msg0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "raw_msg",
-                    "dbo_name": "CAT062",
-                    "description": "Binary represetation",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "raw_msg",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "DBOVariableTrackerrec_num0": {
@@ -1811,43 +2950,15 @@
                     "unit": ""
                 }
             },
-            "DBOVariableTrackerrec_time_ms0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_time_ms",
-                    "dbo_name": "CAT062",
-                    "description": "ms fraction of REC_TIME_POSIX",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "rec_time_ms",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackerrec_time_posix0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "rec_time_posix",
-                    "dbo_name": "CAT062",
-                    "description": "Recording time with accuracy of 1s; is stamped by the communication process",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "rec_time_posix",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
             "DBOVariableTrackerreport_type0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "report_type",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "type_lm",
                     "dbo_name": "CAT062",
-                    "description": "Report classification, see X__SD_REPORT_TYPES",
+                    "description": "From 340.TYP.TYP\n\nLast Measured Detection Type\n\n000 No detection\n001 Single PSR detection\n010 Single SSR detection\n011 SSR + PSR detection\n100 Single ModeS All-Call\n101 Single ModeS Roll-Call\n110 ModeS All-Call + PSR\n111 ModeS Roll-Call +PSR",
                     "dimension": "",
                     "is_key": false,
-                    "name": "report_type",
+                    "name": "Type LM",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1858,10 +2969,10 @@
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
                     "dbo_name": "CAT062",
-                    "description": "ASTERIX System Area Code [I030/010, I062/010]",
+                    "description": "From 010.SAC\n\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sac",
+                    "name": "SAC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1869,27 +2980,27 @@
             },
             "DBOVariableTrackerselected_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "selected_alt_baro_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "selected_altitude_add",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 380.SAL.Altitude\n\nBarometric Altitude\n-1300ft <= Altitude <= 100000ft",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "selected_alt_baro_ft",
+                    "name": "Selected Altitude ADD",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "SA ADD",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackerselected_alt_baro_source0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "selected_alt_baro_source",
+                    "data_type_str": "UCHAR",
+                    "db_column_name": "selected_altitude_source_add",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 380.SAL.Source\n\n0 Unknown\n01 Aircraft Altitude\n2 FCU/MCP Selected Altitude\n3 FMS Selected Altitude\n\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "selected_alt_baro_source",
+                    "name": "Selected Altitude Source ADD",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1900,10 +3011,10 @@
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
                     "dbo_name": "CAT062",
-                    "description": "ASTERIX System Identification Code [I030/010, I062/010]",
+                    "description": "From 010.SIC\n\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "sic",
+                    "name": "SIC",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1911,27 +3022,27 @@
             },
             "DBOVariableTrackersimulated_target0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "simulated_target",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "simulated",
                     "dbo_name": "CAT062",
-                    "description": "Simulated Track? Y, N",
+                    "description": "From 080.SIM\n\n0 Actual track\n1 Simulated track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "simulated_target",
+                    "name": "Simulated",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "SIM",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerspi0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "spi",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 080.SPI\n\n0 default value\n1 SPI present in the last report received from a sensor capable of decoding this data",
                     "dimension": "",
                     "is_key": false,
-                    "name": "spi",
+                    "name": "SPI",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1939,13 +3050,13 @@
             },
             "DBOVariableTrackertarget_addr0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "target_addr",
+                    "data_type_str": "UINT",
+                    "db_column_name": "aircraft_address",
                     "dbo_name": "CAT062",
-                    "description": "24 bit target address / aircraft address / Mode-S address",
+                    "description": "From 380.ADR.Target Address\n\n24 bits Target Address (ADD)",
                     "dimension": "",
                     "is_key": false,
-                    "name": "target_addr",
+                    "name": "Aircraft Address",
                     "representation_str": "DEC_TO_HEX",
                     "short_name": "",
                     "unit": ""
@@ -1954,40 +3065,26 @@
             "DBOVariableTrackertod0": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "db_column_name": "tod",
+                    "db_column_name": "time_of_day",
                     "dbo_name": "CAT062",
-                    "description": "Time of Message / Time of Day (= ms since last midnight), [I030/020, I062/070]",
+                    "description": "From 070.Time Of Track Information\n\nAbsolute time stamping of the information provided in the track\nmessage, in the form of elapsed time since last midnight, expressed as UTC.",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "tod",
+                    "name": "Time of Day",
                     "representation_str": "SECONDS_TO_TIME",
-                    "short_name": "",
+                    "short_name": "ToD",
                     "unit": "Second"
-                }
-            },
-            "DBOVariableTrackertod_calculated0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "tod_calculated",
-                    "dbo_name": "CAT062",
-                    "description": "C:Calculated, R:Recording time, N:From data, L:Local time transform",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "tod_calculated",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableTrackertrack_acs_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_acs_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "acas_age",
                     "dbo_name": "CAT062",
-                    "description": "ACAS Resolution Advisory Report age [I062/295]",
+                    "description": "From 295.ACS.Age\n\nAge of the DAP 'ACAS Resolution Advisory Report' in item 062/380 (Subfield #12)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_acs_age",
+                    "name": "ACAS Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -1996,40 +3093,40 @@
             "DBOVariableTrackertrack_amalgamated0": {
                 "parameters": {
                     "data_type_str": "BOOL",
-                    "db_column_name": "track_amalgamated",
+                    "db_column_name": "amalgamated",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 080.AMA\n\n0 track not resulting from amalgamation process\n1 track resulting from amalgamation process",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_amalgamated",
+                    "name": "Amalgamated",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "AMA",
                     "unit": ""
                 }
             },
             "DBOVariableTrackertrack_bps_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_bps_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_pressure_setting_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Barometric Pressure Setting Data age [I062/295]",
+                    "description": "From 295.BPS.Age\n\nAge of the DAP 'Barometric Pressure Setting' in item 062/380 (Subfield #28)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_bps_age",
+                    "name": "Barometric Pressure Setting ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "BPS ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_bvr_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_bvr_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_vertical_rate_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Barometric Vertical Rate age [I062/295]",
+                    "description": "From 295.BVR.Age\n\nAge of the DAP 'Barometric Vertical Rate' in item 062/380 (Subfield #13)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_bvr_age",
+                    "name": "Barometric Vertical Rate ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2037,13 +3134,13 @@
             },
             "DBOVariableTrackertrack_coasted0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "track_coasted",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "coasting",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 080.CST\n\n0 Default value\n1 Age of the last received track update is higher than system dependent threshold (coasting)",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_coasted",
+                    "name": "Coasting",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2051,13 +3148,13 @@
             },
             "DBOVariableTrackertrack_com_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_com_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "com_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Communications / ACAS Capability and Flight Status age [I062/295]",
+                    "description": "From 295.COM.Age\n\nAge of the DAP 'Communication/ACAS Capability and Flight Status' in item 062/380 (Subfield #10)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_com_age",
+                    "name": "COM ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2065,13 +3162,13 @@
             },
             "DBOVariableTrackertrack_confirmed0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "track_confirmed",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "confirmed",
                     "dbo_name": "CAT062",
-                    "description": "Y or N (tentative)",
+                    "description": "From 080.CNF\n\n0 Tentative track\n1 Confirmed track\n",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_confirmed",
+                    "name": "Confirmed",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2079,55 +3176,55 @@
             },
             "DBOVariableTrackertrack_created0": {
                 "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "track_created",
+                    "data_type_str": "BOOL",
+                    "db_column_name": "track_begin",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 080.TSB\n\n 0 default value\n1 first message transmitted to the user for the track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_created",
+                    "name": "Track Begin",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TSB",
                     "unit": ""
                 }
             },
             "DBOVariableTrackertrack_emc_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_emc_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "emitter_category_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Emitter Category age [I062/295]",
+                    "description": "From 295.EMC.Age\n\nAge of the DAP 'Emitter Category' in item 062/380 (Subfield #21)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_emc_age",
+                    "name": "Emitter Category ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "ECAT ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_end0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_end",
                     "dbo_name": "CAT062",
-                    "description": "Y = End of track, N = Track is still alive",
+                    "description": "From 080.TSE\n\n0 default value\n1 last message transmitted to the user for the track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_end",
+                    "name": "Track End",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TSE",
                     "unit": ""
                 }
             },
             "DBOVariableTrackertrack_es_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_es_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ads_b_es_update_age",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 290.ES.Age\n\nAge of the last 1090 Extended Squitter ADS-B report used to update the track",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_es_age",
+                    "name": "ADS-B ES Update Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2135,111 +3232,97 @@
             },
             "DBOVariableTrackertrack_fss_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_fss_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "fs_sa_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Final State Selected Altitude age [I062/295]",
+                    "description": "From 295.FSS.Age\n\nAge of the DAP 'Final State Selected Altitude' in item 062/380 (Subfield #7)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_fss_age",
+                    "name": "FS SA ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "FSS ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_gal_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_gal_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_altitude_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Geometric Altitude Data age [I062/295]",
+                    "description": "From 295.GAL.Age\n\nAge of the DAP 'Geometric Altitude' in item 062/380 (Subfield #24)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_gal_age",
+                    "name": "Geometric Altitude ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GA ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_gsp_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_gsp_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ground_speed_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Ground Speed age [I062/295]",
+                    "description": "From 295.GSP.Age\n\nAge of the DAP 'Ground Speed' in item 062/380 (Subfield #18)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_gsp_age",
+                    "name": "Ground Speed ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GSP ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_gvr_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_gvr_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "geometric_vertical_rate_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Geometric Vertical Rate age [I062/295]",
+                    "description": "From 295.GVR.Age\n\nAge of the DAP 'Geometrical Vertical Rate' in item 062/380 (Subfield #14)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_gvr_age",
+                    "name": "Geometric Vertical Rate ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "GVR ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_iar_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_iar_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "indicated_airspeed_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Indicated Airspeed Data age [I062/295]",
+                    "description": "From 295.IAR.Age\n\nAge of the DAP 'Indicated Airspeed' in item 062/380 (Subfield #26)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_iar_age",
+                    "name": "Indicated Airspeed ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "IASpd ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_ias_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_ias_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "indicated_airspeed_mach_nb_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Indicated Airspeed/Mach Nb age [I062/295]",
+                    "description": "From 295.IAS.Age\n\nAge of the DAP 'Indicated Airspeed/ Mach Number' in item 062/380 (Subfield #4)\n\nDespite there are now two subfields (#29 and #30) reporting the ages\nof, respectively, the Indicated Airspeed track data and the Mach\nNumber track data, this former subfield is kept free in order to prevent\na full incompatibility with previous releases of ASTERIX Cat. 062\nalready implemented.",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_ias_age",
+                    "name": "Indicated Airspeed/Mach Nb ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "IAS Age",
                     "unit": "Second"
-                }
-            },
-            "DBOVariableTrackertrack_lu_ds_id0": {
-                "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "track_lu_ds_id",
-                    "dbo_name": "CAT062",
-                    "description": "Last updating DATA SOURCE ID",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "track_lu_ds_id",
-                    "representation_str": "DATA_SRC_NAME",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableTrackertrack_lu_sac0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "db_column_name": "track_lu_sac",
+                    "db_column_name": "sac_lm",
                     "dbo_name": "CAT062",
-                    "description": "Last updating ASTERIX System Area Code [I062/340]",
+                    "description": "From 340.SID.SAC\n\nMeasured Information Sensor Identification\nSystem Area Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_lu_sac",
+                    "name": "SAC LM",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2248,12 +3331,12 @@
             "DBOVariableTrackertrack_lu_sic0": {
                 "parameters": {
                     "data_type_str": "UCHAR",
-                    "db_column_name": "track_lu_sic",
+                    "db_column_name": "sic_lm",
                     "dbo_name": "CAT062",
-                    "description": "Last updating ASTERIX System Identification Code [I062/340]",
+                    "description": "From 340.SID.SIC\n\nMeasured Information Sensor Identification\nSystem Identification Code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_lu_sic",
+                    "name": "SIC LM",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -2261,13 +3344,13 @@
             },
             "DBOVariableTrackertrack_mac_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_mac_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mach_number_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Mach Number Data age [I062/295]",
+                    "description": "From 295.MAC.Age\n\nAge of the DAP 'Mach Number' in item 062/380 (Subfield #27)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_mac_age",
+                    "name": "Mach Number ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2275,27 +3358,27 @@
             },
             "DBOVariableTrackertrack_mb_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_mb_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_s_mb_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Mode S MB Data age [I062/295]",
+                    "description": "From 295.MB.Age\n\nAge of the DAP 'Mode S MB Data' in item 062/380 (Subfield #22)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_mb_age",
+                    "name": "Mode S MB ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MB ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_mds_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_mds_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mode_s_update_age",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 290.MDS.Age\n\nAge of the last Mode S detection used to update the track",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_mds_age",
+                    "name": "Mode S Update Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2303,13 +3386,13 @@
             },
             "DBOVariableTrackertrack_met_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_met_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "met_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Meteorological Data age [I062/295]",
+                    "description": "From 295.MET.Age\n\nAge of the DAP 'Meteorological Data' in item 062/380 (Subfield #20)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_met_age",
+                    "name": "MET ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2317,27 +3400,27 @@
             },
             "DBOVariableTrackertrack_mhg_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_mhg_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "magnetic_heading_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Magnetic Heading age [I062/295]",
+                    "description": "From 295.MHG.Age\n\nAge of the DAP 'Magnetic Heading' in item 062/380 (Subfield #3)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_mhg_age",
+                    "name": "Magnetic Heading ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MHG ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_mlt_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_mlt_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "mlat_update_age",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 290.MLT.Age\n\nAge of the last MLT detection",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_mlt_age",
+                    "name": "MLAT Update Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2345,27 +3428,27 @@
             },
             "DBOVariableTrackertrack_num0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "track_num",
+                    "data_type_str": "UINT",
+                    "db_column_name": "track_number",
                     "dbo_name": "CAT062",
-                    "description": "Track number [I030/050 SYSTEM TRACK NUMBER, I062/040]",
+                    "description": "From 040.Track Number\n\nIdentification of a track",
                     "dimension": "",
                     "is_key": false,
-                    "name": "track_num",
+                    "name": "Track Number",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TN",
                     "unit": ""
                 }
             },
             "DBOVariableTrackertrack_pos_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_pos_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "position_data_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Position Data age [I062/295]",
+                    "description": "From 295.POS.Age\n\nAge of the DAP 'Position' in item 062/380 (Subfield #23)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_pos_age",
+                    "name": "Position Data ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2373,13 +3456,13 @@
             },
             "DBOVariableTrackertrack_psr_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_psr_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "psr_update_age",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 290.PSR.Age\n\nAge of the last primary detection used to update the track",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_psr_age",
+                    "name": "PSR Update Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2387,41 +3470,41 @@
             },
             "DBOVariableTrackertrack_pun_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_pun_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "position_uncertainty_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Position Uncertainty Data age [I062/295]",
+                    "description": "From 295.PUN.Age\n\nAge of the DAP 'Position Uncertainty' in item 062/380 (Subfield #25)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_pun_age",
+                    "name": "Position Uncertainty ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "PUN ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_ran_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_ran_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "roll_angle_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Roll Angle age [I062/295]",
+                    "description": "From 295.RAN.Age\n\nAge of the DAP 'Roll Angle' in item 062/380 (Subfield #15)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_ran_age",
+                    "name": "Roll Angle ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "RAN ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_sab_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_sab_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "sab_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Status Reported by ADS-B age [I062/295]",
+                    "description": "From 295.SAB.Age\n\nAge of the DAP 'Status Reported by ADS-B' in item 062/380 (Subfield #11)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_sab_age",
+                    "name": "SAB ADD Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2429,41 +3512,27 @@
             },
             "DBOVariableTrackertrack_sal_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_sal_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "selected_altitude_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Selected Altitude age [I062/295]",
+                    "description": "From 295.SAL.Age\n\nAge of the DAP 'Selected Altitude' in item 062/380 (Subfield #6)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_sal_age",
+                    "name": "Selected Altitude ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "SAL ADD Age",
                     "unit": "Second"
-                }
-            },
-            "DBOVariableTrackertrack_slant_corr_type0": {
-                "parameters": {
-                    "data_type_str": "CHAR",
-                    "db_column_name": "track_slant_corr_type",
-                    "dbo_name": "CAT062",
-                    "description": "see X__SD_TRACK_SLANT_CORR_TYPES",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "track_slant_corr_type",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
                 }
             },
             "DBOVariableTrackertrack_ssr_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_ssr_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "ssr_update_age",
                     "dbo_name": "CAT062",
-                    "description": " ",
+                    "description": "From 290.SSR.Age\n\nAge of the last secondary detection used to update the track ",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_ssr_age",
+                    "name": "SSR Update Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": "Second"
@@ -2471,141 +3540,113 @@
             },
             "DBOVariableTrackertrack_tan_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_tan_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "track_angle_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Track Angle age [I062/295]",
+                    "description": "From 295.TAN.Age\n\nAge of the DAP 'Track Angle' in item 062/380 (Subfield #17)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_tan_age",
+                    "name": "Track Angle ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TAN ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_tar_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_tar_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "track_angle_rate_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Track Angle Rate age [I062/295]",
+                    "description": "From 295.TAR.Age\n\nAge of the DAP 'Track Angle Rate' in item 062/380 (Subfield #16)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_tar_age",
+                    "name": "Track Angle Rate ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TAR ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_tas_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_tas_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "true_airspeed_add_age",
                     "dbo_name": "CAT062",
-                    "description": "True Airspeed age [I062/295]",
+                    "description": "From 295.TAS.Age\n\nAge of the DAP 'True Airspeed' in item 062/380 (Subfield #5)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_tas_age",
+                    "name": "True Airspeed ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TAS ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_tid_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_tid_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "trajectory_intent_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Trajectory Intent Data age [I062/295]",
+                    "description": "From 295.TID.Age\n\nAge of the DAP 'Trajectory Intent' in item 062/380 (Subfield #8)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_tid_age",
+                    "name": "Trajectory Intent ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TID Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertrack_vun_age0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "track_vun_age",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "velocity_uncertainty_add_age",
                     "dbo_name": "CAT062",
-                    "description": "Velocity Uncertainty age [I062/295]",
+                    "description": "From 295.VUN.Age\n\nAge of the DAP 'Velocity Uncertainty' in item 062/380 (Subfield #19)",
                     "dimension": "Time",
                     "is_key": false,
-                    "name": "track_vun_age",
+                    "name": "Velocity Uncertainty ADD Age",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "VUN ADD Age",
                     "unit": "Second"
                 }
             },
             "DBOVariableTrackertracked_alt_baro_ft0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "tracked_alt_baro_ft",
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "barometric_altitude_calculated",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 135.Calculated Track Barometric Altitude\n\nCalculated Barometric Altitude of the track",
                     "dimension": "Height",
                     "is_key": false,
-                    "name": "tracked_alt_baro_ft",
+                    "name": "Barometric Altitude Calculated",
                     "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": "Feet"
-                }
-            },
-            "DBOVariableTrackertracked_alt_geo_ft0": {
-                "parameters": {
-                    "data_type_str": "DOUBLE",
-                    "db_column_name": "tracked_alt_geo_ft",
-                    "dbo_name": "CAT062",
-                    "description": "",
-                    "dimension": "Height",
-                    "is_key": false,
-                    "name": "tracked_alt_geo_ft",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "BA C",
                     "unit": "Feet"
                 }
             },
             "DBOVariableTrackertracked_mode3a_code0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "tracked_mode3a_code",
+                    "data_type_str": "UINT",
+                    "db_column_name": "mode_3a_code",
                     "dbo_name": "CAT062",
-                    "description": "",
+                    "description": "From 060.Mode-3/A reply\n\nMode-3/A code",
                     "dimension": "",
                     "is_key": false,
-                    "name": "tracked_mode3a_code",
+                    "name": "Mode 3/A Code",
                     "representation_str": "DEC_TO_OCTAL",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableTrackertransponder_delay_corr0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "transponder_delay_corr",
-                    "dbo_name": "CAT062",
-                    "description": " ",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "transponder_delay_corr",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MA",
                     "unit": ""
                 }
             },
             "DBOVariableTrackerturnrate_degps0": {
                 "parameters": {
                     "data_type_str": "DOUBLE",
-                    "db_column_name": "turnrate_degps",
+                    "db_column_name": "track_angle_rate_add",
                     "dbo_name": "CAT062",
-                    "description": "Turn rate in Deg/sec",
+                    "description": "From 380.TAR.Rate of Turn\n\nTurn rate in deg/sec\n\nA positive value represents a right turn, whereas a negative value represents a left turn.\nValue 15 means 15 deg/sec or above.",
                     "dimension": "",
                     "is_key": false,
-                    "name": "turnrate_degps",
+                    "name": "Track Angle Rate ADD",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "TAR ADD",
                     "unit": ""
                 }
             }

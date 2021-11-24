@@ -145,7 +145,7 @@
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "020.SIM",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -241,7 +241,7 @@
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "090.G",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -689,7 +689,7 @@
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "020.TST",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -913,22 +913,6 @@
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "020.TYP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping96": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type string, value \"N\", custom from 230.STAT",
-                    "db_object_name": "CAT048",
-                    "dbovariable_name": "Ground Bit",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "ground_bit",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""

@@ -1057,10 +1057,10 @@
             },
             "DBOVariableRadardetection_type0": {
                 "parameters": {
-                    "data_type_str": "CHAR",
+                    "data_type_str": "UCHAR",
                     "db_column_name": "type",
                     "dbo_name": "CAT048",
-                    "description": "Radar detection in last antenna scan, as follows:\n0 No detection;\n1 Sole primary detection;\n2 Sole secondary detection;\n3 Combined primary and secondary detection.",
+                    "description": "From 020.TYP\n\nFrom 020.SSR/PSR\n\nRadar detection in last antenna scan, as follows:\n0 No detection;\n1 Sole primary detection;\n2 Sole secondary detection;\n3 Combined primary and secondary detection.",
                     "dimension": "",
                     "is_key": false,
                     "name": "Type",
@@ -1071,10 +1071,10 @@
             },
             "DBOVariableRadards_id0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "ds_id",
                     "dbo_name": "CAT048",
-                    "description": "Data Source ID",
+                    "description": "From ds_id\n\nData Source ID",
                     "dimension": "",
                     "is_key": false,
                     "name": "DS ID",
@@ -1085,27 +1085,13 @@
             },
             "DBOVariableRadarfrom_fft0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "fft",
                     "dbo_name": "CAT048",
-                    "description": "0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
+                    "description": "From 020.RAB\n\n0 Report from aircraft transponder\n1 Report from field monitor(fixed transponder)",
                     "dimension": "",
                     "is_key": false,
                     "name": "FFT",
-                    "representation_str": "STANDARD",
-                    "short_name": "",
-                    "unit": ""
-                }
-            },
-            "DBOVariableRadarground_bit0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "ground_bit",
-                    "dbo_name": "CAT048",
-                    "description": "",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Ground Bit",
                     "representation_str": "STANDARD",
                     "short_name": "",
                     "unit": ""
@@ -1116,7 +1102,7 @@
                     "data_type_str": "STRING",
                     "db_column_name": "artas_hash",
                     "dbo_name": "CAT048",
-                    "description": "ARTAS MD5 Hash Code",
+                    "description": "From artas_md5\n\nARTAS MD5 Hash Code",
                     "dimension": "",
                     "is_key": false,
                     "name": "ARTAS Hash",
@@ -1127,7 +1113,7 @@
             },
             "DBOVariableRadarline_id0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "line_id",
                     "dbo_name": "CAT048",
                     "description": "COMMUNICATION LINE ID determines the origin of the record, see table COMMS",
@@ -1141,10 +1127,10 @@
             },
             "DBOVariableRadarmil_emergency0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "military_emergency",
                     "dbo_name": "CAT048",
-                    "description": "0 No military emergency \n1 Military emergency",
+                    "description": "From 020.ME\n\n0 No military emergency \n1 Military emergency",
                     "dimension": "",
                     "is_key": false,
                     "name": "Military Emergency",
@@ -1155,10 +1141,10 @@
             },
             "DBOVariableRadarmil_ident0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "military_identification",
                     "dbo_name": "CAT048",
-                    "description": "0 No military identification\n1 Military identification",
+                    "description": "From 020.MI\n\n0 No military identification\n1 Military identification",
                     "dimension": "",
                     "is_key": false,
                     "name": "Military Identification",
@@ -1169,10 +1155,10 @@
             },
             "DBOVariableRadarmode3a_code0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "mode_3a_code",
                     "dbo_name": "CAT048",
-                    "description": "070.Mode-3/A reply in decimal\nrepresentation",
+                    "description": "From 070.Mode-3/A reply\n\n070.Mode-3/A reply in decimal\nrepresentation",
                     "dimension": "",
                     "is_key": false,
                     "name": "Mode 3/A Code",
@@ -1183,10 +1169,10 @@
             },
             "DBOVariableRadarmode3a_g0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_garbled",
                     "dbo_name": "CAT048",
-                    "description": "0 Default\n1 Garbled code",
+                    "description": "From 070.G\n\n0 Default\n1 Garbled code",
                     "dimension": "",
                     "is_key": false,
                     "name": "Mode 3/A Garbled",
@@ -1197,10 +1183,10 @@
             },
             "DBOVariableRadarmode3a_smo0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_smoothed",
                     "dbo_name": "CAT048",
-                    "description": "0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
+                    "description": "From 070.L\n\n0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
                     "dimension": "",
                     "is_key": false,
                     "name": "Mode 3/A Smoothed",
@@ -1211,10 +1197,10 @@
             },
             "DBOVariableRadarmode3a_v0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "mode_3a_valid",
                     "dbo_name": "CAT048",
-                    "description": "0 Code not validated\n1 Code validated\n",
+                    "description": "From 070.V\n\n0 Code not validated\n1 Code validated\n",
                     "dimension": "",
                     "is_key": false,
                     "name": "Mode 3/A Valid",
@@ -1225,21 +1211,21 @@
             },
             "DBOVariableRadarmodec_code_ft0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "FLOAT",
                     "db_column_name": "mode_c_code",
                     "dbo_name": "CAT048",
-                    "description": "From 090.Flight Level\n\nThis data item shall be sent when Mode C code or Mode S altitude code is present and decodable. It represents the flight level of the plot, even if associated\nwith a track.",
+                    "description": "From 090.Mode-C HEIGHT\n\nFrom 090.Flight Level\n\nThis data item shall be sent when Mode C code or Mode S altitude code is present and decodable. It represents the flight level of the plot, even if associated\nwith a track.",
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
                     "representation_str": "STANDARD",
-                    "short_name": "",
+                    "short_name": "MC",
                     "unit": "Feet"
                 }
             },
             "DBOVariableRadarmodec_g0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "mode_c_garbled",
                     "dbo_name": "CAT048",
                     "description": "From 090.G\n\n0 Default\n1 Garbled code",
@@ -1253,7 +1239,7 @@
             },
             "DBOVariableRadarmodec_v0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "mode_c_valid",
                     "dbo_name": "CAT048",
                     "description": "From 090.V\n\n0 Code not validated\n1 Code validated",
@@ -1270,7 +1256,7 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "azimuth",
                     "dbo_name": "CAT048",
-                    "description": "Measured position of an aircraft in local polar co-ordinates",
+                    "description": "From 040.THETA\n\nMeasured position of an aircraft in local polar co-ordinates",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Azimuth",
@@ -1284,7 +1270,7 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "range",
                     "dbo_name": "CAT048",
-                    "description": "Measured position of an aircraft in local polar co-ordinates\n\nMax. range = 256 NM",
+                    "description": "From 040.RHO\n\nMeasured position of an aircraft in local polar co-ordinates\n\nMax. range = 256 NM",
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Range",
@@ -1295,8 +1281,8 @@
             },
             "DBOVariableRadarrec_num0": {
                 "parameters": {
-                    "data_type_str": "INT",
-                    "db_column_name": "sd_ssr.rec_num",
+                    "data_type_str": "UINT",
+                    "db_column_name": "rec_num",
                     "dbo_name": "CAT048",
                     "description": "Unique record id starting with 0 on every new recording",
                     "dimension": "",
@@ -1312,7 +1298,7 @@
                     "data_type_str": "UCHAR",
                     "db_column_name": "sac",
                     "dbo_name": "CAT048",
-                    "description": "Data Source Identifier System Area Code",
+                    "description": "From 010.SAC\n\nData Source Identifier System Area Code",
                     "dimension": "",
                     "is_key": false,
                     "name": "SAC",
@@ -1326,7 +1312,7 @@
                     "data_type_str": "UCHAR",
                     "db_column_name": "sic",
                     "dbo_name": "CAT048",
-                    "description": "Data Source Identifier System Identification Code",
+                    "description": "From 010.SIC\n\nData Source Identifier System Identification Code",
                     "dimension": "",
                     "is_key": false,
                     "name": "SIC",
@@ -1337,10 +1323,10 @@
             },
             "DBOVariableRadarsimulated_target0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "simulated",
                     "dbo_name": "CAT048",
-                    "description": "0  Actual target report\n1 Simulated target report",
+                    "description": "From 020.SIM\n\n0  Actual target report\n1 Simulated target report",
                     "dimension": "",
                     "is_key": false,
                     "name": "Simulated",
@@ -1351,10 +1337,10 @@
             },
             "DBOVariableRadarspi0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "spi",
                     "dbo_name": "CAT048",
-                    "description": "0 Absence of SPI\n1 Special Position Identification",
+                    "description": "From 020.SPI\n\n0 Absence of SPI\n1 Special Position Identification",
                     "dimension": "",
                     "is_key": false,
                     "name": "SPI",
@@ -1365,10 +1351,10 @@
             },
             "DBOVariableRadartest_target0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "test",
                     "dbo_name": "CAT048",
-                    "description": "0 Real target report\n1 Test target report",
+                    "description": "From 020.TST\n\n0 Real target report\n1 Test target report",
                     "dimension": "",
                     "is_key": false,
                     "name": "Test",
@@ -1382,7 +1368,7 @@
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
                     "dbo_name": "CAT048",
-                    "description": "Absolute time stamping expressed as Co-ordinated Universal Time (UTC)",
+                    "description": "From 140.Time-of-Day\n\nAbsolute time stamping expressed as Co-ordinated Universal Time (UTC)",
                     "dimension": "Time",
                     "is_key": false,
                     "name": "Time of Day",
@@ -1393,10 +1379,10 @@
             },
             "DBOVariableRadartrack_confirmed0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_confirmed",
                     "dbo_name": "CAT048",
-                    "description": "From 170.CNF\n\nConfirmed vs. Tentative Track\n0 Tentative Track\n1 Confirmed Track",
+                    "description": "From 170.CON\n\nFrom 170.CNF\n\nConfirmed vs. Tentative Track\n0 Tentative Track\n1 Confirmed Track",
                     "dimension": "",
                     "is_key": false,
                     "name": "Track Confirmed",
@@ -1407,7 +1393,7 @@
             },
             "DBOVariableRadartrack_doubtful0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_doubtful",
                     "dbo_name": "CAT048",
                     "description": "From 170.DOU\n\nSignals level of confidence in plot to track association process\n0 Normal confidence\n1 Low confidence in plot to track association.",
@@ -1421,7 +1407,7 @@
             },
             "DBOVariableRadartrack_end0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_end",
                     "dbo_name": "CAT048",
                     "description": "From 170.TRE\n\nSignal for End_of_Track\n0 Track still alive\n1 End of track lifetime(last report for this track)",
@@ -1435,7 +1421,7 @@
             },
             "DBOVariableRadartrack_ghost_target0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_ghost_target",
                     "dbo_name": "CAT048",
                     "description": "From 170.GHO\n\nGhost vs. true target\n0 True target track.\n1 Ghost target track.",
@@ -1452,7 +1438,7 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_groundspeed",
                     "dbo_name": "CAT048",
-                    "description": "Calculated track velocity expressed in polar co-ordinates.",
+                    "description": "From 200.CALCULATED GROUNDSPEED\n\nCalculated track velocity expressed in polar co-ordinates.",
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Track Groundspeed",
@@ -1466,7 +1452,7 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
                     "dbo_name": "CAT048",
-                    "description": "Calculated track velocity expressed in polar co-ordinates.\n\nWas called Track Heading previously, but renamed since it refers to  the direction of movement.",
+                    "description": "From 200.CALCULATED HEADING\n\nCalculated track velocity expressed in polar co-ordinates.\n\nWas called Track Heading previously, but renamed since it refers to  the direction of movement.",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
@@ -1477,10 +1463,10 @@
             },
             "DBOVariableRadartrack_manoeuvre_hori0": {
                 "parameters": {
-                    "data_type_str": "STRING",
+                    "data_type_str": "BOOL",
                     "db_column_name": "track_horizontal_manoeuvre",
                     "dbo_name": "CAT048",
-                    "description": "From 170.MAH\n\nManoeuvre detection in Horizontal Sense\n0 No horizontal man.sensed\n1 Horizontal man. sensed",
+                    "description": "From 170.MAN\n\nFrom 170.MAH\n\nManoeuvre detection in Horizontal Sense\n0 No horizontal man.sensed\n1 Horizontal man. sensed",
                     "dimension": "",
                     "is_key": false,
                     "name": "Track Horizontal Manoeuvre",
@@ -1491,10 +1477,10 @@
             },
             "DBOVariableRadartrack_num0": {
                 "parameters": {
-                    "data_type_str": "INT",
+                    "data_type_str": "UINT",
                     "db_column_name": "track_number",
                     "dbo_name": "CAT048",
-                    "description": "An integer value representing a unique reference to a\ntrack/plot record within a particular track/plot file.",
+                    "description": "From 161.TRACK/PLOT NUMBER\n\nAn integer value representing a unique reference to a\ntrack/plot record within a particular track/plot file.",
                     "dimension": "",
                     "is_key": false,
                     "name": "Track Number",

@@ -12,7 +12,7 @@
                     "append_value": false,
                     "comment": "Type number, value 13040",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "ds_id",
+                    "dbovariable_name": "DS ID",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -28,7 +28,7 @@
                     "append_value": false,
                     "comment": "Type number, value 33502.296875",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "tod",
+                    "dbovariable_name": "Time of Day",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -40,31 +40,15 @@
             },
             "JSONDataMapping100": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 11.5, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Vy StdDev",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.ATV.ATV (Y-Component)",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping101": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 62",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "cat",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "category",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -76,7 +60,7 @@
                     "append_value": false,
                     "comment": "Type string, value \"DLH9AW \"",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "fpl_callsign",
+                    "dbovariable_name": "Callsign FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -88,11 +72,11 @@
             },
             "JSONDataMapping103": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"EDDF\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Departure Airport FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -104,11 +88,11 @@
             },
             "JSONDataMapping104": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"LIRN\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Destination Airport FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -120,11 +104,11 @@
             },
             "JSONDataMapping105": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Category FR1/FR2 FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -136,11 +120,11 @@
             },
             "JSONDataMapping106": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Category GAT/OAT FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -152,11 +136,11 @@
             },
             "JSONDataMapping107": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Category HPR FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -168,11 +152,11 @@
             },
             "JSONDataMapping108": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Category RVSM FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -184,11 +168,11 @@
             },
             "JSONDataMapping109": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 63249491, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "IFPS_FLIGHT_ID NBR FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -204,7 +188,7 @@
                     "append_value": false,
                     "comment": "Type number, value 7594",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_num",
+                    "dbovariable_name": "Track Number",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -216,11 +200,11 @@
             },
             "JSONDataMapping110": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "IFPS_FLIGHT_ID TYP FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -232,11 +216,11 @@
             },
             "JSONDataMapping111": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"A321\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Type of Aircraft FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -248,11 +232,11 @@
             },
             "JSONDataMapping112": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "SAC FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -264,11 +248,11 @@
             },
             "JSONDataMapping113": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "SIC FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -280,11 +264,11 @@
             },
             "JSONDataMapping114": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"M\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Wake Turbulence Category FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -296,27 +280,27 @@
             },
             "JSONDataMapping115": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 350.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Current Cleared Flight Level FPL",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "390.CFL.CFL",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Flight Level"
                 }
             },
             "JSONDataMapping116": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"ILSCA33\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Standard Instrument Arrival FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -326,29 +310,13 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping117": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 1, not found",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.REP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
             "JSONDataMapping118": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 32, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Runway Designation LTR FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -360,11 +328,11 @@
             },
             "JSONDataMapping119": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 50, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Runway Designation NU1 FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -376,11 +344,11 @@
             },
             "JSONDataMapping12": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 225",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Service Identification",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -392,11 +360,11 @@
             },
             "JSONDataMapping120": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 57, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Runway Designation NU2 FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -408,11 +376,11 @@
             },
             "JSONDataMapping121": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type string, value \"SASAL2C\", not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Standard Instrument Departure FPl",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -424,11 +392,11 @@
             },
             "JSONDataMapping122": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Centre FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -440,11 +408,11 @@
             },
             "JSONDataMapping123": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 3, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Position FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -460,7 +428,7 @@
                     "append_value": false,
                     "comment": "Type number, value 30818.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "calc_alt_geo_ft",
+                    "dbovariable_name": "Geometric Altitude Calculated",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -472,27 +440,27 @@
             },
             "JSONDataMapping125": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 5307, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Mode 3/A Code Pre-Em FPL",
                     "dimension": "",
-                    "format_data_type": "",
+                    "format_data_type": "UINT",
                     "in_array": false,
                     "json_key": "390.PEM.Mode-3/A reply",
-                    "json_value_format": "",
+                    "json_value_format": "octal",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping126": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Mode 3/A Code Pre-Em Valid FPL",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -508,7 +476,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_com_age",
+                    "dbovariable_name": "COM ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -524,7 +492,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_gsp_age",
+                    "dbovariable_name": "Ground Speed ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -536,47 +504,15 @@
             },
             "JSONDataMapping13": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Mode 3/A Change",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "060.CH",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping130": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 63.75, not found",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "295.MD1.Age",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping131": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 63.75, not found",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "295.MD2.Age",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -588,7 +524,7 @@
                     "append_value": false,
                     "comment": "Type number, value 63.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_met_age",
+                    "dbovariable_name": "MET ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -604,7 +540,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_ran_age",
+                    "dbovariable_name": "Roll Angle ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -620,7 +556,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_sal_age",
+                    "dbovariable_name": "Selected Altitude ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -636,7 +572,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_tan_age",
+                    "dbovariable_name": "Track Angle ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -652,7 +588,7 @@
                     "append_value": false,
                     "comment": "Type number, value 9, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_tar_age",
+                    "dbovariable_name": "Track Angle Rate ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -668,7 +604,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_tas_age",
+                    "dbovariable_name": "True Airspeed ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -684,7 +620,7 @@
                     "append_value": false,
                     "comment": "Type number, value 63.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_tid_age",
+                    "dbovariable_name": "Trajectory Intent ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -696,11 +632,11 @@
             },
             "JSONDataMapping139": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "ACID Capability ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -712,11 +648,11 @@
             },
             "JSONDataMapping14": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Mode 3/A Conflict",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -728,11 +664,11 @@
             },
             "JSONDataMapping140": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Altitude Reporting Capability ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -744,11 +680,11 @@
             },
             "JSONDataMapping141": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "B1A ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -760,11 +696,11 @@
             },
             "JSONDataMapping142": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "B1B ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -776,11 +712,11 @@
             },
             "JSONDataMapping143": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Transponder Com. Capability ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -792,11 +728,11 @@
             },
             "JSONDataMapping144": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "SSC ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -808,11 +744,11 @@
             },
             "JSONDataMapping145": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Status ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -824,34 +760,34 @@
             },
             "JSONDataMapping146": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0.1080322155, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Ground Speed ADD",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.GSP.Ground Speed",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "NM/Second"
                 }
             },
             "JSONDataMapping147": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value -3.34, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Roll Angle ADD",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.RAN.Roll Angle",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping148": {
@@ -860,7 +796,7 @@
                     "append_value": false,
                     "comment": "Type number, value 22000.0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "selected_alt_baro_ft",
+                    "dbovariable_name": "Selected Altitude ADD",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -872,11 +808,11 @@
             },
             "JSONDataMapping149": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Selected Altitude Source Av ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -888,11 +824,11 @@
             },
             "JSONDataMapping15": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "ADS-B Coasting",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -908,7 +844,7 @@
                     "append_value": false,
                     "comment": "Type number, value 2",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "selected_alt_baro_source",
+                    "dbovariable_name": "Selected Altitude Source ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -920,18 +856,18 @@
             },
             "JSONDataMapping151": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 279.4921873728, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Track Angle ADD",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.TAN.Track Angle",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping152": {
@@ -940,7 +876,7 @@
                     "append_value": false,
                     "comment": "Type number, value 31.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "turnrate_degps",
+                    "dbovariable_name": "Track Angle Rate ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -952,11 +888,11 @@
             },
             "JSONDataMapping153": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Track Angle Rate TI ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -968,34 +904,18 @@
             },
             "JSONDataMapping154": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 362.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "True Airspeed ADD",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.TAS.True Airspeed",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping155": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 9",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "SPF.REP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
+                    "unit": "Knots"
                 }
             },
             "JSONDataMapping156": {
@@ -1014,209 +934,17 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping157": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [false,true,true,true,false,true,false,true,false,false,true,false,false,false,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "290.available",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping158": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,false,false,true,false,false,true,true,false,false,false,true,false,false,false,true,false,true,false,false,false,false,false,true,false,false,false,false,false,false,false,true,true,true,false,false,false,false,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "295.available",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping159": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,true,false,true,true,true,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "340.available",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
             "JSONDataMapping16": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "ADS-B Data Inconsistent",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "080.AFF",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping160": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,true,true,false,false,false,true,true,false,false,false,false,false,true,false,true,false,false,false,false,false,false,false,true,false,false,false,false,true,true,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "380.available",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping161": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,false,true,true,true,true,true,true,true,false,false,false,false,false,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "500.available",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping162": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,false,true,true,true,true,true,true,true,true,false,true,true,true,true,true,true,true,true,false,true,true,false,true,false,false,false,false,false,true,true,true,false,false,false,false,false,false,true,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "FSPEC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping164": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.AVS",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping165": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.DAY",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping166": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 7",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.HOR",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping167": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.MIN",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping168": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 0",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.SEC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping169": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 7",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.TOD.Time of Departure / Arrival.TYP",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1228,28 +956,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_amalgamated",
+                    "dbovariable_name": "Amalgamated",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.AMA",
                     "json_value_format": "bool",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping170": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [true,true,true,true,true,true,true,true,true,false,true,false,true,false,false,true,false,false,false,false,false,false,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "390.available",
-                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -1260,7 +972,7 @@
                     "append_value": true,
                     "comment": "Type string, value \"6556e4c2\"",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "hash_code",
+                    "dbovariable_name": "Target Report Identifiers",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": true,
@@ -1270,93 +982,13 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping172": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 640.5181396224128",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "groundspeed_kt",
-                    "dimension": "Speed",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "185.Ground Speed",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Knots"
-                }
-            },
-            "JSONDataMapping173": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 1.8458335860267208",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "heading_deg",
-                    "dimension": "Angle",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "185.Track Angle",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Degree"
-                }
-            },
-            "JSONDataMapping174": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 4454",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "index",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping175": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 155",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "length",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping176": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 30818.75",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "alt_geo_ft",
-                    "dimension": "Height",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "130.Altitude",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Feet"
-                }
-            },
             "JSONDataMapping177": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "civil_emergency",
+                    "dbovariable_name": "Civil Emergency",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -1372,12 +1004,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mode3a_g",
+                    "dbovariable_name": "Mode 3/A Garbled",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "060.G",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -1388,12 +1020,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mode3a_v",
+                    "dbovariable_name": "Mode 3/A Valid",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "BOOL",
                     "in_array": false,
                     "json_key": "060.V",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -1404,12 +1036,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_confirmed",
+                    "dbovariable_name": "Confirmed",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "BOOL",
                     "in_array": false,
                     "json_key": "080.CNF",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -1420,7 +1052,7 @@
                     "append_value": false,
                     "comment": "Type number, value 4.25",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_acs_age",
+                    "dbovariable_name": "ACAS Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -1430,45 +1062,13 @@
                     "unit": "Second"
                 }
             },
-            "JSONDataMapping181": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type string, value \"00000000000000\"",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "380.ACS.MB Data",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping182": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Custom calculated",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "detection_type",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "detection_type",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
             "JSONDataMapping183": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_alt_geo_ft",
+                    "dbovariable_name": "Geometric Altitude ADD",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -1484,7 +1084,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "measured_alt_baro_age_s",
+                    "dbovariable_name": "Flight Level Measured Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -1500,7 +1100,7 @@
                     "append_value": false,
                     "comment": "Type number, value 369.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "measured_alt_baro_ft",
+                    "dbovariable_name": "Flight Level Measured",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -1516,7 +1116,7 @@
                     "append_value": false,
                     "comment": "Type number, value 36975.0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "tracked_alt_baro_ft",
+                    "dbovariable_name": "Barometric Altitude Calculated",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -1532,7 +1132,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1736",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "tracked_mode3a_code",
+                    "dbovariable_name": "Mode 3/A Code",
                     "dimension": "",
                     "format_data_type": "INT",
                     "in_array": false,
@@ -1548,7 +1148,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_bps_age",
+                    "dbovariable_name": "Barometric Pressure Setting ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -1564,7 +1164,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_gvr_age",
+                    "dbovariable_name": "Geometric Vertical Rate ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -1580,23 +1180,23 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_coasted",
+                    "dbovariable_name": "Coasting",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.CST",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping190": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 221.10000000000002",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Barometric Pressure Setting ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -1608,11 +1208,11 @@
             },
             "JSONDataMapping191": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1793.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Geometric Vertical Rate ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -1628,7 +1228,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_std_dev_xy_corr_coeff",
+                    "dbovariable_name": "X/Y Covariance",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -1638,68 +1238,52 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping193": {
+            "JSONDataMapping194": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Custom calculated, based on 340.SID",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "track_lu_ds_id",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "track_lu_ds_id",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping194": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
                     "comment": "Type number, value 16383.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "ADS-C Update Age",
+                    "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "290.ADS.Age",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "JSONDataMapping195": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 63.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "ADS-B UAT Age",
+                    "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "290.UAT.Age",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "JSONDataMapping196": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 63.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "ADS-B VDL Update Age",
+                    "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "290.VDL.Age",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "JSONDataMapping197": {
@@ -1756,7 +1340,7 @@
                     "append_value": false,
                     "comment": "Type number, value 50",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "sac",
+                    "dbovariable_name": "SAC",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -1768,31 +1352,15 @@
             },
             "JSONDataMapping20": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Flight Plan Correlated",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "080.FPC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping200": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type array, value [false,false,true,false,false,false,false,false]",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "REF.REF_FSPEC",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
@@ -1830,221 +1398,13 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping203": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 50",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CSN.CSN.SAC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping204": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 9",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CSN.CSN.SIC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping205": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 2",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CSN.CSN.TYP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping206": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 8",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "REF.CSN.REP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping207": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 2015",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CST.CST.LOCAL TRACK NUMBER",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping208": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 50",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CST.CST.SAC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping209": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 78",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CST.CST.SIC",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping21": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "080.FX",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping210": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 9",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": true,
-                    "json_key": "REF.CST.CST.TYP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping211": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 5",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "REF.CST.REP",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping212": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type boolean, value false",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "fs_alert",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping213": {
+            "JSONDataMapping215": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type boolean, value false",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "ground_bit",
-                    "dimension": "",
-                    "format_data_type": "STRING",
-                    "in_array": false,
-                    "json_key": "fs_gbs",
-                    "json_value_format": "bool",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping214": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type boolean, value false",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "STRING",
-                    "in_array": false,
-                    "json_key": "fs_spi",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping215": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_ias_age",
+                    "dbovariable_name": "Indicated Airspeed/Mach Nb ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2060,7 +1420,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_sab_age",
+                    "dbovariable_name": "SAB ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2076,7 +1436,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_vun_age",
+                    "dbovariable_name": "Velocity Uncertainty ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2092,7 +1452,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_emc_age",
+                    "dbovariable_name": "Emitter Category ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2108,7 +1468,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_pos_age",
+                    "dbovariable_name": "Position Data ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2118,29 +1478,13 @@
                     "unit": "Second"
                 }
             },
-            "JSONDataMapping22": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
-                    "comment": "Type number, value 1",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "080.FX2",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
             "JSONDataMapping220": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_gal_age",
+                    "dbovariable_name": "Geometric Altitude ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2156,7 +1500,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_pun_age",
+                    "dbovariable_name": "Position Uncertainty ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2172,7 +1516,7 @@
                     "append_value": false,
                     "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_mb_age",
+                    "dbovariable_name": "Mode S MB ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2182,45 +1526,445 @@
                     "unit": "Second"
                 }
             },
-            "JSONDataMapping23": {
+            "JSONDataMapping223": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 1",
+                    "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Surveillance Data Status",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "080.FX3",
+                    "json_key": "080.SDS",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
-            "JSONDataMapping24": {
+            "JSONDataMapping224": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 0",
+                    "comment": "",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Potential False Track",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
-                    "json_key": "080.FX4",
+                    "json_key": "080.PFT",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
+                }
+            },
+            "JSONDataMapping225": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Flight Plan Track",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.FPLT",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping226": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Mode 3/A Duplicate",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.DUPT",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping227": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Flight Plan Duplicate",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.DUPF",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping228": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Flight Plan Manual Duplicate",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.DUPM",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping229": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Aircraft Identification Duplicate",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.IDD",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping230": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Emergency Code Inconsistent",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.IEC",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping231": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Surface Target",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "080.SFC",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping232": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Aircraft Identification STI",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "245.STI",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping233": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Aircraft Identification",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "245.Target Identification",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping234": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Target Length",
+                    "dimension": "Length",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "270.LENGTH",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Meter"
+                }
+            },
+            "JSONDataMapping235": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Target Orientation",
+                    "dimension": "Angle",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "270.ORIENTATION",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Degree"
+                }
+            },
+            "JSONDataMapping236": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Target Width",
+                    "dimension": "Length",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "270.WIDTH",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Meter"
+                }
+            },
+            "JSONDataMapping237": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Loop Update Age",
+                    "dimension": "Time",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "290.LOP.Age",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Second"
+                }
+            },
+            "JSONDataMapping238": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Track Age",
+                    "dimension": "Time",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "290.TRK.Age",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Second"
+                }
+            },
+            "JSONDataMapping239": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Vehicle Fleet Identification",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "300.VFI",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping240": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "3D Height LM",
+                    "dimension": "Height",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "340.HEI.HEIGHT",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Feet"
+                }
+            },
+            "JSONDataMapping241": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Air Speed ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.AIS.Air Speed",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping242": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "ACAS Status ADS-B ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.SAB.AC",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping243": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Differential Correction ADS-B ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.SAB.DC",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping244": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Ground Bit ADS-B ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.SAB.GBS",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping245": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Multiple Navigational Aids ADS-B ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.SAB.MN",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping246": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Priority Status ADS-B ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.SAB.STAT",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping247": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Velocity Uncertainty ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.VUN.Velocity Uncertainty Category",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping248": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Wind Speed ADD",
+                    "dimension": "Speed",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.MET.WS.Wind Speed",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Knots"
+                }
+            },
+            "JSONDataMapping249": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Wind Direction ADD",
+                    "dimension": "Angle",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.MET.WD.Wind Direction",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping25": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Background Service Used",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2230,13 +1974,173 @@
                     "unit": ""
                 }
             },
+            "JSONDataMapping250": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Temperature ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.MET.TMP.Temperature",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping251": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Turbulence ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.MET.TRB.Turbulence",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping252": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Emitter Category ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.EMC.ECAT",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping253": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Latitude ADD",
+                    "dimension": "Angle",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.POS.Latitude",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Degree"
+                }
+            },
+            "JSONDataMapping254": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Longitude ADD",
+                    "dimension": "Angle",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.POS.Longitude",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": "Degree"
+                }
+            },
+            "JSONDataMapping255": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Position Uncertainty ADD",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "380.PUN.Position Uncertainty",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping256": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Aircraft Stand FPL",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "390.AST.Aircraft Stand",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping257": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Stand Status AVL FPL",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "390.STS.AVL",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping258": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Stand Status EMP FPL",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "390.STS.EMP",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping259": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_object_name": "CAT062",
+                    "dbovariable_name": "Callsign Pre-Em FPL",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "390.PEC.Pre-Emergency Callsign",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping26": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "MD4 Reply",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2248,11 +2152,11 @@
             },
             "JSONDataMapping27": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "MD5 Reply",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2264,11 +2168,11 @@
             },
             "JSONDataMapping28": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "MDS Coasting",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2284,12 +2188,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mil_emergency",
+                    "dbovariable_name": "Military Emergency",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.ME",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2300,7 +2204,7 @@
                     "append_value": false,
                     "comment": "Type number, value 240",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "sic",
+                    "dbovariable_name": "SIC",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2312,11 +2216,11 @@
             },
             "JSONDataMapping30": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Military Identification",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2332,12 +2236,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "multiple_sources",
+                    "dbovariable_name": "Monosensor",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.MON",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2348,23 +2252,23 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "alt_baro_more_reliable",
+                    "dbovariable_name": "Most Reliable Height",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.MRH",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping33": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "PSR Coasting",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2380,12 +2284,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "simulated_target",
+                    "dbovariable_name": "Simulated",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.SIM",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2396,7 +2300,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "spi",
+                    "dbovariable_name": "SPI",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2408,11 +2312,11 @@
             },
             "JSONDataMapping36": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 6, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Geometric Altitude Calculated Src",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2424,11 +2328,11 @@
             },
             "JSONDataMapping37": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "SSR Coasting",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2440,11 +2344,11 @@
             },
             "JSONDataMapping38": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Slave Track Promotion",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2456,32 +2360,16 @@
             },
             "JSONDataMapping39": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Special Used Mode 3/A",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "080.SUC",
                     "json_value_format": "",
-                    "mandatory": false,
-                    "unit": ""
-                }
-            },
-            "JSONDataMapping4": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 1736",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "mode3a_code",
-                    "dimension": "",
-                    "format_data_type": "INT",
-                    "in_array": false,
-                    "json_key": "060.Mode-3/A reply",
-                    "json_value_format": "octal",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2492,12 +2380,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_created",
+                    "dbovariable_name": "Track Begin",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.TSB",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2508,23 +2396,23 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_end",
+                    "dbovariable_name": "Track End",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "080.TSE",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping42": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 197753.0, not mapped",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "X",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2536,11 +2424,11 @@
             },
             "JSONDataMapping43": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value -283968.0, not mapped",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Y",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2550,29 +2438,13 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping44": {
+            "JSONDataMapping45": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
-                    "comment": "Type number, value 36975.0",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "alt_baro_ft",
-                    "dimension": "Height",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "135.Calculated Track Barometric Altitude",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Feet"
-                }
-            },
-            "JSONDataMapping45": {
-                "parameters": {
-                    "active": false,
-                    "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Barometric Altitude QNH Corrected",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2584,43 +2456,43 @@
             },
             "JSONDataMapping46": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 108.5, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Vx",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "185.Vx",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter/Second"
                 }
             },
             "JSONDataMapping47": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 209.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Vy",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "185.Vy",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter/Second"
                 }
             },
             "JSONDataMapping48": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "MOM Altitude Discrepancy",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2636,7 +2508,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mof_long",
+                    "dbovariable_name": "MOM Longitudinal Acc",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2652,7 +2524,7 @@
                     "append_value": false,
                     "comment": "Type number, value 4595559",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "target_addr",
+                    "dbovariable_name": "Aircraft Address",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2668,7 +2540,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mof_trans",
+                    "dbovariable_name": "MOM Transversal Acc",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2684,7 +2556,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "mof_vert",
+                    "dbovariable_name": "MOM Vertical Rate",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2696,11 +2568,11 @@
             },
             "JSONDataMapping52": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Ax",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2712,11 +2584,11 @@
             },
             "JSONDataMapping53": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Ay",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2732,7 +2604,7 @@
                     "append_value": false,
                     "comment": "Type number, value 0.0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "calc_vertical_rate_ftm",
+                    "dbovariable_name": "Rate Of Climb/Descent",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2748,7 +2620,7 @@
                     "append_value": false,
                     "comment": "Type number, value 63.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_es_age",
+                    "dbovariable_name": "ADS-B ES Update Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2764,7 +2636,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_mds_age",
+                    "dbovariable_name": "Mode S Update Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2780,7 +2652,7 @@
                     "append_value": false,
                     "comment": "Type number, value 63.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_mlt_age",
+                    "dbovariable_name": "MLAT Update Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2796,7 +2668,7 @@
                     "append_value": false,
                     "comment": "Type number, value 63.75,",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_psr_age",
+                    "dbovariable_name": "PSR Update Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2812,7 +2684,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_ssr_age",
+                    "dbovariable_name": "SSR Update Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2828,7 +2700,7 @@
                     "append_value": false,
                     "comment": "Type string, value \"FIN4KX  \"",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "callsign",
+                    "dbovariable_name": "Aircraft Identification ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -2844,7 +2716,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_bvr_age",
+                    "dbovariable_name": "Barometric Vertical Rate ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2860,7 +2732,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_fss_age",
+                    "dbovariable_name": "FS SA ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2876,7 +2748,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_iar_age",
+                    "dbovariable_name": "Indicated Airspeed ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2892,7 +2764,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_mac_age",
+                    "dbovariable_name": "Mach Number ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2908,27 +2780,11 @@
                     "append_value": false,
                     "comment": "Type number, value 1.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "measured_mode3a_age_s",
+                    "dbovariable_name": "Mode 3/A Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "295.MDA.Age",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Second"
-                }
-            },
-            "JSONDataMapping65": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 1.75",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "modec_age",
-                    "dimension": "Time",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "295.MFL.Age",
                     "json_value_format": "",
                     "mandatory": false,
                     "unit": "Second"
@@ -2940,7 +2796,7 @@
                     "append_value": false,
                     "comment": "Type number, value 3.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_mhg_age",
+                    "dbovariable_name": "Magnetic Heading ADD Age",
                     "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
@@ -2956,12 +2812,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_mode3a_g",
+                    "dbovariable_name": "Mode 3/A Garbled LM",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "340.MDA.G",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -2972,7 +2828,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_mode3a_s",
+                    "dbovariable_name": "Mode 3/A Smoothed LM",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
@@ -2988,7 +2844,7 @@
                     "append_value": false,
                     "comment": "Type number, value 1736",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_mode3a_code",
+                    "dbovariable_name": "Mode 3/A Code LM",
                     "dimension": "",
                     "format_data_type": "INT",
                     "in_array": false,
@@ -2998,34 +2854,18 @@
                     "unit": ""
                 }
             },
-            "JSONDataMapping7": {
-                "parameters": {
-                    "active": true,
-                    "append_value": false,
-                    "comment": "Type number, value 369.75",
-                    "db_object_name": "CAT062",
-                    "dbovariable_name": "modec_code_ft",
-                    "dimension": "Height",
-                    "format_data_type": "",
-                    "in_array": false,
-                    "json_key": "136.Measured Flight Level",
-                    "json_value_format": "",
-                    "mandatory": false,
-                    "unit": "Flight Level"
-                }
-            },
             "JSONDataMapping70": {
                 "parameters": {
                     "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_mode3a_v",
+                    "dbovariable_name": "Mode 3/A Valid LM",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "340.MDA.V",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -3036,12 +2876,12 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_alt_baro_g",
+                    "dbovariable_name": "Mode C Garbled LM",
                     "dimension": "",
                     "format_data_type": "STRING",
                     "in_array": false,
                     "json_key": "340.MDC.G",
-                    "json_value_format": "bool",
+                    "json_value_format": "",
                     "mandatory": false,
                     "unit": ""
                 }
@@ -3052,7 +2892,7 @@
                     "append_value": false,
                     "comment": "Type number, value 369.75",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_alt_baro_ft",
+                    "dbovariable_name": "Mode C Code LM",
                     "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
@@ -3068,46 +2908,46 @@
                     "append_value": false,
                     "comment": "Type number, value 0",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "lm_alt_baro_v",
+                    "dbovariable_name": "Mode C Valid LM",
                     "dimension": "",
-                    "format_data_type": "STRING",
+                    "format_data_type": "BOOL",
                     "in_array": false,
                     "json_key": "340.MDC.V",
-                    "json_value_format": "bool_invert",
+                    "json_value_format": "invert",
                     "mandatory": false,
                     "unit": ""
                 }
             },
             "JSONDataMapping74": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 129.6171875, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Range LM",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "340.POS.RHO",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 }
             },
             "JSONDataMapping75": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 149.75463860372, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Azimuth LM",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "340.POS.THETA",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping76": {
@@ -3116,7 +2956,7 @@
                     "append_value": false,
                     "comment": "Type number, value 50",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_lu_sac",
+                    "dbovariable_name": "SAC LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3132,7 +2972,7 @@
                     "append_value": false,
                     "comment": "Type number, value 20",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "track_lu_sic",
+                    "dbovariable_name": "SIC LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3144,11 +2984,11 @@
             },
             "JSONDataMapping78": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "FFT LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3160,11 +3000,11 @@
             },
             "JSONDataMapping79": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Simulated LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3180,7 +3020,7 @@
                     "append_value": false,
                     "comment": "Type number, value 44.91761040542",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_lat_deg",
+                    "dbovariable_name": "Latitude",
                     "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
@@ -3192,11 +3032,11 @@
             },
             "JSONDataMapping80": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Test LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3212,7 +3052,7 @@
                     "append_value": false,
                     "comment": "Type number, value 5",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "report_type",
+                    "dbovariable_name": "Type LM",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3224,11 +3064,11 @@
             },
             "JSONDataMapping82": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 62.5, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Barometric Vertical Rate ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3240,11 +3080,11 @@
             },
             "JSONDataMapping83": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "FS SA AH ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3256,11 +3096,11 @@
             },
             "JSONDataMapping84": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "FS SA AM ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3272,27 +3112,27 @@
             },
             "JSONDataMapping85": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 37000.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "FS SA ADD",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.FSS.Altitude",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Feet"
                 }
             },
             "JSONDataMapping86": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "FS SA MV ADD",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3304,50 +3144,50 @@
             },
             "JSONDataMapping87": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 252.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Indicated Air Speed ADD",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.IAR.Indicated Air Speed",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Knots"
                 }
             },
             "JSONDataMapping88": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0.784, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Mach Number ADD",
+                    "dimension": "Speed",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.MAC.Mach Number",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Mach"
                 }
             },
             "JSONDataMapping89": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 22.67578123968, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Magnetic Heading ADD",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "380.MHG.Magnetic Heading",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping9": {
@@ -3356,7 +3196,7 @@
                     "append_value": false,
                     "comment": "Type number, value 16.50341961065",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_long_deg",
+                    "dbovariable_name": "Longitude",
                     "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
@@ -3368,11 +3208,11 @@
             },
             "JSONDataMapping90": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Ax StdDev",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3384,11 +3224,11 @@
             },
             "JSONDataMapping91": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 0.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Ay StdDev",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3404,30 +3244,30 @@
                     "append_value": false,
                     "comment": "Type number, value 0.25, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Barometric Altitude Calculated StdDev",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.ABA.ABA",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Feet"
                 }
             },
             "JSONDataMapping93": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 1593.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
-                    "dimension": "",
+                    "dbovariable_name": "Geometric Altitude StdDev",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.AGA.AGA",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Feet"
                 }
             },
             "JSONDataMapping94": {
@@ -3436,14 +3276,14 @@
                     "append_value": false,
                     "comment": "Type number, value 118.5, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_std_dev_x_m",
-                    "dimension": "",
+                    "dbovariable_name": "X StdDev",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.APC.APC (X-Component)",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "JSONDataMapping95": {
@@ -3452,14 +3292,14 @@
                     "append_value": false,
                     "comment": "Type number, value 98.5, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_std_dev_y_m",
-                    "dimension": "",
+                    "dbovariable_name": "Y StdDev",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.APC.APC (Y-Component)",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "JSONDataMapping96": {
@@ -3468,14 +3308,14 @@
                     "append_value": false,
                     "comment": "Type number, value 0.00088512765, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_std_dev_lat_deg",
-                    "dimension": "",
+                    "dbovariable_name": "Latitude StdDev",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.APW.APW (Latitude Component)",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping97": {
@@ -3484,23 +3324,23 @@
                     "append_value": false,
                     "comment": "Type number, value 0.0014966703899999998, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "pos_std_dev_long_deg",
-                    "dimension": "",
+                    "dbovariable_name": "Longitude StdDev",
+                    "dimension": "Angle",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "500.APW.APW (Longitude Component)",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Degree"
                 }
             },
             "JSONDataMapping98": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 100.0, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Rate Of Climb/Descent StdDev",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,
@@ -3512,11 +3352,11 @@
             },
             "JSONDataMapping99": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "append_value": false,
                     "comment": "Type number, value 12.75, not found",
                     "db_object_name": "CAT062",
-                    "dbovariable_name": "",
+                    "dbovariable_name": "Vx StdDev",
                     "dimension": "",
                     "format_data_type": "",
                     "in_array": false,

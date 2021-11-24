@@ -79,6 +79,18 @@ void ASTERIXJSONParser::doMappingChecks()
     for (auto& map_it : data_mappings_)
     {
         map_it.check();
+
+        // add json key to var desc
+//        if (map_it.dboVariableName().size() && dbObject().hasVariable(map_it.dboVariableName()))
+//        {
+//            DBOVariable& var = dbObject().variable(map_it.dboVariableName());
+
+//            if (var.description().rfind("From "+map_it.jsonKey(), 0) != 0)
+//            {
+//                loginf << "ASTERIXJSONParser: doMappingChecks: adding json key to var " << var.name();
+//                var.description("From "+map_it.jsonKey()+"\n\n"+var.description());
+//            }
+//        }
     }
 
     for (auto& map_it : data_mappings_)
