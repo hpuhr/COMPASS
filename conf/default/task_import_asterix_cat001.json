@@ -18,7 +18,7 @@
                     "in_array": false,
                     "json_key": "ds_id",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -34,7 +34,7 @@
                     "in_array": false,
                     "json_key": "140.Time-of-Day",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Second"
                 }
             },
@@ -93,13 +93,13 @@
                     "comment": "",
                     "db_object_name": "CAT001",
                     "dbovariable_name": "Mode C Code",
-                    "dimension": "",
+                    "dimension": "Height",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "090.Mode-C HEIGHT",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Feet"
                 }
             },
             "JSONDataMapping112": {
@@ -242,7 +242,7 @@
                     "in_array": false,
                     "json_key": "010.SAC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -322,7 +322,7 @@
                     "in_array": false,
                     "json_key": "010.SIC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -525,13 +525,13 @@
                     "comment": "Type number, value 22.046875",
                     "db_object_name": "CAT001",
                     "dbovariable_name": "X",
-                    "dimension": "",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "042.X-Component",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 }
             },
             "JSONDataMapping70": {
@@ -541,13 +541,13 @@
                     "comment": "Type number, value -0.8125",
                     "db_object_name": "CAT001",
                     "dbovariable_name": "Y",
-                    "dimension": "",
+                    "dimension": "Length",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "042.Y-Component",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Nautical Mile"
                 }
             },
             "JSONDataMapping76": {
@@ -578,7 +578,7 @@
                     "in_array": false,
                     "json_key": "040.THETA",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Degree"
                 }
             },
@@ -594,7 +594,7 @@
                     "in_array": false,
                     "json_key": "040.RHO",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Nautical Mile"
                 }
             },

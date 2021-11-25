@@ -18,7 +18,7 @@
                     "in_array": false,
                     "json_key": "ds_id",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -34,7 +34,7 @@
                     "in_array": false,
                     "json_key": "070.Time Of Track Information",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Second"
                 }
             },
@@ -1346,7 +1346,7 @@
                     "in_array": false,
                     "json_key": "010.SAC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -2210,7 +2210,7 @@
                     "in_array": false,
                     "json_key": "010.SIC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -3026,7 +3026,7 @@
                     "in_array": false,
                     "json_key": "105.Latitude",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Degree"
                 }
             },
@@ -3202,7 +3202,7 @@
                     "in_array": false,
                     "json_key": "105.Longitude",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": "Degree"
                 }
             },

@@ -1824,12 +1824,12 @@
                     "data_type_str": "FLOAT",
                     "db_column_name": "air_speed",
                     "description": "From 150.Air Speed\n\nCalculated Air Speed (Element of Air Vector).\n\nAir Speed (in knots, set using IM)\n",
-                    "dimension": "Speed",
+                    "dimension": "",
                     "is_key": false,
                     "name": "Air Speed",
                     "representation_str": "STANDARD",
                     "short_name": "ASpd",
-                    "unit": "Knots"
+                    "unit": ""
                 }
             },
             "DBOVariable4": {
@@ -3081,12 +3081,12 @@
                     "db_column_name": "tomr_position_hp",
                     "dbo_name": "CAT021",
                     "description": "From 074.Time of Message Reception of Position - high precision\n\nTime of Message Reception of Position - High Precision\n\nFractional part of the time of message reception for position in the ground station.\n\nTime at which the latest ADS-B position information was received\nby the ground station, expressed as fraction of the second of the\nUTC Time.",
-                    "dimension": "",
+                    "dimension": "Time",
                     "is_key": false,
                     "name": "ToMR Position HP",
                     "representation_str": "STANDARD",
                     "short_name": "ToMRp HP",
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "DBOVariableADSBtorv0": {

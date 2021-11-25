@@ -187,7 +187,7 @@ bool JSONDataMapping::mandatory() const { return mandatory_; }
 
 void JSONDataMapping::mandatory(bool mandatory)
 {
-    loginf << "JSONDataMapping: mandatory: " << mandatory;
+    logdbg << "JSONDataMapping: mandatory: " << mandatory;
     mandatory_ = mandatory;
 }
 

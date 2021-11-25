@@ -995,12 +995,12 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "y",
                     "description": "From 042.Y-Component\n\nMax. range = +/-256 NM",
-                    "dimension": "",
+                    "dimension": "Length",
                     "is_key": false,
                     "name": "Y",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": ""
+                    "unit": "Meter"
                 }
             },
             "DBOVariable5": {

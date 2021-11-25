@@ -60,6 +60,7 @@ void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
     if (class_id == "JSONDataMapping")
     {
         data_mappings_.emplace_back(class_id, instance_id, *this);
+        data_mappings_.rbegin()->mandatory(false);
 
         mapping_checks_dirty_ = true;
     }

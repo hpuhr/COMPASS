@@ -1139,12 +1139,12 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "vx_stddev",
                     "description": "From 500.ATV.ATV (X-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
-                    "dimension": "Length",
+                    "dimension": "",
                     "is_key": false,
                     "name": "Vx StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Meter"
+                    "unit": ""
                 }
             },
             "DBOVariable117": {
@@ -1152,12 +1152,12 @@
                     "data_type_str": "DOUBLE",
                     "db_column_name": "vy_stddev",
                     "description": "From 500.ATV.ATV (Y-Component)\n\nEstimated accuracy (i.e. standard deviation) of the calculated track velocity in Cartesian co-ordinates.",
-                    "dimension": "Length",
+                    "dimension": "",
                     "is_key": false,
                     "name": "Vy StdDev",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Meter"
+                    "unit": ""
                 }
             },
             "DBOVariable118": {

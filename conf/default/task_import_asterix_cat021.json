@@ -18,7 +18,7 @@
                     "in_array": false,
                     "json_key": "ds_id",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -29,13 +29,13 @@
                     "comment": "Type number, value 0.7000000000000001",
                     "db_object_name": "CAT021",
                     "dbovariable_name": "Aircraft Identification Age",
-                    "dimension": "",
+                    "dimension": "Time",
                     "format_data_type": "",
                     "in_array": false,
                     "json_key": "295.Target Identification.Age",
                     "json_value_format": "",
                     "mandatory": false,
-                    "unit": ""
+                    "unit": "Second"
                 }
             },
             "JSONDataMapping103": {
@@ -1058,7 +1058,7 @@
                     "in_array": false,
                     "json_key": "010.SAC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
@@ -1218,7 +1218,7 @@
                     "in_array": false,
                     "json_key": "010.SIC",
                     "json_value_format": "",
-                    "mandatory": true,
+                    "mandatory": false,
                     "unit": ""
                 }
             },
