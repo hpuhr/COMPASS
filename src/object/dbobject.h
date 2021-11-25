@@ -77,6 +77,8 @@ class DBObject : public QObject, public Configurable
     void updateDoneSlot();
 
   public:
+    static const std::string var_name_datasource_id_;
+
     DBObject(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
              DBObjectManager* manager);
     virtual ~DBObject();

@@ -64,7 +64,7 @@ void SQLiteConnection::openFile(const std::string& file_name)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    int result = sqlite3_open_v2(last_filename_.c_str(), &db_handle_,
+    int result = sqlite3_open_v2(last_filename_.c_str(), &db_handle_, //":memory:"
                                  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
     if (result != SQLITE_OK)

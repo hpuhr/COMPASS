@@ -176,7 +176,7 @@ class ASTERIXImportTask : public Task, public Configurable
     bool waiting_for_insert_{false};
     size_t insert_active_{0};
 
-    std::map<std::string, std::tuple<std::string, DBOVariableSet>> dbo_variable_sets_;
+    std::map<std::string, DBOVariableSet> dbo_variable_sets_;
     std::set<int> added_data_sources_;
 
     unsigned int num_radar_inserted_ {0};

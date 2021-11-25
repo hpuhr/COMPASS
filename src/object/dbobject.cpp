@@ -46,6 +46,8 @@
 using namespace std;
 using namespace Utils;
 
+const std::string DBObject::var_name_datasource_id_ {"DS ID"};
+
 DBObject::DBObject(COMPASS& compass, const string& class_id, const string& instance_id,
                    DBObjectManager* manager)
     : Configurable(class_id, instance_id, manager,

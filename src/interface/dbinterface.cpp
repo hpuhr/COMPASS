@@ -1280,11 +1280,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
                << property.name() << " index cnt " << index_cnt;
 
-        if (connection_type == SQLITE_IDENTIFIER)
-            index_cnt = cnt + 1;
-        else
-            throw runtime_error(
-                    "DBInterface: insertBindStatementForCurrentIndex: unknown db type");
+        index_cnt = cnt + 1;
 
         if (buffer->isNone(property, row))
         {
@@ -1296,56 +1292,52 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
 
         switch (data_type)
         {
-            case PropertyDataType::BOOL:
-                current_connection_->bindVariable(
-                            index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
-                break;
-            case PropertyDataType::CHAR:
-                current_connection_->bindVariable(
-                            index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
-                break;
-            case PropertyDataType::UCHAR:
-                current_connection_->bindVariable(
-                            index_cnt,
-                            static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
-                break;
-            case PropertyDataType::INT:
-                logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt
-                       << " is '" << buffer->get<int>(property.name()).get(row) << "'";
-                current_connection_->bindVariable(
-                            index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
-                break;
-            case PropertyDataType::UINT:
-                assert(false);
-                break;
-            case PropertyDataType::LONGINT:
-                assert(false);
-                break;
-            case PropertyDataType::ULONGINT:
-                assert(false);
-                break;
-            case PropertyDataType::FLOAT:
-                current_connection_->bindVariable(
-                            index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
-                break;
-            case PropertyDataType::DOUBLE:
-                current_connection_->bindVariable(index_cnt,
-                                                  buffer->get<double>(property.name()).get(row));
-                break;
-            case PropertyDataType::STRING:
-                if (connection_type == SQLITE_IDENTIFIER)
-                    current_connection_->bindVariable(
-                                index_cnt, buffer->get<string>(property.name()).get(row));
-                else  // MYSQL assumed
-                    current_connection_->bindVariable(
-                                index_cnt, "'" + buffer->get<string>(property.name()).get(row) + "'");
-                break;
-            default:
-                logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
+        case PropertyDataType::BOOL:
+            current_connection_->bindVariable(
+                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
+            break;
+        case PropertyDataType::CHAR:
+            current_connection_->bindVariable(
+                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
+            break;
+        case PropertyDataType::UCHAR:
+            current_connection_->bindVariable(
+                        index_cnt,
+                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
+            break;
+        case PropertyDataType::INT:
+            current_connection_->bindVariable(
+                        index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
+            break;
+        case PropertyDataType::UINT:
+            current_connection_->bindVariable(
+                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(row)));
+            break;
+        case PropertyDataType::LONGINT:
+            assert(false);
+            break;
+        case PropertyDataType::ULONGINT:
+            assert(false);
+            break;
+        case PropertyDataType::FLOAT:
+            current_connection_->bindVariable(
+                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
+            break;
+        case PropertyDataType::DOUBLE:
+            current_connection_->bindVariable(index_cnt,
+                                              buffer->get<double>(property.name()).get(row));
+            break;
+        case PropertyDataType::STRING:
+
+            current_connection_->bindVariable(
+                        index_cnt, buffer->get<string>(property.name()).get(row));
+            break;
+        default:
+            logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
                        << Property::asString(data_type);
-                throw runtime_error(
-                            "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
-                            Property::asString(data_type));
+            throw runtime_error(
+                        "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
+                        Property::asString(data_type));
         }
     }
 

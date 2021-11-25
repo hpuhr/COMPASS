@@ -1101,13 +1101,14 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
 
             //            DBObject& db_object = parser_it.second->dbObject();
 
-            //            std::string data_source_var_name = parser_it.second.dataSourceVariableName();
-            //            assert(data_source_var_name.size());
+//            std::string data_source_var_name = "DS ID"; //parser_it.second->dataSourceVariableName();
+//            assert(data_source_var_name.size());
 
-            DBOVariableSet set = parser_it.second->variableList();
+            //DBOVariableSet set = parser_it.second->variableList();
+            assert (!dbo_variable_sets_.count(dbo_name));  // add variables
+            dbo_variable_sets_[dbo_name] = parser_it.second->variableList();
 
-            assert (dbo_variable_sets_.count(dbo_name));  // add variables
-            std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
+            //std::get<1>(dbo_variable_sets_.at(dbo_name)).add(set);
 
             //            {
             //                //assert(std::get<0>(dbo_variable_sets_.at(dbo_name)) == data_source_var_name);
@@ -1156,7 +1157,7 @@ void ASTERIXImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>
         connect(&db_object, &DBObject::insertProgressSignal, this,
                 &ASTERIXImportTask::insertProgressSlot, Qt::UniqueConnection);
 
-        DBOVariableSet& set = std::get<1>(dbo_variable_sets_.at(dbo_name));
+        DBOVariableSet& set = dbo_variable_sets_.at(dbo_name);
         db_object.insertData(set, buffer, false);
 
         status_widget_->addNumInserted(db_object.name(), buffer->size());

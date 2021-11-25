@@ -58,6 +58,7 @@ class Property
     PropertyDataType& dataTypeRef() { return data_type_; }
 
     const std::string& dataTypeString() const { return data_type_str_; }
+    const std::string& dbDataTypeString() const;
     std::string& dataTypeStringRef() { return data_type_str_; }
     void dataType(PropertyDataType type)
     {
@@ -71,6 +72,7 @@ class Property
     static PropertyDataType asDataType(const std::string& type);
 
     static const std::map<PropertyDataType, std::string>& dataTypes2Strings();
+    static const std::map<PropertyDataType, std::string>& dbDataTypes2Strings();
     static const std::map<std::string, PropertyDataType>& strings2DataTypes();
 
   protected:

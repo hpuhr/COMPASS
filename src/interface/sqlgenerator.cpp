@@ -99,9 +99,9 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
     unsigned int cnt = 0;
     for (auto& var_it : object.variables())
     {
-        ss << var_it->name();
+        ss << var_it->dbColumnName();
 
-        data_type = var_it->dataTypeString();
+        data_type = var_it->dbDataTypeString();
 
         if (var_it->isKey())
         {
@@ -283,8 +283,8 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
 
         ss << "MIN(" << var_it->dbColumnName() << "),MAX(" << var_it->dbColumnName() << ")";
 
-        command_list.addProperty(var_it->name() + "MIN", PropertyDataType::STRING);
-        command_list.addProperty(var_it->name() + "MAX", PropertyDataType::STRING);
+        command_list.addProperty(var_it->dbColumnName() + "MIN", PropertyDataType::STRING);
+        command_list.addProperty(var_it->dbColumnName() + "MAX", PropertyDataType::STRING);
 
         first = false;
     }

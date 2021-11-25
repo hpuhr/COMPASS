@@ -52,6 +52,22 @@ const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
     return *map;
 }
 
+const std::map<PropertyDataType, std::string>& Property::dbDataTypes2Strings()
+{
+    static const auto* map = new std::map<PropertyDataType, std::string>
+    {{PropertyDataType::BOOL, "TINYINT"},
+        {PropertyDataType::CHAR, "TINYINT"},
+        {PropertyDataType::UCHAR, "TINYINT"},
+        {PropertyDataType::INT, "INT"},
+        {PropertyDataType::UINT, "INT"},
+        {PropertyDataType::LONGINT, "BIGINT"},
+        {PropertyDataType::ULONGINT, "BIGINT"},
+        {PropertyDataType::FLOAT, "FLOAT"},
+        {PropertyDataType::DOUBLE, "DOUBLE"},
+        {PropertyDataType::STRING, "TEXT"}};
+    return *map;
+}
+
 const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
 {
     static const auto* map = new std::map<std::string, PropertyDataType>
@@ -71,6 +87,18 @@ const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
 Property::Property(std::string id, PropertyDataType type) : data_type_(type), name_(id)
 {
     data_type_str_ = asString(data_type_);
+}
+
+const std::string& Property::dbDataTypeString() const
+{
+    if (!dbDataTypes2Strings().count(data_type_))
+    {
+        std::cout << "Property: dbDataTypes2Strings: unkown type " << (unsigned int) data_type_ << std::endl;
+        logerr << "Property: dbDataTypes2Strings: unkown type " << (unsigned int) data_type_;
+    }
+
+    assert(dbDataTypes2Strings().count(data_type_) > 0);
+    return dbDataTypes2Strings().at(data_type_);
 }
 
 const std::string& Property::asString(PropertyDataType type)

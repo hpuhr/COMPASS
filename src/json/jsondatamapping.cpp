@@ -625,7 +625,10 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<boo
     if (val_ptr->is_number())
     {
         unsigned int tmp = *val_ptr;
-        assert(tmp == 0 || tmp == 1);
+        if (tmp > 1)
+            logerr << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+                   << " value '" << tmp << "' format '" << json_value_format_ << "'";
+
         tmp_bool = static_cast<bool>(tmp);
     }
     else
@@ -635,6 +638,8 @@ void JSONDataMapping::setValue(const nlohmann::json* val_ptr, NullableVector<boo
 
     if (json_value_format_ == "")
         array_list.set(row_cnt, tmp_bool);
+    else if (json_value_format_ == "invert")
+        array_list.set(row_cnt, !tmp_bool);
     else
         array_list.setFromFormat(row_cnt, json_value_format_, JSON::toString(tmp_bool));
 
