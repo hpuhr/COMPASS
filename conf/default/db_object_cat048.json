@@ -1006,7 +1006,7 @@
             "DBOVariable5": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "db_column_name": "3d_height",
+                    "db_column_name": "height_3d",
                     "description": "From 110.3D-Height\n\n3D height, in binary notation. Negative values are expressed in two’s complement",
                     "dimension": "Height",
                     "is_key": false,

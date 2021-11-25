@@ -1709,7 +1709,7 @@
             "DBOVariable47": {
                 "parameters": {
                     "data_type_str": "FLOAT",
-                    "db_column_name": "3d_height_lm",
+                    "db_column_name": "height_3d_lm",
                     "description": "From 340.HEI.HEIGHT\n\nMeasured 3-D Height\n\nThe reference level for this height information is the same as the\nreference level applied by the sensor system providing this information.",
                     "dimension": "Height",
                     "is_key": false,
