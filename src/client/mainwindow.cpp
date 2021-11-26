@@ -207,13 +207,16 @@ void MainWindow::updateMenus()
 
     open_recent_menu_->clear();
 
-    for (auto& fn_it : COMPASS::instance().dbFileList())
+    vector<string> recent_file_list = COMPASS::instance().dbFileList();
+
+    for (auto& fn_it : recent_file_list)
     {
         QAction* file_act = new QAction(fn_it.c_str());
         file_act->setData(fn_it.c_str());
         connect(file_act, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
         open_recent_menu_->addAction(file_act);
     }
+    open_recent_menu_->setDisabled(recent_file_list.size() == 0);
 
     bool db_open = COMPASS::instance().dbOpened();
 
