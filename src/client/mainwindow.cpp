@@ -81,13 +81,13 @@ MainWindow::MainWindow()
 
     tab_widget_ = new QTabWidget();
 
-//    TaskManager& task_man = COMPASS::instance().taskManager();
+    //    TaskManager& task_man = COMPASS::instance().taskManager();
 
-//    task_manager_widget_ = task_man.widget();
-//    tab_widget_->addTab(task_manager_widget_, "Tasks");
+    //    task_manager_widget_ = task_man.widget();
+    //    tab_widget_->addTab(task_manager_widget_, "Tasks");
 
-//    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
-//    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
+    //    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
+    //    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -104,8 +104,8 @@ MainWindow::MainWindow()
 
     //emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
 
-//    msg_box->close();
-//    delete msg_box;
+    //    msg_box->close();
+    //    delete msg_box;
 
     QApplication::restoreOverrideCursor();
 
@@ -123,10 +123,11 @@ MainWindow::MainWindow()
 
     //add_view_button_->setDisabled(true);
 
-//    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
-//                     &FilterManager::startedSlot);
+    //    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
+    //                     &FilterManager::startedSlot);
 
     createMenus ();
+    updateMenus ();
 }
 
 MainWindow::~MainWindow()
@@ -139,15 +140,87 @@ MainWindow::~MainWindow()
 void MainWindow::createMenus ()
 {
     // file menu
-
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
 
-    QAction* new_act = new QAction(tr("&New"));
-    new_act->setShortcuts(QKeySequence::New);
-    new_act->setStatusTip(tr("Create a new file"));
-    //connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+    // db operations
+    new_db_action_ = new QAction(tr("&New"));
+    new_db_action_->setShortcuts(QKeySequence::New);
+    new_db_action_->setStatusTip(tr("Create a new database"));
+    connect(new_db_action_, &QAction::triggered, this, &MainWindow::newDBSlot);
+    file_menu->addAction(new_db_action_);
 
-    file_menu->addAction(new_act);
+    open_existng_action_ = new QAction(tr("&Open"));
+    open_existng_action_->setShortcuts(QKeySequence::Open);
+    open_existng_action_->setStatusTip(tr("Open an existing database"));
+    connect(open_existng_action_, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
+    file_menu->addAction(open_existng_action_);
+
+    open_recent_menu_ = file_menu->addMenu("Open Recent");
+    open_recent_menu_->setStatusTip(tr("Open a recent database"));
+
+    open_recent_menu_->addSeparator();
+
+    QAction* clear_act = new QAction("Clear");
+    connect(clear_act, &QAction::triggered, this, &MainWindow::clearExistingDBsSlot);
+    open_recent_menu_->addAction(clear_act);
+
+    close_db_action_ = new QAction(tr("&Close"));
+    close_db_action_->setShortcut(tr("Ctrl+C"));
+    close_db_action_->setStatusTip(tr("Close opened database"));
+    connect(close_db_action_, &QAction::triggered, this, &MainWindow::closeDBSlot);
+    file_menu->addAction(close_db_action_);
+
+    file_menu->addSeparator();
+
+    // config operations
+
+    QAction* save_act = new QAction("&Save Config");
+    save_act->setShortcut(tr("Ctrl+S"));
+    connect(save_act, &QAction::triggered, this, &MainWindow::saveConfigSlot);
+    file_menu->addAction(save_act);
+
+    file_menu->addSeparator();
+
+    // quit operations
+
+    QAction* quit2_act = new QAction(tr("Quit &Without Saving Config"));
+    quit2_act->setShortcut(tr("Ctrl+W"));
+    quit2_act->setStatusTip(tr("Quit the application withour saving the configuration"));
+    connect(quit2_act, &QAction::triggered, this, &MainWindow::quitWOConfigSlot);
+    file_menu->addAction(quit2_act);
+
+    QAction* quit_act = new QAction(tr("&Quit"));
+    quit_act->setShortcuts(QKeySequence::Quit);
+    //QKeySequence(tr("Ctrl+P"));
+    quit_act->setStatusTip(tr("Quit the application"));
+    connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
+    file_menu->addAction(quit_act);
+
+}
+
+void MainWindow::updateMenus()
+{
+    assert (new_db_action_);
+    assert (open_existng_action_);
+    assert (open_recent_menu_);
+    assert (close_db_action_);
+
+    open_recent_menu_->clear();
+
+    for (auto& fn_it : COMPASS::instance().dbFileList())
+    {
+        QAction* file_act = new QAction(fn_it.c_str());
+        file_act->setData(fn_it.c_str());
+        connect(file_act, &QAction::triggered, this, &MainWindow::openExistingDBSlot);
+        open_recent_menu_->addAction(file_act);
+    }
+
+    bool db_open = COMPASS::instance().dbOpened();
+
+    new_db_action_->setDisabled(db_open);
+    open_existng_action_->setDisabled(db_open);
+    open_recent_menu_->setDisabled(db_open);
+    close_db_action_->setDisabled(!db_open);
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -171,7 +244,44 @@ void MainWindow::showViewPointsTab()
 }
 
 
-void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
+void MainWindow::newDBSlot()
+{
+    loginf << "MainWindow: newDBSlot";
+}
+
+void MainWindow::openExistingDBSlot()
+{
+    loginf << "MainWindow: openExistingDBSlot";
+}
+
+void MainWindow::openRecentDBSlot()
+{
+    loginf << "MainWindow: openRecentDBSlot";
+}
+
+void MainWindow::clearExistingDBsSlot()
+{
+    loginf << "MainWindow: clearExistingDBsSlot";
+}
+
+void MainWindow::closeDBSlot()
+{
+    loginf << "MainWindow: closeDBSlot";
+}
+
+void MainWindow::saveConfigSlot()
+{
+    loginf << "MainWindow: saveConfigSlot";
+}
+
+void MainWindow::quitWOConfigSlot()
+{
+    loginf << "MainWindow: quitWOConfigSlot";
+}
+void MainWindow::quitSlot()
+{
+    loginf << "MainWindow: quitSlot";
+}
 
 //void MainWindow::startSlot()
 //{

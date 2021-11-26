@@ -92,8 +92,7 @@ void DatabaseOpenTask::databaseOpenedSlot()
     done_ = true;
 
     task_manager_.appendSuccess(
-        "DatabaseOpenTask: database '" + COMPASS::instance().interface().connection().type() + ":" +
-        COMPASS::instance().interface().connection().identifier() + "' opened");
+        "DatabaseOpenTask: database opened");
 
     emit doneSignal(name_);
 }

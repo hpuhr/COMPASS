@@ -25,8 +25,6 @@
 #include "logger.h"
 #include "property.h"
 #include "savedfile.h"
-#include "sqliteconnectioninfowidget.h"
-#include "sqliteconnectionwidget.h"
 #include "stringconv.h"
 #include "files.h"
 

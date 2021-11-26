@@ -47,11 +47,11 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
     connection_stack_ = new QStackedWidget();
 
-    SQLiteConnection& connection = db_interface_.connection();
+    //SQLiteConnection& connection = db_interface_.connection();
 
-    connection_stack_->addWidget(connection.widget());
-    connect(connection.widget(), SIGNAL(databaseOpenedSignal()), this,
-            SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
+//    connection_stack_->addWidget(connection.widget());
+//    connect(connection.widget(), SIGNAL(databaseOpenedSignal()), this,
+//            SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
 
     main_layout_->addWidget(connection_stack_);
 
@@ -74,7 +74,7 @@ void DatabaseOpenTaskWidget::updateUsedConnection()
 {
     assert(connection_stack_);
 
-    connection_stack_->setCurrentWidget(db_interface_.connectionWidget());
+    //connection_stack_->setCurrentWidget(db_interface_.connectionWidget());
 }
 
 void DatabaseOpenTaskWidget::databaseOpenedSlot()

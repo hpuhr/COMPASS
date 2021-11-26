@@ -36,7 +36,6 @@
 //#include "managedatasourcestaskwidget.h"
 //#include "postprocesstask.h"
 #include "radarplotpositioncalculatortask.h"
-#include "sqliteconnectionwidget.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 
@@ -62,8 +61,8 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     REQUIRE(!client.quitRequested());
 
     // create main window
-    client.mainWindow().show();
-    client.mainWindow().disableConfigurationSaving();
+    COMPASS::instance().mainWindow().show();
+    COMPASS::instance().mainWindow().disableConfigurationSaving();
 
     QThread::msleep(100);  // delay
 
@@ -87,13 +86,15 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
     TaskManager& task_manager = COMPASS::instance().taskManager();
     TaskManagerWidget* task_manager_widget = task_manager.widget();
 
-    SQLiteConnectionWidget* connection_widget =
-        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
-    REQUIRE(connection_widget);
+    TODO_ASSERT
 
-    connection_widget->addFile(db_filename);
-    connection_widget->selectFile(db_filename);
-    connection_widget->openFileSlot();
+//    SQLiteConnectionWidget* connection_widget =
+//        dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
+//    REQUIRE(connection_widget);
+
+//    connection_widget->addFile(db_filename);
+//    connection_widget->selectFile(db_filename);
+//    connection_widget->openFileSlot();
 
     while (client.hasPendingEvents())
         client.processEvents();
@@ -202,7 +203,7 @@ TEST_CASE("COMPASS Import ASTERIX", "[COMPASS]")
         QThread::msleep(1);  // delay
     }
 
-    client.mainWindow().close();
+    COMPASS::instance().mainWindow().close();
 
     while (client.hasPendingEvents())
         client.processEvents();

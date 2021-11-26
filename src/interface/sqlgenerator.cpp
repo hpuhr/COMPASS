@@ -94,7 +94,6 @@ string SQLGenerator::getCreateTableStatement(const DBObject& object)
     ss << "CREATE TABLE " << object.dbTableName() << "(";
 
     string data_type;
-    assert (db_interface_.connection().type() == SQLITE_IDENTIFIER);;
 
     unsigned int cnt = 0;
     for (auto& var_it : object.variables())
@@ -441,13 +440,6 @@ string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     ss << "INSERT INTO " << tablename << " (";
 
-    string connection_type = db_interface_.connection().type();
-
-    if (connection_type != SQLITE_IDENTIFIER)
-        throw runtime_error(
-                "SQLGenerator: insertDBUpdateStringBind: not yet implemented db type " +
-                connection_type);
-
     stringstream values_ss;
     values_ss << "VALUES (";
 
@@ -455,8 +447,7 @@ string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
     {
         ss << properties.at(cnt).name();
 
-        if (connection_type == SQLITE_IDENTIFIER)
-            values_ss << "@VAR" + to_string(cnt + 1);
+        values_ss << "@VAR" + to_string(cnt + 1);
 
         if (cnt != size - 1)
         {
@@ -494,8 +485,6 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     if (key_col_name != properties.at(size - 1).name())
         throw runtime_error(
                 "SQLGenerator: createDBUpdateStringBind: id var not at last position");
-
-    assert (db_interface_.connection().type() == SQLITE_IDENTIFIER);
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
     {

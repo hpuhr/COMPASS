@@ -119,9 +119,6 @@ bool CreateARTASAssociationsTask::checkPrerequisites()
     if (!COMPASS::instance().interface().ready())
         return false;
 
-    if (COMPASS::instance().interface().connection().type() != SQLITE_IDENTIFIER)
-        return false;
-
     logdbg << "CreateARTASAssociationsTask: checkPrerequisites: done "
            << COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME);
 

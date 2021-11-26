@@ -489,26 +489,26 @@ FilterManagerWidget* FilterManager::widget()
     return widget_;
 }
 
-void FilterManager::startedSlot()
-{
-    loginf << "FilterManager: startedSlot";
-    createSubConfigurables();
+//void FilterManager::startedSlot()
+//{
+//    loginf << "FilterManager: startedSlot";
+//    createSubConfigurables();
 
-    std::string tmpstr = COMPASS::instance().interface().connection().identifier();
-    replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
+//    std::string tmpstr = COMPASS::instance().interface().connection().identifier();
+//    replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
 
-    if (db_id_.compare(tmpstr) != 0)
-    {
-        loginf << "FilterManager: startedSlot: different db id, resetting filters";
-        reset();
-        db_id_ = tmpstr;
-    }
+//    if (db_id_.compare(tmpstr) != 0)
+//    {
+//        loginf << "FilterManager: startedSlot: different db id, resetting filters";
+//        reset();
+//        db_id_ = tmpstr;
+//    }
 
-    emit changedFiltersSignal();
+//    emit changedFiltersSignal();
 
-    if (widget_)
-        widget_->databaseOpenedSlot();
-}
+//    if (widget_)
+//        widget_->databaseOpenedSlot();
+//}
 
 void FilterManager::disableAllFilters ()
 {

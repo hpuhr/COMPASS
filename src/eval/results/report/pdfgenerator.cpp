@@ -104,8 +104,10 @@ PDFGeneratorDialog& PDFGenerator::dialog()
         SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
         assert (sql_con);
 
-        report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/eval_report_"
-                    + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
+        string current_filename = COMPASS::instance().lastDbFilename();
+
+        report_path_ = Files::getDirectoryFromPath(current_filename)+"/eval_report_"
+                    + Files::getFilenameFromPath(current_filename) + "/";
         loginf << "PDFGenerator: dialog: report path '" << report_path_ << "'"
                << " filename '"  << report_filename_ << "'";
     }

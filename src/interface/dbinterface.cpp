@@ -147,11 +147,11 @@ DBInterfaceInfoWidget* DBInterface::infoWidget()
     return info_widget_;
 }
 
-QWidget* DBInterface::connectionWidget()
-{
-    assert(db_connection_);
-    return db_connection_->widget();
-}
+//QWidget* DBInterface::connectionWidget()
+//{
+//    assert(db_connection_);
+//    return db_connection_->widget();
+//}
 
 void DBInterface::openDBFile(const std::string& filename)
 {
@@ -1299,10 +1299,6 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
     unsigned int size = list.size();
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: creating bind for " << size
            << " elements";
-
-    string connection_type = db_connection_->type();
-
-    assert(connection_type == SQLITE_IDENTIFIER);
 
     unsigned int index_cnt = 0;
 

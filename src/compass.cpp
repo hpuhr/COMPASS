@@ -182,6 +182,8 @@ void COMPASS::openDBFile(const std::string& file_name)
     assert (!db_opened_);
     assert (db_interface_);
 
+    last_db_filename_ = file_name;
+
     db_interface_->openDBFile(file_name);
     assert (db_interface_->dbOpen());
 

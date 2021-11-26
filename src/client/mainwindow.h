@@ -25,14 +25,16 @@
 //#include "JobOrderer.h"
 
 class QPushButton;
-class DBSelectionWidget;
-class DBSchemaManagerWidget;
-class DBObjectManagerWidget;
-class MainLoadWidget;
 class QTabWidget;
 class QCheckBox;
 class QMenu;
 class QPushButton;
+class QAction;
+
+class DBSelectionWidget;
+class DBSchemaManagerWidget;
+class DBObjectManagerWidget;
+class MainLoadWidget;
 
 /**
  * @brief Main window which embeds all other components
@@ -46,16 +48,21 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-//  signals:
-//    void startedSignal();
-
   private slots:
-    /// @brief Called when database was opened
-    void databaseOpenedSlot();
-    /// @brief If database is open, switch to ManagementWidget
+
+    void newDBSlot();
+    void openExistingDBSlot();
+    void openRecentDBSlot();
+    void clearExistingDBsSlot();
+    void closeDBSlot();
+
+    void saveConfigSlot();
+
+    void quitWOConfigSlot();
+    void quitSlot();
+
     //void startSlot();
 
-    /// @brief Handles key press events
     // void keyPressEvent ( QKeyEvent * event );
 
     void quitRequestedSlot();
@@ -82,7 +89,13 @@ protected:
 
     bool save_configuration_{true};
 
+    QAction* new_db_action_ {nullptr};
+    QAction* open_existng_action_ {nullptr};
+    QMenu* open_recent_menu_ {nullptr};
+    QAction* close_db_action_ {nullptr};
+
     void createMenus ();
+    void updateMenus();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

@@ -1722,7 +1722,7 @@ bool EvaluationManager::useUTN (unsigned int utn)
     logdbg << "EvaluationManager: useUTN: utn " << utn;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
 
@@ -1739,7 +1739,7 @@ void EvaluationManager::useUTN (unsigned int utn, bool value, bool update_td, bo
            << " update_td " << update_td;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["use"] = value;
@@ -1758,7 +1758,7 @@ void EvaluationManager::useAllUTNs (bool value)
     update_results_ = false;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     set<unsigned int> already_set;
 
@@ -1796,7 +1796,7 @@ void EvaluationManager::clearUTNComments ()
     update_results_ = false;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     set<unsigned int> already_set;
 
@@ -1993,7 +1993,7 @@ std::string EvaluationManager::utnComment (unsigned int utn)
     logdbg << "EvaluationManager: utnComment: utn " << utn;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
 
@@ -2010,7 +2010,7 @@ void EvaluationManager::utnComment (unsigned int utn, std::string value, bool up
            << " update_td " << update_td;
 
     if (!current_config_name_.size())
-        current_config_name_ = COMPASS::instance().interface().connection().shortIdentifier();
+        current_config_name_ = COMPASS::instance().lastDbFilename();
 
     string utn_str = to_string(utn);
     configs_[current_config_name_]["utns"][utn_str]["comment"] = value;

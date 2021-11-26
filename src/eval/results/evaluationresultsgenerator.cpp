@@ -351,12 +351,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     EvaluationResultsReport::SectionContentTable& gen_table = gen_sec.getTable("gen_overview_table");
 
-    SQLiteConnection& db_con = COMPASS::instance().interface().connection();
-
     gen_table.addRow({"Application", "Application Filename", APP_FILENAME.c_str()}, nullptr);
     gen_table.addRow({"Application Version", "Application Version", VERSION.c_str()}, nullptr);
-    gen_table.addRow({"DB Type", "Database Type", db_con.type().c_str()}, nullptr);
-    gen_table.addRow({"DB", "Database Identifier", db_con.identifier().c_str()}, nullptr);
+    gen_table.addRow({"DB", "Database Name", COMPASS::instance().lastDbFilename().c_str()}, nullptr);
 
     assert (eval_man_.hasCurrentStandard());
     gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);

@@ -41,7 +41,6 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "taskmanagerlogwidget.h"
 #include "taskmanagerwidget.h"
-#include "sqliteconnectionwidget.h"
 #include "dbinterface.h"
 #include "files.h"
 #include "viewpointsimporttask.h"
@@ -657,565 +656,565 @@ bool TaskManager::automaticTasksDefined() const
 
 void TaskManager::performAutomaticTasks ()
 {
-    loginf << "TaskManager: performAutomaticTasks";
-    assert (automatic_tasks_defined_);
+//    loginf << "TaskManager: performAutomaticTasks";
+//    assert (automatic_tasks_defined_);
 
-    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
-    {
-        logerr << "TaskManager: performAutomaticTasks: neither create nor open sqlite3 is set";
-        return;
-    }
-
-    if (sqlite3_create_new_db_ && sqlite3_open_db_)
-    {
-        logerr << "TaskManager: performAutomaticTasks: both create and open sqlite3 are set";
-        return;
-    }
-
-    SQLiteConnectionWidget* connection_widget =
-            dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
-
-    while (QCoreApplication::hasPendingEvents())
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    if (sqlite3_create_new_db_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: creating and opening new sqlite3 database '"
-               << sqlite3_create_new_db_filename_ << "'";
-
-        if (Files::fileExists(sqlite3_create_new_db_filename_))
-            Files::deleteFile(sqlite3_create_new_db_filename_);
-
-        connection_widget->addFile(sqlite3_create_new_db_filename_);
-        connection_widget->selectFile(sqlite3_create_new_db_filename_);
-        connection_widget->openFileSlot();
-    }
-    else if (sqlite3_open_db_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: opening existing sqlite3 database '"
-               << sqlite3_open_db_filename_ << "'";
-
-        if (!Files::fileExists(sqlite3_open_db_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: sqlite3 database '" << sqlite3_open_db_filename_
-                   << "' does not exist";
-            return;
-        }
-
-        connection_widget->addFile(sqlite3_open_db_filename_);
-        connection_widget->selectFile(sqlite3_open_db_filename_);
-        connection_widget->openFileSlot();
-    }
-
-    loginf << "TaskManager: performAutomaticTasks: database opened";
-
-    // do longer wait on startup for things to settle
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-    {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
-    // does not show widget
-    //QCoreApplication::processEvents();
-
-    // does cause application halt
-    //    while (QCoreApplication::hasPendingEvents())
-    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    loginf << "TaskManager: performAutomaticTasks: waiting done";
-
-    if (view_points_import_file_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: importing view points file '"
-               << view_points_import_filename_ << "'";
-
-        if (!Files::fileExists(view_points_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: view points file '" << view_points_import_filename_
-                   << "' does not exist";
-            return;
-        }
-
-        widget_->setCurrentTask(*view_points_import_task_);
-        if(widget_->getCurrentTaskName() != view_points_import_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
-
-        ViewPointsImportTaskWidget* view_points_import_task_widget =
-                dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
-        assert(view_points_import_task_widget);
-
-        view_points_import_task_widget->addFile(view_points_import_filename_);
-        view_points_import_task_widget->selectFile(view_points_import_filename_);
-
-        assert(view_points_import_task_->canImport());
-        view_points_import_task_->showDoneSummary(false);
-
-        view_points_import_task_widget->importSlot();
-
-        while (!view_points_import_task_->finished())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
-    }
-
-#if USE_JASTERIX
-    if (asterix_import_file_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
-               << asterix_import_filename_ << "'";
-
-        if (!Files::fileExists(asterix_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
-                   << "' does not exist";
-            return;
-        }
-
-        widget_->setCurrentTask(*asterix_importer_task_);
-        if(widget_->getCurrentTaskName() != asterix_importer_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
-
-        ASTERIXImportTaskWidget* asterix_import_task_widget =
-                dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
-        assert(asterix_import_task_widget);
-
-        asterix_import_task_widget->addFile(asterix_import_filename_);
-        asterix_import_task_widget->selectFile(asterix_import_filename_);
-
-        assert(asterix_importer_task_->canRun());
-        asterix_importer_task_->showDoneSummary(false);
-
-        widget_->runTask(*asterix_importer_task_);
-
-        while (!asterix_importer_task_->done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
-    }
-#endif
-
-//    if (json_import_file_)
+//    if (!(sqlite3_create_new_db_ || sqlite3_open_db_))
 //    {
-//        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
-//               << json_import_filename_ << "'";
-
-//#if USE_JASTERIX
-//        if (!Files::fileExists(json_import_filename_))
-//        {
-//            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
-//                   << "' does not exist";
-//            return;
-//        }
-//#endif
-
-//        if(!json_import_task_->hasSchema(json_import_schema_))
-//        {
-//            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
-//                   << "' does not exist";
-//            return;
-//        }
-
-//        widget_->setCurrentTask(*json_import_task_);
-//        if(widget_->getCurrentTaskName() != json_import_task_->name())
-//        {
-//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-//                   << "' selected, aborting";
-//            return;
-//        }
-
-//        JSONImportTaskWidget* json_import_task_widget =
-//                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
-//        assert(json_import_task_widget);
-
-//        json_import_task_widget->addFile(json_import_filename_);
-//        json_import_task_widget->selectFile(json_import_filename_);
-//        json_import_task_widget->selectSchema(json_import_schema_);
-
-//        assert(json_import_task_->canRun());
-//        json_import_task_->showDoneSummary(false);
-
-//        widget_->runTask(*json_import_task_);
-
-//        while (!json_import_task_->done())
-//        {
-//            QCoreApplication::processEvents();
-//            QThread::msleep(1);
-//        }
-
-//        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
+//        logerr << "TaskManager: performAutomaticTasks: neither create nor open sqlite3 is set";
+//        return;
 //    }
 
-    if (gps_trail_import_file_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
-               << gps_trail_import_filename_ << "'";
+//    if (sqlite3_create_new_db_ && sqlite3_open_db_)
+//    {
+//        logerr << "TaskManager: performAutomaticTasks: both create and open sqlite3 are set";
+//        return;
+//    }
 
-        if (!Files::fileExists(gps_trail_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
-                   << "' does not exist";
-            return;
-        }
+//    SQLiteConnectionWidget* connection_widget =
+//            dynamic_cast<SQLiteConnectionWidget*>(COMPASS::instance().interface().connectionWidget());
 
-        widget_->setCurrentTask(*gps_trail_import_task_);
-        if(widget_->getCurrentTaskName() != gps_trail_import_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
+//    while (QCoreApplication::hasPendingEvents())
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        GPSTrailImportTaskWidget* gps_import_task_widget =
-                dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
-        assert(gps_import_task_widget);
+//    if (sqlite3_create_new_db_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: creating and opening new sqlite3 database '"
+//               << sqlite3_create_new_db_filename_ << "'";
 
-        gps_import_task_widget->addFile(gps_trail_import_filename_);
-        gps_import_task_widget->selectFile(gps_trail_import_filename_);
+//        if (Files::fileExists(sqlite3_create_new_db_filename_))
+//            Files::deleteFile(sqlite3_create_new_db_filename_);
 
-        assert(gps_trail_import_task_->canRun());
-        gps_trail_import_task_->showDoneSummary(false);
+//        connection_widget->addFile(sqlite3_create_new_db_filename_);
+//        connection_widget->selectFile(sqlite3_create_new_db_filename_);
+//        connection_widget->openFileSlot();
+//    }
+//    else if (sqlite3_open_db_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: opening existing sqlite3 database '"
+//               << sqlite3_open_db_filename_ << "'";
 
-        widget_->runTask(*gps_trail_import_task_);
-
-        while (!gps_trail_import_task_->done())
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(1);
-        }
-    }
-
-    if (sectors_import_file_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: importing sectors file '"
-               << sectors_import_filename_ << "'";
-
-        if (!Files::fileExists(sectors_import_filename_))
-        {
-            logerr << "TaskManager: performAutomaticTasks: sectors file file '" << sectors_import_filename_
-                   << "' does not exist";
-            return;
-        }
-
-        widget_->setCurrentTask(*manage_sectors_task_);
-        if(widget_->getCurrentTaskName() != manage_sectors_task_->name())
-        {
-            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                   << "' selected, aborting";
-            return;
-        }
-
-        ManageSectorsTaskWidget* manage_sectors_task_widget =
-                dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
-        assert(manage_sectors_task_widget);
-
-        manage_sectors_task_->showDoneSummary(false);
-        manage_sectors_task_widget->importSectorsJSON(sectors_import_filename_);
-
-        //widget_->runTask(*manage_sectors_task_);
-
-        //        while (!manage_sectors_task_->done())
-        //        {
-        //            QCoreApplication::processEvents();
-        //            QThread::msleep(1);
-        //        }
-    }
-
-    start_time = boost::posix_time::microsec_clock::local_time();
-    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-    {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
-
-    if (auto_process_)
-    {
-        // calculate radar plot positions
-        if (radar_plot_position_calculator_task_->isRecommended())
-        {
-            loginf << "TaskManager: performAutomaticTasks: starting radar plot position calculation task";
-
-            widget_->setCurrentTask(*radar_plot_position_calculator_task_);
-            if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
-            {
-                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                       << "' selected, aborting";
-                return;
-            }
-            radar_plot_position_calculator_task_->showDoneSummary(false);
-
-            widget_->runTask(*radar_plot_position_calculator_task_);
-
-            while (!radar_plot_position_calculator_task_->done())
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
-        }
-
-        // post-process
-//        loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
-
-//        if (!post_process_task_->isRecommended())
+//        if (!Files::fileExists(sqlite3_open_db_filename_))
 //        {
+//            logerr << "TaskManager: performAutomaticTasks: sqlite3 database '" << sqlite3_open_db_filename_
+//                   << "' does not exist";
+//            return;
+//        }
 
+//        connection_widget->addFile(sqlite3_open_db_filename_);
+//        connection_widget->selectFile(sqlite3_open_db_filename_);
+//        connection_widget->openFileSlot();
+//    }
+
+//    loginf << "TaskManager: performAutomaticTasks: database opened";
+
+//    // do longer wait on startup for things to settle
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        QThread::msleep(1);
+//    }
+//    // does not show widget
+//    //QCoreApplication::processEvents();
+
+//    // does cause application halt
+//    //    while (QCoreApplication::hasPendingEvents())
+//    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+//    loginf << "TaskManager: performAutomaticTasks: waiting done";
+
+//    if (view_points_import_file_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: importing view points file '"
+//               << view_points_import_filename_ << "'";
+
+//        if (!Files::fileExists(view_points_import_filename_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: view points file '" << view_points_import_filename_
+//                   << "' does not exist";
+//            return;
+//        }
+
+//        widget_->setCurrentTask(*view_points_import_task_);
+//        if(widget_->getCurrentTaskName() != view_points_import_task_->name())
+//        {
 //            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
 //                   << "' selected, aborting";
 //            return;
 //        }
 
-//        assert(post_process_task_->isRecommended());
-//        assert(post_process_task_->isRequired());
+//        ViewPointsImportTaskWidget* view_points_import_task_widget =
+//                dynamic_cast<ViewPointsImportTaskWidget*>(view_points_import_task_->widget());
+//        assert(view_points_import_task_widget);
 
-//        widget_->setCurrentTask(*post_process_task_);
-//        if(widget_->getCurrentTaskName() != post_process_task_->name())
-//            widget_->setCurrentTask(*post_process_task_);
+//        view_points_import_task_widget->addFile(view_points_import_filename_);
+//        view_points_import_task_widget->selectFile(view_points_import_filename_);
 
-//        widget_->runTask(*post_process_task_);
+//        assert(view_points_import_task_->canImport());
+//        view_points_import_task_->showDoneSummary(false);
 
-//        while (!post_process_task_->done())
+//        view_points_import_task_widget->importSlot();
+
+//        while (!view_points_import_task_->finished())
 //        {
 //            QCoreApplication::processEvents();
 //            QThread::msleep(1);
 //        }
+//    }
 
-//        loginf << "TaskManager: performAutomaticTasks: post-processing task done";
+//#if USE_JASTERIX
+//    if (asterix_import_file_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: importing ASTERIX file '"
+//               << asterix_import_filename_ << "'";
 
-        // artas assocs
-        if (create_artas_associations_task_->isRecommended())
-        {
-            loginf << "TaskManager: performAutomaticTasks: starting association task";
+//        if (!Files::fileExists(asterix_import_filename_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: ASTERIX file '" << asterix_import_filename_
+//                   << "' does not exist";
+//            return;
+//        }
 
-            widget_->setCurrentTask(*create_artas_associations_task_);
-            if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
-            {
-                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                       << "' selected, aborting";
-                return;
-            }
+//        widget_->setCurrentTask(*asterix_importer_task_);
+//        if(widget_->getCurrentTaskName() != asterix_importer_task_->name())
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                   << "' selected, aborting";
+//            return;
+//        }
 
-            create_artas_associations_task_->showDoneSummary(false);
+//        ASTERIXImportTaskWidget* asterix_import_task_widget =
+//                dynamic_cast<ASTERIXImportTaskWidget*>(asterix_importer_task_->widget());
+//        assert(asterix_import_task_widget);
 
-            widget_->runTask(*create_artas_associations_task_);
+//        asterix_import_task_widget->addFile(asterix_import_filename_);
+//        asterix_import_task_widget->selectFile(asterix_import_filename_);
 
-            while (!create_artas_associations_task_->done())
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
-        }
-    }
+//        assert(asterix_importer_task_->canRun());
+//        asterix_importer_task_->showDoneSummary(false);
 
-    if (associate_data_)
-    {
-        if (create_associations_task_->canRun())
-        {
-            widget_->setCurrentTask(*create_associations_task_);
-            if(widget_->getCurrentTaskName() != create_associations_task_->name())
-            {
-                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
-                       << "' selected, aborting";
-                return;
-            }
+//        widget_->runTask(*asterix_importer_task_);
 
-            create_associations_task_->showDoneSummary(false);
+//        while (!asterix_importer_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
+//    }
+//#endif
 
-            widget_->runTask(*create_associations_task_);
+////    if (json_import_file_)
+////    {
+////        loginf << "TaskManager: performAutomaticTasks: importing JSON file '"
+////               << json_import_filename_ << "'";
 
-            while (!create_associations_task_->done())
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
-        }
-        else
-            logerr << "TaskManager: performAutomaticTasks: associate data task can not be run";
-    }
+////#if USE_JASTERIX
+////        if (!Files::fileExists(json_import_filename_))
+////        {
+////            logerr << "TaskManager: performAutomaticTasks: JSON file '" << asterix_import_filename_
+////                   << "' does not exist";
+////            return;
+////        }
+////#endif
 
-    loginf << "TaskManager: performAutomaticTasks: done with startup tasks";
+////        if(!json_import_task_->hasSchema(json_import_schema_))
+////        {
+////            logerr << "TaskManager: performAutomaticTasks: JSON schema '" << json_import_schema_
+////                   << "' does not exist";
+////            return;
+////        }
 
-    bool started = false;
+////        widget_->setCurrentTask(*json_import_task_);
+////        if(widget_->getCurrentTaskName() != json_import_task_->name())
+////        {
+////            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+////                   << "' selected, aborting";
+////            return;
+////        }
 
-    if (start_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: starting";
+////        JSONImportTaskWidget* json_import_task_widget =
+////                dynamic_cast<JSONImportTaskWidget*>(json_import_task_->widget());
+////        assert(json_import_task_widget);
 
-        if(widget_->isStartPossible())
-        {
-            widget_->startSlot();
-            QCoreApplication::processEvents();
+////        json_import_task_widget->addFile(json_import_filename_);
+////        json_import_task_widget->selectFile(json_import_filename_);
+////        json_import_task_widget->selectSchema(json_import_schema_);
 
-            started = true;
-        }
-        else
-            loginf << "TaskManager: performAutomaticTasks: start not possible";
-    }
+////        assert(json_import_task_->canRun());
+////        json_import_task_->showDoneSummary(false);
 
-    if (load_data_)
-    {
-        if (!started)
-        {
-            logerr << "TaskManager: performAutomaticTasks: loading data not possible since not started";
-        }
-        else
-        {
+////        widget_->runTask(*json_import_task_);
 
-            loginf << "TaskManager: performAutomaticTasks: loading data";
+////        while (!json_import_task_->done())
+////        {
+////            QCoreApplication::processEvents();
+////            QThread::msleep(1);
+////        }
 
-            DBObjectManager& obj_man = COMPASS::instance().objectManager();
+////        loginf << "TaskManager: performAutomaticTasks: importing JSON file done";
+////    }
 
-            obj_man.loadSlot();
+//    if (gps_trail_import_file_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: importing GPS trail file '"
+//               << gps_trail_import_filename_ << "'";
 
-            while (obj_man.loadInProgress())
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
-        }
-    }
-    else
-        loginf << "TaskManager: performAutomaticTasks: not loading data";
+//        if (!Files::fileExists(gps_trail_import_filename_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: GPS trail file '" << gps_trail_import_filename_
+//                   << "' does not exist";
+//            return;
+//        }
 
-    if (export_view_points_report_)
-    {
-        if (!started)
-        {
-            logerr << "TaskManager: performAutomaticTasks: exporting view points report not possible since not started";
-        }
-        else
-        {
-            loginf << "TaskManager: performAutomaticTasks: exporting view points report";
+//        widget_->setCurrentTask(*gps_trail_import_task_);
+//        if(widget_->getCurrentTaskName() != gps_trail_import_task_->name())
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                   << "' selected, aborting";
+//            return;
+//        }
 
-            getMainWindow()->showViewPointsTab();
+//        GPSTrailImportTaskWidget* gps_import_task_widget =
+//                dynamic_cast<GPSTrailImportTaskWidget*>(gps_trail_import_task_->widget());
+//        assert(gps_import_task_widget);
 
-            ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
+//        gps_import_task_widget->addFile(gps_trail_import_filename_);
+//        gps_import_task_widget->selectFile(gps_trail_import_filename_);
 
-            ViewPointsReportGeneratorDialog& dialog = gen.dialog();
-            dialog.show();
+//        assert(gps_trail_import_task_->canRun());
+//        gps_trail_import_task_->showDoneSummary(false);
 
-            QCoreApplication::processEvents();
+//        widget_->runTask(*gps_trail_import_task_);
 
-            gen.reportPathAndFilename(export_view_points_report_filename_);
-            gen.showDone(false);
+//        while (!gps_trail_import_task_->done())
+//        {
+//            QCoreApplication::processEvents();
+//            QThread::msleep(1);
+//        }
+//    }
 
-            gen.run();
+//    if (sectors_import_file_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: importing sectors file '"
+//               << sectors_import_filename_ << "'";
 
-            while (gen.isRunning()) // not sure if needed here but what the hell
-            {
-                QCoreApplication::processEvents();
-                QThread::msleep(1);
-            }
+//        if (!Files::fileExists(sectors_import_filename_))
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: sectors file file '" << sectors_import_filename_
+//                   << "' does not exist";
+//            return;
+//        }
 
-            gen.showDone(true);
-        }
-    }
+//        widget_->setCurrentTask(*manage_sectors_task_);
+//        if(widget_->getCurrentTaskName() != manage_sectors_task_->name())
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                   << "' selected, aborting";
+//            return;
+//        }
 
-    if (evaluate_ || export_eval_report_)
-    {
-        if (!started)
-        {
-            logerr << "TaskManager: performAutomaticTasks: evaluation not possible since not started";
-        }
-        else
-        {
-            loginf << "TaskManager: performAutomaticTasks: running evaluation";
+//        ManageSectorsTaskWidget* manage_sectors_task_widget =
+//                dynamic_cast<ManageSectorsTaskWidget*>(manage_sectors_task_->widget());
+//        assert(manage_sectors_task_widget);
 
-            getMainWindow()->showEvaluationTab();
+//        manage_sectors_task_->showDoneSummary(false);
+//        manage_sectors_task_widget->importSectorsJSON(sectors_import_filename_);
 
-            EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+//        //widget_->runTask(*manage_sectors_task_);
 
-            if (eval_man.canLoadData())
-            {
-                loginf << "TaskManager: performAutomaticTasks: loading evaluation data";
+//        //        while (!manage_sectors_task_->done())
+//        //        {
+//        //            QCoreApplication::processEvents();
+//        //            QThread::msleep(1);
+//        //        }
+//    }
 
-                eval_man.loadData();
+//    start_time = boost::posix_time::microsec_clock::local_time();
+//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+//    {
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        QThread::msleep(1);
+//    }
 
-                while (!eval_man.dataLoaded())
-                {
-                    QCoreApplication::processEvents();
-                    QThread::msleep(1);
-                }
+//    if (auto_process_)
+//    {
+//        // calculate radar plot positions
+//        if (radar_plot_position_calculator_task_->isRecommended())
+//        {
+//            loginf << "TaskManager: performAutomaticTasks: starting radar plot position calculation task";
 
-                assert (eval_man.dataLoaded());
+//            widget_->setCurrentTask(*radar_plot_position_calculator_task_);
+//            if(widget_->getCurrentTaskName() != radar_plot_position_calculator_task_->name())
+//            {
+//                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                       << "' selected, aborting";
+//                return;
+//            }
+//            radar_plot_position_calculator_task_->showDoneSummary(false);
 
-                if (eval_man.canEvaluate())
-                {
-                    loginf << "TaskManager: performAutomaticTasks: doing evaluation";
+//            widget_->runTask(*radar_plot_position_calculator_task_);
 
-                    eval_man.evaluate();
+//            while (!radar_plot_position_calculator_task_->done())
+//            {
+//                QCoreApplication::processEvents();
+//                QThread::msleep(1);
+//            }
+//        }
 
-//                    while (!eval_man.evaluated())
+//        // post-process
+////        loginf << "TaskManager: performAutomaticTasks: starting post-processing task";
+
+////        if (!post_process_task_->isRecommended())
+////        {
+
+////            logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+////                   << "' selected, aborting";
+////            return;
+////        }
+
+////        assert(post_process_task_->isRecommended());
+////        assert(post_process_task_->isRequired());
+
+////        widget_->setCurrentTask(*post_process_task_);
+////        if(widget_->getCurrentTaskName() != post_process_task_->name())
+////            widget_->setCurrentTask(*post_process_task_);
+
+////        widget_->runTask(*post_process_task_);
+
+////        while (!post_process_task_->done())
+////        {
+////            QCoreApplication::processEvents();
+////            QThread::msleep(1);
+////        }
+
+////        loginf << "TaskManager: performAutomaticTasks: post-processing task done";
+
+//        // artas assocs
+//        if (create_artas_associations_task_->isRecommended())
+//        {
+//            loginf << "TaskManager: performAutomaticTasks: starting association task";
+
+//            widget_->setCurrentTask(*create_artas_associations_task_);
+//            if(widget_->getCurrentTaskName() != create_artas_associations_task_->name())
+//            {
+//                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                       << "' selected, aborting";
+//                return;
+//            }
+
+//            create_artas_associations_task_->showDoneSummary(false);
+
+//            widget_->runTask(*create_artas_associations_task_);
+
+//            while (!create_artas_associations_task_->done())
+//            {
+//                QCoreApplication::processEvents();
+//                QThread::msleep(1);
+//            }
+//        }
+//    }
+
+//    if (associate_data_)
+//    {
+//        if (create_associations_task_->canRun())
+//        {
+//            widget_->setCurrentTask(*create_associations_task_);
+//            if(widget_->getCurrentTaskName() != create_associations_task_->name())
+//            {
+//                logerr << "TaskManager: performAutomaticTasks: wrong task '" << widget_->getCurrentTaskName()
+//                       << "' selected, aborting";
+//                return;
+//            }
+
+//            create_associations_task_->showDoneSummary(false);
+
+//            widget_->runTask(*create_associations_task_);
+
+//            while (!create_associations_task_->done())
+//            {
+//                QCoreApplication::processEvents();
+//                QThread::msleep(1);
+//            }
+//        }
+//        else
+//            logerr << "TaskManager: performAutomaticTasks: associate data task can not be run";
+//    }
+
+//    loginf << "TaskManager: performAutomaticTasks: done with startup tasks";
+
+//    bool started = false;
+
+//    if (start_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: starting";
+
+//        if(widget_->isStartPossible())
+//        {
+//            widget_->startSlot();
+//            QCoreApplication::processEvents();
+
+//            started = true;
+//        }
+//        else
+//            loginf << "TaskManager: performAutomaticTasks: start not possible";
+//    }
+
+//    if (load_data_)
+//    {
+//        if (!started)
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: loading data not possible since not started";
+//        }
+//        else
+//        {
+
+//            loginf << "TaskManager: performAutomaticTasks: loading data";
+
+//            DBObjectManager& obj_man = COMPASS::instance().objectManager();
+
+//            obj_man.loadSlot();
+
+//            while (obj_man.loadInProgress())
+//            {
+//                QCoreApplication::processEvents();
+//                QThread::msleep(1);
+//            }
+//        }
+//    }
+//    else
+//        loginf << "TaskManager: performAutomaticTasks: not loading data";
+
+//    if (export_view_points_report_)
+//    {
+//        if (!started)
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: exporting view points report not possible since not started";
+//        }
+//        else
+//        {
+//            loginf << "TaskManager: performAutomaticTasks: exporting view points report";
+
+//            getMainWindow()->showViewPointsTab();
+
+//            ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
+
+//            ViewPointsReportGeneratorDialog& dialog = gen.dialog();
+//            dialog.show();
+
+//            QCoreApplication::processEvents();
+
+//            gen.reportPathAndFilename(export_view_points_report_filename_);
+//            gen.showDone(false);
+
+//            gen.run();
+
+//            while (gen.isRunning()) // not sure if needed here but what the hell
+//            {
+//                QCoreApplication::processEvents();
+//                QThread::msleep(1);
+//            }
+
+//            gen.showDone(true);
+//        }
+//    }
+
+//    if (evaluate_ || export_eval_report_)
+//    {
+//        if (!started)
+//        {
+//            logerr << "TaskManager: performAutomaticTasks: evaluation not possible since not started";
+//        }
+//        else
+//        {
+//            loginf << "TaskManager: performAutomaticTasks: running evaluation";
+
+//            getMainWindow()->showEvaluationTab();
+
+//            EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+//            if (eval_man.canLoadData())
+//            {
+//                loginf << "TaskManager: performAutomaticTasks: loading evaluation data";
+
+//                eval_man.loadData();
+
+//                while (!eval_man.dataLoaded())
+//                {
+//                    QCoreApplication::processEvents();
+//                    QThread::msleep(1);
+//                }
+
+//                assert (eval_man.dataLoaded());
+
+//                if (eval_man.canEvaluate())
+//                {
+//                    loginf << "TaskManager: performAutomaticTasks: doing evaluation";
+
+//                    eval_man.evaluate();
+
+////                    while (!eval_man.evaluated())
+////                    {
+////                        QCoreApplication::processEvents();
+////                        QThread::msleep(1);
+////                    }
+
+//                    assert (eval_man.evaluated());
+
+//                    loginf << "TaskManager: performAutomaticTasks: evaluation done";
+
+//                    if (export_eval_report_)
 //                    {
-//                        QCoreApplication::processEvents();
-//                        QThread::msleep(1);
+//                        if (eval_man.canGenerateReport())
+//                        {
+//                            loginf << "TaskManager: performAutomaticTasks: generating report";
+
+//                            EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+
+//                            EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+//                            dialog.show();
+
+//                            QCoreApplication::processEvents();
+
+//                            gen.reportPathAndFilename(export_eval_report_filename_);
+//                            gen.showDone(false);
+
+//                            gen.run();
+
+//                            while (gen.isRunning()) // not sure if needed here but what the hell
+//                            {
+//                                QCoreApplication::processEvents();
+//                                QThread::msleep(1);
+//                            }
+
+//                            gen.showDone(true);
+
+//                            loginf << "TaskManager: performAutomaticTasks: generating evaluation report done";
+//                        }
+//                        else
+//                            logerr << "TaskManager: performAutomaticTasks: "
+//                                      "exporting evaluation report not possible since report can't be generated";
 //                    }
+//                }
+//                else
+//                    logerr << "TaskManager: performAutomaticTasks: "
+//                              "evaluation not possible since evaluation can not be made";
+//            }
+//            else
+//                logerr << "TaskManager: performAutomaticTasks: "
+//                          "evaluation not possible since no data can be loaded";
+//        }
+//    }
 
-                    assert (eval_man.evaluated());
+//    if (quit_)
+//    {
+//        loginf << "TaskManager: performAutomaticTasks: quit requested";
 
-                    loginf << "TaskManager: performAutomaticTasks: evaluation done";
-
-                    if (export_eval_report_)
-                    {
-                        if (eval_man.canGenerateReport())
-                        {
-                            loginf << "TaskManager: performAutomaticTasks: generating report";
-
-                            EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
-
-                            EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
-                            dialog.show();
-
-                            QCoreApplication::processEvents();
-
-                            gen.reportPathAndFilename(export_eval_report_filename_);
-                            gen.showDone(false);
-
-                            gen.run();
-
-                            while (gen.isRunning()) // not sure if needed here but what the hell
-                            {
-                                QCoreApplication::processEvents();
-                                QThread::msleep(1);
-                            }
-
-                            gen.showDone(true);
-
-                            loginf << "TaskManager: performAutomaticTasks: generating evaluation report done";
-                        }
-                        else
-                            logerr << "TaskManager: performAutomaticTasks: "
-                                      "exporting evaluation report not possible since report can't be generated";
-                    }
-                }
-                else
-                    logerr << "TaskManager: performAutomaticTasks: "
-                              "evaluation not possible since evaluation can not be made";
-            }
-            else
-                logerr << "TaskManager: performAutomaticTasks: "
-                          "evaluation not possible since no data can be loaded";
-        }
-    }
-
-    if (quit_)
-    {
-        loginf << "TaskManager: performAutomaticTasks: quit requested";
-
-        emit quitRequestedSignal();
-    }
-    else
-        loginf << "TaskManager: performAutomaticTasks: not quitting";
+//        emit quitRequestedSignal();
+//    }
+//    else
+//        loginf << "TaskManager: performAutomaticTasks: not quitting";
 }
 
 void TaskManager::evaluate(bool evaluate)

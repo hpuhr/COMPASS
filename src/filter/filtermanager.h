@@ -49,7 +49,7 @@ signals:
     void changedFiltersSignal();
 
 public slots:
-    void startedSlot();
+    //void startedSlot();
     void deleteFilterSlot(DBFilter* filter);
 
     void unshowViewPointSlot (const ViewableDataConfig* vp);

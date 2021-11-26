@@ -54,6 +54,6 @@ DBInterfaceInfoWidget::~DBInterfaceInfoWidget() {}
 void DBInterfaceInfoWidget::databaseContentChangedSlot()
 {
     assert(layout_);
-    layout_->addWidget(interface_.connection().infoWidget());
+    //layout_->addWidget(interface_.connection().infoWidget());
     //layout_->addStretch();
 }

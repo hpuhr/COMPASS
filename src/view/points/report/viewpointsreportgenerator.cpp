@@ -65,8 +65,10 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
     SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
     assert (sql_con);
 
-    report_path_ = Files::getDirectoryFromPath(sql_con->lastFilename())+"/report_"
-                + Files::getFilenameFromPath(sql_con->lastFilename()) + "/";
+    string current_filename = COMPASS::instance().lastDbFilename();
+
+    report_path_ = Files::getDirectoryFromPath(current_filename)+"/report_"
+                + Files::getFilenameFromPath(current_filename) + "/";
 
     report_filename_ = "report.tex";
 

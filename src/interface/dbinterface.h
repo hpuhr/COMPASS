@@ -88,7 +88,7 @@ public:
 
     DBInterfaceInfoWidget* infoWidget();
 
-    QWidget* connectionWidget();
+    //QWidget* connectionWidget();
 
     void openDBFile(const std::string& file_name);
     void closeDBFile();
