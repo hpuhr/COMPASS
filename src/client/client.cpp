@@ -23,7 +23,6 @@
 #include "files.h"
 #include "global.h"
 #include "logger.h"
-#include "mainwindow.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 
@@ -172,92 +171,83 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     loginf << "COMPASSClient: started with " << std::thread::hardware_concurrency() << " threads";
 
-    TaskManager& task_man = COMPASS::instance().taskManager();
+//    TaskManager& task_man = COMPASS::instance().taskManager();
 
-    if (create_new_sqlite3_db_filename.size())
-        task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
+//    if (create_new_sqlite3_db_filename.size())
+//        task_man.createAndOpenNewSqlite3DB(create_new_sqlite3_db_filename);
 
-    if (open_sqlite3_db_filename.size())
-        task_man.openSqlite3DB(open_sqlite3_db_filename);
+//    if (open_sqlite3_db_filename.size())
+//        task_man.openSqlite3DB(open_sqlite3_db_filename);
 
-    if (import_view_points_filename.size())
-        task_man.importViewPointsFile(import_view_points_filename);
+//    if (import_view_points_filename.size())
+//        task_man.importViewPointsFile(import_view_points_filename);
 
-#if USE_JASTERIX
-    try
-    {
-        if (asterix_framing.size())
-        {
-            if (asterix_framing == "none")
-                task_man.asterixFraming("");
-            else
-                task_man.asterixFraming(asterix_framing);
-        }
+//#if USE_JASTERIX
+//    try
+//    {
+//        if (asterix_framing.size())
+//        {
+//            if (asterix_framing == "none")
+//                task_man.asterixFraming("");
+//            else
+//                task_man.asterixFraming(asterix_framing);
+//        }
 
-        if (asterix_decoder_cfg.size())
-            task_man.asterixDecoderConfig(asterix_decoder_cfg);
+//        if (asterix_decoder_cfg.size())
+//            task_man.asterixDecoderConfig(asterix_decoder_cfg);
 
-        if (task_man.asterixOptionsSet())
-            task_man.setAsterixOptions();
-    }
-    catch (exception& e)
-    {
-        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
-        quit_requested_ = true;
-        return;
-    }
+//        if (task_man.asterixOptionsSet())
+//            task_man.setAsterixOptions();
+//    }
+//    catch (exception& e)
+//    {
+//        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+//        quit_requested_ = true;
+//        return;
+//    }
 
-    if (import_asterix_filename.size())
-        task_man.importASTERIXFile(import_asterix_filename);
-#endif
+//    if (import_asterix_filename.size())
+//        task_man.importASTERIXFile(import_asterix_filename);
+//#endif
 
-    if (import_json_filename.size())
-        task_man.importJSONFile(import_json_filename, import_json_schema);
+//    if (import_json_filename.size())
+//        task_man.importJSONFile(import_json_filename, import_json_schema);
 
-    if (import_gps_trail_filename.size())
-        task_man.importGPSTrailFile(import_gps_trail_filename);
+//    if (import_gps_trail_filename.size())
+//        task_man.importGPSTrailFile(import_gps_trail_filename);
 
-    if (import_sectors_filename.size())
-        task_man.importSectorsFile(import_sectors_filename);
+//    if (import_sectors_filename.size())
+//        task_man.importSectorsFile(import_sectors_filename);
 
-    if (auto_process)
-        task_man.autoProcess(auto_process);
+//    if (auto_process)
+//        task_man.autoProcess(auto_process);
 
-    if (associate_data)
-        task_man.associateData(associate_data);
+//    if (associate_data)
+//        task_man.associateData(associate_data);
 
-    if (start)
-        task_man.start(start);
+//    if (start)
+//        task_man.start(start);
 
-    if (load_data)
-        task_man.loadData(load_data);
+//    if (load_data)
+//        task_man.loadData(load_data);
 
-    if (export_view_points_report_filename.size())
-        task_man.exportViewPointsReportFile(export_view_points_report_filename);
+//    if (export_view_points_report_filename.size())
+//        task_man.exportViewPointsReportFile(export_view_points_report_filename);
 
-    if (evaluate)
-        task_man.evaluate(true);
+//    if (evaluate)
+//        task_man.evaluate(true);
 
-    if (export_eval_report_filename.size())
-        task_man.exportEvalReportFile(export_eval_report_filename);
+//    if (export_eval_report_filename.size())
+//        task_man.exportEvalReportFile(export_eval_report_filename);
 
-    if (quit)
-        task_man.quit(quit);
+//    if (quit)
+//        task_man.quit(quit);
 
 }
 
 Client::~Client()
 {
     loginf << "Client: destructor";
-}
-
-MainWindow& Client::mainWindow()
-{
-    if (!main_window_)
-        main_window_.reset(new MainWindow());
-
-    assert(main_window_);
-    return *main_window_;
 }
 
 bool Client::notify(QObject* receiver, QEvent* event)

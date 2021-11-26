@@ -46,14 +46,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-  signals:
-    void startedSignal();
+//  signals:
+//    void startedSignal();
 
   private slots:
     /// @brief Called when database was opened
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
-    void startSlot();
+    //void startSlot();
 
     /// @brief Handles key press events
     // void keyPressEvent ( QKeyEvent * event );
@@ -81,6 +81,8 @@ protected:
     QPushButton* add_view_button_{nullptr};
 
     bool save_configuration_{true};
+
+    void createMenus ();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

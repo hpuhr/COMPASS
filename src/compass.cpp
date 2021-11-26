@@ -16,11 +16,6 @@
  */
 
 #include "compass.h"
-
-#include <qobject.h>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include "config.h"
 #include "dbinterface.h"
 #include "dbobject.h"
@@ -34,14 +29,23 @@
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "evaluationmanager.h"
+#include "mainwindow.h"
+
+#include <qobject.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
+using namespace nlohmann;
 
 COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
 
     simple_config_.reset(new SimpleConfig("config.json"));
+
+    registerParameter("last_db_filename", &last_db_filename_, "");
+    registerParameter("db_file_list", &db_file_list_, json::array());
 
     JobManager::instance().start();
 
@@ -173,6 +177,28 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
+void COMPASS::openDBFile(const std::string& file_name)
+{
+    assert (!db_opened_);
+    assert (db_interface_);
+
+    db_interface_->openDBFile(file_name);
+    assert (db_interface_->dbOpen());
+
+    db_opened_ = true;
+}
+
+void COMPASS::closeDB()
+{
+    assert (db_opened_);
+
+    db_interface_->closeDBFile();
+    assert (!db_interface_->dbOpen());
+
+    db_opened_ = false;
+}
+
+
 DBInterface& COMPASS::interface()
 {
     assert(db_interface_);
@@ -215,12 +241,9 @@ EvaluationManager& COMPASS::evaluationManager()
     return *eval_manager_;
 }
 
-bool COMPASS::ready()
+bool COMPASS::dbOpened()
 {
-    if (!db_interface_)  // || !initialized_)
-        return false;
-
-    return db_interface_->ready();
+    return db_opened_;
 }
 
 void COMPASS::shutdown()
@@ -264,3 +287,28 @@ void COMPASS::shutdown()
 
     loginf << "COMPASS: shutdown: end";
 }
+
+MainWindow& COMPASS::mainWindow()
+{
+    if (!main_window_)
+        main_window_.reset(new MainWindow());
+
+    assert(main_window_);
+    return *main_window_;
+}
+
+std::string COMPASS::lastDbFilename() const
+{
+    return last_db_filename_;
+}
+
+std::vector<std::string> COMPASS::dbFileList() const
+{
+    return db_file_list_.get<std::vector<string>>();
+}
+
+void COMPASS::clearDBFileList()
+{
+    db_file_list_.clear();
+}
+

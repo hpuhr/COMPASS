@@ -19,27 +19,16 @@
 #define CLIENT_H_
 
 #include <QApplication>
-#include <memory>
 
-class MainWindow;
-
-/**
- * @brief Main Class
- *
- */
 class Client : public QApplication
 {
   public:
-    ///@brief Constructor.
     Client(int& argc, char** argv);
-    ///@brief Destructor.
     virtual ~Client();
 
-    ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
     virtual bool notify(QObject* receiver, QEvent* event);
 
     bool quitRequested() const;
-    MainWindow& mainWindow();
 
   private:
     std::string system_install_path_;
@@ -48,11 +37,6 @@ class Client : public QApplication
     bool home_subdir_deletion_wanted_{false};
     bool config_and_data_copy_wanted_{false};
 
-    //bool config_and_data_exists_{false};
-    //bool config_and_data_copied_{false};
-
-    //bool upgrade_needed_{false};
-
     void checkAndSetupConfig();
 
     void checkNeededActions();
@@ -60,11 +44,9 @@ class Client : public QApplication
 
     void deleteCompleteHomeSubDir();
     void copyConfigurationAndData();
-    //void copyConfiguration();
 
   protected:
-    std::unique_ptr<MainWindow> main_window_;
+
 };
-//}
 
 #endif /* CLIENT_H_ */

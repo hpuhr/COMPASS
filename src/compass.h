@@ -18,13 +18,18 @@
 #ifndef COMPASS_H_
 #define COMPASS_H_
 
+#include "configurable.h"
+#include "propertylist.h"
+#include "singleton.h"
+#include "json.hpp"
+
+#include <QObject>
+
+#include <memory>
 #include <map>
 #include <set>
 #include <vector>
 
-#include "configurable.h"
-#include "propertylist.h"
-#include "singleton.h"
 
 class DBInterface;
 class DBObjectManager;
@@ -33,14 +38,22 @@ class TaskManager;
 class ViewManager;
 class SimpleConfig;
 class EvaluationManager;
+class MainWindow;
 
-class COMPASS : public Configurable, public Singleton
+class COMPASS : public QObject, public Configurable, public Singleton
 {
-  public:
+    Q_OBJECT
+
+public:
     virtual ~COMPASS();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
+
+    void openDBFile(const std::string& file_name);
+    void createNewDBFile(const std::string& file_name);
+    bool dbOpened();
+    void closeDB();
 
     DBInterface& interface();
     DBObjectManager& objectManager();
@@ -50,11 +63,12 @@ class COMPASS : public Configurable, public Singleton
     SimpleConfig& config();
     EvaluationManager& evaluationManager();
 
-    bool ready();
-
     void shutdown();
 
-  protected:
+    MainWindow& mainWindow();
+
+protected:
+    bool db_opened_{false};
     bool shut_down_{false};
 
     std::unique_ptr<SimpleConfig> simple_config_;
@@ -65,16 +79,24 @@ class COMPASS : public Configurable, public Singleton
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
 
+    std::string last_db_filename_;
+    nlohmann::json db_file_list_;
+
     virtual void checkSubConfigurables();
+
+    std::unique_ptr<MainWindow> main_window_;
 
     COMPASS();
 
-  public:
+public:
     static COMPASS& instance()
     {
         static COMPASS instance;
         return instance;
     }
+    std::string lastDbFilename() const;
+    std::vector<std::string> dbFileList() const;
+    void clearDBFileList();
 };
 
 #endif /* COMPASS_H_ */

@@ -65,9 +65,9 @@ void SQLiteConnectionInfoWidget::updateSlot()
     assert(database_label_);
     assert(status_label_);
 
-    if (connection_.ready())
-        database_label_->setText(connection_.identifier().c_str());
-    else
+//    if (connection_.dbOpened())
+//        database_label_->setText(connection_.identifier().c_str());
+//    else
         database_label_->setText("");
 
     status_label_->setText(connection_.status().c_str());

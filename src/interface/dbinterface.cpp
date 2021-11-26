@@ -34,6 +34,7 @@
 #include "stringconv.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "files.h"
 #include "sector.h"
 #include "sectorlayer.h"
 #include "evaluationmanager.h"
@@ -68,7 +69,7 @@ DBInterface::~DBInterface()
 
     QMutexLocker locker(&connection_mutex_);
 
-    current_connection_ = nullptr;
+    db_connection_ = nullptr;
 
     logdbg << "DBInterface: desctructor: end";
 }
@@ -109,8 +110,8 @@ void DBInterface::closeConnection()
         saveProperties();
 
     logdbg << "DBInterface: closeConnection";
-    assert (current_connection_);
-    current_connection_->disconnect();
+    assert (db_connection_);
+    db_connection_->disconnect();
 
 
     if (info_widget_)
@@ -129,8 +130,8 @@ void DBInterface::updateTableInfo()
     loginf << "DBInterface: updateTableInfo";
     table_info_.clear();
 
-    assert(current_connection_);
-    table_info_ = current_connection_->getTableInfo();
+    assert(db_connection_);
+    table_info_ = db_connection_->getTableInfo();
 
     loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
 }
@@ -148,32 +149,66 @@ DBInterfaceInfoWidget* DBInterface::infoWidget()
 
 QWidget* DBInterface::connectionWidget()
 {
-    assert(current_connection_);
-    return current_connection_->widget();
+    assert(db_connection_);
+    return db_connection_->widget();
 }
+
+void DBInterface::openDBFile(const std::string& filename)
+{
+    if (Files::fileExists(filename))
+    {
+        loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
+        Files::deleteFile(filename);
+    }
+
+    loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
+    assert (db_connection_);
+    db_connection_->openFile(filename);
+
+    emit databaseOpenedSignal();
+
+    loginf << "DBInterface: openDBFile: done";
+}
+
+void DBInterface::closeDBFile()
+{
+    loginf << "DBInterface: closeDBFile";
+
+    assert (db_connection_);
+    db_connection_->disconnect();
+
+    emit databaseClosedSignal();
+}
+
+bool DBInterface::dbOpen()
+{
+    assert (db_connection_);
+    return db_connection_->dbOpened();
+}
+
 
 vector<string> DBInterface::getDatabases()
 {
-    assert(current_connection_);
-    return current_connection_->getDatabases();
+    assert(db_connection_);
+    return db_connection_->getDatabases();
 }
 
 bool DBInterface::ready()
 {
-    if (!current_connection_)
+    if (!db_connection_)
     {
         logdbg << "DBInterface: ready: no connection";
         return false;
     }
 
-    logdbg << "DBInterface: ready: connection ready " << current_connection_->ready();
-    return current_connection_->ready();
+    logdbg << "DBInterface: ready: connection ready " << db_connection_->dbOpened();
+    return db_connection_->dbOpened();
 }
 
 SQLiteConnection& DBInterface::connection()
 {
-    assert(current_connection_);
-    return *current_connection_;
+    assert(db_connection_);
+    return *db_connection_;
 }
 
 void DBInterface::generateSubConfigurable(const string& class_id,
@@ -183,10 +218,10 @@ void DBInterface::generateSubConfigurable(const string& class_id,
 
     if (class_id == "SQLiteConnection")
     {
-        assert (!current_connection_);
+        assert (!db_connection_);
 
-        current_connection_.reset( new SQLiteConnection(class_id, instance_id, this));
-        assert (current_connection_);
+        db_connection_.reset( new SQLiteConnection(class_id, instance_id, this));
+        assert (db_connection_);
 
     }
     else
@@ -196,7 +231,7 @@ void DBInterface::generateSubConfigurable(const string& class_id,
 
 void DBInterface::checkSubConfigurables()
 {
-    if (!current_connection_)
+    if (!db_connection_)
     {
         addNewSubConfiguration("SQLiteConnection", "SQLite Connection");
         generateSubConfigurable("SQLiteConnection", "SQLite Connection");
@@ -222,7 +257,7 @@ void DBInterface::createTable(const DBObject& object)
 
     QMutexLocker locker(&connection_mutex_);
 
-    current_connection_->executeSQL(statement);
+    db_connection_->executeSQL(statement);
 
     locker.unlock();
 
@@ -292,7 +327,7 @@ std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
 
     shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
 
-    shared_ptr<DBResult> result = current_connection_->execute(*command);
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
 
     assert(result->containsData());
 
@@ -346,7 +381,7 @@ std::vector<std::unique_ptr<DBContent::DBDataSource>> DBInterface::getDataSource
 
     loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
-    shared_ptr<DBResult> result = current_connection_->execute(*command);
+    shared_ptr<DBResult> result = db_connection_->execute(*command);
     assert(result->containsData());
     shared_ptr<Buffer> buffer = result->buffer();
 
@@ -476,7 +511,7 @@ size_t DBInterface::count(const string& table)
     assert(existsTable(table));
 
     QMutexLocker locker(&connection_mutex_);
-    assert(current_connection_);
+    assert(db_connection_);
 
     string sql = sql_generator_.getCountStatement(table);
 
@@ -489,7 +524,7 @@ size_t DBInterface::count(const string& table)
     list.addProperty("count", PropertyDataType::INT);
     command.list(list);
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = db_connection_->execute(command);
 
     assert(result->containsData());
     int tmp = result->buffer()->get<int>("count").get(0);
@@ -527,7 +562,7 @@ void DBInterface::loadProperties()
     list.addProperty("value", PropertyDataType::STRING);
     command.list(list);
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = db_connection_->execute(command);
 
     assert(result->containsData());
 
@@ -563,14 +598,14 @@ void DBInterface::saveProperties()
 {
     loginf << "DBInterface: saveProperties";
 
-    if (!current_connection_)
+    if (!db_connection_)
     {
         logwrn << "DBInterface: saveProperties: failed since no database connection exists";
         return;
     }
 
     // QMutexLocker locker(&connection_mutex_); // done in closeConnection
-    assert(current_connection_);
+    assert(db_connection_);
     assert (properties_loaded_);
 
     string str;
@@ -578,7 +613,7 @@ void DBInterface::saveProperties()
     for (auto& prop_it : properties_)
     {
         string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
-        current_connection_->executeSQL(str);
+        db_connection_->executeSQL(str);
     }
 
     loginf << "DBInterface: saveProperties: done";
@@ -600,7 +635,7 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
     list.addProperty("json", PropertyDataType::STRING);
     command.list(list);
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = db_connection_->execute(command);
 
     assert(result->containsData());
 
@@ -685,7 +720,7 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
     list.addProperty("count", PropertyDataType::INT);
     command.list(list);
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = db_connection_->execute(command);
 
     assert(result->containsData());
 
@@ -776,7 +811,7 @@ void DBInterface::createViewPointsTable()
     setProperty("view_points_version", "0.1");
 
     connection_mutex_.lock();
-    current_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
+    db_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
     connection_mutex_.unlock();
 
     updateTableInfo();
@@ -784,14 +819,14 @@ void DBInterface::createViewPointsTable()
 
 void DBInterface::setViewPoint(const unsigned int id, const string& value)
 {
-    if (!current_connection_)
+    if (!db_connection_)
     {
         logwrn << "DBInterface: setViewPoint: failed since no database connection exists";
         return;
     }
 
     // QMutexLocker locker(&connection_mutex_); // done in closeConnection
-    assert(current_connection_);
+    assert(db_connection_);
 
     if (!existsViewPointsTable())
         createViewPointsTable();
@@ -799,7 +834,7 @@ void DBInterface::setViewPoint(const unsigned int id, const string& value)
     string str = sql_generator_.getInsertViewPointStatement(id, value);
 
     logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
-    current_connection_->executeSQL(str);
+    db_connection_->executeSQL(str);
 }
 
 map<unsigned int, string> DBInterface::viewPoints()
@@ -818,7 +853,7 @@ map<unsigned int, string> DBInterface::viewPoints()
     list.addProperty("json", PropertyDataType::STRING);
     command.list(list);
 
-    shared_ptr<DBResult> result = current_connection_->execute(command);
+    shared_ptr<DBResult> result = db_connection_->execute(command);
 
     assert(result->containsData());
 
@@ -849,7 +884,7 @@ map<unsigned int, string> DBInterface::viewPoints()
 void DBInterface::deleteViewPoint(const unsigned int id)
 {
     QMutexLocker locker(&connection_mutex_);
-    current_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
+    db_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
                                                                       "id="+to_string(id)));
 }
 
@@ -873,7 +908,7 @@ void DBInterface::createSectorsTable()
     connection_mutex_.lock();
 
     loginf << "DBInterface: createSectorsTable: sql '" << sql_generator_.getTableSectorsCreateStatement() << "'";
-    current_connection_->executeSQL(sql_generator_.getTableSectorsCreateStatement());
+    db_connection_->executeSQL(sql_generator_.getTableSectorsCreateStatement());
     connection_mutex_.unlock();
 
     updateTableInfo();
@@ -891,13 +926,13 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
     loginf << "DBInterface: saveSector: sector " << sector->name() << " layer " << sector->layerName()
            << " id " << sector->id();
 
-    if (!current_connection_)
+    if (!db_connection_)
     {
         logwrn << "DBInterface: saveSector: failed since no database connection exists";
         return;
     }
 
-    assert(current_connection_);
+    assert(db_connection_);
 
     if (!existsSectorsTable())
         createSectorsTable();
@@ -909,7 +944,7 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
     logdbg << "DBInterface: saveSector: cmd '" << str << "'";
     {
         QMutexLocker locker(&connection_mutex_);
-        current_connection_->executeSQL(str);
+        db_connection_->executeSQL(str);
     }
 
 
@@ -923,7 +958,7 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
     string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
 
     //loginf << "UGA '" << cmd << "'";
-    current_connection_->executeSQL(cmd);
+    db_connection_->executeSQL(cmd);
 }
 
 void DBInterface::deleteAllSectors()
@@ -988,7 +1023,7 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
     logdbg << "DBInterface: insertBuffer: table name " << table_name << " buffer size "
            << buffer->size();
 
-    assert(current_connection_);
+    assert(db_connection_);
     assert(buffer);
 
     if (!existsTable(table_name))
@@ -1017,8 +1052,8 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
     QMutexLocker locker(&connection_mutex_);
 
     logdbg << "DBInterface: insertBuffer: preparing bind statement";
-    current_connection_->prepareBindStatement(bind_statement);
-    current_connection_->beginBindTransaction();
+    db_connection_->prepareBindStatement(bind_statement);
+    db_connection_->beginBindTransaction();
 
     logdbg << "DBInterface: insertBuffer: starting inserts";
     size_t size = buffer->size();
@@ -1029,9 +1064,9 @@ void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buff
     }
 
     logdbg << "DBInterface: insertBuffer: ending bind transactions";
-    current_connection_->endBindTransaction();
+    db_connection_->endBindTransaction();
     logdbg << "DBInterface: insertBuffer: finalizing bind statement";
-    current_connection_->finalizeBindStatement();
+    db_connection_->finalizeBindStatement();
 }
 
 //bool DBInterface::checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
@@ -1109,7 +1144,7 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
            << buffer->size() << " key " << key_col;
 
     // assert (checkUpdateBuffer(object, key_var, buffer));
-    assert(current_connection_);
+    assert(db_connection_);
     assert(buffer);
 
     // TODO check
@@ -1129,8 +1164,8 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     QMutexLocker locker(&connection_mutex_);
 
     logdbg << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
-    current_connection_->prepareBindStatement(bind_statement);
-    current_connection_->beginBindTransaction();
+    db_connection_->prepareBindStatement(bind_statement);
+    db_connection_->beginBindTransaction();
 
     if (from_index < 0)
         from_index = 0;
@@ -1145,9 +1180,9 @@ void DBInterface::updateBuffer(const std::string& table_name, const std::string&
     }
 
     logdbg << "DBInterface: updateBuffer: ending bind transactions";
-    current_connection_->endBindTransaction();
+    db_connection_->endBindTransaction();
     logdbg << "DBInterface: update: finalizing bind statement";
-    current_connection_->finalizeBindStatement();
+    db_connection_->finalizeBindStatement();
 }
 
 void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list,
@@ -1156,7 +1191,7 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
                               DBOVariable* order_variable, bool use_order_ascending,
                               const string& limit)
 {
-    assert(current_connection_);
+    assert(db_connection_);
 
     assert(dbobject.existsInDB());
 
@@ -1167,7 +1202,7 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
                 order_variable, use_order_ascending, limit);
 
     logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
-    current_connection_->prepareCommand(read);
+    db_connection_->prepareCommand(read);
 }
 
 /**
@@ -1177,9 +1212,9 @@ void DBInterface::prepareRead(const DBObject& dbobject, DBOVariableSet read_list
 shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
 {
     // locked by prepareRead
-    assert(current_connection_);
+    assert(db_connection_);
 
-    shared_ptr<DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);
+    shared_ptr<DBResult> result = db_connection_->stepPreparedCommand(read_chunk_size_);
 
     if (!result)
     {
@@ -1199,7 +1234,7 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
 
     assert(buffer);
 
-    bool last_one = current_connection_->getPreparedCommandDone();
+    bool last_one = db_connection_->getPreparedCommandDone();
     buffer->lastOne(last_one);
 
     return buffer;
@@ -1208,17 +1243,17 @@ shared_ptr<Buffer> DBInterface::readDataChunk(const DBObject& dbobject)
 void DBInterface::finalizeReadStatement(const DBObject& dbobject)
 {
     connection_mutex_.unlock();
-    assert(current_connection_);
+    assert(db_connection_);
 
     logdbg << "DBInterface: finishReadSystemTracks: start ";
-    current_connection_->finalizeCommand();
+    db_connection_->finalizeCommand();
 }
 
 void DBInterface::createPropertiesTable()
 {
     assert(!existsPropertiesTable());
     connection_mutex_.lock();
-    current_connection_->executeSQL(sql_generator_.getTablePropertiesCreateStatement());
+    db_connection_->executeSQL(sql_generator_.getTablePropertiesCreateStatement());
     connection_mutex_.unlock();
 
     updateTableInfo();
@@ -1238,7 +1273,7 @@ void DBInterface::clearTableContent(const string& table_name)
 {
     QMutexLocker locker(&connection_mutex_);
     // DELETE FROM tablename;
-    current_connection_->executeSQL("DELETE FROM " + table_name + ";");
+    db_connection_->executeSQL("DELETE FROM " + table_name + ";");
 }
 
 shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable(const std::string& table_name)
@@ -1265,7 +1300,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: creating bind for " << size
            << " elements";
 
-    string connection_type = current_connection_->type();
+    string connection_type = db_connection_->type();
 
     assert(connection_type == SQLITE_IDENTIFIER);
 
@@ -1284,7 +1319,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
 
         if (buffer->isNone(property, row))
         {
-            current_connection_->bindVariableNull(index_cnt);
+            db_connection_->bindVariableNull(index_cnt);
             logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt
                    << " is null";
             continue;
@@ -1293,24 +1328,24 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         switch (data_type)
         {
         case PropertyDataType::BOOL:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(row)));
             break;
         case PropertyDataType::CHAR:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(row)));
             break;
         case PropertyDataType::UCHAR:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt,
                         static_cast<int>(buffer->get<unsigned char>(property.name()).get(row)));
             break;
         case PropertyDataType::INT:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, static_cast<int>(buffer->get<int>(property.name()).get(row)));
             break;
         case PropertyDataType::UINT:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(row)));
             break;
         case PropertyDataType::LONGINT:
@@ -1320,16 +1355,16 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
             assert(false);
             break;
         case PropertyDataType::FLOAT:
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(row)));
             break;
         case PropertyDataType::DOUBLE:
-            current_connection_->bindVariable(index_cnt,
+            db_connection_->bindVariable(index_cnt,
                                               buffer->get<double>(property.name()).get(row));
             break;
         case PropertyDataType::STRING:
 
-            current_connection_->bindVariable(
+            db_connection_->bindVariable(
                         index_cnt, buffer->get<string>(property.name()).get(row));
             break;
         default:
@@ -1341,7 +1376,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> bu
         }
     }
 
-    current_connection_->stepAndClearBindings();
+    db_connection_->stepAndClearBindings();
 
     logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
 }
@@ -1350,7 +1385,7 @@ void DBInterface::createAssociationsTable(const string& table_name)
 {
     assert(!existsTable(table_name));
     connection_mutex_.lock();
-    current_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table_name));
+    db_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table_name));
     connection_mutex_.unlock();
 
     updateTableInfo();
@@ -1365,7 +1400,7 @@ DBOAssociationCollection DBInterface::getAssociations(const string& table_name)
 
     connection_mutex_.lock();
 
-    shared_ptr<DBResult> result = current_connection_->execute(*command.get());
+    shared_ptr<DBResult> result = db_connection_->execute(*command.get());
 
     connection_mutex_.unlock();
 

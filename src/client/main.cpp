@@ -35,7 +35,7 @@ int main(int argc, char** argv)
         if (client.quitRequested())
             return 0;
 
-        client.mainWindow().show();
+        COMPASS::instance().mainWindow().show();
 
 //        if (COMPASS::instance().taskManager().automaticTasksDefined())
 //        {

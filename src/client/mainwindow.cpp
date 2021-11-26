@@ -43,6 +43,8 @@
 #include <QLocale>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QMenu>
+#include <QMenuBar>
 
 using namespace Utils;
 using namespace std;
@@ -121,8 +123,10 @@ MainWindow::MainWindow()
 
     //add_view_button_->setDisabled(true);
 
-    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
-                     &FilterManager::startedSlot);
+//    QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
+//                     &FilterManager::startedSlot);
+
+    createMenus ();
 }
 
 MainWindow::~MainWindow()
@@ -130,6 +134,20 @@ MainWindow::~MainWindow()
     logdbg << "MainWindow: destructor";
 
     // remember: this not called! insert deletes into closeEvent function
+}
+
+void MainWindow::createMenus ()
+{
+    // file menu
+
+    QMenu* file_menu = menuBar()->addMenu(tr("&File"));
+
+    QAction* new_act = new QAction(tr("&New"));
+    new_act->setShortcuts(QKeySequence::New);
+    new_act->setStatusTip(tr("Create a new file"));
+    //connect(newAct, &QAction::triggered, this, &MainWindow::newFile);
+
+    file_menu->addAction(new_act);
 }
 
 void MainWindow::disableConfigurationSaving()
@@ -155,60 +173,60 @@ void MainWindow::showViewPointsTab()
 
 void MainWindow::databaseOpenedSlot() { logdbg << "MainWindow: databaseOpenedSlot"; }
 
-void MainWindow::startSlot()
-{
-    loginf << "MainWindow: startSlot";
-    assert (!started_);
+//void MainWindow::startSlot()
+//{
+//    loginf << "MainWindow: startSlot";
+//    assert (!started_);
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    QMessageBox* msg_box = new QMessageBox(this);
-//    msg_box->setWindowTitle("Starting");
-//    msg_box->setText("Please wait...");
-//    msg_box->setStandardButtons(0);
-//    msg_box->show();
+////    QMessageBox* msg_box = new QMessageBox(this);
+////    msg_box->setWindowTitle("Starting");
+////    msg_box->setText("Please wait...");
+////    msg_box->setStandardButtons(0);
+////    msg_box->show();
 
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
+////    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+////    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+////    {
+////        QCoreApplication::processEvents();
+////        QThread::msleep(1);
+////    }
 
-    emit startedSignal();
+//    emit startedSignal();
 
-//    assert(task_manager_widget_);
-//    tab_widget_->removeTab(0);
+////    assert(task_manager_widget_);
+////    tab_widget_->removeTab(0);
 
-    // close any opened dbobject widgets
-//    for (auto& obj_it : COMPASS::instance().objectManager())
-//        obj_it.second->closeWidget();
+//    // close any opened dbobject widgets
+////    for (auto& obj_it : COMPASS::instance().objectManager())
+////        obj_it.second->closeWidget();
 
-    assert(management_widget_);
-    tab_widget_->addTab(management_widget_, "Load");
+//    assert(management_widget_);
+//    tab_widget_->addTab(management_widget_, "Load");
 
-//    start_time = boost::posix_time::microsec_clock::local_time();
-//    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-//    {
-//        QCoreApplication::processEvents();
-//        QThread::msleep(1);
-//    }
+////    start_time = boost::posix_time::microsec_clock::local_time();
+////    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
+////    {
+////        QCoreApplication::processEvents();
+////        QThread::msleep(1);
+////    }
 
-    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
+//    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+//    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
 
-    tab_widget_->setCurrentIndex(0);
-    add_view_button_->setDisabled(false);
+//    tab_widget_->setCurrentIndex(0);
+//    add_view_button_->setDisabled(false);
 
-    emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
+//    emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
 
-//    msg_box->close();
-//    delete msg_box;
+////    msg_box->close();
+////    delete msg_box;
 
-    QApplication::restoreOverrideCursor();
+//    QApplication::restoreOverrideCursor();
 
-    started_ = true;
-}
+//    started_ = true;
+//}
 
 void MainWindow::quitRequestedSlot()
 {

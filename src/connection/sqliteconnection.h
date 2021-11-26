@@ -31,9 +31,9 @@
 
 class Buffer;
 class DBInterface;
-class SQLiteConnectionWidget;
+//class SQLiteConnectionWidget;
 class SQLiteConnectionInfoWidget;
-class SavedFile;
+//class SavedFile;
 class PropertyList;
 class DBCommand;
 class DBCommandList;
@@ -90,30 +90,28 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
 
-    QWidget* widget();
+    //QWidget* widget();
     // void deleteWidget ();
-    QWidget* infoWidget();
+    //QWidget* infoWidget();
     std::string status() const;
-    std::string identifier() const;
-    std::string shortIdentifier() const;
-    std::string type() const { return SQLITE_IDENTIFIER; }
+//    std::string identifier() const;
+//    std::string shortIdentifier() const;
+//    std::string type() const { return SQLITE_IDENTIFIER; }
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
-    void addFile(const std::string& filename);
-    void removeFile(const std::string& filename);
-    void removeAllFiles ();
+//    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
+//    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+//    void addFile(const std::string& filename);
+//    void removeFile(const std::string& filename);
+//    void removeAllFiles ();
 
-    const std::string& lastFilename() { return last_filename_; }
+//    const std::string& lastFilename() { return last_filename_; }
 
-    bool ready() { return connection_ready_; }
+    bool dbOpened() { return db_opened_; }
 
 protected:
     DBInterface& interface_;
 
-    bool connection_ready_;
-
-    std::string last_filename_;
+    bool db_opened_;
 
     /// Database handle to execute queries
     sqlite3* db_handle_{nullptr};
@@ -123,10 +121,10 @@ protected:
     std::shared_ptr<DBCommand> prepared_command_;
     bool prepared_command_done_;
 
-    std::unique_ptr<SQLiteConnectionWidget> widget_;
-    std::unique_ptr<SQLiteConnectionInfoWidget> info_widget_;
+    //std::unique_ptr<SQLiteConnectionWidget> widget_;
+    //std::unique_ptr<SQLiteConnectionInfoWidget> info_widget_;
 
-    std::map<std::string, SavedFile*> file_list_;
+    //std::map<std::string, SavedFile*> file_list_;
 
     void execute(const std::string& command);
     void execute(const std::string& command, std::shared_ptr<Buffer> buffer);

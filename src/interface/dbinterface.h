@@ -63,10 +63,13 @@ class DBDataSource;
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
-  signals:
-    void databaseContentChangedSignal();
 
-  public:
+signals:
+    void databaseOpenedSignal();
+    void databaseContentChangedSignal();
+    void databaseClosedSignal();
+
+public:
     /// @brief Constructor
     DBInterface(std::string class_id, std::string instance_id, COMPASS* compass);
     /// @brief Destructor
@@ -87,6 +90,10 @@ class DBInterface : public QObject, public Configurable
 
     QWidget* connectionWidget();
 
+    void openDBFile(const std::string& file_name);
+    void closeDBFile();
+    bool dbOpen();
+
     const std::map<std::string, DBTableInfo>& tableInfo() { return table_info_; }
 
     bool ready();
@@ -101,11 +108,11 @@ class DBInterface : public QObject, public Configurable
     void insertBuffer(const DBObject& dbobject, std::shared_ptr<Buffer> buffer);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
-//    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
-//                           std::shared_ptr<Buffer> buffer);
-//    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
-//                      std::shared_ptr<Buffer> buffer, int from_index = -1,
-//                      int to_index = -1);  // no indexes means full buffer
+    //    bool checkUpdateBuffer(DBObject& object, DBOVariable& key_var, DBOVariableSet& list,
+    //                           std::shared_ptr<Buffer> buffer);
+    //    void updateBuffer(MetaDBTable& meta_table, const DBTableColumn& key_col,
+    //                      std::shared_ptr<Buffer> buffer, int from_index = -1,
+    //                      int to_index = -1);  // no indexes means full buffer
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
@@ -127,13 +134,13 @@ class DBInterface : public QObject, public Configurable
 
     bool existsTable(const std::string& table_name);
     void createTable(const DBObject& object);
-//    bool existsMinMaxTable();
-//    void createMinMaxTable();
-//    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
-//    /// (dbo type, id) -> (min, max)
-//    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string>> getMinMaxInfo();
-//    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
-//                      const std::string& max);
+    //    bool existsMinMaxTable();
+    //    void createMinMaxTable();
+    //    std::pair<std::string, std::string> getMinMaxString(const DBOVariable& var);
+    //    /// (dbo type, id) -> (min, max)
+    //    std::map<std::pair<std::string, std::string>, std::pair<std::string, std::string>> getMinMaxInfo();
+    //    void insertMinMax(const std::string& id, const std::string& object_name, const std::string& min,
+    //                      const std::string& max);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -170,7 +177,7 @@ class DBInterface : public QObject, public Configurable
     DBOAssociationCollection getAssociations(const std::string& table_name);
 
 protected:
-    std::unique_ptr<SQLiteConnection> current_connection_;
+    std::unique_ptr<SQLiteConnection> db_connection_;
 
     bool properties_loaded_ {false};
 

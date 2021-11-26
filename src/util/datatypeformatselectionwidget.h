@@ -18,11 +18,13 @@
 #ifndef DATATYPEFORMATSELECTIONWIDGET_H
 #define DATATYPEFORMATSELECTIONWIDGET_H
 
+#include "format.h"
+#include "property.h"
+
 #include <QMenu>
 #include <QPushButton>
 
-#include "format.h"
-#include "property.h"
+#include <memory>
 
 /**
  * @brief Sets a Unit using a context menu
