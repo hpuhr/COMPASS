@@ -101,9 +101,9 @@ void DBObjectManager::generateSubConfigurable(const std::string& class_id,
     if (class_id.compare("DBObject") == 0)
     {
         DBObject* object = new DBObject(compass_, class_id, instance_id, this);
-        logdbg << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
-        assert(objects_.find(object->name()) == objects_.end());
-        objects_.insert(std::pair<std::string, DBObject*>(object->name(), object));
+        loginf << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
+        assert(!objects_.count(object->name()));
+        objects_[object->name()] = object;
 
         connect(object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
@@ -138,6 +138,8 @@ void DBObjectManager::checkSubConfigurables()
 
 bool DBObjectManager::existsObject(const std::string& dbo_name)
 {
+    loginf << "DBObjectManager: existsObject: '" << dbo_name << "'";
+
     return (objects_.find(dbo_name) != objects_.end());
 }
 

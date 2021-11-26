@@ -79,16 +79,33 @@ MainWindow::MainWindow()
 
     tab_widget_ = new QTabWidget();
 
-    TaskManager& task_man = COMPASS::instance().taskManager();
+//    TaskManager& task_man = COMPASS::instance().taskManager();
 
-    task_manager_widget_ = task_man.widget();
-    tab_widget_->addTab(task_manager_widget_, "Tasks");
+//    task_manager_widget_ = task_man.widget();
+//    tab_widget_->addTab(task_manager_widget_, "Tasks");
 
-    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
-    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
+//    connect(&task_man, &TaskManager::startInspectionSignal, this, &MainWindow::startSlot);
+//    connect(&task_man, &TaskManager::quitRequestedSignal, this, &MainWindow::quitRequestedSlot, Qt::QueuedConnection);
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     // management widget
     management_widget_ = new MainLoadWidget();
+
+    assert(management_widget_);
+    tab_widget_->addTab(management_widget_, "Load");
+
+    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
+    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
+
+    tab_widget_->setCurrentIndex(0);
+
+    //emit JobManager::instance().databaseIdle();  // to enable ViewManager add button, slightly HACKY
+
+//    msg_box->close();
+//    delete msg_box;
+
+    QApplication::restoreOverrideCursor();
 
     setCentralWidget(tab_widget_);
 
@@ -102,7 +119,7 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
-    add_view_button_->setDisabled(true);
+    //add_view_button_->setDisabled(true);
 
     QObject::connect(this, &MainWindow::startedSignal, &COMPASS::instance().filterManager(),
                      &FilterManager::startedSlot);
@@ -160,12 +177,12 @@ void MainWindow::startSlot()
 
     emit startedSignal();
 
-    assert(task_manager_widget_);
-    tab_widget_->removeTab(0);
+//    assert(task_manager_widget_);
+//    tab_widget_->removeTab(0);
 
     // close any opened dbobject widgets
-    for (auto& obj_it : COMPASS::instance().objectManager())
-        obj_it.second->closeWidget();
+//    for (auto& obj_it : COMPASS::instance().objectManager())
+//        obj_it.second->closeWidget();
 
     assert(management_widget_);
     tab_widget_->addTab(management_widget_, "Load");

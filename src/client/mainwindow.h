@@ -33,7 +33,6 @@ class QTabWidget;
 class QCheckBox;
 class QMenu;
 class QPushButton;
-class TaskManagerWidget;
 
 /**
  * @brief Main window which embeds all other components
@@ -76,8 +75,6 @@ protected:
     bool started_ {false};
     /// Widget stack for startup to usage switch
     QTabWidget* tab_widget_{nullptr};
-
-    TaskManagerWidget* task_manager_widget_{nullptr};
 
     MainLoadWidget* management_widget_{nullptr};
 

@@ -479,6 +479,9 @@ std::string EvaluationManager::getCannotEvaluateComment()
 {
     assert (!canEvaluate());
 
+    if (!sectors_loaded_)
+        return "No Database loaded";
+
     // no sector
     if (!sectorsLayers().size())
         return "Please add at least one sector";
@@ -797,6 +800,9 @@ void EvaluationManager::loadSectors()
 
     assert (!sectors_loaded_);
 
+    if (!COMPASS::instance().interface().ready())
+        sectors_loaded_ = false;
+
     sector_layers_ = COMPASS::instance().interface().loadSectors();
 
     for (auto& sec_lay_it : sector_layers_)
@@ -1092,14 +1098,7 @@ bool EvaluationManager::hasValidReferenceDBO ()
     if (!dbo_name_ref_.size())
         return false;
 
-    if (!COMPASS::instance().objectManager().existsObject(dbo_name_ref_))
-        return false;
-
-    TODO_ASSERT
-
-//    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
-
-//    return object.hasDataSources();
+    return COMPASS::instance().objectManager().existsObject(dbo_name_ref_);
 }
 
 
@@ -1133,13 +1132,7 @@ bool EvaluationManager::hasValidTestDBO ()
     if (!dbo_name_tst_.size())
         return false;
 
-    if (!COMPASS::instance().objectManager().existsObject(dbo_name_tst_))
-        return false;
-
-    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
-
-    TODO_ASSERT
-    //return object.hasDataSources();
+    return COMPASS::instance().objectManager().existsObject(dbo_name_tst_);
 }
 
 std::set<int> EvaluationManager::activeDataSourcesTst()
@@ -1332,6 +1325,8 @@ void EvaluationManager::updateReferenceDBO()
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
+    return;
+
     TODO_ASSERT
 
 //    if (object.hasDataSources())
@@ -1346,6 +1341,8 @@ void EvaluationManager::updateReferenceDataSources()
     loginf << "EvaluationManager: updateReferenceDataSources";
 
     assert (hasValidReferenceDBO());
+
+    return;
 
 //    DBObject& object = COMPASS::instance().objectManager().object(dbo_name_ref_);
 
@@ -1407,6 +1404,8 @@ void EvaluationManager::updateTestDBO()
     if (!hasValidTestDBO())
         return;
 
+    return;
+
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
     TODO_ASSERT
@@ -1423,6 +1422,8 @@ void EvaluationManager::updateTestDataSources()
     loginf << "EvaluationManager: updateTestDataSources";
 
     assert (hasValidTestDBO());
+
+    return;
 
     DBObject& object = COMPASS::instance().objectManager().object(dbo_name_tst_);
 
