@@ -285,6 +285,8 @@ void COMPASS::shutdown()
     assert(filter_manager_);
     filter_manager_ = nullptr;
 
+    //main_window_ = nullptr;
+
     shut_down_ = true;
 
     loginf << "COMPASS: shutdown: end";
@@ -293,7 +295,7 @@ void COMPASS::shutdown()
 MainWindow& COMPASS::mainWindow()
 {
     if (!main_window_)
-        main_window_.reset(new MainWindow());
+        main_window_ = new MainWindow();
 
     assert(main_window_);
     return *main_window_;

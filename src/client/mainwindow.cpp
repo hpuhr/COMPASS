@@ -272,15 +272,27 @@ void MainWindow::closeDBSlot()
 void MainWindow::saveConfigSlot()
 {
     loginf << "MainWindow: saveConfigSlot";
+
+    ConfigurationManager::getInstance().saveConfiguration();
 }
 
 void MainWindow::quitWOConfigSlot()
 {
     loginf << "MainWindow: quitWOConfigSlot";
+
+    save_configuration_ = false;
+
+    shutdown();
+
+    QApplication::quit();
 }
 void MainWindow::quitSlot()
 {
     loginf << "MainWindow: quitSlot";
+
+    shutdown();
+
+    QApplication::quit();
 }
 
 //void MainWindow::startSlot()
@@ -352,7 +364,7 @@ void MainWindow::showAddViewMenuSlot()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    logdbg << "MainWindow: closeEvent: start";
+    loginf << "MainWindow: closeEvent";
 
     shutdown();
     event->accept();

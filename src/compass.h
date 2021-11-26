@@ -84,7 +84,7 @@ protected:
 
     virtual void checkSubConfigurables();
 
-    std::unique_ptr<MainWindow> main_window_;
+    MainWindow* main_window_;
 
     COMPASS();
 
